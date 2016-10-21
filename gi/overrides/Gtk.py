@@ -202,205 +202,203 @@ Editable = override(Editable)
 __all__.append("Editable")
 
 
-class Action(Gtk.Action):
-    __init__ = deprecated_init(Gtk.Action.__init__,
-                               arg_names=('name', 'label', 'tooltip', 'stock_id'),
-                               category=PyGTKDeprecationWarning)
+if Gtk._version in ("2.0", "3.0"):
+    class Action(Gtk.Action):
+        __init__ = deprecated_init(Gtk.Action.__init__,
+                                   arg_names=('name', 'label', 'tooltip', 'stock_id'),
+                                   category=PyGTKDeprecationWarning)
 
-Action = override(Action)
-__all__.append("Action")
+    Action = override(Action)
+    __all__.append("Action")
 
+    class RadioAction(Gtk.RadioAction):
+        __init__ = deprecated_init(Gtk.RadioAction.__init__,
+                                   arg_names=('name', 'label', 'tooltip', 'stock_id', 'value'),
+                                   category=PyGTKDeprecationWarning)
 
-class RadioAction(Gtk.RadioAction):
-    __init__ = deprecated_init(Gtk.RadioAction.__init__,
-                               arg_names=('name', 'label', 'tooltip', 'stock_id', 'value'),
-                               category=PyGTKDeprecationWarning)
+    RadioAction = override(RadioAction)
+    __all__.append("RadioAction")
 
-RadioAction = override(RadioAction)
-__all__.append("RadioAction")
+    class ActionGroup(Gtk.ActionGroup):
+        __init__ = deprecated_init(Gtk.ActionGroup.__init__,
+                                   arg_names=('name',),
+                                   category=PyGTKDeprecationWarning)
 
+        def add_actions(self, entries, user_data=None):
+            """
+            The add_actions() method is a convenience method that creates a number
+            of gtk.Action  objects based on the information in the list of action
+            entry tuples contained in entries and adds them to the action group.
+            The entry tuples can vary in size from one to six items with the
+            following information:
 
-class ActionGroup(Gtk.ActionGroup):
-    __init__ = deprecated_init(Gtk.ActionGroup.__init__,
-                               arg_names=('name',),
-                               category=PyGTKDeprecationWarning)
+                * The name of the action. Must be specified.
+                * The stock id for the action. Optional with a default value of None
+                  if a label is specified.
+                * The label for the action. This field should typically be marked
+                  for translation, see the set_translation_domain() method. Optional
+                  with a default value of None if a stock id is specified.
+                * The accelerator for the action, in the format understood by the
+                  gtk.accelerator_parse() function. Optional with a default value of
+                  None.
+                * The tooltip for the action. This field should typically be marked
+                  for translation, see the set_translation_domain() method. Optional
+                  with a default value of None.
+                * The callback function invoked when the action is activated.
+                  Optional with a default value of None.
 
-    def add_actions(self, entries, user_data=None):
-        """
-        The add_actions() method is a convenience method that creates a number
-        of gtk.Action  objects based on the information in the list of action
-        entry tuples contained in entries and adds them to the action group.
-        The entry tuples can vary in size from one to six items with the
-        following information:
+            The "activate" signals of the actions are connected to the callbacks and
+            their accel paths are set to <Actions>/group-name/action-name.
+            """
+            try:
+                iter(entries)
+            except (TypeError):
+                raise TypeError('entries must be iterable')
 
-            * The name of the action. Must be specified.
-            * The stock id for the action. Optional with a default value of None
-              if a label is specified.
-            * The label for the action. This field should typically be marked
-              for translation, see the set_translation_domain() method. Optional
-              with a default value of None if a stock id is specified.
-            * The accelerator for the action, in the format understood by the
-              gtk.accelerator_parse() function. Optional with a default value of
-              None.
-            * The tooltip for the action. This field should typically be marked
-              for translation, see the set_translation_domain() method. Optional
-              with a default value of None.
-            * The callback function invoked when the action is activated.
-              Optional with a default value of None.
+            def _process_action(name, stock_id=None, label=None, accelerator=None, tooltip=None, callback=None):
+                action = Action(name=name, label=label, tooltip=tooltip, stock_id=stock_id)
+                if callback is not None:
+                    if user_data is None:
+                        action.connect('activate', callback)
+                    else:
+                        action.connect('activate', callback, user_data)
 
-        The "activate" signals of the actions are connected to the callbacks and
-        their accel paths are set to <Actions>/group-name/action-name.
-        """
-        try:
-            iter(entries)
-        except (TypeError):
-            raise TypeError('entries must be iterable')
+                self.add_action_with_accel(action, accelerator)
 
-        def _process_action(name, stock_id=None, label=None, accelerator=None, tooltip=None, callback=None):
-            action = Action(name=name, label=label, tooltip=tooltip, stock_id=stock_id)
-            if callback is not None:
+            for e in entries:
+                # using inner function above since entries can leave out optional arguments
+                _process_action(*e)
+
+        def add_toggle_actions(self, entries, user_data=None):
+            """
+            The add_toggle_actions() method is a convenience method that creates a
+            number of gtk.ToggleAction objects based on the information in the list
+            of action entry tuples contained in entries and adds them to the action
+            group. The toggle action entry tuples can vary in size from one to seven
+            items with the following information:
+
+                * The name of the action. Must be specified.
+                * The stock id for the action. Optional with a default value of None
+                  if a label is specified.
+                * The label for the action. This field should typically be marked
+                  for translation, see the set_translation_domain() method. Optional
+                  with a default value of None if a stock id is specified.
+                * The accelerator for the action, in the format understood by the
+                  gtk.accelerator_parse() function. Optional with a default value of
+                  None.
+                * The tooltip for the action. This field should typically be marked
+                  for translation, see the set_translation_domain() method. Optional
+                  with a default value of None.
+                * The callback function invoked when the action is activated.
+                  Optional with a default value of None.
+                * A flag indicating whether the toggle action is active. Optional
+                  with a default value of False.
+
+            The "activate" signals of the actions are connected to the callbacks and
+            their accel paths are set to <Actions>/group-name/action-name.
+            """
+
+            try:
+                iter(entries)
+            except (TypeError):
+                raise TypeError('entries must be iterable')
+
+            def _process_action(name, stock_id=None, label=None, accelerator=None, tooltip=None, callback=None, is_active=False):
+                action = Gtk.ToggleAction(name=name, label=label, tooltip=tooltip, stock_id=stock_id)
+                action.set_active(is_active)
+                if callback is not None:
+                    if user_data is None:
+                        action.connect('activate', callback)
+                    else:
+                        action.connect('activate', callback, user_data)
+
+                self.add_action_with_accel(action, accelerator)
+
+            for e in entries:
+                # using inner function above since entries can leave out optional arguments
+                _process_action(*e)
+
+        def add_radio_actions(self, entries, value=None, on_change=None, user_data=None):
+            """
+            The add_radio_actions() method is a convenience method that creates a
+            number of gtk.RadioAction objects based on the information in the list
+            of action entry tuples contained in entries and adds them to the action
+            group. The entry tuples can vary in size from one to six items with the
+            following information:
+
+                * The name of the action. Must be specified.
+                * The stock id for the action. Optional with a default value of None
+                  if a label is specified.
+                * The label for the action. This field should typically be marked
+                  for translation, see the set_translation_domain() method. Optional
+                  with a default value of None if a stock id is specified.
+                * The accelerator for the action, in the format understood by the
+                  gtk.accelerator_parse() function. Optional with a default value of
+                  None.
+                * The tooltip for the action. This field should typically be marked
+                  for translation, see the set_translation_domain() method. Optional
+                  with a default value of None.
+                * The value to set on the radio action. Optional with a default
+                  value of 0. Should be specified in applications.
+
+            The value parameter specifies the radio action that should be set
+            active. The "changed" signal of the first radio action is connected to
+            the on_change callback (if specified and not None) and the accel paths
+            of the actions are set to <Actions>/group-name/action-name.
+            """
+            try:
+                iter(entries)
+            except (TypeError):
+                raise TypeError('entries must be iterable')
+
+            first_action = None
+
+            def _process_action(group_source, name, stock_id=None, label=None, accelerator=None, tooltip=None, entry_value=0):
+                action = RadioAction(name=name, label=label, tooltip=tooltip, stock_id=stock_id, value=entry_value)
+
+                # FIXME: join_group is a patch to Gtk+ 3.0
+                #        otherwise we can't effectively add radio actions to a
+                #        group.  Should we depend on 3.0 and error out here
+                #        or should we offer the functionality via a compat
+                #        C module?
+                if hasattr(action, 'join_group'):
+                    action.join_group(group_source)
+
+                if value == entry_value:
+                    action.set_active(True)
+
+                self.add_action_with_accel(action, accelerator)
+                return action
+
+            for e in entries:
+                # using inner function above since entries can leave out optional arguments
+                action = _process_action(first_action, *e)
+                if first_action is None:
+                    first_action = action
+
+            if first_action is not None and on_change is not None:
                 if user_data is None:
-                    action.connect('activate', callback)
+                    first_action.connect('changed', on_change)
                 else:
-                    action.connect('activate', callback, user_data)
+                    first_action.connect('changed', on_change, user_data)
 
-            self.add_action_with_accel(action, accelerator)
+    ActionGroup = override(ActionGroup)
+    __all__.append('ActionGroup')
 
-        for e in entries:
-            # using inner function above since entries can leave out optional arguments
-            _process_action(*e)
+    class UIManager(Gtk.UIManager):
+        def add_ui_from_string(self, buffer):
+            if not isinstance(buffer, _basestring):
+                raise TypeError('buffer must be a string')
 
-    def add_toggle_actions(self, entries, user_data=None):
-        """
-        The add_toggle_actions() method is a convenience method that creates a
-        number of gtk.ToggleAction objects based on the information in the list
-        of action entry tuples contained in entries and adds them to the action
-        group. The toggle action entry tuples can vary in size from one to seven
-        items with the following information:
+            length = len(buffer.encode('UTF-8'))
 
-            * The name of the action. Must be specified.
-            * The stock id for the action. Optional with a default value of None
-              if a label is specified.
-            * The label for the action. This field should typically be marked
-              for translation, see the set_translation_domain() method. Optional
-              with a default value of None if a stock id is specified.
-            * The accelerator for the action, in the format understood by the
-              gtk.accelerator_parse() function. Optional with a default value of
-              None.
-            * The tooltip for the action. This field should typically be marked
-              for translation, see the set_translation_domain() method. Optional
-              with a default value of None.
-            * The callback function invoked when the action is activated.
-              Optional with a default value of None.
-            * A flag indicating whether the toggle action is active. Optional
-              with a default value of False.
+            return Gtk.UIManager.add_ui_from_string(self, buffer, length)
 
-        The "activate" signals of the actions are connected to the callbacks and
-        their accel paths are set to <Actions>/group-name/action-name.
-        """
+        def insert_action_group(self, buffer, length=-1):
+            return Gtk.UIManager.insert_action_group(self, buffer, length)
 
-        try:
-            iter(entries)
-        except (TypeError):
-            raise TypeError('entries must be iterable')
-
-        def _process_action(name, stock_id=None, label=None, accelerator=None, tooltip=None, callback=None, is_active=False):
-            action = Gtk.ToggleAction(name=name, label=label, tooltip=tooltip, stock_id=stock_id)
-            action.set_active(is_active)
-            if callback is not None:
-                if user_data is None:
-                    action.connect('activate', callback)
-                else:
-                    action.connect('activate', callback, user_data)
-
-            self.add_action_with_accel(action, accelerator)
-
-        for e in entries:
-            # using inner function above since entries can leave out optional arguments
-            _process_action(*e)
-
-    def add_radio_actions(self, entries, value=None, on_change=None, user_data=None):
-        """
-        The add_radio_actions() method is a convenience method that creates a
-        number of gtk.RadioAction objects based on the information in the list
-        of action entry tuples contained in entries and adds them to the action
-        group. The entry tuples can vary in size from one to six items with the
-        following information:
-
-            * The name of the action. Must be specified.
-            * The stock id for the action. Optional with a default value of None
-              if a label is specified.
-            * The label for the action. This field should typically be marked
-              for translation, see the set_translation_domain() method. Optional
-              with a default value of None if a stock id is specified.
-            * The accelerator for the action, in the format understood by the
-              gtk.accelerator_parse() function. Optional with a default value of
-              None.
-            * The tooltip for the action. This field should typically be marked
-              for translation, see the set_translation_domain() method. Optional
-              with a default value of None.
-            * The value to set on the radio action. Optional with a default
-              value of 0. Should be specified in applications.
-
-        The value parameter specifies the radio action that should be set
-        active. The "changed" signal of the first radio action is connected to
-        the on_change callback (if specified and not None) and the accel paths
-        of the actions are set to <Actions>/group-name/action-name.
-        """
-        try:
-            iter(entries)
-        except (TypeError):
-            raise TypeError('entries must be iterable')
-
-        first_action = None
-
-        def _process_action(group_source, name, stock_id=None, label=None, accelerator=None, tooltip=None, entry_value=0):
-            action = RadioAction(name=name, label=label, tooltip=tooltip, stock_id=stock_id, value=entry_value)
-
-            # FIXME: join_group is a patch to Gtk+ 3.0
-            #        otherwise we can't effectively add radio actions to a
-            #        group.  Should we depend on 3.0 and error out here
-            #        or should we offer the functionality via a compat
-            #        C module?
-            if hasattr(action, 'join_group'):
-                action.join_group(group_source)
-
-            if value == entry_value:
-                action.set_active(True)
-
-            self.add_action_with_accel(action, accelerator)
-            return action
-
-        for e in entries:
-            # using inner function above since entries can leave out optional arguments
-            action = _process_action(first_action, *e)
-            if first_action is None:
-                first_action = action
-
-        if first_action is not None and on_change is not None:
-            if user_data is None:
-                first_action.connect('changed', on_change)
-            else:
-                first_action.connect('changed', on_change, user_data)
-
-ActionGroup = override(ActionGroup)
-__all__.append('ActionGroup')
-
-
-class UIManager(Gtk.UIManager):
-    def add_ui_from_string(self, buffer):
-        if not isinstance(buffer, _basestring):
-            raise TypeError('buffer must be a string')
-
-        length = len(buffer.encode('UTF-8'))
-
-        return Gtk.UIManager.add_ui_from_string(self, buffer, length)
-
-    def insert_action_group(self, buffer, length=-1):
-        return Gtk.UIManager.insert_action_group(self, buffer, length)
-
-UIManager = override(UIManager)
-__all__.append('UIManager')
+    UIManager = override(UIManager)
+    __all__.append('UIManager')
 
 
 class ComboBox(Gtk.ComboBox, Container):
@@ -592,13 +590,14 @@ MessageDialog = override(MessageDialog)
 __all__.append('MessageDialog')
 
 
-class ColorSelectionDialog(Gtk.ColorSelectionDialog):
-    __init__ = deprecated_init(Gtk.ColorSelectionDialog.__init__,
-                               arg_names=('title',),
-                               category=PyGTKDeprecationWarning)
+if Gtk._version in ("2.0", "3.0"):
+    class ColorSelectionDialog(Gtk.ColorSelectionDialog):
+        __init__ = deprecated_init(Gtk.ColorSelectionDialog.__init__,
+                                   arg_names=('title',),
+                                   category=PyGTKDeprecationWarning)
 
-ColorSelectionDialog = override(ColorSelectionDialog)
-__all__.append('ColorSelectionDialog')
+    ColorSelectionDialog = override(ColorSelectionDialog)
+    __all__.append('ColorSelectionDialog')
 
 
 class FileChooserDialog(Gtk.FileChooserDialog):
@@ -610,13 +609,14 @@ FileChooserDialog = override(FileChooserDialog)
 __all__.append('FileChooserDialog')
 
 
-class FontSelectionDialog(Gtk.FontSelectionDialog):
-    __init__ = deprecated_init(Gtk.FontSelectionDialog.__init__,
-                               arg_names=('title',),
-                               category=PyGTKDeprecationWarning)
+if Gtk._version in ("2.0", "3.0"):
+    class FontSelectionDialog(Gtk.FontSelectionDialog):
+        __init__ = deprecated_init(Gtk.FontSelectionDialog.__init__,
+                                   arg_names=('title',),
+                                   category=PyGTKDeprecationWarning)
 
-FontSelectionDialog = override(FontSelectionDialog)
-__all__.append('FontSelectionDialog')
+    FontSelectionDialog = override(FontSelectionDialog)
+    __all__.append('FontSelectionDialog')
 
 
 class RecentChooserDialog(Gtk.RecentChooserDialog):
@@ -1446,17 +1446,18 @@ Adjustment = override(Adjustment)
 __all__.append('Adjustment')
 
 
-class Table(Gtk.Table, Container):
-    __init__ = deprecated_init(Gtk.Table.__init__,
-                               arg_names=('n_rows', 'n_columns', 'homogeneous'),
-                               deprecated_aliases={'n_rows': 'rows', 'n_columns': 'columns'},
-                               category=PyGTKDeprecationWarning)
+if Gtk._version in ("2.0", "3.0"):
+    class Table(Gtk.Table, Container):
+        __init__ = deprecated_init(Gtk.Table.__init__,
+                                   arg_names=('n_rows', 'n_columns', 'homogeneous'),
+                                   deprecated_aliases={'n_rows': 'rows', 'n_columns': 'columns'},
+                                   category=PyGTKDeprecationWarning)
 
-    def attach(self, child, left_attach, right_attach, top_attach, bottom_attach, xoptions=Gtk.AttachOptions.EXPAND | Gtk.AttachOptions.FILL, yoptions=Gtk.AttachOptions.EXPAND | Gtk.AttachOptions.FILL, xpadding=0, ypadding=0):
-        Gtk.Table.attach(self, child, left_attach, right_attach, top_attach, bottom_attach, xoptions, yoptions, xpadding, ypadding)
+        def attach(self, child, left_attach, right_attach, top_attach, bottom_attach, xoptions=Gtk.AttachOptions.EXPAND | Gtk.AttachOptions.FILL, yoptions=Gtk.AttachOptions.EXPAND | Gtk.AttachOptions.FILL, xpadding=0, ypadding=0):
+            Gtk.Table.attach(self, child, left_attach, right_attach, top_attach, bottom_attach, xoptions, yoptions, xpadding, ypadding)
 
-Table = override(Table)
-__all__.append('Table')
+    Table = override(Table)
+    __all__.append('Table')
 
 
 class ScrolledWindow(Gtk.ScrolledWindow):
@@ -1468,22 +1469,22 @@ ScrolledWindow = override(ScrolledWindow)
 __all__.append('ScrolledWindow')
 
 
-class HScrollbar(Gtk.HScrollbar):
-    __init__ = deprecated_init(Gtk.HScrollbar.__init__,
-                               arg_names=('adjustment',),
-                               category=PyGTKDeprecationWarning)
+if Gtk._version in ("2.0", "3.0"):
+    class HScrollbar(Gtk.HScrollbar):
+        __init__ = deprecated_init(Gtk.HScrollbar.__init__,
+                                   arg_names=('adjustment',),
+                                   category=PyGTKDeprecationWarning)
 
-HScrollbar = override(HScrollbar)
-__all__.append('HScrollbar')
+    HScrollbar = override(HScrollbar)
+    __all__.append('HScrollbar')
 
+    class VScrollbar(Gtk.VScrollbar):
+        __init__ = deprecated_init(Gtk.VScrollbar.__init__,
+                                   arg_names=('adjustment',),
+                                   category=PyGTKDeprecationWarning)
 
-class VScrollbar(Gtk.VScrollbar):
-    __init__ = deprecated_init(Gtk.VScrollbar.__init__,
-                               arg_names=('adjustment',),
-                               category=PyGTKDeprecationWarning)
-
-VScrollbar = override(VScrollbar)
-__all__.append('VScrollbar')
+    VScrollbar = override(VScrollbar)
+    __all__.append('VScrollbar')
 
 
 class Paned(Gtk.Paned):
@@ -1497,31 +1498,31 @@ Paned = override(Paned)
 __all__.append('Paned')
 
 
-class Arrow(Gtk.Arrow):
-    __init__ = deprecated_init(Gtk.Arrow.__init__,
-                               arg_names=('arrow_type', 'shadow_type'),
-                               category=PyGTKDeprecationWarning)
+if Gtk._version in ("2.0", "3.0"):
+    class Arrow(Gtk.Arrow):
+        __init__ = deprecated_init(Gtk.Arrow.__init__,
+                                   arg_names=('arrow_type', 'shadow_type'),
+                                   category=PyGTKDeprecationWarning)
 
-Arrow = override(Arrow)
-__all__.append('Arrow')
+    Arrow = override(Arrow)
+    __all__.append('Arrow')
 
+    class IconSet(Gtk.IconSet):
+        def __new__(cls, pixbuf=None):
+            if pixbuf is not None:
+                warnings.warn('Gtk.IconSet(pixbuf) has been deprecated. Please use: '
+                              'Gtk.IconSet.new_from_pixbuf(pixbuf)',
+                              PyGTKDeprecationWarning, stacklevel=2)
+                iconset = Gtk.IconSet.new_from_pixbuf(pixbuf)
+            else:
+                iconset = Gtk.IconSet.__new__(cls)
+            return iconset
 
-class IconSet(Gtk.IconSet):
-    def __new__(cls, pixbuf=None):
-        if pixbuf is not None:
-            warnings.warn('Gtk.IconSet(pixbuf) has been deprecated. Please use: '
-                          'Gtk.IconSet.new_from_pixbuf(pixbuf)',
-                          PyGTKDeprecationWarning, stacklevel=2)
-            iconset = Gtk.IconSet.new_from_pixbuf(pixbuf)
-        else:
-            iconset = Gtk.IconSet.__new__(cls)
-        return iconset
+        def __init__(self, *args, **kwargs):
+            return super(IconSet, self).__init__()
 
-    def __init__(self, *args, **kwargs):
-        return super(IconSet, self).__init__()
-
-IconSet = override(IconSet)
-__all__.append('IconSet')
+    IconSet = override(IconSet)
+    __all__.append('IconSet')
 
 
 class Viewport(Gtk.Viewport):
@@ -1559,8 +1560,9 @@ _Gtk_main_quit = Gtk.main_quit
 def main_quit(*args):
     _Gtk_main_quit()
 
-stock_lookup = strip_boolean_result(Gtk.stock_lookup)
-__all__.append('stock_lookup')
+if Gtk._version in ("2.0", "3.0"):
+    stock_lookup = strip_boolean_result(Gtk.stock_lookup)
+    __all__.append('stock_lookup')
 
 initialized, argv = Gtk.init_check(sys.argv)
 sys.argv = list(argv)
