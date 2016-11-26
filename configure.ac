@@ -259,6 +259,8 @@ AC_CONFIG_FILES(
   examples/Makefile
   tests/Makefile
   pygtkcompat/Makefile
+  win32/Makefile
+  win32/pygobject-version.mak
   PKG-INFO)
 AC_OUTPUT
 
