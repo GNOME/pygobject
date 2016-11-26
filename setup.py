@@ -15,6 +15,11 @@ from setuptools import setup, Extension
 with open("configure.ac", "r") as h:
     version = ".".join(re.findall("pygobject_[^\s]+_version,\s*(\d+)\)", h.read()))
 
+if os.name == 'nt' and 'MSYSTEM' not in os.environ:
+    data_files = [('include/pygobject-3.0', ['gi/pygobject.h']),
+                  ('lib/pkgconfig', ['win32/pygobject-3.0.pc'])]
+else:
+    data_files = []
 
 def makedirs(dirpath):
     """Safely make directories
@@ -38,31 +43,57 @@ def makedirs(dirpath):
 
 class Build(orig_build):
     """Dummy version of distutils build which runs an Autotools build system
-    instead.
+    or NMake instead.
     """
+
     def run(self):
         srcdir = os.getcwd()
         builddir = os.path.join(srcdir, self.build_temp)
+        print(builddir)
         makedirs(builddir)
-        configure = os.path.join(srcdir, 'configure')
 
-        if not os.path.exists(configure):
-            configure = os.path.join(srcdir, 'autogen.sh')
+        if os.name == 'nt':
+            if 'MSYSTEM' in os.environ:
+                use_autotools = True
+            else:
+                use_autotools = False
+        else:
+            use_autotools = True
 
-        subprocess.check_call([
-                configure,
-                'PYTHON=%s' % sys.executable,
-                # Put the documentation, etc. out of the way: we only want
-                # the Python code and extensions
-                '--prefix=' + os.path.join(builddir, 'prefix'),
-            ],
-            cwd=builddir)
-        make_args = [
-            'pythondir=%s' % os.path.join(srcdir, self.build_lib),
-            'pyexecdir=%s' % os.path.join(srcdir, self.build_lib),
-        ]
-        subprocess.check_call(['make', '-C', builddir] + make_args)
-        subprocess.check_call(['make', '-C', builddir, 'install'] + make_args)
+        if use_autotools is True:
+            configure = os.path.join(srcdir, 'configure')
+
+            if not os.path.exists(configure):
+                configure = os.path.join(srcdir, 'autogen.sh')
+
+            subprocess.check_call([
+                    configure,
+                    'PYTHON=%s' % sys.executable,
+                    # Put the documentation, etc. out of the way: we only want
+                    # the Python code and extensions
+                    '--prefix=' + os.path.join(builddir, 'prefix'),
+                ],
+                cwd=builddir)
+            make_args = [
+                'pythondir=%s' % os.path.join(srcdir, self.build_lib),
+                'pyexecdir=%s' % os.path.join(srcdir, self.build_lib),
+            ]
+            subprocess.check_call(['make', '-C', builddir] + make_args)
+            subprocess.check_call(['make', '-C', builddir, 'install'] + make_args)
+
+        else:
+            os.chdir('win32')
+            subprocess.check_call(['nmake', '-f',
+                                   'Makefile.vc',
+                                   'CFG=release',
+                                   'PYTHON=%s' % sys.executable])
+            subprocess.check_call(['nmake', '-f',
+                                   'Makefile.vc',
+                                   'CFG=release',
+                                   'PYTHON=%s' % sys.executable,
+                                   'USE_SETUP_TOOLS=1',
+                                   'install'])
+            os.chdir('..')
 
 
 class BuildExt(orig_build_ext):
@@ -102,4 +133,5 @@ setup(
         'build_py': BuildPy,
         'build_ext': BuildExt,
     },
+    data_files = data_files,
 )

@@ -1,5 +1,5 @@
 # Limit PyFlakes and PEP8 to these directories.
-pycheck_dirs = examples gi tests pygtkcompat
+pycheck_dirs = examples gi tests pygtkcompat win32
 
 # Part of the gi subdirectory is handled with non-recursive make to avoid
 # py-compile getting confused between gi/types.py and Python's standard
