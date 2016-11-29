@@ -27,6 +27,9 @@ import textwrap
 
 from gi.repository import GLib, GObject, Pango, GdkPixbuf, Gtk, Gio
 
+if os.name == 'nt':
+    GLib.file_test = GLib.file_test_utf8
+
 try:
     from gi.repository import GtkSource
     GtkSource  # PyFlakes
