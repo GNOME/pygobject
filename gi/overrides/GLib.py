@@ -251,7 +251,16 @@ class Variant(GLib.Variant):
         return GLib.Variant.new_tuple(elements)
 
     def __del__(self):
-        self.unref()
+        try:
+            self.unref()
+        except ImportError:
+            # Calling unref will cause gi and gi.repository.GLib to be
+            # imported. However, if the program is exiting, then these
+            # modules have likely been removed from sys.modules and will
+            # raise an exception. Assume that's the case for ImportError
+            # and ignore the exception since everything will be cleaned
+            # up, anyways.
+            pass
 
     def __str__(self):
         return self.print_(True)
