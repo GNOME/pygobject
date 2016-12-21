@@ -684,14 +684,13 @@ _callable_cache_generate_args_cache_real (PyGICallableCache *callable_cache,
 static void
 _callable_cache_deinit_real (PyGICallableCache *cache)
 {
-    g_slist_free (cache->to_py_args);
-    g_slist_free (cache->arg_name_list);
-    g_hash_table_destroy (cache->arg_name_hash);
-    g_ptr_array_unref (cache->args_cache);
-    Py_XDECREF (cache->resulttuple_type);
+    g_clear_pointer (&cache->to_py_args, g_slist_free);
+    g_clear_pointer (&cache->arg_name_list, g_slist_free);
+    g_clear_pointer (&cache->arg_name_hash, g_hash_table_unref);
+    g_clear_pointer (&cache->args_cache, g_ptr_array_unref);
+    Py_CLEAR (cache->resulttuple_type);
 
-    if (cache->return_cache != NULL)
-        pygi_arg_cache_free (cache->return_cache);
+    g_clear_pointer (&cache->return_cache, pygi_arg_cache_free);
 }
 
 static gboolean
