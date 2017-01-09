@@ -204,6 +204,7 @@ class _GObjectMetaBase(type):
 
         _gobject.type_register(cls, namespace.get('__gtype_name__'))
 
+
 _gobject._install_metaclass(_GObjectMetaBase)
 
 

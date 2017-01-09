@@ -423,5 +423,6 @@ second line
             self.assertEqual(GLib.IOFlags.IS_SEEKABLE, GLib.IO_FLAG_IS_SEEKABLE)
             self.assertEqual(GLib.IOStatus.NORMAL, GLib.IO_STATUS_NORMAL)
 
+
 if __name__ == '__main__':
     unittest.main()

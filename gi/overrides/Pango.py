@@ -37,6 +37,7 @@ class FontDescription(Pango.FontDescription):
     def __init__(self, *args, **kwargs):
         return super(FontDescription, self).__init__()
 
+
 FontDescription = override(FontDescription)
 __all__.append('FontDescription')
 
@@ -48,6 +49,7 @@ class Layout(Pango.Layout):
 
     def set_markup(self, text, length=-1):
         super(Layout, self).set_markup(text, length)
+
 
 Layout = override(Layout)
 __all__.append('Layout')

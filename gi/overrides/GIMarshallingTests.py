@@ -41,6 +41,7 @@ class OverridesStruct(GIMarshallingTests.OverridesStruct):
     def method(self):
         return GIMarshallingTests.OverridesStruct.method(self) / 7
 
+
 OverridesStruct = override(OverridesStruct)
 __all__.append('OverridesStruct')
 
@@ -65,6 +66,7 @@ class OverridesObject(GIMarshallingTests.OverridesObject):
     def method(self):
         """Overridden doc string."""
         return GIMarshallingTests.OverridesObject.method(self) / 7
+
 
 OverridesObject = override(OverridesObject)
 __all__.append('OverridesObject')

@@ -76,8 +76,8 @@ class TestGtk(unittest.TestCase):
         self.assertTrue(label2 in box)
         self.assertEqual(len(box), 2)
         self.assertTrue(box)
-        l = [x for x in box]
-        self.assertEqual(l, [label, label2])
+        labels = [x for x in box]
+        self.assertEqual(labels, [label, label2])
 
     def test_actions(self):
         self.assertEqual(Gtk.Action, gi.overrides.Gtk.Action)
@@ -615,9 +615,9 @@ class TestGtk(unittest.TestCase):
         self.assertEqual(viewport.props.hadjustment, hadjustment)
 
     def test_stock_lookup(self):
-        l = Gtk.stock_lookup('gtk-ok')
-        self.assertEqual(type(l), Gtk.StockItem)
-        self.assertEqual(l.stock_id, 'gtk-ok')
+        stock_item = Gtk.stock_lookup('gtk-ok')
+        self.assertEqual(type(stock_item), Gtk.StockItem)
+        self.assertEqual(stock_item.stock_id, 'gtk-ok')
         self.assertEqual(Gtk.stock_lookup('nosuchthing'), None)
 
     def test_gtk_main(self):

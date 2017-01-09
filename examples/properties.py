@@ -13,6 +13,7 @@ class MyObject(GObject.GObject):
     def readonly(self):
         return 'readonly'
 
+
 GObject.type_register(MyObject)
 
 print("MyObject properties: ", list(MyObject.props))

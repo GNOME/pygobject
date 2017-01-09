@@ -20,6 +20,8 @@ class MyUnknown(Unknown, testhelper.Interface):
     def do_iface_method(self):
         self.called = True
         Unknown.do_iface_method(self)
+
+
 GObject.type_register(MyUnknown)
 
 
@@ -32,6 +34,8 @@ class MyObject(GObject.GObject, testhelper.Interface):
 
     def do_iface_method(self):
         self.called = True
+
+
 GObject.type_register(MyObject)
 
 

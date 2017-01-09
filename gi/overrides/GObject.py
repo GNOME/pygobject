@@ -351,6 +351,7 @@ class Value(GObjectModule.Value):
     def __repr__(self):
         return '<Value (%s) %s>' % (self.g_type.name, self.get_value())
 
+
 Value = override(Value)
 __all__.append('Value')
 
@@ -361,6 +362,7 @@ def type_from_name(name):
         raise RuntimeError('unknown type name: %s' % name)
     return type_
 
+
 __all__.append('type_from_name')
 
 
@@ -369,6 +371,7 @@ def type_parent(type_):
     if parent == TYPE_INVALID:
         raise RuntimeError('no parent for type')
     return parent
+
 
 __all__.append('type_parent')
 
@@ -384,6 +387,7 @@ def signal_list_ids(type_):
     _validate_type_for_signal_method(type_)
     return GObjectModule.signal_list_ids(type_)
 
+
 __all__.append('signal_list_ids')
 
 
@@ -391,12 +395,14 @@ def signal_list_names(type_):
     ids = signal_list_ids(type_)
     return tuple(GObjectModule.signal_name(i) for i in ids)
 
+
 __all__.append('signal_list_names')
 
 
 def signal_lookup(name, type_):
     _validate_type_for_signal_method(type_)
     return GObjectModule.signal_lookup(name, type_)
+
 
 __all__.append('signal_lookup')
 
@@ -429,6 +435,7 @@ def signal_query(id_or_name, type_=None):
     return SignalQuery(res.signal_id, res.signal_name, res.itype,
                        res.signal_flags, res.return_type,
                        tuple(res.param_types))
+
 
 __all__.append('signal_query')
 
@@ -465,6 +472,7 @@ def signal_handler_block(obj, handler_id):
     GObjectModule.signal_handler_block(obj, handler_id)
     return _HandlerBlockManager(obj, handler_id)
 
+
 __all__.append('signal_handler_block')
 
 
@@ -486,12 +494,14 @@ def signal_parse_name(detailed_signal, itype, force_detail_quark):
     else:
         raise ValueError('%s: unknown signal name: %s' % (itype, detailed_signal))
 
+
 __all__.append('signal_parse_name')
 
 
 def remove_emission_hook(obj, detailed_signal, hook_id):
     signal_id, detail = signal_parse_name(detailed_signal, obj, True)
     GObjectModule.signal_remove_emission_hook(signal_id, hook_id)
+
 
 __all__.append('remove_emission_hook')
 
@@ -503,12 +513,14 @@ def signal_accumulator_first_wins(ihint, return_accu, handler_return, user_data=
     # Stop emission but return the result of the last handler
     return (False, handler_return)
 
+
 __all__.append('signal_accumulator_first_wins')
 
 
 def signal_accumulator_true_handled(ihint, return_accu, handler_return, user_data=None):
     # Stop emission if the last handler returns True
     return (not handler_return, handler_return)
+
 
 __all__.append('signal_accumulator_true_handled')
 

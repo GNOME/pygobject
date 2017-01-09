@@ -415,5 +415,6 @@ class TestReturnsAfterError(unittest.TestCase):
             res = self.model.iter_parent(child)
         self.assertEqual(res, None)
 
+
 if __name__ == '__main__':
     unittest.main()

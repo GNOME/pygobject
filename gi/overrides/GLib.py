@@ -477,6 +477,7 @@ def get_string(self):
     value, length = GLib.Variant.get_string(self)
     return value
 
+
 setattr(Variant, 'get_string', get_string)
 
 __all__.append('Variant')
@@ -487,6 +488,8 @@ def markup_escape_text(text, length=-1):
         return GLib.markup_escape_text(text.decode('UTF-8'), length)
     else:
         return GLib.markup_escape_text(text, length)
+
+
 __all__.append('markup_escape_text')
 
 
@@ -585,6 +588,7 @@ class MainLoop(GLib.MainLoop):
             # caught by _main_loop_sigint_handler()
             raise KeyboardInterrupt
 
+
 MainLoop = override(MainLoop)
 __all__.append('MainLoop')
 
@@ -593,6 +597,7 @@ class MainContext(GLib.MainContext):
     # Backwards compatible API with default value
     def iteration(self, may_block=True):
         return super(MainContext, self).iteration(may_block)
+
 
 MainContext = override(MainContext)
 __all__.append('MainContext')
@@ -643,6 +648,7 @@ class Source(GLib.Source):
 
     can_recurse = property(__get_can_recurse, __set_can_recurse)
 
+
 Source = override(Source)
 __all__.append('Source')
 
@@ -658,6 +664,7 @@ class Idle(Source):
         if priority != GLib.PRIORITY_DEFAULT:
             self.set_priority(priority)
 
+
 __all__.append('Idle')
 
 
@@ -671,6 +678,7 @@ class Timeout(Source):
         if priority != GLib.PRIORITY_DEFAULT:
             self.set_priority(priority)
 
+
 __all__.append('Timeout')
 
 
@@ -679,6 +687,7 @@ def idle_add(function, *user_data, **kwargs):
     priority = kwargs.get('priority', GLib.PRIORITY_DEFAULT_IDLE)
     return GLib.idle_add(priority, function, *user_data)
 
+
 __all__.append('idle_add')
 
 
@@ -686,12 +695,14 @@ def timeout_add(interval, function, *user_data, **kwargs):
     priority = kwargs.get('priority', GLib.PRIORITY_DEFAULT)
     return GLib.timeout_add(priority, interval, function, *user_data)
 
+
 __all__.append('timeout_add')
 
 
 def timeout_add_seconds(interval, function, *user_data, **kwargs):
     priority = kwargs.get('priority', GLib.PRIORITY_DEFAULT)
     return GLib.timeout_add_seconds(priority, interval, function, *user_data)
+
 
 __all__.append('timeout_add_seconds')
 
@@ -750,6 +761,7 @@ def _io_add_watch_get_args(channel, priority_, condition, *cb_and_user_data, **k
 
     return real_channel, priority_, condition, func_fdtransform, user_data
 
+
 __all__.append('_io_add_watch_get_args')
 
 
@@ -757,6 +769,7 @@ def io_add_watch(*args, **kwargs):
     """io_add_watch(channel, priority, condition, func, *user_data) -> event_source_id"""
     channel, priority, condition, func, user_data = _io_add_watch_get_args(*args, **kwargs)
     return GLib.io_add_watch(channel, priority, condition, func, *user_data)
+
 
 __all__.append('io_add_watch')
 
@@ -839,6 +852,7 @@ class IOChannel(GLib.IOChannel):
     # Python 2.x compatibility
     next = __next__
 
+
 IOChannel = override(IOChannel)
 __all__.append('IOChannel')
 
@@ -852,6 +866,7 @@ class PollFD(GLib.PollFD):
     def __init__(self, fd, events):
         self.fd = fd
         self.events = events
+
 
 PollFD = override(PollFD)
 __all__.append('PollFD')
@@ -900,6 +915,7 @@ def _child_watch_add_get_args(priority_or_pid, pid_or_callback, *args, **kwargs)
 
     return priority, pid, callback, user_data
 
+
 # we need this to be accessible for unit testing
 __all__.append('_child_watch_add_get_args')
 
@@ -909,11 +925,13 @@ def child_watch_add(*args, **kwargs):
     priority, pid, function, data = _child_watch_add_get_args(*args, **kwargs)
     return GLib.child_watch_add(priority, pid, function, *data)
 
+
 __all__.append('child_watch_add')
 
 
 def get_current_time():
     return GLib.get_real_time() * 0.000001
+
 
 get_current_time = deprecated(get_current_time, 'GLib.get_real_time()')
 
@@ -924,6 +942,7 @@ __all__.append('get_current_time')
 # output argument
 def filename_from_utf8(utf8string, len=-1):
     return GLib.filename_from_utf8(utf8string, len)[0]
+
 
 __all__.append('filename_from_utf8')
 

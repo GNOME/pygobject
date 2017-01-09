@@ -659,6 +659,7 @@ class _TestCMarshaller:
         self.assertEqual(self.obj.emit("test-gvalue-ret", GObject.TYPE_STRING),
                          "hello")
 
+
 if 'generic-c-marshaller' in GObject.features:
     class TestCMarshaller(_TestCMarshaller, unittest.TestCase):
         pass

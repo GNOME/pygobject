@@ -1137,9 +1137,9 @@ class CPropertiesTestBase(object):
     def test_boxed_glist(self):
         self.assertEqual(self.get_prop(self.obj, 'some-boxed-glist'), [])
 
-        l = [GLib.MININT, 42, GLib.MAXINT]
-        self.set_prop(self.obj, 'some-boxed-glist', l)
-        self.assertEqual(self.get_prop(self.obj, 'some-boxed-glist'), l)
+        list_ = [GLib.MININT, 42, GLib.MAXINT]
+        self.set_prop(self.obj, 'some-boxed-glist', list_)
+        self.assertEqual(self.get_prop(self.obj, 'some-boxed-glist'), list_)
         self.set_prop(self.obj, 'some-boxed-glist', [])
         self.assertEqual(self.get_prop(self.obj, 'some-boxed-glist'), [])
 
@@ -1158,9 +1158,9 @@ class CPropertiesTestBase(object):
 
     @unittest.expectedFailure
     def test_boxed_glist_ctor(self):
-        l = [GLib.MININT, 42, GLib.MAXINT]
-        obj = GIMarshallingTests.PropertiesObject(some_boxed_glist=l)
-        self.assertEqual(self.get_prop(obj, 'some-boxed-glist'), l)
+        list_ = [GLib.MININT, 42, GLib.MAXINT]
+        obj = GIMarshallingTests.PropertiesObject(some_boxed_glist=list_)
+        self.assertEqual(self.get_prop(obj, 'some-boxed-glist'), list_)
 
     def test_variant(self):
         self.assertEqual(self.get_prop(self.obj, 'some-variant'), None)

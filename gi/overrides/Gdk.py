@@ -77,6 +77,7 @@ class Color(Gdk.Color):
                      int(green * Color.MAX_VALUE),
                      int(blue * Color.MAX_VALUE))
 
+
 Color = override(Color)
 __all__.append('Color')
 
@@ -243,6 +244,7 @@ class Event(Gdk.Event):
         base_repr = Gdk.Event.__repr__(self).strip("><")
         return "<%s type=%r>" % (base_repr, self.type)
 
+
 Event = override(Event)
 __all__.append('Event')
 
@@ -311,6 +313,7 @@ class DragContext(Gdk.DragContext):
     def finish(self, success, del_, time):
         Gtk = get_introspection_module('Gtk')
         Gtk.drag_finish(self, success, del_, time)
+
 
 DragContext = override(DragContext)
 __all__.append('DragContext')

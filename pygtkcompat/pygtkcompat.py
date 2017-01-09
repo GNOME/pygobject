@@ -99,6 +99,7 @@ def enable():
     from gi.repository import Gio
     sys.modules['gio'] = Gio
 
+
 _unset = object()
 
 

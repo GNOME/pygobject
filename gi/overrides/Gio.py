@@ -116,6 +116,7 @@ class Settings(Gio.Settings):
     def keys(self):
         return self.list_keys()
 
+
 Settings = override(Settings)
 __all__.append('Settings')
 
@@ -234,6 +235,7 @@ class DBusProxy(Gio.DBusProxy):
     '''
     def __getattr__(self, name):
         return _DBusProxyMethodCall(self, name)
+
 
 DBusProxy = override(DBusProxy)
 __all__.append('DBusProxy')

@@ -53,6 +53,7 @@ python module to use with Gtk 2.0"
 class PyGTKDeprecationWarning(PyGIDeprecationWarning):
     pass
 
+
 __all__.append('PyGTKDeprecationWarning')
 
 
@@ -68,6 +69,7 @@ def _construct_target_list(targets):
             entry = Gtk.TargetEntry.new(*entry)
         target_entries.append(entry)
     return target_entries
+
 
 __all__.append('_construct_target_list')
 
@@ -404,6 +406,7 @@ if Gtk._version in ("2.0", "3.0"):
 class ComboBox(Gtk.ComboBox, Container):
     get_active_iter = strip_boolean_result(Gtk.ComboBox.get_active_iter)
 
+
 ComboBox = override(ComboBox)
 __all__.append('ComboBox')
 
@@ -412,6 +415,7 @@ class Box(Gtk.Box):
     __init__ = deprecated_init(Gtk.Box.__init__,
                                arg_names=('homogeneous', 'spacing'),
                                category=PyGTKDeprecationWarning)
+
 
 Box = override(Box)
 __all__.append('Box')
@@ -423,6 +427,7 @@ class SizeGroup(Gtk.SizeGroup):
                                deprecated_defaults={'mode': Gtk.SizeGroupMode.VERTICAL},
                                category=PyGTKDeprecationWarning)
 
+
 SizeGroup = override(SizeGroup)
 __all__.append('SizeGroup')
 
@@ -431,6 +436,7 @@ class MenuItem(Gtk.MenuItem):
     __init__ = deprecated_init(Gtk.MenuItem.__init__,
                                arg_names=('label',),
                                category=PyGTKDeprecationWarning)
+
 
 MenuItem = override(MenuItem)
 __all__.append('MenuItem')
@@ -467,6 +473,7 @@ class Builder(Gtk.Builder):
 
         return Gtk.Builder.add_objects_from_string(self, buffer, length, object_ids)
 
+
 Builder = override(Builder)
 __all__.append('Builder')
 
@@ -479,6 +486,7 @@ class Window(Gtk.Window):
     __init__ = deprecated_init(Gtk.Window.__init__,
                                arg_names=('type',),
                                category=PyGTKDeprecationWarning)
+
 
 Window = override(Window)
 __all__.append('Window')
@@ -566,6 +574,7 @@ class Dialog(Gtk.Dialog, Container):
         except (IndexError):
             raise TypeError('Must pass an even number of arguments')
 
+
 Dialog = override(Dialog)
 __all__.append('Dialog')
 
@@ -586,6 +595,7 @@ class MessageDialog(Gtk.MessageDialog, Dialog):
         self.set_property('secondary-use-markup', True)
         self.set_property('secondary-text', message_format)
 
+
 MessageDialog = override(MessageDialog)
 __all__.append('MessageDialog')
 
@@ -604,6 +614,7 @@ class FileChooserDialog(Gtk.FileChooserDialog):
     __init__ = deprecated_init(Gtk.FileChooserDialog.__init__,
                                arg_names=('title', 'parent', 'action', 'buttons'),
                                category=PyGTKDeprecationWarning)
+
 
 FileChooserDialog = override(FileChooserDialog)
 __all__.append('FileChooserDialog')
@@ -627,6 +638,7 @@ class RecentChooserDialog(Gtk.RecentChooserDialog):
                                deprecated_aliases={'recent_manager': 'manager'},
                                category=PyGTKDeprecationWarning)
 
+
 RecentChooserDialog = override(RecentChooserDialog)
 __all__.append('RecentChooserDialog')
 
@@ -640,6 +652,7 @@ class IconView(Gtk.IconView):
     get_visible_range = strip_boolean_result(Gtk.IconView.get_visible_range)
     get_dest_item_at_pos = strip_boolean_result(Gtk.IconView.get_dest_item_at_pos)
 
+
 IconView = override(IconView)
 __all__.append('IconView')
 
@@ -649,6 +662,7 @@ class ToolButton(Gtk.ToolButton):
                                arg_names=('stock_id',),
                                category=PyGTKDeprecationWarning)
 
+
 ToolButton = override(ToolButton)
 __all__.append('ToolButton')
 
@@ -656,12 +670,14 @@ __all__.append('ToolButton')
 class IMContext(Gtk.IMContext):
     get_surrounding = strip_boolean_result(Gtk.IMContext.get_surrounding)
 
+
 IMContext = override(IMContext)
 __all__.append('IMContext')
 
 
 class RecentInfo(Gtk.RecentInfo):
     get_application_info = strip_boolean_result(Gtk.RecentInfo.get_application_info)
+
 
 RecentInfo = override(RecentInfo)
 __all__.append('RecentInfo')
@@ -750,6 +766,7 @@ class TextBuffer(Gtk.TextBuffer):
 
     get_selection_bounds = strip_boolean_result(Gtk.TextBuffer.get_selection_bounds, fail_ret=())
 
+
 TextBuffer = override(TextBuffer)
 __all__.append('TextBuffer')
 
@@ -757,6 +774,7 @@ __all__.append('TextBuffer')
 class TextIter(Gtk.TextIter):
     forward_search = strip_boolean_result(Gtk.TextIter.forward_search)
     backward_search = strip_boolean_result(Gtk.TextIter.backward_search)
+
 
 TextIter = override(TextIter)
 __all__.append('TextIter')
@@ -924,6 +942,7 @@ class TreeSortable(Gtk.TreeSortable, ):
     def set_default_sort_func(self, sort_func, user_data=None):
         super(TreeSortable, self).set_default_sort_func(sort_func, user_data)
 
+
 TreeSortable = override(TreeSortable)
 __all__.append('TreeSortable')
 
@@ -932,6 +951,7 @@ class TreeModelSort(Gtk.TreeModelSort):
     __init__ = deprecated_init(Gtk.TreeModelSort.__init__,
                                arg_names=('model',),
                                category=PyGTKDeprecationWarning)
+
 
 TreeModelSort = override(TreeModelSort)
 __all__.append('TreeModelSort')
@@ -1016,6 +1036,7 @@ class ListStore(Gtk.ListStore, TreeModel, TreeSortable):
                 _set_lists(columns, values)
             else:
                 raise TypeError('Argument list must be in the form of (column, value, ...), ((columns,...), (values, ...)) or {column: value}.  No -1 termination is needed.')
+
 
 ListStore = override(ListStore)
 __all__.append('ListStore')
@@ -1123,6 +1144,7 @@ class TreeModelRow(object):
         child_iter = self.model.iter_children(self.iter)
         return TreeModelRowIter(self.model, child_iter)
 
+
 __all__.append('TreeModelRow')
 
 
@@ -1144,6 +1166,7 @@ class TreeModelRowIter(object):
 
     def __iter__(self):
         return self
+
 
 __all__.append('TreeModelRowIter')
 
@@ -1195,6 +1218,7 @@ class TreePath(Gtk.TreePath):
 
     def __getitem__(self, index):
         return self.get_indices()[index]
+
 
 TreePath = override(TreePath)
 __all__.append('TreePath')
@@ -1275,6 +1299,7 @@ class TreeStore(Gtk.TreeStore, TreeModel, TreeSortable):
             else:
                 raise TypeError('Argument list must be in the form of (column, value, ...), ((columns,...), (values, ...)) or {column: value}.  No -1 termination is needed.')
 
+
 TreeStore = override(TreeStore)
 __all__.append('TreeStore')
 
@@ -1320,6 +1345,7 @@ class TreeView(Gtk.TreeView, Container):
         column.pack_start(cell, False)
         self.insert_column(column, position)
         column.set_attributes(cell, **kwargs)
+
 
 TreeView = override(TreeView)
 __all__.append('TreeView')
@@ -1402,6 +1428,7 @@ class Button(Gtk.Button, Container):
         else:
             self._init(*args, **kwargs)
 
+
 Button = override(Button)
 __all__.append('Button')
 
@@ -1411,6 +1438,7 @@ class LinkButton(Gtk.LinkButton):
                                arg_names=('uri', 'label'),
                                category=PyGTKDeprecationWarning)
 
+
 LinkButton = override(LinkButton)
 __all__.append('LinkButton')
 
@@ -1419,6 +1447,7 @@ class Label(Gtk.Label):
     __init__ = deprecated_init(Gtk.Label.__init__,
                                arg_names=('label',),
                                category=PyGTKDeprecationWarning)
+
 
 Label = override(Label)
 __all__.append('Label')
@@ -1442,6 +1471,7 @@ class Adjustment(Gtk.Adjustment):
         if 'value' in kwargs:
             self.set_value(kwargs['value'])
 
+
 Adjustment = override(Adjustment)
 __all__.append('Adjustment')
 
@@ -1464,6 +1494,7 @@ class ScrolledWindow(Gtk.ScrolledWindow):
     __init__ = deprecated_init(Gtk.ScrolledWindow.__init__,
                                arg_names=('hadjustment', 'vadjustment'),
                                category=PyGTKDeprecationWarning)
+
 
 ScrolledWindow = override(ScrolledWindow)
 __all__.append('ScrolledWindow')
@@ -1493,6 +1524,7 @@ class Paned(Gtk.Paned):
 
     def pack2(self, child, resize=True, shrink=True):
         super(Paned, self).pack2(child, resize, shrink)
+
 
 Paned = override(Paned)
 __all__.append('Paned')
@@ -1530,6 +1562,7 @@ class Viewport(Gtk.Viewport):
                                arg_names=('hadjustment', 'vadjustment'),
                                category=PyGTKDeprecationWarning)
 
+
 Viewport = override(Viewport)
 __all__.append('Viewport')
 
@@ -1542,6 +1575,7 @@ class TreeModelFilter(Gtk.TreeModelFilter):
         # Delegate to child model
         iter = self.convert_iter_to_child_iter(iter)
         self.get_model().set_value(iter, column, value)
+
 
 TreeModelFilter = override(TreeModelFilter)
 __all__.append('TreeModelFilter')
@@ -1559,6 +1593,7 @@ _Gtk_main_quit = Gtk.main_quit
 @override(Gtk.main_quit)
 def main_quit(*args):
     _Gtk_main_quit()
+
 
 if Gtk._version in ("2.0", "3.0"):
     stock_lookup = strip_boolean_result(Gtk.stock_lookup)
