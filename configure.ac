@@ -228,7 +228,7 @@ AC_SUBST(INTROSPECTION_SCANNER)
 AC_SUBST(INTROSPECTION_COMPILER)
 
 # compiler warnings, errors, required cflags, and code coverage support
-GNOME_COMPILE_WARNINGS([maximum])
+GNOME_COMPILE_WARNINGS([maximum], [-Wno-error=missing-prototypes])
 AC_MSG_CHECKING(for Gnome code coverage support)
 m4_ifdef([GNOME_CODE_COVERAGE],
          [AC_MSG_RESULT(yes)
