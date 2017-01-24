@@ -10,6 +10,7 @@ dist_libgimarshallingtests_la_SOURCES = \
 	$(srcdir)/gimarshallingtestsextra.c \
 	$(srcdir)/gimarshallingtestsextra.h
 
+# We don't control the source so don't pass WARN_CFLAGS etc
 libgimarshallingtests_la_CFLAGS = $(GLIB_CFLAGS)
 libgimarshallingtests_la_LDFLAGS = -module -avoid-version $(GLIB_LIBS) -no-undefined
 
@@ -35,6 +36,7 @@ if ENABLE_CAIRO
 check_LTLIBRARIES += libregress.la
 test_typelibs += Regress-1.0.typelib
 nodist_libregress_la_SOURCES = $(GI_DATADIR)/tests/regress.c $(GI_DATADIR)/tests/regress.h
+# We don't control the source so don't pass WARN_CFLAGS etc
 libregress_la_CFLAGS = $(GIO_CFLAGS) $(CAIRO_CFLAGS)
 libregress_la_LDFLAGS = -module -avoid-version $(GIO_LIBS) $(CAIRO_LIBS) -no-undefined
 
@@ -63,9 +65,10 @@ CLEANFILES += Regress-1.0.gir Regress-1.0.typelib GIMarshallingTests-1.0.gir GIM
 
 check_LTLIBRARIES += testhelper.la
 
-testhelper_la_CFLAGS = -I$(top_srcdir)/gi $(PYTHON_INCLUDES) $(GLIB_CFLAGS)
-testhelper_la_LDFLAGS = -module -avoid-version -no-undefined $(PYTHON_LIBS)
-testhelper_la_LIBADD = $(GLIB_LIBS)
+testhelper_la_CFLAGS = $(CODE_COVERAGE_CFLAGS) $(WARN_CFLAGS) -I$(top_srcdir)/gi $(PYTHON_INCLUDES) $(GLIB_CFLAGS)
+testhelper_la_CPPFLAGS = $(CODE_COVERAGE_CPPFLAGS)
+testhelper_la_LDFLAGS = $(WARN_LDFLAGS) -module -avoid-version -no-undefined $(PYTHON_LIBS)
+testhelper_la_LIBADD = $(CODE_COVERAGE_LIBS) $(GLIB_LIBS)
 testhelper_la_SOURCES = \
 	testhelpermodule.c \
 	test-floating.c \

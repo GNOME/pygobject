@@ -1,6 +1,3 @@
-AUTOMAKE_OPTIONS = 1.7
-PLATFORM_VERSION = 3.0
-
 pygobjectdir = $(pyexecdir)/gi/_gobject
 
 pygobject_PYTHON = \

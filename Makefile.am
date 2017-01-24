@@ -1,5 +1,4 @@
-ACLOCAL_AMFLAGS = -I m4 ${ACLOCAL_FLAGS}
-AUTOMAKE_OPTIONS = 1.7
+ACLOCAL_AMFLAGS = -I m4
 
 # Limit PyFlakes and PEP8 to these directories.
 pycheck_dirs = examples gi tests pygtkcompat
@@ -21,9 +20,8 @@ EXTRA_DIST = \
 	PKG-INFO \
 	PKG-INFO.in \
 	pygi-convert.sh \
-	m4/as-ac-expand.m4 \
-	m4/jhflags.m4 \
 	m4/python.m4 \
+	m4/introspection.m4 \
 	setup.py
 
 MAINTAINERCLEANFILES = \
@@ -167,4 +165,4 @@ check.valgrindlog:
 check.valgrindxml:
 	cd tests && $(MAKE) check.valgrindxml
 
-@GNOME_CODE_COVERAGE_RULES@
+@CODE_COVERAGE_RULES@

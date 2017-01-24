@@ -121,17 +121,22 @@ _gi_la_SOURCES = \
 	pygi-hashtable.c \
 	pygi-hashtable.h
 _gi_la_CFLAGS = \
+	$(CODE_COVERAGE_CFLAGS) \
+	$(WARN_CFLAGS) \
 	$(extension_cppflags) \
 	$(GLIB_CFLAGS) \
 	$(GI_CFLAGS)
 _gi_la_CPPFLAGS = \
+	$(CODE_COVERAGE_CPPFLAGS) \
 	$(extension_cppflags)
 _gi_la_LIBADD = \
+	$(CODE_COVERAGE_LIBS) \
 	$(extension_libadd) \
 	$(GLIB_LIBS) \
 	$(GI_LIBS) \
 	$(FFI_LIBS)
 _gi_la_LDFLAGS = \
+	$(WARN_LDFLAGS) \
 	$(extension_ldflags) \
 	-export-symbols-regex "init_gi|PyInit__gi"
 
@@ -142,17 +147,22 @@ endif
 _gi_cairo_la_SOURCES = \
 	pygi-foreign-cairo.c
 _gi_cairo_la_CFLAGS = \
+	$(CODE_COVERAGE_CFLAGS) \
+	$(WARN_CFLAGS) \
 	$(GI_CFLAGS) \
 	$(CAIRO_CFLAGS) \
 	$(PYCAIRO_CFLAGS)
 _gi_cairo_la_CPPFLAGS = \
+	$(CODE_COVERAGE_CPPFLAGS) \
 	$(extension_cppflags)
 _gi_cairo_la_LIBADD = \
+	$(CODE_COVERAGE_LIBS) \
 	$(extension_libadd) \
 	$(GI_LIBS) \
 	$(CAIRO_LIBS) \
 	$(PYCAIRO_LIBS)
 _gi_cairo_la_LDFLAGS = \
+	$(WARN_LDFLAGS) \
 	$(extension_ldflags) \
 	-export-symbols-regex "init_gi_cairo|PyInit__gi_cairo"
 

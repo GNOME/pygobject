@@ -55,6 +55,9 @@ Makefile.in
 /m4/ltsugar.m4
 /m4/ltversion.m4
 /m4/lt~obsolete.m4
+/m4/glib-2.0.m4
+/m4/pkg.m4
+/m4/ax_*.m4
 /missing
 /mkinstalldirs
 /omf.make
