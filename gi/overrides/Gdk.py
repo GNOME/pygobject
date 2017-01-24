@@ -39,49 +39,51 @@ try:
 except (ValueError, ImportError):
     pass
 
+if hasattr(Gdk, 'Color'):
+    # Gdk.Color was deprecated since 3.14 and dropped in Gtk+-4.0
+    class Color(Gdk.Color):
+        MAX_VALUE = 65535
 
-class Color(Gdk.Color):
-    MAX_VALUE = 65535
+        def __init__(self, red, green, blue):
+            Gdk.Color.__init__(self)
+            self.red = red
+            self.green = green
+            self.blue = blue
 
-    def __init__(self, red, green, blue):
-        Gdk.Color.__init__(self)
-        self.red = red
-        self.green = green
-        self.blue = blue
+        def __eq__(self, other):
+            return self.equal(other)
 
-    def __eq__(self, other):
-        return self.equal(other)
+        def __repr__(self):
+            return 'Gdk.Color(red=%d, green=%d, blue=%d)' % (self.red, self.green, self.blue)
 
-    def __repr__(self):
-        return 'Gdk.Color(red=%d, green=%d, blue=%d)' % (self.red, self.green, self.blue)
+        red_float = property(fget=lambda self: self.red / float(self.MAX_VALUE),
+                             fset=lambda self, v: setattr(self, 'red', int(v * self.MAX_VALUE)))
 
-    red_float = property(fget=lambda self: self.red / float(self.MAX_VALUE),
-                         fset=lambda self, v: setattr(self, 'red', int(v * self.MAX_VALUE)))
+        green_float = property(fget=lambda self: self.green / float(self.MAX_VALUE),
+                               fset=lambda self, v: setattr(self, 'green', int(v * self.MAX_VALUE)))
 
-    green_float = property(fget=lambda self: self.green / float(self.MAX_VALUE),
-                           fset=lambda self, v: setattr(self, 'green', int(v * self.MAX_VALUE)))
+        blue_float = property(fget=lambda self: self.blue / float(self.MAX_VALUE),
+                              fset=lambda self, v: setattr(self, 'blue', int(v * self.MAX_VALUE)))
 
-    blue_float = property(fget=lambda self: self.blue / float(self.MAX_VALUE),
-                          fset=lambda self, v: setattr(self, 'blue', int(v * self.MAX_VALUE)))
+        def to_floats(self):
+            """Return (red_float, green_float, blue_float) triple."""
 
-    def to_floats(self):
-        """Return (red_float, green_float, blue_float) triple."""
+            return (self.red_float, self.green_float, self.blue_float)
 
-        return (self.red_float, self.green_float, self.blue_float)
+        @staticmethod
+        def from_floats(red, green, blue):
+            """Return a new Color object from red/green/blue values from 0.0 to 1.0."""
 
-    @staticmethod
-    def from_floats(red, green, blue):
-        """Return a new Color object from red/green/blue values from 0.0 to 1.0."""
-
-        return Color(int(red * Color.MAX_VALUE),
-                     int(green * Color.MAX_VALUE),
-                     int(blue * Color.MAX_VALUE))
+            return Color(int(red * Color.MAX_VALUE),
+                         int(green * Color.MAX_VALUE),
+                         int(blue * Color.MAX_VALUE))
 
 
-Color = override(Color)
-__all__.append('Color')
+    Color = override(Color)
+    __all__.append('Color')
 
-if Gdk._version == '3.0':
+if hasattr(Gdk, 'RGBA'):
+    # Introduced since Gtk+-3.0
     class RGBA(Gdk.RGBA):
         def __init__(self, red=1.0, green=1.0, blue=1.0, alpha=1.0):
             Gdk.RGBA.__init__(self)
@@ -363,8 +365,10 @@ class Cursor(Gdk.Cursor):
 Cursor = override(Cursor)
 __all__.append('Cursor')
 
-color_parse = strip_boolean_result(Gdk.color_parse)
-__all__.append('color_parse')
+if hasattr(Gdk, 'color_parse'):
+    # Gdk.Color was deprecated since 3.14 and dropped in Gtk+-4.0
+    color_parse = strip_boolean_result(Gdk.color_parse)
+    __all__.append('color_parse')
 
 
 # Note, we cannot override the entire class as Gdk.Atom has no gtype, so just
@@ -439,6 +443,6 @@ if Gdk._version >= '3.0':
     SELECTION_TYPE_STRING = Gdk.atom_intern('STRING', True)
     __all__.append('SELECTION_TYPE_STRING')
 
-import sys
-
-initialized, argv = Gdk.init_check(sys.argv)
+if Gdk._version in ('2.0', '3.0'):
+    import sys
+    initialized, argv = Gdk.init_check(sys.argv)

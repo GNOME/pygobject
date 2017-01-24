@@ -1599,5 +1599,8 @@ if Gtk._version in ("2.0", "3.0"):
     stock_lookup = strip_boolean_result(Gtk.stock_lookup)
     __all__.append('stock_lookup')
 
-initialized, argv = Gtk.init_check(sys.argv)
-sys.argv = list(argv)
+if Gtk._version == "4.0":
+    Gtk.init_check()
+else:
+    initialized, argv = Gtk.init_check(sys.argv)
+    sys.argv = list(argv)
