@@ -1,5 +1,3 @@
-ACLOCAL_AMFLAGS = -I m4
-
 # Limit PyFlakes and PEP8 to these directories.
 pycheck_dirs = examples gi tests pygtkcompat
 

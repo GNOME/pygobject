@@ -44,9 +44,7 @@ AC_SUBST(PYGOBJECT_MICRO_VERSION, pygobject_micro_version)
 
 AC_CONFIG_HEADERS(config.h)
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES(yes)])
-# 1.12.6 to get a py-compile supporting newer Python 3 versions.
-# See https://debbugs.gnu.org/cgi/bugreport.cgi?bug=8847
-AM_INIT_AUTOMAKE([1.12.6 foreign no-dist-gzip dist-xz])
+AM_INIT_AUTOMAKE([1.13 foreign no-dist-gzip dist-xz])
 
 AC_CANONICAL_BUILD
 AC_CANONICAL_HOST
@@ -116,9 +114,9 @@ fi
 PYTHON_SO=`$PYTHON -c "import distutils.sysconfig, sys; get = distutils.sysconfig.get_config_var; sys.stdout.write(get('EXT_SUFFIX') or get('SO') or '.so');"`
 AC_SUBST(PYTHON_SO)
 
-AM_CHECK_PYTHON_HEADERS(, AC_MSG_ERROR([Python headers not found]))
+PYG_CHECK_PYTHON_HEADERS(, AC_MSG_ERROR([Python headers not found]))
 if test "x$link_python_libs" = "xyes"; then
-  AM_CHECK_PYTHON_LIBS(, AC_MSG_ERROR([Python libs not found. Windows and Darwin require Python modules to be explicitly linked to libpython.]))
+  PYG_CHECK_PYTHON_LIBS(, AC_MSG_ERROR([Python libs not found. Windows and Darwin require Python modules to be explicitly linked to libpython.]))
 fi
 
 AC_MSG_CHECKING([for PySignal_SetWakeupFd in Python.h])
@@ -140,10 +138,10 @@ AC_ARG_ENABLE(thread,
   AS_HELP_STRING([--disable-thread],[Disable pygobject threading support]),,
   enable_thread=yes)
 
-AM_CHECK_PYMOD(thread,,,enable_thread=check_for_py3_module)
+PYG_CHECK_PYMOD(thread,,,enable_thread=check_for_py3_module)
 if test "x$enable_thread" = xcheck_for_py3_module; then
   dnl Python 3 uses the _thread module so check for that
-  AM_CHECK_PYMOD(_thread,,enable_thread=yes,enable_thread=no)
+  PYG_CHECK_PYMOD(_thread,,enable_thread=yes,enable_thread=no)
 fi
 
 AC_MSG_CHECKING(whether to enable threading in pygobject)

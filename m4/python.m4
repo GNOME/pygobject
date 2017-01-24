@@ -1,7 +1,7 @@
 ## this one is commonly used with AM_PATH_PYTHONDIR ...
-dnl AM_CHECK_PYMOD(MODNAME [,SYMBOL [,ACTION-IF-FOUND [,ACTION-IF-NOT-FOUND]]])
+dnl PYG_CHECK_PYMOD(MODNAME [,SYMBOL [,ACTION-IF-FOUND [,ACTION-IF-NOT-FOUND]]])
 dnl Check if a module containing a given symbol is visible to python.
-AC_DEFUN([AM_CHECK_PYMOD],
+AC_DEFUN([PYG_CHECK_PYMOD],
 [AC_REQUIRE([AM_PATH_PYTHON])
 py_mod_var=`echo $1['_']$2 | sed 'y%./+-%__p_%'`
 AC_MSG_CHECKING(for ifelse([$2],[],,[$2 in ])python module $1)
@@ -37,9 +37,9 @@ fi
 ])
 
 dnl a macro to check for ability to create python extensions
-dnl  AM_CHECK_PYTHON_HEADERS([ACTION-IF-POSSIBLE], [ACTION-IF-NOT-POSSIBLE])
+dnl  PYG_CHECK_PYTHON_HEADERS([ACTION-IF-POSSIBLE], [ACTION-IF-NOT-POSSIBLE])
 dnl function also defines PYTHON_INCLUDES
-AC_DEFUN([AM_CHECK_PYTHON_HEADERS],
+AC_DEFUN([PYG_CHECK_PYTHON_HEADERS],
 [AC_REQUIRE([AM_PATH_PYTHON])
 AC_MSG_CHECKING(for headers required to compile python extensions)
 dnl deduce PYTHON_INCLUDES
@@ -65,9 +65,9 @@ CPPFLAGS="$save_CPPFLAGS"
 ])
 
 dnl a macro to check for ability to embed python
-dnl  AM_CHECK_PYTHON_LIBS([ACTION-IF-POSSIBLE], [ACTION-IF-NOT-POSSIBLE])
+dnl  PYG_CHECK_PYTHON_LIBS([ACTION-IF-POSSIBLE], [ACTION-IF-NOT-POSSIBLE])
 dnl function also defines PYTHON_LIBS
-AC_DEFUN([AM_CHECK_PYTHON_LIBS],
+AC_DEFUN([PYG_CHECK_PYTHON_LIBS],
 [AC_REQUIRE([AM_PATH_PYTHON])
 AC_MSG_CHECKING(for libraries required to embed python)
 dnl deduce PYTHON_LIBS
