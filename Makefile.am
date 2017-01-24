@@ -91,33 +91,6 @@ endif
 # python
 pyexec_LTLIBRARIES =
 
-# install pth file.
-
-EGG_NAME = $(PACKAGE)-$(PACKAGE_VERSION)-py$(PYTHON_VERSION)-$(PLATFORM)
-
-install-data-local:
-	$(mkinstalldirs) $(DESTDIR)$(pyexecdir)
-	cp $(top_builddir)/PKG-INFO $(DESTDIR)$(pyexecdir)/$(EGG_NAME).egg-info
-install-exec-local:
-	$(mkinstalldirs) $(DESTDIR)$(pyexecdir)
-uninstall-local:
-	rm -f $(DESTDIR)$(pyexecdir)/$(EGG_NAME).egg-info
-
-egg: EGG_TMPDIR:=$(TMPDIR)/$(PACKAGE)-$(PACKAGE_VERSION)
-egg: $(top_srcdir)/gobject/gobject.la PKG-INFO
-	rm -fr $(EGG_TMPDIR)
-	echo $(EGG_NAME).egg
-	$(MKDIR_P) $(EGG_TMPDIR)
-	$(MKDIR_P) $(EGG_TMPDIR)/EGG-INFO
-	$(MAKE) -C gobject install-pkgpyexecLTLIBRARIES pkgpyexecdir=$(EGG_TMPDIR)
-	rm -fr $(EGG_TMPDIR)/gobject.la
-	$(INSTALL) PKG-INFO $(EGG_TMPDIR)/EGG-INFO
-	echo "gobject.so" >> $(EGG_TMPDIR)/EGG-INFO/native_libs.txt
-	( echo "gobject" ) >> $(EGG_TMPDIR)/EGG-INFO/top_level.txt
-	cd $(EGG_TMPDIR) && zip -rq $(EGG_NAME).egg .
-	mv $(EGG_TMPDIR)/$(EGG_NAME).egg .
-	rm -fr $(EGG_TMPDIR)
-
 release-news:
 	printf "%-8s%s\n" "$(VERSION)" "`LC_TIME=C date '+%d-%b-%Y'`" > NEWS.tmp
 
