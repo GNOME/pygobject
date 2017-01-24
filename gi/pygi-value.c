@@ -157,6 +157,8 @@ _pygi_argument_from_g_value(const GValue *value,
         case GI_TYPE_TAG_VOID:
             arg.v_pointer = g_value_get_pointer (value);
             break;
+        default:
+            break;
     }
 
     return arg;
@@ -173,15 +175,16 @@ pyg_value_array_from_pyobject(GValue *value,
                               PyObject *obj,
                               const GParamSpecValueArray *pspec)
 {
-    int len;
+    Py_ssize_t seq_len;
     GValueArray *value_array;
-    int i;
+    guint len, i;
 
-    len = PySequence_Length(obj);
-    if (len == -1) {
+    seq_len = PySequence_Length(obj);
+    if (seq_len == -1) {
         PyErr_Clear();
         return -1;
     }
+    len = (guint)seq_len;
 
     if (pspec && pspec->fixed_n_elements > 0 && len != pspec->fixed_n_elements)
         return -1;

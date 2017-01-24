@@ -74,7 +74,7 @@ generate_repr(GType gtype, guint value)
 {
     GFlagsClass *flags_class;
     char *retval = NULL, *tmp;
-    int i;
+    guint i;
 
     flags_class = g_type_class_ref(gtype);
     g_assert(G_IS_FLAGS_CLASS(flags_class));
@@ -256,7 +256,7 @@ pyg_flags_add (PyObject *   module,
     PyGILState_STATE state;
     PyObject *instance_dict, *stub, *values, *o;
     GFlagsClass *eclass;
-    int i;
+    guint i;
 
     g_return_val_if_fail(typename != NULL, NULL);
     if (!g_type_is_a(gtype, G_TYPE_FLAGS)) {
@@ -425,7 +425,7 @@ pyg_flags_get_value_names(PyGFlags *self, void *closure)
 {
   GFlagsClass *flags_class;
   PyObject *retval;
-  int i;
+  guint i;
 
   flags_class = g_type_class_ref(self->gtype);
   g_assert(G_IS_FLAGS_CLASS(flags_class));
@@ -445,7 +445,7 @@ pyg_flags_get_value_nicks(PyGFlags *self, void *closure)
 {
   GFlagsClass *flags_class;
   PyObject *retval;
-  int i;
+  guint i;
 
   flags_class = g_type_class_ref(self->gtype);
   g_assert(G_IS_FLAGS_CLASS(flags_class));

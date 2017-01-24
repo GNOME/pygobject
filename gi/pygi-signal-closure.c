@@ -88,6 +88,7 @@ pygi_signal_closure_marshal(GClosure *closure,
 
     signal_info = ((PyGISignalClosure *)closure)->signal_info;
     n_sig_info_args = g_callable_info_get_n_args(signal_info);
+    g_assert_cmpint (n_sig_info_args, >=, 0);
     /* the first argument to a signal callback is instance,
        but instance is not counted in the introspection data */
     sig_info_highest_arg = n_sig_info_args + 1;
@@ -110,7 +111,7 @@ pygi_signal_closure_marshal(GClosure *closure,
             }
             PyTuple_SetItem(params, i, item);
 
-        } else if (i < sig_info_highest_arg) {
+        } else if (i < (guint)sig_info_highest_arg) {
             GIArgInfo arg_info;
             GITypeInfo type_info;
             GITypeTag type_tag;

@@ -428,6 +428,8 @@ pygi_arg_cache_new (GITypeInfo *type_info,
                                                       transfer,
                                                       direction);
            break;
+       default:
+           break;
     }
 
     if (arg_cache != NULL) {

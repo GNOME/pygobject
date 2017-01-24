@@ -1269,6 +1269,8 @@ _pygi_argument_release (GIArgument   *arg,
             g_slice_free (GError *, arg->v_pointer);
             break;
         }
+        default:
+            break;
     }
 }
 

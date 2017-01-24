@@ -511,6 +511,9 @@ _invoke_marshal_in_args (PyGIInvokeState *state, PyGIFunctionCache *function_cac
                 }
 
                 break;
+            default:
+                g_assert_not_reached();
+                break;
         }
 
         if (py_arg == _PyGIDefaultArgPlaceholder) {

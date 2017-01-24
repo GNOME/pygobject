@@ -185,7 +185,7 @@ _pygi_marshal_from_py_array (PyGIInvokeState   *state,
 {
     PyGIMarshalFromPyFunc from_py_marshaller;
     int i = 0;
-    int success_count = 0;
+    gsize success_count = 0;
     Py_ssize_t length;
     gssize item_size;
     gboolean is_ptr_array;
@@ -360,15 +360,15 @@ err:
             /* Only attempt per item cleanup on pointer items */
             if (sequence_cache->item_cache->is_pointer) {
                 for(j = 0; j < success_count; j++) {
-                    PyObject *py_item = PySequence_GetItem (py_arg, j);
+                    PyObject *py_seq_item = PySequence_GetItem (py_arg, j);
                     cleanup_func (state,
                                   sequence_cache->item_cache,
-                                  py_item,
+                                  py_seq_item,
                                   is_ptr_array ?
                                           g_ptr_array_index ((GPtrArray *)array_, j) :
                                           g_array_index (array_, gpointer, j),
                                   TRUE);
-                    Py_DECREF (py_item);
+                    Py_DECREF (py_seq_item);
                 }
             }
         }
@@ -532,10 +532,10 @@ _pygi_marshal_to_py_array (PyGIInvokeState   *state,
             }
         } else {
             GIArgument *len_arg = &state->args[array_cache->len_arg_index].arg_value;
-            PyGIArgCache *arg_cache = _pygi_callable_cache_get_arg (callable_cache,
+            PyGIArgCache *sub_cache = _pygi_callable_cache_get_arg (callable_cache,
                                                                     array_cache->len_arg_index);
 
-            if (!gi_argument_to_gsize (len_arg, &len, arg_cache->type_tag)) {
+            if (!gi_argument_to_gsize (len_arg, &len, sub_cache->type_tag)) {
                 return NULL;
             }
         }
@@ -570,7 +570,7 @@ _pygi_marshal_to_py_array (PyGIInvokeState   *state,
         if (arg->v_pointer == NULL) {
             py_obj = PyList_New (0);
         } else {
-            int i;
+            guint i;
 
             gsize item_size;
             PyGIMarshalToPyFunc item_to_py_marshaller;
@@ -656,7 +656,7 @@ err:
     } else {
         /* clean up unprocessed items */
         if (seq_cache->item_cache->to_py_cleanup != NULL) {
-            int j;
+            guint j;
             PyGIMarshalCleanupFunc cleanup_func = seq_cache->item_cache->to_py_cleanup;
             for (j = processed_items; j < array_->len; j++) {
                 cleanup_func (state,

@@ -23,6 +23,7 @@
 
 #include <glib-object.h>
 
+#include "config.h"
 #include "pyglib.h"
 #include "pyginterface.h"
 #include "pygi-repository.h"
@@ -567,7 +568,7 @@ pyg_channel_read(PyObject* self, PyObject *args, PyObject *kwargs)
     iochannel = pyg_boxed_get (py_iochannel, GIOChannel);
 
     while (status == G_IO_STATUS_NORMAL
-	   && (max_count == -1 || total_read < max_count)) {
+	   && (max_count == -1 || total_read < (gsize)max_count)) {
 	gsize single_read;
 	char* buf;
 	gsize buf_size;
@@ -585,7 +586,7 @@ pyg_channel_read(PyObject* self, PyObject *args, PyObject *kwargs)
 	    if (ret_obj == NULL)
 		goto failure;
 	}
-	else if (buf_size + total_read > PYGLIB_PyBytes_Size(ret_obj)) {
+	else if (buf_size + total_read > (gsize)PYGLIB_PyBytes_Size(ret_obj)) {
 	    if (PYGLIB_PyBytes_Resize(&ret_obj, buf_size + total_read) == -1)
 		goto failure;
 	}
@@ -602,7 +603,7 @@ pyg_channel_read(PyObject* self, PyObject *args, PyObject *kwargs)
 	total_read += single_read;
     }
 	
-    if ( total_read != PYGLIB_PyBytes_Size(ret_obj) ) {
+    if ( total_read != (gsize)PYGLIB_PyBytes_Size(ret_obj) ) {
 	if (PYGLIB_PyBytes_Resize(&ret_obj, total_read) == -1)
 	    goto failure;
     }

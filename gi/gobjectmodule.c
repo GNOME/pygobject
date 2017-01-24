@@ -783,19 +783,19 @@ add_properties (GObjectClass *klass, PyObject *properties)
 	if (pspec) {
 	    g_object_class_install_property(klass, 1, pspec);
 	} else {
-            PyObject *type, *value, *traceback;
+            PyObject *type, *pvalue, *traceback;
 	    ret = FALSE;
-            PyErr_Fetch(&type, &value, &traceback);
-            if (PYGLIB_PyUnicode_Check(value)) {
+            PyErr_Fetch(&type, &pvalue, &traceback);
+            if (PYGLIB_PyUnicode_Check(pvalue)) {
                 char msg[256];
                 g_snprintf(msg, 256,
 			   "%s (while registering property '%s' for GType '%s')",
-               PYGLIB_PyUnicode_AsString(value),
+               PYGLIB_PyUnicode_AsString(pvalue),
 			   prop_name, G_OBJECT_CLASS_NAME(klass));
-                Py_DECREF(value);
+                Py_DECREF(pvalue);
                 value = PYGLIB_PyUnicode_FromString(msg);
             }
-            PyErr_Restore(type, value, traceback);
+            PyErr_Restore(type, pvalue, traceback);
 	    break;
 	}
     }
@@ -1616,7 +1616,7 @@ static PyMethodDef _gobject_functions[] = {
 const gchar *
 pyg_constant_strip_prefix(const gchar *name, const gchar *strip_prefix)
 {
-    gint prefix_len;
+    size_t prefix_len;
     guint i;
 
     prefix_len = strlen(strip_prefix);
@@ -1632,9 +1632,9 @@ pyg_constant_strip_prefix(const gchar *name, const gchar *strip_prefix)
 
     /* strip off prefix from value name, while keeping it a valid
      * identifier */
-    for (i = prefix_len; i >= 0; i--) {
-	if (g_ascii_isalpha(name[i]) || name[i] == '_') {
-	    return &name[i];
+    for (i = prefix_len + 1; i > 0; i--) {
+	if (g_ascii_isalpha(name[i - 1]) || name[i - 1] == '_') {
+	    return &name[i - 1];
 	}
     }
     return name;
@@ -1757,7 +1757,7 @@ pyg_parse_constructor_args(GType        obj_type,
         params[param_i].name = prop_names[arg_i];
         g_value_init(&params[param_i].value, spec->value_type);
         if (pyg_value_from_pyobject(&params[param_i].value, py_args[arg_i]) == -1) {
-            int i;
+            guint i;
             PyErr_Format(PyExc_TypeError, "could not convert parameter '%s' of type '%s'",
                          arg_names[arg_i], g_type_name(spec->value_type));
             g_type_class_unref(oclass);

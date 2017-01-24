@@ -204,7 +204,7 @@ _pygi_closure_convert_ffi_arguments (PyGIInvokeArgState *state,
                                      PyGICallableCache *cache,
                                      void **args)
 {
-    gint i;
+    guint i;
 
     for (i = 0; i < _pygi_callable_cache_args_len (cache); i++) {
         PyGIArgCache *arg_cache = g_ptr_array_index (cache->args_cache, i);

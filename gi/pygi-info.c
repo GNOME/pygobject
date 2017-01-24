@@ -1108,6 +1108,8 @@ _pygi_g_type_tag_size (GITypeTag type_tag)
                           "Unable to know the size (assuming %s is not a pointer)",
                           g_type_tag_to_string (type_tag));
             break;
+        default:
+            break;
     }
 
     return size;
@@ -1166,10 +1168,10 @@ _pygi_g_type_info_size (GITypeInfo *type_info)
                     if (g_type_info_is_pointer (type_info)) {
                         size = sizeof (gpointer);
                     } else {
-                        GITypeTag type_tag;
+                        GITypeTag enum_type_tag;
 
-                        type_tag = g_enum_info_get_storage_type ( (GIEnumInfo *) info);
-                        size = _pygi_g_type_tag_size (type_tag);
+                        enum_type_tag = g_enum_info_get_storage_type ( (GIEnumInfo *) info);
+                        size = _pygi_g_type_tag_size (enum_type_tag);
                     }
                     break;
                 case GI_INFO_TYPE_BOXED:
@@ -1206,6 +1208,8 @@ _pygi_g_type_info_size (GITypeInfo *type_info)
         case GI_TYPE_TAG_GHASH:
         case GI_TYPE_TAG_ERROR:
             size = sizeof (gpointer);
+            break;
+        default:
             break;
     }
 
@@ -1429,6 +1433,9 @@ pygi_g_struct_info_is_simple (GIStructInfo *struct_info)
                 g_base_info_unref (info);
                 break;
             }
+            default:
+                g_assert_not_reached();
+                break;
         }
 
         g_base_info_unref ( (GIBaseInfo *) field_type_info);

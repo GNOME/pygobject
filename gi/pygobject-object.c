@@ -701,7 +701,7 @@ pyg_type_get_bases(GType gtype)
     guint n_interfaces;
     PyTypeObject *py_parent_type, *py_interface_type;
     PyObject *bases;
-    int i;
+    guint i;
     
     if (G_UNLIKELY(gtype == G_TYPE_OBJECT))
         return NULL;
@@ -847,7 +847,7 @@ pygobject_inherit_slots(PyTypeObject *type, PyObject *bases, gboolean check_for_
                                   offsetof(PyTypeObject, tp_repr),
                                   offsetof(PyTypeObject, tp_str),
                                   offsetof(PyTypeObject, tp_print) };
-    int i;
+    gsize i;
 
     /* Happens when registering gobject.GObject itself, at least. */
     if (!bases)
@@ -922,19 +922,19 @@ pygobject_lookup_class(GType gtype)
     PyTypeObject *py_type;
 
     if (gtype == G_TYPE_INTERFACE)
-	return &PyGInterface_Type;
+        return &PyGInterface_Type;
     
     py_type = g_type_get_qdata(gtype, pygobject_class_key);
     if (py_type == NULL) {
-	py_type = g_type_get_qdata(gtype, pyginterface_type_key);
+        py_type = g_type_get_qdata(gtype, pyginterface_type_key);
 
-    if (py_type == NULL)
-        py_type = (PyTypeObject *)pygi_type_import_by_g_type(gtype);
+        if (py_type == NULL)
+            py_type = (PyTypeObject *)pygi_type_import_by_g_type(gtype);
 
-	if (py_type == NULL) {
-	    py_type = pygobject_new_with_interfaces(gtype);
-	    g_type_set_qdata(gtype, pyginterface_type_key, py_type);
-	}
+        if (py_type == NULL) {
+            py_type = pygobject_new_with_interfaces(gtype);
+            g_type_set_qdata(gtype, pyginterface_type_key, py_type);
+        }
     }
     
     return py_type;

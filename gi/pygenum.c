@@ -235,7 +235,7 @@ pyg_enum_add (PyObject *   module,
     PyGILState_STATE state;
     PyObject *instance_dict, *stub, *values, *o;
     GEnumClass *eclass;
-    int i;
+    guint i;
 
     g_return_val_if_fail(typename != NULL, NULL);
     if (!g_type_is_a (gtype, G_TYPE_ENUM)) {

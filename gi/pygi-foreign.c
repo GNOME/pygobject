@@ -50,7 +50,7 @@ init_foreign_structs (void)
 static PyGIForeignStruct *
 do_lookup (const gchar *namespace, const gchar *name)
 {
-    gint i;
+    guint i;
     for (i = 0; i < foreign_structs->len; i++) {
         PyGIForeignStruct *foreign_struct = \
                 g_ptr_array_index (foreign_structs, i);

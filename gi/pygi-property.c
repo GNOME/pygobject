@@ -348,7 +348,7 @@ pygi_set_property_value (PyGObject *instance,
              */
             GArray *arg_items = (GArray*) arg.v_pointer;
             gchar** strings;
-            int i;
+            guint i;
 
             if (arg_items == NULL)
                 goto out;
