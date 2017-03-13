@@ -1,3 +1,13 @@
+3.23.92 13-Mar-2017
+        - overrides: Update for Gdk-4.0 and Gtk+-4.0 (Fabian Orccon) (#777680)
+        - Disable -Werror=missing-prototypes (Christoph Reiter) (#777534)
+        - Fix new PEP8 errors (Christoph Reiter) (#776009)
+        - Move pep8/pyflakes tests from 'make check' to 'make check.quality' (Christoph Reiter) (#764087)
+        - overrides: Update for Gtk-4.0 (Christoph Reiter) (#773315)
+        - Handle exception unreffing Variant at exit (Dan Nicholson) (#776092)
+        - Handle multiple deinit of callable cache (Dan Nicholson) (#776092)
+        - configure.ac: post-release version bump to 3.23.0 (Christoph Reiter)
+
 3.22.0  19-Sep-2016
         - configure.ac: pre-release version bump to 3.22.0 (Christoph Reiter)
 
