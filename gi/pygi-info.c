@@ -1716,7 +1716,7 @@ static PyObject *
 _wrap_g_constant_info_get_value (PyGIBaseInfo *self)
 {
     GITypeInfo *type_info;
-    GIArgument value;
+    GIArgument value = {0};
     PyObject *py_value;
     gboolean free_array = FALSE;
 
