@@ -34,6 +34,27 @@ from helper import capture_gi_deprecation_warnings, capture_glib_warnings
 
 
 @unittest.skipUnless(Gtk, 'Gtk not available')
+class TestMultipleEnable(unittest.TestCase):
+
+    def test_main(self):
+        pygtkcompat.enable()
+        pygtkcompat.enable()
+
+    def test_gtk(self):
+        pygtkcompat.enable_gtk("3.0")
+        pygtkcompat.enable_gtk("3.0")
+
+        # https://bugzilla.gnome.org/show_bug.cgi?id=759009
+        w = gtk.Window()
+        w.realize()
+        self.assertEqual(len(w.window.get_origin()), 2)
+        w.destroy()
+
+    def test_gtk_version_conflict(self):
+        self.assertRaises(ValueError, pygtkcompat.enable_gtk, version='2.0')
+
+
+@unittest.skipUnless(Gtk, 'Gtk not available')
 class TestATKCompat(unittest.TestCase):
     def test_object(self):
         self.assertTrue(hasattr(atk, 'Object'))

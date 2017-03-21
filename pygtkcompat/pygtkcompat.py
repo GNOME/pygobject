@@ -84,7 +84,28 @@ def _install_enums(module, dest=None, strip=''):
             continue
 
 
+_enabled_registry = {}
+
+
+def _check_enabled(name, version=None):
+    """Returns True in case it is already enabled"""
+
+    if name in _enabled_registry:
+        enabled_version = _enabled_registry[name]
+        if enabled_version != version:
+            raise ValueError(
+                "%r already enabled with different version (%r)" % (
+                    name, enabled_version))
+        return True
+    else:
+        _enabled_registry[name] = version
+        return False
+
+
 def enable():
+    if _check_enabled(""):
+        return
+
     # gobject
     from gi.repository import GLib
     sys.modules['glib'] = GLib
@@ -104,6 +125,9 @@ _unset = object()
 
 
 def enable_gtk(version='3.0'):
+    if _check_enabled("gtk", version):
+        return
+
     # set the default encoding like PyGTK
     reload(sys)
     if sys.version_info < (3, 0):
@@ -499,12 +523,18 @@ def enable_gtk(version='3.0'):
 
 
 def enable_vte():
+    if _check_enabled("vte"):
+        return
+
     gi.require_version('Vte', '0.0')
     from gi.repository import Vte
     sys.modules['vte'] = Vte
 
 
 def enable_poppler():
+    if _check_enabled("poppler"):
+        return
+
     gi.require_version('Poppler', '0.18')
     from gi.repository import Poppler
     sys.modules['poppler'] = Poppler
@@ -512,6 +542,9 @@ def enable_poppler():
 
 
 def enable_webkit(version='1.0'):
+    if _check_enabled("webkit", version):
+        return
+
     gi.require_version('WebKit', version)
     from gi.repository import WebKit
     sys.modules['webkit'] = WebKit
@@ -519,12 +552,18 @@ def enable_webkit(version='1.0'):
 
 
 def enable_gudev():
+    if _check_enabled("gudev"):
+        return
+
     gi.require_version('GUdev', '1.0')
     from gi.repository import GUdev
     sys.modules['gudev'] = GUdev
 
 
 def enable_gst():
+    if _check_enabled("gst"):
+        return
+
     gi.require_version('Gst', '0.10')
     from gi.repository import Gst
     sys.modules['gst'] = Gst
@@ -565,6 +604,9 @@ def enable_gst():
 
 
 def enable_goocanvas():
+    if _check_enabled("goocanvas"):
+        return
+
     gi.require_version('GooCanvas', '2.0')
     from gi.repository import GooCanvas
     sys.modules['goocanvas'] = GooCanvas
