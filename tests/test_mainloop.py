@@ -7,12 +7,6 @@ import signal
 import time
 import unittest
 
-try:
-    from _thread import start_new_thread
-    start_new_thread  # pyflakes
-except ImportError:
-    # Python 2
-    from thread import start_new_thread
 from gi.repository import GLib
 
 from compathelper import _bytes
@@ -61,27 +55,6 @@ class TestMainLoop(unittest.TestCase):
         # than here. See bug #303573
         #
         self.assertFalse(got_exception)
-
-    @unittest.skipUnless(hasattr(signal, "SIGUSR1"), "no SIGUSR1")
-    def test_concurrency(self):
-        def on_usr1(signum, frame):
-            pass
-
-        try:
-            # create a thread which will terminate upon SIGUSR1 by way of
-            # interrupting sleep()
-            orig_handler = signal.signal(signal.SIGUSR1, on_usr1)
-            start_new_thread(time.sleep, (10,))
-
-            # now create two main loops
-            loop1 = GLib.MainLoop()
-            loop2 = GLib.MainLoop()
-            GLib.timeout_add(100, lambda: os.kill(os.getpid(), signal.SIGUSR1))
-            GLib.timeout_add(500, loop1.quit)
-            loop1.run()
-            loop2.quit()
-        finally:
-            signal.signal(signal.SIGUSR1, orig_handler)
 
     @unittest.skipUnless(hasattr(os, "fork"), "no os.fork available")
     def test_sigint(self):
