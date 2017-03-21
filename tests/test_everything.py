@@ -54,6 +54,15 @@ class RawGList(ctypes.Structure):
 
 
 @unittest.skipUnless(has_cairo, 'built without cairo support')
+class TestInstanceTransfer(unittest.TestCase):
+
+    def test_main(self):
+        obj = Everything.TestObj()
+        for _ in range(10):
+            obj.instance_method_full()
+
+
+@unittest.skipUnless(has_cairo, 'built without cairo support')
 class TestEverything(unittest.TestCase):
 
     def test_bool(self):

@@ -975,14 +975,16 @@ _function_with_instance_cache_generate_args_cache_real (PyGICallableCache *calla
 {
     GIInterfaceInfo *interface_info;
     PyGIArgCache *instance_cache;
+    GITransfer transfer;
 
     interface_info = g_base_info_get_container ((GIBaseInfo *) callable_info);
+    transfer = g_callable_info_get_instance_ownership_transfer (callable_info);
 
     instance_cache =
         _arg_cache_new_for_interface (interface_info,
                                       NULL,
                                       NULL,
-                                      GI_TRANSFER_NOTHING,
+                                      transfer,
                                       PYGI_DIRECTION_FROM_PYTHON,
                                       callable_cache);
 
