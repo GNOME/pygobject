@@ -60,11 +60,11 @@ static void
 _pyg_set_thread_block_funcs (PyGThreadBlockFunc block_threads_func,
 			     PyGThreadBlockFunc unblock_threads_func)
 {
-    PyGILState_STATE state = pyglib_gil_state_ensure ();
+    PyGILState_STATE state = PyGILState_Ensure ();
     PyErr_Warn (PyExc_DeprecationWarning,
                 "Using pyg_set_thread_block_funcs is not longer needed. "
                 "PyGObject always uses Py_BLOCK/UNBLOCK_THREADS.");
-    pyglib_gil_state_release (state);
+    PyGILState_Release (state);
 }
 
 /**
@@ -80,9 +80,9 @@ pyg_destroy_notify(gpointer user_data)
     PyObject *obj = (PyObject *)user_data;
     PyGILState_STATE state;
 
-    state = pyglib_gil_state_ensure();
+    state = PyGILState_Ensure();
     Py_DECREF(obj);
-    pyglib_gil_state_release(state);
+    PyGILState_Release(state);
 }
 
 
@@ -166,12 +166,12 @@ pyg_object_set_property (GObject *object, guint property_id,
     PyObject *py_pspec, *py_value;
     PyGILState_STATE state;
 
-    state = pyglib_gil_state_ensure();
+    state = PyGILState_Ensure();
 
     object_wrapper = pygobject_new(object);
 
     if (object_wrapper == NULL) {
-	pyglib_gil_state_release(state);
+	PyGILState_Release(state);
 	return;
     }
 
@@ -190,7 +190,7 @@ pyg_object_set_property (GObject *object, guint property_id,
     Py_DECREF(py_pspec);
     Py_DECREF(py_value);
 
-    pyglib_gil_state_release(state);
+    PyGILState_Release(state);
 }
 
 static void
@@ -200,12 +200,12 @@ pyg_object_get_property (GObject *object, guint property_id,
     PyObject *object_wrapper, *retval;
     PyGILState_STATE state;
 
-    state = pyglib_gil_state_ensure();
+    state = PyGILState_Ensure();
 
     object_wrapper = pygobject_new(object);
 
     if (object_wrapper == NULL) {
-	pyglib_gil_state_release(state);
+	PyGILState_Release(state);
 	return;
     }
 
@@ -216,7 +216,7 @@ pyg_object_get_property (GObject *object, guint property_id,
     Py_DECREF(object_wrapper);
     Py_XDECREF(retval);
 
-    pyglib_gil_state_release(state);
+    PyGILState_Release(state);
 }
 
 typedef struct _PyGSignalAccumulatorData {
@@ -236,7 +236,7 @@ _pyg_signal_accumulator(GSignalInvocationHint *ihint,
     PyGSignalAccumulatorData *data = _data;
     PyGILState_STATE state;
 
-    state = pyglib_gil_state_ensure();
+    state = PyGILState_Ensure();
     if (ihint->detail)
         py_detail = PYGLIB_PyUnicode_FromString(g_quark_to_string(ihint->detail));
     else {
@@ -270,7 +270,7 @@ _pyg_signal_accumulator(GSignalInvocationHint *ihint,
         }
         Py_DECREF(py_retval);
     }
-    pyglib_gil_state_release(state);
+    PyGILState_Release(state);
     return retval;
 }
 
@@ -1021,7 +1021,7 @@ pygobject__g_instance_init(GTypeInstance   *instance,
            * g_object_new -> we have no python wrapper, so create it
            * now */
         PyGILState_STATE state;
-        state = pyglib_gil_state_ensure();
+        state = PyGILState_Ensure();
         wrapper = pygobject_new_full(object,
                                      /*steal=*/ FALSE,
                                      g_class);
@@ -1037,7 +1037,7 @@ pygobject__g_instance_init(GTypeInstance   *instance,
 
         Py_DECREF(args);
         Py_DECREF(kwargs);
-        pyglib_gil_state_release(state);
+        PyGILState_Release(state);
     }
 }
 
@@ -1395,13 +1395,13 @@ pyg_object_new (PyGObject *self, PyObject *args, PyObject *kwargs)
 static int
 pygobject_gil_state_ensure (void)
 {
-    return pyglib_gil_state_ensure ();
+    return PyGILState_Ensure ();
 }
 
 static void
 pygobject_gil_state_release (int flag)
 {
-    pyglib_gil_state_release(flag);
+    PyGILState_Release(flag);
 }
 
 /* Only for backwards compatibility */
@@ -1433,7 +1433,7 @@ marshal_emission_hook(GSignalInvocationHint *ihint,
     PyObject *params;
     guint i;
 
-    state = pyglib_gil_state_ensure();
+    state = PyGILState_Ensure();
 
     /* construct Python tuple for the parameter values */
     params = PyTuple_New(n_param_values);
@@ -1464,7 +1464,7 @@ marshal_emission_hook(GSignalInvocationHint *ihint,
     retval = (retobj == Py_True ? TRUE : FALSE);
     Py_XDECREF(retobj);
 out:
-    pyglib_gil_state_release(state);
+    PyGILState_Release(state);
     return retval;
 }
 
@@ -1783,9 +1783,9 @@ _log_func(const gchar *log_domain,
 	PyGILState_STATE state;
 	PyObject* warning = user_data;
 
-	state = pyglib_gil_state_ensure();
+	state = PyGILState_Ensure();
 	PyErr_Warn(warning, (char *) message);
-	pyglib_gil_state_release(state);
+	PyGILState_Release(state);
     } else
         g_log_default_handler(log_domain, log_level, message, user_data);
 }

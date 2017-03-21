@@ -244,7 +244,7 @@ pyg_enum_add (PyObject *   module,
         return NULL;
     }
 
-    state = pyglib_gil_state_ensure();
+    state = PyGILState_Ensure();
 
     /* Create a new type derived from GEnum. This is the same as:
      * >>> stub = type(typename, (GEnum,), {})
@@ -256,7 +256,7 @@ pyg_enum_add (PyObject *   module,
     Py_DECREF(instance_dict);
     if (!stub) {
 	PyErr_SetString(PyExc_RuntimeError, "can't create const");
-	pyglib_gil_state_release(state);
+	PyGILState_Release(state);
 	return NULL;
     }
 
@@ -309,7 +309,7 @@ pyg_enum_add (PyObject *   module,
 
     g_type_class_unref(eclass);
 
-    pyglib_gil_state_release(state);
+    PyGILState_Release(state);
     return stub;
 }
 

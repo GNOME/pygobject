@@ -112,7 +112,7 @@ pygobject_data_free(PyGObjectData *data)
 
     if (Py_IsInitialized()) {
 	state_saved = TRUE;
-	state = pyglib_gil_state_ensure();
+	state = PyGILState_Ensure();
 	Py_DECREF(data->type);
 	/* We cannot use Py_BEGIN_ALLOW_THREADS here because this is inside
 	 * a branch. */
@@ -140,7 +140,7 @@ pygobject_data_free(PyGObjectData *data)
 
     if (state_saved && Py_IsInitialized ()) {
 	Py_BLOCK_THREADS; /* Restores _save */
-	pyglib_gil_state_release(state);
+	PyGILState_Release(state);
     }
 }
 
@@ -606,7 +606,7 @@ pyg_toggle_notify (gpointer data, GObject *object, gboolean is_last_ref)
     PyGObject *self;
     PyGILState_STATE state;
 
-    state = pyglib_gil_state_ensure();
+    state = PyGILState_Ensure();
 
     /* Avoid thread safety problems by using qdata for wrapper retrieval
      * instead of the user data argument.
@@ -620,7 +620,7 @@ pyg_toggle_notify (gpointer data, GObject *object, gboolean is_last_ref)
             Py_INCREF(self);
     }
 
-    pyglib_gil_state_release(state);
+    PyGILState_Release(state);
 }
 
   /* Called when the inst_dict is first created; switches the 
@@ -747,7 +747,7 @@ pygobject_new_with_interfaces(GType gtype)
     PyTypeObject *py_parent_type;
     PyObject *bases;
 
-    state = pyglib_gil_state_ensure();
+    state = PyGILState_Ensure();
 
     bases = pyg_type_get_bases(gtype);
     py_parent_type = (PyTypeObject *) PyTuple_GetItem(bases, 0);
@@ -772,7 +772,7 @@ pygobject_new_with_interfaces(GType gtype)
 
     if (type == NULL) {
 	PyErr_Print();
-        pyglib_gil_state_release(state);
+        PyGILState_Release(state);
 	return NULL;
     }
 
@@ -797,7 +797,7 @@ pygobject_new_with_interfaces(GType gtype)
 
     if (PyType_Ready(type) < 0) {
 	g_warning ("couldn't make the type `%s' ready", type->tp_name);
-        pyglib_gil_state_release(state);
+        PyGILState_Release(state);
 	return NULL;
     }
 
@@ -805,7 +805,7 @@ pygobject_new_with_interfaces(GType gtype)
     Py_INCREF(type);
     g_type_set_qdata(gtype, pygobject_class_key, type);
 
-    pyglib_gil_state_release(state);
+    PyGILState_Release(state);
 
     return type;
 }
@@ -1459,10 +1459,10 @@ pygbinding_closure_invalidate(gpointer data, GClosure *closure)
     PyGClosure *pc = (PyGClosure *)closure;
     PyGILState_STATE state;
 
-    state = pyglib_gil_state_ensure();
+    state = PyGILState_Ensure();
     Py_XDECREF(pc->callback);
     Py_XDECREF(pc->extra_args);
-    pyglib_gil_state_release(state);
+    PyGILState_Release(state);
 
     pc->callback = NULL;
     pc->extra_args = NULL;
@@ -1481,7 +1481,7 @@ pygbinding_marshal (GClosure     *closure,
     PyObject *params, *ret;
     GValue *out_value;
 
-    state = pyglib_gil_state_ensure();
+    state = PyGILState_Ensure();
 
     /* construct Python tuple for the parameter values */
     params = PyTuple_New(2);
@@ -1516,7 +1516,7 @@ pygbinding_marshal (GClosure     *closure,
 
 out:
     Py_DECREF(params);
-    pyglib_gil_state_release(state);
+    PyGILState_Release(state);
 }
 
 static GClosure *
@@ -2219,7 +2219,7 @@ pygobject_weak_ref_notify(PyGObjectWeakRef *self, GObject *dummy)
     self->obj = NULL;
     if (self->callback) {
         PyObject *retval;
-        PyGILState_STATE state = pyglib_gil_state_ensure();
+        PyGILState_STATE state = PyGILState_Ensure();
         retval = PyObject_Call(self->callback, self->user_data, NULL);
         if (retval) {
             if (retval != Py_None)
@@ -2237,7 +2237,7 @@ pygobject_weak_ref_notify(PyGObjectWeakRef *self, GObject *dummy)
             self->have_floating_ref = FALSE;
             Py_DECREF((PyObject *) self);
         }
-        pyglib_gil_state_release(state);
+        PyGILState_Release(state);
     }
 }
 
@@ -2326,9 +2326,9 @@ pyobject_copy(gpointer boxed)
     PyObject *object = boxed;
     PyGILState_STATE state;
 
-    state = pyglib_gil_state_ensure();
+    state = PyGILState_Ensure();
     Py_INCREF(object);
-    pyglib_gil_state_release(state);
+    PyGILState_Release(state);
     return object;
 }
 
@@ -2338,9 +2338,9 @@ pyobject_free(gpointer boxed)
     PyObject *object = boxed;
     PyGILState_STATE state;
 
-    state = pyglib_gil_state_ensure();
+    state = PyGILState_Ensure();
     Py_DECREF(object);
-    pyglib_gil_state_release(state);
+    PyGILState_Release(state);
 }
 
 void

@@ -79,9 +79,9 @@ _pyglib_destroy_notify(gpointer user_data)
     PyObject *obj = (PyObject *)user_data;
     PyGILState_STATE state;
 
-    state = pyglib_gil_state_ensure();
+    state = PyGILState_Ensure();
     Py_DECREF(obj);
-    pyglib_gil_state_release(state);
+    PyGILState_Release(state);
 }
 
 gboolean
@@ -93,7 +93,7 @@ _pyglib_handler_marshal(gpointer user_data)
 
     g_return_val_if_fail(user_data != NULL, FALSE);
 
-    state = pyglib_gil_state_ensure();
+    state = PyGILState_Ensure();
 
     tuple = (PyObject *)user_data;
     ret = PyObject_CallObject(PyTuple_GetItem(tuple, 0),
@@ -106,7 +106,7 @@ _pyglib_handler_marshal(gpointer user_data)
 	Py_DECREF(ret);
     }
     
-    pyglib_gil_state_release(state);
+    PyGILState_Release(state);
 
     return res;
 }

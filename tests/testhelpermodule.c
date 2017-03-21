@@ -147,12 +147,12 @@ _wrap_TestInterface__proxy_do_iface_method(TestInterface *self)
     PyObject *py_args;
     PyObject *py_method;
     
-    __py_state = pyg_gil_state_ensure();
+    __py_state = PyGILState_Ensure();
     py_self = pygobject_new((GObject *) self);
     if (!py_self) {
         if (PyErr_Occurred())
             PyErr_Print();
-        pyg_gil_state_release(__py_state);
+        PyGILState_Release(__py_state);
         return;
     }
     py_args = PyTuple_New(0);
@@ -162,7 +162,7 @@ _wrap_TestInterface__proxy_do_iface_method(TestInterface *self)
             PyErr_Print();
         Py_DECREF(py_args);
         Py_DECREF(py_self);
-        pyg_gil_state_release(__py_state);
+        PyGILState_Release(__py_state);
         return;
     }
     py_retval = PyObject_CallObject(py_method, py_args);
@@ -172,7 +172,7 @@ _wrap_TestInterface__proxy_do_iface_method(TestInterface *self)
         Py_DECREF(py_method);
         Py_DECREF(py_args);
         Py_DECREF(py_self);
-        pyg_gil_state_release(__py_state);
+        PyGILState_Release(__py_state);
         return;
     }
     if (py_retval != Py_None) {
@@ -183,7 +183,7 @@ _wrap_TestInterface__proxy_do_iface_method(TestInterface *self)
         Py_DECREF(py_method);
         Py_DECREF(py_args);
         Py_DECREF(py_self);
-        pyg_gil_state_release(__py_state);
+        PyGILState_Release(__py_state);
         return;
     }
     
@@ -191,7 +191,7 @@ _wrap_TestInterface__proxy_do_iface_method(TestInterface *self)
     Py_DECREF(py_method);
     Py_DECREF(py_args);
     Py_DECREF(py_self);
-    pyg_gil_state_release(__py_state);
+    PyGILState_Release(__py_state);
 }
 
 static void

@@ -45,7 +45,7 @@ pyg_source_prepare(GSource *source, gint *timeout)
     gboolean got_err = TRUE;
     PyGILState_STATE state;
 
-    state = pyglib_gil_state_ensure();
+    state = PyGILState_Ensure();
 
     t = PyObject_CallMethod(pysource->obj, "prepare", NULL);
 
@@ -81,7 +81,7 @@ bail:
 
     Py_XDECREF(t);
 
-    pyglib_gil_state_release(state);
+    PyGILState_Release(state);
 
     return ret;
 }
@@ -94,7 +94,7 @@ pyg_source_check(GSource *source)
     gboolean ret;
     PyGILState_STATE state;
 
-    state = pyglib_gil_state_ensure();
+    state = PyGILState_Ensure();
 
     t = PyObject_CallMethod(pysource->obj, "check", NULL);
 
@@ -106,7 +106,7 @@ pyg_source_check(GSource *source)
 	Py_DECREF(t);
     }
 
-    pyglib_gil_state_release(state);
+    PyGILState_Release(state);
 
     return ret;
 }
@@ -119,7 +119,7 @@ pyg_source_dispatch(GSource *source, GSourceFunc callback, gpointer user_data)
     gboolean ret;
     PyGILState_STATE state;
 
-    state = pyglib_gil_state_ensure();
+    state = PyGILState_Ensure();
 
     if (callback) {
 	tuple = user_data;
@@ -141,7 +141,7 @@ pyg_source_dispatch(GSource *source, GSourceFunc callback, gpointer user_data)
 	Py_DECREF(t);
     }
 
-    pyglib_gil_state_release(state);
+    PyGILState_Release(state);
 
     return ret;
 }
@@ -153,7 +153,7 @@ pyg_source_finalize(GSource *source)
     PyObject *func, *t;
     PyGILState_STATE state;
 
-    state = pyglib_gil_state_ensure();
+    state = PyGILState_Ensure();
 
     func = PyObject_GetAttrString(pysource->obj, "finalize");
     if (func) {
@@ -167,7 +167,7 @@ pyg_source_finalize(GSource *source)
 	}
     }
 
-    pyglib_gil_state_release(state);
+    PyGILState_Release(state);
 }
 
 static GSourceFuncs pyg_source_funcs =

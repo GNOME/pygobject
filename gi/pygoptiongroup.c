@@ -70,7 +70,7 @@ static void
 destroy_g_group(PyGOptionGroup *self)
 {
     PyGILState_STATE state;
-    state = pyglib_gil_state_ensure();
+    state = PyGILState_Ensure();
 
     self->group = NULL;
     Py_CLEAR(self->callback);
@@ -83,7 +83,7 @@ destroy_g_group(PyGOptionGroup *self)
         Py_DECREF(self);
     }
 
-    pyglib_gil_state_release(state);
+    PyGILState_Release(state);
 }
 
 static int
@@ -137,8 +137,7 @@ arg_func(const gchar *option_name,
     PyGILState_STATE state;
     gboolean no_error;
 
-    state = pyglib_gil_state_ensure();
-
+    state = PyGILState_Ensure();
     if (value == NULL)
         ret = PyObject_CallFunction(self->callback, "sOO",
                                     option_name, Py_None, self);
@@ -153,7 +152,7 @@ arg_func(const gchar *option_name,
     } else
 	no_error = pygi_gerror_exception_check(error) != -1;
 
-    pyglib_gil_state_release(state);
+    PyGILState_Release(state);
     return no_error;
 }
 

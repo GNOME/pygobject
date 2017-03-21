@@ -670,11 +670,11 @@ pyg_closure_invalidate(gpointer data, GClosure *closure)
     PyGClosure *pc = (PyGClosure *)closure;
     PyGILState_STATE state;
 
-    state = pyglib_gil_state_ensure();
+    state = PyGILState_Ensure();
     Py_XDECREF(pc->callback);
     Py_XDECREF(pc->extra_args);
     Py_XDECREF(pc->swap_data);
-    pyglib_gil_state_release(state);
+    PyGILState_Release(state);
 
     pc->callback = NULL;
     pc->extra_args = NULL;
@@ -694,7 +694,7 @@ pyg_closure_marshal(GClosure *closure,
     PyObject *params, *ret;
     guint i;
 
-    state = pyglib_gil_state_ensure();
+    state = PyGILState_Ensure();
 
     /* construct Python tuple for the parameter values */
     params = PyTuple_New(n_param_values);
@@ -754,7 +754,7 @@ pyg_closure_marshal(GClosure *closure,
 
  out:
     Py_DECREF(params);
-    pyglib_gil_state_release(state);
+    PyGILState_Release(state);
 }
 
 /**
@@ -847,7 +847,7 @@ pyg_signal_class_closure_marshal(GClosure *closure,
     PyObject *params, *ret;
     guint i, len;
 
-    state = pyglib_gil_state_ensure();
+    state = PyGILState_Ensure();
 
     g_return_if_fail(invocation_hint != NULL);
     /* get the object passed as the first argument to the closure */
@@ -873,7 +873,7 @@ pyg_signal_class_closure_marshal(GClosure *closure,
     if (!method) {
 	PyErr_Clear();
 	Py_DECREF(object_wrapper);
-	pyglib_gil_state_release(state);
+	PyGILState_Release(state);
 	return;
     }
     Py_DECREF(object_wrapper);
@@ -887,7 +887,7 @@ pyg_signal_class_closure_marshal(GClosure *closure,
 	/* error condition */
 	if (!item) {
 	    Py_DECREF(params);
-	    pyglib_gil_state_release(state);
+	    PyGILState_Release(state);
 	    return;
 	}
 	PyTuple_SetItem(params, i - 1, item);
@@ -915,7 +915,7 @@ pyg_signal_class_closure_marshal(GClosure *closure,
 	PyErr_Print();
 	Py_DECREF(method);
 	Py_DECREF(params);
-	pyglib_gil_state_release(state);
+	PyGILState_Release(state);
 	return;
     }
     Py_DECREF(method);
@@ -923,7 +923,7 @@ pyg_signal_class_closure_marshal(GClosure *closure,
     if (G_IS_VALUE(return_value))
 	pyg_value_from_pyobject(return_value, ret);
     Py_DECREF(ret);
-    pyglib_gil_state_release(state);
+    PyGILState_Release(state);
 }
 
 /**

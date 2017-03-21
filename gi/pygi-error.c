@@ -51,7 +51,7 @@ pygi_error_marshal_to_py (GError **error)
     if (*error == NULL)
         return NULL;
 
-    state = pyglib_gil_state_ensure();
+    state = PyGILState_Ensure();
 
     exc_type = PyGError;
     if (exception_table != NULL)
@@ -71,7 +71,7 @@ pygi_error_marshal_to_py (GError **error)
                                           domain,
                                           (*error)->code);
 
-    pyglib_gil_state_release(state);
+    PyGILState_Release(state);
 
     return exc_instance;
 }
@@ -96,14 +96,14 @@ pygi_error_check (GError **error)
     if (*error == NULL)
         return FALSE;
 
-    state = pyglib_gil_state_ensure();
+    state = PyGILState_Ensure();
 
     exc_instance = pygi_error_marshal_to_py (error);
     PyErr_SetObject(PyGError, exc_instance);
     Py_DECREF(exc_instance);
     g_clear_error(error);
 
-    pyglib_gil_state_release(state);
+    PyGILState_Release(state);
 
     return TRUE;
 }

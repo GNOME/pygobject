@@ -39,9 +39,9 @@ static void
 pyg_boxed_dealloc(PyGBoxed *self)
 {
     if (self->free_on_dealloc && pyg_boxed_get_ptr (self)) {
-	PyGILState_STATE state = pyglib_gil_state_ensure();
+	PyGILState_STATE state = PyGILState_Ensure();
 	g_boxed_free (self->gtype, pyg_boxed_get_ptr (self));
-	pyglib_gil_state_release(state);
+	PyGILState_Release(state);
     }
 
     Py_TYPE(self)->tp_free((PyObject *)self);
@@ -203,11 +203,11 @@ pyg_boxed_new(GType boxed_type, gpointer boxed, gboolean copy_boxed,
     g_return_val_if_fail(boxed_type != 0, NULL);
     g_return_val_if_fail(!copy_boxed || (copy_boxed && own_ref), NULL);
 
-    state = pyglib_gil_state_ensure();
+    state = PyGILState_Ensure();
 
     if (!boxed) {
 	Py_INCREF(Py_None);
-	pyglib_gil_state_release(state);
+	PyGILState_Release(state);
 	return Py_None;
     }
 
@@ -221,14 +221,14 @@ pyg_boxed_new(GType boxed_type, gpointer boxed, gboolean copy_boxed,
 
     if (!PyType_IsSubtype (tp, &PyGBoxed_Type)) {
         PyErr_Format (PyExc_RuntimeError, "%s isn't a GBoxed", tp->tp_name);
-        pyglib_gil_state_release (state);
+        PyGILState_Release (state);
         return NULL;
     }
 
     self = (PyGBoxed *)tp->tp_alloc(tp, 0);
 
     if (self == NULL) {
-	pyglib_gil_state_release(state);
+	PyGILState_Release(state);
         return NULL;
     }
 
@@ -238,7 +238,7 @@ pyg_boxed_new(GType boxed_type, gpointer boxed, gboolean copy_boxed,
     self->gtype = boxed_type;
     self->free_on_dealloc = own_ref;
 
-    pyglib_gil_state_release(state);
+    PyGILState_Release(state);
     
     return (PyObject *)self;
 }

@@ -31,9 +31,6 @@ G_BEGIN_DECLS
 typedef void (*PyGLibThreadsEnabledFunc) (void);
 typedef void (*PyGLibThreadBlockFunc) (void);
 
-#define pyglib_gil_state_ensure          PyGILState_Ensure
-#define pyglib_gil_state_release         PyGILState_Release
-
 GOptionGroup * pyglib_option_group_transfer_group(PyObject *self);
 
 /* Private: for gobject <-> glib interaction only. */

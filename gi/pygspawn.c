@@ -76,7 +76,7 @@ _pyg_spawn_async_callback(gpointer user_data)
     PyGILState_STATE gil;
 
     data = (struct _PyGChildSetupData *) user_data;
-    gil = pyglib_gil_state_ensure();
+    gil = PyGILState_Ensure();
     if (data->data)
         retval = PyObject_CallFunction(data->func, "O", data->data);
     else
@@ -88,7 +88,7 @@ _pyg_spawn_async_callback(gpointer user_data)
     Py_DECREF(data->func);
     Py_XDECREF(data->data);
     g_slice_free(struct _PyGChildSetupData, data);
-    pyglib_gil_state_release(gil);
+    PyGILState_Release(gil);
 }
 
 PyObject *
