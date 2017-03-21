@@ -134,18 +134,24 @@ https://my.org/q?x=1&y=2
 
         def cb(fd, condition):
             call_data.append((fd, condition, os.read(fd, 1)))
+            if len(call_data) == 2:
+                ml.quit()
             return True
 
         # io_add_watch() takes an IOChannel, calling with an fd is deprecated
         with warnings.catch_warnings(record=True) as warn:
             warnings.simplefilter('always')
-            GLib.io_add_watch(r, GLib.IOCondition.IN, cb)
+            GLib.io_add_watch(r, GLib.IOCondition.IN, cb,
+                              priority=GLib.PRIORITY_HIGH)
             self.assertTrue(issubclass(warn[0].category, PyGIDeprecationWarning))
 
+        def write():
+            os.write(w, b'a')
+            GLib.idle_add(lambda: os.write(w, b'b') and False)
+
         ml = GLib.MainLoop()
-        GLib.timeout_add(10, lambda: os.write(w, b'a') and False)
-        GLib.timeout_add(100, lambda: os.write(w, b'b') and False)
-        GLib.timeout_add(200, ml.quit)
+        GLib.idle_add(write)
+        GLib.timeout_add(2000, ml.quit)
         ml.run()
 
         self.assertEqual(call_data, [(r, GLib.IOCondition.IN, b'a'),
@@ -158,18 +164,24 @@ https://my.org/q?x=1&y=2
 
         def cb(fd, condition, data):
             call_data.append((fd, condition, os.read(fd, 1), data))
+            if len(call_data) == 2:
+                ml.quit()
             return True
 
         # io_add_watch() takes an IOChannel, calling with an fd is deprecated
         with warnings.catch_warnings(record=True) as warn:
             warnings.simplefilter('always')
-            GLib.io_add_watch(r, GLib.IOCondition.IN, cb, 'moo')
+            GLib.io_add_watch(r, GLib.IOCondition.IN, cb, 'moo',
+                              priority=GLib.PRIORITY_HIGH)
             self.assertTrue(issubclass(warn[0].category, PyGIDeprecationWarning))
 
+        def write():
+            os.write(w, b'a')
+            GLib.idle_add(lambda: os.write(w, b'b') and False)
+
         ml = GLib.MainLoop()
-        GLib.timeout_add(10, lambda: os.write(w, b'a') and False)
-        GLib.timeout_add(100, lambda: os.write(w, b'b') and False)
-        GLib.timeout_add(200, ml.quit)
+        GLib.idle_add(write)
+        GLib.timeout_add(2000, ml.quit)
         ml.run()
 
         self.assertEqual(call_data, [(r, GLib.IOCondition.IN, b'a', 'moo'),
@@ -182,6 +194,7 @@ https://my.org/q?x=1&y=2
 
         def cb(fd, condition, *user_data):
             call_data.append((fd, condition, os.read(fd, 1), user_data))
+            ml.quit()
             return True
 
         # io_add_watch() takes an IOChannel, calling with an fd is deprecated
@@ -191,8 +204,8 @@ https://my.org/q?x=1&y=2
             self.assertTrue(issubclass(warn[0].category, PyGIDeprecationWarning))
 
         ml = GLib.MainLoop()
-        GLib.timeout_add(10, lambda: os.write(w, b'a') and False)
-        GLib.timeout_add(100, ml.quit)
+        GLib.idle_add(lambda: os.write(w, b'a') and False)
+        GLib.timeout_add(2000, ml.quit)
         ml.run()
 
         self.assertEqual(call_data, [(r, GLib.IOCondition.IN, b'a', ('moo', 'foo'))])
@@ -201,8 +214,8 @@ https://my.org/q?x=1&y=2
     def test_io_add_watch_pyfile(self):
         call_data = []
 
-        cmd = subprocess.Popen('sleep 0.1; echo hello; sleep 0.2; echo world',
-                               shell=True, stdout=subprocess.PIPE)
+        cmd = subprocess.Popen('echo hello; echo world',
+                               shell=True, bufsize=0, stdout=subprocess.PIPE)
 
         def cb(file, condition):
             call_data.append((file, condition, file.readline()))

@@ -4,7 +4,6 @@ import os
 import sys
 import select
 import signal
-import time
 import unittest
 
 from gi.repository import GLib
@@ -58,12 +57,22 @@ class TestMainLoop(unittest.TestCase):
 
     @unittest.skipUnless(hasattr(os, "fork"), "no os.fork available")
     def test_sigint(self):
+        r, w = os.pipe()
         pid = os.fork()
         if pid == 0:
-            time.sleep(0.5)
+            # wait for the parent process loop to start
+            os.read(r, 1)
+            os.close(r)
+
             os.kill(os.getppid(), signal.SIGINT)
             os._exit(0)
 
+        def notify_child():
+            # tell the child that it can kill the parent
+            os.write(w, b"X")
+            os.close(w)
+
+        GLib.idle_add(notify_child)
         loop = GLib.MainLoop()
         try:
             loop.run()

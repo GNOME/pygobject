@@ -622,11 +622,11 @@ class TestGtk(unittest.TestCase):
 
     def test_gtk_main(self):
         # with no arguments
-        GLib.timeout_add(100, Gtk.main_quit)
+        GLib.idle_add(Gtk.main_quit)
         Gtk.main()
 
         # overridden function ignores its arguments
-        GLib.timeout_add(100, Gtk.main_quit, 'hello')
+        GLib.idle_add(Gtk.main_quit, 'hello')
         Gtk.main()
 
     def test_widget_render_icon(self):

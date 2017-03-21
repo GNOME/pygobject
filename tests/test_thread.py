@@ -9,11 +9,14 @@ from gi.repository import GLib
 class TestThread(unittest.TestCase):
     def setUp(self):
         self.main = GLib.MainLoop()
+        self.called = False
 
     def from_thread_cb(self, test, enum):
         assert test == self.obj
         assert int(enum) == 0
         assert type(enum) != int
+        self.called = True
+        GLib.idle_add(self.timeout_cb)
 
     def idle_cb(self):
         self.obj = testhelper.get_test_thread()
@@ -22,8 +25,9 @@ class TestThread(unittest.TestCase):
 
     def test_extension_module(self):
         GLib.idle_add(self.idle_cb)
-        GLib.timeout_add(50, self.timeout_cb)
+        GLib.timeout_add(2000, self.timeout_cb)
         self.main.run()
+        self.assertTrue(self.called)
 
     def timeout_cb(self):
         self.main.quit()

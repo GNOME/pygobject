@@ -225,19 +225,23 @@ second line
             self.assertEqual(channel, ch)
             self.assertEqual(condition, GLib.IOCondition.IN)
             cb_reads.append(channel.read())
+            if len(cb_reads) == 2:
+                ml.quit()
             return True
 
         # io_add_watch() method is deprecated, use GLib.io_add_watch
         with warnings.catch_warnings(record=True) as warn:
             warnings.simplefilter('always')
-            ch.add_watch(GLib.IOCondition.IN, cb)
+            ch.add_watch(GLib.IOCondition.IN, cb, priority=GLib.PRIORITY_HIGH)
             self.assertTrue(issubclass(warn[0].category, PyGIDeprecationWarning))
 
-        ml = GLib.MainLoop()
+        def write():
+            os.write(w, b'a')
+            GLib.idle_add(lambda: os.write(w, b'b') and False)
 
-        GLib.timeout_add(10, lambda: os.write(w, b'a') and False)
-        GLib.timeout_add(100, lambda: os.write(w, b'b') and False)
-        GLib.timeout_add(200, ml.quit)
+        ml = GLib.MainLoop()
+        GLib.idle_add(write)
+        GLib.timeout_add(2000, ml.quit)
         ml.run()
 
         self.assertEqual(cb_reads, [b'a', b'b'])
@@ -257,6 +261,8 @@ second line
             self.assertEqual(condition, GLib.IOCondition.IN)
             self.assertEqual(data, 'hello')
             cb_reads.append(channel.read())
+            if len(cb_reads) == 2:
+                ml.quit()
             return True
 
         ml = GLib.MainLoop()
@@ -269,9 +275,12 @@ second line
         self.assertEqual(ml.get_context().find_source_by_id(id).priority,
                          GLib.PRIORITY_HIGH)
 
-        GLib.timeout_add(10, lambda: os.write(w, b'a') and False)
-        GLib.timeout_add(100, lambda: os.write(w, b'b') and False)
-        GLib.timeout_add(200, ml.quit)
+        def write():
+            os.write(w, b'a')
+            GLib.idle_add(lambda: os.write(w, b'b') and False)
+
+        GLib.idle_add(write)
+        GLib.timeout_add(2000, ml.quit)
         ml.run()
 
         self.assertEqual(cb_reads, [b'a', b'b'])
@@ -290,6 +299,8 @@ second line
             self.assertEqual(channel, ch)
             self.assertEqual(condition, GLib.IOCondition.IN)
             cb_reads.append(channel.read())
+            if len(cb_reads) == 2:
+                ml.quit()
             return True
 
         id = GLib.io_add_watch(ch, GLib.PRIORITY_HIGH, GLib.IOCondition.IN, cb)
@@ -297,9 +308,13 @@ second line
         ml = GLib.MainLoop()
         self.assertEqual(ml.get_context().find_source_by_id(id).priority,
                          GLib.PRIORITY_HIGH)
-        GLib.timeout_add(10, lambda: os.write(w, b'a') and False)
-        GLib.timeout_add(100, lambda: os.write(w, b'b') and False)
-        GLib.timeout_add(200, ml.quit)
+
+        def write():
+            os.write(w, b'a')
+            GLib.idle_add(lambda: os.write(w, b'b') and False)
+
+        GLib.idle_add(write)
+        GLib.timeout_add(2000, ml.quit)
         ml.run()
 
         self.assertEqual(cb_reads, [b'a', b'b'])
@@ -319,6 +334,8 @@ second line
             self.assertEqual(condition, GLib.IOCondition.IN)
             self.assertEqual(data, 'hello')
             cb_reads.append(channel.read())
+            if len(cb_reads) == 2:
+                ml.quit()
             return True
 
         id = GLib.io_add_watch(ch, GLib.PRIORITY_HIGH, GLib.IOCondition.IN, cb, 'hello')
@@ -326,9 +343,13 @@ second line
         ml = GLib.MainLoop()
         self.assertEqual(ml.get_context().find_source_by_id(id).priority,
                          GLib.PRIORITY_HIGH)
-        GLib.timeout_add(10, lambda: os.write(w, b'a') and False)
-        GLib.timeout_add(100, lambda: os.write(w, b'b') and False)
-        GLib.timeout_add(200, ml.quit)
+
+        def write():
+            os.write(w, b'a')
+            GLib.idle_add(lambda: os.write(w, b'b') and False)
+
+        GLib.idle_add(write)
+        GLib.timeout_add(2000, ml.quit)
         ml.run()
 
         self.assertEqual(cb_reads, [b'a', b'b'])
@@ -350,6 +371,8 @@ second line
             self.assertEqual(data2, 'b')
             self.assertEqual(data3, 'c')
             cb_reads.append(channel.read())
+            if len(cb_reads) == 2:
+                ml.quit()
             return True
 
         id = GLib.io_add_watch(ch, GLib.PRIORITY_HIGH, GLib.IOCondition.IN, cb,
@@ -358,9 +381,13 @@ second line
         ml = GLib.MainLoop()
         self.assertEqual(ml.get_context().find_source_by_id(id).priority,
                          GLib.PRIORITY_HIGH)
-        GLib.timeout_add(10, lambda: os.write(w, b'a') and False)
-        GLib.timeout_add(100, lambda: os.write(w, b'b') and False)
-        GLib.timeout_add(200, ml.quit)
+
+        def write():
+            os.write(w, b'a')
+            GLib.idle_add(lambda: os.write(w, b'b') and False)
+
+        GLib.idle_add(write)
+        GLib.timeout_add(2000, ml.quit)
         ml.run()
 
         self.assertEqual(cb_reads, [b'a', b'b'])
@@ -379,6 +406,8 @@ second line
             self.assertEqual(channel, ch)
             self.assertEqual(condition, GLib.IOCondition.IN)
             cb_reads.append(channel.read())
+            if len(cb_reads) == 2:
+                ml.quit()
             return True
 
         with warnings.catch_warnings(record=True) as warn:
@@ -389,9 +418,13 @@ second line
         ml = GLib.MainLoop()
         self.assertEqual(ml.get_context().find_source_by_id(id).priority,
                          GLib.PRIORITY_HIGH)
-        GLib.timeout_add(10, lambda: os.write(w, b'a') and False)
-        GLib.timeout_add(100, lambda: os.write(w, b'b') and False)
-        GLib.timeout_add(200, ml.quit)
+
+        def write():
+            os.write(w, b'a')
+            GLib.idle_add(lambda: os.write(w, b'b') and False)
+
+        GLib.idle_add(write)
+        GLib.timeout_add(2000, ml.quit)
         ml.run()
 
         self.assertEqual(cb_reads, [b'a', b'b'])
@@ -411,6 +444,8 @@ second line
             self.assertEqual(condition, GLib.IOCondition.IN)
             self.assertEqual(data, 'hello')
             cb_reads.append(channel.read())
+            if len(cb_reads) == 2:
+                ml.quit()
             return True
 
         with warnings.catch_warnings(record=True) as warn:
@@ -422,9 +457,14 @@ second line
         ml = GLib.MainLoop()
         self.assertEqual(ml.get_context().find_source_by_id(id).priority,
                          GLib.PRIORITY_HIGH)
-        GLib.timeout_add(10, lambda: os.write(w, b'a') and False)
-        GLib.timeout_add(100, lambda: os.write(w, b'b') and False)
-        GLib.timeout_add(200, ml.quit)
+
+        def write():
+            os.write(w, b'a')
+            GLib.idle_add(lambda: os.write(w, b'b') and False)
+
+        GLib.idle_add(write)
+
+        GLib.timeout_add(2000, ml.quit)
         ml.run()
 
         self.assertEqual(cb_reads, [b'a', b'b'])

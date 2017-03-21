@@ -300,7 +300,7 @@ class TestUserData(unittest.TestCase):
 
         def cb():
             ml.quit()
-        id = GLib.timeout_add(50, cb)
+        id = GLib.timeout_add(1, cb)
         self.assertEqual(ml.get_context().find_source_by_id(id).priority,
                          GLib.PRIORITY_DEFAULT)
         ml.run()
@@ -340,7 +340,7 @@ class TestUserData(unittest.TestCase):
             data['called'] = True
             ml.quit()
         data = {}
-        id = GLib.timeout_add(50, cb, data)
+        id = GLib.timeout_add(1, cb, data)
         self.assertEqual(ml.get_context().find_source_by_id(id).priority,
                          GLib.PRIORITY_DEFAULT)
         ml.run()
@@ -354,7 +354,7 @@ class TestUserData(unittest.TestCase):
             data['data2'] = data2
             ml.quit()
         data = {}
-        id = GLib.timeout_add(50, cb, data, 'hello')
+        id = GLib.timeout_add(1, cb, data, 'hello')
         self.assertEqual(ml.get_context().find_source_by_id(id).priority,
                          GLib.PRIORITY_DEFAULT)
         ml.run()
@@ -376,7 +376,7 @@ class TestUserData(unittest.TestCase):
 
         def cb():
             ml.quit()
-        id = GLib.timeout_add(50, cb, priority=GLib.PRIORITY_HIGH)
+        id = GLib.timeout_add(1, cb, priority=GLib.PRIORITY_HIGH)
         self.assertEqual(ml.get_context().find_source_by_id(id).priority,
                          GLib.PRIORITY_HIGH)
         ml.run()
@@ -401,7 +401,7 @@ class TestUserData(unittest.TestCase):
             data['called'] = True
             ml.quit()
         data = {}
-        id = GLib.timeout_add(50, cb, data, priority=GLib.PRIORITY_HIGH)
+        id = GLib.timeout_add(1, cb, data, priority=GLib.PRIORITY_HIGH)
         self.assertEqual(ml.get_context().find_source_by_id(id).priority,
                          GLib.PRIORITY_HIGH)
         ml.run()
