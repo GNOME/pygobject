@@ -31,13 +31,8 @@ G_BEGIN_DECLS
 typedef void (*PyGLibThreadsEnabledFunc) (void);
 typedef void (*PyGLibThreadBlockFunc) (void);
 
-#ifdef DISABLE_THREADING
-#    define pyglib_gil_state_ensure()        PyGILState_LOCKED
-#    define pyglib_gil_state_release(state)  state
-#else
-#    define pyglib_gil_state_ensure          PyGILState_Ensure
-#    define pyglib_gil_state_release         PyGILState_Release
-#endif
+#define pyglib_gil_state_ensure          PyGILState_Ensure
+#define pyglib_gil_state_release         PyGILState_Release
 
 GOptionGroup * pyglib_option_group_transfer_group(PyObject *self);
 

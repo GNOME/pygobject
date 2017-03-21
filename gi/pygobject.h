@@ -208,21 +208,12 @@ struct _PyGObject_Functions {
 };
 
 
-#ifdef DISABLE_THREADING
-#    define pyg_threads_enabled           FALSE
-#    define pyg_gil_state_ensure()        0
-#    define pyg_gil_state_release(state)
-#    define pyg_begin_allow_threads       G_STMT_START {
-#    define pyg_end_allow_threads         } G_STMT_END
-#else
-#    define pyg_threads_enabled           TRUE
-#    define pyg_gil_state_ensure          PyGILState_Ensure
-#    define pyg_gil_state_release         PyGILState_Release
-#    define pyg_begin_allow_threads       Py_BEGIN_ALLOW_THREADS
-#    define pyg_end_allow_threads         Py_END_ALLOW_THREADS
-#endif
-
 /* Deprecated, only available for API compatibility. */
+#define pyg_threads_enabled           TRUE
+#define pyg_gil_state_ensure          PyGILState_Ensure
+#define pyg_gil_state_release         PyGILState_Release
+#define pyg_begin_allow_threads       Py_BEGIN_ALLOW_THREADS
+#define pyg_end_allow_threads         Py_END_ALLOW_THREADS
 #define pyg_enable_threads()
 #define pyg_set_thread_block_funcs(a, b)
 #define pyg_block_threads()

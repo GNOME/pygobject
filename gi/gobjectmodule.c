@@ -1893,12 +1893,7 @@ struct _PyGObject_Functions pygobject_api_functions = {
   pyg_flags_add,
   pyg_flags_from_gtype,
 
-  /* threads_enabled */
-#ifdef DISABLE_THREADING
-  FALSE,
-#else
-  TRUE,
-#endif
+  TRUE, /* threads_enabled */
 
   pygobject_enable_threads,
   pygobject_gil_state_ensure,

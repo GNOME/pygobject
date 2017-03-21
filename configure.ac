@@ -134,29 +134,6 @@ CPPFLAGS=$old_CPPFLAGS
 PLATFORM=`$PYTHON -c "import sys; from distutils import util; sys.stdout.write(util.get_platform())"`
 AC_SUBST(PLATFORM)
 
-AC_ARG_ENABLE(thread,
-  AS_HELP_STRING([--disable-thread],[Disable pygobject threading support]),,
-  enable_thread=yes)
-
-PYG_CHECK_PYMOD(thread,,,enable_thread=check_for_py3_module)
-if test "x$enable_thread" = xcheck_for_py3_module; then
-  dnl Python 3 uses the _thread module so check for that
-  PYG_CHECK_PYMOD(_thread,,enable_thread=yes,enable_thread=no)
-fi
-
-AC_MSG_CHECKING(whether to enable threading in pygobject)
-if test "x$enable_thread" != xno; then
-  extra_mods=gthread
-  THREADING_CFLAGS=
-  AC_MSG_RESULT(yes)
-else
-  extra_mods=
-  THREADING_CFLAGS="-DDISABLE_THREADING"
-  AC_MSG_RESULT(no)
-fi
-AC_SUBST(THREADING_CFLAGS)
-CPPFLAGS="${CPPFLAGS} $THREADING_CFLAGS"
-
 dnl get rid of the -export-dynamic stuff from the configure flags ...
 export_dynamic=`(./libtool --config; echo eval echo \\$export_dynamic_flag_spec) | sh`
 
@@ -247,7 +224,6 @@ AC_MSG_RESULT([
 	Is release:			$ax_is_release
 	Using python interpreter:	$PYTHON
 	cairo support:			$enable_cairo
-	thread support:			$enable_thread
 	code coverage support:          $enable_code_coverage
 ])
 
