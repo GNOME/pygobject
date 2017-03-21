@@ -165,20 +165,6 @@ def load_overrides(introspection_module):
     return proxy
 
 
-class overridefunc(object):
-    """decorator for overriding a function"""
-    def __init__(self, func):
-        if not isinstance(func, CallableInfo):
-            raise TypeError("func must be a gi function, got %s" % func)
-
-        module_name = func.__module__.rsplit('.', 1)[-1]
-        self.module = sys.modules["gi.repository." + module_name]
-
-    def __call__(self, func):
-        setattr(self.module, func.__name__, func)
-        return func
-
-
 def override(type_):
     """Decorator for registering an override.
 
@@ -187,8 +173,18 @@ def override(type_):
     for example), so they have to be added to the module immediately.
     """
 
-    if isinstance(type_, (types.FunctionType, CallableInfo)):
-        return overridefunc(type_)
+    if isinstance(type_, CallableInfo):
+        func = type_
+        namespace = func.__module__.rsplit('.', 1)[-1]
+        module = sys.modules["gi.repository." + namespace]
+
+        def wrapper(func):
+            setattr(module, func.__name__, func)
+            return func
+
+        return wrapper
+    elif isinstance(type_, types.FunctionType):
+        raise TypeError("func must be a gi function, got %s" % type_)
     else:
         try:
             info = getattr(type_, '__info__')
@@ -212,6 +208,10 @@ def override(type_):
         setattr(module, type_.__name__, type_)
 
         return type_
+
+
+overridefunc = override
+"""Deprecated"""
 
 
 def deprecated(fn, replacement):
