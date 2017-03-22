@@ -165,7 +165,7 @@ pyg_enum_new(PyTypeObject *type, PyObject *args, PyObject *kwargs)
      * values might not have been that good", but we need to keep
      * backward compatibility.
      */
-    if (!PyDict_Check(values) || PyDict_Size(values) > eclass->n_values) {
+    if (!PyDict_Check(values) || (gsize)PyDict_Size(values) > eclass->n_values) {
 	PyErr_SetString(PyExc_TypeError, "__enum_values__ badly formed");
 	Py_DECREF(values);
 	g_type_class_unref(eclass);

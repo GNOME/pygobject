@@ -87,7 +87,7 @@ gi_argument_from_py_ssize_t (GIArgument   *arg_out,
         }
 
     case GI_TYPE_TAG_UINT32:
-        if (size_in >= 0 && size_in <= G_MAXUINT32) {
+        if (size_in >= 0 && (gsize)size_in <= G_MAXUINT32) {
             arg_out->v_uint32 = size_in;
             return TRUE;
         } else {
@@ -832,7 +832,7 @@ pygi_arg_garray_len_arg_setup (PyGIArgCache *arg_cache,
             callable_cache->n_py_args -= 1;
 
             for (i = seq_cache->len_arg_index + 1;
-                   i < _pygi_callable_cache_args_len (callable_cache); i++) {
+                   (gsize)i < _pygi_callable_cache_args_len (callable_cache); i++) {
                 PyGIArgCache *update_cache = _pygi_callable_cache_get_arg (callable_cache, i);
                 if (update_cache == NULL)
                     break;

@@ -345,7 +345,7 @@ _pygi_closure_convert_arguments (PyGIInvokeState *state,
     gssize n_in_args = 0;
     gssize i;
 
-    for (i = 0; i < _pygi_callable_cache_args_len (cache); i++) {
+    for (i = 0; (gsize)i < _pygi_callable_cache_args_len (cache); i++) {
         PyGIArgCache *arg_cache;
 
         arg_cache = g_ptr_array_index (cache->args_cache, i);
@@ -447,7 +447,7 @@ _pygi_closure_set_out_arguments (PyGIInvokeState *state,
         i_py_retval++;
     }
 
-    for (i = 0; i < _pygi_callable_cache_args_len (cache); i++) {
+    for (i = 0; (gsize)i < _pygi_callable_cache_args_len (cache); i++) {
         PyGIArgCache *arg_cache = g_ptr_array_index (cache->args_cache, i);
 
         if (arg_cache->direction & PYGI_DIRECTION_FROM_PYTHON) {

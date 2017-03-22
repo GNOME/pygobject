@@ -18,9 +18,9 @@
 #ifndef __PYGI_VALUE_H__
 #define __PYGI_VALUE_H__
 
+#include <Python.h>
 #include <glib-object.h>
 #include <girepository.h>
-#include <Python.h>
 
 G_BEGIN_DECLS
 

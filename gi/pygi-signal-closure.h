@@ -24,6 +24,7 @@
 #ifndef __PYGI_SIGNAL_CLOSURE_H__
 #define __PYGI_SIGNAL_CLOSURE_H__
 
+#include <Python.h>
 #include <girepository.h>
 #include "pygobject-internal.h"
 

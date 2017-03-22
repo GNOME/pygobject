@@ -501,7 +501,7 @@ _callable_cache_generate_args_cache_real (PyGICallableCache *callable_cache,
     callable_cache->user_data_index = -1;
 
     for (i = 0, arg_index = callable_cache->args_offset;
-         arg_index < _pygi_callable_cache_args_len (callable_cache);
+         (gsize)arg_index < _pygi_callable_cache_args_len (callable_cache);
          i++, arg_index++) {
         PyGIArgCache *arg_cache = NULL;
         GIArgInfo *arg_info;
@@ -1143,7 +1143,7 @@ pygi_closure_cache_new (GICallableInfo *info)
      *
      * See: https://bugzilla.gnome.org/show_bug.cgi?id=652115
      */
-    for (i = 0; i < _pygi_callable_cache_args_len (callable_cache); i++) {
+    for (i = 0; (gsize)i < _pygi_callable_cache_args_len (callable_cache); i++) {
         PyGIArgCache *arg_cache;
         PyGIArgGArray *garray_cache;
         PyGIArgCache *len_arg_cache;
@@ -1166,7 +1166,7 @@ pygi_closure_cache_new (GICallableInfo *info)
      * do not recognize user_data/data arguments correctly.
      */
     if (callable_cache->user_data_index == -1) {
-        for (i = 0; i < _pygi_callable_cache_args_len (callable_cache); i++) {
+        for (i = 0; (gsize)i < _pygi_callable_cache_args_len (callable_cache); i++) {
             PyGIArgCache *arg_cache;
 
             arg_cache = g_ptr_array_index (callable_cache->args_cache, i);

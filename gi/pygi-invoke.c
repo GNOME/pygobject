@@ -89,7 +89,7 @@ _py_args_combine_and_check_length (PyGICallableCache *cache,
 {
     PyObject *combined_py_args = NULL;
     Py_ssize_t n_py_args, n_py_kwargs, i;
-    guint n_expected_args = cache->n_py_args;
+    gssize n_expected_args = cache->n_py_args;
     GSList *l;
 
     n_py_args = PyTuple_GET_SIZE (py_args);
@@ -107,7 +107,7 @@ _py_args_combine_and_check_length (PyGICallableCache *cache,
     if (cache->user_data_varargs_index < 0 && n_expected_args < n_py_args) {
         char *full_name = pygi_callable_cache_get_full_name (cache);
         PyErr_Format (PyExc_TypeError,
-                      "%.200s() takes exactly %d %sargument%s (%zd given)",
+                      "%.200s() takes exactly %zd %sargument%s (%zd given)",
                       full_name,
                       n_expected_args,
                       n_py_kwargs > 0 ? "non-keyword " : "",
@@ -194,7 +194,7 @@ _py_args_combine_and_check_length (PyGICallableCache *cache,
             } else {
                 char *full_name = pygi_callable_cache_get_full_name (cache);
                 PyErr_Format (PyExc_TypeError,
-                              "%.200s() takes exactly %d %sargument%s (%zd given)",
+                              "%.200s() takes exactly %zd %sargument%s (%zd given)",
                               full_name,
                               n_expected_args,
                               n_py_kwargs > 0 ? "non-keyword " : "",
@@ -414,7 +414,7 @@ _invoke_marshal_in_args (PyGIInvokeState *state, PyGIFunctionCache *function_cac
         return FALSE;
     }
 
-    for (i = 0; i < _pygi_callable_cache_args_len (cache); i++) {
+    for (i = 0; (gsize)i < _pygi_callable_cache_args_len (cache); i++) {
         GIArgument *c_arg = &state->args[i].arg_value;
         PyGIArgCache *arg_cache = g_ptr_array_index (cache->args_cache, i);
         PyObject *py_arg = NULL;

@@ -21,8 +21,8 @@
 #ifndef __PYGOBJECT_TYPE_H__ 
 #define __PYGOBJECT_TYPE_H__
 
-#include <glib-object.h>
 #include <Python.h>
+#include <glib-object.h>
 #include "pygobject-internal.h"
 
 #define PYGOBJECT_REGISTER_GTYPE(d, type, name, gtype)      \

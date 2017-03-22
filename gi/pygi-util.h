@@ -1,6 +1,7 @@
 #ifndef __PYGI_UTIL_H__
 #define __PYGI_UTIL_H__
 
+#include <Python.h>
 #include <glib.h>
 #include "pygobject-internal.h"
 #include <pyglib-python-compat.h>

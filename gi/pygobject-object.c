@@ -1837,7 +1837,7 @@ pygobject_emit(PyGObject *self, PyObject *args)
 	return NULL;
     }
     g_signal_query(signal_id, &query);
-    if (len != query.n_params + 1) {
+    if ((gsize)len != query.n_params + 1) {
 	gchar buf[128];
 
 	g_snprintf(buf, sizeof(buf),
@@ -1922,7 +1922,7 @@ pygobject_chain_from_overridden(PyGObject *self, PyObject *args)
 	return NULL;
     }
     g_signal_query(signal_id, &query);
-    if (len != query.n_params) {
+    if (len < 0 || (gsize)len != query.n_params) {
 	gchar buf[128];
 
 	g_snprintf(buf, sizeof(buf),
