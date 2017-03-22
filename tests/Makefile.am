@@ -164,11 +164,15 @@ RUN_TESTS_ENV_VARS= \
 	G_SLICE=debug-blocks \
 	TESTS_BUILDDIR=$(builddir)
 
+# if dbus-run-session is available, use it, otherwise disable DBUS
+check-local:
+	DBUS_ENV=$$(dbus-run-session true && echo "dbus-run-session --" || echo "DBUS_SESSION_BUS_ADDRESS= ") $(MAKE) check.real
+
 # pygtkcompat tests need to be run in a separate process as they
 # clobber global name space
-check-local: $(target_libraries) $(test_typelibs) gschemas.compiled
-	$(RUN_TESTS_ENV_VARS) dbus-run-session -- $(EXEC_NAME) $(PYTHON) -Wd $(srcdir)/runtests.py; rc=$$?; \
-	[ "$$rc" -ne 0 ] || [ -n "$$TEST_NAMES" ] || { TEST_NAMES=compat_test_pygtk $(RUN_TESTS_ENV_VARS) dbus-run-session -- $(EXEC_NAME) $(PYTHON) -Wd -Werror::PendingDeprecationWarning -Werror::DeprecationWarning -Werror::RuntimeWarning $(srcdir)/runtests.py; rc=$$?; }; \
+check.real: $(target_libraries) $(test_typelibs) gschemas.compiled
+	$(RUN_TESTS_ENV_VARS) $(DBUS_ENV) $(EXEC_NAME) $(PYTHON) -Wd $(srcdir)/runtests.py; rc=$$?; \
+	[ "$$rc" -ne 0 ] || [ -n "$$TEST_NAMES" ] || { TEST_NAMES=compat_test_pygtk $(RUN_TESTS_ENV_VARS) $(DBUS_ENV) $(EXEC_NAME) $(PYTHON) -Wd -Werror::PendingDeprecationWarning -Werror::DeprecationWarning -Werror::RuntimeWarning $(srcdir)/runtests.py; rc=$$?; }; \
 	exit $$rc
 
 check.gdb:

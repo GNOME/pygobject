@@ -664,6 +664,7 @@ class TestWidget(unittest.TestCase):
             button.style_get_property('not-a-valid-style-property')
 
 
+@unittest.skipIf(sys.platform == "darwin", "hangs")
 @unittest.skipUnless(Gtk, 'Gtk not available')
 class TestSignals(unittest.TestCase):
     def test_class_closure_override_with_aliased_type(self):
@@ -1698,6 +1699,7 @@ class TestTreeModel(unittest.TestCase):
         self.assertTrue(filt is not None)
 
 
+@unittest.skipIf(sys.platform == "darwin", "hangs")
 @unittest.skipUnless(Gtk, 'Gtk not available')
 class TestTreeView(unittest.TestCase):
     def test_tree_view(self):

@@ -1,5 +1,6 @@
 # -*- Mode: Python -*-
 
+import sys
 import gc
 import unittest
 import warnings
@@ -191,6 +192,7 @@ class TestSource(unittest.TestCase):
         GLib.Timeout(20)
         GLib.Idle()
 
+    @unittest.skipIf(sys.platform == "darwin", "hangs")
     def test_finalize(self):
         self.dispatched = False
         self.finalized = False
@@ -281,6 +283,7 @@ class TestSource(unittest.TestCase):
         self.assertEqual(source.kwarg, 2)
 
 
+@unittest.skipIf(sys.platform == "darwin", "hangs")
 class TestUserData(unittest.TestCase):
     def test_idle_no_data(self):
         ml = GLib.MainLoop()

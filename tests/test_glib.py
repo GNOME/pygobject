@@ -1,6 +1,7 @@
 # -*- Mode: Python -*-
 # encoding: UTF-8
 
+import sys
 import unittest
 import os.path
 import warnings
@@ -85,6 +86,7 @@ https://my.org/q?x=1&y=2
         self.assertTrue(isinstance(tm, float))
         self.assertGreater(tm, 1350000000.0)
 
+    @unittest.skipIf(sys.platform == "darwin", "fails on OSX")
     def test_main_loop(self):
         # note we do not test run() here, as we use this in countless other
         # tests

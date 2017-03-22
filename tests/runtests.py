@@ -27,6 +27,9 @@ sys.path.insert(0, builddir)
 # force untranslated messages, as we check for them in some tests
 os.environ['LC_MESSAGES'] = 'C'
 os.environ['G_DEBUG'] = 'fatal-warnings fatal-criticals'
+if sys.platform == "darwin":
+    # gtk 3.22 has warnings and ciriticals on OS X, ignore for now
+    os.environ['G_DEBUG'] = ''
 
 # make Gio able to find our gschemas.compiled in tests/. This needs to be set
 # before importing Gio. Support a separate build tree, so look in build dir

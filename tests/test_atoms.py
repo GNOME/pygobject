@@ -1,3 +1,4 @@
+import sys
 import unittest
 
 try:
@@ -53,6 +54,7 @@ class TestGdkAtom(unittest.TestCase):
         self.assertTrue(Gtk.targets_include_image([a_jpeg], False))
         self.assertTrue(Gtk.targets_include_image([a_jpeg, a_plain], False))
 
+    @unittest.skipIf(sys.platform == "darwin", "fails on OSX")
     def test_out_array(self):
         a_selection = Gdk.Atom.intern('my_clipboard', False)
         clipboard = Gtk.Clipboard.get(a_selection)
@@ -72,6 +74,7 @@ class TestGdkAtom(unittest.TestCase):
         self.assertFalse(None in names, names)
         self.assertTrue('TEXT' in names, names)
 
+    @unittest.skipIf(sys.platform == "darwin", "fails on OSX")
     def test_out_glist(self):
         display = Gdk.Display.get_default()
         dm = display.get_device_manager()

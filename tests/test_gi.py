@@ -1486,6 +1486,8 @@ class TestEnum(unittest.TestCase):
 
         Run test under a locale which defines toupper('a') == 'a'
         '''
+        if sys.platform == "darwin":
+            return
         cls.locale_dir = tempfile.mkdtemp()
         src = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'te_ST@nouppera')
         dest = os.path.join(cls.locale_dir, 'te_ST.UTF-8@nouppera')
@@ -1495,6 +1497,8 @@ class TestEnum(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
+        if sys.platform == "darwin":
+            return
         locale.setlocale(locale.LC_ALL, 'C')
         shutil.rmtree(cls.locale_dir)
         try:

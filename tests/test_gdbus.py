@@ -7,6 +7,15 @@ from gi.repository import GLib
 from gi.repository import Gio
 
 
+try:
+    Gio.bus_get_sync(Gio.BusType.SESSION, None)
+except GLib.Error:
+    has_dbus = False
+else:
+    has_dbus = True
+
+
+@unittest.skipUnless(has_dbus, "no dbus running")
 class TestGDBusClient(unittest.TestCase):
     def setUp(self):
         self.bus = Gio.bus_get_sync(Gio.BusType.SESSION, None)
