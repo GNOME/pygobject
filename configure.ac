@@ -48,7 +48,7 @@ AM_INIT_AUTOMAKE([1.13 foreign no-dist-gzip dist-xz])
 
 AC_CANONICAL_BUILD
 AC_CANONICAL_HOST
-AC_MSG_CHECKING([for build time linking with Python (Darwin and Win32)])
+AC_MSG_CHECKING([for build time linking with Python (Win32)])
 case "$host" in
   *-*-mingw*|*-*-cygwin*)
     os_win32=yes
@@ -57,7 +57,7 @@ case "$host" in
     ;;
   *-*-darwin*)
     os_win32=no
-    link_python_libs=yes
+    link_python_libs=no
     OS_EXT=dylib
     ;;
   *)
@@ -116,7 +116,7 @@ AC_SUBST(PYTHON_SO)
 
 PYG_CHECK_PYTHON_HEADERS(, AC_MSG_ERROR([Python headers not found]))
 if test "x$link_python_libs" = "xyes"; then
-  PYG_CHECK_PYTHON_LIBS(, AC_MSG_ERROR([Python libs not found. Windows and Darwin require Python modules to be explicitly linked to libpython.]))
+  PYG_CHECK_PYTHON_LIBS(, AC_MSG_ERROR([Python libs not found. Windows requires Python modules to be explicitly linked to libpython.]))
 fi
 
 AC_MSG_CHECKING([for PySignal_SetWakeupFd in Python.h])
