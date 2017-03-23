@@ -1,6 +1,7 @@
 # -*- Mode: Python -*-
 # encoding: UTF-8
 
+import os
 import sys
 import unittest
 import os.path
@@ -14,9 +15,11 @@ from compathelper import _unicode, _bytes
 
 
 class TestGLib(unittest.TestCase):
+
+    @unittest.skipIf(os.name == "nt", "no bash on Windows")
     def test_find_program_in_path(self):
         bash_path = GLib.find_program_in_path('bash')
-        self.assertTrue(bash_path.endswith('/bash'))
+        self.assertTrue(bash_path.endswith(os.path.sep + 'bash'))
         self.assertTrue(os.path.exists(bash_path))
 
         self.assertEqual(GLib.find_program_in_path('non existing'), None)
@@ -38,9 +41,9 @@ class TestGLib(unittest.TestCase):
 
     def test_xdg_dirs(self):
         d = GLib.get_user_data_dir()
-        self.assertTrue('/' in d, d)
+        self.assertTrue(os.path.sep in d, d)
         d = GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_DESKTOP)
-        self.assertTrue('/' in d, d)
+        self.assertTrue(os.path.sep in d, d)
         with warnings.catch_warnings():
             warnings.simplefilter('ignore', PyGIDeprecationWarning)
 
@@ -49,7 +52,7 @@ class TestGLib(unittest.TestCase):
                              GLib.get_user_special_dir(GLib.USER_DIRECTORY_MUSIC))
 
         for d in GLib.get_system_config_dirs():
-            self.assertTrue('/' in d, d)
+            self.assertTrue(os.path.sep in d, d)
         for d in GLib.get_system_data_dirs():
             self.assertTrue(isinstance(d, str), d)
 
@@ -124,6 +127,7 @@ https://my.org/q?x=1&y=2
         self.assertTrue(context.pending() in [True, False])
         self.assertTrue(context.iteration(False) in [True, False])
 
+    @unittest.skipIf(os.name == "nt", "hangs")
     def test_io_add_watch_no_data(self):
         (r, w) = os.pipe()
         call_data = []
@@ -147,6 +151,7 @@ https://my.org/q?x=1&y=2
         self.assertEqual(call_data, [(r, GLib.IOCondition.IN, b'a'),
                                      (r, GLib.IOCondition.IN, b'b')])
 
+    @unittest.skipIf(os.name == "nt", "hangs")
     def test_io_add_watch_with_data(self):
         (r, w) = os.pipe()
         call_data = []
@@ -170,6 +175,7 @@ https://my.org/q?x=1&y=2
         self.assertEqual(call_data, [(r, GLib.IOCondition.IN, b'a', 'moo'),
                                      (r, GLib.IOCondition.IN, b'b', 'moo')])
 
+    @unittest.skipIf(os.name == "nt", "hangs")
     def test_io_add_watch_with_multiple_data(self):
         (r, w) = os.pipe()
         call_data = []
@@ -191,6 +197,7 @@ https://my.org/q?x=1&y=2
 
         self.assertEqual(call_data, [(r, GLib.IOCondition.IN, b'a', ('moo', 'foo'))])
 
+    @unittest.skipIf(os.name == "nt", "no shell on Windows")
     def test_io_add_watch_pyfile(self):
         call_data = []
 

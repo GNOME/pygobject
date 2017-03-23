@@ -106,7 +106,6 @@ EXTRA_DIST = \
 	helper.py \
 	compathelper.py \
 	runtests.py \
-	runtests-windows.py \
 	testmodule.py \
 	test-floating.h \
 	test-thread.h \
@@ -154,19 +153,17 @@ EXTRA_DIST = \
 clean-local:
 	rm -f $(target_libraries) file.txt~
 
+# Unsetting MSYSTEM prevents msys2 from changing os.path.sep to "/"
 RUN_TESTS_ENV_VARS= \
-	PYTHONPATH=$(top_builddir):$(top_builddir)/tests:$${PYTHONPATH:+:$$PYTHONPATH} \
-	LD_LIBRARY_PATH=$(builddir)/.libs:$$LD_LIBRARY_PATH \
-	GI_TYPELIB_PATH=$(builddir):$$GI_TYPELIB_PATH \
-	XDG_DATA_DIRS=$$XDG_DATA_DIRS:/usr/share \
 	MALLOC_PERTURB_=85 \
 	MALLOC_CHECK_=3 \
 	G_SLICE=debug-blocks \
+	MSYSTEM= \
 	TESTS_BUILDDIR=$(builddir)
 
 # if dbus-run-session is available, use it, otherwise disable DBUS
 check-local:
-	DBUS_ENV=$$(dbus-run-session true && echo "dbus-run-session --" || echo "DBUS_SESSION_BUS_ADDRESS= ") $(MAKE) check.real
+	DBUS_ENV=$$(dbus-run-session true && echo "dbus-run-session --" || echo "DBUS_SESSION_BUS_ADDRESS=.") $(MAKE) check.real
 
 # pygtkcompat tests need to be run in a separate process as they
 # clobber global name space

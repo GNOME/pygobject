@@ -9,6 +9,7 @@ from gi.repository import GLib
 from gi import PyGIDeprecationWarning
 
 
+@unittest.skipIf(os.name == "nt", "not on Windows")
 class TestProcess(unittest.TestCase):
 
     def test_deprecated_child_watch_no_data(self):

@@ -1,3 +1,4 @@
+import os
 import sys
 import unittest
 
@@ -74,7 +75,8 @@ class TestGdkAtom(unittest.TestCase):
         self.assertFalse(None in names, names)
         self.assertTrue('TEXT' in names, names)
 
-    @unittest.skipIf(sys.platform == "darwin", "fails on OSX")
+    @unittest.skipIf(sys.platform == "darwin" or os.name == "nt",
+                     "fails on OSX/Windows")
     def test_out_glist(self):
         display = Gdk.Display.get_default()
         dm = display.get_device_manager()

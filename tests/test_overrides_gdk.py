@@ -1,6 +1,7 @@
 # -*- Mode: Python; py-indent-offset: 4 -*-
 # vim: tabstop=4 shiftwidth=4 expandtab
 
+import os
 import sys
 import unittest
 
@@ -19,7 +20,7 @@ from helper import capture_glib_deprecation_warnings
 @unittest.skipUnless(Gdk, 'Gdk not available')
 class TestGdk(unittest.TestCase):
 
-    @unittest.skipIf(sys.platform == "darwin", "crashes")
+    @unittest.skipIf(sys.platform == "darwin" or os.name == "nt", "crashes")
     def test_constructor(self):
         attribute = Gdk.WindowAttr()
         attribute.window_type = Gdk.WindowType.CHILD

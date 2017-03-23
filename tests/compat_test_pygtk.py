@@ -182,4 +182,6 @@ class TestGTKCompat(unittest.TestCase):
     def test_gdk_window(self):
         w = gtk.Window()
         w.realize()
-        self.assertEqual(w.get_window().get_origin(), (0, 0))
+        origin = w.get_window().get_origin()
+        self.assertTrue(isinstance(origin, tuple))
+        self.assertEqual(len(origin), 2)

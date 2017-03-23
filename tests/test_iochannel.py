@@ -2,12 +2,17 @@
 # encoding: UTF-8
 from __future__ import unicode_literals
 
+import os
 import unittest
 import tempfile
 import os.path
-import fcntl
 import shutil
 import warnings
+
+try:
+    import fcntl
+except ImportError:
+    fcntl = None
 
 from gi.repository import GLib
 from gi import PyGIDeprecationWarning
@@ -112,6 +117,7 @@ second line
 
         # invalid whence value
         self.assertRaises(ValueError, ch.seek, 0, 3)
+        ch.shutdown(True)
 
     def test_file_write(self):
         ch = GLib.IOChannel(filename=self.testout, mode='w')
@@ -167,6 +173,7 @@ second line
         self.assertEqual(reader.read(), b'ghi')
         reader.shutdown(True)
 
+    @unittest.skipIf(os.name == "nt", "NONBLOCK not implemented on Windows")
     def test_fd_read(self):
         (r, w) = os.pipe()
 
@@ -186,6 +193,7 @@ second line
 
         ch.shutdown(True)
 
+    @unittest.skipUnless(fcntl, "no fcntl")
     def test_fd_write(self):
         (r, w) = os.pipe()
         fcntl.fcntl(r, fcntl.F_SETFL, fcntl.fcntl(r, fcntl.F_GETFL) | os.O_NONBLOCK)
@@ -203,6 +211,7 @@ second line
         self.assertEqual(os.read(r, 10), b'\x03\x04')
         os.close(r)
 
+    @unittest.skipIf(os.name == "nt", "NONBLOCK not implemented on Windows")
     def test_deprecated_method_add_watch_no_data(self):
         (r, w) = os.pipe()
 
@@ -233,6 +242,7 @@ second line
 
         self.assertEqual(cb_reads, [b'a', b'b'])
 
+    @unittest.skipIf(os.name == "nt", "NONBLOCK not implemented on Windows")
     def test_deprecated_method_add_watch_data_priority(self):
         (r, w) = os.pipe()
 
@@ -266,6 +276,7 @@ second line
 
         self.assertEqual(cb_reads, [b'a', b'b'])
 
+    @unittest.skipIf(os.name == "nt", "NONBLOCK not implemented on Windows")
     def test_add_watch_no_data(self):
         (r, w) = os.pipe()
 
@@ -293,6 +304,7 @@ second line
 
         self.assertEqual(cb_reads, [b'a', b'b'])
 
+    @unittest.skipIf(os.name == "nt", "NONBLOCK not implemented on Windows")
     def test_add_watch_with_data(self):
         (r, w) = os.pipe()
 
@@ -321,6 +333,7 @@ second line
 
         self.assertEqual(cb_reads, [b'a', b'b'])
 
+    @unittest.skipIf(os.name == "nt", "NONBLOCK not implemented on Windows")
     def test_add_watch_with_multi_data(self):
         (r, w) = os.pipe()
 
@@ -352,6 +365,7 @@ second line
 
         self.assertEqual(cb_reads, [b'a', b'b'])
 
+    @unittest.skipIf(os.name == "nt", "NONBLOCK not implemented on Windows")
     def test_deprecated_add_watch_no_data(self):
         (r, w) = os.pipe()
 
@@ -382,6 +396,7 @@ second line
 
         self.assertEqual(cb_reads, [b'a', b'b'])
 
+    @unittest.skipIf(os.name == "nt", "NONBLOCK not implemented on Windows")
     def test_deprecated_add_watch_with_data(self):
         (r, w) = os.pipe()
 

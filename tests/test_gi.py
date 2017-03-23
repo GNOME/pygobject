@@ -714,11 +714,12 @@ class TestFilename(unittest.TestCase):
         self.assertTrue(GIMarshallingTests.filename_copy(None) is None)
         self.assertRaises(TypeError, GIMarshallingTests.filename_exists, None)
 
+    @unittest.skipIf(os.name == "nt", "fixme")
     def test_filename_out(self):
         self.assertRaises(GLib.GError, GLib.Dir.make_tmp, 'test')
 
         dirname = GLib.Dir.make_tmp('testäø.XXXXXX')
-        self.assertTrue('/testäø.' in dirname, dirname)
+        self.assertTrue(os.path.sep + 'testäø.' in dirname, dirname)
         dirname = _bytes(dirname)
         self.assertTrue(os.path.isdir(dirname))
         os.rmdir(dirname)
@@ -1486,7 +1487,7 @@ class TestEnum(unittest.TestCase):
 
         Run test under a locale which defines toupper('a') == 'a'
         '''
-        if sys.platform == "darwin":
+        if sys.platform == "darwin" or os.name == "nt":
             return
         cls.locale_dir = tempfile.mkdtemp()
         src = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'te_ST@nouppera')
@@ -1497,7 +1498,7 @@ class TestEnum(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        if sys.platform == "darwin":
+        if sys.platform == "darwin" or os.name == "nt":
             return
         locale.setlocale(locale.LC_ALL, 'C')
         shutil.rmtree(cls.locale_dir)

@@ -1,6 +1,7 @@
 # -*- Mode: Python; py-indent-offset: 4 -*-
 # vim: tabstop=4 shiftwidth=4 expandtab
 
+import os
 import unittest
 
 import gi.overrides
@@ -142,6 +143,7 @@ class TestGSettings(unittest.TestCase):
                                              1)])
 
 
+@unittest.skipIf(os.name == "nt", "FIXME")
 class TestGFile(unittest.TestCase):
     def setUp(self):
         self.file, self.io_stream = Gio.File.new_tmp('TestGFile.XXXXXX')
@@ -206,6 +208,7 @@ class TestGFile(unittest.TestCase):
         self.assertFalse(self.file.query_exists(None))
 
 
+@unittest.skipIf(os.name == "nt", "crashes on Windows")
 class TestGApplication(unittest.TestCase):
     def test_command_line(self):
         class App(Gio.Application):

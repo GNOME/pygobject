@@ -18,9 +18,11 @@ if '--help' in sys.argv:
 mydir = os.path.dirname(os.path.abspath(__file__))
 tests_builddir = os.path.abspath(os.environ.get('TESTS_BUILDDIR', os.path.dirname(__file__)))
 builddir = os.path.dirname(tests_builddir)
+tests_srcdir = os.path.abspath(os.path.dirname(__file__))
+srcdir = os.path.dirname(tests_srcdir)
 
-# we have to do this here instead of Makefile.am so that the implicitly added
-# directory for the source file comes after the builddir
+sys.path.insert(0, tests_srcdir)
+sys.path.insert(0, srcdir)
 sys.path.insert(0, tests_builddir)
 sys.path.insert(0, builddir)
 
@@ -37,6 +39,13 @@ if sys.platform == "darwin":
 os.environ['GSETTINGS_BACKEND'] = 'memory'
 os.environ['GSETTINGS_SCHEMA_DIR'] = tests_builddir
 os.environ['G_FILENAME_ENCODING'] = 'UTF-8'
+
+import gi
+gi.require_version("GIRepository", "2.0")
+from gi.repository import GIRepository
+repo = GIRepository.Repository.get_default()
+repo.prepend_library_path(os.path.join(tests_builddir, ".libs"))
+repo.prepend_search_path(tests_builddir)
 
 # Load tests.
 if 'TEST_NAMES' in os.environ:

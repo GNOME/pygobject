@@ -19,6 +19,8 @@ from compathelper import _bytes
 
 
 class TestMainLoop(unittest.TestCase):
+
+    @unittest.skipUnless(hasattr(os, "fork"), "no os.fork available")
     def test_exception_handling(self):
         pipe_r, pipe_w = os.pipe()
 
@@ -60,6 +62,7 @@ class TestMainLoop(unittest.TestCase):
         #
         self.assertFalse(got_exception)
 
+    @unittest.skipUnless(hasattr(signal, "SIGUSR1"), "no SIGUSR1")
     def test_concurrency(self):
         def on_usr1(signum, frame):
             pass
@@ -80,6 +83,7 @@ class TestMainLoop(unittest.TestCase):
         finally:
             signal.signal(signal.SIGUSR1, orig_handler)
 
+    @unittest.skipUnless(hasattr(os, "fork"), "no os.fork available")
     def test_sigint(self):
         pid = os.fork()
         if pid == 0:

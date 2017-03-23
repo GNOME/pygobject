@@ -1,10 +1,12 @@
 # coding=utf-8
 
+import os
 import gc
 import sys
 import struct
 import types
 import unittest
+import tempfile
 
 import gi
 from gi.repository import GObject
@@ -417,10 +419,11 @@ class TestPropertyObject(unittest.TestCase):
     def test_interface(self):
         obj = new(PropertyObject)
 
-        file = Gio.File.new_for_path('/some/path')
+        path = os.path.join(tempfile.gettempdir(), "some", "path")
+        file = Gio.File.new_for_path(path)
         obj.props.interface = file
-        self.assertEqual(obj.props.interface.get_path(), '/some/path')
-        self.assertEqual(obj.interface.get_path(), '/some/path')
+        self.assertEqual(obj.props.interface.get_path(), path)
+        self.assertEqual(obj.interface.get_path(), path)
 
         self.assertRaises(TypeError, setattr, obj, 'interface', 'foo')
         self.assertRaises(TypeError, setattr, obj, 'interface', object())

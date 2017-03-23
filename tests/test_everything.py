@@ -575,7 +575,7 @@ class TestEverything(unittest.TestCase):
             self.assertTrue('TestBoxedPrivate' in str(e_value), str(e_value))
             self.assertTrue('constructor' in str(e_value), str(e_value))
             tb = ''.join(traceback.format_exception(e_type, e_value, e_tb))
-            self.assertTrue('tests/test_everything.py", line' in tb, tb)
+            self.assertTrue('test_everything.py", line' in tb, tb)
 
 
 @unittest.skipUnless(has_cairo, 'built without cairo support')
