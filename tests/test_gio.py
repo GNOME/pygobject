@@ -3,8 +3,10 @@
 
 import os
 import unittest
+import warnings
 
 import gi.overrides
+from gi import PyGIWarning
 from gi.repository import GLib, Gio
 
 from helper import ignore_gi_deprecation_warnings
@@ -39,6 +41,15 @@ class TestGio(unittest.TestCase):
         self.assertEqual("Test", value.unpack())
         value = menu.get_item_attribute_value(0, "action", GLib.VariantType.new("s"))
         self.assertEqual("app.test", value.unpack())
+
+    def test_volume_monitor_warning(self):
+        with warnings.catch_warnings(record=True) as warn:
+            warnings.simplefilter('always')
+            Gio.VolumeMonitor()
+            self.assertEqual(len(warn), 1)
+            self.assertTrue(issubclass(warn[0].category, PyGIWarning))
+            self.assertRegexpMatches(str(warn[0].message),
+                                     '.*Gio\\.VolumeMonitor\\.get\\(\\).*')
 
 
 class TestGSettings(unittest.TestCase):

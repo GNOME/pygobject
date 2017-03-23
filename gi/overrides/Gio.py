@@ -18,8 +18,11 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
 # USA
 
+import warnings
+
 from ..overrides import override, deprecated_init
 from ..module import get_introspection_module
+from gi import PyGIWarning
 
 from gi.repository import GLib
 
@@ -28,6 +31,22 @@ import sys
 Gio = get_introspection_module('Gio')
 
 __all__ = []
+
+
+class VolumeMonitor(Gio.VolumeMonitor):
+
+    def __init__(self, *args, **kwargs):
+        super(VolumeMonitor, self).__init__(*args, **kwargs)
+
+        # https://bugzilla.gnome.org/show_bug.cgi?id=744690
+        warnings.warn(
+            "Gio.VolumeMonitor shouldn't be instantiated directly, "
+            "use Gio.VolumeMonitor.get() instead.",
+            PyGIWarning, stacklevel=2)
+
+
+VolumeMonitor = override(VolumeMonitor)
+__all__.append('VolumeMonitor')
 
 
 class FileEnumerator(Gio.FileEnumerator):
