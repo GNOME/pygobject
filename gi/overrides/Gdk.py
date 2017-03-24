@@ -78,7 +78,6 @@ if hasattr(Gdk, 'Color'):
                          int(green * Color.MAX_VALUE),
                          int(blue * Color.MAX_VALUE))
 
-
     Color = override(Color)
     __all__.append('Color')
 
