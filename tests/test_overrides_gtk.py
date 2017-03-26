@@ -1934,6 +1934,20 @@ class TestTextBuffer(unittest.TestCase):
         self.assertEqual(buffer.get_property('text'),
                          'first line\nsecond line\n')
 
+    def test_backward_find_char(self):
+        buffer = Gtk.TextBuffer()
+        buffer.set_text('abc')
+        end = buffer.get_iter_at_line(99)
+
+        values = []
+
+        def pred_func(ch, user_data):
+            values.append(ch)
+            return ch == u"a"
+
+        self.assertTrue(end.backward_find_char(pred_func))
+        self.assertEqual(values, [u"c", u"b", u"a"])
+
 
 @unittest.skipUnless(Gtk, 'Gtk not available')
 class TestContainer(unittest.TestCase):

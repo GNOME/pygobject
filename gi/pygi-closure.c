@@ -274,6 +274,9 @@ _pygi_closure_convert_ffi_arguments (PyGIInvokeArgState *state,
                 }
                 break;
             }
+            case GI_TYPE_TAG_UNICHAR:
+                state[i].arg_value.v_uint32 = * (guint32 *) args[i];
+                break;
             case GI_TYPE_TAG_ERROR:
             case GI_TYPE_TAG_GHASH:
             case GI_TYPE_TAG_GLIST:
