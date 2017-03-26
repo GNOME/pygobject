@@ -58,6 +58,12 @@ _pygi_marshal_from_py_gobject (PyObject *py_arg, /*in*/
     }
 
     gobj = pygobject_get (py_arg);
+    if (gobj == NULL) {
+        PyErr_Format(PyExc_RuntimeError, "object at %p of type %s is not initialized",
+                     py_arg, Py_TYPE(py_arg)->tp_name);
+        return FALSE;
+    }
+
     if (transfer == GI_TRANSFER_EVERYTHING) {
         /* For transfer everything, add a new ref that the callee will take ownership of.
          * Pythons existing ref to the GObject will be managed with the PyGObject wrapper.

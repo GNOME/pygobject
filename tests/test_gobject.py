@@ -16,6 +16,12 @@ import testhelper
 
 
 class TestGObjectAPI(unittest.TestCase):
+
+    def test_call_method_uninitialized_instance(self):
+        obj = GObject.Object.__new__(GObject.Object)
+        with self.assertRaisesRegex(RuntimeError, '.*is not initialized'):
+            obj.notify("foo")
+
     def test_gobject_inheritance(self):
         # GObject.Object is a class hierarchy as follows:
         # overrides.Object -> introspection.Object -> static.GObject
