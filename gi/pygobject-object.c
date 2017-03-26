@@ -913,6 +913,8 @@ pygobject_find_slot_for(PyTypeObject *type, PyObject *bases, int slot_offset,
  * or interface has been registered for the given GType, then a new
  * type will be created.
  *
+ * Does not set an exception when NULL is returned.
+ *
  * Returns: The wrapper class for the GObject or NULL if the
  *          GType has no registered type and a new type couldn't be created
  */
@@ -928,11 +930,14 @@ pygobject_lookup_class(GType gtype)
     if (py_type == NULL) {
         py_type = g_type_get_qdata(gtype, pyginterface_type_key);
 
-        if (py_type == NULL)
+        if (py_type == NULL) {
             py_type = (PyTypeObject *)pygi_type_import_by_g_type(gtype);
+            PyErr_Clear ();
+        }
 
         if (py_type == NULL) {
             py_type = pygobject_new_with_interfaces(gtype);
+            PyErr_Clear ();
             g_type_set_qdata(gtype, pyginterface_type_key, py_type);
         }
     }
