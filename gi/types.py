@@ -35,11 +35,10 @@ from ._gi import \
     VFuncInfo, \
     register_interface_info, \
     hook_up_vfunc_implementation, \
-    _gobject
+    GInterface
+from . import _gi
 
-GInterface = _gobject.GInterface
-
-StructInfo  # pyflakes
+StructInfo, GInterface  # pyflakes
 
 from . import _propertyhelper as propertyhelper
 from . import _signalhelper as signalhelper
@@ -147,7 +146,7 @@ def find_vfunc_info_in_interface(bases, vfunc_name):
         # This can be seen in IntrospectionModule.__getattr__() in module.py.
         # We do not need to search regular classes here, only wrapped interfaces.
         # We also skip GInterface, because it is not wrapped and has no __info__ attr.
-        # Skip bases without __info__ (static _gobject._gobject.GObject)
+        # Skip bases without __info__ (static _gi.GObject)
         if base is GInterface or\
                 not issubclass(base, GInterface) or\
                 not hasattr(base, '__info__'):
@@ -202,10 +201,10 @@ class _GObjectMetaBase(type):
         if cls.__module__.startswith('gi.overrides.'):
             return
 
-        _gobject.type_register(cls, namespace.get('__gtype_name__'))
+        _gi.type_register(cls, namespace.get('__gtype_name__'))
 
 
-_gobject._install_metaclass(_GObjectMetaBase)
+_gi._install_metaclass(_GObjectMetaBase)
 
 
 class GObjectMeta(_GObjectMetaBase, MetaClassHelper):

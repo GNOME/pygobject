@@ -2,8 +2,7 @@ PLATFORM_VERSION = 3.0
 
 SUBDIRS = \
 	repository \
-	overrides \
-	_gobject
+	overrides
 
 extension_cppflags = \
 	$(PYTHON_INCLUDES) \

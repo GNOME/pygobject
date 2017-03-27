@@ -20,8 +20,7 @@
 import sys
 import traceback
 
-import gi._gi
-_gobject = gi._gi._gobject
+from . import _gi
 
 from ._constants import \
     TYPE_NONE, TYPE_INTERFACE, TYPE_CHAR, TYPE_UCHAR, \
@@ -31,14 +30,14 @@ from ._constants import \
     TYPE_POINTER, TYPE_BOXED, TYPE_PARAM, TYPE_OBJECT, \
     TYPE_PYOBJECT, TYPE_GTYPE, TYPE_STRV, TYPE_VARIANT
 
-G_MAXFLOAT = _gobject.G_MAXFLOAT
-G_MAXDOUBLE = _gobject.G_MAXDOUBLE
-G_MININT = _gobject.G_MININT
-G_MAXINT = _gobject.G_MAXINT
-G_MAXUINT = _gobject.G_MAXUINT
-G_MINLONG = _gobject.G_MINLONG
-G_MAXLONG = _gobject.G_MAXLONG
-G_MAXULONG = _gobject.G_MAXULONG
+G_MAXFLOAT = _gi.G_MAXFLOAT
+G_MAXDOUBLE = _gi.G_MAXDOUBLE
+G_MININT = _gi.G_MININT
+G_MAXINT = _gi.G_MAXINT
+G_MAXUINT = _gi.G_MAXUINT
+G_MINLONG = _gi.G_MINLONG
+G_MAXLONG = _gi.G_MAXLONG
+G_MAXULONG = _gi.G_MAXULONG
 
 if sys.version_info >= (3, 0):
     _basestring = str
@@ -153,7 +152,7 @@ class Property(object):
             return "<class 'GObject.Property'>"
 
     def __init__(self, getter=None, setter=None, type=None, default=None,
-                 nick='', blurb='', flags=_gobject.PARAM_READWRITE,
+                 nick='', blurb='', flags=_gi.PARAM_READWRITE,
                  minimum=None, maximum=None):
         self.name = None
 
@@ -211,7 +210,7 @@ class Property(object):
     def __repr__(self):
         return '<GObject Property %s (%s)>' % (
             self.name or '(uninitialized)',
-            _gobject.type_name(self.type))
+            _gi.type_name(self.type))
 
     def __get__(self, instance, klass):
         if instance is None:
@@ -276,11 +275,11 @@ class Property(object):
         if type_ in self._type_from_pytype_lookup:
             return self._type_from_pytype_lookup[type_]
         elif (isinstance(type_, type) and
-              issubclass(type_, (_gobject.GObject,
-                                 _gobject.GEnum,
-                                 _gobject.GFlags,
-                                 _gobject.GBoxed,
-                                 _gobject.GInterface))):
+              issubclass(type_, (_gi.GObject,
+                                 _gi.GEnum,
+                                 _gi.GFlags,
+                                 _gi.GBoxed,
+                                 _gi.GInterface))):
             return type_.__gtype__
         elif type_ in (TYPE_NONE, TYPE_INTERFACE, TYPE_CHAR, TYPE_UCHAR,
                        TYPE_INT, TYPE_UINT, TYPE_BOOLEAN, TYPE_LONG,
@@ -309,24 +308,24 @@ class Property(object):
         elif ptype == TYPE_GTYPE:
             if default is not None:
                 raise TypeError("GType types does not have default values")
-        elif _gobject.type_is_a(ptype, TYPE_ENUM):
+        elif _gi.type_is_a(ptype, TYPE_ENUM):
             if default is None:
                 raise TypeError("enum properties needs a default value")
-            elif not _gobject.type_is_a(default, ptype):
+            elif not _gi.type_is_a(default, ptype):
                 raise TypeError("enum value %s must be an instance of %r" %
                                 (default, ptype))
-        elif _gobject.type_is_a(ptype, TYPE_FLAGS):
-            if not _gobject.type_is_a(default, ptype):
+        elif _gi.type_is_a(ptype, TYPE_FLAGS):
+            if not _gi.type_is_a(default, ptype):
                 raise TypeError("flags value %s must be an instance of %r" %
                                 (default, ptype))
-        elif _gobject.type_is_a(ptype, TYPE_STRV) and default is not None:
+        elif _gi.type_is_a(ptype, TYPE_STRV) and default is not None:
             if not isinstance(default, list):
                 raise TypeError("Strv value %s must be a list" % repr(default))
             for val in default:
                 if type(val) not in (str, bytes):
                     raise TypeError("Strv value %s must contain only strings" % str(default))
-        elif _gobject.type_is_a(ptype, TYPE_VARIANT) and default is not None:
-            if not hasattr(default, '__gtype__') or not _gobject.type_is_a(default, TYPE_VARIANT):
+        elif _gi.type_is_a(ptype, TYPE_VARIANT) and default is not None:
+            if not hasattr(default, '__gtype__') or not _gi.type_is_a(default, TYPE_VARIANT):
                 raise TypeError("variant value %s must be an instance of %r" %
                                 (default, ptype))
 

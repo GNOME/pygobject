@@ -19,7 +19,7 @@
 
 import sys
 
-from ._gi import _gobject
+from . import _gi
 
 # Callable went away in python 3.0 and came back in 3.2.
 # Use versioning to figure out when to define it, otherwise we have to deal with
@@ -127,7 +127,7 @@ class Signal(str):
             name = name.__name__
         return str.__new__(cls, name)
 
-    def __init__(self, name='', func=None, flags=_gobject.SIGNAL_RUN_FIRST,
+    def __init__(self, name='', func=None, flags=_gi.SIGNAL_RUN_FIRST,
                  return_type=None, arg_types=None, doc='', accumulator=None, accu_data=None):
         if func and not name:
             name = func.__name__
@@ -164,7 +164,7 @@ class Signal(str):
 
         # If obj is a GObject, than we call this signal as a closure otherwise
         # it is used as a re-application of a decorator.
-        if isinstance(obj, _gobject.GObject):
+        if isinstance(obj, _gi.GObject):
             self.func(obj, *args, **kargs)
         else:
             # If self is already an allocated name, use it otherwise create a new named

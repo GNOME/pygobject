@@ -41,7 +41,6 @@ __all__.append('option')
 
 # Types and functions still needed from static bindings
 from gi import _gi
-from gi._gi import _gobject
 from gi._error import GError
 
 Error = GError
@@ -552,7 +551,7 @@ for name in ['G_MINFLOAT', 'G_MAXFLOAT', 'G_MINDOUBLE', 'G_MAXDOUBLE',
              'G_MAXUINT', 'G_MINLONG', 'G_MAXLONG', 'G_MAXULONG', 'G_MAXSIZE',
              'G_MINSSIZE', 'G_MAXSSIZE', 'G_MINOFFSET', 'G_MAXOFFSET']:
     attr = name.split("_", 1)[-1]
-    globals()[attr] = getattr(_gobject, name)
+    globals()[attr] = getattr(_gi, name)
     __all__.append(attr)
 
 

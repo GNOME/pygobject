@@ -8,9 +8,7 @@ import warnings
 from gi.repository import GObject, GLib
 from gi import PyGIDeprecationWarning
 from gi.module import get_introspection_module
-
-import gi
-_gobject = gi._gi._gobject
+from gi import _gi
 
 import testhelper
 
@@ -27,9 +25,9 @@ class TestGObjectAPI(unittest.TestCase):
         # overrides.Object -> introspection.Object -> static.GObject
         GIObjectModule = get_introspection_module('GObject')
         self.assertTrue(issubclass(GObject.Object, GIObjectModule.Object))
-        self.assertTrue(issubclass(GIObjectModule.Object, _gobject.GObject))
+        self.assertTrue(issubclass(GIObjectModule.Object, _gi.GObject))
 
-        self.assertEqual(_gobject.GObject.__gtype__, GObject.TYPE_OBJECT)
+        self.assertEqual(_gi.GObject.__gtype__, GObject.TYPE_OBJECT)
         self.assertEqual(GIObjectModule.Object.__gtype__, GObject.TYPE_OBJECT)
         self.assertEqual(GObject.Object.__gtype__, GObject.TYPE_OBJECT)
 

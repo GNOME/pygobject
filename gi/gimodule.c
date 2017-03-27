@@ -43,9 +43,13 @@
 #include "pygi-boxed.h"
 #include "pygi-info.h"
 #include "pygi-struct.h"
+#include "pygobject-object.h"
 #include "pygoptioncontext.h"
 #include "pygoptiongroup.h"
 #include "pygspawn.h"
+#include "gobjectmodule.h"
+#include "pygparamspec.h"
+#include "pygpointer.h"
 
 #include <pyglib-python-compat.h>
 
@@ -641,6 +645,25 @@ static PyMethodDef _gi_functions[] = {
       "\n"
       "Execute a child program asynchronously within a glib.MainLoop()\n"
       "See the reference manual for a complete reference.\n" },
+    { "type_name", pyg_type_name, METH_VARARGS },
+    { "type_from_name", pyg_type_from_name, METH_VARARGS },
+    { "type_is_a", pyg_type_is_a, METH_VARARGS },
+    { "type_register", _wrap_pyg_type_register, METH_VARARGS },
+    { "signal_new", pyg_signal_new, METH_VARARGS },
+    { "list_properties",
+      pyg_object_class_list_properties, METH_VARARGS },
+    { "new",
+      (PyCFunction)pyg_object_new, METH_VARARGS|METH_KEYWORDS },
+    { "signal_accumulator_true_handled",
+      (PyCFunction)pyg_signal_accumulator_true_handled, METH_VARARGS },
+    { "add_emission_hook",
+      (PyCFunction)pyg_add_emission_hook, METH_VARARGS },
+    { "_install_metaclass",
+      (PyCFunction)pyg__install_metaclass, METH_O },
+    { "_gvalue_get",
+      (PyCFunction)pyg__gvalue_get, METH_O },
+    { "_gvalue_set",
+      (PyCFunction)pyg__gvalue_set, METH_VARARGS },
     { NULL, NULL, 0 }
 };
 
@@ -651,7 +674,6 @@ static struct PyGI_API CAPI = {
 PYGLIB_MODULE_START(_gi, "_gi")
 {
     PyObject *api;
-    PyObject *_gobject_module;
     PyObject *module_dict = PyModule_GetDict (module);
 
     /* Always enable Python threads since we cannot predict which GI repositories
@@ -661,16 +683,6 @@ PYGLIB_MODULE_START(_gi, "_gi")
      */
     PyEval_InitThreads ();
 
-    PyModule_AddStringConstant(module, "__package__", "gi._gi");
-
-    _gobject_module = pyglib__gobject_module_create ();
-    if (_gobject_module == NULL) {
-        return PYGLIB_MODULE_ERROR_RETURN;
-    }
-    if (PY_MAJOR_VERSION < 3) {
-        Py_INCREF (_gobject_module);
-    }
-    PyModule_AddObject (module, "_gobject", _gobject_module);
     PyModule_AddStringConstant(module, "__package__", "gi._gi");
 
     pygi_foreign_init ();
@@ -685,6 +697,20 @@ PYGLIB_MODULE_START(_gi, "_gi")
     pyglib_spawn_register_types (module_dict);
     pyglib_option_context_register_types (module_dict);
     pyglib_option_group_register_types (module_dict);
+
+    pygobject_register_api (module_dict);
+    pygobject_register_constants (module);
+    pygobject_register_features (module_dict);
+    pygobject_register_version_tuples (module_dict);
+    pygobject_register_warnings (module_dict);
+    pygobject_type_register_types (module_dict);
+    pygobject_object_register_types (module_dict);
+    pygobject_interface_register_types (module_dict);
+    pygobject_paramspec_register_types (module_dict);
+    pygobject_boxed_register_types (module_dict);
+    pygobject_pointer_register_types (module_dict);
+    pygobject_enum_register_types (module_dict);
+    pygobject_flags_register_types (module_dict);
 
     PyGIWarning = PyErr_NewException ("gi.PyGIWarning", PyExc_Warning, NULL);
 

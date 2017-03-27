@@ -88,7 +88,7 @@ def capture_glib_warnings(allow_warnings=False, allow_criticals=False):
 
     GLib.log_set_always_fatal(GLib.LogLevelFlags(new_mask))
 
-    GLibWarning = gi._gi._gobject.Warning
+    GLibWarning = gi._gi.Warning
     try:
         with warnings.catch_warnings(record=True) as warn:
             warnings.filterwarnings('always', category=GLibWarning)
@@ -101,7 +101,7 @@ def capture_glib_warnings(allow_warnings=False, allow_criticals=False):
 def capture_glib_deprecation_warnings():
     """Temporarily suppress glib deprecation warning output and record them"""
 
-    GLibWarning = gi._gi._gobject.Warning
+    GLibWarning = gi._gi.Warning
     with warnings.catch_warnings(record=True) as warn:
         warnings.filterwarnings(
             'always', category=GLibWarning,

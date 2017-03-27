@@ -88,7 +88,7 @@ pyg_destroy_notify(gpointer user_data)
 
 /* ---------------- gobject module functions -------------------- */
 
-static PyObject *
+PyObject *
 pyg_type_name (PyObject *self, PyObject *args)
 {
     PyObject *gtype;
@@ -113,7 +113,7 @@ pyg_type_name (PyObject *self, PyObject *args)
     return NULL;
 }
 
-static PyObject *
+PyObject *
 pyg_type_from_name (PyObject *self, PyObject *args)
 {
     const gchar *name;
@@ -138,7 +138,7 @@ pyg_type_from_name (PyObject *self, PyObject *args)
     return NULL;
 }
 
-static PyObject *
+PyObject *
 pyg_type_is_a (PyObject *self, PyObject *args)
 {
     PyObject *gtype, *gparent;
@@ -892,7 +892,7 @@ pyg_run_class_init(GType gtype, gpointer gclass, PyTypeObject *pyclass)
     return 0;
 }
 
-static PyObject *
+PyObject *
 _wrap_pyg_type_register(PyObject *self, PyObject *args)
 {
     PyTypeObject *class;
@@ -1215,7 +1215,7 @@ pyg_type_register(PyTypeObject *class, const char *type_name)
     return 0;
 }
 
-static PyObject *
+PyObject *
 pyg_signal_new(PyObject *self, PyObject *args)
 {
     gchar *signal_name;
@@ -1282,7 +1282,7 @@ pyg_signal_new(PyObject *self, PyObject *args)
     return NULL;
 }
 
-static PyObject *
+PyObject *
 pyg_object_class_list_properties (PyObject *self, PyObject *args)
 {
     GParamSpec **specs;
@@ -1339,7 +1339,7 @@ pyg_object_class_list_properties (PyObject *self, PyObject *args)
     return list;
 }
 
-static PyObject *
+PyObject *
 pyg_object_new (PyGObject *self, PyObject *args, PyObject *kwargs)
 {
     PyObject *pytype;
@@ -1415,7 +1415,7 @@ pygobject_enable_threads(void)
     return 0;
 }
 
-static PyObject *
+PyObject *
 pyg_signal_accumulator_true_handled(PyObject *unused, PyObject *args)
 {
     PyErr_SetString(PyExc_TypeError,
@@ -1472,7 +1472,7 @@ out:
     return retval;
 }
 
-static PyObject *
+PyObject *
 pyg_add_emission_hook(PyGObject *self, PyObject *args)
 {
     PyObject *first, *callback, *extra_args, *data, *repr;
@@ -1530,7 +1530,7 @@ pyg_add_emission_hook(PyGObject *self, PyObject *args)
     return PyLong_FromUnsignedLong(hook_id);
 }
 
-static PyObject *
+PyObject *
 pyg__install_metaclass(PyObject *dummy, PyTypeObject *metaclass)
 {
     Py_INCREF(metaclass);
@@ -1543,7 +1543,7 @@ pyg__install_metaclass(PyObject *dummy, PyTypeObject *metaclass)
     return Py_None;
 }
 
-static PyObject *
+PyObject *
 pyg__gvalue_get(PyObject *module, PyObject *pygvalue)
 {
     if (!pyg_boxed_check (pygvalue, G_TYPE_VALUE)) {
@@ -1555,13 +1555,13 @@ pyg__gvalue_get(PyObject *module, PyObject *pygvalue)
                                   /*copy_boxed=*/ TRUE);
 }
 
-static PyObject *
+PyObject *
 pyg__gvalue_set(PyObject *module, PyObject *args)
 {
     PyObject *pygvalue;
     PyObject *pyobject;
 
-    if (!PyArg_ParseTuple (args, "OO:_gobject._gvalue_set",
+    if (!PyArg_ParseTuple (args, "OO:_gi._gvalue_set",
                            &pygvalue, &pyobject))
         return NULL;
 
@@ -1576,30 +1576,6 @@ pyg__gvalue_set(PyObject *module, PyObject *args)
 
     Py_RETURN_NONE;
 }
-
-static PyMethodDef _gobject_functions[] = {
-    { "type_name", pyg_type_name, METH_VARARGS },
-    { "type_from_name", pyg_type_from_name, METH_VARARGS },
-    { "type_is_a", pyg_type_is_a, METH_VARARGS },
-    { "type_register", _wrap_pyg_type_register, METH_VARARGS },
-    { "signal_new", pyg_signal_new, METH_VARARGS },
-    { "list_properties",
-      pyg_object_class_list_properties, METH_VARARGS },
-    { "new",
-      (PyCFunction)pyg_object_new, METH_VARARGS|METH_KEYWORDS },
-    { "signal_accumulator_true_handled",
-      (PyCFunction)pyg_signal_accumulator_true_handled, METH_VARARGS },
-    { "add_emission_hook",
-      (PyCFunction)pyg_add_emission_hook, METH_VARARGS },
-    { "_install_metaclass",
-      (PyCFunction)pyg__install_metaclass, METH_O },
-    { "_gvalue_get",
-      (PyCFunction)pyg__gvalue_get, METH_O },
-    { "_gvalue_set",
-      (PyCFunction)pyg__gvalue_set, METH_VARARGS },
-
-    { NULL, NULL, 0 }
-};
 
 
 /* ----------------- Constant extraction ------------------------ */
@@ -1924,7 +1900,7 @@ struct _PyGObject_Functions pygobject_api_functions = {
 };
 
 /* for addon libraries ... */
-static void
+void
 pygobject_register_api(PyObject *d)
 {
     PyObject *api;
@@ -1935,7 +1911,7 @@ pygobject_register_api(PyObject *d)
 }
 
 /* some constants */
-static void
+void
 pygobject_register_constants(PyObject *m)
 {
     /* PyFloat_ return a new ref, and add object takes the ref */
@@ -1967,7 +1943,7 @@ pygobject_register_constants(PyObject *m)
 }
 
 /* features */
-static void
+void
 pygobject_register_features(PyObject *d)
 {
     PyObject *features;
@@ -1978,7 +1954,7 @@ pygobject_register_features(PyObject *d)
     Py_DECREF(features);
 }
 
-static void
+void
 pygobject_register_version_tuples(PyObject *d)
 {
     PyObject *tuple;
@@ -1991,7 +1967,7 @@ pygobject_register_version_tuples(PyObject *d)
     PyDict_SetItemString(d, "pygobject_version", tuple);
 }
 
-static void
+void
 pygobject_register_warnings(PyObject *d)
 {
     PyObject *warning;
@@ -2002,25 +1978,3 @@ pygobject_register_warnings(PyObject *d)
     add_warning_redirection("GLib-GObject", warning);
     add_warning_redirection("GThread", warning);
 }
-
-
-PYGLIB_MODULE_START(_gobject, "_gobject")
-{
-    PyObject *d;
-
-    d = PyModule_GetDict(module);
-    pygobject_register_api(d);
-    pygobject_register_constants(module);
-    pygobject_register_features(d);
-    pygobject_register_version_tuples(d);
-    pygobject_register_warnings(d);
-    pygobject_type_register_types(d);
-    pygobject_object_register_types(d);
-    pygobject_interface_register_types(d);
-    pygobject_paramspec_register_types(d);
-    pygobject_boxed_register_types(d);
-    pygobject_pointer_register_types(d);
-    pygobject_enum_register_types(d);
-    pygobject_flags_register_types(d);
-}
-PYGLIB_MODULE_END

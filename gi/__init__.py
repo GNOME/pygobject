@@ -40,7 +40,6 @@ if 'gobject' in sys.modules:
 
 
 from . import _gi
-from ._gi import _gobject
 from ._gi import _API
 from ._gi import Repository
 from ._gi import PyGIDeprecationWarning
@@ -53,7 +52,13 @@ PyGIWarning = PyGIWarning
 _versions = {}
 _overridesdir = os.path.join(os.path.dirname(__file__), 'overrides')
 
-version_info = _gobject.pygobject_version[:]
+# Needed for compatibility with "pygobject.h"/pygobject_init()
+_gobject = types.ModuleType("gi._gobject")
+sys.modules[_gobject.__name__] = _gobject
+_gobject._PyGObject_API = _gi._PyGObject_API
+_gobject.pygobject_version = _gi.pygobject_version
+
+version_info = _gi.pygobject_version[:]
 __version__ = "{0}.{1}.{2}".format(*version_info)
 
 

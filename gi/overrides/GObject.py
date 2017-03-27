@@ -33,8 +33,8 @@ from gi import PyGIDeprecationWarning
 
 from gi import _propertyhelper as propertyhelper
 from gi import _signalhelper as signalhelper
+from gi import _gi
 
-_gobject = gi._gi._gobject
 
 GObjectModule = gi.module.get_introspection_module('GObject')
 
@@ -42,7 +42,7 @@ __all__ = []
 
 
 from gi import _option as option
-sys.modules['gi._gobject.option'] = option
+option = option
 
 
 # API aliases for backwards compatibility
@@ -184,27 +184,27 @@ for name in ['SIGNAL_ACTION', 'SIGNAL_DETAILED', 'SIGNAL_NO_HOOKS',
     __all__.append(name)
 
 # Static types
-GBoxed = _gobject.GBoxed
-GEnum = _gobject.GEnum
-GFlags = _gobject.GFlags
-GInterface = _gobject.GInterface
-GObject = _gobject.GObject
-GObjectWeakRef = _gobject.GObjectWeakRef
-GParamSpec = _gobject.GParamSpec
-GPointer = _gobject.GPointer
-GType = _gobject.GType
-Warning = _gobject.Warning
+GBoxed = _gi.GBoxed
+GEnum = _gi.GEnum
+GFlags = _gi.GFlags
+GInterface = _gi.GInterface
+GObject = _gi.GObject
+GObjectWeakRef = _gi.GObjectWeakRef
+GParamSpec = _gi.GParamSpec
+GPointer = _gi.GPointer
+GType = _gi.GType
+Warning = _gi.Warning
 __all__ += ['GBoxed', 'GEnum', 'GFlags', 'GInterface', 'GObject',
             'GObjectWeakRef', 'GParamSpec', 'GPointer', 'GType',
             'Warning']
 
 
-features = _gobject.features
-list_properties = _gobject.list_properties
-new = _gobject.new
-pygobject_version = _gobject.pygobject_version
+features = _gi.features
+list_properties = _gi.list_properties
+new = _gi.new
+pygobject_version = _gi.pygobject_version
 threads_init = GLib.threads_init
-type_register = _gobject.type_register
+type_register = _gi.type_register
 __all__ += ['features', 'list_properties', 'new',
             'pygobject_version', 'threads_init', 'type_register']
 
@@ -228,15 +228,15 @@ class Value(GObjectModule.Value):
         # Workaround the introspection marshalers inability to know
         # these methods should be marshaling boxed types. This is because
         # the type information is stored on the GValue.
-        _gobject._gvalue_set(self, boxed)
+        _gi._gvalue_set(self, boxed)
 
     def get_boxed(self):
-        return _gobject._gvalue_get(self)
+        return _gi._gvalue_get(self)
 
     def set_value(self, py_value):
         gtype = self.g_type
 
-        if gtype == _gobject.TYPE_INVALID:
+        if gtype == _gi.TYPE_INVALID:
             raise TypeError("GObject.Value needs to be initialized first")
         elif gtype == TYPE_BOOLEAN:
             self.set_boolean(py_value)
@@ -527,8 +527,8 @@ __all__.append('signal_accumulator_true_handled')
 
 # Statically bound signal functions which need to clobber GI (for now)
 
-add_emission_hook = _gobject.add_emission_hook
-signal_new = _gobject.signal_new
+add_emission_hook = _gi.add_emission_hook
+signal_new = _gi.signal_new
 
 __all__ += ['add_emission_hook', 'signal_new']
 
@@ -596,23 +596,23 @@ class Object(GObjectModule.Object):
 
     # The following methods are static APIs which need to leap frog the
     # gi methods until we verify the gi methods can replace them.
-    get_property = _gobject.GObject.get_property
-    get_properties = _gobject.GObject.get_properties
-    set_property = _gobject.GObject.set_property
-    set_properties = _gobject.GObject.set_properties
-    bind_property = _gobject.GObject.bind_property
-    connect = _gobject.GObject.connect
-    connect_after = _gobject.GObject.connect_after
-    connect_object = _gobject.GObject.connect_object
-    connect_object_after = _gobject.GObject.connect_object_after
-    disconnect_by_func = _gobject.GObject.disconnect_by_func
-    handler_block_by_func = _gobject.GObject.handler_block_by_func
-    handler_unblock_by_func = _gobject.GObject.handler_unblock_by_func
-    emit = _gobject.GObject.emit
-    chain = _gobject.GObject.chain
-    weak_ref = _gobject.GObject.weak_ref
-    __copy__ = _gobject.GObject.__copy__
-    __deepcopy__ = _gobject.GObject.__deepcopy__
+    get_property = _gi.GObject.get_property
+    get_properties = _gi.GObject.get_properties
+    set_property = _gi.GObject.set_property
+    set_properties = _gi.GObject.set_properties
+    bind_property = _gi.GObject.bind_property
+    connect = _gi.GObject.connect
+    connect_after = _gi.GObject.connect_after
+    connect_object = _gi.GObject.connect_object
+    connect_object_after = _gi.GObject.connect_object_after
+    disconnect_by_func = _gi.GObject.disconnect_by_func
+    handler_block_by_func = _gi.GObject.handler_block_by_func
+    handler_unblock_by_func = _gi.GObject.handler_unblock_by_func
+    emit = _gi.GObject.emit
+    chain = _gi.GObject.chain
+    weak_ref = _gi.GObject.weak_ref
+    __copy__ = _gi.GObject.__copy__
+    __deepcopy__ = _gi.GObject.__deepcopy__
 
     def freeze_notify(self):
         """Freezes the object's property-changed notification queue.
@@ -648,9 +648,9 @@ class Object(GObjectModule.Object):
         """
         flags = kwargs.get('connect_flags', 0)
         if flags & GObjectModule.ConnectFlags.AFTER:
-            connect_func = _gobject.GObject.connect_after
+            connect_func = _gi.GObject.connect_after
         else:
-            connect_func = _gobject.GObject.connect
+            connect_func = _gi.GObject.connect
 
         if flags & GObjectModule.ConnectFlags.SWAPPED:
             if len(data) != 1:

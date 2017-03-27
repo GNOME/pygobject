@@ -53,12 +53,10 @@ from ._gi import \
     enum_register_new_gtype_and_add, \
     flags_add, \
     flags_register_new_gtype_and_add, \
-    _gobject
+    GInterface
 from .types import \
     GObjectMeta, \
     StructMeta
-
-GInterface = _gobject.GInterface
 
 from ._constants import \
     TYPE_NONE, \
@@ -82,7 +80,7 @@ def get_parent_for_object(object_info):
         # for an existing wrapper on the GType and use it as a base for the
         # new introspection wrapper. This allows static C wrappers already
         # registered with the GType to be used as the introspection base
-        # (_gobject.GObject for example)
+        # (_gi.GObject for example)
         gtype = object_info.get_g_type()
         if gtype and gtype.pytype:
             return gtype.pytype
