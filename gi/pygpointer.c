@@ -53,10 +53,10 @@ pyg_pointer_richcompare(PyObject *self, PyObject *other, int op)
     }
 }
 
-static long
+static PYGLIB_Py_hash_t
 pyg_pointer_hash(PyGPointer *self)
 {
-    return (long)pyg_pointer_get_ptr (self);
+    return PYGLIB_Py_hash_t_FromVoidPtr (pyg_pointer_get_ptr (self));
 }
 
 static PyObject *

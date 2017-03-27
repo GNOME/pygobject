@@ -46,10 +46,10 @@ pyg_param_spec_richcompare(PyObject *self, PyObject *other, int op)
     }
 }
 
-static long
+static PYGLIB_Py_hash_t
 pyg_param_spec_hash(PyGParamSpec *self)
 {
-    return (long)pyg_param_spec_get (self);
+    return PYGLIB_Py_hash_t_FromVoidPtr (pyg_param_spec_get (self));
 }
 
 static PyObject *

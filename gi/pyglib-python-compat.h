@@ -68,6 +68,8 @@
 #define PYGLIB_PyLong_AS_LONG PyInt_AS_LONG
 #define Py_TYPE(ob) (((PyObject*)(ob))->ob_type)
 
+#define PYGLIB_Py_hash_t long
+
 /* Python 2.7 lacks a PyInt_FromUnsignedLong function; use signed longs, and
  * rely on PyInt_AsUnsignedLong() to interpret them correctly */
 #define PYGLIB_PyLong_FromUnsignedLong PyInt_FromLong
@@ -192,6 +194,10 @@ PyTypeObject symbol = {                                 \
 
 #define PYGLIB_PyNumber_Long PyNumber_Long
 
+#define PYGLIB_Py_hash_t Py_hash_t
+
 #endif
+
+#define PYGLIB_Py_hash_t_FromVoidPtr(ptr) ((PYGLIB_Py_hash_t)(gintptr)(ptr))
 
 #endif /* __PYGLIB_PYTHON_COMPAT_H__ */

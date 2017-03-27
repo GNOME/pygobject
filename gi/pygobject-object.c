@@ -1115,10 +1115,10 @@ pygobject_richcompare(PyObject *self, PyObject *other, int op)
                                            op);
 }
 
-static long
+static PYGLIB_Py_hash_t
 pygobject_hash(PyGObject *self)
 {
-    return (long)self->obj;
+    return PYGLIB_Py_hash_t_FromVoidPtr (self->obj);
 }
 
 static PyObject *

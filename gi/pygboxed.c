@@ -63,10 +63,10 @@ pyg_boxed_richcompare(PyObject *self, PyObject *other, int op)
 }
 
 
-static long
+static PYGLIB_Py_hash_t
 pyg_boxed_hash(PyGBoxed *self)
 {
-    return (long)pyg_boxed_get_ptr (self);
+    return PYGLIB_Py_hash_t_FromVoidPtr (pyg_boxed_get_ptr (self));
 }
 
 static PyObject *
