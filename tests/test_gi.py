@@ -1478,8 +1478,13 @@ class TestGValue(unittest.TestCase):
 
     def test_gvalue_flat_array_in_item_marshal_failure(self):
         # Tests the failure to marshal 2^256 to a GValue mid-way through the array marshaling.
-        self.assertRaises(RuntimeError, GIMarshallingTests.gvalue_flat_array,
+        self.assertRaises(OverflowError, GIMarshallingTests.gvalue_flat_array,
                           [42, 2 ** 256, True])
+
+        self.assertRaises(OverflowError, GIMarshallingTests.gvalue_flat_array,
+                          [GLib.MAXINT + 1, "42", True])
+        self.assertRaises(OverflowError, GIMarshallingTests.gvalue_flat_array,
+                          [GLib.MININT - 1, "42", True])
 
     def test_gvalue_flat_array_out(self):
         values = GIMarshallingTests.return_gvalue_flat_array()

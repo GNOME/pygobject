@@ -125,9 +125,8 @@ pygi_arg_gvalue_from_py_marshal (PyObject *py_arg,
     } else {
         value = g_slice_new0 (GValue);
         g_value_init (value, object_type);
-        if (pyg_value_from_pyobject (value, py_arg) < 0) {
+        if (pyg_value_from_pyobject_with_error (value, py_arg) < 0) {
             g_slice_free (GValue, value);
-            PyErr_SetString (PyExc_RuntimeError, "PyObject conversion to GValue failed");
             return FALSE;
         }
     }

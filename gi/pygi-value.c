@@ -386,8 +386,17 @@ pyg_value_from_pyobject_with_error(GValue *value, PyObject *obj)
         g_value_set_boolean(value, PyObject_IsTrue(obj));
         break;
     case G_TYPE_INT:
-        g_value_set_int(value, PYGLIB_PyLong_AsLong(obj));
+    {
+        glong val = PYGLIB_PyLong_AsLong(obj);
+        if (val == -1 && PyErr_Occurred ())
+            return -1;
+        if (val > G_MAXINT || val < G_MININT) {
+            PyErr_SetString(PyExc_OverflowError, "out of range for int property");
+            return -1;
+        }
+        g_value_set_int(value, (gint)val);
         break;
+    }
     case G_TYPE_UINT:
     {
         if (PYGLIB_PyLong_Check(obj)) {
