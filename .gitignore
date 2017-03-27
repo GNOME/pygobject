@@ -11,6 +11,9 @@
 .*.sw[nop]
 *.gir
 *.typelib
+*.dll
+*.dylib
+.DS_STORE
 .deps
 .libs
 .idea
