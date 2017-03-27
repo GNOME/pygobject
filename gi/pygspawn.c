@@ -34,10 +34,20 @@ struct _PyGChildSetupData {
 
 PYGLIB_DEFINE_TYPE("gi._glib.Pid", PyGPid_Type, PYGLIB_PyLongObject)
 
+static GPid
+pyg_pid_get_pid (PyObject *self)
+{
+#ifdef G_OS_WIN32
+    return (GPid)PyLong_AsVoidPtr (self);
+#else
+    return (GPid)PYGLIB_PyLong_AsLong (self);
+#endif
+}
+
 static PyObject *
 pyg_pid_close(PyObject *self, PyObject *args, PyObject *kwargs)
 {
-    g_spawn_close_pid(PYGLIB_PyLong_AsLong(self));
+    g_spawn_close_pid(pyg_pid_get_pid (self));
     Py_INCREF(Py_None);
     return Py_None;
 }
@@ -50,7 +60,7 @@ static PyMethodDef pyg_pid_methods[] = {
 static void
 pyg_pid_free(PyObject *gpid)
 {
-    g_spawn_close_pid((GPid) PYGLIB_PyLong_AsLong(gpid));
+    g_spawn_close_pid(pyg_pid_get_pid (gpid));
     PYGLIB_PyLong_Type.tp_free((void *) gpid);
 }
 
@@ -64,8 +74,14 @@ pyg_pid_tp_init(PyObject *self, PyObject *args, PyObject *kwargs)
 PyObject *
 pyg_pid_new(GPid pid)
 {
-    return PyObject_CallMethod((PyObject*)&PyGPid_Type, "__new__", "Oi",
-		               &PyGPid_Type, pid);
+    PyObject *long_val;
+#ifdef G_OS_WIN32
+    long_val = PyLong_FromVoidPtr (pid);
+#else
+    long_val = PYGLIB_PyLong_FromLong (pid);
+#endif
+    return PyObject_CallMethod((PyObject*)&PyGPid_Type, "__new__", "ON",
+                               &PyGPid_Type, long_val);
 }
 
 static void
@@ -106,7 +122,7 @@ pyglib_spawn_async(PyObject *object, PyObject *args, PyObject *kwargs)
     gint *standard_input, *standard_output, *standard_error;
     struct _PyGChildSetupData *callback_data = NULL;
     GError *error = NULL;
-    GPid child_pid = -1;
+    GPid child_pid = 0;
     Py_ssize_t len, i;
 
     if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O|OsiOOOOO:gi._glib.spawn_async",
