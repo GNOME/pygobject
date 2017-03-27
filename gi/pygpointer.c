@@ -64,8 +64,9 @@ pyg_pointer_repr(PyGPointer *self)
 {
     gchar buf[128];
 
-    g_snprintf(buf, sizeof(buf), "<%s at 0x%lx>", g_type_name(self->gtype),
-	       (long)pyg_pointer_get_ptr (self));
+    g_snprintf(buf, sizeof(buf), "<%s at 0x%" G_GUINTPTR_FORMAT ">",
+               g_type_name(self->gtype),
+               (guintptr)pyg_pointer_get_ptr (self));
     return PYGLIB_PyUnicode_FromString(buf);
 }
 
