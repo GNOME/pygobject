@@ -40,15 +40,15 @@ __all__.append('option')
 
 
 # Types and functions still needed from static bindings
-from gi._gi import _glib
+from gi import _gi
 from gi._gi import _gobject
 from gi._error import GError
 
 Error = GError
-OptionContext = _glib.OptionContext
-OptionGroup = _glib.OptionGroup
-Pid = _glib.Pid
-spawn_async = _glib.spawn_async
+OptionContext = _gi.OptionContext
+OptionGroup = _gi.OptionGroup
+Pid = _gi.Pid
+spawn_async = _gi.spawn_async
 
 
 def threads_init():

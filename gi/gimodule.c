@@ -43,6 +43,9 @@
 #include "pygi-boxed.h"
 #include "pygi-info.h"
 #include "pygi-struct.h"
+#include "pygoptioncontext.h"
+#include "pygoptiongroup.h"
+#include "pygspawn.h"
 
 #include <pyglib-python-compat.h>
 
@@ -629,6 +632,15 @@ static PyMethodDef _gi_functions[] = {
     { "source_set_callback", (PyCFunction) pyg_source_set_callback, METH_VARARGS },
     { "io_channel_read", (PyCFunction) pyg_channel_read, METH_VARARGS },
     { "require_foreign", (PyCFunction) pygi_require_foreign, METH_VARARGS | METH_KEYWORDS },
+    { "spawn_async",
+      (PyCFunction)pyglib_spawn_async, METH_VARARGS|METH_KEYWORDS,
+      "spawn_async(argv, envp=None, working_directory=None,\n"
+      "            flags=0, child_setup=None, user_data=None,\n"
+      "            standard_input=None, standard_output=None,\n"
+      "            standard_error=None) -> (pid, stdin, stdout, stderr)\n"
+      "\n"
+      "Execute a child program asynchronously within a glib.MainLoop()\n"
+      "See the reference manual for a complete reference.\n" },
     { NULL, NULL, 0 }
 };
 
@@ -639,8 +651,8 @@ static struct PyGI_API CAPI = {
 PYGLIB_MODULE_START(_gi, "_gi")
 {
     PyObject *api;
-    PyObject *_glib_module;
     PyObject *_gobject_module;
+    PyObject *module_dict = PyModule_GetDict (module);
 
     /* Always enable Python threads since we cannot predict which GI repositories
      * might accept Python callbacks run within non-Python threads or might trigger
@@ -649,19 +661,6 @@ PYGLIB_MODULE_START(_gi, "_gi")
      */
     PyEval_InitThreads ();
 
-    _glib_module = pyglib__glib_module_create ();
-    if (_glib_module == NULL) {
-        return PYGLIB_MODULE_ERROR_RETURN;
-    }
-    /* In Python 2.x, pyglib_..._module_create returns a borrowed reference and
-     * PyModule_AddObject steals a reference. Ensure we don't share a reference
-     * between sys.modules and gi._gi._glib by incrementing the ref count here.
-     * Note that we don't add this to the PYGLIB_MODULE_START macro because that
-     * would cause a leak for the main module gi._gi */
-    if (PY_MAJOR_VERSION < 3) {
-        Py_INCREF (_glib_module);
-    }
-    PyModule_AddObject (module, "_glib", _glib_module);
     PyModule_AddStringConstant(module, "__package__", "gi._gi");
 
     _gobject_module = pyglib__gobject_module_create ();
@@ -682,6 +681,10 @@ PYGLIB_MODULE_START(_gi, "_gi")
     _pygi_boxed_register_types (module);
     _pygi_ccallback_register_types (module);
     pygi_resulttuple_register_types (module);
+
+    pyglib_spawn_register_types (module_dict);
+    pyglib_option_context_register_types (module_dict);
+    pyglib_option_group_register_types (module_dict);
 
     PyGIWarning = PyErr_NewException ("gi.PyGIWarning", PyExc_Warning, NULL);
 

@@ -55,7 +55,6 @@ _gi_la_SOURCES = \
 	pygpointer.h \
 	pygtype.c \
 	pygtype.h \
-	glibmodule.c \
 	pygoptioncontext.c \
 	pygoptioncontext.h \
 	pygoptiongroup.c \

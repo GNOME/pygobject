@@ -40,7 +40,7 @@ else:
     _basestring = basestring
     _bytes = str
 
-from gi._gi import _glib
+from gi import _gi
 from gi._error import GError
 GLib = get_introspection_module('GLib')
 
@@ -209,7 +209,7 @@ class OptionGroup(optparse.OptionGroup):
                 gerror.message = str(error)
                 raise gerror
 
-        group = _glib.OptionGroup(self.name, self.description,
+        group = _gi.OptionGroup(self.name, self.description,
                                   self.help_description, callback)
         if self.translation_domain:
             group.set_translation_domain(self.translation_domain)
@@ -285,12 +285,12 @@ class OptionParser(optparse.OptionParser):
             parameter_string = self.usage + " - " + self.description
         else:
             parameter_string = self.usage
-        context = _glib.OptionContext(parameter_string)
+        context = _gi.OptionContext(parameter_string)
         context.set_help_enabled(self.help_enabled)
         context.set_ignore_unknown_options(self.ignore_unknown_options)
 
         for option_group in self.option_groups:
-            if isinstance(option_group, _glib.OptionGroup):
+            if isinstance(option_group, _gi.OptionGroup):
                 g_group = option_group
             else:
                 g_group = option_group.get_option_group(self)
@@ -303,7 +303,7 @@ class OptionParser(optparse.OptionParser):
                 opt = self._short_opt[option_name]
             opt.process(option_name, option_value, values, self)
 
-        main_group = _glib.OptionGroup(None, None, None, callback)
+        main_group = _gi.OptionGroup(None, None, None, callback)
         main_entries = []
         for option in self.option_list:
             main_entries.extend(option._to_goptionentries())
@@ -323,7 +323,7 @@ class OptionParser(optparse.OptionParser):
                     args[0].parser = self
                 if args[0].parser is not self:
                     raise ValueError("invalid OptionGroup (wrong parser)")
-            if isinstance(args[0], _glib.OptionGroup):
+            if isinstance(args[0], _gi.OptionGroup):
                 self.option_groups.append(args[0])
                 return
         optparse.OptionParser.add_option_group(self, *args, **kwargs)

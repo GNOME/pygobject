@@ -26,7 +26,7 @@
 #include "pygoptioncontext.h"
 #include "pygi-error.h"
 
-PYGLIB_DEFINE_TYPE("gi._glib.OptionContext", PyGOptionContext_Type, PyGOptionContext)
+PYGLIB_DEFINE_TYPE("gi._gi.OptionContext", PyGOptionContext_Type, PyGOptionContext)
 
 /**
  * pyg_option_context_new:
@@ -56,7 +56,7 @@ pyg_option_context_init(PyGOptionContext *self,
 {
     char *parameter_string;
 
-    if (!PyArg_ParseTuple(args, "s:gi._glib.GOptionContext.__init__",
+    if (!PyArg_ParseTuple(args, "s:gi._gi.GOptionContext.__init__",
                           &parameter_string))
         return -1;
 
