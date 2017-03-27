@@ -517,8 +517,8 @@ class TestULong(unittest.TestCase):
 
 class TestSSize(unittest.TestCase):
 
-    MAX = GLib.MAXLONG
-    MIN = GLib.MINLONG
+    MAX = GLib.MAXSSIZE
+    MIN = GLib.MINSSIZE
 
     def test_ssize_return(self):
         self.assertEqual(self.MAX, GIMarshallingTests.ssize_return_max())
@@ -550,7 +550,7 @@ class TestSSize(unittest.TestCase):
 
 class TestSize(unittest.TestCase):
 
-    MAX = GLib.MAXULONG
+    MAX = GLib.MAXSIZE
 
     def test_size_return(self):
         self.assertEqual(self.MAX, GIMarshallingTests.size_return())
