@@ -973,6 +973,40 @@ class CPropertiesTestBase(object):
     def set_prop(self, obj, name, value):
         raise NotImplementedError
 
+    # https://bugzilla.gnome.org/show_bug.cgi?id=780652
+    @unittest.skipUnless(
+        "some_flags" in dir(GIMarshallingTests.PropertiesObject.props),
+        "tool old gi")
+    def test_flags(self):
+        self.assertEqual(
+            self.get_prop(self.obj, 'some-flags'),
+            GIMarshallingTests.Flags.VALUE1)
+        self.set_prop(self.obj, 'some-flags', GIMarshallingTests.Flags.VALUE2)
+        self.assertEqual(self.get_prop(self.obj, 'some-flags'),
+                         GIMarshallingTests.Flags.VALUE2)
+
+        obj = GIMarshallingTests.PropertiesObject(
+            some_flags=GIMarshallingTests.Flags.VALUE3)
+        self.assertEqual(self.get_prop(obj, 'some-flags'),
+                         GIMarshallingTests.Flags.VALUE3)
+
+    # https://bugzilla.gnome.org/show_bug.cgi?id=780652
+    @unittest.skipUnless(
+        "some_enum" in dir(GIMarshallingTests.PropertiesObject.props),
+        "tool old gi")
+    def test_enum(self):
+        self.assertEqual(
+            self.get_prop(self.obj, 'some-enum'),
+            GIMarshallingTests.GEnum.VALUE1)
+        self.set_prop(self.obj, 'some-enum', GIMarshallingTests.GEnum.VALUE2)
+        self.assertEqual(self.get_prop(self.obj, 'some-enum'),
+                         GIMarshallingTests.GEnum.VALUE2)
+
+        obj = GIMarshallingTests.PropertiesObject(
+            some_enum=GIMarshallingTests.GEnum.VALUE3)
+        self.assertEqual(self.get_prop(obj, 'some-enum'),
+                         GIMarshallingTests.GEnum.VALUE3)
+
     def test_boolean(self):
         self.assertEqual(self.get_prop(self.obj, 'some-boolean'), False)
         self.set_prop(self.obj, 'some-boolean', True)

@@ -258,6 +258,9 @@ pygi_set_property_value (PyGObject *instance,
                 case GI_INFO_TYPE_ENUM:
                     g_value_set_enum (&value, arg.v_int);
                     break;
+                case GI_INFO_TYPE_FLAGS:
+                    g_value_set_flags (&value, arg.v_uint);
+                    break;
                 case GI_INFO_TYPE_INTERFACE:
                 case GI_INFO_TYPE_OBJECT:
                     g_value_set_object (&value, arg.v_pointer);
