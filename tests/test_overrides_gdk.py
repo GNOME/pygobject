@@ -119,7 +119,8 @@ class TestGdk(unittest.TestCase):
         b = Gtk.Button()
         b.connect('button-press-event', button_press_cb)
         w.add(b)
-        w.show_all()
+        b.show()
+        b.realize()
         Gdk.test_simulate_button(b.get_window(),
                                  2, 5,
                                  0,
