@@ -9,7 +9,8 @@ import sys
 import warnings
 
 from compathelper import _unicode, _bytes
-from helper import ignore_gi_deprecation_warnings, capture_glib_warnings
+from helper import ignore_gi_deprecation_warnings, capture_glib_warnings, \
+    capture_glib_deprecation_warnings
 
 import gi
 import gi.overrides
@@ -1868,7 +1869,8 @@ class TestTextBuffer(unittest.TestCase):
         buffer.set_text('')
         buffer.insert_with_tags(buffer.get_start_iter(), 'HelloHello', tag)
         (start, end) = buffer.get_bounds()
-        self.assertTrue(start.begins_tag(tag))
+        with capture_glib_deprecation_warnings():
+            self.assertTrue(start.begins_tag(tag))
         self.assertTrue(start.has_tag(tag))
 
         buffer.set_text('')

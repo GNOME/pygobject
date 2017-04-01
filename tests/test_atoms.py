@@ -10,6 +10,8 @@ try:
 except (ValueError, ImportError):
     Gdk = None
 
+from helper import capture_glib_deprecation_warnings
+
 
 @unittest.skipUnless(Gdk, 'Gdk not available')
 class TestGdkAtom(unittest.TestCase):
@@ -79,8 +81,9 @@ class TestGdkAtom(unittest.TestCase):
                      "fails on OSX/Windows")
     def test_out_glist(self):
         display = Gdk.Display.get_default()
-        dm = display.get_device_manager()
-        device = dm.get_client_pointer()
+        with capture_glib_deprecation_warnings():
+            dm = display.get_device_manager()
+            device = dm.get_client_pointer()
         axes = device.list_axes()
         axes_names = [atom.name() for atom in axes]
         self.assertNotEqual(axes_names, [])
