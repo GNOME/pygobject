@@ -165,6 +165,8 @@ pyg_source_finalize(GSource *source)
 	} else {
 	    Py_DECREF(t);
 	}
+    } else {
+        PyErr_Clear ();
     }
 
     PyGILState_Release(state);
