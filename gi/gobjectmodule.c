@@ -986,9 +986,10 @@ pygobject_constructv(PyGObject  *self,
 
     g_assert (self->obj == NULL);
     pygobject_init_wrapper_set((PyObject *) self);
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
     obj = g_object_newv(pyg_type_from_object((PyObject *) self),
                         n_parameters, parameters);
-
+G_GNUC_END_IGNORE_DEPRECATIONS
     if (g_object_is_floating (obj))
         self->private_flags.flags |= PYGOBJECT_GOBJECT_WAS_FLOATING;
     pygobject_sink (obj);
@@ -1370,7 +1371,10 @@ pyg_object_new (PyGObject *self, PyObject *args, PyObject *kwargs)
     if (!pygobject_prepare_construct_properties (class, kwargs, &n_params, &params))
         goto cleanup;
 
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
     obj = g_object_newv(type, n_params, params);
+G_GNUC_END_IGNORE_DEPRECATIONS
+
     if (!obj)
 	PyErr_SetString (PyExc_RuntimeError, "could not create object");
 
