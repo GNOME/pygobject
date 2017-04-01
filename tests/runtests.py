@@ -11,6 +11,11 @@ import unittest
 if sys.version_info[:2] == (2, 7):
     unittest.TestCase.assertRaisesRegex = unittest.TestCase.assertRaisesRegexp
 
+if sys.version_info[0] == 3:
+    unittest.TestCase.assertRegexpMatches = unittest.TestCase.assertRegex
+    unittest.TestCase.assertRaisesRegexp = unittest.TestCase.assertRaisesRegex
+
+
 if '--help' in sys.argv:
     print("Usage: ./runtests.py <testfiles>")
     sys.exit(0)
