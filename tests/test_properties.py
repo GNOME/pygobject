@@ -27,14 +27,7 @@ from gi.repository import GIMarshallingTests
 from gi.repository import Regress
 from gi import _propertyhelper as propertyhelper
 
-if sys.version_info < (3, 0):
-    TEST_UTF8 = "\xe2\x99\xa5"
-    UNICODE_UTF8 = unicode(TEST_UTF8, 'UTF-8')
-else:
-    TEST_UTF8 = "♥"
-    UNICODE_UTF8 = TEST_UTF8
-
-from compathelper import _long, _unicode
+from compathelper import _long
 from helper import capture_glib_warnings, capture_output
 
 
@@ -174,12 +167,14 @@ class TestPropertyObject(unittest.TestCase):
         self.assertEqual(obj.props.construct, "789")
 
     def test_utf8(self):
-        obj = new(PropertyObject, construct_only=UNICODE_UTF8)
-        self.assertEqual(obj.props.construct_only, TEST_UTF8)
-        obj.set_property('construct', UNICODE_UTF8)
-        self.assertEqual(obj.props.construct, TEST_UTF8)
-        obj.props.normal = UNICODE_UTF8
-        self.assertEqual(obj.props.normal, TEST_UTF8)
+        test_utf8 = "♥"
+        unicode_utf8 = u"♥"
+        obj = new(PropertyObject, construct_only=unicode_utf8)
+        self.assertEqual(obj.props.construct_only, test_utf8)
+        obj.set_property('construct', unicode_utf8)
+        self.assertEqual(obj.props.construct, test_utf8)
+        obj.props.normal = unicode_utf8
+        self.assertEqual(obj.props.normal, test_utf8)
 
     def test_int_to_str(self):
         obj = new(PropertyObject, construct_only=1)
@@ -1137,10 +1132,10 @@ class CPropertiesTestBase(object):
         self.assertEqual(self.get_prop(obj, 'some-strv'), ['hello', 'world'])
 
         # unicode on py2
-        obj = GIMarshallingTests.PropertiesObject(some_strv=[_unicode('foo')])
-        self.assertEqual(self.get_prop(obj, 'some-strv'), [_unicode('foo')])
+        obj = GIMarshallingTests.PropertiesObject(some_strv=[u'foo'])
+        self.assertEqual(self.get_prop(obj, 'some-strv'), [u'foo'])
         self.assertRaises(TypeError, self.set_prop, self.obj, 'some-strv',
-                          [_unicode('foo'), 1])
+                          [u'foo', 1])
 
     def test_boxed_struct(self):
         self.assertEqual(self.get_prop(self.obj, 'some-boxed-struct'), None)

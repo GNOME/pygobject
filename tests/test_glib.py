@@ -11,8 +11,6 @@ import subprocess
 from gi.repository import GLib
 from gi import PyGIDeprecationWarning
 
-from compathelper import _unicode, _bytes
-
 
 class TestGLib(unittest.TestCase):
 
@@ -25,11 +23,11 @@ class TestGLib(unittest.TestCase):
         self.assertEqual(GLib.find_program_in_path('non existing'), None)
 
     def test_markup_escape_text(self):
-        self.assertEqual(GLib.markup_escape_text(_unicode('a&bä')), 'a&amp;bä')
-        self.assertEqual(GLib.markup_escape_text(_bytes('a&b\x05')), 'a&amp;b&#x5;')
+        self.assertEqual(GLib.markup_escape_text(u'a&bä'), 'a&amp;bä')
+        self.assertEqual(GLib.markup_escape_text(b'a&b\x05'), 'a&amp;b&#x5;')
 
         # with explicit length argument
-        self.assertEqual(GLib.markup_escape_text(_bytes('a\x05\x01\x02'), 2), 'a&#x5;')
+        self.assertEqual(GLib.markup_escape_text(b'a\x05\x01\x02', 2), 'a&#x5;')
 
     def test_progname(self):
         GLib.set_prgname('moo')
@@ -64,12 +62,12 @@ class TestGLib(unittest.TestCase):
         self.assertEqual(GLib.filename_display_basename('bar/foo'), 'foo')
 
         # this is locale dependent, so we cannot completely verify the result
-        res = GLib.filename_from_utf8(_unicode('aäb'))
+        res = GLib.filename_from_utf8(u'aäb')
         self.assertTrue(isinstance(res, bytes))
         self.assertGreaterEqual(len(res), 3)
 
         # with explicit length argument
-        self.assertEqual(GLib.filename_from_utf8(_unicode('aäb'), 1), b'a')
+        self.assertEqual(GLib.filename_from_utf8(u'aäb', 1), b'a')
 
     def test_uri_extract(self):
         res = GLib.uri_list_extract_uris('''# some comment

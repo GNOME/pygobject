@@ -8,7 +8,6 @@ import time
 import sys
 import warnings
 
-from compathelper import _unicode, _bytes
 from helper import ignore_gi_deprecation_warnings, capture_glib_warnings
 
 import gi.overrides
@@ -930,7 +929,7 @@ class TestTreeModel(unittest.TestCase):
                                                 GLib.MININT64,
                                                 0xffffffffffffffff,
                                                 254,
-                                                _bytes('a')
+                                                b'a'
                                                 ))
         # test set
         parent = tree_store.append(parent)
@@ -952,7 +951,7 @@ class TestTreeModel(unittest.TestCase):
                        11, GLib.MININT64,
                        12, 0xffffffffffffffff,
                        13, 254,
-                       14, _bytes('a'))
+                       14, b'a')
 
         parent = tree_store.append(parent)
         i = 98
@@ -972,7 +971,7 @@ class TestTreeModel(unittest.TestCase):
                                 11: GLib.MININT64,
                                 12: 0xffffffffffffffff,
                                 13: 254,
-                                14: _bytes('a')})
+                                14: b'a'})
 
         parent = tree_store.append(parent)
         i = 99
@@ -993,7 +992,7 @@ class TestTreeModel(unittest.TestCase):
                                 GLib.MININT64,
                                 0xffffffffffffffff,
                                 254,
-                                _bytes('a')))
+                                b'a'))
 
         # len gets the number of children in the root node
         # since we kept appending to the previous node
@@ -1103,7 +1102,7 @@ class TestTreeModel(unittest.TestCase):
                                bool(i % 2)))
 
         i = 93
-        label = _unicode('this is row #93')
+        label = u'this is row #93'
         treeiter = list_store.append()
         list_store.set_value(treeiter, 0, i)
         list_store.set_value(treeiter, 1, label)
@@ -1127,7 +1126,7 @@ class TestTreeModel(unittest.TestCase):
 
         # test automatic unicode->str conversion
         i = 94
-        label = _unicode('this is row #94')
+        label = u'this is row #94'
         treeiter = list_store.append((i,
                                       label,
                                       TestGtk.TestClass(self, i, label),

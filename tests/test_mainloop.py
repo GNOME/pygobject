@@ -8,8 +8,6 @@ import unittest
 
 from gi.repository import GLib
 
-from compathelper import _bytes
-
 
 class TestMainLoop(unittest.TestCase):
 
@@ -32,7 +30,7 @@ class TestMainLoop(unittest.TestCase):
         GLib.child_watch_add(GLib.PRIORITY_DEFAULT, pid, child_died, loop)
 
         os.close(pipe_r)
-        os.write(pipe_w, _bytes("Y"))
+        os.write(pipe_w, b"Y")
         os.close(pipe_w)
 
         def excepthook(type, value, traceback):

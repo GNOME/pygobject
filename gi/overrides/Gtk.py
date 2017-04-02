@@ -30,10 +30,8 @@ from gi import PyGIDeprecationWarning
 
 if sys.version_info >= (3, 0):
     _basestring = str
-    _callable = lambda c: hasattr(c, '__call__')
 else:
     _basestring = basestring
-    _callable = callable
 
 Gtk = get_introspection_module('Gtk')
 
@@ -91,7 +89,7 @@ def _extract_handler_and_args(obj_or_map, handler_name):
         args = handler[1:]
         handler = handler[0]
 
-    elif not _callable(handler):
+    elif not callable(handler):
         raise TypeError('Handler %s is not a method, function or tuple' % handler)
 
     return handler, args

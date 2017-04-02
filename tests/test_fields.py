@@ -8,8 +8,6 @@ from gi.repository import GLib
 from gi.repository import Regress
 from gi.repository import GIMarshallingTests
 
-from compathelper import _unicode
-
 
 class Number(object):
 
@@ -108,8 +106,8 @@ class TestFields(unittest.TestCase):
         s.string_ = "hello"
         self.assertEqual(s.string_, "hello")
 
-        s.string_ = _unicode("hello")
-        self.assertEqual(s.string_, _unicode("hello"))
+        s.string_ = u"hello"
+        self.assertEqual(s.string_, u"hello")
 
         s.string_ = None
         self.assertEqual(s.string_, None)

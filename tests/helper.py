@@ -10,7 +10,7 @@ import gi
 from gi import PyGIDeprecationWarning
 from gi.repository import GLib
 
-from compathelper import callable, StringIO
+from compathelper import StringIO
 
 
 ExceptionInfo = namedtuple("ExceptionInfo", ["type", "value", "traceback"])

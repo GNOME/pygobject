@@ -23,18 +23,11 @@ from gi.repository import GObject, GLib, Gio
 
 from gi.repository import GIMarshallingTests
 
-from compathelper import _bytes, _unicode, PY2, PY3
+from compathelper import PY2, PY3
 from helper import capture_exceptions
 
-if PY2:
-    CONSTANT_UTF8 = "const \xe2\x99\xa5 utf8"
-    PY2_UNICODE_UTF8 = unicode(CONSTANT_UTF8, 'UTF-8')
-    CHAR_255 = '\xff'
-else:
-    CONSTANT_UTF8 = "const ♥ utf8"
-    CHAR_255 = bytes([255])
 
-CONSTANT_NUMBER = 42
+CONSTANT_UTF8 = "const ♥ utf8"
 
 
 class Number(object):
@@ -67,7 +60,7 @@ class TestConstant(unittest.TestCase):
         self.assertEqual(CONSTANT_UTF8, GIMarshallingTests.CONSTANT_UTF8)
 
     def test_constant_number(self):
-        self.assertEqual(CONSTANT_NUMBER, GIMarshallingTests.CONSTANT_NUMBER)
+        self.assertEqual(42, GIMarshallingTests.CONSTANT_NUMBER)
 
     def test_min_max_int(self):
         self.assertEqual(GLib.MAXINT32, 2 ** 31 - 1)
@@ -145,7 +138,7 @@ class TestUInt8(unittest.TestCase):
         number = Number(self.MAX)
 
         GIMarshallingTests.uint8_in(number)
-        GIMarshallingTests.uint8_in(CHAR_255)
+        GIMarshallingTests.uint8_in(b'\xff')
 
         number.value += 1
         self.assertRaises(OverflowError, GIMarshallingTests.uint8_in, number)
@@ -427,7 +420,7 @@ class TestInt(unittest.TestCase):
     def test_int_inout(self):
         self.assertEqual(self.MIN, GIMarshallingTests.int_inout_max_min(Number(self.MAX)))
         self.assertEqual(self.MAX, GIMarshallingTests.int_inout_min_max(Number(self.MIN)))
-        self.assertRaises(TypeError, GIMarshallingTests.int_inout_min_max, Number(self.MIN), CONSTANT_NUMBER)
+        self.assertRaises(TypeError, GIMarshallingTests.int_inout_min_max, Number(self.MIN), 42)
 
 
 class TestUInt(unittest.TestCase):
@@ -671,9 +664,9 @@ class TestUtf8(unittest.TestCase):
     def test_utf8_none_in(self):
         GIMarshallingTests.utf8_none_in(CONSTANT_UTF8)
         if sys.version_info < (3, 0):
-            GIMarshallingTests.utf8_none_in(PY2_UNICODE_UTF8)
+            GIMarshallingTests.utf8_none_in(CONSTANT_UTF8.decode("utf-8"))
 
-        self.assertRaises(TypeError, GIMarshallingTests.utf8_none_in, CONSTANT_NUMBER)
+        self.assertRaises(TypeError, GIMarshallingTests.utf8_none_in, 42)
         self.assertRaises(TypeError, GIMarshallingTests.utf8_none_in, None)
 
     def test_utf8_none_out(self):
@@ -700,7 +693,7 @@ class TestFilename(unittest.TestCase):
         shutil.rmtree(self.workdir)
 
     def test_filename_in(self):
-        fname = os.path.join(self.workdir, _unicode('testäø.txt'))
+        fname = os.path.join(self.workdir, u'testäø.txt')
         self.assertRaises(GLib.GError, GLib.file_get_contents, fname)
 
         with open(fname.encode('UTF-8'), 'wb') as f:
@@ -720,7 +713,6 @@ class TestFilename(unittest.TestCase):
 
         dirname = GLib.Dir.make_tmp('testäø.XXXXXX')
         self.assertTrue(os.path.sep + 'testäø.' in dirname, dirname)
-        dirname = _bytes(dirname)
         self.assertTrue(os.path.isdir(dirname))
         os.rmdir(dirname)
 
@@ -916,7 +908,7 @@ class TestArray(unittest.TestCase):
 
     def test_array_uint8_in(self):
         GIMarshallingTests.array_uint8_in(Sequence([97, 98, 99, 100]))
-        GIMarshallingTests.array_uint8_in(_bytes("abcd"))
+        GIMarshallingTests.array_uint8_in(b"abcd")
 
     def test_array_string_in(self):
         GIMarshallingTests.array_string_in(['foo', 'bar'])
