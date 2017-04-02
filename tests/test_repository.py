@@ -33,13 +33,6 @@ from gi.repository import GObject
 from gi.repository import GIMarshallingTests
 from gi.repository import GIRepository as IntrospectedRepository
 
-try:
-    import cairo
-    cairo
-    has_cairo = True
-except ImportError:
-    has_cairo = False
-
 from helper import capture_glib_warnings
 
 
@@ -149,7 +142,6 @@ class Test(unittest.TestCase):
         self.assertEqual(GIRepository.RegisteredTypeInfo.get_type_init(info),
                          'gi_marshalling_tests_object_get_type')
 
-    @unittest.skipUnless(has_cairo, 'Regress needs cairo')
     def test_fundamental_object_info(self):
         repo.require('Regress')
         info = repo.find_by_name('Regress', 'TestFundamentalObject')
@@ -253,7 +245,6 @@ class Test(unittest.TestCase):
         self.assertEqual(func_info.get_return_type().get_tag(), GIRepository.TypeTag.VOID)
         self.assertRaises(AttributeError, func_info.get_return_attribute, '_not_an_attr')
 
-    @unittest.skipUnless(has_cairo, 'Regress needs cairo')
     def test_signal_info(self):
         repo.require('Regress')
         info = repo.find_by_name('Regress', 'TestObj')
@@ -270,7 +261,6 @@ class Test(unittest.TestCase):
         self.assertFalse(sig_info.true_stops_emit())
         self.assertEqual(sig_info.get_flags(), sig_flags)
 
-    @unittest.skipUnless(has_cairo, 'Regress needs cairo')
     def test_notify_signal_info_with_obj(self):
         repo.require('Regress')
         info = repo.find_by_name('Regress', 'TestObj')

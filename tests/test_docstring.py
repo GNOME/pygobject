@@ -2,19 +2,16 @@ import unittest
 
 import gi.docstring
 
+from gi.repository import Regress
 from gi.repository import GIMarshallingTests
 from gi.repository import Gio
 from gi.repository import GObject
 from gi.repository import GLib
 
 try:
-    import cairo
-    cairo = cairo
-    has_cairo = True
-    from gi.repository import Regress
     from gi.repository import Gtk
 except ImportError:
-    has_cairo = False
+    Gtk = None
 
 
 class Test(unittest.TestCase):
@@ -80,7 +77,6 @@ class Test(unittest.TestCase):
         self.assertTrue('new()' in doc)
         self.assertTrue('BoxedStruct()' in doc)
 
-    @unittest.skipUnless(has_cairo, 'built without cairo support')
     def test_private_struct_constructors(self):
         # Structs without a size or constructor should have no constructor docs.
         doc = Regress.TestBoxedPrivate.__doc__
@@ -94,7 +90,7 @@ class Test(unittest.TestCase):
         self.assertEqual(GIMarshallingTests.array_out_etc.__doc__,
                          'array_out_etc(first:int, last:int) -> ints:list, sum:int')
 
-    @unittest.skipUnless(has_cairo, 'built without cairo support')
+    @unittest.skipUnless(Gtk, 'no Gtk')
     def test_shared_array_length_with_prior_out_arg(self):
         # Test the 'iter' out argument does not effect length argument skipping.
         self.assertEqual(Gtk.ListStore.insert_with_valuesv.__doc__,

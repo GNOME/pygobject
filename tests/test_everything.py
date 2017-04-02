@@ -8,14 +8,7 @@ import ctypes
 import warnings
 import sys
 
-try:
-    import cairo
-    cairo  # Pyflakes
-    has_cairo = True
-    from gi.repository import Regress as Everything
-except ImportError:
-    has_cairo = False
-
+from gi.repository import Regress as Everything
 from gi.repository import GObject
 from gi.repository import GLib
 from gi.repository import Gio
@@ -53,7 +46,6 @@ class RawGList(ctypes.Structure):
         return ctypes.POINTER(cls).from_address(id(obj) + offset)
 
 
-@unittest.skipUnless(has_cairo, 'built without cairo support')
 class TestInstanceTransfer(unittest.TestCase):
 
     def test_main(self):
@@ -62,7 +54,6 @@ class TestInstanceTransfer(unittest.TestCase):
             obj.instance_method_full()
 
 
-@unittest.skipUnless(has_cairo, 'built without cairo support')
 class TestEverything(unittest.TestCase):
 
     def test_bool(self):
@@ -578,7 +569,6 @@ class TestEverything(unittest.TestCase):
             self.assertTrue('test_everything.py", line' in tb, tb)
 
 
-@unittest.skipUnless(has_cairo, 'built without cairo support')
 class TestNullableArgs(unittest.TestCase):
     def test_in_nullable_hash(self):
         Everything.test_ghash_null_in(None)
@@ -616,7 +606,6 @@ class TestNullableArgs(unittest.TestCase):
         self.assertEqual(None, Everything.TestObj.null_out())
 
 
-@unittest.skipUnless(has_cairo, 'built without cairo support')
 class TestCallbacks(unittest.TestCase):
     called = False
     main_loop = GLib.MainLoop()
@@ -1025,7 +1014,6 @@ class TestCallbacks(unittest.TestCase):
         self.assertEqual(mydict, {'foo': 1, 'bar': 2, 'new': 42})
 
 
-@unittest.skipUnless(has_cairo, 'built without cairo support')
 class TestClosures(unittest.TestCase):
     def test_no_arg(self):
         def callback():
@@ -1086,7 +1074,6 @@ class TestClosures(unittest.TestCase):
         self.assertTrue('return value' in str(exc[0].value), exc[0].value)
 
 
-@unittest.skipUnless(has_cairo, 'built without cairo support')
 class TestBoxed(unittest.TestCase):
     def test_boxed(self):
         object_ = Everything.TestObj()
@@ -1137,7 +1124,6 @@ class TestBoxed(unittest.TestCase):
         self.assertNotEqual(id(boxed), id(copy))
 
 
-@unittest.skipUnless(has_cairo, 'built without cairo support')
 class TestTortureProfile(unittest.TestCase):
     def test_torture_profile(self):
         import time
@@ -1200,7 +1186,6 @@ class TestTortureProfile(unittest.TestCase):
         print("\tTotal: %f sec" % total_time)
 
 
-@unittest.skipUnless(has_cairo, 'built without cairo support')
 class TestAdvancedInterfaces(unittest.TestCase):
     def test_array_objs(self):
         obj1, obj2 = Everything.test_array_fixed_out_objects()

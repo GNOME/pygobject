@@ -9,7 +9,6 @@ import gi
 try:
     gi.require_foreign('cairo')
     import cairo
-    from gi.repository import Regress
     has_cairo = True
 except ImportError:
     has_cairo = False
@@ -23,7 +22,7 @@ except:
     Gtk = None
     Gdk = None
 
-from gi.repository import GObject
+from gi.repository import GObject, Regress
 
 
 @unittest.skipUnless(has_cairo, 'built without cairo support')

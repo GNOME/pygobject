@@ -5,19 +5,11 @@ import unittest
 import sys
 import weakref
 
-from gi.repository import GObject, GLib
+from gi.repository import GObject, GLib, Regress
 from gi import _signalhelper as signalhelper
 import testhelper
 from compathelper import _long
 from helper import capture_glib_warnings, capture_gi_deprecation_warnings
-
-try:
-    import cairo
-    cairo  # PyFlakes
-    from gi.repository import Regress
-    has_cairo = True
-except ImportError:
-    has_cairo = False
 
 
 class C(GObject.GObject):
@@ -949,7 +941,6 @@ class TestConnectDataNonIntrospected(unittest.TestCase, _ConnectDataTestBase):
                                              flags=GObject.SignalFlags.RUN_LAST)
 
 
-@unittest.skipUnless(has_cairo, 'built without cairo support')
 class TestConnectDataIntrospected(unittest.TestCase, _ConnectDataTestBase):
     # This tests connect_data with introspected signals brought in from Regress.
     Object = Regress.TestObj
@@ -1089,7 +1080,6 @@ class TestSignalModuleLevelFunctions(unittest.TestCase):
                          None)
 
 
-@unittest.skipUnless(has_cairo, 'built without cairo support')
 class TestIntrospectedSignals(unittest.TestCase):
     def test_object_param_signal(self):
         obj = Regress.TestObj()
@@ -1315,7 +1305,6 @@ class TestConnectGObjectNonIntrospected(unittest.TestCase, _ConnectObjectTestBas
         pass
 
 
-@unittest.skipUnless(has_cairo, 'built without cairo support')
 class TestConnectGObjectIntrospected(unittest.TestCase, _ConnectObjectTestBase):
     # This tests connect_object with introspected signals brought in from Regress.
     Object = Regress.TestObj
@@ -1338,7 +1327,6 @@ class TestConnectPyObjectNonIntrospected(unittest.TestCase, _ConnectObjectTestBa
     SwapObject = object
 
 
-@unittest.skipUnless(has_cairo, 'built without cairo support')
 class TestConnectPyObjectIntrospected(unittest.TestCase, _ConnectObjectTestBase):
     # This tests connect_object with introspected signals brought in from Regress.
     Object = Regress.TestObj
@@ -1474,7 +1462,6 @@ class TestRefCountsNonIntrospected(unittest.TestCase, _RefCountTestBase):
                                              flags=GObject.SignalFlags.RUN_LAST)
 
 
-@unittest.skipUnless(has_cairo, 'built without cairo support')
 class TestRefCountsIntrospected(unittest.TestCase, _RefCountTestBase):
     Object = Regress.TestObj
 

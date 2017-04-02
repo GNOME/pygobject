@@ -28,12 +28,8 @@ gi.require_version('GIMarshallingTests', '1.0')
 from gi.repository import GIMarshallingTests
 from gi import _propertyhelper as propertyhelper
 
-try:
-    gi.require_version('Regress', '1.0')
-    from gi.repository import Regress
-    has_regress = True
-except (ValueError, ImportError):
-    has_regress = False
+gi.require_version('Regress', '1.0')
+from gi.repository import Regress
 
 if sys.version_info < (3, 0):
     TEST_UTF8 = "\xe2\x99\xa5"
@@ -95,20 +91,19 @@ class PropertyObject(GObject.GObject):
         flags=ParamFlags.READABLE | ParamFlags.WRITABLE | ParamFlags.CONSTRUCT)
 
 
-if has_regress:
-    class PropertyInheritanceObject(Regress.TestObj):
-        # override property from the base class, with a different type
-        string = GObject.Property(type=int)
+class PropertyInheritanceObject(Regress.TestObj):
+    # override property from the base class, with a different type
+    string = GObject.Property(type=int)
 
-        # a property entirely defined at the Python level
-        python_prop = GObject.Property(type=str)
-
-    class PropertySubClassObject(PropertyInheritanceObject):
-        # override property from the base class, with a different type
-        python_prop = GObject.Property(type=int)
+    # a property entirely defined at the Python level
+    python_prop = GObject.Property(type=str)
 
 
-@unittest.skipUnless(has_regress, 'Missing Regress typelib')
+class PropertySubClassObject(PropertyInheritanceObject):
+    # override property from the base class, with a different type
+    python_prop = GObject.Property(type=int)
+
+
 class TestPropertyInheritanceObject(unittest.TestCase):
     def test_override_gi_property(self):
         self.assertNotEqual(Regress.TestObj.props.string.value_type,
@@ -769,7 +764,6 @@ class TestProperty(unittest.TestCase):
         b.prop1 = 20
         self.assertEqual(b.prop1, 20)
 
-    @unittest.skipUnless(has_regress, 'Missing regress typelib')
     def test_property_subclass_c(self):
         class A(Regress.TestSubObj):
             prop1 = GObject.Property(type=int)
@@ -1184,7 +1178,6 @@ class CPropertiesTestBase(object):
         self.assertRaises(TypeError, self.set_prop, self.obj, 'some-boxed-glist', 'foo')
         self.assertRaises(TypeError, self.set_prop, self.obj, 'some-boxed-glist', ['a'])
 
-    @unittest.skipUnless(has_regress, 'built without cairo support')
     def test_annotated_glist(self):
         obj = Regress.TestObj()
         self.assertEqual(self.get_prop(obj, 'list'), [])
@@ -1225,7 +1218,6 @@ class CPropertiesTestBase(object):
         self.assertEqual(42, self.get_prop(obj, 'some-int'))
         self.assertEqual(54, self.get_prop(obj, 'some-uchar'))
 
-    @unittest.skipUnless(has_regress, 'built without cairo support')
     def test_gtype(self):
         obj = Regress.TestObj()
         self.assertEqual(self.get_prop(obj, 'gtype'), GObject.TYPE_INVALID)
@@ -1237,7 +1229,6 @@ class CPropertiesTestBase(object):
         self.set_prop(obj, 'gtype', str)
         self.assertEqual(self.get_prop(obj, 'gtype'), GObject.TYPE_STRING)
 
-    @unittest.skipUnless(has_regress, 'built without cairo support')
     def test_hash_table(self):
         obj = Regress.TestObj()
         self.assertEqual(self.get_prop(obj, 'hash-table'), None)
@@ -1247,7 +1238,6 @@ class CPropertiesTestBase(object):
         self.assertEqual(list(self.get_prop(obj, 'hash-table').items())[0],
                          ('mec', 56))
 
-    @unittest.skipUnless(has_regress, 'built without cairo support')
     def test_parent_class(self):
         class A(Regress.TestObj):
             prop1 = GObject.Property(type=int)
