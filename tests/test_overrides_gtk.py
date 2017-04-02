@@ -12,20 +12,18 @@ from compathelper import _unicode, _bytes
 from helper import ignore_gi_deprecation_warnings, capture_glib_warnings, \
     capture_glib_deprecation_warnings
 
-import gi
 import gi.overrides
 import gi.types
 from gi.repository import GLib, GObject
 
 try:
-    gi.require_version('Gtk', '3.0')
-    gi.require_version('GdkPixbuf', '2.0')
     from gi.repository import Gtk, GdkPixbuf, Gdk
-    Gtk  # pyflakes
     PyGTKDeprecationWarning = Gtk.PyGTKDeprecationWarning
-except (ValueError, ImportError):
+except ImportError:
     Gtk = None
     PyGTKDeprecationWarning = None
+    GdkPixbuf = None
+    Gdk = None
 
 
 @contextlib.contextmanager

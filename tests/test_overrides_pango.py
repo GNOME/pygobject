@@ -4,14 +4,9 @@
 import unittest
 
 try:
-    import gi
-    gi.require_version('Pango', '1.0')
-    gi.require_version('PangoCairo', '1.0')
     from gi.repository import Pango
     from gi.repository import PangoCairo
-    Pango
-    PangoCairo
-except (ValueError, ImportError):
+except ImportError:
     Pango = None
     PangoCairo = None
 

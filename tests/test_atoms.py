@@ -3,12 +3,11 @@ import sys
 import unittest
 
 try:
-    import gi
-    gi.require_version('Gtk', '3.0')
     from gi.repository import Gtk, Atk, Gdk
-    (Atk, Gdk)  # pyflakes
-except (ValueError, ImportError):
+except ImportError:
     Gdk = None
+    Atk = None
+    Gtk = None
 
 from helper import capture_glib_deprecation_warnings
 

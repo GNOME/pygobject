@@ -23,10 +23,6 @@
 import unittest
 import collections
 
-import gi
-
-gi.require_version('GIRepository', '2.0')
-
 import gi._gi as GIRepository
 from gi.module import repository as repo
 from gi.repository import GObject

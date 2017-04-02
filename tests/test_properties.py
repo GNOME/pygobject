@@ -8,7 +8,6 @@ import types
 import unittest
 import tempfile
 
-import gi
 from gi.repository import GObject
 from gi.repository.GObject import ParamFlags, GType, new
 from gi.repository.GObject import \
@@ -24,12 +23,9 @@ from gi.repository.GLib import \
 
 from gi.repository import Gio
 from gi.repository import GLib
-gi.require_version('GIMarshallingTests', '1.0')
 from gi.repository import GIMarshallingTests
-from gi import _propertyhelper as propertyhelper
-
-gi.require_version('Regress', '1.0')
 from gi.repository import Regress
+from gi import _propertyhelper as propertyhelper
 
 if sys.version_info < (3, 0):
     TEST_UTF8 = "\xe2\x99\xa5"

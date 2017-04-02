@@ -52,6 +52,32 @@ repo = GIRepository.Repository.get_default()
 repo.prepend_library_path(os.path.join(tests_builddir, ".libs"))
 repo.prepend_search_path(tests_builddir)
 
+
+def try_require_version(namespace, version):
+    try:
+        gi.require_version(namespace, version)
+    except ValueError:
+        # prevent tests from running with the wrong version
+        sys.modules["gi.repository." + namespace] = None
+
+
+# Optional
+try_require_version("Gtk", os.environ.get("TEST_GTK_VERSION", "3.0"))
+try_require_version("Gdk", os.environ.get("TEST_GTK_VERSION", "3.0"))
+try_require_version("GdkPixbuf", "2.0")
+try_require_version("Pango", "1.0")
+try_require_version("PangoCairo", "1.0")
+try_require_version("Atk", "1.0")
+
+# Required
+gi.require_versions({
+    "GIMarshallingTests": "1.0",
+    "Regress": "1.0",
+    "GLib": "2.0",
+    "Gio": "2.0",
+    "GObject": "2.0",
+})
+
 # Load tests.
 if 'TEST_NAMES' in os.environ:
     names = os.environ['TEST_NAMES'].split()
