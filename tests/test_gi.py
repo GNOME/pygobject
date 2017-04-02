@@ -2143,23 +2143,23 @@ class TestStructure(unittest.TestCase):
     def test_repr(self):
         self.assertRegexpMatches(
             repr(GIMarshallingTests.PointerStruct()),
-            "<GIMarshallingTests.PointerStruct object at 0x[^\s]+ "
-            "\(void at 0x[^\s]+\)>")
+            r"<GIMarshallingTests.PointerStruct object at 0x[^\s]+ "
+            r"\(void at 0x[^\s]+\)>")
 
         self.assertRegexpMatches(
             repr(GIMarshallingTests.SimpleStruct()),
-            "<GIMarshallingTests.SimpleStruct object at 0x[^\s]+ "
-            "\(void at 0x[^\s]+\)>")
+            r"<GIMarshallingTests.SimpleStruct object at 0x[^\s]+ "
+            r"\(void at 0x[^\s]+\)>")
 
         self.assertRegexpMatches(
             repr(GIMarshallingTests.Union()),
-            "<GIMarshallingTests.Union object at 0x[^\s]+ "
-            "\(GIMarshallingTestsUnion at 0x[^\s]+\)>")
+            r"<GIMarshallingTests.Union object at 0x[^\s]+ "
+            r"\(GIMarshallingTestsUnion at 0x[^\s]+\)>")
 
         self.assertRegexpMatches(
             repr(GIMarshallingTests.BoxedStruct()),
-            "<GIMarshallingTests.BoxedStruct object at 0x[^\s]+ "
-            "\(GIMarshallingTestsBoxedStruct at 0x[^\s]+\)>")
+            r"<GIMarshallingTests.BoxedStruct object at 0x[^\s]+ "
+            r"\(GIMarshallingTestsBoxedStruct at 0x[^\s]+\)>")
 
 
 class TestGObject(unittest.TestCase):
@@ -2294,14 +2294,14 @@ class TestGObject(unittest.TestCase):
     def test_repr(self):
         self.assertRegexpMatches(
             repr(GIMarshallingTests.Object(int=42)),
-            "<GIMarshallingTests.Object object at 0x[^\s]+ "
-            "\(GIMarshallingTestsObject at 0x[^\s]+\)>")
+            r"<GIMarshallingTests.Object object at 0x[^\s]+ "
+            r"\(GIMarshallingTestsObject at 0x[^\s]+\)>")
 
     def test_nongir_repr(self):
         self.assertRegexpMatches(
             repr(Gio.File.new_for_path("")),
-            "<__gi__.GLocalFile object at 0x[^\s]+ "
-            "\(GLocalFile at 0x[^\s]+\)>")
+            r"<__gi__.GLocalFile object at 0x[^\s]+ "
+            r"\(GLocalFile at 0x[^\s]+\)>")
 
 # FIXME: Doesn't actually return the same object.
 #    def test_object_inout_same(self):

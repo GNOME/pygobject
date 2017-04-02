@@ -105,8 +105,8 @@ def capture_glib_deprecation_warnings():
     with warnings.catch_warnings(record=True) as warn:
         warnings.filterwarnings(
             'always', category=GLibWarning,
-            message=".+ is deprecated and shouldn't be used anymore\. "
-                    "It will be removed in a future version\.")
+            message=".+ is deprecated and shouldn't be used anymore\\. "
+                    "It will be removed in a future version\\.")
         yield warn
 
 
