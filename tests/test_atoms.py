@@ -78,6 +78,7 @@ class TestGdkAtom(unittest.TestCase):
 
     @unittest.skipIf(sys.platform == "darwin" or os.name == "nt",
                      "fails on OSX/Windows")
+    @unittest.skipIf(not Gdk or Gdk._version == "4.0", "not in gdk4")
     def test_out_glist(self):
         display = Gdk.Display.get_default()
         with capture_glib_deprecation_warnings():

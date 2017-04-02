@@ -128,6 +128,9 @@ def enable_gtk(version='3.0'):
     if _check_enabled("gtk", version):
         return
 
+    if version == "4.0":
+        raise ValueError("version 4.0 not supported")
+
     # set the default encoding like PyGTK
     reload(sys)
     if sys.version_info < (3, 0):

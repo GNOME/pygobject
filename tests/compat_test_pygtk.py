@@ -14,14 +14,14 @@ try:
     import pygtkcompat
 
     pygtkcompat.enable()
-    pygtkcompat.enable_gtk(version='3.0')
+    pygtkcompat.enable_gtk(version=Gtk._version)
 
     import atk
     import pango
     import pangocairo
     import gtk
     import gtk.gdk
-except ImportError:
+except (ValueError, ImportError):
     Gtk = None
 
 from helper import capture_gi_deprecation_warnings, capture_glib_warnings

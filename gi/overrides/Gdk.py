@@ -321,12 +321,15 @@ __all__.append('DragContext')
 
 
 class Cursor(Gdk.Cursor):
+
     def __new__(cls, *args, **kwds):
         arg_len = len(args)
         kwd_len = len(kwds)
         total_len = arg_len + kwd_len
 
         if total_len == 1:
+            if Gdk._version == "4.0":
+                raise ValueError("Wrong number of parameters")
             # Since g_object_newv (super.__new__) does not seem valid for
             # direct use with GdkCursor, we must assume usage of at least
             # one of the C constructors to be valid.
