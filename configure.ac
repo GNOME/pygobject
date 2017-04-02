@@ -119,18 +119,6 @@ if test "x$link_python_libs" = "xyes"; then
   PYG_CHECK_PYTHON_LIBS(, AC_MSG_ERROR([Python libs not found. Windows requires Python modules to be explicitly linked to libpython.]))
 fi
 
-AC_MSG_CHECKING([for PySignal_SetWakeupFd in Python.h])
-old_CPPFLAGS=$CPPFLAGS
-CPPFLAGS="-Wall -Werror $PYTHON_INCLUDES"
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <Python.h>]], [[PySignal_SetWakeupFd(0);]])],
-                  [setwakeupfd_ok=yes],[setwakeupfd_ok=no])
-AC_MSG_RESULT($setwakeupfd_ok)
-if test "x$setwakeupfd_ok" != xno; then
-  AC_DEFINE(HAVE_PYSIGNAL_SETWAKEUPFD, 1,
-                [Define to 1 if PySignal_SetWakeupFd is available])
-fi
-CPPFLAGS=$old_CPPFLAGS
-
 PLATFORM=`$PYTHON -c "import sys; from distutils import util; sys.stdout.write(util.get_platform())"`
 AC_SUBST(PLATFORM)
 
