@@ -168,8 +168,8 @@ check-local:
 # pygtkcompat tests need to be run in a separate process as they
 # clobber global name space
 check.real: $(target_libraries) $(test_typelibs) gschemas.compiled
-	$(RUN_TESTS_ENV_VARS) $(DBUS_ENV) $(EXEC_NAME) $(PYTHON) -Wd $(srcdir)/runtests.py; rc=$$?; \
-	[ "$$rc" -ne 0 ] || [ -n "$$TEST_NAMES" ] || { TEST_NAMES=compat_test_pygtk $(RUN_TESTS_ENV_VARS) $(DBUS_ENV) $(EXEC_NAME) $(PYTHON) -Wd -Werror::PendingDeprecationWarning -Werror::DeprecationWarning -Werror::RuntimeWarning $(srcdir)/runtests.py; rc=$$?; }; \
+	$(RUN_TESTS_ENV_VARS) $(EXTRA_ENV) $(DBUS_ENV) $(EXEC_NAME) $(PYTHON) -Wd $(srcdir)/runtests.py; rc=$$?; \
+	[ "$$rc" -ne 0 ] || [ -n "$$TEST_NAMES" ] || { TEST_NAMES=compat_test_pygtk $(RUN_TESTS_ENV_VARS)  $(EXTRA_ENV) $(DBUS_ENV) $(EXEC_NAME) $(PYTHON) -Wd -Werror::PendingDeprecationWarning -Werror::DeprecationWarning -Werror::RuntimeWarning $(srcdir)/runtests.py; rc=$$?; }; \
 	exit $$rc
 
 check.gdb:
@@ -180,17 +180,17 @@ check.nemiver:
 
 # Note G_SLICE in these check variations is intended to clobber the default set in RUN_TESTS_ENV_VARS
 check.valgrind:
-	EXEC_NAME="G_SLICE=always-malloc G_DEBUG=gc-friendly \
-	valgrind --leak-check=full --show-possibly-lost=no --num-callers=20 \
-	--suppressions=$(top_srcdir)/tests/$(PYTHON_BASENAME).supp \
+	EXTRA_ENV="G_SLICE=always-malloc G_DEBUG=gc-friendly PYTHONMALLOC=malloc" \
+	EXEC_NAME="valgrind --leak-check=full --show-possibly-lost=no --num-callers=20 \
+	--suppressions=$(top_srcdir)/tests/$(PYTHON_VALGRIND_SUPP).supp \
 	" \
 	$(MAKE) check
 
 check.valgrindlog:
 	mkdir -p $(top_builddir)/tmp
-	EXEC_NAME="G_SLICE=always-malloc G_DEBUG=gc-friendly \
-	valgrind --leak-check=full --show-possibly-lost=no --num-callers=20 \
-	--suppressions=$(top_srcdir)/tests/$(PYTHON_BASENAME).supp \
+	EXTRA_ENV="G_SLICE=always-malloc G_DEBUG=gc-friendly PYTHONMALLOC=malloc" \
+	EXEC_NAME="valgrind --leak-check=full --show-possibly-lost=no --num-callers=20 \
+	--suppressions=$(top_srcdir)/tests/$(PYTHON_VALGRIND_SUPP).supp \
 	--child-silent-after-fork=yes \
 	--log-file=$(top_builddir)/tmp/`git rev-parse HEAD | cut -c1-8`-$$TEST_NAMES.log \
 	" \
@@ -198,9 +198,9 @@ check.valgrindlog:
 
 check.valgrindxml:
 	mkdir -p $(top_builddir)/tmp
-	EXEC_NAME="G_SLICE=always-malloc G_DEBUG=gc-friendly \
-	valgrind --leak-check=full --show-possibly-lost=no --num-callers=20 \
-	--suppressions=$(top_srcdir)/tests/$(PYTHON_BASENAME).supp \
+	EXTRA_ENV="G_SLICE=always-malloc G_DEBUG=gc-friendly PYTHONMALLOC=malloc" \
+	EXEC_NAME="valgrind --leak-check=full --show-possibly-lost=no --num-callers=20 \
+	--suppressions=$(top_srcdir)/tests/$(PYTHON_VALGRIND_SUPP).supp \
 	--child-silent-after-fork=yes \
 	--xml=yes --xml-file=$(top_builddir)/tmp/`git rev-parse HEAD | cut -c1-8`-$$TEST_NAMES.xml \
 	" \

@@ -142,8 +142,9 @@ AM_PATH_GLIB_2_0(glib_required_version,,[AC_MSG_ERROR(maybe you want the pygobje
 if test -n "$export_dynamic"; then
   GLIB_LIBS=`echo $GLIB_LIBS | sed -e "s/$export_dynamic//"`
 fi
-PYTHON_BASENAME=`basename $PYTHON`
-AC_SUBST([PYTHON_BASENAME])
+
+PYTHON_VALGRIND_SUPP=`$PYTHON -c "import sys; sys.stdout.write('python' + sys.version.__getitem__(0))"`
+AC_SUBST([PYTHON_VALGRIND_SUPP])
 
 dnl libffi
 PKG_CHECK_MODULES(FFI, libffi >= 3.0)
