@@ -141,7 +141,10 @@ pygobject_data_free(PyGObjectData *data)
 
     if (state_saved && Py_IsInitialized ()) {
 	Py_BLOCK_THREADS; /* Restores _save */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
 	PyGILState_Release(state);
+#pragma GCC diagnostic pop
     }
 }
 
