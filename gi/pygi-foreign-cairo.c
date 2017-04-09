@@ -367,7 +367,7 @@ cairo_pattern_from_gvalue (const GValue *value)
     return PycairoPattern_FromPattern (pattern, NULL);
 }
 
-#if PY_VERSION_HEX >= 0x03000000 && defined(PycairoRegion_Type)
+#if defined(PycairoRegion_Type)
 
 static PyObject *
 cairo_region_to_arg (PyObject        *value,
@@ -449,7 +449,7 @@ PYGLIB_MODULE_START(_gi_cairo, "_gi_cairo")
                                   cairo_font_options_from_arg,
                                   cairo_font_options_release);
 
-#if PY_VERSION_HEX >= 0x03000000 && defined(PycairoRegion_Type)
+#if defined(PycairoRegion_Type)
     pygi_register_foreign_struct ("cairo",
                                   "Region",
                                   cairo_region_to_arg,
