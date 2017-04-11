@@ -534,6 +534,43 @@ _wrap_test_value_array(PyObject *self, PyObject *args)
   return pyg_value_as_pyobject(value, FALSE);
 }
 
+
+static PyObject *
+_wrap_value_array_get_nth_type(PyObject *self, PyObject *args)
+{
+  guint n;
+  GType type;
+  GValue *nth;
+  GValueArray *arr;
+  PyObject *obj;
+
+  if (!PyArg_ParseTuple(args, "OI", &obj, &n))
+    return NULL;
+
+  G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+
+  if (pyg_boxed_check(obj, G_TYPE_VALUE) &&
+      G_VALUE_HOLDS(pyg_boxed_get(obj, GValue), G_TYPE_VALUE_ARRAY)) {
+    arr = g_value_get_boxed(pyg_boxed_get(obj, GValue));
+  } else if (pyg_boxed_check(obj, G_TYPE_VALUE_ARRAY)) {
+    arr = pyg_boxed_get(obj, GValueArray);
+  } else {
+    PyErr_SetString(PyExc_TypeError, "First argument is not GValueArray");
+    return NULL;
+  }
+
+  if (n >= arr->n_values) {
+    PyErr_SetString(PyExc_TypeError, "Index is out of bounds");
+    return NULL;
+  }
+  nth = g_value_array_get_nth(arr, n);
+  type = G_VALUE_TYPE(nth);
+
+  G_GNUC_END_IGNORE_DEPRECATIONS
+
+  return pyg_type_wrapper_new(type);
+}
+
 static PyObject *
 _wrap_constant_strip_prefix(PyObject *self, PyObject *args)
 {
@@ -665,6 +702,7 @@ static PyMethodDef testhelper_functions[] = {
     { "connectcallbacks", (PyCFunction)_wrap_connectcallbacks, METH_VARARGS },
     { "test_value", (PyCFunction)_wrap_test_value, METH_VARARGS },      
     { "test_value_array", (PyCFunction)_wrap_test_value_array, METH_VARARGS },
+    { "value_array_get_nth_type", (PyCFunction)_wrap_value_array_get_nth_type, METH_VARARGS },
     { "constant_strip_prefix", (PyCFunction)_wrap_constant_strip_prefix, METH_VARARGS },
     { "test_gerror_exception", (PyCFunction)_wrap_test_gerror_exception, METH_VARARGS },
     { "owned_by_library_get_instance_list", (PyCFunction)_wrap_test_owned_by_library_get_instance_list, METH_NOARGS },
