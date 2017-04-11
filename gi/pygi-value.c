@@ -196,8 +196,6 @@ pyg_value_array_from_pyobject(GValue *value,
     for (i = 0; i < len; ++i) {
         PyObject *item = PySequence_GetItem(obj, i);
         GType type;
-        GValue item_value = { 0, };
-        int status;
 
         if (! item) {
             PyErr_Clear();
@@ -219,20 +217,27 @@ pyg_value_array_from_pyobject(GValue *value,
             }
         }
 
-        g_value_init(&item_value, type);
-        status = (pspec && pspec->element_spec)
-                 ? pyg_param_gvalue_from_pyobject(&item_value, item, pspec->element_spec)
-                 : pyg_value_from_pyobject(&item_value, item);
-        Py_DECREF(item);
+        if (type == G_TYPE_VALUE) {
+            const GValue * item_value = pyg_boxed_get(item, GValue);
+            g_value_array_append(value_array, item_value);
+        } else {
+            GValue item_value = { 0, };
+            int status;
 
-        if (status == -1) {
-            g_value_array_free(value_array);
+            g_value_init(&item_value, type);
+            status = (pspec && pspec->element_spec)
+                ? pyg_param_gvalue_from_pyobject(&item_value, item, pspec->element_spec)
+                : pyg_value_from_pyobject(&item_value, item);
+            Py_DECREF(item);
+
+            if (status == -1) {
+                g_value_array_free(value_array);
+                g_value_unset(&item_value);
+                return -1;
+            }
+            g_value_array_append(value_array, &item_value);
             g_value_unset(&item_value);
-            return -1;
         }
-
-        g_value_array_append(value_array, &item_value);
-        g_value_unset(&item_value);
     }
 
     g_value_take_boxed(value, value_array);

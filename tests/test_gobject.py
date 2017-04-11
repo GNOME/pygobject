@@ -698,6 +698,24 @@ class TestGValue(unittest.TestCase):
         value.set_value([32, 'foo_bar', 0.3])
         self.assertEqual(value.get_value(), [32, 'foo_bar', 0.3])
 
+    def test_value_array_from_gvalue_list(self):
+        value = GObject.Value(GObject.ValueArray, [
+            GObject.Value(GObject.TYPE_UINT, 0xffffffff),
+            GObject.Value(GObject.TYPE_STRING, 'foo_bar')])
+        self.assertEqual(value.g_type, GObject.type_from_name('GValueArray'))
+        self.assertEqual(value.get_value(), [0xffffffff, 'foo_bar'])
+        self.assertEqual(testhelper.value_array_get_nth_type(value, 0), GObject.TYPE_UINT)
+        self.assertEqual(testhelper.value_array_get_nth_type(value, 1), GObject.TYPE_STRING)
+
+    def test_value_array_append_gvalue(self):
+        arr = GObject.ValueArray.new(0)
+        arr.append(GObject.Value(GObject.TYPE_UINT, 0xffffffff))
+        arr.append(GObject.Value(GObject.TYPE_STRING, 'foo_bar'))
+        self.assertEqual(arr.get_nth(0), 0xffffffff)
+        self.assertEqual(arr.get_nth(1), 'foo_bar')
+        self.assertEqual(testhelper.value_array_get_nth_type(arr, 0), GObject.TYPE_UINT)
+        self.assertEqual(testhelper.value_array_get_nth_type(arr, 1), GObject.TYPE_STRING)
+
     def test_gerror_boxing(self):
         error = GLib.Error('test message', domain='mydomain', code=42)
         value = GObject.Value(GLib.Error, error)
