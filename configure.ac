@@ -23,8 +23,7 @@ m4_define(pygobject_version, pygobject_major_version.pygobject_minor_version.pyg
 
 dnl versions of packages we require ...
 m4_define(introspection_required_version, 1.46.0)
-m4_define(py2cairo_required_version, 1.2.0)
-m4_define(py3cairo_required_version, 1.10.0)
+m4_define(pycairo_required_version, 1.11.1)
 m4_define(glib_required_version, 2.38.0)
 m4_define(gio_required_version, 2.38.0)
 
@@ -162,11 +161,11 @@ if test "$enable_cairo" != no; then
 
     if test $build_py3k = true; then
         PKG_CHECK_MODULES(PYCAIRO,
-            py3cairo >= py3cairo_required_version
+            py3cairo >= pycairo_required_version
         )
     else
         PKG_CHECK_MODULES(PYCAIRO,
-            pycairo >= py2cairo_required_version
+            pycairo >= pycairo_required_version
         )
     fi
 fi
