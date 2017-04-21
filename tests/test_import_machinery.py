@@ -140,6 +140,18 @@ class TestImporter(unittest.TestCase):
                 from gi.repository import InvalidGObjectRepositoryModuleName
                 InvalidGObjectRepositoryModuleName
 
+    def test_require_version_versiontype(self):
+        import gi
+        with self.assertRaises(ValueError) as context:
+            gi.require_version('GLib', 2.0)
+
+        # Test that unicode strings work in python 2
+        if sys.version_info[0] <= 2:
+            gi.require_version('GLib', unicode('2.0'))
+        else:
+            with self.assertRaises(ValueError) as context:
+                gi.require_version('GLib', b'2.0')
+
     def test_require_versions(self):
         import gi
         gi.require_versions({'GLib': '2.0', 'Gio': '2.0', 'GObject': '2.0'})
