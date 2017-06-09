@@ -95,7 +95,7 @@ class TestPango(unittest.TestCase):
     def test_cairo_font_options(self):
         screen = Gtk.Window().get_screen()
         font_opts = screen.get_font_options()
-        self.assertEqual(type(font_opts.get_subpixel_order()), int)
+        self.assertTrue(isinstance(font_opts.get_subpixel_order(), int))
 
 
 if has_cairo:
