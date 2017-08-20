@@ -1080,6 +1080,12 @@ class TestTreeModel(unittest.TestCase):
         tree_store.insert(None, 1)
         self.assertEqual(signals, ['row-inserted'])
 
+        # One set one signal
+        signals.pop()
+        tree_iter = tree_store.append(None, (10, False))
+        tree_store.set(tree_iter, (0, 1), (20, True))
+        self.assertEqual(signals, ['row-inserted', 'row-changed'])
+
     def test_list_store(self):
         class TestPyObject(object):
             pass
@@ -1336,6 +1342,12 @@ class TestTreeModel(unittest.TestCase):
         signals.pop()
         list_store.insert(1)
         self.assertEqual(signals, ['row-inserted'])
+
+        # One set one signal
+        signals.pop()
+        tree_iter = list_store.append((10, False))
+        list_store.set(tree_iter, (0, 1), (20, True))
+        self.assertEqual(signals, ['row-inserted', 'row-changed'])
 
     def test_tree_path(self):
         p1 = Gtk.TreePath()
