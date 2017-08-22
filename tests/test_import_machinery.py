@@ -142,14 +142,14 @@ class TestImporter(unittest.TestCase):
 
     def test_require_version_versiontype(self):
         import gi
-        with self.assertRaises(ValueError) as context:
+        with self.assertRaises(ValueError):
             gi.require_version('GLib', 2.0)
 
         # Test that unicode strings work in python 2
         if sys.version_info[0] <= 2:
             gi.require_version('GLib', unicode('2.0'))
         else:
-            with self.assertRaises(ValueError) as context:
+            with self.assertRaises(ValueError):
                 gi.require_version('GLib', b'2.0')
 
     def test_require_versions(self):

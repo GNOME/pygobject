@@ -139,12 +139,12 @@ dist-hook: $(BUILT_EXTRA_DIST)
 check.quality:
 	@echo "  CHECK  Pyflakes" $(pycheck_dirs)
 	@if type pyflakes >/dev/null 2>&1; then \
-		(cd $(abs_top_srcdir) && pyflakes $(pycheck_dirs) ); \
+		(cd $(abs_top_srcdir) && PYFLAKES_BUILTINS="basestring,long,unicode" pyflakes $(pycheck_dirs) ); \
 	else echo "skipped, pyflakes not installed"; \
 	fi
 	@echo "  CHECK  PEP8";
 	@if type pep8 >/dev/null 2>&1; then \
-		(cd $(abs_top_srcdir) && pep8 --ignore=E501,E123,E124,E402,E731 --repeat --show-source $(pycheck_dirs) ); \
+		(cd $(abs_top_srcdir) && pep8 --ignore=E501,E123,E124,E402,E731,E722 --repeat --show-source $(pycheck_dirs) ); \
 	else echo "skipped, pep8 not installed"; \
 	fi
 
