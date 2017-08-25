@@ -184,8 +184,8 @@ _pygi_closure_assign_pyobj_to_out_argument (gpointer out_arg,
                    }
                    break;
                }
-
-           /* Fall through if pointer */
+               *((gpointer *) out_arg) = arg->v_pointer;
+               break;
            default:
                *((gpointer *) out_arg) = arg->v_pointer;
                break;
