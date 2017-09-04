@@ -182,7 +182,7 @@ _pygi_marshal_from_py_interface_flags (PyGIInvokeState   *state,
                                        gpointer          *cleanup_data)
 {
     PyObject *py_long;
-    long c_long;
+    unsigned long c_ulong;
     gint is_instance;
     PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)arg_cache;
     GIBaseInfo *interface;
@@ -195,17 +195,17 @@ _pygi_marshal_from_py_interface_flags (PyGIInvokeState   *state,
         goto err;
     }
 
-    c_long = PYGLIB_PyLong_AsLong (py_long);
+    c_ulong = PYGLIB_PyLong_AsUnsignedLong (py_long);
     Py_DECREF (py_long);
 
     /* only 0 or argument of type Flag is allowed */
-    if (!is_instance && c_long != 0)
+    if (!is_instance && c_ulong != 0)
         goto err;
 
     /* Write c_long into arg */
     interface = g_type_info_get_interface (arg_cache->type_info);
     g_assert (g_base_info_get_type (interface) == GI_INFO_TYPE_FLAGS);
-    if (!gi_argument_from_c_long(arg, c_long,
+    if (!gi_argument_from_c_long(arg, c_ulong,
                                  g_enum_info_get_storage_type ((GIEnumInfo *)interface))) {
         g_base_info_unref (interface);
         return FALSE;
