@@ -1,3 +1,12 @@
+3.26.0  12-Sep-2017
+        - configure.ac: pre-release version bump to 3.26.0 (Christoph Reiter)
+        - closure: silence a new compiler warning (Christoph Reiter)
+        - tests: skip some failing test under Windows with Python 3.6 (Christoph Reiter)
+        - tests: pyflakes/pep8 fixes (Christoph Reiter)
+        - tests: Fix cairo test with pycairo >= 1.13 (Christoph Reiter)
+        - Make sure version information passed to require_version is a string. (Benjamin Berg) (#781582)
+        - configure.ac: post-release version bump to 3.25.2 (Christoph Reiter)
+
 3.25.1  21-Apr-2017
         - Bump pycairo requirement to 1.11.1 (Christoph Reiter) (#707196)
         - configure.ac: Always disable -Werror (Christoph Reiter)
