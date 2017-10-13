@@ -695,6 +695,13 @@ class TestFilename(unittest.TestCase):
     @unittest.skipIf(os.name == "nt", "fixme")
     def test_filename_in(self):
         fname = os.path.join(self.workdir, u'testäø.txt')
+
+        try:
+            os.path.exists(fname)
+        except ValueError:
+            # non-unicode fs encoding
+            return
+
         self.assertRaises(GLib.GError, GLib.file_get_contents, fname)
 
         with open(fname.encode('UTF-8'), 'wb') as f:
@@ -711,8 +718,15 @@ class TestFilename(unittest.TestCase):
     @unittest.skipIf(os.name == "nt", "fixme")
     def test_filename_out(self):
         self.assertRaises(GLib.GError, GLib.Dir.make_tmp, 'test')
+        name = 'testäø.XXXXXX'
 
-        dirname = GLib.Dir.make_tmp('testäø.XXXXXX')
+        try:
+            os.path.exists(name)
+        except ValueError:
+            # non-unicode fs encoding
+            return
+
+        dirname = GLib.Dir.make_tmp(name)
         self.assertTrue(os.path.sep + 'testäø.' in dirname, dirname)
         self.assertTrue(os.path.isdir(dirname))
         os.rmdir(dirname)
@@ -857,7 +871,8 @@ class TestFilename(unittest.TestCase):
         wd = self.workdir
         wdb = os.fsencode(wd) if PY3 else wd
 
-        paths = [(wdb, b"foo-1"), (wd, u"foo-2"), (wd, u"öäü-3")]
+        paths = [(wdb, b"foo-1"), (wd, u"foo-2"), (wd, u"öäü-3"),
+                 (wdb, b"\xff\xfe-5")]
         if PY3:
             try:
                 paths.append((wd, os.fsdecode(b"\xff\xfe-4")))
@@ -865,10 +880,16 @@ class TestFilename(unittest.TestCase):
                 # depends on the code page
                 pass
 
-        if os.name != "nt":
-            paths.append((wdb, b"\xff\xfe-5"))
+        def valid_path(p):
+            try:
+                os.path.exists(p)
+            except ValueError:
+                return False
+            return True
 
         for (d, path) in paths:
+            if not valid_path(path):
+                continue
             path = os.path.join(d, path)
             with open(path, "wb"):
                 self.assertTrue(GIMarshallingTests.filename_exists(path))
