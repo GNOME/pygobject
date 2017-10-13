@@ -871,14 +871,16 @@ class TestFilename(unittest.TestCase):
         wd = self.workdir
         wdb = os.fsencode(wd) if PY3 else wd
 
-        paths = [(wdb, b"foo-1"), (wd, u"foo-2"), (wd, u"öäü-3"),
-                 (wdb, b"\xff\xfe-5")]
+        paths = [(wdb, b"foo-1"), (wd, u"foo-2"), (wd, u"öäü-3")]
         if PY3:
             try:
                 paths.append((wd, os.fsdecode(b"\xff\xfe-4")))
             except UnicodeDecodeError:
                 # depends on the code page
                 pass
+
+        if os.name != "nt":
+            paths.append((wdb, b"\xff\xfe-5"))
 
         def valid_path(p):
             try:

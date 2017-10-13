@@ -7,6 +7,7 @@ import traceback
 import ctypes
 import warnings
 import sys
+import os
 
 from gi.repository import Regress as Everything
 from gi.repository import GObject
@@ -19,6 +20,7 @@ try:
 except:
     Gtk = None
 
+from compathelper import PY3
 from helper import capture_exceptions
 
 
@@ -246,7 +248,11 @@ class TestEverything(unittest.TestCase):
         self.assertEqual(Everything.test_utf8_inout(const_str), noconst_str)
 
     def test_filename_return(self):
-        self.assertEqual(Everything.test_filename_return(), ['åäö', '/etc/fstab'])
+        if PY3:
+            result = [os.fsdecode(b'\xc3\xa5\xc3\xa4\xc3\xb6'), '/etc/fstab']
+        else:
+            result = ['åäö', '/etc/fstab']
+        self.assertEqual(Everything.test_filename_return(), result)
 
     def test_int_out_utf8(self):
         # returns g_utf8_strlen() in out argument
