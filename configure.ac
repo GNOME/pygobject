@@ -194,7 +194,6 @@ AX_CODE_COVERAGE()
 AC_CONFIG_FILES(
   Makefile
   pygobject-3.0.pc
-  pygobject-3.0-uninstalled.pc
   gi/Makefile
   gi/repository/Makefile
   gi/overrides/Makefile
