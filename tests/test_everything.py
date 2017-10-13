@@ -248,7 +248,7 @@ class TestEverything(unittest.TestCase):
         self.assertEqual(Everything.test_utf8_inout(const_str), noconst_str)
 
     def test_filename_return(self):
-        if PY3:
+        if PY3 and os.name != "nt":
             result = [os.fsdecode(b'\xc3\xa5\xc3\xa4\xc3\xb6'), '/etc/fstab']
         else:
             result = ['åäö', '/etc/fstab']
