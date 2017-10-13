@@ -87,6 +87,13 @@ endif
 # python
 pyexec_LTLIBRARIES =
 
+EGG_NAME = $(PACKAGE)-$(PACKAGE_VERSION)-py$(PYTHON_VERSION)
+install-data-local:
+	$(mkinstalldirs) $(DESTDIR)$(pyexecdir)
+	cp $(top_builddir)/PKG-INFO $(DESTDIR)$(pyexecdir)/$(EGG_NAME).egg-info
+uninstall-local:
+	rm -f $(DESTDIR)$(pyexecdir)/$(EGG_NAME).egg-info
+
 release-news:
 	printf "%-8s%s\n" "$(VERSION)" "`LC_TIME=C date '+%d-%b-%Y'`" > NEWS.tmp
 
