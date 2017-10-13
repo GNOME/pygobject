@@ -208,6 +208,7 @@ _pygi_closure_convert_ffi_arguments (PyGIInvokeArgState *state,
 
     for (i = 0; i < _pygi_callable_cache_args_len (cache); i++) {
         PyGIArgCache *arg_cache = g_ptr_array_index (cache->args_cache, i);
+        gpointer arg_pointer;
 
         if (arg_cache->direction & PYGI_DIRECTION_FROM_PYTHON) {
             state[i].arg_value.v_pointer = * (gpointer *) args[i];
@@ -216,46 +217,47 @@ _pygi_closure_convert_ffi_arguments (PyGIInvokeArgState *state,
                 continue;
 
             state[i].arg_pointer.v_pointer = state[i].arg_value.v_pointer;
-            state[i].arg_value = *(GIArgument *) state[i].arg_value.v_pointer;
-            continue;
+            arg_pointer = state[i].arg_value.v_pointer;
+        } else {
+            arg_pointer = args[i];
         }
 
         switch (arg_cache->type_tag) {
             case GI_TYPE_TAG_BOOLEAN:
-                state[i].arg_value.v_boolean = * (gboolean *) args[i];
+                state[i].arg_value.v_boolean = * (gboolean *) arg_pointer;
                 break;
             case GI_TYPE_TAG_INT8:
-                state[i].arg_value.v_int8 = * (gint8 *) args[i];
+                state[i].arg_value.v_int8 = * (gint8 *) arg_pointer;
                 break;
             case GI_TYPE_TAG_UINT8:
-                state[i].arg_value.v_uint8 = * (guint8 *) args[i];
+                state[i].arg_value.v_uint8 = * (guint8 *) arg_pointer;
                 break;
             case GI_TYPE_TAG_INT16:
-                state[i].arg_value.v_int16 = * (gint16 *) args[i];
+                state[i].arg_value.v_int16 = * (gint16 *) arg_pointer;
                 break;
             case GI_TYPE_TAG_UINT16:
-                state[i].arg_value.v_uint16 = * (guint16 *) args[i];
+                state[i].arg_value.v_uint16 = * (guint16 *) arg_pointer;
                 break;
             case GI_TYPE_TAG_INT32:
-                state[i].arg_value.v_int32 = * (gint32 *) args[i];
+                state[i].arg_value.v_int32 = * (gint32 *) arg_pointer;
                 break;
             case GI_TYPE_TAG_UINT32:
-                state[i].arg_value.v_uint32 = * (guint32 *) args[i];
+                state[i].arg_value.v_uint32 = * (guint32 *) arg_pointer;
                 break;
             case GI_TYPE_TAG_INT64:
-                state[i].arg_value.v_int64 = * (glong *) args[i];
+                state[i].arg_value.v_int64 = * (glong *) arg_pointer;
                 break;
             case GI_TYPE_TAG_UINT64:
-                state[i].arg_value.v_uint64 = * (glong *) args[i];
+                state[i].arg_value.v_uint64 = * (glong *) arg_pointer;
                 break;
             case GI_TYPE_TAG_FLOAT:
-                state[i].arg_value.v_float = * (gfloat *) args[i];
+                state[i].arg_value.v_float = * (gfloat *) arg_pointer;
                 break;
             case GI_TYPE_TAG_DOUBLE:
-                state[i].arg_value.v_double = * (gdouble *) args[i];
+                state[i].arg_value.v_double = * (gdouble *) arg_pointer;
                 break;
             case GI_TYPE_TAG_UTF8:
-                state[i].arg_value.v_string = * (gchar **) args[i];
+                state[i].arg_value.v_string = * (gchar **) arg_pointer;
                 break;
             case GI_TYPE_TAG_INTERFACE:
             {
@@ -266,16 +268,16 @@ _pygi_closure_convert_ffi_arguments (PyGIInvokeArgState *state,
                 interface_type = g_base_info_get_type (interface);
 
                 if (interface_type == GI_INFO_TYPE_ENUM) {
-                    state[i].arg_value.v_int = * (gint *) args[i];
+                    state[i].arg_value.v_int = * (gint *) arg_pointer;
                 } else if (interface_type == GI_INFO_TYPE_FLAGS) {
-                    state[i].arg_value.v_uint = * (guint *) args[i];
+                    state[i].arg_value.v_uint = * (guint *) arg_pointer;
                 } else {
-                    state[i].arg_value.v_pointer = * (gpointer *) args[i];
+                    state[i].arg_value.v_pointer = * (gpointer *) arg_pointer;
                 }
                 break;
             }
             case GI_TYPE_TAG_UNICHAR:
-                state[i].arg_value.v_uint32 = * (guint32 *) args[i];
+                state[i].arg_value.v_uint32 = * (guint32 *) arg_pointer;
                 break;
             case GI_TYPE_TAG_ERROR:
             case GI_TYPE_TAG_GHASH:
@@ -283,7 +285,7 @@ _pygi_closure_convert_ffi_arguments (PyGIInvokeArgState *state,
             case GI_TYPE_TAG_GSLIST:
             case GI_TYPE_TAG_ARRAY:
             case GI_TYPE_TAG_VOID:
-                state[i].arg_value.v_pointer = * (gpointer *) args[i];
+                state[i].arg_value.v_pointer = * (gpointer *) arg_pointer;
                 break;
             default:
                 g_warning ("Unhandled type tag %s",
