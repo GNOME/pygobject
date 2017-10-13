@@ -1,4 +1,21 @@
-2.28.6 11-Jun-1011
+2.28.7 13-Oct-2017
+        - Move property and signal creation into _class_init() (Martin Pitt)
+        - gio-types.defs: change some enums to flags (Ryan Lortie)
+        - Fix set_qdata warning on accessing NULL gobject property (Ivan Stankovic)
+        - Disable introspection support by default (Dieter Verfaillie)
+        - Don't install codegen for Python 3 (Arfrever Frehtes Taifersar Arahesis)
+        - Ship tests/te_ST@nouppera in release tarballs for tests to succeed (Martin Pitt)
+        - [gi] Port test_properties from static gio to GI Gio (Martin Pitt)
+        - [python3] fix build. PYcairo_IMPORT doesn't exists anymore (Ignacio Casal Quinteiro)
+        - [python3] Fix maketrans import (Martin Pitt)
+        - [gi-overrides] fix MessageBox so it correctly handles the type constructor param (John (J5) Palmieri)
+        - gdbus tests: Fix hang if test case fails (Martin Pitt)
+        - Fix crash in Gtk.TextIter overrides (Martin Pitt)
+        - correctly initialize the _gi_cairo_functions array to be zero filled (John (J5) Palmieri)
+        - [gtk-override] print warning if user imports Gtk 2.0 (John (J5) Palmieri)
+        - Add support for enums in gobject.property (Johan Dahlin)
+
+2.28.6 11-Jun-2011
         - closure: avoid double free crash (Ignacio Casal Quinteiro)
         - [gi] backport of "GVariant has a GType" fe386a (John (J5) Palmieri)
         - [gi] fixes to backport commit 6b5a65 - in older glib GVariants are still structs (John (J5) Palmieri)
