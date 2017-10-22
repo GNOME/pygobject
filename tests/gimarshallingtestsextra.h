@@ -37,4 +37,6 @@ gchar * gi_marshalling_tests_filename_copy (gchar *path_in);
 gboolean gi_marshalling_tests_filename_exists (gchar *path);
 gchar * gi_marshalling_tests_filename_to_glib_repr (gchar *path_in, gsize *len);
 
+GIMarshallingTestsExtraEnum * gi_marshalling_tests_enum_array_return_type (gsize *n_members);
+
 #endif /* EXTRA_TESTS */

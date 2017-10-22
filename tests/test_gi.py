@@ -1071,6 +1071,12 @@ class TestArray(unittest.TestCase):
         self.assertEqual((True, ['hello']),
                          GIMarshallingTests.init_function(['hello', 'world']))
 
+    def test_enum_array_return_type(self):
+        self.assertEqual(GIMarshallingTests.enum_array_return_type(),
+                         [GIMarshallingTests.ExtraEnum.VALUE1,
+                          GIMarshallingTests.ExtraEnum.VALUE2,
+                          GIMarshallingTests.ExtraEnum.VALUE3])
+
 
 class TestGStrv(unittest.TestCase):
 
