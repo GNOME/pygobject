@@ -618,6 +618,9 @@ _pygi_marshal_to_py_array (PyGIInvokeState   *state,
                                 item_arg.v_pointer = array_->data + i * item_size;
                             }
                             break;
+                        case GI_INFO_TYPE_ENUM:
+                            memcpy (&item_arg, array_->data + i * item_size, item_size);
+                            break;
                         default:
                             item_arg.v_pointer = g_array_index (array_, gpointer, i);
                             break;

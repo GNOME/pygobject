@@ -104,3 +104,24 @@ gi_marshalling_tests_filename_exists (gchar *path)
 {
   return g_file_test (path, G_FILE_TEST_EXISTS);
 }
+
+
+/**
+ * gi_marshalling_tests_enum_array_return_type:
+ * @n_members: (out): The number of members
+ *
+ * Returns: (array length=n_members) (transfer full): An array of enum values
+ */
+GIMarshallingTestsExtraEnum *
+gi_marshalling_tests_enum_array_return_type (gsize *n_members)
+{
+  GIMarshallingTestsExtraEnum *res = g_new0(GIMarshallingTestsExtraEnum, 3);
+
+  *n_members = 3;
+
+  res[0] = GI_MARSHALLING_TESTS_EXTRA_ENUM_VALUE1;
+  res[1] = GI_MARSHALLING_TESTS_EXTRA_ENUM_VALUE2;
+  res[2] = GI_MARSHALLING_TESTS_EXTRA_ENUM_VALUE3;
+
+  return res;
+}
