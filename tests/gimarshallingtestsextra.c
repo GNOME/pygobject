@@ -125,3 +125,32 @@ gi_marshalling_tests_enum_array_return_type (gsize *n_members)
 
   return res;
 }
+
+GType
+gi_marshalling_tests_extra_flags_get_type (void)
+{
+  static GType type = 0;
+  if (G_UNLIKELY (type == 0))
+    {
+      static const GFlagsValue values[] = {
+        {GI_MARSHALLING_TESTS_EXTRA_FLAGS_VALUE1,
+         "GI_MARSHALLING_TESTS_EXTRA_FLAGS_VALUE1", "value1"},
+        {GI_MARSHALLING_TESTS_EXTRA_FLAGS_VALUE2,
+         "GI_MARSHALLING_TESTS_EXTRA_FLAGS_VALUE2", "value2"},
+        {0, NULL, NULL}
+      };
+      type = g_flags_register_static (
+        g_intern_static_string ("GIMarshallingTestsExtraFlags"), values);
+    }
+
+  return type;
+}
+
+/**
+ * gi_marshalling_tests_extra_flags_large_in:
+ */
+void
+gi_marshalling_tests_extra_flags_large_in (GIMarshallingTestsExtraFlags value)
+{
+  g_assert_cmpint (value, ==, GI_MARSHALLING_TESTS_EXTRA_FLAGS_VALUE2);
+}
