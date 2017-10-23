@@ -29,6 +29,15 @@ typedef enum
 } GIMarshallingTestsExtraEnum;
 
 
+typedef enum
+{
+  GI_MARSHALLING_TESTS_EXTRA_FLAGS_VALUE1 = 0,
+  GI_MARSHALLING_TESTS_EXTRA_FLAGS_VALUE2 = (gint)(1 << 31),
+} GIMarshallingTestsExtraFlags;
+
+GType gi_marshalling_tests_extra_flags_get_type (void) G_GNUC_CONST;
+#define GI_MARSHALLING_TESTS_TYPE_EXTRA_FLAGS (gi_marshalling_tests_extra_flags_get_type ())
+
 void gi_marshalling_tests_compare_two_gerrors_in_gvalue (GValue *v, GValue *v1);
 void gi_marshalling_tests_ghashtable_enum_none_in (GHashTable *hash_table);
 GHashTable * gi_marshalling_tests_ghashtable_enum_none_return (void);
@@ -38,5 +47,7 @@ gboolean gi_marshalling_tests_filename_exists (gchar *path);
 gchar * gi_marshalling_tests_filename_to_glib_repr (gchar *path_in, gsize *len);
 
 GIMarshallingTestsExtraEnum * gi_marshalling_tests_enum_array_return_type (gsize *n_members);
+
+void gi_marshalling_tests_extra_flags_large_in (GIMarshallingTestsExtraFlags value);
 
 #endif /* EXTRA_TESTS */
