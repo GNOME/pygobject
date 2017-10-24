@@ -730,7 +730,7 @@ PYGLIB_MODULE_START(_gi, "_gi")
     /* Place holder object used to fill in "from Python" argument lists
      * for values not supplied by the caller but support a GI default.
      */
-    _PyGIDefaultArgPlaceholder = PyObject_New(PyObject, &PyType_Type);
+    _PyGIDefaultArgPlaceholder = PyList_New(0);
 
     Py_INCREF (PyGIWarning);
     PyModule_AddObject (module, "PyGIWarning", PyGIWarning);
