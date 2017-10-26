@@ -1865,7 +1865,6 @@ class TestGFlags(unittest.TestCase):
                          "GIMarshallingTests.Flags>")
 
     def test_flags_large_in(self):
-        self.assertEqual(int(GIMarshallingTests.ExtraFlags.VALUE2), 1 << 31)
         GIMarshallingTests.extra_flags_large_in(
             GIMarshallingTests.ExtraFlags.VALUE2)
 
