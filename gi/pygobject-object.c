@@ -1168,8 +1168,10 @@ pygobject_traverse(PyGObject *self, visitproc visit, void *arg)
     if (self->inst_dict) ret = visit(self->inst_dict, arg);
     if (ret != 0) return ret;
 
-    if (data) {
-
+    /* Only let the GC track the closures when tp_clear() would free them.
+     * https://bugzilla.gnome.org/show_bug.cgi?id=731501
+     */
+    if (data && self->obj->ref_count == 1) {
         for (tmp = data->closures; tmp != NULL; tmp = tmp->next) {
             PyGClosure *closure = tmp->data;
 

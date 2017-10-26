@@ -5,7 +5,7 @@ import unittest
 import sys
 import weakref
 
-from gi.repository import GObject, GLib, Regress
+from gi.repository import GObject, GLib, Regress, Gio
 from gi import _signalhelper as signalhelper
 import testhelper
 from compathelper import _long
@@ -1464,6 +1464,33 @@ class TestRefCountsNonIntrospected(unittest.TestCase, _RefCountTestBase):
 
 class TestRefCountsIntrospected(unittest.TestCase, _RefCountTestBase):
     Object = Regress.TestObj
+
+
+class TestClosureRefCycle(unittest.TestCase):
+
+    def test_closure_ref_cycle_unreachable(self):
+        # https://bugzilla.gnome.org/show_bug.cgi?id=731501
+
+        called = []
+
+        def on_add(store, *args):
+            called.append(store)
+
+        store = Gio.ListStore()
+        store.connect_object('items-changed', on_add, store)
+
+        # Remove all Python references to the object and keep it alive
+        # on the C level.
+        x = Gio.FileInfo()
+        x.set_attribute_object('store', store)
+        del store
+        gc.collect()
+
+        # get it back and trigger the signal
+        x.get_attribute_object('store').append(Gio.FileInfo())
+
+        self.assertEqual(len(called), 1)
+        self.assertTrue(called[0].__grefcount__ > 0)
 
 
 if __name__ == '__main__':
