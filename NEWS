@@ -1,3 +1,14 @@
+3.26.1  27-Oct-2017
+        - pygobject-object: Fix Python GC collecting a ref cycle too early (Christoph Reiter) (#731501)
+        - Fix potential uninitialized memory access during GC (Daniel Colascione) (#786872)
+        - test: revert parts of the previous test as it's broken on 32 bit builds (Christoph Reiter) (#786948)
+        - flags: Add testcase for bug 786948 (Christoph Reiter) (#786948)
+        - fix potential overflow when marshalling flags from py interface (Philippe Renon) (#786948)
+        - to_py_array: Properly handle enum array items (Christoph Reiter) (#788890)
+        - closure: Fix unaligned and out-of-bounds access (James Clarke) (#788894)
+        - build: Fix not installing .egg-info file (Christoph Reiter) (#777719)
+        - configure.ac: version bump to 3.26.1 (Christoph Reiter)
+
 3.26.0  12-Sep-2017
         - configure.ac: pre-release version bump to 3.26.0 (Christoph Reiter)
         - closure: silence a new compiler warning (Christoph Reiter)
