@@ -24,6 +24,7 @@ import sys
 import warnings
 
 from gi.repository import GObject
+from .._ossighelper import wakeup_on_signal
 from ..overrides import override, strip_boolean_result, deprecated_init
 from ..module import get_introspection_module
 from gi import PyGIDeprecationWarning
@@ -542,6 +543,10 @@ class Dialog(Gtk.Dialog, Container):
 
         if add_buttons:
             self.add_buttons(*add_buttons)
+
+    def run(self, *args, **kwargs):
+        with wakeup_on_signal():
+            return Gtk.Dialog.run(self, *args, **kwargs)
 
     action_area = property(lambda dialog: dialog.get_action_area())
     vbox = property(lambda dialog: dialog.get_content_area())
@@ -1592,6 +1597,15 @@ _Gtk_main_quit = Gtk.main_quit
 @override(Gtk.main_quit)
 def main_quit(*args):
     _Gtk_main_quit()
+
+
+_Gtk_main = Gtk.main
+
+
+@override(Gtk.main)
+def main(*args, **kwargs):
+    with wakeup_on_signal():
+        return _Gtk_main(*args, **kwargs)
 
 
 if Gtk._version in ("2.0", "3.0"):

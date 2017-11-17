@@ -144,6 +144,7 @@ EXTRA_DIST = \
 	test_docstring.py \
 	test_repository.py \
 	test_resulttuple.py \
+	test_ossig.py \
 	compat_test_pygtk.py \
 	gi/__init__.py \
 	gi/overrides/__init__.py \

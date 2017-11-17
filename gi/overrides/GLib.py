@@ -24,6 +24,7 @@ import warnings
 import sys
 import socket
 
+from .._ossighelper import wakeup_on_signal
 from ..module import get_introspection_module
 from .._gi import (variant_type_from_string, source_new,
                    source_set_callback, io_channel_read)
@@ -582,7 +583,8 @@ class MainLoop(GLib.MainLoop):
             GLib.source_remove(self._signal_source)
 
     def run(self):
-        super(MainLoop, self).run()
+        with wakeup_on_signal():
+            super(MainLoop, self).run()
         if hasattr(self, '_quit_by_sigint'):
             # caught by _main_loop_sigint_handler()
             raise KeyboardInterrupt

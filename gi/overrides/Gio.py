@@ -20,6 +20,7 @@
 
 import warnings
 
+from .._ossighelper import wakeup_on_signal
 from ..overrides import override, deprecated_init
 from ..module import get_introspection_module
 from gi import PyGIWarning
@@ -31,6 +32,17 @@ import sys
 Gio = get_introspection_module('Gio')
 
 __all__ = []
+
+
+class Application(Gio.Application):
+
+    def run(self, *args, **kwargs):
+        with wakeup_on_signal():
+            return Gio.Application.run(self, *args, **kwargs)
+
+
+Application = override(Application)
+__all__.append('Application')
 
 
 class VolumeMonitor(Gio.VolumeMonitor):
