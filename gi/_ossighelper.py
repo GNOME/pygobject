@@ -20,6 +20,8 @@ import os
 import sys
 import socket
 import signal
+import ctypes
+import threading
 from contextlib import closing, contextmanager
 
 
@@ -135,3 +137,116 @@ def wakeup_on_signal():
                 # so let's re-revert again.
                 signal.set_wakeup_fd(write_fd)
             _wakeup_fd_is_active = False
+
+
+pydll = ctypes.PyDLL(None)
+PyOS_getsig = pydll.PyOS_getsig
+PyOS_getsig.restype = ctypes.c_void_p
+PyOS_getsig.argtypes = [ctypes.c_int]
+
+# We save the signal pointer so we can detect if glib has changed the
+# signal handler behind Python's back (GLib.unix_signal_add)
+if signal.getsignal(signal.SIGINT) is signal.default_int_handler:
+    startup_sigint_ptr = PyOS_getsig(signal.SIGINT)
+else:
+    # Something has set the handler before import, we can't get a ptr
+    # for the default handler so make sure the pointer will never match.
+    startup_sigint_ptr = -1
+
+
+def sigint_handler_is_default():
+    """Returns if on SIGINT the default Python handler would be called"""
+
+    return (signal.getsignal(signal.SIGINT) is signal.default_int_handler and
+            PyOS_getsig(signal.SIGINT) == startup_sigint_ptr)
+
+
+@contextmanager
+def sigint_handler_set_and_restore_default(handler):
+    """Context manager for saving/restoring the SIGINT handler default state.
+
+    Will only restore the default handler again if the handler is not changed
+    while the context is active.
+    """
+
+    assert sigint_handler_is_default()
+
+    signal.signal(signal.SIGINT, handler)
+    sig_ptr = PyOS_getsig(signal.SIGINT)
+    try:
+        yield
+    finally:
+        if signal.getsignal(signal.SIGINT) is handler and \
+                PyOS_getsig(signal.SIGINT) == sig_ptr:
+            signal.signal(signal.SIGINT, signal.default_int_handler)
+
+
+def is_main_thread():
+    """Returns True in case the function is called from the main thread"""
+
+    return threading.current_thread().name == "MainThread"
+
+
+_callback_stack = []
+_sigint_called = False
+
+
+@contextmanager
+def register_sigint_fallback(callback):
+    """Installs a SIGINT signal handler in case the default Python one is
+    active which calls 'callback' in case the signal occurs.
+
+    Only does something if called from the main thread.
+
+    In case of nested context managers the signal handler will be only
+    installed once and the callbacks will be called in the reverse order
+    of their registration.
+
+    The old signal handler will be restored in case no signal handler is
+    registered while the context is active.
+    """
+
+    # To handle multiple levels of event loops we need to call the last
+    # callback first, wait until the inner most event loop returns control
+    # and only then call the next callback, and so on... until we
+    # reach the outer most which manages the signal handler and raises
+    # in the end
+
+    global _callback_stack, _sigint_called
+
+    if not is_main_thread():
+        yield
+        return
+
+    if not sigint_handler_is_default():
+        if _callback_stack:
+            # This is an inner event loop, append our callback
+            # to the stack so the parent context can call it.
+            _callback_stack.append(callback)
+            try:
+                yield
+            finally:
+                if _sigint_called:
+                    _callback_stack.pop()()
+        else:
+            # There is a signal handler set by the user, just do nothing
+            yield
+        return
+
+    _sigint_called = False
+
+    def sigint_handler(sig_num, frame):
+        global _callback_stack, _sigint_called
+
+        if _sigint_called:
+            return
+        _sigint_called = True
+        _callback_stack.pop()()
+
+    _callback_stack.append(callback)
+    with sigint_handler_set_and_restore_default(sigint_handler):
+        try:
+            yield
+        finally:
+            if _sigint_called:
+                signal.default_int_handler()

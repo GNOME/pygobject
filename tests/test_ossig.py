@@ -21,7 +21,7 @@ import threading
 from contextlib import contextmanager
 
 from gi.repository import Gtk, Gio, GLib
-from gi._ossighelper import wakeup_on_signal
+from gi._ossighelper import wakeup_on_signal, register_sigint_fallback
 
 
 class TestOverridesWakeupOnAlarm(unittest.TestCase):
@@ -100,3 +100,74 @@ class TestOverridesWakeupOnAlarm(unittest.TestCase):
 
         with self._run_with_timeout(2000, d.destroy):
             d.run()
+
+
+class TestSigintFallback(unittest.TestCase):
+
+    def setUp(self):
+        self.assertEqual(
+            signal.getsignal(signal.SIGINT), signal.default_int_handler)
+
+    def tearDown(self):
+        self.assertEqual(
+            signal.getsignal(signal.SIGINT), signal.default_int_handler)
+
+    def test_replace_handler_and_restore_nested(self):
+        with register_sigint_fallback(lambda: None):
+            new_handler = signal.getsignal(signal.SIGINT)
+            self.assertNotEqual(new_handler, signal.default_int_handler)
+            with register_sigint_fallback(lambda: None):
+                self.assertTrue(signal.getsignal(signal.SIGINT) is new_handler)
+        self.assertEqual(
+            signal.getsignal(signal.SIGINT), signal.default_int_handler)
+
+    def test_no_replace_if_not_default(self):
+        new_handler = lambda *args: None
+        signal.signal(signal.SIGINT, new_handler)
+        try:
+            with register_sigint_fallback(lambda: None):
+                self.assertTrue(signal.getsignal(signal.SIGINT) is new_handler)
+                with register_sigint_fallback(lambda: None):
+                    self.assertTrue(
+                        signal.getsignal(signal.SIGINT) is new_handler)
+            self.assertTrue(signal.getsignal(signal.SIGINT) is new_handler)
+        finally:
+            signal.signal(signal.SIGINT, signal.default_int_handler)
+
+    def test_noop_in_threads(self):
+        failed = []
+
+        def target():
+            try:
+                with register_sigint_fallback(lambda: None):
+                    with register_sigint_fallback(lambda: None):
+                        self.assertTrue(
+                            signal.getsignal(signal.SIGINT) is
+                            signal.default_int_handler)
+            except:
+                failed.append(1)
+
+        t = threading.Thread(target=target)
+        t.start()
+        t.join(5)
+        self.assertFalse(failed)
+
+    @unittest.skipIf(os.name == "nt", "not on Windows")
+    def test_no_replace_if_set_by_glib(self):
+        id_ = GLib.unix_signal_add(
+            GLib.PRIORITY_DEFAULT, signal.SIGINT, lambda *args: None)
+        try:
+            # signal.getsignal() doesn't pick up that unix_signal_add()
+            # has changed the handler, but we should anyway.
+            self.assertEqual(
+                signal.getsignal(signal.SIGINT), signal.default_int_handler)
+            with register_sigint_fallback(lambda: None):
+                self.assertEqual(
+                    signal.getsignal(signal.SIGINT),
+                    signal.default_int_handler)
+            self.assertEqual(
+                signal.getsignal(signal.SIGINT), signal.default_int_handler)
+        finally:
+            GLib.source_remove(id_)
+            signal.signal(signal.SIGINT, signal.SIG_DFL)
+            signal.signal(signal.SIGINT, signal.default_int_handler)
