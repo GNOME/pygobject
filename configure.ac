@@ -26,6 +26,7 @@ m4_define(introspection_required_version, 1.46.0)
 m4_define(pycairo_required_version, 1.11.1)
 m4_define(glib_required_version, 2.38.0)
 m4_define(gio_required_version, 2.38.0)
+m4_define(libffi_required_version, 3.0)
 
 AC_INIT([pygobject],[pygobject_version],
 	[http://bugzilla.gnome.org/enter_bug.cgi?product=pygobject],
@@ -131,7 +132,7 @@ PYTHON_VALGRIND_SUPP=`$PYTHON -c "import sys; sys.stdout.write('python' + sys.ve
 AC_SUBST([PYTHON_VALGRIND_SUPP])
 
 dnl libffi
-PKG_CHECK_MODULES(FFI, libffi >= 3.0)
+PKG_CHECK_MODULES(FFI, libffi >= libffi_required_version)
 LIBFFI_PC=libffi
 
 AC_SUBST(FFI_CFLAGS)

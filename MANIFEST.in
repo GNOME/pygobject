@@ -1,0 +1,20 @@
+include *.am
+include AUTHORS
+include autogen.sh
+include configure.ac
+include COPYING
+include HACKING
+include *.in
+include INSTALL
+include m4/introspection.m4
+include m4/python.m4
+include NEWS
+include pre-commit.hook
+include pygi-convert.sh
+include pygobject.doap
+include README
+recursive-include demos *.py *.png *.css *.ui *.gif *.gresource *.jpg *.xml
+recursive-include examples *.py *.am
+recursive-include gi *.am *.h
+recursive-include pygtkcompat *.am
+recursive-include tests *.py *.c *.h *.xml *.supp *nouppera *.am

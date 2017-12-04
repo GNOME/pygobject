@@ -20,7 +20,8 @@ EXTRA_DIST = \
 	pygi-convert.sh \
 	m4/python.m4 \
 	m4/introspection.m4 \
-	setup.py
+	setup.py \
+	MANIFEST.in
 
 MAINTAINERCLEANFILES = \
 	$(srcdir)/INSTALL \

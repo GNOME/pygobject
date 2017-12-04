@@ -76,3 +76,4 @@ Makefile.in
 /build/
 /dist/
 /pygobject.egg-info/
+/MANIFEST
