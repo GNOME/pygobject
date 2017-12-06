@@ -11,8 +11,7 @@ include NEWS
 include pygi-convert.sh
 include pygobject.doap
 include README
-recursive-include demos *.py *.png *.css *.ui *.gif *.gresource *.jpg *.xml
-recursive-include examples *.py *.am
+recursive-include examples *.py *.am *.png *.css *.ui *.gif *.gresource *.jpg *.xml
 recursive-include gi *.am *.h
 recursive-include pygtkcompat *.am
 recursive-include tests *.py *.c *.h *.xml *.supp *nouppera *.am

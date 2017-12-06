@@ -1,1 +1,6 @@
-EXTRA_DIST = properties.py signal.py option.py cairo-demo.py
+EXTRA_DIST = \
+	properties.py \
+	signal.py \
+	option.py \
+	cairo-demo.py \
+	demo
