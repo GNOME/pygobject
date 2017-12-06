@@ -10,7 +10,7 @@ include m4/python.m4
 include NEWS
 include pygi-convert.sh
 include pygobject.doap
-include README
+include README.rst
 recursive-include examples *.py *.am *.png *.css *.ui *.gif *.gresource *.jpg *.xml
 recursive-include gi *.am *.h
 recursive-include pygtkcompat *.am

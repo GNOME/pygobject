@@ -1,15 +1,6 @@
+=========
 PyGObject
-=====
-Original authors:   James Henstridge <james@daa.com.au>
-                    Johan Dahlin <johan@gnome.org>
-
-Current maintainers:  Tomeu Vizoso <tomeu.vizoso@collabora.co.uk>
-                      Martin Pitt <martinpitt@gnome.org>
-                      Paolo Borelli <pborelli@gnome.org>
-                      Ignacio Casal Quinteiro <icq@gnome.org>
-                      Sebastian Pölsterl <sebp@k-d-w.org>
-                      Simon Feltman <sfeltman@gnome.org>
-                      Christoph Reiter <reiter.christoph@gmail.com>
+=========
 
 This archive contains bindings for the GLib, and GObject,
 to be used in Python. It is a fairly complete set of bindings,
@@ -19,7 +10,8 @@ of the simpler programs you could write).
 
 If you have any enhancements or bug reports, please file them in
 bugzilla at:
-  http://bugzilla.gnome.org/enter_bug.cgi?product=pygobject
+
+    http://bugzilla.gnome.org/enter_bug.cgi?product=pygobject
 
 If you have a patch, file the bug first and then use the "create new
 attachment" link on the bug's info page.  My preferred format for
@@ -27,11 +19,13 @@ patches is unified diff format (ie. diff -u).  Please don't send me
 diffs which don't have any context, as these make it very difficult to
 see what the patch does.
 
+
 New Versions
 ============
 
 New versions of this package can be found at:
-  http://ftp.gnome.org/pub/GNOME/sources/pygobject/
+
+    http://ftp.gnome.org/pub/GNOME/sources/pygobject/
 
 
 Mailing list
@@ -42,13 +36,16 @@ You can subscribe to it through the web interface:
 
   https://mail.gnome.org/mailman/listinfo/python-hackers-list/
 
+
 Requirements
 ============
+
   * C compiler (GCC and MSVC supported)
   * Python 2.7 or higher
   * Glib/Gio 2.38.0 or higher
   * gobject-introspection 1.46.0 or higher
   * libffi (optional)
+
 
 Copyright Information
 =====================
@@ -57,11 +54,12 @@ This software is covered by the GNU Lesser General Public Licence
 (version 2.1, or if you choose, a later version).  Basically just don't
 say you wrote bits you didn't.
 
+
 Compilation
 ===========
 
 PyGObject uses the standard autotools for the build infrastructure.  To
-build, it should be as simple as running:
+build, it should be as simple as running::
 
     $ ./configure --prefix=<prefix where python is installed>
     $ make
@@ -71,11 +69,11 @@ By default, configure searches for a few well-known Python interpreter
 names, such as "python3", "python2", "python2.7", or "python".  If your
 Python interpreter isn't in the path, or is not called "python", you can
 configure pygobject to build against that with --with-python=<path> or
-setting the PYTHON environment variable:
+setting the PYTHON environment variable::
 
-   $ ./configure --with-python=python3
-   $ PYTHON=python3.2 ./configure
-   $ ./configure --with-python=~/my-patched-python/python
+    $ ./configure --with-python=python3
+    $ PYTHON=python3.2 ./configure
+    $ ./configure --with-python=~/my-patched-python/python
 
 If configure can't find GTK+, you may need to set the PKG_CONFIG_PATH
 environment variable to help it find the libraries.
@@ -87,6 +85,7 @@ Note. If you're installing to another prefix than the one where python
 is installed you'll need to set the PYTHONPATH variable to the
 $prefix/lib/pythonX.Y/site-packages directory created by
 the PyGObject installation.
+
 
 Tests
 =====
@@ -102,7 +101,26 @@ Getting Help
 If you have questions about programming with PyGObject, you might want to
 check the documentation on
 
-  https://live.gnome.org/PyGObject/
+    https://live.gnome.org/PyGObject/
 
 If that does not help, send a message to the mailing list (information on
 subscribing is above), or join #python on irc.gnome.org.
+
+
+Authors
+=======
+
+Original authors:
+    * James Henstridge <james@daa.com.au>
+    * Johan Dahlin <johan@gnome.org>
+
+Current maintainers:
+    * Tomeu Vizoso <tomeu.vizoso@collabora.co.uk>
+    * Martin Pitt <martinpitt@gnome.org>
+    * Paolo Borelli <pborelli@gnome.org>
+    * Ignacio Casal Quinteiro <icq@gnome.org>
+    * Sebastian Pölsterl <sebp@k-d-w.org>
+    * Simon Feltman <sfeltman@gnome.org>
+    * Christoph Reiter <reiter.christoph@gmail.com>
+
+See the NEWS file and the git history for a list of all contributors.

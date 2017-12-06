@@ -21,7 +21,8 @@ EXTRA_DIST = \
 	m4/python.m4 \
 	m4/introspection.m4 \
 	setup.py \
-	MANIFEST.in
+	MANIFEST.in \
+	README.rst
 
 MAINTAINERCLEANFILES = \
 	$(srcdir)/INSTALL \
