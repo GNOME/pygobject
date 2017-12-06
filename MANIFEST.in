@@ -1,5 +1,4 @@
 include *.am
-include AUTHORS
 include autogen.sh
 include configure.ac
 include COPYING

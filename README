@@ -8,8 +8,8 @@ Current maintainers:  Tomeu Vizoso <tomeu.vizoso@collabora.co.uk>
                       Paolo Borelli <pborelli@gnome.org>
                       Ignacio Casal Quinteiro <icq@gnome.org>
                       Sebastian Pölsterl <sebp@k-d-w.org>
-		      Simon Feltman <sfeltman@gnome.org>
-
+                      Simon Feltman <sfeltman@gnome.org>
+                      Christoph Reiter <reiter.christoph@gmail.com>
 
 This archive contains bindings for the GLib, and GObject,
 to be used in Python. It is a fairly complete set of bindings,
