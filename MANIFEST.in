@@ -9,7 +9,6 @@ include INSTALL
 include m4/introspection.m4
 include m4/python.m4
 include NEWS
-include pre-commit.hook
 include pygi-convert.sh
 include pygobject.doap
 include README
