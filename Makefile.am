@@ -17,7 +17,7 @@ EXTRA_DIST = \
 	pygobject-$(PLATFORM_VERSION).pc.in \
 	PKG-INFO \
 	PKG-INFO.in \
-	pygi-convert.sh \
+	tools/pygi-convert.sh \
 	m4/python.m4 \
 	m4/introspection.m4 \
 	setup.py \
