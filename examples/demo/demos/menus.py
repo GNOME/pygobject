@@ -129,5 +129,6 @@ def main(demoapp=None):
     MenusApp()
     Gtk.main()
 
+
 if __name__ == '__main__':
     main()

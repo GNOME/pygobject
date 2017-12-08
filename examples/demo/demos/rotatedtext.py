@@ -194,5 +194,6 @@ def main(demoapp=None):
     RotatedTextApp()
     Gtk.main()
 
+
 if __name__ == '__main__':
     main()

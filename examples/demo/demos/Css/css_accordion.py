@@ -67,6 +67,7 @@ def main(demoapp=None):
     CSSAccordionApp()
     Gtk.main()
 
+
 if __name__ == '__main__':
     import os
     base_path = os.path.abspath(os.path.dirname(__file__))

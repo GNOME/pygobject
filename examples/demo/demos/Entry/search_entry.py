@@ -249,5 +249,6 @@ def main(demoapp=None):
     SearchboxApp(demoapp)
     Gtk.main()
 
+
 if __name__ == '__main__':
     main()

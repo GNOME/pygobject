@@ -175,5 +175,6 @@ def main(demoapp=None):
     GLib.idle_add(app.run, demoapp.window)
     Gtk.main()
 
+
 if __name__ == '__main__':
     main()

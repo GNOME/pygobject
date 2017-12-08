@@ -223,5 +223,6 @@ def main(demoapp=None):
     ClipboardApp()
     Gtk.main()
 
+
 if __name__ == '__main__':
     main()

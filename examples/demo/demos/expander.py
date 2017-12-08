@@ -57,5 +57,6 @@ def main(demoapp=None):
     ExpanderApp()
     Gtk.main()
 
+
 if __name__ == '__main__':
     main()

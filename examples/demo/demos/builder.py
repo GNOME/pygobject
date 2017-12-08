@@ -60,5 +60,6 @@ def main(demoapp=None):
     BuilderApp(demoapp)
     Gtk.main()
 
+
 if __name__ == '__main__':
     main()

@@ -67,5 +67,6 @@ def main(demoapp=None):
     EntryBufferApp()
     Gtk.main()
 
+
 if __name__ == '__main__':
     main()

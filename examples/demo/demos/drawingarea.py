@@ -87,11 +87,11 @@ class DrawingAreaApp:
 
         # Ask to receive events the drawing area doesn't normally
         # subscribe to
-        da.set_events(da.get_events()
-                      | Gdk.EventMask.LEAVE_NOTIFY_MASK
-                      | Gdk.EventMask.BUTTON_PRESS_MASK
-                      | Gdk.EventMask.POINTER_MOTION_MASK
-                      | Gdk.EventMask.POINTER_MOTION_HINT_MASK)
+        da.set_events(da.get_events() |
+                      Gdk.EventMask.LEAVE_NOTIFY_MASK |
+                      Gdk.EventMask.BUTTON_PRESS_MASK |
+                      Gdk.EventMask.POINTER_MOTION_MASK |
+                      Gdk.EventMask.POINTER_MOTION_HINT_MASK)
 
         window.show_all()
 
@@ -201,6 +201,7 @@ class DrawingAreaApp:
 def main(demoapp=None):
     DrawingAreaApp()
     Gtk.main()
+
 
 if __name__ == '__main__':
     main()

@@ -117,5 +117,6 @@ def main(demoapp=None):
     ButtonBoxApp()
     Gtk.main()
 
+
 if __name__ == '__main__':
     main()

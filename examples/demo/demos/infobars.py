@@ -98,5 +98,6 @@ def main(demoapp=None):
     InfobarApp()
     Gtk.main()
 
+
 if __name__ == '__main__':
     main()

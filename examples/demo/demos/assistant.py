@@ -130,5 +130,6 @@ def main(demoapp=None):
     AssistantApp()
     Gtk.main()
 
+
 if __name__ == '__main__':
     main()

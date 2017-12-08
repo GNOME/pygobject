@@ -179,5 +179,6 @@ def main(demoapp=None):
     PixbufApp()
     Gtk.main()
 
+
 if __name__ == '__main__':
     main()

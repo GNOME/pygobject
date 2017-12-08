@@ -72,5 +72,6 @@ def main(demoapp=None):
     LinksApp()
     Gtk.main()
 
+
 if __name__ == '__main__':
     main()

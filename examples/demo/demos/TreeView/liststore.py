@@ -37,6 +37,7 @@ class Bug:
         self.severity = severity
         self.description = description
 
+
 # initial data we use to fill in the store
 data = [Bug(False, 60482, "Normal", "scrollable notebooks and hidden tabs"),
         Bug(False, 60620, "Critical", "gdk_window_clear_area (gdkwindow-win32.c) is not thread-safe"),
@@ -205,6 +206,7 @@ class ListStoreApp:
 def main(demoapp=None):
     ListStoreApp()
     Gtk.main()
+
 
 if __name__ == '__main__':
     main()

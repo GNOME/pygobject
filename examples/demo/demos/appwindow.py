@@ -403,5 +403,6 @@ def main(demoapp=None):
     window.show_all()
     Gtk.main()
 
+
 if __name__ == '__main__':
     main()

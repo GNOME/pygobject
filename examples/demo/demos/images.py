@@ -300,5 +300,6 @@ def main(demoapp=None):
     ImagesApp()
     Gtk.main()
 
+
 if __name__ == '__main__':
     main()

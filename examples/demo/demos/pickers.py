@@ -72,5 +72,6 @@ def main(demoapp=None):
     PickersApp()
     Gtk.main()
 
+
 if __name__ == '__main__':
     main()
