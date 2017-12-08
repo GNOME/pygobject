@@ -31,6 +31,9 @@ m4_define(libffi_required_version, 3.0)
 AC_INIT([pygobject],[pygobject_version],
 	[http://bugzilla.gnome.org/enter_bug.cgi?product=pygobject],
 	[pygobject],[https://wiki.gnome.org/Projects/PyGObject/])
+
+m4_ifndef([AX_IS_RELEASE], [AC_MSG_ERROR(['autoconf-archive' missing])])
+
 AX_IS_RELEASE([minor-version])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_SRCDIR([gi/gimodule.c])
