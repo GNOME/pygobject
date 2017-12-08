@@ -139,7 +139,18 @@ def wakeup_on_signal():
             _wakeup_fd_is_active = False
 
 
-pydll = ctypes.PyDLL(None)
+def create_pythonapi():
+    # We need our own instance of ctypes.pythonapi so we don't modify the
+    # global shared one. Adapted from the ctypes source.
+    if os.name == "nt":
+        return ctypes.PyDLL("python dll", None, sys.dllhandle)
+    elif sys.platform == "cygwin":
+        return ctypes.PyDLL("libpython%d.%d.dll" % sys.version_info[:2])
+    else:
+        return ctypes.PyDLL(None)
+
+
+pydll = create_pythonapi()
 PyOS_getsig = pydll.PyOS_getsig
 PyOS_getsig.restype = ctypes.c_void_p
 PyOS_getsig.argtypes = [ctypes.c_int]
