@@ -332,7 +332,6 @@ def main():
         maintainer=pkginfo["Maintainer"],
         maintainer_email=pkginfo["Maintainer-email"],
         license=pkginfo["License"],
-        download_url=pkginfo["Download-url"],
         long_description=pkginfo["Description"],
         platforms=pkginfo.get_all("Platform"),
         classifiers=pkginfo.get_all("Classifier"),
