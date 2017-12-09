@@ -180,7 +180,8 @@ class distcheck(du_sdist):
         # make sure the tarball builds
         assert self.get_archive_files()
 
-        distcheck_dir = os.path.join(self.dist_dir, "distcheck")
+        distcheck_dir = os.path.abspath(
+            os.path.join(self.dist_dir, "distcheck"))
         if os.path.exists(distcheck_dir):
             dir_util.remove_tree(distcheck_dir)
         self.mkpath(distcheck_dir)
@@ -198,7 +199,11 @@ class distcheck(du_sdist):
         try:
             self.spawn([sys.executable, "setup.py", "build"])
             self.spawn([sys.executable, "setup.py", "install",
-                        "--root", "../prefix", "--record", "../log.txt"])
+                        "--root",
+                        os.path.join(distcheck_dir, "prefix"),
+                        "--record",
+                        os.path.join(distcheck_dir, "log.txt"),
+                        ])
         finally:
             os.chdir(old_pwd)
 
