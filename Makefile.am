@@ -22,10 +22,10 @@ EXTRA_DIST = \
 	m4/introspection.m4 \
 	setup.py \
 	MANIFEST.in \
-	README.rst
+	README.rst \
+	docs
 
 MAINTAINERCLEANFILES = \
-	$(srcdir)/INSTALL \
 	$(srcdir)/aclocal.m4 \
 	$(srcdir)/autoscan.log \
 	$(srcdir)/compile \
@@ -143,6 +143,7 @@ dist-hook: $(BUILT_EXTRA_DIST)
 	for f in $$files; do \
 	  if test -f $$f; then d=.; else d=$(srcdir); fi; \
 	  rm -f $(distdir)/$$f && cp $$d/$$f $(distdir) || exit 1; done
+	rm -rf "$(distdir)/docs/_build"
 
 # pycheck_subdirs = 
 

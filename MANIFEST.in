@@ -2,9 +2,7 @@ include *.am
 include autogen.sh
 include configure.ac
 include COPYING
-include HACKING
 include *.in
-include INSTALL
 include m4/introspection.m4
 include m4/python.m4
 include NEWS
@@ -15,3 +13,4 @@ recursive-include examples *.py *.am *.png *.css *.ui *.gif *.gresource *.jpg *.
 recursive-include gi *.am *.h
 recursive-include pygtkcompat *.am
 recursive-include tests *.py *.c *.h *.xml *.supp *nouppera *.am
+recursive-include docs *.rst *.svg LICENSE *.ico *.png *.css *.py *.dia Makefile

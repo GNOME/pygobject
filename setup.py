@@ -323,6 +323,10 @@ def main():
     for s in cairo_sources:
         sources.remove(s)
 
+    readme = os.path.join(script_dir, "README.rst")
+    with io.open(readme, encoding="utf-8") as h:
+        long_description = h.read()
+
     gi_ext = Extension(
         name='gi._gi',
         sources=sources,
@@ -347,7 +351,7 @@ def main():
         maintainer=pkginfo["Maintainer"],
         maintainer_email=pkginfo["Maintainer-email"],
         license=pkginfo["License"],
-        long_description=pkginfo["Description"],
+        long_description=long_description,
         platforms=pkginfo.get_all("Platform"),
         classifiers=pkginfo.get_all("Classifier"),
         packages=find_packages(script_dir),
