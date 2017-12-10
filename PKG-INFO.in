@@ -1,5 +1,5 @@
 Metadata-Version: 1.0
-Name: pygobject
+Name: PyGObject
 Version: @VERSION@
 Summary: Python bindings for GObject Introspection
 Home-page: https://pygobject.readthedocs.io
