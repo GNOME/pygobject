@@ -29,8 +29,10 @@ import sys
 import errno
 import subprocess
 import tarfile
+import sysconfig
 from email import parser
 
+import pkg_resources
 from setuptools import setup, find_packages
 from distutils.core import Extension, Distribution
 from distutils.ccompiler import new_compiler
@@ -107,16 +109,8 @@ def parse_pkg_info(conf_dir):
 def _run_pkg_config(args):
     command = ["pkg-config"] + args
 
-    # Add $prefix/share/pkgconfig to PKG_CONFIG_PATH so we use the right
-    # pycairo in case we are in a virtualenv
-    env = dict(os.environ)
-    paths = env.get("PKG_CONFIG_PATH", "").split(os.pathsep)
-    paths = [p for p in paths if p]
-    paths.insert(0, os.path.join(sys.prefix, "share", "pkgconfig"))
-    env["PKG_CONFIG_PATH"] = os.pathsep.join(paths)
-
     try:
-        return subprocess.check_output(command, env=env)
+        return subprocess.check_output(command)
     except OSError as e:
         if e.errno == errno.ENOENT:
             raise SystemExit(
@@ -253,7 +247,6 @@ class build_ext(du_build_ext):
             "gio-2.0": ["gio-2.0", "gobject-2.0", "glib-2.0"],
             "gobject-introspection-1.0":
                 ["girepository-1.0", "gobject-2.0", "glib-2.0"],
-            get_pycairo_pkg_config_name(): ["cairo"],
             "cairo": ["cairo"],
             "cairo-gobject":
                 ["cairo-gobject", "cairo", "gobject-2.0", "glib-2.0"],
@@ -266,18 +259,35 @@ class build_ext(du_build_ext):
             if self.compiler_type == "msvc":
                 # assume that INCLUDE and LIB contains the right paths
                 ext.libraries += fallback_libs
-
-                # The PyCairo header is installed in a subdir of the
-                # Python installation that we are building for, so
-                # deduce that include path here, and use it
-                ext.include_dirs += [
-                    os.path.join(sys.prefix, "include", "pycairo")]
             else:
                 min_version = get_version_requirement(script_dir, name)
                 pkg_config_version_check(name, min_version)
                 ext.include_dirs += pkg_config_parse("--cflags-only-I", name)
                 ext.library_dirs += pkg_config_parse("--libs-only-L", name)
                 ext.libraries += pkg_config_parse("--libs-only-l", name)
+
+        def add_pycairo(ext):
+            min_version = get_version_requirement(
+                script_dir, get_pycairo_pkg_config_name())
+
+            dist = pkg_resources.get_distribution("pycairo>=%s" % min_version)
+
+            def get_sys_path(dist, name):
+                """The sysconfig path for a distribution, or None"""
+
+                location = dist.location
+                for scheme in sysconfig.get_scheme_names():
+                    for path_type in ["platlib", "purelib"]:
+                        path = sysconfig.get_path(path_type, scheme)
+                        try:
+                            if os.path.samefile(path, location):
+                                return sysconfig.get_path(name, scheme)
+                        except EnvironmentError:
+                            pass
+
+            data_path = get_sys_path(dist, "data") or sys.prefix
+            include_dir = os.path.join(data_path, "include", "pycairo")
+            ext.include_dirs += [include_dir]
 
         gi_ext = ext["gi._gi"]
         add_dependency(gi_ext, "glib-2.0")
@@ -292,7 +302,7 @@ class build_ext(du_build_ext):
         add_dependency(gi_cairo_ext, "libffi")
         add_dependency(gi_cairo_ext, "cairo")
         add_dependency(gi_cairo_ext, "cairo-gobject")
-        add_dependency(gi_cairo_ext, get_pycairo_pkg_config_name())
+        add_pycairo(gi_cairo_ext)
 
     def run(self):
         self._write_config_h()
