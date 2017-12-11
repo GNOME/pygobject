@@ -135,6 +135,19 @@ def pkg_config_parse(opt, pkg):
     return [x.lstrip(opt) for x in output.split()]
 
 
+def samefile(src, dst):
+    # Python 2 on Windows doesn't have os.path.samefile, so we have to provide
+    # a fallback
+
+    if hasattr(os.path, "samefile"):
+        return os.path.samefile(src, dst)
+
+    os.stat(src)
+    os.stat(dst)
+    return (os.path.normcase(os.path.abspath(src)) ==
+            os.path.normcase(os.path.abspath(dst)))
+
+
 du_sdist = get_command_class("sdist")
 
 
@@ -280,7 +293,7 @@ class build_ext(du_build_ext):
                     for path_type in ["platlib", "purelib"]:
                         path = sysconfig.get_path(path_type, scheme)
                         try:
-                            if os.path.samefile(path, location):
+                            if samefile(path, location):
                                 return sysconfig.get_path(name, scheme)
                         except EnvironmentError:
                             pass
