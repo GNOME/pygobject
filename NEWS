@@ -1,3 +1,14 @@
+3.27.1  11-Dec-2017
+        - Revert "setup.py: Also set setup_requires to require pycairo" (Christoph Reiter)
+        - setup.py: Also set setup_requires to require pycairo (Christoph Reiter)
+        - setup.py: Provide a os.path.samefile fallback for Python 2 under Windows (Christoph Reiter)
+        - Add sphinx based documentation (Christoph Reiter) (#791448)
+        - PKG-INFO: Revert name back to PyGObject (Christoph Reiter)
+        - setup.py: Rework pycairo discovery to not use pkg-config (Christoph Reiter)
+        - setup.py: Fix the distcheck command on Windows (Christoph Reiter)
+        - setup.py: Remove various classifiers and the download-url which aren't accepted by pypi (Christoph Reiter)
+        - version bump (Christoph Reiter)
+
 3.27.0  08-Dec-2017
         - demo: pep8 fixes (Christoph Reiter)
         - Fix ctypes.PyDLL construction under Windows (Christoph Reiter) (#622084)
