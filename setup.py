@@ -380,10 +380,6 @@ def main():
             "pycairo>=%s" % get_version_requirement(
                 script_dir, get_pycairo_pkg_config_name()),
         ],
-        setup_requires=[
-            "pycairo>=%s" % get_version_requirement(
-                script_dir, get_pycairo_pkg_config_name()),
-        ],
     )
 
 
