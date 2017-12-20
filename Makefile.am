@@ -98,7 +98,7 @@ uninstall-local:
 	rm -f $(DESTDIR)$(pyexecdir)/$(EGG_NAME).egg-info
 
 release-news:
-	printf "%-8s%s\n" "$(VERSION)" "`LC_TIME=C date '+%d-%b-%Y'`" > NEWS.tmp
+	printf "%s - %s\n\n" "$(VERSION)" "`LC_TIME=C date -I`" > NEWS.tmp
 
 	@echo -e "\n\n\nFor blogging, you can copy&paste this HTML formatted news:"
 	@echo "-------------- 8< -------------"
@@ -107,7 +107,7 @@ release-news:
 	for commit in `git rev-list $$last..`; do \
 	   data=`git log --format="format:%s%n%an%n%b" $$commit^..$$commit`; \
 	   echo "$$data" | perl -e '$$subj = <>; chomp $$subj; $$author = <>; chomp $$author; while (<>) { if (/bugzilla.gnome.org.*id=([0-9]+)/) { $$bug = $$1 }};  print "  <li>$$subj ($$author)"; if ($$bug) { print " (<a href=\"https://bugzilla.gnome.org/show_bug.cgi?id=$$bug\">#$$bug</a>)"; }; print "</li>\n"'; \
-	   echo "$$data" | perl -e '$$subj = <>; chomp $$subj; $$author = <>; chomp $$author; while (<>) { if (/bugzilla.gnome.org.*id=([0-9]+)/) { $$bug = $$1 }};  print "        - $$subj ($$author)"; if ($$bug) { print " (#$$bug)"; }; print "\n"' >> NEWS.tmp; \
+	   echo "$$data" | perl -e '$$subj = <>; chomp $$subj; $$author = <>; chomp $$author; while (<>) { if (/bugzilla.gnome.org.*id=([0-9]+)/) { $$bug = $$1 }};  print "* $$subj ($$author)"; if ($$bug) { print " (#$$bug)"; }; print "\n"' >> NEWS.tmp; \
         done
 	@echo "</ul>"
 	@echo "-------------- 8< -------------"

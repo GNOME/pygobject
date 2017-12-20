@@ -44,7 +44,7 @@ html_theme_options = {
 }
 
 extlinks = {
-    'gnomebug': ('https://bugzilla.gnome.org/show_bug.cgi?id=%s', '#'),
+    'bzbug': ('https://bugzilla.gnome.org/show_bug.cgi?id=%s', 'bz#'),
 }
 
 suppress_warnings = ["image.nonlocal_uri"]

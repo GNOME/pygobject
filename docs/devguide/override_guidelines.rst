@@ -11,19 +11,19 @@ is also a good idea to study the `Zen of Python by Tim Peters
 In general, overrides should be minimized and preference should always be
 placed on updating the underlying API to be more bindable, adding features to
 GI to support the requirement, or adding mechanical features to PyGObject
-which can apply generically to all overrides (:gnomebug:`721226` and
-:gnomebug:`640812`).
+which can apply generically to all overrides (:bzbug:`721226` and
+:bzbug:`640812`).
 
 If a GI feature or more bindable API for a library is in the works, it is a
 good idea to avoid the temptation to add temporary short term workarounds in
 overrides. The reason is this can creaste unnecessary conflicts when the
-bindable API becomes a reality (:gnomebug:`707280`).
+bindable API becomes a reality (:bzbug:`707280`).
 
 * Minimize class overrides when possible.
 
   *Reason*: Class overrides incur a load time performance penalty because
   they require the classes GType and all of the Python method bindings to be
-  created. See :gnomebug:`705810`
+  created. See :bzbug:`705810`
 
 * Prefer monkey patching methods on repository classes over inheritance.
 
@@ -36,13 +36,13 @@ bindable API becomes a reality (:gnomebug:`707280`).
 
 * Avoid overriding ``__init__``
   *Reason*: Sub-classing the overridden class then becomes challenging and
-  has the potential to cause bugs (see :gnomebug:`711487` and reasoning
+  has the potential to cause bugs (see :bzbug:`711487` and reasoning
   listed in https://wiki.gnome.org/Projects/PyGObject/InitializerDeprecations).
 
 * Unbindable functions which take variadic arguments are generally ok to add
   Python implementations, but keep in mind the prior noted guidelines. A lot
   of times adding bindable versions of the functions to the underlying library
-  which take a list is acceptable. For example: :gnomebug:`706119`. Another
+  which take a list is acceptable. For example: :bzbug:`706119`. Another
   problem here is if an override is added, then later a bindable version of
   the API is added which takes a list, there is a good chance we have to live
   with the override forever which masks a working version implemented by GI.
@@ -58,7 +58,7 @@ bindable API becomes a reality (:gnomebug:`707280`).
 
   *Reason*: This turns into a documentation discrepancy between the libraries
   API and the Python version of the API. Default value work should focus on
-  bug :gnomebug:`558620`, not cherry-picking individual Python functions and
+  bug :bzbug:`558620`, not cherry-picking individual Python functions and
   adding defaults.
 
 * Avoid implicit side effects to the Python standard library (or anywhere).
