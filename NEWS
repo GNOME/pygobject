@@ -47,6 +47,38 @@
 * tests: Make the test suite pass with the C locale (Christoph Reiter)
 * configure.ac: post-release version bump to 3.27.0 (Christoph Reiter)
 
+3.26.1 - 2017-10-27
+-------------------
+
+* pygobject-object: Fix Python GC collecting a ref cycle too early (Christoph Reiter) (:bzbug:`731501`)
+* Fix potential uninitialized memory access during GC (Daniel Colascione) (:bzbug:`786872`)
+* test: revert parts of the previous test as it's broken on 32 bit builds (Christoph Reiter) (:bzbug:`786948`)
+* flags: Add testcase for bug 786948 (Christoph Reiter) (:bzbug:`786948`)
+* fix potential overflow when marshalling flags from py interface (Philippe Renon) (:bzbug:`786948`)
+* to_py_array: Properly handle enum array items (Christoph Reiter) (:bzbug:`788890`)
+* closure: Fix unaligned and out-of-bounds access (James Clarke) (:bzbug:`788894`)
+* build: Fix not installing .egg-info file (Christoph Reiter) (:bzbug:`777719`)
+* configure.ac: version bump to 3.26.1 (Christoph Reiter)
+
+2.28.7 - 2017-10-13
+-------------------
+
+* Move property and signal creation into _class_init() (Martin Pitt)
+* gio-types.defs: change some enums to flags (Ryan Lortie)
+* Fix set_qdata warning on accessing NULL gobject property (Ivan Stankovic)
+* Disable introspection support by default (Dieter Verfaillie)
+* Don't install codegen for Python 3 (Arfrever Frehtes Taifersar Arahesis)
+* Ship tests/te_ST@nouppera in release tarballs for tests to succeed (Martin Pitt)
+* [gi] Port test_properties from static gio to GI Gio (Martin Pitt)
+* [python3] fix build. PYcairo_IMPORT doesn't exists anymore (Ignacio Casal Quinteiro)
+* [python3] Fix maketrans import (Martin Pitt)
+* [gi-overrides] fix MessageBox so it correctly handles the type constructor param (John (J5) Palmieri)
+* gdbus tests: Fix hang if test case fails (Martin Pitt)
+* Fix crash in Gtk.TextIter overrides (Martin Pitt)
+* correctly initialize the _gi_cairo_functions array to be zero filled (John (J5) Palmieri)
+* [gtk-override] print warning if user imports Gtk 2.0 (John (J5) Palmieri)
+* Add support for enums in gobject.property (Johan Dahlin)
+
 3.26.0 - 2017-09-12
 -------------------
 
@@ -119,6 +151,12 @@
 * Remove egg make target (Christoph Reiter) (:bzbug:`777719`)
 * Remove legacy docs (Christoph Reiter) (:bzbug:`777719`)
 
+3.24.1 - 2017-04-10
+-------------------
+
+* pygi-info: initialize GIArgument before passing it to g_constant_info_get_value (Christoph Reiter) (:bzbug:`772949`)
+* configure.ac: post-release version bump to 3.24.1 (Christoph Reiter)
+
 3.24.0 - 2017-03-20
 -------------------
 
@@ -173,6 +211,12 @@
   (Iain Lane) (:bzbug:`764165`)
 * build: Do not enable code coverage based on lcov
   (Emmanuele Bassi) (:bzbug:`764075`)
+
+3.20.1 - 2016-04-24
+-------------------
+
+* test_gerror_novalue: Don't assign the error to a variable
+  (Iain Lane) (:bzbug:`764165`)
 
 3.20.0 - 2016-03-21
 -------------------
@@ -235,6 +279,19 @@
 * Don't emit require_version warning if namespace was loaded previously using g_irepository_require (Christoph Reiter) (:bzbug:`754491`)
 * configure.ac: post release version bump to 3.19.1 (Garrett Regier)
 
+3.18.2 - 2015-10-24
+-------------------
+
+* configure.ac: post release version bump to 3.18.2 (Christoph Reiter)
+
+3.18.1 - 2015-10-23
+-------------------
+
+* Fix Gdk.rectangle_intersect/rectangle_union missing with GTK+ 3.18 (Christoph Reiter) (:bzbug:`756364`)
+* pep8: ignore new errors reported by pep8 1.6 (Christoph Reiter)
+* Don't emit require_version warning if namespace was loaded previously using g_irepository_require (Christoph Reiter) (:bzbug:`754491`)
+* configure.ac: post release version bump to 3.18.1 (Garrett Regier)
+
 3.18.0 - 2015-09-22
 -------------------
 
@@ -271,6 +328,18 @@
   (Christoph Reiter) (:bzbug:`746985`)
 * Improve test coverage for field setters/getters
   (Christoph Reiter) (:bzbug:`746985`)
+
+3.16.2 - 2015-06-15
+-------------------
+
+* overrides: Provide _overrides_module attribute
+  (Christoph Reiter) (:bzbug:`736678`)
+
+3.16.1 - 2015-04-13
+-------------------
+
+* overrides: Conditionalize touch override support in Gdk
+  (Simon Feltman) (:bzbug:`747717`)
 
 3.16.0 - 2015-03-24
 -------------------
@@ -408,6 +477,12 @@
 * Unify GLib.GError and GLib.Error (Simon Feltman) (:bzbug:`712519`)
 * PEP8 fixes (Simon Feltman)
 
+3.12.2 - 2014-05-26
+-------------------
+
+* PEP8 fixes (Simon Feltman)
+* Python 3.4 make check fixes (Simon Feltman) (:bzbug:`730411`)
+
 3.13.1 - 2014-04-28
 -------------------
 
@@ -423,6 +498,13 @@
   (Simon Feltman) (:bzbug:`726877`)
 * tests: Rename test_overrides to test_import_machinery
   (Simon Feltman) (:bzbug:`726877`)
+
+3.12.1 - 2014-04-14
+-------------------
+
+* Fix crash with type checking invalid GObject arguments
+  (Simon Feltman) (:bzbug:`727604`)
+* Do not leak info of destroy notify (Paolo Borelli)
 
 3.12.0 - 2014-03-24
 -------------------
@@ -500,6 +582,12 @@
 * Fix dir method for static GParamSpec in Python 3 (Simon Feltman)
 * Remove overzealous argument checking for callback userdata (Simon Feltman) (:bzbug:`711173`)
 
+3.10.2 - 2013-11-11
+-------------------
+
+* Fix thread safety problems by always enabling the GIL
+  (Simon Feltman) (:bzbug:`709223`, :bzbug:`710447`)
+
 3.11.1 - 2013-10-28
 -------------------
 
@@ -528,6 +616,16 @@
 * Refactor argument cache handling (Simon Feltman) (:bzbug:`640812`)
 * Remove support for allowing PyObjects as void pointers
   (Simon Feltman) (:bzbug:`688081`)
+
+3.10.1 - 2013-10-14
+-------------------
+
+* Fix TypeError when setting drag target_list to None (Nuno Araujo)
+  (:bzbug:`709926`)
+* Use qdata for wrapper retrieval in toggle reference notifications
+  (Simon Feltman) (:bzbug:`709223`)
+* Fix memory leak for caller allocated GValue out arguments
+  (Simon Feltman) (:bzbug:`709397`)
 
 3.10.0 - 2013-09-23
 -------------------
@@ -609,6 +707,24 @@
 * gi/pygi-info.c: Avoid C99-style variable declaration
   (Chun-wei Fan) (:bzbug:`702786`)
 
+3.8.3 - 2013-07-05
+------------------
+
+* Add marshalling of GI_TYPE_TAG_VOID held in a GValue to int.  While
+  not particularly useful this allows some callbacks in WebKit to
+  function without causing a segfault. (Simon Feltman) (:bzbug:`694233`)
+* pygtkcompat: Fix for missing methods on Windows (Martin Pitt)
+  (:bzbug:`702787`)
+* gi/pygi-info.c: Avoid C99-style variable declaration (Chun-wei Fan)
+  (:bzbug:`702786`)
+* Clear return value of closures to zero when an exception occures
+  (Simon Feltman) (:bzbug:`702552`)
+* Re-add support for passing GValue's by reference (Simon Feltman)
+  (:bzbug:`701058`)
+* Don't use doctest syntax in docstrings for examples, to fix test
+  failures with pyflakes 0.7.x (Martin Pitt) (:bzbug:`701009`)
+* examples/option.py: Port to GI and Python 3 (Martin Pitt)
+
 3.9.2 - 2013-05-28
 ------------------
 
@@ -625,6 +741,24 @@
   (Simon Feltman) (:bzbug:`699440`)
 * Remove and deprecate API for setting of thread blocking functions
   (Simon Feltman) (:bzbug:`699440`)
+
+3.8.2 - 2013-05-13
+------------------
+
+* Fix vfunc info search for classes with multiple inheritance
+  (Simon Feltman) (:bzbug:`700092`)
+* Fix closure argument conversion for enum and flag in args
+  (Simon Feltman)
+* Fix marshaling Python to FFI return value for enum and flags
+  (Simon Feltman)
+* Use correct class for GtkEditable's get_selection_bounds() function
+  (Mike Ruprecht) (:bzbug:`699096`)
+* Test results of g_base_info_get_name for NULL (Simon Feltman)
+  (:bzbug:`698829`)
+* Change interpretation of NULL pointer field from None to 0
+  (Simon Feltman) (:bzbug:`698366`)
+* Remove Python keyword escapement in Repository.find_by_name
+  (Simon Feltman) (:bzbug:`697363`)
 
 3.9.1 - 2013-04-30
 ------------------
@@ -676,6 +810,16 @@
 * Remove static PollFD bindings (Martin Pitt) (:bzbug:`686795`)
 * Drop test skipping due to too old g-i (Martin Pitt)
 * Bump glib and g-i dependencies (Martin Pitt)
+
+3.8.1 - 2013-04-15
+------------------
+
+* pygi-convert.sh: Add GStreamer rules (Christoph Reiter) (:bzbug:`697951`)
+* pygi-convert: Add rule for TreeModelFlags (Jussi Kukkonen)
+* Fix enum and flags marshaling type assumptions (Simon Feltman)
+* Use g_strdup() consistently (Martin Pitt) (:bzbug:`696650`)
+* Fix stack corruption due to incorrect format for argument parser
+  (Simon Feltman) (:bzbug:`696892`)
 
 3.8.0 - 2013-03-25
 ------------------
@@ -903,6 +1047,19 @@
 * Mark GLib.Source.get_current_time() as deprecated (Martin Pitt)
 * Fix OverflowError in source_remove() (Martin Pitt) (:bzbug:`684526`)
 
+3.4.2 - 2012-11-12
+------------------
+
+* Fix marshalling of GByteArrays (Martin Pitt)
+* Fix marshalling of ssize_t to smaller ints (Martin Pitt)
+* Fix crash with GLib.child_watch_add (Daniel Narvaez) (:bzbug:`688067`)
+* Fix various bugs in GLib.IOChannel (Martin Pitt)
+* Work around wrong 64 bit constants in GLib Gir (Martin Pitt)
+  (:bzbug:`685022`)
+* Fix OverflowError in source_remove() (Martin Pitt) (:bzbug:`684526`)
+* Fix Signal decorator to not use base class gsignals dict
+  (Simon Feltman) (:bzbug:`686496`)
+
 3.7.1 - 2012-10-22
 ------------------
 
@@ -946,6 +1103,33 @@
   (Simon Feltman) (:bzbug:`683599`)
 * pygi-property: Lookup property in base classes of non-introspected
   types (Olivier Crête) (:bzbug:`684058`)
+
+3.4.1.1 - 2012-10-17
+--------------------
+
+* Bump g-i dependency to >= 1.34.1.1 (Paolo Borelli)
+* Fix leaked vfunc return values (Simon Feltman) (:bzbug:`686140`)
+* Install egg-info files in the right dir  Kalev Lember) (:bzbug:`686315`)
+
+3.4.1 - 2012-10-15
+------------------
+
+* Skip Regress tests with --disable-cairo (Martin Pitt) (:bzbug:`685094`)
+* Fix leak with python callables as closure argument. (Simon Feltman) (:bzbug:`685598`)
+* Gio overrides: Handle setting GSettings enum keys (Martin Pitt) (:bzbug:`685947`)
+* Fix unsigned values in GArray/GList/GSList/GHash (Martin Pitt) (:bzbug:`685860`)
+* _pygi_marshal_from_py_uint64(): Use correct data type in py2.7 check (Alban Browaeys) (:bzbug:`685000`)
+* Install an .egg-info file (Johan Dahlin) (:bzbug:`680138`)
+* PyGProps_getattro(): Fix GObjectClass leak (Johan Dahlin) (:bzbug:`685218`)
+* pygobject.c: Don't leak GObjectClass reference (Olivier Crête) (:bzbug:`684062`)
+* Fix memory leak in _pygi_argument_to_array() (Alban Browaeys) (:bzbug:`685082`)
+* Fix error messages for out of range numbers (Martin Pitt) (:bzbug:`684314`)
+* Kill dbus-daemon after running tests (Martin Pitt) (:bzbug:`685009`)
+* GVariant overrides: Support empty tuple arrays (Martin Pitt) (:bzbug:`684928`)
+* tests: Fix wrong return type in test_int64_callback() (Martin Pitt) (:bzbug:`684700`)
+* Fix GValue marshalling of long and unsigned long (Giovanni Campagna) (:bzbug:`684331`)
+* Clean up deprecation message for assigning gpointers to objects. (Simon Feltman) (:bzbug:`683599`)
+* pygi-property: Lookup property in base classes of non-introspected types (Olivier Crête) (:bzbug:`684058`)
 
 3.4.0 - 2012-09-24
 ------------------
@@ -1144,6 +1328,28 @@
 * tests: Fix deprecated assertions (Martin Pitt)
 * Run tests with ``MALLOC_PERTURB_`` (Martin Pitt)
 
+3.2.2 - 2012-05-14
+------------------
+
+* pygtkcompat: Correctly set flags (Jose Rostagno) (:bzbug:`675911`)
+* Gtk overrides: Implement __delitem__ on TreeModel (Jose Rostagno)
+  (:bzbug:`675892`)
+
+3.2.1 - 2012-05-10
+------------------
+
+* Reindent files in tests to use 4-space indentation (Sebastian Pölsterl
+* Add missing override for TreeModel.iter_previous() (Martin Pitt)
+* GSettings: allow extra keyword arguments (Giovanni Campagna)
+* pygtkcompat: Correct Userlist module use (Jose Rostagno)
+* test_gdbus: Call GetConnectionUnixProcessID() with correct signature (Martin Pitt)
+* GTK overrides: Add missing keyword arguments (Martin Pitt)
+* pygi-convert.py: Drop obsolete drag method conversions (Martin Pitt)
+* Fix len_arg_index for array arguments (Bastian Winkler)
+* Add missing GObject.TYPE_GTYPE (Martin Pitt)
+* Fix "distcheck" and tests with out-of-tree builds (Martin Pitt)
+* Add GtkComboBoxEntry compatibility (Paolo Borelli)
+
 3.3.1 - 2012-04-30
 ------------------
 
@@ -1213,6 +1419,21 @@
   (Martin Pitt) (:bzbug:`672463`)
 * pygtkcompat test: Properly clean up PixbufLoader (Martin Pitt)
 
+3.2.0 - 2012-03-26
+------------------
+
+* No changes since 3.1.93 except version number.
+
+3.1.93 - 2012-03-22
+-------------------
+
+* Fix warnings on None values in added tree/list store rows.
+  (:bzbug:`672463`, Martin Pitt)
+* Support marshalling GI_TYPE_TAG_INTERFACE (:bzbug:`668903`, Alberto Mardegan)
+* test_overrides: Find local gsettings schema with current glib
+  (Martin Pitt)
+* pygtkcompat test: Properly clean up PixbufLoader (Martin Pitt)
+
 3.1.92 - 2012-03-19
 -------------------
 
@@ -1280,6 +1501,13 @@
 * fix GtkBuilder signal connection 'after' logic (Ryan Lortie)
 * test(1) uses '=' to test if strings are identical (Patrick Welche)
 * pygspawn: improve error checking (Ryan Lortie)
+
+3.0.4 - 2012-02-09
+------------------
+
+* Revert "Convert all strings to utf-8 encoding when retrieving from TreeModel" (Martin Pitt)
+* Fixed bug where GObject.property did not respect minimum and maximum values (Sebastian Pölsterl)
+* Remove mention of removed option --enable-docs (Tomeu Vizoso)
 
 3.1.0 - 2012-02-06
 ------------------
@@ -1611,6 +1839,92 @@
 * [gi] wrap map in a list for Python 3 compat (John (J5) Palmieri)
 * [gi-demos] fix up the validation combobox (John (J5) Palmieri)
 * add overridesdir variable in the .pc file for 3rd party overrides (John (J5) Palmieri)
+* setup.py: Set bdist_wininst user-access-control property (Dieter Verfaillie)
+* Fix uninitialized variable in gi.require_version() (Martin Pitt)
+* Run tests with LC_MESSAGES="C" (Martin Pitt)
+* [gi-overrides] override Gtk.stock_lookup to not return success (John (J5) Palmieri)
+
+2.28.6 - 2011-06-11
+-------------------
+
+* closure: avoid double free crash (Ignacio Casal Quinteiro)
+* [gi] backport of "GVariant has a GType" fe386a (John (J5) Palmieri)
+* [gi] fixes to backport commit 6b5a65 - in older glib GVariants are still structs (John (J5) Palmieri)
+* GVariantType is a boxed struct (Tomeu Vizoso)
+* Use _gi.Struct to wrap fundamentals (Tomeu Vizoso)
+* Added __eq__ method for Gdk.Color and Gdk.RGBA (Jason Siefken)
+* Remove useless import (Ignacio Casal Quinteiro)
+* Revert "[gi] Removed hack to avoid using GLib.Variant.new_variant." (Ignacio Casal Quinteiro)
+* closure: Check the out arg is not null. Fixes bug :bzbug:`651812` (Ignacio Casal Quinteiro)
+* Fix GC-related crash during PyGObject deallocation (Daniel Drake)
+* Fix symbol names to be locale independent (Martin Pitt)
+* Updated DOAP file (Sebastian Pölsterl)
+
+2.28.4 - 2011-04-18
+-------------------
+
+* Version bump to 2.24.4 (Sebastian Pölsterl)
+* [gi] Don't create variant twice (Sebastian Pölsterl)
+* pygi-convert.sh: Make sure the uppercase GObject module is imported instead of the lowercase (Sebastian Pölsterl)
+* [gi] Removed hack to avoid using GLib.Variant.new_variant. (Sebastian Pölsterl)
+* [gi] Added additional test case for GVariant handling (Sebastian Pölsterl)
+* [gi] Added support for GVariant arguments (Sebastian Pölsterl)
+* Fix ABI break in old static bindings. (Steve Frécinaux)
+* fetch size from an enum type (Mike Gorse)
+* dsextras.py: ensure eol characters are preserved when writing template files (so \n does not become \r\n) (Dieter Verfaillie)
+
+2.28.3 - 2011-03-23
+-------------------
+
+* fix a typo when converting objects to strings gvalues (John (J5) Palmieri)
+
+2.28.2 - 2011-03-22
+-------------------
+
+* fix static ABI for setting string gvalues from python objects (John (J5) Palmieri)
+* Fix GSchema tests for separate build tree (Martin Pitt)
+* GIO tests: Fix remaining test case for separate build tree (Martin Pit
+* GIO tests: Fix for separate build tree (Martin Pitt)
+
+2.28.1 - 2011-03-21
+-------------------
+
+* pygi-convert.sh remove gobject tests, GObject works now (John Stowers)
+* pygi-convert.sh add GObject.xxx and webkit (John Stowers)
+* [gi] marshal raw closures (John (J5) Palmieri)
+* Revert "Deduce PYTHON_LIBS in addition to PYTHON_INCLUDES" (Martin Pitt)
+* setup.py: fix user_access_control option (Dieter Verfaillie)
+* [gi-overrides] fix marshalling pygobjects in treemodels (John (J5) Palmieri)
+* [gi] Respect the MessageType for Gtk.MessageDialog (Martin Pitt)
+* [gi] Do not require signature for D-BUS methods without arguments (Martin Pitt)
+* [gi-demos] add pickers demo (John (J5) Palmieri)
+* [gi-demos] add menu demo (John (J5) Palmieri)
+* [gi-overrides] TreeViewColumn.set_cell_data_func func_data can be None
+* [gi-demos] dont try and run demos that represent directories (John Stowers)
+* [gi-overrides] fix exception block so it works in Python 2.5 (John (J5) Palmieri)
+
+2.28.0 - 2011-03-08
+-------------------
+
+* [gi-demos] some python 3 compat fixes (John (J5) Palmieri)
+* [gi-demos] catch the correct error class (John (J5) Palmieri)
+* Try not to sink objects returned by C functions. (Steve Frécinaux)
+* Do not leak python references when using the gobject.property() helper. (Steve Frécinaux)
+* [gi] fix try except blocks so they work in Python 2.5 (John (J5) Palmieri)
+* handle uchar as bytes, not strings in python 3 (John (J5) Palmieri)
+* [gi-overrides] handle unichar gvalues when setting treemodels (John (J5) Palmieri)
+* [gi-overrides] special case python 2 keywords that crept in (John (J5) Palmieri)
+* check for the py3 _thread module in configure.ac if thread is not found (John (J5) Palmieri)
+* [gi-demos] add iconview demo (John (J5) Palmieri)
+* [gi] wrap the keyword argument in a dict so we don't break Python 2.5 (John (J5) Palmieri)
+* [gi-demos] add the combobox with string ids section to the demos (John (J5) Palmieri)
+* [gi-overrides] add an override for Gdk.RGBA (John (J5) Palmieri)
+* [gi-demos] fix up search-entry to reflect annotations fixed in Gtk+ master (John (J5) Palmieri)
+* [gi-demos] add search entry demo (John (J5) Palmieri)
+* [gi] wrap map in a list for Python 3 compat (John (J5) Palmieri)
+* [gi-demos] fix up the validation combobox (John (J5) Palmieri)
+* add overridesdir variable in the .pc file for 3rd party overrides (John (J5) Palmieri)
+* [gi] remove unref for closures since they are floating objects that get sunk (John (J5) Palmieri)
 * setup.py: Set bdist_wininst user-access-control property (Dieter Verfaillie)
 * Fix uninitialized variable in gi.require_version() (Martin Pitt)
 * Run tests with LC_MESSAGES="C" (Martin Pitt)
@@ -2533,6 +2847,24 @@
 * Fix error message in pyg_io_add_watch (Juha Sahkangas)
 * Improve h2def.py (Oliver Crete, Murray Cumming, Lauro Moura)
 
+2.14.2 - 2008-05-23
+-------------------
+
+* Allow gobject.property work with subclasses. (:bzbug:`523352`, Tomeu Vizoso)
+* Unbreak Source.prepare (:bzbug:`523075`, Bryan Silverthorn)
+* Never override customly set 'tp_new' and 'tp_alloc' (Paul Pogonyshev)
+* Don't link against libffi if we cannot find libffi
+  on the system. (:bzbug:`496006`, Ed Catmur)
+* Dist .m4 files. (:bzbug:`496011`, Ed Catmur)
+* Don't return NULL after warning of enum comparsion
+  (:bzbug:`519631`, Paul Pogonyshev)
+
+2.14.1 - 2008-01-03
+-------------------
+
+* Avoid wakeups when using Python trunk (Johan Dahlin, :bzbug:`481569`)
+* Add an uninstalled.pc (Damien Carbery, :bzbug:`486876`)
+
 2.14.0 - 2007-09-16
 -------------------
 
@@ -2679,6 +3011,9 @@
 -------------------
 
 * enum/leak fix (Michael Smith)
+
+2.9.1 - 2006-01-16
+------------------
 
 2.9.0 - 2006-01-16
 ------------------
