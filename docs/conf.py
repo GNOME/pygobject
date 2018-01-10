@@ -32,6 +32,12 @@ html_context = {
         'https://quodlibet.github.io/fonts/font-mfizz.css',
         '_static/extra.css',
     ],
+    "display_gitlab": True,
+    "gitlab_user": "GNOME",
+    "gitlab_repo": "pygobject",
+    "gitlab_version": "master",
+    "conf_py_path": "/docs/",
+    "gitlab_host": "gitlab.gnome.org",
 }
 
 html_static_path = [

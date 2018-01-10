@@ -9,6 +9,7 @@
 
     getting_started
     changelog
+    bugs_repo
     guide/index
     devguide/index
     packagingguide

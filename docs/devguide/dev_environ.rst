@@ -15,7 +15,7 @@ on ":ref:`gettingstarted`" first, as they are a pre-requirement.
 
     sudo apt build-dep pygobject
     sudo apt install autoconf-archive
-    git clone https://git.gnome.org/browse/pygobject
+    git clone https://gitlab.gnome.org/GNOME/pygobject.git
     cd pygobject
     ./autogen.sh
     make
@@ -31,7 +31,7 @@ on ":ref:`gettingstarted`" first, as they are a pre-requirement.
         mingw-w64-i686-python3 mingw-w64-i686-python3-cairo \
         mingw-w64-i686-gobject-introspection mingw-w64-i686-gtk3 \
         mingw-w64-i686-libffi autoconf-archive
-    git clone https://git.gnome.org/browse/pygobject
+    git clone https://gitlab.gnome.org/GNOME/pygobject.git
     cd pygobject
     ./autogen.sh
     make

@@ -35,7 +35,7 @@ General Porting Tips
 PyGObject contains a shell script which can help you with the many naming
 differences between static and dynamic bindings:
 
-https://git.gnome.org/browse/pygobject/plain/tools/pygi-convert.sh
+https://gitlab.gnome.org/GNOME/pygobject/raw/master/tools/pygi-convert.sh
 
 ::
 
