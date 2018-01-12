@@ -67,6 +67,7 @@ interface based on that information.
 Who Is Using PyGObject?
 -----------------------
 
+* `Anaconda <https://fedoraproject.org/wiki/Anaconda>`__ - an installation program used by Fedora, RHEL and others
 * `D-Feet <https://wiki.gnome.org/action/show/Apps/DFeet>`__ - an easy to use D-Bus debugger
 * `GNOME Music <https://wiki.gnome.org/Apps/Music>`__ - a music player for GNOME
 * `GNOME Tweak Tool <https://wiki.gnome.org/action/show/Apps/GnomeTweakTool>`__ - a tool to customize advanced GNOME 3 options
