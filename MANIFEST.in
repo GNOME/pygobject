@@ -9,8 +9,10 @@ include NEWS
 include tools/pygi-convert.sh
 include pygobject.doap
 include README.rst
+include .gitlab-ci.yml
 recursive-include examples *.py *.am *.png *.css *.ui *.gif *.gresource *.jpg *.xml
 recursive-include gi *.am *.h
 recursive-include pygtkcompat *.am
 recursive-include tests *.py *.c *.h *.xml *.supp *nouppera *.am
 recursive-include docs *.rst *.svg LICENSE *.ico *.png *.css *.py *.dia Makefile
+recursive-include .gitlab-ci *.sh *.rst Dockerfile
