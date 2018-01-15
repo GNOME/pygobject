@@ -1465,6 +1465,8 @@ class Adjustment(Gtk.Adjustment):
         # was set, we set it again here.
         if 'value' in kwargs:
             self.set_value(kwargs['value'])
+        elif len(args) >= 1:
+            self.set_value(args[0])
 
 
 Adjustment = override(Adjustment)

@@ -463,6 +463,12 @@ class TestGtk(unittest.TestCase):
         adjustment = Gtk.Adjustment()
         self.adjustment_check(adjustment)
 
+        adjustment = Gtk.Adjustment(1, -1, 3, 0, 0, 0)
+        self.adjustment_check(adjustment, value=1, lower=-1, upper=3)
+
+        adjustment = Gtk.Adjustment(1, -1, 3, 0, 0, 0, value=2)
+        self.adjustment_check(adjustment, value=2, lower=-1, upper=3)
+
     @unittest.skipIf(Gtk._version == "4.0", "not in gtk4")
     def test_table(self):
         table = Gtk.Table()
