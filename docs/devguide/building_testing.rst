@@ -2,8 +2,8 @@
 Building & Testing
 ==================
 
-Building with Autotools
------------------------
+Using Autotools
+---------------
 
 Building for Python 2:
 
@@ -19,19 +19,6 @@ Building for Python 3:
     ./autogen.sh --with-python=python3
     make
 
-
-Building with Setuptools
-------------------------
-
-Building in the source directory:
-
-::
-
-    python setup.py buildext --inplace
-
-
-Testing
--------
 
 To run the test suite::
 
@@ -54,3 +41,14 @@ To executes all the tests in valgrind::
 To execute pyflakes and pep8 tests::
 
     make check.quality
+
+
+Using Setuptools
+----------------
+
+Building and testing in the source directory:
+
+::
+
+    python2 setup.py test
+    python3 setup.py test

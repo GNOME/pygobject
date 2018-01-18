@@ -34,7 +34,7 @@ from email import parser
 
 import pkg_resources
 from setuptools import setup, find_packages
-from distutils.core import Extension, Distribution
+from distutils.core import Extension, Distribution, Command
 from distutils.ccompiler import new_compiler
 from distutils import dir_util
 
@@ -130,7 +130,10 @@ def pkg_config_version_check(pkg, version):
 
 def pkg_config_parse(opt, pkg):
     ret = _run_pkg_config([opt, pkg])
-    output = ret.decode()
+    if sys.version_info[0] == 3:
+        output = ret.decode()
+    else:
+        output = ret
     opt = opt[-2:]
     return [x.lstrip(opt) for x in output.split()]
 
@@ -153,7 +156,8 @@ du_sdist = get_command_class("sdist")
 
 class distcheck(du_sdist):
     """Creates a tarball and does some additional sanity checks such as
-    checking if the tarballs includes all files and builds.
+    checking if the tarball includes all files, builds successfully and
+    the tests suite passes.
     """
 
     def _check_manifest(self):
@@ -211,6 +215,7 @@ class distcheck(du_sdist):
                         "--record",
                         os.path.join(distcheck_dir, "log.txt"),
                         ])
+            self.spawn([sys.executable, "setup.py", "test"])
         finally:
             os.chdir(old_pwd)
 
@@ -218,6 +223,280 @@ class distcheck(du_sdist):
         du_sdist.run(self)
         self._check_manifest()
         self._check_dist()
+
+
+class build_tests(Command):
+    description = "build test libraries and extensions"
+    user_options = [
+        ("force", "f", "force a rebuild"),
+    ]
+
+    def initialize_options(self):
+        self.build_temp = None
+        self.force = False
+
+    def finalize_options(self):
+        self.set_undefined_options(
+            'build_ext',
+            ('build_temp', 'build_temp'))
+
+    def _newer_group(self, sources, target):
+        from distutils.dep_util import newer_group
+
+        if self.force:
+            return True
+        else:
+            return newer_group(sources, target)
+
+    def run(self):
+        from distutils.ccompiler import new_compiler
+        from distutils.sysconfig import customize_compiler
+
+        gidatadir = pkg_config_parse(
+            "--variable=gidatadir", "gobject-introspection-1.0")[0]
+        g_ir_scanner = pkg_config_parse(
+            "--variable=g_ir_scanner", "gobject-introspection-1.0")[0]
+        g_ir_compiler = pkg_config_parse(
+            "--variable=g_ir_compiler", "gobject-introspection-1.0")[0]
+
+        script_dir = get_script_dir()
+        tests_dir = os.path.join(script_dir, "tests")
+        gi_tests_dir = os.path.join(gidatadir, "tests")
+
+        schema_xml = os.path.join(tests_dir, "org.gnome.test.gschema.xml")
+        schema_bin = os.path.join(tests_dir, "gschemas.compiled")
+        if self._newer_group([schema_xml], schema_bin):
+            subprocess.check_call([
+                "glib-compile-schemas",
+                "--targetdir=%s" % tests_dir,
+                "--schema-file=%s" % schema_xml,
+            ])
+
+        compiler = new_compiler()
+        customize_compiler(compiler)
+
+        def build_ext(ext):
+            ext_path = os.path.join(
+                tests_dir,
+                compiler.shared_object_filename(ext.name))
+
+            if self._newer_group(ext.sources + ext.depends, ext_path):
+                objects = compiler.compile(
+                    ext.sources,
+                    output_dir=self.build_temp,
+                    include_dirs=ext.include_dirs)
+
+                compiler.link_shared_object(
+                    objects,
+                    ext_path,
+                    output_dir=script_dir,
+                    libraries=ext.libraries,
+                    library_dirs=ext.library_dirs)
+
+        ext = Extension(
+            name='libgimarshallingtests',
+            sources=[
+                os.path.join(gi_tests_dir, "gimarshallingtests.c"),
+                os.path.join(tests_dir, "gimarshallingtestsextra.c"),
+            ],
+            include_dirs=[
+                gi_tests_dir,
+                tests_dir,
+            ],
+            depends=[
+                os.path.join(gi_tests_dir, "gimarshallingtests.h"),
+                os.path.join(tests_dir, "gimarshallingtestsextra.h"),
+            ],
+        )
+        add_ext_pkg_config_dep(ext, compiler.compiler_type, "glib-2.0")
+        add_ext_pkg_config_dep(ext, compiler.compiler_type, "gio-2.0")
+        build_ext(ext)
+
+        gir_path = os.path.join(tests_dir, "GIMarshallingTests-1.0.gir")
+        typelib_path = os.path.join(
+            tests_dir, "GIMarshallingTests-1.0.typelib")
+
+        if self._newer_group(ext.sources + ext.depends, gir_path):
+            subprocess.check_call([
+                g_ir_scanner,
+                "--include=Gio-2.0",
+                "--namespace=GIMarshallingTests",
+                "--nsversion=1.0",
+                "--symbol-prefix=gi_marshalling_tests",
+                "--warn-all",
+                "--warn-error",
+                "--library-path=%s" % tests_dir,
+                "--library=gimarshallingtests",
+                "--pkg=glib-2.0",
+                "--pkg=gio-2.0",
+                "--output=%s" % gir_path,
+            ] + ext.sources + ext.depends)
+
+        if self._newer_group([gir_path], typelib_path):
+            subprocess.check_call([
+                g_ir_compiler,
+                gir_path,
+                "--output=%s" % typelib_path,
+            ])
+
+        ext = Extension(
+            name='libregress',
+            sources=[
+                os.path.join(gi_tests_dir, "regress.c"),
+            ],
+            include_dirs=[
+                gi_tests_dir,
+            ],
+            depends=[
+                os.path.join(gi_tests_dir, "regress.h"),
+            ],
+        )
+        add_ext_pkg_config_dep(ext, compiler.compiler_type, "glib-2.0")
+        add_ext_pkg_config_dep(ext, compiler.compiler_type, "gio-2.0")
+        add_ext_pkg_config_dep(ext, compiler.compiler_type, "cairo")
+        add_ext_pkg_config_dep(ext, compiler.compiler_type, "cairo-gobject")
+        build_ext(ext)
+
+        gir_path = os.path.join(tests_dir, "Regress-1.0.gir")
+        typelib_path = os.path.join(tests_dir, "Regress-1.0.typelib")
+
+        if self._newer_group(ext.sources + ext.depends, gir_path):
+            subprocess.check_call([
+                g_ir_scanner,
+                "--include=cairo-1.0",
+                "--include=Gio-2.0",
+                "--namespace=Regress",
+                "--nsversion=1.0",
+                "--warn-all",
+                "--warn-error",
+                "--library-path=%s" % tests_dir,
+                "--library=regress",
+                "--pkg=glib-2.0",
+                "--pkg=gio-2.0",
+                "--pkg=cairo",
+                "--pkg=cairo-gobject",
+                "--output=%s" % gir_path,
+            ] + ext.sources + ext.depends)
+
+        if self._newer_group([gir_path], typelib_path):
+            subprocess.check_call([
+                g_ir_compiler,
+                gir_path,
+                "--output=%s" % typelib_path,
+            ])
+
+        ext = Extension(
+            name='tests.testhelper',
+            sources=[
+                os.path.join(tests_dir, "testhelpermodule.c"),
+                os.path.join(tests_dir, "test-floating.c"),
+                os.path.join(tests_dir, "test-thread.c"),
+                os.path.join(tests_dir, "test-unknown.c"),
+            ],
+            include_dirs=[
+                os.path.join(script_dir, "gi"),
+                tests_dir,
+            ],
+            depends=[
+                os.path.join(tests_dir, "test-thread.h"),
+                os.path.join(tests_dir, "test-unknown.h"),
+                os.path.join(tests_dir, "test-floating.h"),
+            ],
+        )
+        add_ext_pkg_config_dep(ext, compiler.compiler_type, "glib-2.0")
+        add_ext_pkg_config_dep(ext, compiler.compiler_type, "gio-2.0")
+        add_ext_pkg_config_dep(ext, compiler.compiler_type, "cairo")
+
+        dist = Distribution({"ext_modules": [ext]})
+        cmd = dist.get_command_obj("build_ext")
+        cmd.inplace = True
+        cmd.ensure_finalized()
+        cmd.run()
+
+
+class test(Command):
+    user_options = []
+
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        cmd = self.reinitialize_command("build_ext")
+        cmd.inplace = True
+        cmd.ensure_finalized()
+        cmd.run()
+
+        cmd = self.reinitialize_command("build_tests")
+        cmd.ensure_finalized()
+        cmd.run()
+
+        tests_dir = os.path.join(get_script_dir(), "tests")
+        subprocess.check_call([
+            sys.executable,
+            os.path.join(tests_dir, "runtests.py"),
+        ])
+
+
+def get_script_dir():
+    return os.path.dirname(os.path.realpath(__file__))
+
+
+def get_pycairo_include_dir():
+    """Returns the best guess at where to find the pycairo headers.
+
+    Raises if pycairo isn't found.
+    """
+
+    script_dir = get_script_dir()
+    min_version = get_version_requirement(
+        script_dir, get_pycairo_pkg_config_name())
+
+    dist = pkg_resources.get_distribution("pycairo>=%s" % min_version)
+
+    def get_sys_path(dist, name):
+        """The sysconfig path for a distribution, or None"""
+
+        location = dist.location
+        for scheme in sysconfig.get_scheme_names():
+            for path_type in ["platlib", "purelib"]:
+                path = sysconfig.get_path(path_type, scheme)
+                try:
+                    if samefile(path, location):
+                        return sysconfig.get_path(name, scheme)
+                except EnvironmentError:
+                    pass
+
+    data_path = get_sys_path(dist, "data") or sys.prefix
+    return os.path.join(data_path, "include", "pycairo")
+
+
+def add_ext_pkg_config_dep(ext, compiler_type, name):
+    script_dir = get_script_dir()
+
+    msvc_libraries = {
+        "glib-2.0": ["glib-2.0"],
+        "gio-2.0": ["gio-2.0", "gobject-2.0", "glib-2.0"],
+        "gobject-introspection-1.0":
+            ["girepository-1.0", "gobject-2.0", "glib-2.0"],
+        "cairo": ["cairo"],
+        "cairo-gobject":
+            ["cairo-gobject", "cairo", "gobject-2.0", "glib-2.0"],
+        "libffi": ["ffi"],
+    }
+
+    fallback_libs = msvc_libraries[name]
+    if compiler_type == "msvc":
+        # assume that INCLUDE and LIB contains the right paths
+        ext.libraries += fallback_libs
+    else:
+        min_version = get_version_requirement(script_dir, name)
+        pkg_config_version_check(name, min_version)
+        ext.include_dirs += pkg_config_parse("--cflags-only-I", name)
+        ext.library_dirs += pkg_config_parse("--libs-only-L", name)
+        ext.libraries += pkg_config_parse("--libs-only-l", name)
 
 
 du_build_ext = get_command_class("build_ext")
@@ -234,7 +513,7 @@ class build_ext(du_build_ext):
         self.compiler_type = new_compiler(compiler=self.compiler).compiler_type
 
     def _write_config_h(self):
-        script_dir = os.path.dirname(os.path.realpath(__file__))
+        script_dir = get_script_dir()
         target = os.path.join(script_dir, "config.h")
         versions = parse_versions(script_dir)
         with io.open(target, 'w', encoding="utf-8") as h:
@@ -253,53 +532,12 @@ class build_ext(du_build_ext):
 
     def _setup_extensions(self):
         ext = {e.name: e for e in self.extensions}
-        script_dir = os.path.dirname(os.path.realpath(__file__))
-
-        msvc_libraries = {
-            "glib-2.0": ["glib-2.0"],
-            "gio-2.0": ["gio-2.0", "gobject-2.0", "glib-2.0"],
-            "gobject-introspection-1.0":
-                ["girepository-1.0", "gobject-2.0", "glib-2.0"],
-            "cairo": ["cairo"],
-            "cairo-gobject":
-                ["cairo-gobject", "cairo", "gobject-2.0", "glib-2.0"],
-            "libffi": ["ffi"],
-        }
 
         def add_dependency(ext, name):
-            fallback_libs = msvc_libraries[name]
-
-            if self.compiler_type == "msvc":
-                # assume that INCLUDE and LIB contains the right paths
-                ext.libraries += fallback_libs
-            else:
-                min_version = get_version_requirement(script_dir, name)
-                pkg_config_version_check(name, min_version)
-                ext.include_dirs += pkg_config_parse("--cflags-only-I", name)
-                ext.library_dirs += pkg_config_parse("--libs-only-L", name)
-                ext.libraries += pkg_config_parse("--libs-only-l", name)
+            add_ext_pkg_config_dep(ext, self.compiler_type, name)
 
         def add_pycairo(ext):
-            min_version = get_version_requirement(
-                script_dir, get_pycairo_pkg_config_name())
-
-            dist = pkg_resources.get_distribution("pycairo>=%s" % min_version)
-
-            def get_sys_path(dist, name):
-                """The sysconfig path for a distribution, or None"""
-
-                location = dist.location
-                for scheme in sysconfig.get_scheme_names():
-                    for path_type in ["platlib", "purelib"]:
-                        path = sysconfig.get_path(path_type, scheme)
-                        try:
-                            if samefile(path, location):
-                                return sysconfig.get_path(name, scheme)
-                        except EnvironmentError:
-                            pass
-
-            data_path = get_sys_path(dist, "data") or sys.prefix
-            include_dir = os.path.join(data_path, "include", "pycairo")
+            include_dir = get_pycairo_include_dir()
             ext.include_dirs += [include_dir]
 
         gi_ext = ext["gi._gi"]
@@ -324,7 +562,7 @@ class build_ext(du_build_ext):
 
 
 def main():
-    script_dir = os.path.dirname(os.path.realpath(__file__))
+    script_dir = get_script_dir()
     pkginfo = parse_pkg_info(script_dir)
     gi_dir = os.path.join(script_dir, "gi")
 
@@ -375,6 +613,8 @@ def main():
         cmdclass={
             "build_ext": build_ext,
             "distcheck": distcheck,
+            "build_tests": build_tests,
+            "test": test,
         },
         install_requires=[
             "pycairo>=%s" % get_version_requirement(
