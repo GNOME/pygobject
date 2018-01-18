@@ -140,6 +140,35 @@ class TestGVariant(unittest.TestCase):
         self.assertEqual(variant.get_type_string(), 'aai')
         self.assertEqual(variant.unpack(), [[1, 2], [3, 4, 5]])
 
+    def test_create_maybe(self):
+        variant = GLib.Variant('mai', None)
+        self.assertEqual(variant.get_type_string(), 'mai')
+        self.assertEqual(variant.n_children(), 0)
+        self.assertEqual(variant.unpack(), None)
+
+        variant = GLib.Variant('mai', [])
+        self.assertEqual(variant.get_type_string(), 'mai')
+        self.assertEqual(variant.n_children(), 1)
+
+        variant = GLib.Variant('mami', [None])
+        self.assertEqual(variant.get_type_string(), 'mami')
+        self.assertEqual(variant.n_children(), 1)
+
+        variant = GLib.Variant('mami', [None, 13, None])
+        self.assertEqual(variant.get_type_string(), 'mami')
+        self.assertEqual(variant.n_children(), 1)
+        array = variant.get_child_value(0)
+        self.assertEqual(array.n_children(), 3)
+
+        element = array.get_child_value(0)
+        self.assertEqual(element.n_children(), 0)
+        element = array.get_child_value(1)
+        self.assertEqual(element.n_children(), 1)
+        self.assertEqual(element.get_child_value(0).get_int32(), 13)
+        element = array.get_child_value(2)
+        self.assertEqual(element.n_children(), 0)
+
+
     def test_create_complex(self):
         variant = GLib.Variant('(as)', ([],))
         self.assertEqual(variant.get_type_string(), '(as)')
@@ -232,8 +261,8 @@ class TestGVariant(unittest.TestCase):
         self.assertRaises(TypeError, GLib.Variant, '(ss)', 'mec', 'mac')
         self.assertRaises(TypeError, GLib.Variant, '(s)', 'hello')
 
-        # unimplemented data type
-        self.assertRaises(NotImplementedError, GLib.Variant, 'Q', 1)
+        # invalid format string
+        self.assertRaises(TypeError, GLib.Variant, 'Q', 1)
 
         # invalid types
         self.assertRaises(TypeError, GLib.Variant, '(ii', (42, 3))
@@ -280,12 +309,16 @@ class TestGVariant(unittest.TestCase):
         self.assertEqual(res, {'key1': 1, 'key2': 2})
 
         # maybe
-        v = GLib.Variant.new_maybe(GLib.VariantType.new('i'), GLib.Variant('i', 1))
-        res = v.unpack()
-        self.assertEqual(res, 1)
-        v = GLib.Variant.new_maybe(GLib.VariantType.new('i'), None)
-        res = v.unpack()
-        self.assertEqual(res, None)
+        v = GLib.Variant('mi', 1)
+        self.assertEqual(v.unpack(), 1)
+        v = GLib.Variant('mi', None)
+        self.assertEqual(v.unpack(), None)
+        v = GLib.Variant('mai', [])
+        self.assertEqual(v.unpack(), [])
+        v = GLib.Variant('m()', ())
+        self.assertEqual(v.unpack(), ())
+        v = GLib.Variant('mami', [None, 1, None])
+        self.assertEqual(v.unpack(), [None, 1, None])
 
     def test_iteration(self):
         # array index access
