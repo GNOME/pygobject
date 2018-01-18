@@ -28,3 +28,6 @@ if [[ "${PYVER}" == "2" ]]; then
     python -m pip install sphinx sphinx_rtd_theme
     python -m sphinx -W -a -E -b html -n docs docs/_build
 fi;
+
+# BUILD & TEST AGAIN USING SETUP.PY
+xvfb-run -a python setup.py distcheck
