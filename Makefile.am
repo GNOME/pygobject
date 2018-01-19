@@ -1,10 +1,7 @@
-# Limit PyFlakes and PEP8 to these directories.
-pycheck_dirs = examples gi tests pygtkcompat
-
 # Part of the gi subdirectory is handled with non-recursive make to avoid
 # py-compile getting confused between gi/types.py and Python's standard
 # types module.
-SUBDIRS = . $(pycheck_dirs)
+SUBDIRS = . examples gi tests pygtkcompat
 
 PLATFORM_VERSION = 3.0
 
@@ -21,6 +18,7 @@ EXTRA_DIST = \
 	m4/python.m4 \
 	m4/introspection.m4 \
 	setup.py \
+	setup.cfg \
 	MANIFEST.in \
 	README.rst \
 	docs
@@ -145,19 +143,8 @@ dist-hook: $(BUILT_EXTRA_DIST)
 	  rm -f $(distdir)/$$f && cp $$d/$$f $(distdir) || exit 1; done
 	rm -rf "$(distdir)/docs/_build"
 
-# pycheck_subdirs = 
-
 check.quality:
-	@echo "  CHECK  Pyflakes" $(pycheck_dirs)
-	@if type pyflakes >/dev/null 2>&1; then \
-		(cd $(abs_top_srcdir) && PYFLAKES_BUILTINS="basestring,long,unicode" pyflakes $(pycheck_dirs) ); \
-	else echo "skipped, pyflakes not installed"; \
-	fi
-	@echo "  CHECK  PEP8";
-	@if type pep8 >/dev/null 2>&1; then \
-		(cd $(abs_top_srcdir) && pep8 --ignore=E501,E123,E124,E402,E731,E722 --repeat --show-source $(pycheck_dirs) ); \
-	else echo "skipped, pep8 not installed"; \
-	fi
+	(cd $(abs_top_srcdir) && $(PYTHON) -m flake8);
 
 check.gdb:
 	cd tests && $(MAKE) check.gdb

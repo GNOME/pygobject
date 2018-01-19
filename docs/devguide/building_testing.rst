@@ -38,7 +38,7 @@ To executes all the tests in valgrind::
 
     make check.valgrind
 
-To execute pyflakes and pep8 tests::
+To execute flake8 tests::
 
     make check.quality
 
