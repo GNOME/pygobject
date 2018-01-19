@@ -54,6 +54,7 @@ extlinks = {
     'issue': ('https://gitlab.gnome.org/GNOME/pygobject/issues/%s', 'issue#'),
     'mr': (
         'https://gitlab.gnome.org/GNOME/pygobject/merge_requests/%s', 'mr#'),
+    'user': ('https://gitlab.gnome.org/%s', ''),
 }
 
 suppress_warnings = ["image.nonlocal_uri"]

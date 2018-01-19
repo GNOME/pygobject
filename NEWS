@@ -2,8 +2,11 @@
 -------------------
 
 * overrides: Fix ``Gtk.Adjustment.__init__()`` overrides not setting "value"
-  sometimes. :issue:`151` :mr:`3`
-
+  sometimes. :issue:`151` :mr:`3` (:user:`Christoph Reiter <creiter>`)
+* overrides: ``GLib.Variant``: add support to create maybe types.
+  :issue:`152` :mr:`4` (:user:`Alberto Ruiz <aruiz>`)
+* setup.py: Add a "test" command which is equal to "make check" with autotools
+  :mr:`5` (:user:`Christoph Reiter <creiter>`)
 
 3.27.1 - 2017-12-11
 -------------------
