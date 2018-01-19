@@ -128,7 +128,7 @@ class _VariantCreator(object):
 
         if not isinstance(value, (dict, tuple, list)):
             raise TypeError("Could not create array, tuple or dictionary entry from non iterable value %s %s" %
-                    (format, value))
+                            (format, value))
 
         if gvtype.is_tuple() and gvtype.n_items() != len(value):
             raise TypeError("Tuple mismatches value's number of elements %s %s" % (format, value))
@@ -150,6 +150,7 @@ class _VariantCreator(object):
 
         return builder.end()
 
+
 class Variant(GLib.Variant):
     def __new__(cls, format_string, value):
         """Create a GVariant from a native Python object.
@@ -163,7 +164,7 @@ class Variant(GLib.Variant):
           GLib.Variant('(asa{sv})', ([], {'foo': GLib.Variant('b', True),
                                           'bar': GLib.Variant('i', 2)}))
         """
-        if not GLib.VariantType.string_is_valid (format_string):
+        if not GLib.VariantType.string_is_valid(format_string):
             raise TypeError("Invalid GVariant format string '%s'", format_string)
         creator = _VariantCreator()
         v = creator._create(format_string, value)

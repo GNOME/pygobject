@@ -168,7 +168,6 @@ class TestGVariant(unittest.TestCase):
         element = array.get_child_value(2)
         self.assertEqual(element.n_children(), 0)
 
-
     def test_create_complex(self):
         variant = GLib.Variant('(as)', ([],))
         self.assertEqual(variant.get_type_string(), '(as)')
