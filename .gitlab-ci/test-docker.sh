@@ -13,8 +13,12 @@ export MALLOC_CHECK_=3
 export MALLOC_PERTURB_=$((${RANDOM} % 255 + 1))
 PYVER=$(python -c "import sys; sys.stdout.write(str(sys.version_info[0]))")
 
+SOURCE_DIR="$(pwd)"
+mkdir /tmp/build
+cd /tmp/build
+
 # BUILD
-./autogen.sh --with-python=python
+"${SOURCE_DIR}"/autogen.sh --with-python=python
 make
 
 # TESTS
@@ -22,6 +26,8 @@ xvfb-run -a make check
 
 # CODE QUALITY CHECKS
 make check.quality
+
+cd "${SOURCE_DIR}"
 
 # DOCUMENTATION CHECKS
 if [[ "${PYVER}" == "2" ]]; then
