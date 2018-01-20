@@ -168,7 +168,12 @@ pyg_object_set_property (GObject *object, guint property_id,
 
     state = PyGILState_Ensure();
 
-    object_wrapper = pygobject_new(object);
+    object_wrapper = g_object_get_qdata(object, pygobject_wrapper_key);
+
+    if (object_wrapper)
+      Py_INCREF (object_wrapper);
+    else
+      object_wrapper = pygobject_new(object);
 
     if (object_wrapper == NULL) {
 	PyGILState_Release(state);
@@ -202,7 +207,12 @@ pyg_object_get_property (GObject *object, guint property_id,
 
     state = PyGILState_Ensure();
 
-    object_wrapper = pygobject_new(object);
+    object_wrapper = g_object_get_qdata(object, pygobject_wrapper_key);
+
+    if (object_wrapper)
+      Py_INCREF (object_wrapper);
+    else
+      object_wrapper = pygobject_new(object);
 
     if (object_wrapper == NULL) {
 	PyGILState_Release(state);
