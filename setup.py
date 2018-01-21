@@ -440,6 +440,24 @@ class test(Command):
         ])
 
 
+class quality(Command):
+    description = "run code quality tests"
+    user_options = []
+
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        status = subprocess.call([
+            sys.executable, "-m", "flake8",
+        ], cwd=get_script_dir())
+        if status != 0:
+            raise SystemExit(status)
+
+
 def get_script_dir():
     return os.path.dirname(os.path.realpath(__file__))
 
@@ -615,6 +633,7 @@ def main():
             "distcheck": distcheck,
             "build_tests": build_tests,
             "test": test,
+            "quality": quality,
         },
         install_requires=[
             "pycairo>=%s" % get_version_requirement(
