@@ -388,11 +388,9 @@ pygi_arg_struct_to_py_marshal (GIArgument *arg,
                                                               arg->v_pointer);
     } else if (g_type_is_a (g_type, G_TYPE_BOXED)) {
         if (py_type) {
-            /* Force a boxed copy if we are not transfered ownership and the
-             * memory is not caller allocated. */
             py_obj = _pygi_boxed_new ((PyTypeObject *) py_type,
                                       arg->v_pointer,
-                                      transfer == GI_TRANSFER_NOTHING && !is_allocated,
+                                      transfer == GI_TRANSFER_EVERYTHING || is_allocated,
                                       is_allocated ?
                                               g_struct_info_get_size(interface_info) : 0);
         }
@@ -448,36 +446,6 @@ arg_struct_to_py_marshal_adapter (PyGIInvokeState   *state,
                                           arg_cache->transfer,
                                           arg_cache->is_caller_allocates,
                                           iface_cache->is_foreign);
-}
-
-static PyObject *
-arg_boxed_to_py_marshal_pass_by_ref (PyGIInvokeState   *state,
-                                     PyGICallableCache *callable_cache,
-                                     PyGIArgCache      *arg_cache,
-                                     GIArgument        *arg)
-{
-    PyObject *py_obj = NULL;
-    PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)arg_cache;
-
-    if (arg->v_pointer == NULL) {
-        Py_RETURN_NONE;
-    }
-
-    if (g_type_is_a (iface_cache->g_type, G_TYPE_BOXED)) {
-        if (iface_cache->py_type) {
-            py_obj = _pygi_boxed_new ((PyTypeObject *) iface_cache->py_type,
-                                      arg->v_pointer,
-                                      FALSE, /* copy_boxed */
-                                      0);    /* slice_alloc */
-            ((PyGBoxed *)py_obj)->free_on_dealloc = FALSE;
-        }
-    } else {
-        PyErr_Format (PyExc_NotImplementedError,
-                      "expected boxed type but got %s",
-                      g_type_name (iface_cache->g_type));
-    }
-
-    return py_obj;
 }
 
 static void
@@ -561,51 +529,15 @@ arg_struct_from_py_setup (PyGIArgCache     *arg_cache,
 static void
 arg_struct_to_py_setup (PyGIArgCache     *arg_cache,
                         GIInterfaceInfo  *iface_info,
-                        GITransfer        transfer,
-                        GIArgInfo        *arg_info)
+                        GITransfer        transfer)
 {
     PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)arg_cache;
-
-    /* HACK to force GtkTreeModel:iter_next() and iter_previous() vfunc implementations
-     * to receive their Gtk.TreeIter argument as pass-by-reference. We create a new
-     * PyGIBoxed wrapper which does not copy the memory and also does not free it.
-     * This is needed to hack the noted vfunc implementations so they can continue
-     * working with bug https://bugzilla.gnome.org/show_bug.cgi?id=722899
-     * being fixed. This hack should be removed once GTK+ has fixed bug
-     * https://bugzilla.gnome.org/show_bug.cgi?id=734465
-     * and we've moved to a new major version.
-     */
-    if (arg_info && g_strcmp0 (iface_cache->type_name, "Gtk.TreeIter") == 0) {
-
-        /* GICallbackInfo */
-        GIBaseInfo *info = g_base_info_get_container (arg_info);
-        if (info && g_base_info_get_type (info) == GI_INFO_TYPE_CALLBACK &&
-                (g_strcmp0 (g_base_info_get_name (info), "iter_next") == 0 ||
-                 g_strcmp0 (g_base_info_get_name (info), "iter_previous") == 0)) {
-
-            /* GITypeInfo */
-            info = g_base_info_get_container (info);
-            if (info && g_base_info_get_type (info) == GI_INFO_TYPE_TYPE &&
-                    g_type_info_get_tag ((GITypeInfo *)info) == GI_TYPE_TAG_INTERFACE) {
-
-                /* GIFieldInfo */
-                info = g_base_info_get_container (info);
-                if (info && g_base_info_get_type (info) == GI_INFO_TYPE_FIELD) {
-
-                    /* GIStructInfo */
-                    info = g_base_info_get_container (info);
-                    if (info && g_base_info_get_type (info) == GI_INFO_TYPE_STRUCT &&
-                            g_strcmp0 (g_base_info_get_name (info), "TreeModelIface") == 0) {
-                        arg_cache->to_py_marshaller = arg_boxed_to_py_marshal_pass_by_ref;
-                    }
-                }
-            }
-        }
-    }
 
     if (arg_cache->to_py_marshaller == NULL) {
         arg_cache->to_py_marshaller = arg_struct_to_py_marshal_adapter;
     }
+
+    iface_cache->is_foreign = g_struct_info_is_foreign ( (GIStructInfo*)iface_info);
 
     if (iface_cache->is_foreign)
         arg_cache->to_py_cleanup = arg_foreign_to_py_cleanup;
@@ -638,7 +570,7 @@ pygi_arg_struct_new_from_info (GITypeInfo      *type_info,
     }
 
     if (direction & PYGI_DIRECTION_TO_PYTHON) {
-        arg_struct_to_py_setup (cache, iface_info, transfer, arg_info);
+        arg_struct_to_py_setup (cache, iface_info, transfer);
     }
 
     return cache;
