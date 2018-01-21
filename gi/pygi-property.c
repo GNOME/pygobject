@@ -160,6 +160,7 @@ pygi_get_property_value (PyGObject *instance, GParamSpec *pspec)
         GITypeInfo *type_info = NULL;
         gboolean free_array = FALSE;
         GIArgument arg = { 0, };
+        GITransfer transfer = GI_TRANSFER_NOTHING;
 
         type_info = g_property_info_get_type (property_info);
         arg = _pygi_argument_from_g_value (&value, type_info);
@@ -168,9 +169,12 @@ pygi_get_property_value (PyGObject *instance, GParamSpec *pspec)
         if (g_type_info_get_tag (type_info) == GI_TYPE_TAG_ARRAY) {
             arg.v_pointer = _pygi_argument_to_array (&arg, NULL, NULL, NULL,
                                                      type_info, &free_array);
+        } else if (g_type_is_a (pspec->value_type, G_TYPE_BOXED)) {
+          arg.v_pointer = g_value_dup_boxed (&value);
+          transfer = GI_TRANSFER_EVERYTHING;
         }
 
-        py_value = _pygi_argument_to_object (&arg, type_info, GI_TRANSFER_NOTHING);
+        py_value = _pygi_argument_to_object (&arg, type_info, transfer);
 
         if (free_array) {
             g_array_free (arg.v_pointer, FALSE);

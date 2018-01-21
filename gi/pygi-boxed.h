@@ -34,9 +34,9 @@ typedef struct {
 
 extern PyTypeObject PyGIBoxed_Type;
 
-PyObject * _pygi_boxed_new (PyTypeObject *pytype,
+PyObject * _pygi_boxed_new (PyTypeObject *type,
                             gpointer      boxed,
-                            gboolean      copy_boxed,
+                            gboolean      free_on_dealloc,
                             gsize         allocated_slice);
 
 void * _pygi_boxed_alloc (GIBaseInfo *info,
