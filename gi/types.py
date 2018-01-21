@@ -24,6 +24,7 @@ from __future__ import absolute_import
 
 import sys
 import warnings
+import re
 
 from ._constants import TYPE_INVALID
 from .docstring import generate_doc_string
@@ -47,6 +48,11 @@ if (3, 0) <= sys.version_info < (3, 3):
     # callable not available for python 3.0 thru 3.2
     def callable(obj):
         return hasattr(obj, '__call__')
+
+
+def snake_case(name):
+    s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
+    return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
 
 
 class MetaClassHelper(object):
@@ -81,6 +87,8 @@ class MetaClassHelper(object):
             if not vfunc_name.startswith("do_") or not callable(py_vfunc):
                 continue
 
+            skip_ambiguity_check = False
+
             # If a method name starts with "do_" assume it is a vfunc, and search
             # in the base classes for a method with the same name to override.
             # Recursion is necessary as overriden methods in most immediate parent
@@ -90,6 +98,20 @@ class MetaClassHelper(object):
                 method = getattr(base, vfunc_name, None)
                 if method is not None and isinstance(method, VFuncInfo):
                     vfunc_info = method
+                    break
+
+                if not hasattr(base, '__info__') or not hasattr(base.__info__, 'get_vfuncs'):
+                    continue
+
+                base_name = snake_case(base.__info__.get_type_name())
+
+                for v in base.__info__.get_vfuncs():
+                    if vfunc_name == 'do_%s_%s' % (base_name, v.get_name()):
+                        vfunc_info = v
+                        skip_ambiguity_check = True
+                        break
+
+                if vfunc_info:
                     break
 
             # If we did not find a matching method name in the bases, we might
@@ -102,22 +124,22 @@ class MetaClassHelper(object):
                 vfunc_info = find_vfunc_info_in_interface(cls.__bases__, vfunc_name[len("do_"):])
 
             if vfunc_info is not None:
-                assert vfunc_name == ('do_' + vfunc_info.get_name())
                 # Check to see if there are vfuncs with the same name in the bases.
                 # We have no way of specifying which one we are supposed to override.
-                ambiguous_base = find_vfunc_conflict_in_bases(vfunc_info, cls.__bases__)
-                if ambiguous_base is not None:
-                    base_info = vfunc_info.get_container()
-                    raise TypeError('Method %s() on class %s.%s is ambiguous '
-                                    'with methods in base classes %s.%s and %s.%s' %
-                                    (vfunc_name,
-                                     cls.__info__.get_namespace(),
-                                     cls.__info__.get_name(),
-                                     base_info.get_namespace(),
-                                     base_info.get_name(),
-                                     ambiguous_base.__info__.get_namespace(),
-                                     ambiguous_base.__info__.get_name()
-                                    ))
+                if not skip_ambiguity_check:
+                    ambiguous_base = find_vfunc_conflict_in_bases(vfunc_info, cls.__bases__)
+                    if ambiguous_base is not None:
+                        base_info = vfunc_info.get_container()
+                        raise TypeError('Method %s() on class %s.%s is ambiguous '
+                                        'with methods in base classes %s.%s and %s.%s' %
+                                        (vfunc_name,
+                                         cls.__info__.get_namespace(),
+                                         cls.__info__.get_name(),
+                                         base_info.get_namespace(),
+                                         base_info.get_name(),
+                                         ambiguous_base.__info__.get_namespace(),
+                                         ambiguous_base.__info__.get_name()
+                                        ))
                 hook_up_vfunc_implementation(vfunc_info, cls.__gtype__,
                                              py_vfunc)
 
