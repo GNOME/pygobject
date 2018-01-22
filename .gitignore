@@ -79,3 +79,5 @@ Makefile.in
 /MANIFEST
 /docs/_build
 /PyGObject.egg-info/
+*.pyd
+*.dll.a

@@ -240,13 +240,18 @@ class build_tests(Command):
             'build_ext',
             ('build_temp', 'build_temp'))
 
-    def _newer_group(self, sources, target):
+    def _newer_group(self, sources, *targets):
+        assert targets
+
         from distutils.dep_util import newer_group
 
         if self.force:
             return True
         else:
-            return newer_group(sources, target)
+            for target in targets:
+                if not newer_group(sources, target):
+                    return False
+            return True
 
     def run(self):
         from distutils.ccompiler import new_compiler
@@ -274,24 +279,41 @@ class build_tests(Command):
 
         compiler = new_compiler()
         customize_compiler(compiler)
+        if os.name == "nt":
+            # XXX: something broken with mingw python2
+            compiler.shared_lib_extension = ".dll"
 
         def build_ext(ext):
-            ext_path = os.path.join(
-                tests_dir,
-                compiler.shared_object_filename(ext.name))
+            if compiler.compiler_type == "msvc":
+                raise Exception("MSVC support not implemented")
 
-            if self._newer_group(ext.sources + ext.depends, ext_path):
+            libname = compiler.shared_object_filename(ext.name)
+            ext_paths = [os.path.join(tests_dir, libname)]
+            if os.name == "nt":
+                implibname = libname + ".a"
+                ext_paths.append(os.path.join(tests_dir, implibname))
+
+            if self._newer_group(ext.sources + ext.depends, *ext_paths):
                 objects = compiler.compile(
                     ext.sources,
                     output_dir=self.build_temp,
                     include_dirs=ext.include_dirs)
 
+                if os.name == "nt":
+                    postargs = ["-Wl,--out-implib=%s" %
+                                os.path.join(tests_dir, implibname)]
+                else:
+                    postargs = []
+
                 compiler.link_shared_object(
                     objects,
-                    ext_path,
-                    output_dir=script_dir,
+                    compiler.shared_object_filename(ext.name),
+                    output_dir=tests_dir,
                     libraries=ext.libraries,
-                    library_dirs=ext.library_dirs)
+                    library_dirs=ext.library_dirs,
+                    extra_postargs=postargs)
+
+            return ext_paths
 
         ext = Extension(
             name='libgimarshallingtests',
@@ -310,15 +332,16 @@ class build_tests(Command):
         )
         add_ext_pkg_config_dep(ext, compiler.compiler_type, "glib-2.0")
         add_ext_pkg_config_dep(ext, compiler.compiler_type, "gio-2.0")
-        build_ext(ext)
+        ext_paths = build_ext(ext)
 
         gir_path = os.path.join(tests_dir, "GIMarshallingTests-1.0.gir")
         typelib_path = os.path.join(
             tests_dir, "GIMarshallingTests-1.0.typelib")
 
-        if self._newer_group(ext.sources + ext.depends, gir_path):
+        if self._newer_group(ext_paths, gir_path):
             subprocess.check_call([
                 g_ir_scanner,
+                "--no-libtool",
                 "--include=Gio-2.0",
                 "--namespace=GIMarshallingTests",
                 "--nsversion=1.0",
@@ -355,14 +378,15 @@ class build_tests(Command):
         add_ext_pkg_config_dep(ext, compiler.compiler_type, "gio-2.0")
         add_ext_pkg_config_dep(ext, compiler.compiler_type, "cairo")
         add_ext_pkg_config_dep(ext, compiler.compiler_type, "cairo-gobject")
-        build_ext(ext)
+        ext_paths = build_ext(ext)
 
         gir_path = os.path.join(tests_dir, "Regress-1.0.gir")
         typelib_path = os.path.join(tests_dir, "Regress-1.0.typelib")
 
-        if self._newer_group(ext.sources + ext.depends, gir_path):
+        if self._newer_group(ext_paths, gir_path):
             subprocess.check_call([
                 g_ir_scanner,
+                "--no-libtool",
                 "--include=cairo-1.0",
                 "--include=Gio-2.0",
                 "--namespace=Regress",
@@ -433,11 +457,16 @@ class test(Command):
         cmd.ensure_finalized()
         cmd.run()
 
+        env = os.environ.copy()
+        env.pop("MSYSTEM", None)
+        # TODO: set up a temp bus, disable until then
+        env["DBUS_SESSION_BUS_ADDRESS"] = ""
+
         tests_dir = os.path.join(get_script_dir(), "tests")
         subprocess.check_call([
             sys.executable,
             os.path.join(tests_dir, "runtests.py"),
-        ])
+        ], env=env)
 
 
 class quality(Command):
