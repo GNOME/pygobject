@@ -50,13 +50,20 @@ typedef gboolean (*PyGIMarshalFromPyFunc) (PyGIInvokeState   *state,
 typedef PyObject *(*PyGIMarshalToPyFunc) (PyGIInvokeState   *state,
                                           PyGICallableCache *callable_cache,
                                           PyGIArgCache      *arg_cache,
-                                          GIArgument        *arg);
+                                          GIArgument        *arg,
+                                          gpointer          *cleanup_data);
 
 typedef void (*PyGIMarshalCleanupFunc) (PyGIInvokeState *state,
                                         PyGIArgCache    *arg_cache,
-                                        PyObject        *py_arg, /* always NULL for to_py cleanup */
+                                        PyObject        *py_arg,
                                         gpointer         data,
                                         gboolean         was_processed);
+
+typedef void (*PyGIMarshalToPyCleanupFunc) (PyGIInvokeState *state,
+                                            PyGIArgCache    *arg_cache,
+                                            gpointer         cleanup_data,
+                                            gpointer         data,
+                                            gboolean         was_processed);
 
 /* Argument meta types denote how we process the argument:
  *  - PYGI_META_ARG_TYPE_PARENT - parents may or may not have children
@@ -118,7 +125,7 @@ struct _PyGIArgCache
     PyGIMarshalToPyFunc to_py_marshaller;
 
     PyGIMarshalCleanupFunc from_py_cleanup;
-    PyGIMarshalCleanupFunc to_py_cleanup;
+    PyGIMarshalToPyCleanupFunc to_py_cleanup;
 
     GDestroyNotify destroy_notify;
 
