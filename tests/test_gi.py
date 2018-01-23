@@ -2591,7 +2591,6 @@ class TestPythonGObject(unittest.TestCase):
 
     @unittest.skipUnless(hasattr(GIMarshallingTests, 'callback_owned_boxed'),
                          'requires newer version of GI')
-    @unittest.expectedFailure  # bug 722899
     def test_callback_owned_box(self):
         def callback(box, data):
             self.box = box
