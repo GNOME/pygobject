@@ -42,6 +42,8 @@ boxed_del (PyGIBoxed *self)
     if ( ( (PyGBoxed *) self)->free_on_dealloc && boxed != NULL) {
         if (self->slice_allocated) {
             g_slice_free1 (self->size, boxed);
+            self->slice_allocated = FALSE;
+            self->size = 0;
         } else {
             g_type = pyg_type_from_object ( (PyObject *) self);
             g_boxed_free (g_type, boxed);
@@ -203,7 +205,11 @@ void
 _pygi_boxed_copy_in_place (PyGIBoxed *self)
 {
     PyGBoxed *pygboxed = (PyGBoxed *)self;
-    gpointer copy = g_boxed_copy (pygboxed->gtype, pyg_boxed_get_ptr (self));
+    gpointer ptr = pyg_boxed_get_ptr (self);
+    gpointer copy = NULL;
+
+    if (ptr)
+        copy = g_boxed_copy (pygboxed->gtype, ptr);
 
     boxed_del (self);
     pyg_boxed_set_ptr (pygboxed, copy);
