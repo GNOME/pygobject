@@ -35,8 +35,9 @@ from email import parser
 import pkg_resources
 from setuptools import setup, find_packages
 from distutils.core import Extension, Distribution, Command
+from distutils.errors import DistutilsSetupError
 from distutils.ccompiler import new_compiler
-from distutils import dir_util
+from distutils import dir_util, log
 
 
 def get_command_class(name):
@@ -502,6 +503,7 @@ def get_pycairo_include_dir():
         script_dir, get_pycairo_pkg_config_name())
 
     dist = pkg_resources.get_distribution("pycairo>=%s" % min_version)
+    log.info("pycairo: found %r" % dist)
 
     def get_sys_path(dist, name):
         """The sysconfig path for a distribution, or None"""
@@ -585,6 +587,15 @@ class build_ext(du_build_ext):
 
         def add_pycairo(ext):
             include_dir = get_pycairo_include_dir()
+
+            log.info("pycairo: using include directory: %r" % include_dir)
+            header_path = os.path.join(
+                include_dir, "%s.h" % get_pycairo_pkg_config_name())
+            if not os.path.exists(header_path):
+                raise DistutilsSetupError(
+                    "pycairo: header file (%r) not found" % header_path)
+            log.info("pycairo: found %r" % header_path)
+
             ext.include_dirs += [include_dir]
 
         gi_ext = ext["gi._gi"]
