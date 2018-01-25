@@ -16,12 +16,6 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
 # USA
 
-"""
-ATTENTION DISTRO PACKAGERS: This is not a valid replacement for autotools.
-It does not install headers, pkgconfig files and does not support running
-tests. Its main use case atm is installation in virtualenvs and via pip.
-"""
-
 import io
 import os
 import re
@@ -619,6 +613,83 @@ class build_ext(du_build_ext):
         du_build_ext.run(self)
 
 
+class install_pkgconfig(Command):
+    description = "install .pc file"
+    user_options = []
+
+    def initialize_options(self):
+        self.install_base = None
+        self.install_platbase = None
+        self.install_data = None
+        self.compiler_type = None
+        self.outfiles = []
+
+    def finalize_options(self):
+        self.set_undefined_options(
+            'install',
+            ('install_base', 'install_base'),
+            ('install_data', 'install_data'),
+            ('install_platbase', 'install_platbase'),
+        )
+
+        self.set_undefined_options(
+            'build_ext',
+            ('compiler_type', 'compiler_type'),
+        )
+
+    def get_outputs(self):
+        return self.outfiles
+
+    def get_inputs(self):
+        return []
+
+    def run(self):
+        cmd = self.distribution.get_command_obj("bdist_wheel", create=False)
+        if cmd is not None:
+            log.warn(
+                "Python wheels and pkg-config is not compatible. "
+                "No pkg-config file will be included in the wheel. Install "
+                "from source if you need one.")
+            return
+
+        if self.compiler_type == "msvc":
+            return
+
+        script_dir = get_script_dir()
+        pkgconfig_in = os.path.join(script_dir, "pygobject-3.0.pc.in")
+        with io.open(pkgconfig_in, "r", encoding="utf-8") as h:
+            content = h.read()
+
+        config = {
+            "prefix": self.install_base,
+            "exec_prefix": self.install_platbase,
+            "includedir": "${prefix}/include",
+            "datarootdir": "${prefix}/share",
+            "datadir": "${datarootdir}",
+            "libdir": "",  # XXX: we don't know it, ignore for now..
+            "VERSION": self.distribution.get_version(),
+        }
+        for key, value in config.items():
+            content = content.replace("@%s@" % key, value)
+
+        pkgconfig_dir = os.path.join(self.install_data, "share", "pkgconfig")
+        self.mkpath(pkgconfig_dir)
+        target = os.path.join(pkgconfig_dir, "pygobject-3.0.pc")
+        with io.open(target, "w", encoding="utf-8") as h:
+            h.write(content)
+        self.outfiles.append(target)
+
+
+du_install = get_command_class("install")
+
+
+class install(du_install):
+
+    sub_commands = du_install.sub_commands + [
+        ("install_pkgconfig", lambda self: True),
+    ]
+
+
 def main():
     script_dir = get_script_dir()
     pkginfo = parse_pkg_info(script_dir)
@@ -674,6 +745,8 @@ def main():
             "build_tests": build_tests,
             "test": test,
             "quality": quality,
+            "install": install,
+            "install_pkgconfig": install_pkgconfig,
         },
         install_requires=[
             "pycairo>=%s" % get_version_requirement(

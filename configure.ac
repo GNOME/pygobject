@@ -136,11 +136,9 @@ AC_SUBST([PYTHON_VALGRIND_SUPP])
 
 dnl libffi
 PKG_CHECK_MODULES(FFI, libffi >= libffi_required_version)
-LIBFFI_PC=libffi
 
 AC_SUBST(FFI_CFLAGS)
 AC_SUBST(FFI_LIBS)
-AC_SUBST(LIBFFI_PC)
 
 dnl gio
 PKG_CHECK_MODULES(GIO, gio-2.0 >= gio_required_version)
