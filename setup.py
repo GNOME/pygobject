@@ -679,6 +679,9 @@ def main():
             "pycairo>=%s" % get_version_requirement(
                 script_dir, get_pycairo_pkg_config_name()),
         ],
+        data_files=[
+            ('include/pygobject-3.0', ['gi/pygobject.h']),
+        ],
     )
 
 
