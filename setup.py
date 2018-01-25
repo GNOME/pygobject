@@ -755,6 +755,7 @@ def main():
         data_files=[
             ('include/pygobject-3.0', ['gi/pygobject.h']),
         ],
+        zip_safe=False,
     )
 
 
