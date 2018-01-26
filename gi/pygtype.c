@@ -618,20 +618,46 @@ pyg_flags_get_value(GType flag_type, PyObject *obj, guint *val)
 }
 
 static GQuark pyg_type_marshal_key = 0;
+static GQuark pyg_type_marshal_helper_key = 0;
+typedef enum {
+    MARSHAL_HELPER_NEVER_SAW_YOU_BEFORE = 0,
+    MARSHAL_HELPER_RETURN_NULL,
+    MARSHAL_HELPER_PYGTYPE_IMPORT_DONE
+} marshal_helper_data_e;
 
 PyGTypeMarshal *
 pyg_type_lookup(GType type)
 {
-    GType	ptype = type;
-    PyGTypeMarshal	*tm = NULL;
+    PyGTypeMarshal  *tm = NULL;
+    if (type != G_TYPE_INVALID) {
+	marshal_helper_data_e marshal_helper = GPOINTER_TO_INT(
+	    g_type_get_qdata(type, pyg_type_marshal_helper_key));
 
-    /* recursively lookup types */
-    while (ptype) {
-        pygi_type_import_by_g_type (ptype);
-	if ((tm = g_type_get_qdata(ptype, pyg_type_marshal_key)) != NULL)
-	    break;
-	ptype = g_type_parent(ptype);
+	/* If we did marshal data lookup previously and nothing was found,
+	 * return NULL and don't waist time in the expensive loop below */
+	if (MARSHAL_HELPER_RETURN_NULL != marshal_helper) {
+	    GType ptype = type;
+
+	    /* Otherwise do recursive type lookup */
+	    while (ptype) {
+		/* We need to import the module before checking qdata. If we have never
+		 * imported the module before qdata will not be set */
+		if (MARSHAL_HELPER_PYGTYPE_IMPORT_DONE != marshal_helper)
+		    pygi_type_import_by_g_type (ptype);
+
+		if ((tm = g_type_get_qdata(ptype, pyg_type_marshal_key)) != NULL)
+		    break;
+		ptype = g_type_parent(ptype);
+	    }
+
+	    if (MARSHAL_HELPER_NEVER_SAW_YOU_BEFORE == marshal_helper)
+		g_type_set_qdata(type, pyg_type_marshal_helper_key,
+		    GINT_TO_POINTER(tm == NULL
+			? MARSHAL_HELPER_RETURN_NULL
+			: MARSHAL_HELPER_PYGTYPE_IMPORT_DONE));
+	}
     }
+
     return tm;
 }
 
@@ -653,8 +679,10 @@ pyg_register_gtype_custom(GType gtype,
 {
     PyGTypeMarshal *tm;
 
-    if (!pyg_type_marshal_key)
+    if (!pyg_type_marshal_key) {
         pyg_type_marshal_key = g_quark_from_static_string("PyGType::marshal");
+        pyg_type_marshal_helper_key = g_quark_from_static_string("PyGType::marshal-helper");
+    }
 
     tm = g_new(PyGTypeMarshal, 1);
     tm->fromvalue = from_func;
