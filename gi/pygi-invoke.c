@@ -565,10 +565,13 @@ _invoke_marshal_out_args (PyGIInvokeState *state, PyGIFunctionCache *function_ca
 
     if (cache->return_cache) {
         if (!cache->return_cache->is_skipped) {
+            gpointer cleanup_data = NULL;
             py_return = cache->return_cache->to_py_marshaller ( state,
                                                                 cache,
                                                                 cache->return_cache,
-                                                               &state->return_arg);
+                                                               &state->return_arg,
+                                                               &cleanup_data);
+            state->to_py_return_arg_cleanup_data = cleanup_data;
             if (py_return == NULL) {
                 pygi_marshal_cleanup_args_return_fail (state,
                                                        cache);
@@ -576,7 +579,7 @@ _invoke_marshal_out_args (PyGIInvokeState *state, PyGIFunctionCache *function_ca
             }
         } else {
             if (cache->return_cache->transfer == GI_TRANSFER_EVERYTHING) {
-                PyGIMarshalCleanupFunc to_py_cleanup =
+                PyGIMarshalToPyCleanupFunc to_py_cleanup =
                     cache->return_cache->to_py_cleanup;
 
                 if (to_py_cleanup != NULL)
@@ -604,10 +607,13 @@ _invoke_marshal_out_args (PyGIInvokeState *state, PyGIFunctionCache *function_ca
     } else if (!cache->has_return && n_out_args == 1) {
         /* if we get here there is one out arg an no return */
         PyGIArgCache *arg_cache = (PyGIArgCache *)cache->to_py_args->data;
+        gpointer cleanup_data = NULL;
         py_out = arg_cache->to_py_marshaller (state,
                                               cache,
                                               arg_cache,
-                                              state->args[arg_cache->c_arg_index].arg_pointer.v_pointer);
+                                              state->args[arg_cache->c_arg_index].arg_pointer.v_pointer,
+                                              &cleanup_data);
+        state->args[arg_cache->c_arg_index].to_py_arg_cleanup_data = cleanup_data;
         if (py_out == NULL) {
             pygi_marshal_cleanup_args_to_py_parameter_fail (state,
                                                             cache,
@@ -637,10 +643,13 @@ _invoke_marshal_out_args (PyGIInvokeState *state, PyGIFunctionCache *function_ca
 
         for (; py_arg_index < tuple_len; py_arg_index++) {
             PyGIArgCache *arg_cache = (PyGIArgCache *)cache_item->data;
+            gpointer cleanup_data = NULL;
             PyObject *py_obj = arg_cache->to_py_marshaller (state,
                                                             cache,
                                                             arg_cache,
-                                                            state->args[arg_cache->c_arg_index].arg_pointer.v_pointer);
+                                                            state->args[arg_cache->c_arg_index].arg_pointer.v_pointer,
+                                                            &cleanup_data);
+            state->args[arg_cache->c_arg_index].to_py_arg_cleanup_data = cleanup_data;
 
             if (py_obj == NULL) {
                 if (cache->has_return)
