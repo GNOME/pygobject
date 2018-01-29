@@ -4,12 +4,15 @@ import gc
 import unittest
 import sys
 import weakref
+import threading
+import time
 
 from gi.repository import GObject, GLib, Regress, Gio
 from gi import _signalhelper as signalhelper
 import testhelper
 from compathelper import _long
 from helper import capture_glib_warnings, capture_gi_deprecation_warnings
+from gi.module import repository as repo
 
 
 class C(GObject.GObject):
@@ -1217,6 +1220,53 @@ class TestIntrospectedSignals(unittest.TestCase):
 
         # Boxed equality checks pointers by default.
         self.assertNotEqual(struct, held_struct)
+
+
+class TestIntrospectedSignalsIssue158(unittest.TestCase):
+    """
+    The test for https://gitlab.gnome.org/GNOME/pygobject/issues/158
+    """
+    _obj_sig_names = [sig.get_name() for sig in repo.find_by_name('Regress', 'TestObj').get_signals()]
+
+    def __init__(self, *args):
+        unittest.TestCase.__init__(self, *args)
+        self._gc_thread_stop = False
+
+    def _gc_thread(self):
+        while not self._gc_thread_stop:
+            gc.collect()
+            time.sleep(0.010)
+
+    def _callback(self, *args):
+        pass
+
+    def test_run(self):
+        """
+        Manually trigger GC from a different thread periodicaly
+        while the main thread keeps connecting/disconnecting to/from signals.
+
+        It takes a lot of time to reproduce the issue. It is possible to make it
+        fail reliably by changing the code of pygobject_unwatch_closure slightly from:
+          PyGObjectData *inst_data = data;
+          inst_data->closures = g_slist_remove (inst_data->closures, closure);
+        to
+          PyGObjectData *inst_data = data;
+          GSList *tmp = g_slist_remove (inst_data->closures, closure);
+          g_usleep(G_USEC_PER_SEC/10);
+          inst_data->closures = tmp;
+        """
+        obj = Regress.TestObj()
+        gc_thread = threading.Thread(target=self._gc_thread)
+        gc_thread.start()
+
+        for _ in range(8):
+            handlers = [obj.connect(sig, self._callback) for sig in self._obj_sig_names]
+            time.sleep(0.010)
+            while len(handlers) > 0:
+                obj.disconnect(handlers.pop())
+
+        self._gc_thread_stop = True
+        gc_thread.join()
 
 
 class _ConnectObjectTestBase(object):

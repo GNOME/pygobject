@@ -1037,7 +1037,12 @@ pygobject_unwatch_closure(gpointer data, GClosure *closure)
 {
     PyGObjectData *inst_data = data;
 
+    /* Despite no Python API is called the list inst_data->closures
+     * must be protected by GIL as it is used by GC in
+     * pygobject_traverse */
+    PyGILState_STATE state = PyGILState_Ensure();
     inst_data->closures = g_slist_remove (inst_data->closures, closure);
+    PyGILState_Release(state);
 }
 
 /**
