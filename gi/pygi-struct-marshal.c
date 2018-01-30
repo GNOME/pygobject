@@ -475,8 +475,15 @@ arg_boxed_to_py_cleanup (PyGIInvokeState *state,
                            gpointer         data,
                            gboolean         was_processed)
 {
-    if (arg_cache->transfer == GI_TRANSFER_NOTHING)
-        _pygi_boxed_copy_in_place ((PyGIBoxed *) cleanup_data);
+    PyGIBoxed *boxed;
+
+    if (arg_cache->transfer == GI_TRANSFER_NOTHING) {
+        boxed = (PyGIBoxed *) cleanup_data;
+        /* If we are the sole owner of the wrapper it will be freed after this
+         * anyway, so no need to copy the wrapped boxed. */
+        if (Py_REFCNT (boxed) > 1)
+            _pygi_boxed_copy_in_place (boxed);
+    }
 }
 
 static gboolean
