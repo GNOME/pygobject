@@ -463,6 +463,13 @@ class test(Command):
             os.path.join(tests_dir, "runtests.py"),
         ], env=env)
 
+        if not env.get("TEST_NAMES"):
+            env["TEST_NAMES"] = "compat_test_pygtk"
+            subprocess.check_call([
+                sys.executable,
+                os.path.join(tests_dir, "runtests.py"),
+            ], env=env)
+
 
 class quality(Command):
     description = "run code quality tests"
