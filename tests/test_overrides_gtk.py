@@ -544,6 +544,7 @@ class TestGtk(unittest.TestCase):
             self.assertTrue(hasattr(widget, 'drag_dest_set_proxy'))
         self.assertTrue(hasattr(widget, 'drag_get_data'))
 
+    @unittest.skipIf(sys.platform == "darwin", "crashes")
     def test_drag_target_list(self):
         mixed_target_list = [Gtk.TargetEntry.new('test0', 0, 0),
                              ('test1', 1, 1),
