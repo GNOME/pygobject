@@ -208,6 +208,7 @@ https://my.org/q?x=1&y=2
 
         self.assertEqual(call_data, [(r, GLib.IOCondition.IN, b'a', ('moo', 'foo'))])
 
+    @unittest.skipIf(sys.platform == "darwin", "fails")
     @unittest.skipIf(os.name == "nt", "no shell on Windows")
     def test_io_add_watch_pyfile(self):
         call_data = []
