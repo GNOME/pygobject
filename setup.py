@@ -265,6 +265,13 @@ class build_tests(Command):
             # XXX: something broken with mingw python2
             compiler.shared_lib_extension = ".dll"
 
+        if sys.platform == "darwin":
+            compiler.shared_lib_extension = ".dylib"
+            if "-bundle" in compiler.linker_so:
+                compiler.linker_so = list(compiler.linker_so)
+                i = compiler.linker_so.index("-bundle")
+                compiler.linker_so[i] = "-dynamiclib"
+
         def build_ext(ext):
             if compiler.compiler_type == "msvc":
                 raise Exception("MSVC support not implemented")
