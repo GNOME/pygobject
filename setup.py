@@ -133,19 +133,6 @@ def pkg_config_parse(opt, pkg):
     return [x.lstrip(opt) for x in output.split()]
 
 
-def samefile(src, dst):
-    # Python 2 on Windows doesn't have os.path.samefile, so we have to provide
-    # a fallback
-
-    if hasattr(os.path, "samefile"):
-        return os.path.samefile(src, dst)
-
-    os.stat(src)
-    os.stat(dst)
-    return (os.path.normcase(os.path.abspath(src)) ==
-            os.path.normcase(os.path.abspath(dst)))
-
-
 du_sdist = get_command_class("sdist")
 
 
@@ -495,32 +482,99 @@ def get_script_dir():
 
 def get_pycairo_include_dir():
     """Returns the best guess at where to find the pycairo headers.
+    A bit convoluted because we have to deal with multiple pycairo
+    versions.
 
-    Raises if pycairo isn't found.
+    Raises if pycairo isn't found or it's too old.
     """
 
     script_dir = get_script_dir()
-    min_version = get_version_requirement(
-        script_dir, get_pycairo_pkg_config_name())
+    pkg_config_name = get_pycairo_pkg_config_name()
+    min_version = get_version_requirement(script_dir, pkg_config_name)
 
-    dist = pkg_resources.get_distribution("pycairo>=%s" % min_version)
-    log.info("pycairo: found %r" % dist)
+    def check_path(include_dir):
+        log.info("pycairo: trying include directory: %r" % include_dir)
+        header_path = os.path.join(include_dir, "%s.h" % pkg_config_name)
+        if os.path.exists(header_path):
+            log.info("pycairo: found %r" % header_path)
+            return True
+        log.info("pycairo: header file (%r) not found" % header_path)
+        return False
 
-    def get_sys_path(dist, name):
-        """The sysconfig path for a distribution, or None"""
+    def find_path(paths):
+        for p in reversed(paths):
+            if check_path(p):
+                return p
 
-        location = dist.location
-        for scheme in sysconfig.get_scheme_names():
-            for path_type in ["platlib", "purelib"]:
-                path = sysconfig.get_path(path_type, scheme)
-                try:
-                    if samefile(path, location):
-                        return sysconfig.get_path(name, scheme)
-                except EnvironmentError:
-                    pass
+    def find_new_api():
+        log.info("pycairo: new API")
+        import cairo
 
-    data_path = get_sys_path(dist, "data") or sys.prefix
-    return os.path.join(data_path, "include", "pycairo")
+        pkg_version = pkg_resources.parse_version(cairo.version)
+        pkg_min_version = pkg_resources.parse_version(min_version)
+        if pkg_version < pkg_min_version:
+            raise DistutilsSetupError(
+                "pycairo >=%s required, %s found." % (
+                    pkg_min_version, pkg_version))
+
+        if hasattr(cairo, "get_include"):
+            return [cairo.get_include()]
+        log.info("pycairo: no get_include()")
+        return []
+
+    def find_old_api():
+        log.info("pycairo: old API")
+        dist = pkg_resources.get_distribution("pycairo>=%s" % min_version)
+        log.info("pycairo: found %r" % dist)
+
+        def samefile(src, dst):
+            # Python 2 on Windows doesn't have os.path.samefile, so we have to
+            # provide a fallback
+            if hasattr(os.path, "samefile"):
+                return os.path.samefile(src, dst)
+            os.stat(src)
+            os.stat(dst)
+            return (os.path.normcase(os.path.abspath(src)) ==
+                    os.path.normcase(os.path.abspath(dst)))
+
+        def get_sys_path(dist, name):
+            # Returns the sysconfig path for a distribution, or None
+            location = dist.location
+            for scheme in sysconfig.get_scheme_names():
+                for path_type in ["platlib", "purelib"]:
+                    path = sysconfig.get_path(path_type, scheme)
+                    try:
+                        if samefile(path, location):
+                            return sysconfig.get_path(name, scheme)
+                    except EnvironmentError:
+                        pass
+
+        data_path = get_sys_path(dist, "data") or sys.prefix
+        return [os.path.join(data_path, "include", "pycairo")]
+
+    def find_pkg_config():
+        log.info("pycairo: pkg-config")
+        pkg_config_version_check(pkg_config_name, min_version)
+        return pkg_config_parse("--cflags-only-I", pkg_config_name)
+
+    # First the new get_include() API added in >1.15.6
+    include_dir = find_path(find_new_api())
+    if include_dir is not None:
+        return include_dir
+
+    # Then try to find it in the data prefix based on the module path.
+    # This works with many virtualenv/userdir setups, but not all apparently,
+    # see https://gitlab.gnome.org/GNOME/pygobject/issues/150
+    include_dir = find_path(find_old_api())
+    if include_dir is not None:
+        return include_dir
+
+    # Finally, fall back to pkg-config
+    include_dir = find_path(find_pkg_config())
+    if include_dir is not None:
+        return include_dir
+
+    raise DistutilsSetupError("Could not find pycairo headers")
 
 
 def add_ext_pkg_config_dep(ext, compiler_type, name):
@@ -587,17 +641,7 @@ class build_ext(du_build_ext):
             add_ext_pkg_config_dep(ext, self.compiler_type, name)
 
         def add_pycairo(ext):
-            include_dir = get_pycairo_include_dir()
-
-            log.info("pycairo: using include directory: %r" % include_dir)
-            header_path = os.path.join(
-                include_dir, "%s.h" % get_pycairo_pkg_config_name())
-            if not os.path.exists(header_path):
-                raise DistutilsSetupError(
-                    "pycairo: header file (%r) not found" % header_path)
-            log.info("pycairo: found %r" % header_path)
-
-            ext.include_dirs += [include_dir]
+            ext.include_dirs += [get_pycairo_include_dir()]
 
         gi_ext = ext["gi._gi"]
         add_dependency(gi_ext, "glib-2.0")
