@@ -1,12 +1,30 @@
-3.27.2 - 2018-??-??
+3.27.2 - 2018-02-??
 -------------------
 
+* setup.py: Add a "quality" command which is equal to "make check.quality".
+* setup.py: Add a "test" command which is equal to "make check". :mr:`5`
+* setup.py: Install pkg-config and header files.
+* setup.py: Improve pycairo header lookup with pycairo >=1.16. :issue:`150`
+* autotools: "make check.quality" now requires flake8.
 * overrides: Fix ``Gtk.Adjustment.__init__()`` overrides not setting "value"
-  sometimes. :issue:`151` :mr:`3` (:user:`Christoph Reiter <creiter>`)
+  sometimes. :issue:`151` :mr:`3`
 * overrides: ``GLib.Variant``: add support to create maybe types.
   :issue:`152` :mr:`4` (:user:`Alberto Ruiz <aruiz>`)
-* setup.py: Add a "test" command which is equal to "make check" with autotools
-  :mr:`5` (:user:`Christoph Reiter <creiter>`)
+* Make it possible to resolve ambiguous vmethod names. Ambiguities can be
+  resolved by implementing methods named
+  "do_$namespaced_base_class_name_$vfunc_name". :mr:`9` :issue:`105`
+  (:user:`Mathieu Duponchelle <mathieudu>`)
+* Fix setting a property installed in Python from C in some cases. :mr:`8`
+  (:user:`Mathieu Duponchelle <mathieudu>`)
+* pygobject-object: fix memory corruption around list of closures. :mr:`12`
+  :issue:`158` (:user:` Mikhail Fludkov <fludkov.me>`)
+* Don't copy the boxed if we are the sole owner of the wrapper after a closure.
+  :mr:`14`
+* Only copy transfer-none boxed values in closures once the closure exists.
+  This allows modifying the passed boxed while allowing to keep the wrapper
+  around after the closure is done. :mr:`10`
+  (:user:`Mathieu Duponchelle <mathieudu>`)
+
 
 3.27.1 - 2017-12-11
 -------------------
