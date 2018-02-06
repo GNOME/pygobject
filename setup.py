@@ -356,12 +356,14 @@ class build_tests(Command):
             name='libregress',
             sources=[
                 os.path.join(gi_tests_dir, "regress.c"),
+                os.path.join(tests_dir, "regressextra.c"),
             ],
             include_dirs=[
                 gi_tests_dir,
             ],
             depends=[
                 os.path.join(gi_tests_dir, "regress.h"),
+                os.path.join(tests_dir, "regressextra.h"),
             ],
         )
         add_ext_pkg_config_dep(ext, compiler.compiler_type, "glib-2.0")

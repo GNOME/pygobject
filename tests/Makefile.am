@@ -53,12 +53,13 @@ GIMarshallingTests-1.0.typelib: GIMarshallingTests-1.0.gir Makefile
 test_ltlibraries += libregress.la
 test_typelibs += Regress-1.0.typelib
 nodist_libregress_la_SOURCES = $(GI_DATADIR)/tests/regress.c $(GI_DATADIR)/tests/regress.h
+dist_libregress_la_SOURCES = $(srcdir)/regressextra.c $(srcdir)/regressextra.h
 # We don't control the source so don't pass WARN_CFLAGS etc
 if ENABLE_CAIRO
-libregress_la_CFLAGS = $(GIO_CFLAGS) $(CAIRO_CFLAGS)
+libregress_la_CFLAGS = $(GIO_CFLAGS) $(CAIRO_CFLAGS) -I$(GI_DATADIR)/tests
 libregress_la_LIBADD = $(GIO_LIBS) $(CAIRO_LIBS)
 else
-libregress_la_CFLAGS = $(GIO_CFLAGS) -D_GI_DISABLE_CAIRO
+libregress_la_CFLAGS = $(GIO_CFLAGS) -D_GI_DISABLE_CAIRO -I$(GI_DATADIR)/tests
 libregress_la_LIBADD = $(GIO_LIBS) $(CAIRO_LIBS)
 endif
 libregress_la_LDFLAGS = $(common_ldflags)
@@ -71,7 +72,8 @@ Regress-1.0.gir: libregress.la Makefile
 	--library=libregress.la \
 	--libtool="$(top_builddir)/libtool" \
 	--output $@ \
-	$(nodist_libregress_la_SOURCES)
+	$(nodist_libregress_la_SOURCES) \
+	$(dist_libregress_la_SOURCES)
 Regress-1.0.typelib: Regress-1.0.gir Makefile
 	$(AM_V_GEN) $(INTROSPECTION_COMPILER) $< -o $@
 
