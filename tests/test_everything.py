@@ -1129,6 +1129,34 @@ class TestBoxed(unittest.TestCase):
         self.assertEqual(boxed, copy)
         self.assertNotEqual(id(boxed), id(copy))
 
+    def test_boxed_c_wrapper(self):
+        wrapper = Everything.TestBoxedCWrapper()
+        obj = wrapper.get()
+
+        # TestBoxedC uses refcounting, so we know that
+        # it should be 2 at this point:
+        # - one owned by @wrapper
+        # - another owned by @obj
+        self.assertEqual(obj.refcount, 2)
+        del wrapper
+        self.assertEqual(obj.refcount, 1)
+
+    def test_boxed_c_wrapper_copy(self):
+        wrapper = Everything.TestBoxedCWrapper()
+        wrapper_copy = wrapper.copy()
+        obj = wrapper.get()
+
+        # TestBoxedC uses refcounting, so we know that
+        # it should be 3 at this point:
+        # - one owned by @wrapper
+        # - one owned by @wrapper_copy
+        # - another owned by @obj
+        self.assertEqual(obj.refcount, 3)
+        del wrapper
+        self.assertEqual(obj.refcount, 2)
+        del wrapper_copy
+        self.assertEqual(obj.refcount, 1)
+        del obj
 
 class TestTortureProfile(unittest.TestCase):
     def test_torture_profile(self):
