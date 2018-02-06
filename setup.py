@@ -262,8 +262,8 @@ class build_tests(Command):
 
         compiler = new_compiler()
         customize_compiler(compiler)
+
         if os.name == "nt":
-            # XXX: something broken with mingw python2
             compiler.shared_lib_extension = ".dll"
 
         if sys.platform == "darwin":
