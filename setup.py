@@ -31,6 +31,7 @@ from setuptools import setup, find_packages
 from distutils.core import Extension, Distribution, Command
 from distutils.errors import DistutilsSetupError
 from distutils.ccompiler import new_compiler
+from distutils.sysconfig import get_python_lib
 from distutils import dir_util, log
 
 
@@ -730,7 +731,8 @@ class install_pkgconfig(Command):
         for key, value in config.items():
             content = content.replace("@%s@" % key, value)
 
-        pkgconfig_dir = os.path.join(self.install_data, "share", "pkgconfig")
+        libdir = os.path.dirname(get_python_lib(True, True, self.install_data))
+        pkgconfig_dir = os.path.join(libdir, "pkgconfig")
         self.mkpath(pkgconfig_dir)
         target = os.path.join(pkgconfig_dir, "pygobject-3.0.pc")
         with io.open(target, "w", encoding="utf-8") as h:
