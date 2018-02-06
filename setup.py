@@ -725,7 +725,6 @@ class install_pkgconfig(Command):
             "includedir": "${prefix}/include",
             "datarootdir": "${prefix}/share",
             "datadir": "${datarootdir}",
-            "libdir": "",  # XXX: we don't know it, ignore for now..
             "VERSION": self.distribution.get_version(),
         }
         for key, value in config.items():
