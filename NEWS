@@ -1,4 +1,4 @@
-3.27.2 - 2018-02-??
+3.27.2 - 2018-02-07
 -------------------
 
 * setup.py: Add a "quality" command which is equal to "make check.quality".
@@ -17,7 +17,7 @@
 * Fix setting a property installed in Python from C in some cases. :mr:`8`
   (:user:`Mathieu Duponchelle <mathieudu>`)
 * pygobject-object: fix memory corruption around list of closures. :mr:`12`
-  :issue:`158` (:user:` Mikhail Fludkov <fludkov.me>`)
+  :issue:`158` (:user:`Mikhail Fludkov <fludkov.me>`)
 * Don't copy the boxed if we are the sole owner of the wrapper after a closure.
   :mr:`14`
 * Only copy transfer-none boxed values in closures once the closure exists.
