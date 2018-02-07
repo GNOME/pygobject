@@ -12,6 +12,8 @@ Making a Release
 #. Commit NEWS as ``"release 3.X.Y"`` and push
 #. Tag with: ``git tag -s 3.X.Y -m "release 3.X.Y"``
 #. Push tag with: ``git push origin 3.X.Y``
+#. In case of a stable release ``python3 setup.py distcheck`` and
+   ``python3 setup.py sdist register upload``
 #. Commit post-release version bump to configure.ac
 #. Upload tarball: ``scp pygobject-3.X.Y.tar.gz user@master.gnome.org:``
 #. Install tarball:
