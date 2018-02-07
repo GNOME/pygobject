@@ -41,7 +41,7 @@ _generate_doc_string(PyGIBaseInfo *self)
     static PyObject *_py_generate_doc_string = NULL;
 
     if (_py_generate_doc_string == NULL) {
-        PyObject *mod = PyImport_ImportModule ("gi.docstring");
+        PyObject *mod = PYGLIB_PyImport_ImportModule ("gi.docstring");
         if (!mod)
             return NULL;
 
