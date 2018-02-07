@@ -42,7 +42,7 @@ and their dependencies. Follow the instructions for your platform below.
 4) Execute ``pacman -S mingw-w64-i686-gtk3 mingw-w64-i686-python2-gobject mingw-w64-i686-python3-gobject``
 5) To test that GTK+3 is working you can run ``gtk3-demo``
 6) Copy the ``hello.py`` script you created to ``C:\msys64\home\<username>``
-7) In the mingw32 terminal execute ``python2 hello.py`` - a window should appear.
+7) In the mingw32 terminal execute ``python3 hello.py`` - a window should appear.
 
 .. figure:: images/start_windows.png
     :scale: 60%
@@ -56,7 +56,7 @@ and their dependencies. Follow the instructions for your platform below.
 1) Open a terminal
 2) Execute ``sudo apt install python-gi python-gi-cairo python3-gi python3-gi-cairo gir1.2-gtk-3.0``
 3) Change the directory to where your ``hello.py`` script can be found (e.g. ``cd Desktop``)
-4) Run ``python2 hello.py``
+4) Run ``python3 hello.py``
 
 .. figure:: images/start_linux.png
     :scale: 60%
@@ -70,7 +70,7 @@ and their dependencies. Follow the instructions for your platform below.
 1) Open a terminal
 2) Execute ``sudo dnf install pygobject3 python3-gobject gtk3``
 3) Change the directory to where your ``hello.py`` script can be found (e.g. ``cd Desktop``)
-4) Run ``python2 hello.py``
+4) Run ``python3 hello.py``
 
 
 .. _arch:
@@ -81,7 +81,7 @@ and their dependencies. Follow the instructions for your platform below.
 1) Open a terminal
 2) Execute ``sudo pacman -S python-gobject python2-gobject gtk3``
 3) Change the directory to where your ``hello.py`` script can be found (e.g. ``cd Desktop``)
-4) Run ``python2 hello.py``
+4) Run ``python3 hello.py``
 
 
 .. _opensuse:
@@ -92,7 +92,7 @@ and their dependencies. Follow the instructions for your platform below.
 1) Open a terminal
 2) Execute ``sudo zypper install python-gobject python3-gobject gtk3``
 3) Change the directory to where your ``hello.py`` script can be found (e.g. ``cd Desktop``)
-4) Run ``python2 hello.py``
+4) Run ``python3 hello.py``
 
 
 .. _macosx:
@@ -104,7 +104,7 @@ and their dependencies. Follow the instructions for your platform below.
 2) Open a terminal
 3) Execute ``brew install pygobject3 --with-python3 gtk+3`` to install for both python2 and python3
 4) Change the directory to where your ``hello.py`` script can be found (e.g. ``cd Desktop``)
-5) Run ``python2 hello.py``
+5) Run ``python3 hello.py``
 
 .. figure:: images/start_macos.png
     :scale: 70%
