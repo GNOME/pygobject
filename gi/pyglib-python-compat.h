@@ -115,6 +115,21 @@ PyTypeObject symbol = {                                 \
 	return;                                         \
     PyDict_SetItemString(d, name, (PyObject *)&type);
 
+/* Better alternative to PyImport_ImportModule which tries to import from
+ * sys.modules first */
+static inline PyObject *
+PYGLIB_PyImport_ImportModule(const char *name)
+{
+    /* see PyImport_ImportModuleNoBlock
+     * https://github.com/python/cpython/blob/2.7/Python/import.c#L2166-L2206 */
+    PyObject *result = PyImport_ImportModuleNoBlock(name);
+    if (result)
+        return result;
+
+    PyErr_Clear();
+    return PyImport_ImportModule(name);
+}
+
 #else
 
 #define PYGLIB_MODULE_START(symbol, modname)	        \
@@ -156,6 +171,8 @@ PyTypeObject symbol = {                                 \
     if (PyType_Ready(&type))                            \
 	    return;                                         \
     PyDict_SetItemString(d, name, (PyObject *)&type);
+
+#define PYGLIB_PyImport_ImportModule PyImport_ImportModule
 
 #define PYGLIB_PyBaseString_Check PyUnicode_Check
 

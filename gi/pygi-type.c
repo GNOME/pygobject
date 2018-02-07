@@ -35,7 +35,7 @@ _pygi_type_import_by_name (const char *namespace_,
 
     module_name = g_strconcat ("gi.repository.", namespace_, NULL);
 
-    py_module = PyImport_ImportModule (module_name);
+    py_module = PYGLIB_PyImport_ImportModule (module_name);
 
     g_free (module_name);
 
