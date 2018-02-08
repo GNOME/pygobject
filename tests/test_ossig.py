@@ -20,7 +20,11 @@ import unittest
 import threading
 from contextlib import contextmanager
 
-from gi.repository import Gtk, Gio, GLib
+try:
+    from gi.repository import Gtk
+except ImportError:
+    Gtk = None
+from gi.repository import Gio, GLib
 from gi._ossighelper import wakeup_on_signal, register_sigint_fallback
 
 
@@ -83,7 +87,7 @@ class TestOverridesWakeupOnAlarm(unittest.TestCase):
             app.connect("activate", lambda *args: None)
             app.run()
 
-    @unittest.skipIf(os.name == "nt", "not on Windows")
+    @unittest.skipIf(Gtk is None or os.name == "nt", "not on Windows")
     def test_gtk_main(self):
         signal.signal(signal.SIGALRM, lambda *args: Gtk.main_quit())
         GLib.idle_add(signal.setitimer, signal.ITIMER_REAL, 0.001)
@@ -91,7 +95,7 @@ class TestOverridesWakeupOnAlarm(unittest.TestCase):
         with self._run_with_timeout(2000, Gtk.main_quit):
             Gtk.main()
 
-    @unittest.skipIf(os.name == "nt", "not on Windows")
+    @unittest.skipIf(Gtk is None or os.name == "nt", "not on Windows")
     def test_gtk_dialog_run(self):
         w = Gtk.Window()
         d = Gtk.Dialog(transient_for=w)

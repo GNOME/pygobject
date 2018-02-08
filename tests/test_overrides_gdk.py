@@ -10,9 +10,10 @@ from gi import PyGIDeprecationWarning
 
 try:
     from gi.repository import Gdk, GdkPixbuf, Gtk
-    Gdk  # pyflakes
+    Gdk_version = Gdk._version
 except ImportError:
     Gdk = None
+    Gdk_version = None
 
 from helper import capture_glib_deprecation_warnings
 
@@ -21,7 +22,7 @@ from helper import capture_glib_deprecation_warnings
 class TestGdk(unittest.TestCase):
 
     @unittest.skipIf(sys.platform == "darwin" or os.name == "nt", "crashes")
-    @unittest.skipIf(Gdk._version == "4.0", "not in gdk4")
+    @unittest.skipIf(Gdk_version == "4.0", "not in gdk4")
     def test_constructor(self):
         attribute = Gdk.WindowAttr()
         attribute.window_type = Gdk.WindowType.CHILD
@@ -30,7 +31,7 @@ class TestGdk(unittest.TestCase):
         window = Gdk.Window(None, attribute, attributes_mask)
         self.assertEqual(window.get_window_type(), Gdk.WindowType.CHILD)
 
-    @unittest.skipIf(Gdk._version == "4.0", "not in gdk4")
+    @unittest.skipIf(Gdk_version == "4.0", "not in gdk4")
     def test_color(self):
         color = Gdk.Color(100, 200, 300)
         self.assertEqual(color.red, 100)
@@ -40,7 +41,7 @@ class TestGdk(unittest.TestCase):
             self.assertEqual(color, Gdk.Color(100, 200, 300))
         self.assertNotEqual(color, Gdk.Color(1, 2, 3))
 
-    @unittest.skipIf(Gdk._version == "4.0", "not in gdk4")
+    @unittest.skipIf(Gdk_version == "4.0", "not in gdk4")
     def test_color_floats(self):
         self.assertEqual(Gdk.Color(13107, 21845, 65535),
                          Gdk.Color.from_floats(0.2, 1.0 / 3.0, 1.0))
@@ -107,7 +108,7 @@ class TestGdk(unittest.TestCase):
         event = Gdk.Event.new(Gdk.EventType.CONFIGURE)
         self.assertTrue("CONFIGURE" in repr(event))
 
-    @unittest.skipIf(Gdk._version == "4.0", "not in gdk4")
+    @unittest.skipIf(Gdk_version == "4.0", "not in gdk4")
     def test_event_structures(self):
         def button_press_cb(button, event):
             self.assertTrue(isinstance(event, Gdk.EventButton))
@@ -131,7 +132,7 @@ class TestGdk(unittest.TestCase):
                                  Gdk.ModifierType.CONTROL_MASK,
                                  Gdk.EventType.BUTTON_PRESS)
 
-    @unittest.skipIf(Gdk._version == "4.0", "not in gdk4")
+    @unittest.skipIf(Gdk_version == "4.0", "not in gdk4")
     def test_cursor(self):
         self.assertEqual(Gdk.Cursor, gi.overrides.Gdk.Cursor)
         with capture_glib_deprecation_warnings():
@@ -178,7 +179,7 @@ class TestGdk(unittest.TestCase):
         self.assertEqual(str(Gdk.ModifierType.RELEASE_MASK | Gdk.ModifierType.META_MASK),
                          '<flags GDK_META_MASK | GDK_RELEASE_MASK of type Gdk.ModifierType>')
 
-    @unittest.skipIf(Gdk._version == "4.0", "not in gdk4")
+    @unittest.skipIf(Gdk_version == "4.0", "not in gdk4")
     def test_color_parse(self):
         with capture_glib_deprecation_warnings():
             c = Gdk.color_parse('#00FF80')
@@ -187,7 +188,7 @@ class TestGdk(unittest.TestCase):
         self.assertEqual(c.blue, 32896)
         self.assertEqual(Gdk.color_parse('bogus'), None)
 
-    @unittest.skipIf(Gdk._version == "4.0", "not in gdk4")
+    @unittest.skipIf(Gdk_version == "4.0", "not in gdk4")
     def test_color_representations(self):
         # __repr__ should generate a string which is parsable when possible
         # http://docs.python.org/2/reference/datamodel.html#object.__repr__
