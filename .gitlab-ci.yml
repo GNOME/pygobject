@@ -1,22 +1,28 @@
 services:
   - docker
 
-image: lazka/pygobject:latest
+image: lazka/pygobject:pyenv
 
 .defaults: &defaults
-  variables:
-    PYTHON: "$CI_JOB_NAME"
   script:
    - bash -x ./.gitlab-ci/test-docker.sh
 
 python2.7:
+  variables:
+    PYENV_VERSION: "2.7.14"
   <<: *defaults
 
 python3.4:
+  variables:
+    PYENV_VERSION: "3.4.7"
   <<: *defaults
 
 python3.5:
+  variables:
+    PYENV_VERSION: "3.5.5"
   <<: *defaults
 
 python3.6:
+  variables:
+    PYENV_VERSION: "3.6.4"
   <<: *defaults

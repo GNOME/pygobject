@@ -1,32 +1,44 @@
-FROM ubuntu:zesty
+FROM ubuntu:artful
 
-ENV LANG C.UTF-8
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV CI true
-
-RUN apt-get update
-RUN apt-get install -y dirmngr
-RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys F23C5A6CF475977595C89F51BA6932366A755776
-RUN echo "deb http://ppa.launchpad.net/deadsnakes/ppa/ubuntu xenial main" >> /etc/apt/sources.list
-RUN apt-get update
-
-RUN apt-get install -y \
+RUN apt-get update && apt-get install -y \
     autoconf-archive \
-    libglib2.0-dev \
-    libcairo2-dev \
-    virtualenv \
-    git \
-    python2.7-dev \
-    python3.4-dev \
-    python3.5-dev \
-    python3.6-dev \
-    libtool \
-    libffi-dev \
-    gobject-introspection \
-    libgirepository1.0-dev \
-    libgtk-3-0 \
-    gir1.2-gtk-3.0 \
+    build-essential \
+    curl \
     dbus \
+    dbus-x11 \
+    gir1.2-gtk-3.0 \
+    git \
+    gobject-introspection \
+    libbz2-dev \
+    libcairo2-dev \
+    libffi-dev \
+    libgirepository1.0-dev \
+    libglib2.0-dev \
+    libgtk-3-0 \
+    libreadline-dev \
+    libsqlite3-dev \
+    libssl-dev \
+    libtool \
+    locales \
     xauth \
     xvfb \
-    locales
+    && rm -rf /var/lib/apt/lists/*
+
+ARG HOST_USER_ID=5555
+ENV HOST_USER_ID ${HOST_USER_ID}
+RUN useradd -u $HOST_USER_ID -ms /bin/bash user
+
+USER user
+WORKDIR /home/user
+
+ENV LANG C.UTF-8
+ENV CI true
+ENV PYENV_ROOT /home/user/.pyenv
+ENV PATH="${PYENV_ROOT}/shims:${PYENV_ROOT}/bin:${PATH}"
+
+RUN curl -L https://raw.githubusercontent.com/pyenv/pyenv-installer/master/bin/pyenv-installer | bash
+
+RUN pyenv install 2.7.14
+RUN pyenv install 3.4.7
+RUN pyenv install 3.5.5
+RUN pyenv install 3.6.4
