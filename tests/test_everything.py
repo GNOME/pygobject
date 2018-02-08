@@ -1129,7 +1129,6 @@ class TestBoxed(unittest.TestCase):
         self.assertEqual(boxed, copy)
         self.assertNotEqual(id(boxed), id(copy))
 
-    @unittest.expectedFailure
     def test_boxed_c_wrapper(self):
         wrapper = Everything.TestBoxedCWrapper()
         obj = wrapper.get()
@@ -1142,7 +1141,6 @@ class TestBoxed(unittest.TestCase):
         del wrapper
         self.assertEqual(obj.refcount, 1)
 
-    @unittest.expectedFailure
     def test_boxed_c_wrapper_copy(self):
         wrapper = Everything.TestBoxedCWrapper()
         wrapper_copy = wrapper.copy()
