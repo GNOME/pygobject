@@ -5,7 +5,6 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     curl \
     dbus \
-    dbus-x11 \
     gir1.2-gtk-3.0 \
     git \
     gobject-introspection \

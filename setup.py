@@ -452,25 +452,15 @@ class test(Command):
         env = os.environ.copy()
         env.pop("MSYSTEM", None)
 
-        pre_args = []
-        try:
-            subprocess.check_call(["dbus-run-session", "--", "true"])
-        except (EnvironmentError, subprocess.CalledProcessError):
-            # Spawning a bus failed, disable dbus instead of inheriting
-            # the user one
-            env["DBUS_SESSION_BUS_ADDRESS"] = ""
-        else:
-            pre_args = ["dbus-run-session", "--"]
-
         tests_dir = os.path.join(get_script_dir(), "tests")
-        subprocess.check_call(pre_args + [
+        subprocess.check_call([
             sys.executable,
             os.path.join(tests_dir, "runtests.py"),
         ], env=env)
 
         if not env.get("TEST_NAMES"):
             env["TEST_NAMES"] = "compat_test_pygtk"
-            subprocess.check_call(pre_args + [
+            subprocess.check_call([
                 sys.executable,
                 os.path.join(tests_dir, "runtests.py"),
             ], env=env)

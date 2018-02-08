@@ -4,8 +4,10 @@
 import os
 import glob
 import sys
-
+import signal
 import unittest
+import subprocess
+import atexit
 
 # this was renamed in Python 3, provide backwards compatible name
 if sys.version_info[:2] == (2, 7):
@@ -15,10 +17,31 @@ if sys.version_info[0] == 3:
     unittest.TestCase.assertRegexpMatches = unittest.TestCase.assertRegex
     unittest.TestCase.assertRaisesRegexp = unittest.TestCase.assertRaisesRegex
 
-
 if '--help' in sys.argv:
     print("Usage: ./runtests.py <testfiles>")
     sys.exit(0)
+
+
+def dbus_launch_session():
+    try:
+        out = subprocess.check_output([
+            "dbus-daemon", "--session", "--fork", "--print-address=1",
+            "--print-pid=1"])
+    except (subprocess.CalledProcessError, OSError):
+        return (-1, "")
+    else:
+        if sys.version_info[0] == 3:
+            out = out.decode("utf-8")
+        addr, pid = out.splitlines()
+        return int(pid), addr
+
+
+pid, addr = dbus_launch_session()
+if pid >= 0:
+    os.environ["DBUS_SESSION_BUS_ADDRESS"] = addr
+    atexit.register(os.kill, pid, signal.SIGKILL)
+else:
+    os.environ["DBUS_SESSION_BUS_ADDRESS"] = ""
 
 mydir = os.path.dirname(os.path.abspath(__file__))
 tests_builddir = os.path.abspath(os.environ.get('TESTS_BUILDDIR', os.path.dirname(__file__)))
