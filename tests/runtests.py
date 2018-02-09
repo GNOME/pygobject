@@ -23,6 +23,9 @@ if '--help' in sys.argv:
 
 
 def dbus_launch_session():
+    if os.name == "nt" or sys.platform == "darwin":
+        return (-1, "")
+
     try:
         out = subprocess.check_output([
             "dbus-daemon", "--session", "--fork", "--print-address=1",
