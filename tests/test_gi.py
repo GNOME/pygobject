@@ -8,8 +8,6 @@ import unittest
 import tempfile
 import shutil
 import os
-import locale
-import subprocess
 import gc
 import weakref
 import warnings
@@ -1657,35 +1655,6 @@ class TestPointer(unittest.TestCase):
 
 
 class TestEnum(unittest.TestCase):
-
-    @classmethod
-    def setUpClass(cls):
-        '''Run tests under a test locale.
-
-        Upper case conversion of member names should not be locale specific
-        e.  g. in Turkish, "i".upper() == "i", which gives results like "iNVALiD"
-
-        Run test under a locale which defines toupper('a') == 'a'
-        '''
-        if sys.platform == "darwin" or os.name == "nt":
-            return
-        cls.locale_dir = tempfile.mkdtemp()
-        src = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'te_ST@nouppera')
-        dest = os.path.join(cls.locale_dir, 'te_ST.UTF-8@nouppera')
-        subprocess.check_call(['localedef', '-i', src, '-c', '-f', 'UTF-8', dest])
-        os.environ['LOCPATH'] = cls.locale_dir
-        locale.setlocale(locale.LC_ALL, 'te_ST.UTF-8@nouppera')
-
-    @classmethod
-    def tearDownClass(cls):
-        if sys.platform == "darwin" or os.name == "nt":
-            return
-        locale.setlocale(locale.LC_ALL, 'C')
-        shutil.rmtree(cls.locale_dir)
-        try:
-            del os.environ['LOCPATH']
-        except KeyError:
-            pass
 
     def test_enum(self):
         self.assertTrue(issubclass(GIMarshallingTests.Enum, int))

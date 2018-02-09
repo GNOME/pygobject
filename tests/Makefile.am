@@ -112,7 +112,6 @@ EXTRA_DIST = \
 	test-floating.h \
 	test-thread.h \
 	test-unknown.h \
-	te_ST@nouppera \
 	org.gnome.test.gschema.xml \
 	test_cairo.py \
 	test_error.py \
