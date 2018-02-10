@@ -44,7 +44,7 @@ if pid >= 0:
     os.environ["DBUS_SESSION_BUS_ADDRESS"] = addr
     atexit.register(os.kill, pid, signal.SIGKILL)
 else:
-    os.environ["DBUS_SESSION_BUS_ADDRESS"] = ""
+    os.environ["DBUS_SESSION_BUS_ADDRESS"] = "."
 
 mydir = os.path.dirname(os.path.abspath(__file__))
 tests_builddir = os.path.abspath(os.environ.get('TESTS_BUILDDIR', os.path.dirname(__file__)))
