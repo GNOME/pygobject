@@ -1,3 +1,14 @@
+3.27.3 - 2018-02-10
+-------------------
+
+* Fix a 3.27.2 regression where functions return invalid boxed values. :mr:`16`
+  (thanks to :user:`Mikhail Fludkov <fludkov.me>` for providing a test)
+* tests: Make tests run without Gtk/Gdk installed. :mr:`17`
+  (:user:`Mikhail Fludkov <fludkov.me>`)
+* tests: Remove dependency on ``localedef``. :commit:`64b02e301`
+* tests: Require/Use pytest. :mr:`20` :issue:`153`
+
+
 3.27.2 - 2018-02-07
 -------------------
 
