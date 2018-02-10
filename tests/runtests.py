@@ -9,6 +9,9 @@ import unittest
 import subprocess
 import atexit
 
+import pytest
+
+
 # this was renamed in Python 3, provide backwards compatible name
 if sys.version_info[:2] == (2, 7):
     unittest.TestCase.assertRaisesRegex = unittest.TestCase.assertRaisesRegexp
@@ -121,12 +124,11 @@ else:
     for filename in glob.iglob(os.path.join(mydir, 'test_*.py')):
         names.append(os.path.basename(filename)[:-3])
 
-loader = unittest.TestLoader()
-suite = loader.loadTestsFromNames(names)
+
+def unittest_to_pytest_name(name):
+    parts = name.split(".")
+    parts[0] = os.path.join(mydir, parts[0] + ".py")
+    return "::".join(parts)
 
 
-# Run tests.
-runner = unittest.TextTestRunner(verbosity=2)
-result = runner.run(suite)
-if not result.wasSuccessful():
-    sys.exit(1)  # exit code so "make check" reports error
+sys.exit(pytest.main([unittest_to_pytest_name(n) for n in names]))

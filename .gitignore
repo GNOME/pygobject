@@ -17,6 +17,8 @@
 .deps
 .libs
 .idea
+.cache
+.pytest_cache
 gschemas.compiled
 pygobject-*.tar.xz
 Makefile

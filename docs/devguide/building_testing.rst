@@ -2,6 +2,15 @@
 Building & Testing
 ==================
 
+To pass extra arguments to pytest you can set "PYTEST_ADDOPTS":
+
+.. code:: shell
+
+    # don't hide stdout
+    export PYTEST_ADDOPTS="-s"
+    python3 setup.py test
+
+
 Using Autotools
 ---------------
 

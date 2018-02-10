@@ -167,7 +167,7 @@ RUN_TESTS_ENV_VARS= \
 # clobber global name space
 check-local: $(target_libraries) $(test_typelibs) gschemas.compiled
 	$(RUN_TESTS_ENV_VARS) $(EXTRA_ENV) $(EXEC_NAME) $(PYTHON) -Wd $(srcdir)/runtests.py; rc=$$?; \
-	[ "$$rc" -ne 0 ] || [ -n "$$TEST_NAMES" ] || { TEST_NAMES=compat_test_pygtk $(RUN_TESTS_ENV_VARS)  $(EXTRA_ENV) $(EXEC_NAME) $(PYTHON) -Wd -Werror::PendingDeprecationWarning -Werror::DeprecationWarning -Werror::RuntimeWarning $(srcdir)/runtests.py; rc=$$?; }; \
+	[ "$$rc" -ne 0 ] || [ -n "$$TEST_NAMES" ] || { TEST_NAMES=compat_test_pygtk $(RUN_TESTS_ENV_VARS)  $(EXTRA_ENV) $(EXEC_NAME) $(PYTHON) -Wd $(srcdir)/runtests.py; rc=$$?; }; \
 	exit $$rc
 
 check.gdb:
