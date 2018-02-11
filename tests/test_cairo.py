@@ -2,6 +2,8 @@
 # coding=utf-8
 # vim: tabstop=4 shiftwidth=4 expandtab
 
+from __future__ import absolute_import
+
 import unittest
 
 import gi
@@ -158,7 +160,3 @@ class TestSignalMarshaling(unittest.TestCase):
         result = self.pass_object_through_signal(pattern, self.tester.sig_pattern)
         self.assertTrue(isinstance(result, cairo.Pattern))
         self.assertTrue(isinstance(result, cairo.SolidPattern))
-
-
-if __name__ == '__main__':
-    unittest.main()

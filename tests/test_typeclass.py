@@ -20,6 +20,8 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
 # USA
 
+from __future__ import absolute_import
+
 import unittest
 
 from gi.repository import GObject
@@ -74,7 +76,3 @@ class TestTypeClassMethodsMovedToClass(unittest.TestCase):
     def test_find_child_property(self):
         pspec = GIMarshallingTests.PropertiesObject.find_property('some-int')
         self.assertEqual(pspec.name, 'some-int')
-
-
-if __name__ == '__main__':
-    unittest.main()

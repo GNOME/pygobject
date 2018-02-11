@@ -1,5 +1,7 @@
 # -*- Mode: Python -*-
 
+from __future__ import absolute_import
+
 import sys
 import gc
 import unittest
@@ -10,7 +12,7 @@ from gi import PyGIDeprecationWarning
 from gi.module import get_introspection_module
 from gi import _gi
 
-import testhelper
+from . import testhelper
 
 
 class TestGObjectAPI(unittest.TestCase):
@@ -694,7 +696,3 @@ class TestGValue(unittest.TestCase):
         value = GObject.Value(GLib.Error)
         self.assertEqual(value.g_type, GObject.type_from_name('GError'))
         self.assertEqual(value.get_value(), None)
-
-
-if __name__ == '__main__':
-    unittest.main()

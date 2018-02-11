@@ -1,6 +1,8 @@
 # -*- Mode: Python; py-indent-offset: 4 -*-
 # vim: tabstop=4 shiftwidth=4 expandtab
 
+from __future__ import absolute_import
+
 import os
 import sys
 import unittest
@@ -15,7 +17,7 @@ except ImportError:
     Gdk = None
     Gdk_version = None
 
-from helper import capture_glib_deprecation_warnings
+from .helper import capture_glib_deprecation_warnings
 
 
 @unittest.skipUnless(Gdk, 'Gdk not available')

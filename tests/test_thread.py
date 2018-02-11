@@ -1,9 +1,12 @@
 # -*- Mode: Python -*-
 
+from __future__ import absolute_import
+
 import unittest
-import testhelper
 
 from gi.repository import GLib
+
+from . import testhelper
 
 
 class TestThread(unittest.TestCase):

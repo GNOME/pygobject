@@ -53,6 +53,9 @@ Using Setuptools
     # Build in-tree
     python3 setup.py build_ext --inplace
 
+    # Build in-tree including tests
+    python3 setup.py build_tests
+
     # Executing some code after the build
     PYTHONPATH=. python3 foo.py
 
@@ -63,6 +66,9 @@ Using Setuptools
     TEST_NAMES=test_gi python3 python3 setup.py test
     TEST_NAMES=test_gi.TestUtf8 python3 setup.py test
     TEST_NAMES=test_gi.TestUtf8.test_utf8_full_return python3 setup.py test
+
+    # using pytest directly
+    py.test-3 tests/test_gi.py
 
     # Running flake8 tests
     python3 setup.py quality

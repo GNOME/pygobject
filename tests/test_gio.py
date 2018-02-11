@@ -1,6 +1,8 @@
 # -*- Mode: Python; py-indent-offset: 4 -*-
 # vim: tabstop=4 shiftwidth=4 expandtab
 
+from __future__ import absolute_import
+
 import os
 import unittest
 import warnings
@@ -9,7 +11,7 @@ import gi.overrides
 from gi import PyGIWarning
 from gi.repository import GLib, Gio
 
-from helper import ignore_gi_deprecation_warnings
+from .helper import ignore_gi_deprecation_warnings
 
 
 class TestGio(unittest.TestCase):

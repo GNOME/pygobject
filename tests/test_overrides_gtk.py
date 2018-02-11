@@ -2,13 +2,15 @@
 # coding: UTF-8
 # vim: tabstop=4 shiftwidth=4 expandtab
 
+from __future__ import absolute_import
+
 import contextlib
 import unittest
 import time
 import sys
 import warnings
 
-from helper import ignore_gi_deprecation_warnings, capture_glib_warnings
+from .helper import ignore_gi_deprecation_warnings, capture_glib_warnings
 
 import gi.overrides
 import gi.types

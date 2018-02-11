@@ -2,6 +2,8 @@
 # coding=utf-8
 # vim: tabstop=4 shiftwidth=4 expandtab
 
+from __future__ import absolute_import
+
 import sys
 
 import unittest
@@ -21,8 +23,8 @@ from gi.repository import GObject, GLib, Gio
 
 from gi.repository import GIMarshallingTests
 
-from compathelper import PY2, PY3
-from helper import capture_exceptions
+from .compathelper import PY2, PY3
+from .helper import capture_exceptions
 
 
 CONSTANT_UTF8 = "const ♥ utf8"
