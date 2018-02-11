@@ -121,7 +121,7 @@ elif len(sys.argv) > 1:
         names.append(filename.replace('.py', ''))
 else:
     names = []
-    for filename in glob.iglob(os.path.join(mydir, 'test_*.py')):
+    for filename in sorted(glob.iglob(os.path.join(mydir, 'test_*.py'))):
         names.append(os.path.basename(filename)[:-3])
 
 

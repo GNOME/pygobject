@@ -166,9 +166,7 @@ RUN_TESTS_ENV_VARS= \
 # pygtkcompat tests need to be run in a separate process as they
 # clobber global name space
 check-local: $(target_libraries) $(test_typelibs) gschemas.compiled
-	$(RUN_TESTS_ENV_VARS) $(EXTRA_ENV) $(EXEC_NAME) $(PYTHON) -Wd $(srcdir)/runtests.py; rc=$$?; \
-	[ "$$rc" -ne 0 ] || [ -n "$$TEST_NAMES" ] || { TEST_NAMES=compat_test_pygtk $(RUN_TESTS_ENV_VARS)  $(EXTRA_ENV) $(EXEC_NAME) $(PYTHON) -Wd $(srcdir)/runtests.py; rc=$$?; }; \
-	exit $$rc
+	$(RUN_TESTS_ENV_VARS) $(EXTRA_ENV) $(EXEC_NAME) $(PYTHON) -Wd $(srcdir)/runtests.py;
 
 check.gdb:
 	EXEC_NAME="gdb --args" $(MAKE) check
