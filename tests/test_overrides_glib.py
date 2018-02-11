@@ -1,12 +1,14 @@
 # -*- Mode: Python; py-indent-offset: 4 -*-
 # vim: tabstop=4 shiftwidth=4 expandtab
 
+from __future__ import absolute_import
+
 import gc
 import unittest
 
 import gi
 from gi.repository import GLib
-from compathelper import _long
+from .compathelper import _long
 
 
 class TestGVariant(unittest.TestCase):

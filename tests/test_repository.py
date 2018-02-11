@@ -20,6 +20,8 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
 # USA
 
+from __future__ import absolute_import
+
 import unittest
 import collections
 
@@ -29,7 +31,7 @@ from gi.repository import GObject
 from gi.repository import GIMarshallingTests
 from gi.repository import GIRepository as IntrospectedRepository
 
-from helper import capture_glib_warnings
+from .helper import capture_glib_warnings
 
 
 def find_child_info(info, getter_name, name):
@@ -384,7 +386,3 @@ class Test(unittest.TestCase):
         IntrospectedRepository.Argument.__info__ = 'not an info'
         self.assertRaises(TypeError, IntrospectedRepository.Argument)
         IntrospectedRepository.Argument.__info__ = old_info
-
-
-if __name__ == '__main__':
-    unittest.main()

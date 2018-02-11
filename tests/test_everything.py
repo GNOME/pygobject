@@ -2,6 +2,8 @@
 # coding=utf-8
 # vim: tabstop=4 shiftwidth=4 expandtab
 
+from __future__ import absolute_import
+
 import unittest
 import traceback
 import ctypes
@@ -20,8 +22,8 @@ try:
 except:
     Gtk = None
 
-from compathelper import PY3
-from helper import capture_exceptions
+from .compathelper import PY3
+from .helper import capture_exceptions
 
 
 if sys.version_info < (3, 0):

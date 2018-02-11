@@ -1,11 +1,13 @@
 # -*- Mode: Python -*-
 
+from __future__ import absolute_import
+
 import unittest
 
 from gi.repository import GLib, GObject
 
-import testhelper
-import testmodule
+from . import testhelper
+from . import testmodule
 
 
 class TestObject(unittest.TestCase):
@@ -67,7 +69,3 @@ class TestErrors(unittest.TestCase):
     def test_no_gerror(self):
         callable_ = lambda: GLib.file_get_contents(__file__)
         self.assertEqual(testhelper.test_gerror_exception(callable_), None)
-
-
-if __name__ == '__main__':
-    unittest.main()

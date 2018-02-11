@@ -1,6 +1,8 @@
 # -*- Mode: Python; py-indent-offset: 4 -*-
 # coding=utf-8
 
+from __future__ import absolute_import
+
 import math
 import unittest
 

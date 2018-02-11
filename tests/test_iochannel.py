@@ -1,6 +1,8 @@
 # -*- Mode: Python -*-
 # encoding: UTF-8
 
+from __future__ import absolute_import
+
 import os
 import unittest
 import tempfile
@@ -474,7 +476,3 @@ second line
             self.assertEqual(GLib.IOFlags.NONBLOCK, GLib.IO_FLAG_NONBLOCK)
             self.assertEqual(GLib.IOFlags.IS_SEEKABLE, GLib.IO_FLAG_IS_SEEKABLE)
             self.assertEqual(GLib.IOStatus.NORMAL, GLib.IO_STATUS_NORMAL)
-
-
-if __name__ == '__main__':
-    unittest.main()

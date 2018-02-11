@@ -1,5 +1,7 @@
 # -*- Mode: Python -*-
 
+from __future__ import absolute_import
+
 import gc
 import unittest
 import sys
@@ -9,10 +11,11 @@ import time
 
 from gi.repository import GObject, GLib, Regress, Gio
 from gi import _signalhelper as signalhelper
-import testhelper
-from compathelper import _long
-from helper import capture_glib_warnings, capture_gi_deprecation_warnings
 from gi.module import repository as repo
+
+from . import testhelper
+from .compathelper import _long
+from .helper import capture_glib_warnings, capture_gi_deprecation_warnings
 
 
 class C(GObject.GObject):
@@ -1541,7 +1544,3 @@ class TestClosureRefCycle(unittest.TestCase):
 
         self.assertEqual(len(called), 1)
         self.assertTrue(called[0].__grefcount__ > 0)
-
-
-if __name__ == '__main__':
-    unittest.main()

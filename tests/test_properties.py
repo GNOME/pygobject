@@ -1,5 +1,7 @@
 # coding=utf-8
 
+from __future__ import absolute_import
+
 import os
 import gc
 import sys
@@ -27,8 +29,8 @@ from gi.repository import GIMarshallingTests
 from gi.repository import Regress
 from gi import _propertyhelper as propertyhelper
 
-from compathelper import _long
-from helper import capture_glib_warnings, capture_output
+from .compathelper import _long
+from .helper import capture_glib_warnings, capture_output
 
 
 class PropertyObject(GObject.GObject):
@@ -1317,7 +1319,3 @@ class TestCGetPropertyMethod(CPropertiesTestBase, unittest.TestCase):
 
     def set_prop(self, obj, name, value):
         obj.set_property(name, value)
-
-
-if __name__ == '__main__':
-    unittest.main()
