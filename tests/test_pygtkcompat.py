@@ -1,13 +1,15 @@
 # -*- Mode: Python; py-indent-offset: 4 -*-
 # vim: tabstop=4 shiftwidth=4 expandtab
 
+from __future__ import absolute_import
+
 import unittest
 import base64
 
 import pygtkcompat
 from pygtkcompat.pygtkcompat import _disable_all as disable_all
 
-from helper import capture_gi_deprecation_warnings, capture_glib_warnings
+from .helper import capture_gi_deprecation_warnings, capture_glib_warnings
 
 try:
     from gi.repository import Gtk, Gdk

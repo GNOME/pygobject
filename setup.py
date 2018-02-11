@@ -237,6 +237,11 @@ class build_tests(Command):
             return True
 
     def run(self):
+        cmd = self.reinitialize_command("build_ext")
+        cmd.inplace = True
+        cmd.ensure_finalized()
+        cmd.run()
+
         from distutils.ccompiler import new_compiler
         from distutils.sysconfig import customize_compiler
 
@@ -440,11 +445,6 @@ class test(Command):
         pass
 
     def run(self):
-        cmd = self.reinitialize_command("build_ext")
-        cmd.inplace = True
-        cmd.ensure_finalized()
-        cmd.run()
-
         cmd = self.reinitialize_command("build_tests")
         cmd.ensure_finalized()
         cmd.run()

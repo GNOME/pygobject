@@ -1,5 +1,7 @@
 # -*- Mode: Python -*-
 
+from __future__ import absolute_import
+
 import sys
 import unittest
 import warnings
@@ -7,7 +9,7 @@ import warnings
 from gi.repository import GLib
 from gi import PyGIDeprecationWarning
 
-from helper import capture_glib_warnings
+from .helper import capture_glib_warnings
 
 
 class Idle(GLib.Idle):
@@ -421,7 +423,3 @@ class TestUserData(unittest.TestCase):
         GLib.idle_add(self.cb_with_data, data)
         self.loop.run()
         self.assertTrue(data['called'])
-
-
-if __name__ == '__main__':
-    unittest.main()

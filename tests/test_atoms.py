@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 import os
 import sys
 import unittest
@@ -9,7 +11,7 @@ except ImportError:
     Atk = None
     Gtk = None
 
-from helper import capture_glib_deprecation_warnings
+from .helper import capture_glib_deprecation_warnings
 
 
 @unittest.skipUnless(Gdk, 'Gdk not available')

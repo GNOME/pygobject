@@ -22,6 +22,8 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
 # USA
 
+from __future__ import absolute_import
+
 import unittest
 
 from gi.repository import GLib
@@ -138,7 +140,3 @@ class TestMarshalling(unittest.TestCase):
         error1 = GLib.Error.new_literal(1, "error", 1)
 
         GIMarshallingTests.compare_two_gerrors_in_gvalue(error, error1)
-
-
-if __name__ == '__main__':
-    unittest.main()

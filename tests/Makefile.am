@@ -163,10 +163,14 @@ RUN_TESTS_ENV_VARS= \
 	MSYSTEM= \
 	TESTS_BUILDDIR=$(builddir)
 
+# for non-srcdir builds
+__init__.py: $(abs_srcdir)/__init__.py
+	echo "__path__ = __import__('pkgutil').extend_path(__path__, __name__)" > $@
+
 # pygtkcompat tests need to be run in a separate process as they
 # clobber global name space
-check-local: $(target_libraries) $(test_typelibs) gschemas.compiled
-	$(RUN_TESTS_ENV_VARS) $(EXTRA_ENV) $(EXEC_NAME) $(PYTHON) -Wd $(srcdir)/runtests.py;
+check-local: $(target_libraries) $(test_typelibs) gschemas.compiled __init__.py
+	$(RUN_TESTS_ENV_VARS) $(EXTRA_ENV) $(EXEC_NAME) $(PYTHON) $(srcdir)/runtests.py;
 
 check.gdb:
 	EXEC_NAME="gdb --args" $(MAKE) check
