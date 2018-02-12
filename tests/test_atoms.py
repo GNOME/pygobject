@@ -1,7 +1,5 @@
 from __future__ import absolute_import
 
-import os
-import sys
 import unittest
 
 try:
@@ -12,6 +10,16 @@ except ImportError:
     Gtk = None
 
 from .helper import capture_glib_deprecation_warnings
+
+
+def is_X11():
+    try:
+        from gi.repository import Gdk, GdkX11
+    except ImportError:
+        return False
+
+    display = Gdk.Display.get_default()
+    return isinstance(display, GdkX11.X11Display)
 
 
 @unittest.skipUnless(Gdk, 'Gdk not available')
@@ -58,7 +66,7 @@ class TestGdkAtom(unittest.TestCase):
         self.assertTrue(Gtk.targets_include_image([a_jpeg], False))
         self.assertTrue(Gtk.targets_include_image([a_jpeg, a_plain], False))
 
-    @unittest.skipIf(sys.platform == "darwin", "fails on OSX")
+    @unittest.skipUnless(is_X11(), "only on X11")
     def test_out_array(self):
         a_selection = Gdk.Atom.intern('my_clipboard', False)
         clipboard = Gtk.Clipboard.get(a_selection)
@@ -78,8 +86,7 @@ class TestGdkAtom(unittest.TestCase):
         self.assertFalse(None in names, names)
         self.assertTrue('TEXT' in names, names)
 
-    @unittest.skipIf(sys.platform == "darwin" or os.name == "nt",
-                     "fails on OSX/Windows")
+    @unittest.skipUnless(is_X11(), "only on X11")
     @unittest.skipIf(not Gdk or Gdk._version == "4.0", "not in gdk4")
     def test_out_glist(self):
         display = Gdk.Display.get_default()
