@@ -63,7 +63,8 @@ You can define your own signals using the :obj:`GObject.Signal` decorator:
     :param GObject.SignalFlags flags: Signal flags
     :param GObject.GType return_type: Return type
     :param list arg_types: List of :class:`GObject.GType` argument types
-    :param GObject.SignalAccumulator accumulator: Accumulator function
+    :param accumulator: Accumulator function
+    :type accumulator: :obj:`GObject.SignalAccumulator`
     :param object accu_data: User data for the accumulator
 
 
