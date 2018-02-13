@@ -17,6 +17,35 @@ else:
     has_dbus = True
 
 
+class TestDBusNodeInfo(unittest.TestCase):
+
+    def test_new_for_xml(self):
+        info = Gio.DBusNodeInfo.new_for_xml("""
+<!DOCTYPE node PUBLIC '-//freedesktop//DTD D-BUS Object Introspection 1.0//EN'
+    'http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd'>
+<node>
+    <interface name='org.freedesktop.DBus.Introspectable'>
+        <method name='Introspect'>
+            <arg name='data' direction='out' type='s'/>
+        </method>
+    </interface>
+</node>
+""")
+
+        interfaces = info.interfaces
+        del info
+        assert len(interfaces) == 1
+        assert interfaces[0].name == "org.freedesktop.DBus.Introspectable"
+        methods = interfaces[0].methods
+        del interfaces
+        assert len(methods) == 1
+        assert methods[0].name == "Introspect"
+        out_args = methods[0].out_args
+        assert len(out_args)
+        del methods
+        assert out_args[0].name == "data"
+
+
 @unittest.skipUnless(has_dbus, "no dbus running")
 class TestGDBusClient(unittest.TestCase):
     def setUp(self):
