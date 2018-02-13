@@ -220,8 +220,7 @@ static PyObject *
 _pygi_marshal_to_py_ghash (PyGIInvokeState   *state,
                            PyGICallableCache *callable_cache,
                            PyGIArgCache      *arg_cache,
-                           GIArgument        *arg,
-                           gpointer          *cleanup_data)
+                           GIArgument        *arg)
 {
     GHashTable *hash_;
     GHashTableIter hash_table_iter;
@@ -260,8 +259,6 @@ _pygi_marshal_to_py_ghash (PyGIInvokeState   *state,
     while (g_hash_table_iter_next (&hash_table_iter,
                                    &key_arg.v_pointer,
                                    &value_arg.v_pointer)) {
-        gpointer key_cleanup_data = NULL;
-        gpointer value_cleanup_data = NULL;
         PyObject *py_key;
         PyObject *py_value;
         int retval;
@@ -271,8 +268,7 @@ _pygi_marshal_to_py_ghash (PyGIInvokeState   *state,
         py_key = key_to_py_marshaller ( state,
                                       callable_cache,
                                       key_arg_cache,
-                                     &key_arg,
-                                     &key_cleanup_data);
+                                     &key_arg);
 
         if (py_key == NULL) {
             Py_CLEAR (py_obj);
@@ -283,8 +279,7 @@ _pygi_marshal_to_py_ghash (PyGIInvokeState   *state,
         py_value = value_to_py_marshaller ( state,
                                           callable_cache,
                                           value_arg_cache,
-                                         &value_arg,
-                                         &value_cleanup_data);
+                                         &value_arg);
 
         if (py_value == NULL) {
             Py_CLEAR (py_obj);
@@ -309,7 +304,7 @@ _pygi_marshal_to_py_ghash (PyGIInvokeState   *state,
 static void
 _pygi_marshal_cleanup_to_py_ghash (PyGIInvokeState *state,
                                    PyGIArgCache    *arg_cache,
-                                   gpointer         cleanup_data,
+                                   PyObject        *dummy,
                                    gpointer         data,
                                    gboolean         was_processed)
 {

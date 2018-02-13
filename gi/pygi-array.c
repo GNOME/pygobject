@@ -505,8 +505,7 @@ static PyObject *
 _pygi_marshal_to_py_array (PyGIInvokeState   *state,
                            PyGICallableCache *callable_cache,
                            PyGIArgCache      *arg_cache,
-                           GIArgument        *arg,
-                           gpointer          *cleanup_data)
+                           GIArgument        *arg)
 {
     GArray *array_;
     PyObject *py_obj = NULL;
@@ -576,14 +575,11 @@ _pygi_marshal_to_py_array (PyGIInvokeState   *state,
             gsize item_size;
             PyGIMarshalToPyFunc item_to_py_marshaller;
             PyGIArgCache *item_arg_cache;
-            GPtrArray *item_cleanups;
 
             py_obj = PyList_New (array_->len);
             if (py_obj == NULL)
                 goto err;
 
-            item_cleanups = g_ptr_array_sized_new (array_->len);
-            *cleanup_data = item_cleanups;
 
             item_arg_cache = seq_cache->item_cache;
             item_to_py_marshaller = item_arg_cache->to_py_marshaller;
@@ -593,7 +589,6 @@ _pygi_marshal_to_py_array (PyGIInvokeState   *state,
             for (i = 0; i < array_->len; i++) {
                 GIArgument item_arg = {0};
                 PyObject *py_item;
-                gpointer item_cleanup_data = NULL;
 
                 /* If we are receiving an array of pointers, simply assign the pointer
                  * and move on, letting the per-item marshaler deal with the
@@ -637,18 +632,13 @@ _pygi_marshal_to_py_array (PyGIInvokeState   *state,
                 py_item = item_to_py_marshaller ( state,
                                                 callable_cache,
                                                 item_arg_cache,
-                                                &item_arg,
-                                                &item_cleanup_data);
-
-                g_ptr_array_index (item_cleanups, i) = item_cleanup_data;
+                                                &item_arg);
 
                 if (py_item == NULL) {
                     Py_CLEAR (py_obj);
 
                     if (array_cache->array_type == GI_ARRAY_TYPE_C)
                         g_array_unref (array_);
-
-                    g_ptr_array_unref (item_cleanups);
 
                     goto err;
                 }
@@ -670,7 +660,7 @@ err:
         /* clean up unprocessed items */
         if (seq_cache->item_cache->to_py_cleanup != NULL) {
             guint j;
-            PyGIMarshalToPyCleanupFunc cleanup_func = seq_cache->item_cache->to_py_cleanup;
+            PyGIMarshalCleanupFunc cleanup_func = seq_cache->item_cache->to_py_cleanup;
             for (j = processed_items; j < array_->len; j++) {
                 cleanup_func (state,
                               seq_cache->item_cache,
@@ -721,7 +711,7 @@ _wrap_c_array (PyGIInvokeState   *state,
 static void
 _pygi_marshal_cleanup_to_py_array (PyGIInvokeState *state,
                                    PyGIArgCache    *arg_cache,
-                                   gpointer         cleanup_data,
+                                   PyObject        *dummy,
                                    gpointer         data,
                                    gboolean         was_processed)
 {
@@ -747,19 +737,17 @@ _pygi_marshal_cleanup_to_py_array (PyGIInvokeState *state,
         }
 
         if (sequence_cache->item_cache->to_py_cleanup != NULL) {
-            GPtrArray *item_cleanups = (GPtrArray *) cleanup_data;
             gsize i;
             guint len = (array_ != NULL) ? array_->len : ptr_array_->len;
 
-            PyGIMarshalToPyCleanupFunc cleanup_func = sequence_cache->item_cache->to_py_cleanup;
+            PyGIMarshalCleanupFunc cleanup_func = sequence_cache->item_cache->to_py_cleanup;
             for (i = 0; i < len; i++) {
                 cleanup_func (state,
                               sequence_cache->item_cache,
-                              g_ptr_array_index(item_cleanups, i),
+                              NULL,
                               (array_ != NULL) ? g_array_index (array_, gpointer, i) : g_ptr_array_index (ptr_array_, i),
                               was_processed);
             }
-            g_ptr_array_unref (item_cleanups);
         }
 
         if (array_ != NULL)
