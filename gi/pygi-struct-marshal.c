@@ -435,8 +435,7 @@ static PyObject *
 arg_struct_to_py_marshal_adapter (PyGIInvokeState   *state,
                                   PyGICallableCache *callable_cache,
                                   PyGIArgCache      *arg_cache,
-                                  GIArgument        *arg,
-                                  gpointer          *cleanup_data)
+                                  GIArgument        *arg)
 {
     PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)arg_cache;
 
@@ -452,7 +451,7 @@ arg_struct_to_py_marshal_adapter (PyGIInvokeState   *state,
 static void
 arg_foreign_to_py_cleanup (PyGIInvokeState *state,
                            PyGIArgCache    *arg_cache,
-                           gpointer         cleanup_data,
+                           PyObject        *dummy,
                            gpointer         data,
                            gboolean         was_processed)
 {

@@ -225,8 +225,7 @@ static PyObject *
 _pygi_marshal_to_py_interface_enum (PyGIInvokeState   *state,
                                     PyGICallableCache *callable_cache,
                                     PyGIArgCache      *arg_cache,
-                                    GIArgument        *arg,
-                                    gpointer          *cleanup_data)
+                                    GIArgument        *arg)
 {
     PyObject *py_obj = NULL;
     PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)arg_cache;
@@ -254,8 +253,7 @@ static PyObject *
 _pygi_marshal_to_py_interface_flags (PyGIInvokeState   *state,
                                      PyGICallableCache *callable_cache,
                                      PyGIArgCache      *arg_cache,
-                                     GIArgument        *arg,
-                                     gpointer          *cleanup_data)
+                                     GIArgument        *arg)
 {
     PyObject *py_obj = NULL;
     PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)arg_cache;

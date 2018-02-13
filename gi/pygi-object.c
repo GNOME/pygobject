@@ -279,8 +279,7 @@ static PyObject *
 _pygi_marshal_to_py_called_from_c_interface_object_cache_adapter (PyGIInvokeState   *state,
                                                                   PyGICallableCache *callable_cache,
                                                                   PyGIArgCache      *arg_cache,
-                                                                  GIArgument        *arg,
-                                                                  gpointer          *cleanup_data)
+                                                                  GIArgument        *arg)
 {
     return pygi_arg_gobject_to_py_called_from_c (arg, arg_cache->transfer);
 }
@@ -289,8 +288,7 @@ static PyObject *
 _pygi_marshal_to_py_called_from_py_interface_object_cache_adapter (PyGIInvokeState   *state,
                                                                    PyGICallableCache *callable_cache,
                                                                    PyGIArgCache      *arg_cache,
-                                                                   GIArgument        *arg,
-                                                                   gpointer          *cleanup_data)
+                                                                   GIArgument        *arg)
 {
     return pygi_arg_gobject_to_py (arg, arg_cache->transfer);
 }
@@ -298,7 +296,7 @@ _pygi_marshal_to_py_called_from_py_interface_object_cache_adapter (PyGIInvokeSta
 static void
 _pygi_marshal_cleanup_to_py_interface_object (PyGIInvokeState *state,
                                               PyGIArgCache    *arg_cache,
-                                              gpointer         cleanup_data,
+                                              PyObject        *dummy,
                                               gpointer         data,
                                               gboolean         was_processed)
 {
