@@ -439,19 +439,14 @@ arg_struct_to_py_marshal_adapter (PyGIInvokeState   *state,
                                   gpointer          *cleanup_data)
 {
     PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)arg_cache;
-    PyObject *ret;
 
-    ret = pygi_arg_struct_to_py_marshal (arg,
-                                         iface_cache->interface_info,
-                                         iface_cache->g_type,
-                                         iface_cache->py_type,
-                                         arg_cache->transfer,
-                                         arg_cache->is_caller_allocates,
-                                         iface_cache->is_foreign);
-
-    *cleanup_data = ret;
-
-    return ret;
+    return pygi_arg_struct_to_py_marshal (arg,
+                                          iface_cache->interface_info,
+                                          iface_cache->g_type,
+                                          iface_cache->py_type,
+                                          arg_cache->transfer,
+                                          arg_cache->is_caller_allocates,
+                                          iface_cache->is_foreign);
 }
 
 static void
@@ -466,17 +461,6 @@ arg_foreign_to_py_cleanup (PyGIInvokeState *state,
             ( (PyGIInterfaceCache *)arg_cache)->interface_info,
             data);
     }
-}
-
-static void
-arg_boxed_to_py_cleanup (PyGIInvokeState *state,
-                           PyGIArgCache    *arg_cache,
-                           gpointer         cleanup_data,
-                           gpointer         data,
-                           gboolean         was_processed)
-{
-    if (arg_cache->transfer == GI_TRANSFER_NOTHING)
-        _pygi_boxed_copy_in_place ((PyGIBoxed *) cleanup_data);
 }
 
 static gboolean
@@ -558,10 +542,6 @@ arg_struct_to_py_setup (PyGIArgCache     *arg_cache,
 
     if (iface_cache->is_foreign)
         arg_cache->to_py_cleanup = arg_foreign_to_py_cleanup;
-    else if (!g_type_is_a (iface_cache->g_type, G_TYPE_VALUE) &&
-             iface_cache->py_type &&
-             g_type_is_a (iface_cache->g_type, G_TYPE_BOXED))
-        arg_cache->to_py_cleanup = arg_boxed_to_py_cleanup;
 }
 
 PyGIArgCache *
