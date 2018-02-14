@@ -127,6 +127,7 @@ EXTRA_DIST = \
 	test_object_marshaling.py \
 	test_option.py \
 	test_properties.py \
+	test_pygtkcompat.py \
 	test_signal.py \
 	test_source.py \
 	test_subprocess.py \
@@ -145,15 +146,19 @@ EXTRA_DIST = \
 	test_docstring.py \
 	test_repository.py \
 	test_resulttuple.py \
+	test_unknown.py \
 	test_ossig.py \
-	compat_test_pygtk.py \
+	__init__.py \
 	gi/__init__.py \
 	gi/overrides/__init__.py \
 	gi/overrides/Regress.py \
 	$(NULL)
 
 clean-local:
-	rm -f $(target_libraries) file.txt~
+	rm -f $(target_libraries) file.txt~;
+	@if [ "$(abs_builddir)" != "$(abs_srcdir)" ]; then \
+		rm -f __init__.py; \
+	fi;
 
 # Unsetting MSYSTEM prevents msys2 from changing os.path.sep to "/"
 RUN_TESTS_ENV_VARS= \
