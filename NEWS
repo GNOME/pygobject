@@ -1,3 +1,12 @@
+3.27.4 - 2018-02-14
+-------------------
+
+* tests: Fix tests under Wayland. :issue:`163`
+* tests: Make it possible to use pytest directly.
+* Reverted transfer-none boxed copy changes (:mr:`10`) due to regressions in
+  gnome-music. :issue:`164` :mr:`23`
+
+
 3.27.3 - 2018-02-10
 -------------------
 
