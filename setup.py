@@ -102,18 +102,23 @@ def parse_pkg_info(conf_dir):
     return message
 
 
-def _run_pkg_config(args):
-    command = ["pkg-config"] + args
+def _run_pkg_config(args, _cache={}):
+    command = tuple(["pkg-config"] + args)
 
-    try:
-        return subprocess.check_output(command)
-    except OSError as e:
-        if e.errno == errno.ENOENT:
-            raise SystemExit(
-                "%r not found.\nArguments: %r" % (command[0], command))
-        raise SystemExit(e)
-    except subprocess.CalledProcessError as e:
-        raise SystemExit(e)
+    if command not in _cache:
+        try:
+            result = subprocess.check_output(command)
+        except OSError as e:
+            if e.errno == errno.ENOENT:
+                raise SystemExit(
+                    "%r not found.\nArguments: %r" % (command[0], command))
+            raise SystemExit(e)
+        except subprocess.CalledProcessError as e:
+            raise SystemExit(e)
+        else:
+            _cache[command] = result
+
+    return _cache[command]
 
 
 def pkg_config_version_check(pkg, version):
