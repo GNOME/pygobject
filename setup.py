@@ -452,11 +452,15 @@ class test(Command):
         env = os.environ.copy()
         env.pop("MSYSTEM", None)
 
+        env["MALLOC_PERTURB_"] = "85"
+        env["MALLOC_CHECK_"] = "3"
+        env["G_SLICE"] = "debug-blocks"
+
         tests_dir = os.path.join(get_script_dir(), "tests")
-        subprocess.check_call([
+        sys.exit(subprocess.call([
             sys.executable,
             os.path.join(tests_dir, "runtests.py"),
-        ], env=env)
+        ], env=env))
 
 
 class quality(Command):
