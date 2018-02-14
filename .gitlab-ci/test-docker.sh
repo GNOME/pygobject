@@ -5,7 +5,7 @@ set -e
 python --version
 
 python -m pip install git+https://github.com/pygobject/pycairo.git
-python -m pip install flake8 pytest
+python -m pip install flake8 pytest pytest-faulthandler
 
 PY_PREFIX="$(python -c 'import sys; sys.stdout.write(sys.prefix)')"
 export PKG_CONFIG_PATH="${PY_PREFIX}/lib/pkgconfig"
