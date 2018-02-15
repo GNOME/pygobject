@@ -43,7 +43,8 @@ PyObject *_pygi_marshal_to_py_basic_type               (GIArgument    *arg,     
 PyObject *_pygi_marshal_to_py_basic_type_cache_adapter (PyGIInvokeState   *state,
                                                         PyGICallableCache *callable_cache,
                                                         PyGIArgCache      *arg_cache,
-                                                        GIArgument        *arg);
+                                                        GIArgument        *arg,
+                                                        gpointer          *cleanup_data);
 
 PyGIArgCache *pygi_arg_basic_type_new_from_info        (GITypeInfo    *type_info,
                                                         GIArgInfo     *arg_info,   /* may be null */
