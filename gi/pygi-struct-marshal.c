@@ -364,15 +364,14 @@ arg_foreign_from_py_cleanup (PyGIInvokeState *state,
     }
 }
 
-
-PyObject *
-pygi_arg_struct_to_py_marshal (GIArgument *arg,
-                               GIInterfaceInfo *interface_info,
-                               GType g_type,
-                               PyObject *py_type,
-                               GITransfer transfer,
-                               gboolean is_allocated,
-                               gboolean is_foreign)
+static PyObject *
+pygi_arg_struct_to_py_marshaller (GIArgument *arg,
+                                  GIInterfaceInfo *interface_info,
+                                  GType g_type,
+                                  PyObject *py_type,
+                                  GITransfer transfer,
+                                  gboolean is_allocated,
+                                  gboolean is_foreign)
 {
     PyObject *py_obj = NULL;
 
@@ -393,6 +392,7 @@ pygi_arg_struct_to_py_marshal (GIArgument *arg,
                                       transfer == GI_TRANSFER_EVERYTHING || is_allocated,
                                       is_allocated ?
                                               g_struct_info_get_size(interface_info) : 0);
+            g_print ("Marshalling one boxed %p with %p\n", arg->v_pointer, py_obj);
         }
     } else if (g_type_is_a (g_type, G_TYPE_POINTER)) {
         if (py_type == NULL ||
@@ -431,6 +431,23 @@ pygi_arg_struct_to_py_marshal (GIArgument *arg,
     return py_obj;
 }
 
+PyObject *
+pygi_arg_struct_to_py_marshal (GIArgument *arg,
+                               GIInterfaceInfo *interface_info,
+                               GType g_type,
+                               PyObject *py_type,
+                               GITransfer transfer,
+                               gboolean is_allocated,
+                               gboolean is_foreign)
+{
+    PyObject *ret = pygi_arg_struct_to_py_marshaller (arg, interface_info, g_type, py_type, transfer, is_allocated, is_foreign);
+
+    if (!g_type_is_a (g_type, G_TYPE_VALUE) && py_type && g_type_is_a (g_type, G_TYPE_BOXED) && transfer == GI_TRANSFER_NOTHING)
+        _pygi_boxed_copy_in_place ((PyGIBoxed *) ret);
+
+    return ret;
+};
+
 static PyObject *
 arg_struct_to_py_marshal_adapter (PyGIInvokeState   *state,
                                   PyGICallableCache *callable_cache,
@@ -441,13 +458,13 @@ arg_struct_to_py_marshal_adapter (PyGIInvokeState   *state,
     PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)arg_cache;
     PyObject *ret;
 
-    ret = pygi_arg_struct_to_py_marshal (arg,
-                                         iface_cache->interface_info,
-                                         iface_cache->g_type,
-                                         iface_cache->py_type,
-                                         arg_cache->transfer,
-                                         arg_cache->is_caller_allocates,
-                                         iface_cache->is_foreign);
+    ret = pygi_arg_struct_to_py_marshaller (arg,
+                                            iface_cache->interface_info,
+                                            iface_cache->g_type,
+                                            iface_cache->py_type,
+                                            arg_cache->transfer,
+                                            arg_cache->is_caller_allocates,
+                                            iface_cache->is_foreign);
 
     *cleanup_data = ret;
 
