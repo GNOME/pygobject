@@ -275,7 +275,8 @@ static PyObject *
 _pygi_marshal_to_py_gerror (PyGIInvokeState   *state,
                             PyGICallableCache *callable_cache,
                             PyGIArgCache      *arg_cache,
-                            GIArgument        *arg)
+                            GIArgument        *arg,
+                            gpointer          *cleanup_data)
 {
     GError *error = arg->v_pointer;
     PyObject *py_obj = NULL;
