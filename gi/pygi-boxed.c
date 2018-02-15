@@ -113,7 +113,7 @@ _boxed_new (PyTypeObject *type,
         goto out;
     }
 
-    self = (PyGIBoxed *) _pygi_boxed_new (type, boxed, FALSE, size);
+    self = (PyGIBoxed *) _pygi_boxed_new (type, boxed, TRUE, size);
     if (self == NULL) {
         g_slice_free1 (size, boxed);
         goto out;
@@ -149,48 +149,30 @@ _boxed_init (PyObject *self,
 PYGLIB_DEFINE_TYPE("gi.Boxed", PyGIBoxed_Type, PyGIBoxed);
 
 PyObject *
-_pygi_boxed_new (PyTypeObject *pytype,
+_pygi_boxed_new (PyTypeObject *type,
                  gpointer      boxed,
-                 gboolean      copy_boxed,
+                 gboolean      free_on_dealloc,
                  gsize         allocated_slice)
 {
     PyGIBoxed *self;
-    GType gtype;
 
     if (!boxed) {
         Py_RETURN_NONE;
     }
 
-    if (!PyType_IsSubtype (pytype, &PyGIBoxed_Type)) {
+    if (!PyType_IsSubtype (type, &PyGIBoxed_Type)) {
         PyErr_SetString (PyExc_TypeError, "must be a subtype of gi.Boxed");
         return NULL;
     }
 
-    gtype = pyg_type_from_object ((PyObject *)pytype);
-
-    /* Boxed objects with slice allocation means they come from caller allocated
-     * out arguments. In this case copy_boxed does not make sense because we
-     * already own the slice allocated memory and we should be receiving full
-     * ownership transfer. */
-    if (copy_boxed) {
-        g_assert (allocated_slice == 0);
-        boxed = g_boxed_copy (gtype, boxed);
-    }
-
-    self = (PyGIBoxed *) pytype->tp_alloc (pytype, 0);
+    self = (PyGIBoxed *) type->tp_alloc (type, 0);
     if (self == NULL) {
         return NULL;
     }
 
-    /* We always free on dealloc because we always own the memory due to:
-     *   1) copy_boxed == TRUE
-     *   2) allocated_slice > 0
-     *   3) otherwise the mode is assumed "transfer everything".
-     */
-    ((PyGBoxed *)self)->free_on_dealloc = TRUE;
-    ((PyGBoxed *)self)->gtype = gtype;
+    ( (PyGBoxed *) self)->gtype = pyg_type_from_object ( (PyObject *) type);
+    ( (PyGBoxed *) self)->free_on_dealloc = free_on_dealloc;
     pyg_boxed_set_ptr (self, boxed);
-
     if (allocated_slice > 0) {
         self->size = allocated_slice;
         self->slice_allocated = TRUE;
