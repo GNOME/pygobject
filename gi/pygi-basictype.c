@@ -684,7 +684,8 @@ static PyObject *
 _pygi_marshal_to_py_void (PyGIInvokeState   *state,
                           PyGICallableCache *callable_cache,
                           PyGIArgCache      *arg_cache,
-                          GIArgument        *arg)
+                          GIArgument        *arg,
+                          gpointer          *cleanup_data)
 {
     if (arg_cache->is_pointer) {
         return PyLong_FromVoidPtr (arg->v_pointer);
@@ -828,7 +829,8 @@ PyObject *
 _pygi_marshal_to_py_basic_type_cache_adapter (PyGIInvokeState   *state,
                                               PyGICallableCache *callable_cache,
                                               PyGIArgCache      *arg_cache,
-                                              GIArgument        *arg)
+                                              GIArgument        *arg,
+                                              gpointer          *cleanup_data)
 {
     return _pygi_marshal_to_py_basic_type (arg,
                                             arg_cache->type_tag,
@@ -838,7 +840,7 @@ _pygi_marshal_to_py_basic_type_cache_adapter (PyGIInvokeState   *state,
 static void
 _pygi_marshal_cleanup_to_py_utf8 (PyGIInvokeState *state,
                                   PyGIArgCache    *arg_cache,
-                                  PyObject        *dummy,
+                                  gpointer         cleanup_data,
                                   gpointer         data,
                                   gboolean         was_processed)
 {

@@ -393,10 +393,14 @@ _pygi_closure_convert_arguments (PyGIInvokeState *state,
             } else if (arg_cache->meta_type != PYGI_META_ARG_TYPE_PARENT) {
                 continue;
             } else {
+                gpointer cleanup_data = NULL;
+
                 value = arg_cache->to_py_marshaller (state,
                                                      cache,
                                                      arg_cache,
-                                                     &state->args[i].arg_value);
+                                                     &state->args[i].arg_value,
+                                                     &cleanup_data);
+                state->args[i].to_py_arg_cleanup_data = cleanup_data;
 
                 if (value == NULL) {
                     pygi_marshal_cleanup_args_to_py_parameter_fail (state,
@@ -800,7 +804,8 @@ static PyObject *
 _pygi_marshal_to_py_interface_callback (PyGIInvokeState   *state,
                                         PyGICallableCache *callable_cache,
                                         PyGIArgCache      *arg_cache,
-                                        GIArgument        *arg)
+                                        GIArgument        *arg,
+                                        gpointer          *arg_cleanup_data)
 {
     PyGICallbackCache *callback_cache = (PyGICallbackCache *) arg_cache;
     gssize user_data_index;
