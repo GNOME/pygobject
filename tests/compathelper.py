@@ -33,9 +33,14 @@ if sys.version_info >= (3, 0):
     from io import StringIO
     StringIO
     PY3 = True
+
+    def reraise(tp, value, tb):
+        raise tp(value).with_traceback(tb)
 else:
     _long = long
     _basestring = basestring
     from StringIO import StringIO
     StringIO
     PY2 = True
+
+    exec("def reraise(tp, value, tb):\n raise tp, value, tb")

@@ -10,11 +10,24 @@ import os.path
 import warnings
 import subprocess
 
+import pytest
 from gi.repository import GLib
 from gi import PyGIDeprecationWarning
 
 
 class TestGLib(unittest.TestCase):
+
+    @pytest.mark.xfail(strict=True)
+    def test_pytest_capture_error_in_closure(self):
+        # this test is supposed to fail
+        ml = GLib.MainLoop()
+
+        def callback():
+            ml.quit()
+            raise Exception("expected")
+
+        GLib.idle_add(callback)
+        ml.run()
 
     @unittest.skipIf(os.name == "nt", "no bash on Windows")
     def test_find_program_in_path(self):

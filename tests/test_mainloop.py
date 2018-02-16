@@ -3,12 +3,13 @@
 from __future__ import absolute_import
 
 import os
-import sys
 import select
 import signal
 import unittest
 
 from gi.repository import GLib
+
+from .helper import capture_exceptions
 
 
 class TestMainLoop(unittest.TestCase):
@@ -35,25 +36,12 @@ class TestMainLoop(unittest.TestCase):
         os.write(pipe_w, b"Y")
         os.close(pipe_w)
 
-        def excepthook(type, value, traceback):
-            self.assertTrue(type is Exception)
-            self.assertEqual(value.args[0], "deadbabe")
-        sys.excepthook = excepthook
-        try:
-            got_exception = False
-            try:
-                loop.run()
-            except:
-                got_exception = True
-        finally:
-            sys.excepthook = sys.__excepthook__
+        with capture_exceptions() as exc:
+            loop.run()
 
-        #
-        # The exception should be handled (by printing it)
-        # immediately on return from child_died() rather
-        # than here. See bug #303573
-        #
-        self.assertFalse(got_exception)
+        assert len(exc) == 1
+        assert exc[0].type is Exception
+        assert exc[0].value.args[0] == "deadbabe"
 
     @unittest.skipUnless(hasattr(os, "fork"), "no os.fork available")
     def test_sigint(self):
