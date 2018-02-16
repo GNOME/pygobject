@@ -725,47 +725,55 @@ _pygi_marshal_cleanup_to_py_array (PyGIInvokeState *state,
                                    gpointer         data,
                                    gboolean         was_processed)
 {
+    GArray *array_ = NULL;
+    GPtrArray *ptr_array_ = NULL;
+    PyGISequenceCache *sequence_cache = (PyGISequenceCache *)arg_cache;
+    PyGIArgGArray *array_cache = (PyGIArgGArray *)arg_cache;
+    gboolean free_array = FALSE;
+    gboolean free_array_full = TRUE;
+
     if (arg_cache->transfer == GI_TRANSFER_EVERYTHING ||
         arg_cache->transfer == GI_TRANSFER_CONTAINER) {
-        GArray *array_ = NULL;
-        GPtrArray *ptr_array_ = NULL;
-        PyGISequenceCache *sequence_cache = (PyGISequenceCache *)arg_cache;
-        PyGIArgGArray *array_cache = (PyGIArgGArray *)arg_cache;
+        free_array = TRUE;
+    }
 
-        /* If this isn't a garray create one to help process variable sized
-           array elements */
-        if (array_cache->array_type == GI_ARRAY_TYPE_C) {
-            array_ = _wrap_c_array (state, array_cache, data);
+    /* If this isn't a garray create one to help process variable sized
+       array elements */
+    if (array_cache->array_type == GI_ARRAY_TYPE_C) {
+        array_ = _wrap_c_array (state, array_cache, data);
 
-            if (array_ == NULL)
-                return;
+        if (array_ == NULL)
+            return;
 
-        } else if (array_cache->array_type == GI_ARRAY_TYPE_PTR_ARRAY) {
-            ptr_array_ = (GPtrArray *) data;
-        } else {
-            array_ = (GArray *) data;
+        free_array = TRUE;
+        free_array_full = FALSE;
+    } else if (array_cache->array_type == GI_ARRAY_TYPE_PTR_ARRAY) {
+        ptr_array_ = (GPtrArray *) data;
+    } else {
+        array_ = (GArray *) data;
+    }
+
+    if (sequence_cache->item_cache->to_py_cleanup != NULL) {
+        GPtrArray *item_cleanups = (GPtrArray *) cleanup_data;
+        gsize i;
+        guint len = (array_ != NULL) ? array_->len : ptr_array_->len;
+
+        PyGIMarshalToPyCleanupFunc cleanup_func = sequence_cache->item_cache->to_py_cleanup;
+        for (i = 0; i < len; i++) {
+            cleanup_func (state,
+                          sequence_cache->item_cache,
+                          g_ptr_array_index(item_cleanups, i),
+                          (array_ != NULL) ? g_array_index (array_, gpointer, i) : g_ptr_array_index (ptr_array_, i),
+                          was_processed);
         }
+        g_ptr_array_unref (item_cleanups);
+    }
 
-        if (sequence_cache->item_cache->to_py_cleanup != NULL) {
-            GPtrArray *item_cleanups = (GPtrArray *) cleanup_data;
-            gsize i;
-            guint len = (array_ != NULL) ? array_->len : ptr_array_->len;
-
-            PyGIMarshalToPyCleanupFunc cleanup_func = sequence_cache->item_cache->to_py_cleanup;
-            for (i = 0; i < len; i++) {
-                cleanup_func (state,
-                              sequence_cache->item_cache,
-                              g_ptr_array_index(item_cleanups, i),
-                              (array_ != NULL) ? g_array_index (array_, gpointer, i) : g_ptr_array_index (ptr_array_, i),
-                              was_processed);
-            }
-            g_ptr_array_unref (item_cleanups);
-        }
-
+    if (free_array) {
         if (array_ != NULL)
-            g_array_free (array_, TRUE);
+            g_array_free (array_, free_array_full);
         else
-            g_ptr_array_free (ptr_array_, TRUE);
+            g_ptr_array_free (ptr_array_, free_array_full);
     }
 }
 
