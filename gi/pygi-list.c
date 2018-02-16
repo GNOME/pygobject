@@ -356,26 +356,27 @@ _pygi_marshal_cleanup_to_py_glist (PyGIInvokeState *state,
 {
     GPtrArray *item_cleanups = (GPtrArray *) cleanup_data;
     PyGISequenceCache *sequence_cache = (PyGISequenceCache *)arg_cache;
+    GSList *list_ = (GSList *)data;
+
+    if (sequence_cache->item_cache->to_py_cleanup != NULL) {
+        PyGIMarshalToPyCleanupFunc cleanup_func =
+            sequence_cache->item_cache->to_py_cleanup;
+        GSList *node = list_;
+        guint i = 0;
+
+        while (node != NULL) {
+            cleanup_func (state,
+                          sequence_cache->item_cache,
+                          g_ptr_array_index(item_cleanups, i),
+                          node->data,
+                          was_processed);
+            node = node->next;
+            i++;
+        }
+    }
+
     if (arg_cache->transfer == GI_TRANSFER_EVERYTHING ||
             arg_cache->transfer == GI_TRANSFER_CONTAINER) {
-        GSList *list_ = (GSList *)data;
-
-        if (sequence_cache->item_cache->to_py_cleanup != NULL) {
-            PyGIMarshalToPyCleanupFunc cleanup_func =
-                sequence_cache->item_cache->to_py_cleanup;
-            GSList *node = list_;
-            guint i = 0;
-
-            while (node != NULL) {
-                cleanup_func (state,
-                              sequence_cache->item_cache,
-                              g_ptr_array_index(item_cleanups, i),
-                              node->data,
-                              was_processed);
-                node = node->next;
-                i++;
-            }
-        }
 
         if (arg_cache->type_tag == GI_TYPE_TAG_GLIST) {
             g_list_free ( (GList *)list_);
