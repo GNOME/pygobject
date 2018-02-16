@@ -1160,6 +1160,12 @@ class TestBoxed(unittest.TestCase):
         self.assertEqual(obj.refcount, 1)
         del obj
 
+    def test_array_fixed_boxed_none_out(self):
+        arr = Everything.test_array_fixed_boxed_none_out()
+        assert len(arr) == 2
+        assert arr[0].refcount == 2
+        assert arr[1].refcount == 2
+
 
 class TestTortureProfile(unittest.TestCase):
     def test_torture_profile(self):

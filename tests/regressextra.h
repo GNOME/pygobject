@@ -14,4 +14,7 @@ RegressTestBoxedCWrapper * regress_test_boxed_c_wrapper_copy (RegressTestBoxedCW
 _GI_TEST_EXTERN
 RegressTestBoxedC *regress_test_boxed_c_wrapper_get (RegressTestBoxedCWrapper *self);
 
+_GI_TEST_EXTERN
+void regress_test_array_fixed_boxed_none_out (RegressTestBoxedC ***objs);
+
 #endif /* REGRESS_EXTRA_H */

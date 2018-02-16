@@ -49,3 +49,21 @@ regress_test_boxed_c_wrapper_get (RegressTestBoxedCWrapper *self)
 {
   return self->cptr;
 }
+
+/**
+ * regress_test_array_fixed_boxed_none_out
+ * @objs: (out) (array fixed-size=2) (transfer none): An array of #RegressTestBoxedC
+**/
+void
+regress_test_array_fixed_boxed_none_out (RegressTestBoxedC ***objs)
+{
+  static RegressTestBoxedC **arr;
+
+  if (arr == NULL) {
+    arr = g_new0 (RegressTestBoxedC *, 3);
+    arr[0] = regress_test_boxed_c_new ();
+    arr[1] = regress_test_boxed_c_new ();
+  }
+
+  *objs = arr;
+}
