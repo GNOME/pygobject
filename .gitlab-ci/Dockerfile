@@ -3,6 +3,7 @@ FROM ubuntu:artful
 RUN apt-get update && apt-get install -y \
     autoconf-archive \
     build-essential \
+    ccache \
     curl \
     dbus \
     gir1.2-gtk-3.0 \
@@ -41,3 +42,5 @@ RUN pyenv install 2.7.14
 RUN pyenv install 3.4.7
 RUN pyenv install 3.5.5
 RUN pyenv install 3.6.4
+
+ENV PATH="/usr/lib/ccache:${PATH}"

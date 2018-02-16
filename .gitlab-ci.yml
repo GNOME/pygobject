@@ -3,6 +3,15 @@ services:
 
 image: lazka/pygobject:pyenv
 
+before_script:
+  - mkdir -p _ccache
+  - export CCACHE_BASEDIR=${PWD}
+  - export CCACHE_DIR=${PWD}/_ccache
+
+cache:
+  paths:
+    - _ccache/
+
 .defaults: &defaults
   script:
    - bash -x ./.gitlab-ci/test-docker.sh
