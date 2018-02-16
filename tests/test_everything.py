@@ -1166,6 +1166,22 @@ class TestBoxed(unittest.TestCase):
         assert arr[0].refcount == 2
         assert arr[1].refcount == 2
 
+    def test_glist_boxed_none_return(self):
+        assert len(Everything.test_glist_boxed_none_return(0)) == 0
+
+        list_ = Everything.test_glist_boxed_none_return(2)
+        assert len(list_) == 2
+        assert list_[0].refcount == 2
+        assert list_[1].refcount == 2
+
+    def test_glist_boxed_full_return(self):
+        assert len(Everything.test_glist_boxed_full_return(0)) == 0
+
+        list_ = Everything.test_glist_boxed_full_return(2)
+        assert len(list_) == 2
+        assert list_[0].refcount == 1
+        assert list_[1].refcount == 1
+
 
 class TestTortureProfile(unittest.TestCase):
     def test_torture_profile(self):

@@ -67,3 +67,36 @@ regress_test_array_fixed_boxed_none_out (RegressTestBoxedC ***objs)
 
   *objs = arr;
 }
+
+/**
+ * regress_test_glist_boxed_none_return
+ * Return value: (element-type RegressTestBoxedC) (transfer none):
+**/
+GList *
+regress_test_glist_boxed_none_return (guint count)
+{
+    static GList *list = NULL;
+    if (!list) {
+        while (count > 0) {
+            list = g_list_prepend (list, regress_test_boxed_c_new ());
+            count--;
+        }
+    }
+
+    return list;
+}
+
+/**
+ * regress_test_glist_boxed_full_return
+ * Return value: (element-type RegressTestBoxedC) (transfer full):
+**/
+GList *
+regress_test_glist_boxed_full_return (guint count)
+{
+    GList *list = NULL;
+    while (count > 0) {
+        list = g_list_prepend (list, regress_test_boxed_c_new ());
+        count--;
+    }
+    return list;
+}
