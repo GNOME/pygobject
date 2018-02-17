@@ -7,7 +7,7 @@ python --version
 python -m pip install git+https://github.com/pygobject/pycairo.git
 python -m pip install flake8 pytest pytest-faulthandler coverage
 
-PYVER=$(python -c "import sys; sys.stdout.write(str(sys.version_info[0]))")
+PYVER=$(python -c "import sys; sys.stdout.write(''.join(map(str, sys.version_info[:3])))")
 SOURCE_DIR="$(pwd)"
 PY_PREFIX="$(python -c 'import sys; sys.stdout.write(sys.prefix)')"
 COV_DIR="${SOURCE_DIR}/coverage"
