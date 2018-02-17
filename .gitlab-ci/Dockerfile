@@ -9,6 +9,7 @@ RUN apt-get update && apt-get install -y \
     gir1.2-gtk-3.0 \
     git \
     gobject-introspection \
+    lcov \
     libbz2-dev \
     libcairo2-dev \
     libffi-dev \
