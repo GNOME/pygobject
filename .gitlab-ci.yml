@@ -3,6 +3,10 @@ services:
 
 image: lazka/pygobject:pyenv
 
+stages:
+  - build_and_test
+  - coverage
+
 before_script:
   - mkdir -p _ccache
   - export CCACHE_BASEDIR=${PWD}
@@ -13,8 +17,22 @@ cache:
     - _ccache/
 
 .defaults: &defaults
+  stage: build_and_test
+  artifacts:
+    paths:
+      - coverage/
   script:
    - bash -x ./.gitlab-ci/test-docker.sh
+
+coverage:
+  stage: coverage
+  artifacts:
+    paths:
+      - coverage/
+  variables:
+    PYENV_VERSION: "3.6.4"
+  script:
+    - bash -x ./.gitlab-ci/coverage-docker.sh
 
 python2.7:
   variables:

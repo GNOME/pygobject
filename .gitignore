@@ -83,3 +83,4 @@ Makefile.in
 /PyGObject.egg-info/
 *.pyd
 *.dll.a
+.coverage
