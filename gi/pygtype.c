@@ -618,6 +618,14 @@ pyg_flags_get_value(GType flag_type, PyObject *obj, guint *val)
 }
 
 static GQuark pyg_type_marshal_key = 0;
+static GQuark pyg_type_marshal_helper_key = 0;
+
+typedef enum _marshal_helper_data_e marshal_helper_data_e;
+enum _marshal_helper_data_e {
+    MARSHAL_HELPER_NONE = 0,
+    MARSHAL_HELPER_RETURN_NULL,
+    MARSHAL_HELPER_IMPORT_DONE,
+};
 
 PyGTypeMarshal *
 pyg_type_lookup(GType type)
@@ -625,12 +633,33 @@ pyg_type_lookup(GType type)
     GType	ptype = type;
     PyGTypeMarshal	*tm = NULL;
 
-    /* recursively lookup types */
-    while (ptype) {
-        pygi_type_import_by_g_type (ptype);
+    if (type == G_TYPE_INVALID)
+	return NULL;
+
+    marshal_helper_data_e marshal_helper = GPOINTER_TO_INT (
+	g_type_get_qdata(type, pyg_type_marshal_helper_key));
+
+    /* If we called this function before with @type and nothing was found,
+     * return NULL early to not spend time in the loop below */
+    if (marshal_helper == MARSHAL_HELPER_RETURN_NULL)
+	return NULL;
+
+    /* Otherwise do recursive type lookup */
+    do {
+	if (marshal_helper == MARSHAL_HELPER_IMPORT_DONE)
+	    pygi_type_import_by_g_type (ptype);
+
 	if ((tm = g_type_get_qdata(ptype, pyg_type_marshal_key)) != NULL)
 	    break;
 	ptype = g_type_parent(ptype);
+    } while (ptype);
+
+    if (marshal_helper == MARSHAL_HELPER_NONE) {
+	marshal_helper = (tm == NULL) ?
+	    MARSHAL_HELPER_RETURN_NULL:
+	    MARSHAL_HELPER_IMPORT_DONE;
+	g_type_set_qdata(type, pyg_type_marshal_helper_key,
+	    GINT_TO_POINTER(marshal_helper));
     }
     return tm;
 }
@@ -653,8 +682,10 @@ pyg_register_gtype_custom(GType gtype,
 {
     PyGTypeMarshal *tm;
 
-    if (!pyg_type_marshal_key)
-        pyg_type_marshal_key = g_quark_from_static_string("PyGType::marshal");
+    if (!pyg_type_marshal_key) {
+	pyg_type_marshal_key = g_quark_from_static_string("PyGType::marshal");
+	pyg_type_marshal_helper_key = g_quark_from_static_string("PyGType::marshal-helper");
+    }
 
     tm = g_new(PyGTypeMarshal, 1);
     tm->fromvalue = from_func;
