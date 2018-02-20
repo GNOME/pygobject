@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 
+import os
 import unittest
 
 try:
@@ -43,6 +44,7 @@ class TestGdkAtom(unittest.TestCase):
 
         self.assertEqual(repr(Gdk.SELECTION_CLIPBOARD), 'Gdk.Atom.intern("CLIPBOARD", False)')
 
+    @unittest.skipUnless(os.name != "nt", "not on Windows")
     def test_in_single(self):
         a_selection = Gdk.Atom.intern('test_clipboard', False)
         clipboard = Gtk.Clipboard.get(a_selection)
