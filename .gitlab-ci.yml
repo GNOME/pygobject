@@ -17,10 +17,18 @@ cache:
     paths:
       - coverage/
   script:
-   - mkdir -p _ccache
-   - export CCACHE_BASEDIR=${PWD}
-   - export CCACHE_DIR=${PWD}/_ccache
    - bash -x ./.gitlab-ci/test-docker.sh
+
+.mingw-defaults: &mingw-defaults
+  stage: build_and_test
+  tags:
+    - win32
+  artifacts:
+    paths:
+      - coverage/
+  script:
+    - C:\msys64\usr\bin\pacman --noconfirm -Syyuu
+    - C:\msys64\usr\bin\bash -lc "bash -x ./.gitlab-ci/test-msys2.sh"
 
 coverage:
   stage: coverage
@@ -33,28 +41,32 @@ coverage:
     - bash -x ./.gitlab-ci/coverage-docker.sh
 
 python2-mingw32:
-  stage: build_and_test
-  tags:
-    - win32
   variables:
     PYTHON: "python2"
     MSYSTEM: "MINGW32"
     CHERE_INVOKING: "yes"
-  script:
-    - C:\msys64\usr\bin\pacman --noconfirm -Syyuu --ask 20
-    - C:\msys64\usr\bin\bash -lc "bash -x ./.gitlab-ci/test-msys2.sh"
+  <<: *mingw-defaults
+
+python2-mingw64:
+  variables:
+    PYTHON: "python2"
+    MSYSTEM: "MINGW64"
+    CHERE_INVOKING: "yes"
+  <<: *mingw-defaults
 
 python3-mingw32:
-  stage: build_and_test
-  tags:
-    - win32
   variables:
     PYTHON: "python3"
     MSYSTEM: "MINGW32"
     CHERE_INVOKING: "yes"
-  script:
-    - C:\msys64\usr\bin\pacman --noconfirm -Syyuu --ask 20
-    - C:\msys64\usr\bin\bash -lc "bash -x ./.gitlab-ci/test-msys2.sh"
+  <<: *mingw-defaults
+
+python3-mingw64:
+  variables:
+    PYTHON: "python3"
+    MSYSTEM: "MINGW64"
+    CHERE_INVOKING: "yes"
+  <<: *mingw-defaults
 
 python2.7:
   variables:

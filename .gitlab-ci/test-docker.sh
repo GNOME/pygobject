@@ -4,6 +4,11 @@ set -e
 
 python --version
 
+# ccache setup
+mkdir -p _ccache
+export CCACHE_BASEDIR="$(pwd)"
+export CCACHE_DIR="${CCACHE_BASEDIR}/_ccache"
+
 python -m pip install git+https://github.com/pygobject/pycairo.git
 python -m pip install flake8 pytest pytest-faulthandler coverage
 
