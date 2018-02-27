@@ -16,4 +16,4 @@ recursive-include gi *.am *.h
 recursive-include pygtkcompat *.am
 recursive-include tests *.py *.c *.h *.xml *.supp *.am
 recursive-include docs *.rst *.svg LICENSE *.ico *.png *.css *.py *.dia Makefile
-recursive-include .gitlab-ci *.sh *.rst Dockerfile
+recursive-include .gitlab-ci *.sh *.rst *.py Dockerfile
