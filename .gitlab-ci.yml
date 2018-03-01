@@ -87,3 +87,9 @@ python3.6:
   variables:
     PYENV_VERSION: "3.6.4"
   <<: *defaults
+
+python3.7:
+  allow_failure: true
+  variables:
+    PYENV_VERSION: "3.7.0b2"
+  <<: *defaults
