@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 TAG="lazka/pygobject:pyenv"
 
 sudo docker build --build-arg HOST_USER_ID="$UID" --tag "${TAG}" \
