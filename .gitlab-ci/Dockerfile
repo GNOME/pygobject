@@ -43,5 +43,6 @@ RUN pyenv install 2.7.14
 RUN pyenv install 3.4.7
 RUN pyenv install 3.5.5
 RUN pyenv install 3.6.4
+RUN pyenv install 3.7.0b2
 
 ENV PATH="/usr/lib/ccache:${PATH}"
