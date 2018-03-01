@@ -1,3 +1,12 @@
+3.27.5 - 2018-03-01
+-------------------
+
+* Re-revert transfer-none boxed copy changes (:mr:`23`). Now with more fixes
+  and tests. :mr:`24` (:user:`Mathieu Duponchelle <mathieudu>`)
+* Add caching for boxed type lookup and try to avoid the import lock. :mr:`13`
+  (:user:`Mikhail Fludkov <fludkov.me>`)
+
+
 3.27.4 - 2018-02-14
 -------------------
 
