@@ -126,3 +126,7 @@ dependencies are present yourself as pip will only take care of pycairo.
     source myvenv/bin/activate
     pip install pygobject
     python hello.py
+
+
+For more details on how to use a virtualenv with PyGObject, see the
+":ref:`devenv`" page.
