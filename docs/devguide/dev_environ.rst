@@ -16,6 +16,8 @@ instructions on ":ref:`gettingstarted`" first, as they are a pre-requirement.
 Pipenv Setup
 ************
 
+.. _install-dependencies:
+
 Install Dependencies
 ====================
 In order to compile Python and pip install pygobject, pygobjectendencies are need for
@@ -229,6 +231,7 @@ do the following additional steps:
 Work on PyGObject
 *****************
 
+.. _platform-ind-steps
 
 Platform Independent Steps
 ==========================
@@ -246,6 +249,7 @@ additional steps:
     pipenv install flake8
     pipenv shell
 
+.. _additional-platform-steps
 
 Additional Steps Per Platform
 =============================
