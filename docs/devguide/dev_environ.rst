@@ -231,7 +231,7 @@ do the following additional steps:
 Work on PyGObject
 *****************
 
-.. _platform-ind-steps
+.. _platform-ind-steps:
 
 Platform Independent Steps
 ==========================
@@ -249,7 +249,7 @@ additional steps:
     pipenv install flake8
     pipenv shell
 
-.. _additional-platform-steps
+.. _additional-platform-steps:
 
 Additional Steps Per Platform
 =============================
