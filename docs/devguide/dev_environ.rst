@@ -150,7 +150,7 @@ TODO: currently no way to install `pyenv`_ in Windows. So we'll use a normal
 .. _install-pipsi:
 
 Install `pipsi`_
-=============
+================
 
 `pipsi`_ is a wrapper around virtualenv and pip which installs
 scripts provided by python packages into separate virtualenvs to shield them
