@@ -2,9 +2,9 @@
 
 .. _devenv:
 
-==================================
+##################################
 Creating a Development Environment
-==================================
+##################################
 
 This describes how to setup a development environment for working on a project
 that uses PyGObject, or for working on PyGObject itself. Please follow the
@@ -229,6 +229,11 @@ do the following additional steps:
 Work on PyGObject
 *****************
 
+
+Platform Independent Steps
+==========================
+
+
 If you are going to work on developing PyGObject itself, then do the following
 additional steps:
 
@@ -240,6 +245,10 @@ additional steps:
     pipenv install pytest
     pipenv install flake8
     pipenv shell
+
+
+Additional Steps Per Platform
+=============================
 
 ================================================= ============================================== ====================================================
 |ubuntu-logo| :ref:`Ubuntu <ubuntu-pygobject>`    |fedora-logo| :ref:`Fedora <fedora-pygobject>` |arch-logo| :ref:`Arch Linux <arch-pygobject>`
