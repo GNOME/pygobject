@@ -10,7 +10,7 @@ This describes how to setup a development environment for working on a project
 that uses PyGObject, or for working on PyGObject itself. Please follow the
 instructions on ":ref:`gettingstarted`" first, as they are a pre-requirement.
 
-.. _pipenv:
+.. _pipenv-setup:
 
 ************
 Pipenv Setup
@@ -21,12 +21,12 @@ Install Dependencies
 In order to compile Python and pip install pygobject, pygobjectendencies are need for
 your operating system.
 
-================================================= ============================================== ====================================================
-|ubuntu-logo| :ref:`Ubuntu <ubuntu-pygobject>`    |fedora-logo| :ref:`Fedora <fedora-pygobject>` |arch-logo| :ref:`Arch Linux <arch-pygobject>`
-|windows-logo| :ref:`Windows <windows-pygobject>` |macosx-logo| :ref:`macOS <macosx-pygobject>`  |opensuse-logo| :ref:`openSUSE <opensuse-pygobject>`
-================================================= ============================================== ====================================================
+=========================================== ======================================== ==============================================
+|ubuntu-logo| :ref:`Ubuntu <ubuntu-dep>`    |fedora-logo| :ref:`Fedora <fedora-dep>` |arch-logo| :ref:`Arch Linux <arch-dep>`
+|windows-logo| :ref:`Windows <windows-dep>` |macosx-logo| :ref:`macOS <macosx-dep>`  |opensuse-logo| :ref:`openSUSE <opensuse-dep>`
+=========================================== ======================================== ==============================================
 
-.. _ubuntu-pygobject:
+.. _ubuntu-dep:
 
 |ubuntu-logo| Ubuntu / |debian-logo| Debian
 -------------------------------------------
@@ -39,7 +39,7 @@ your operating system.
       curl llvm libncurses5-dev libncursesw5-dev xz-utils tk-dev
 
 
-.. _fedora-pygobject:
+.. _fedora-dep:
 
 |fedora-logo| Fedora
 --------------------
@@ -53,7 +53,7 @@ your operating system.
       cairo-gobject-devel gobject-introspection-devel
 
 
-.. _arch-pygobject:
+.. _arch-dep:
 
 |arch-logo| Arch Linux
 ----------------------
@@ -64,7 +64,7 @@ your operating system.
     sudo pacman -S --noconfirm base-devel openssl zlib git gobject-introspection
 
 
-.. _opensuse-pygobject:
+.. _opensuse-dep:
 
 |opensuse-logo| openSUSE
 ------------------------
@@ -76,7 +76,7 @@ your operating system.
     sudo zypper install --type pattern devel_basis
 
 
-.. _windows-pygobject:
+.. _windows-dep:
 
 |windows-logo| Windows
 ----------------------
@@ -87,7 +87,7 @@ your operating system.
        mingw-w64-i686-python3 mingw-w64-i686-python3-cairo \
        mingw-w64-i686-gobject-introspection mingw-w64-i686-libffi
 
-.. _macos-pygobject:
+.. _macos-dep:
 
 |macosx-logo| macOS
 -------------------
