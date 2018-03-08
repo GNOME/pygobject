@@ -25,13 +25,13 @@ the following content and save it somewhere:
 Before we can run the example application we need to install PyGObject, GTK+
 and their dependencies. Follow the instructions for your platform below.
 
-======================================= ==================================== ==================================== ==========================================
-|ubuntu-logo| :ref:`Ubuntu <ubuntu>`    |fedora-logo| :ref:`Fedora <fedora>` |arch-logo| :ref:`Arch Linux <arch>` |opensuse-logo| :ref:`openSUSE <opensuse>`
-|windows-logo| :ref:`Windows <windows>` |macosx-logo| :ref:`macOS <macosx>`  |python-logo| :ref:`PyPI <pypi>`
-======================================= ==================================== ==================================== ==========================================
+======================================================= ==================================================== ==================================================== ==========================================================
+|ubuntu-logo| :ref:`Ubuntu <ubuntu-getting-started>`    |fedora-logo| :ref:`Fedora <fedora-getting-started>` |arch-logo| :ref:`Arch Linux <arch-getting-started>` |opensuse-logo| :ref:`openSUSE <opensuse-getting-started>`
+|windows-logo| :ref:`Windows <windows-getting-started>` |macosx-logo| :ref:`macOS <macosx-getting-started>`  |python-logo| :ref:`PyPI <pypi-getting-started>`
+======================================================= ==================================================== ==================================================== ==========================================================
 
 
-.. _windows:
+.. _windows-getting-started:
 
 |windows-logo| Windows
 ----------------------
@@ -48,7 +48,7 @@ and their dependencies. Follow the instructions for your platform below.
     :scale: 60%
 
 
-.. _ubuntu:
+.. _ubuntu-getting-started:
 
 |ubuntu-logo| Ubuntu / |debian-logo| Debian
 -------------------------------------------
@@ -62,7 +62,7 @@ and their dependencies. Follow the instructions for your platform below.
     :scale: 60%
 
 
-.. _fedora:
+.. _fedora-getting-started:
 
 |fedora-logo| Fedora
 --------------------
@@ -73,7 +73,7 @@ and their dependencies. Follow the instructions for your platform below.
 4) Run ``python3 hello.py``
 
 
-.. _arch:
+.. _arch-getting-started:
 
 |arch-logo| Arch Linux
 ----------------------
@@ -84,7 +84,7 @@ and their dependencies. Follow the instructions for your platform below.
 4) Run ``python3 hello.py``
 
 
-.. _opensuse:
+.. _opensuse-getting-started:
 
 |opensuse-logo| openSUSE
 ------------------------
@@ -95,7 +95,7 @@ and their dependencies. Follow the instructions for your platform below.
 4) Run ``python3 hello.py``
 
 
-.. _macosx:
+.. _macosx-getting-started:
 
 |macosx-logo| macOS
 -------------------
