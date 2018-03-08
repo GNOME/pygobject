@@ -21,10 +21,10 @@ Install Dependencies
 In order to compile Python and pip install pygobject, pygobjectendencies are need for
 your operating system.
 
-=========================================== ======================================== ==============================================
+================================================= ============================================== ====================================================
 |ubuntu-logo| :ref:`Ubuntu <ubuntu-pygobject>`    |fedora-logo| :ref:`Fedora <fedora-pygobject>` |arch-logo| :ref:`Arch Linux <arch-pygobject>`
 |windows-logo| :ref:`Windows <windows-pygobject>` |macosx-logo| :ref:`macOS <macosx-pygobject>`  |opensuse-logo| :ref:`openSUSE <opensuse-pygobject>`
-=========================================== ======================================== ==============================================
+================================================= ============================================== ====================================================
 
 .. _ubuntu-pygobject:
 
