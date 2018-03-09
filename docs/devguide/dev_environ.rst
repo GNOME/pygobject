@@ -20,7 +20,7 @@ Pipenv Setup
 
 Install Dependencies
 ====================
-In order to compile Python and pip install pygobject, pygobjectendencies are need for
+In order to compile Python and pip install pygobject, dependencies are need for
 your operating system.
 
 =========================================== ======================================== ==============================================
@@ -47,7 +47,6 @@ your operating system.
 --------------------
 
 .. code:: console
-
 
     sudo dnf install -y python3-venv python3-wheel
     sudo dnf install -y gcc zlib-devel bzip2 bzip2-devel readline-devel \
@@ -89,12 +88,12 @@ your operating system.
        mingw-w64-i686-python3 mingw-w64-i686-python3-cairo \
        mingw-w64-i686-gobject-introspection mingw-w64-i686-libffi
 
-.. _macos-dep:
+.. _macosx-dep:
 
 |macosx-logo| macOS
 -------------------
 
-No extra pygobjectendencies needed.
+No extra dependencies needed.
 
 
 .. _install-pyenv:
@@ -105,14 +104,14 @@ Install `pyenv`_
 `pyenv`_ lets you easily switch between multiple versions of Python.
 
 ============================================= =========================================
-|ubuntu-logo| :ref:`Linux <linux-pyenv>`      |macosx-logo| :ref:`macOS <macosx-pyenv>`
+|linux-logo| :ref:`Linux <linux-pyenv>`       |macosx-logo| :ref:`macOS <macosx-pyenv>`
 |windows-logo| :ref:`Windows <windows-pyenv>`
 ============================================= =========================================
 
 .. _linux-pyenv:
 
-Linux
------
+|linux-logo| Linux
+------------------
 
 .. code:: console
 
@@ -138,7 +137,7 @@ TODO: currently no way to install `pyenv`_ in Windows. So we'll use a normal
     source myvenv/bin/activate
 
 
-.. _macos-pyenv:
+.. _macosx-pyenv:
 
 |macosx-logo| macOS
 -------------------
@@ -159,14 +158,14 @@ scripts provided by python packages into separate virtualenvs to shield them
 from your system and each other. We'll use this to install pipenv.
 
 ============================================= =========================================
-|ubuntu-logo| :ref:`Linux <linux-pipsi>`      |macosx-logo| :ref:`macOS <macosx-pipsi>`
+|linux-logo| :ref:`Linux <linux-pipsi>`       |macosx-logo| :ref:`macOS <macosx-pipsi>`
 |windows-logo| :ref:`Windows <windows-pipsi>`
 ============================================= =========================================
 
 .. _linux-pipsi:
 
-Linux
------
+|linux-logo| Linux
+------------------
 
 .. code:: console
 
@@ -186,7 +185,7 @@ Linux
 
     curl https://raw.githubusercontent.com/mitsuhiko/pipsi/master/get-pipsi.py | python3 - --src=git+https://github.com/mitsuhiko/pipsi.git\#egg=pipsi
 
-Add C:\Users\.local\bin to your path via Control Panel->All Control Panel
+Add C:/\Users/\.local/\bin to your path via Control Panel->All Control Panel
 Items->System->Advanced System Setttings->Environment Variables
 
 .. code:: console
@@ -195,7 +194,7 @@ Items->System->Advanced System Setttings->Environment Variables
     pipsi install pipenv
 
 
-.. _macos-pipsi:
+.. _macosx-pipsi:
 
 |macosx-logo| macOS
 -------------------
@@ -206,13 +205,13 @@ Items->System->Advanced System Setttings->Environment Variables
     pyenv install 3.6.4
 
 
-.. _projects-pygobject-pygobjectendencies:
+.. _projects-pygobject-dependencies:
 
 ************************************
 Projects with PyGObject Dependencies
 ************************************
 
-If you are going to work on a project that has PyGObject as a pygobjectendency, then
+If you are going to work on a project that has PyGObject as a dependency, then
 do the following additional steps:
 
 .. code:: console
@@ -280,13 +279,13 @@ Additional Steps Per Platform
 
 .. code:: console
 
-    sudo dnf buildpygobject pygobject
+    sudo dnf build pygobject
     ./autogen.sh
     make
     make check
 
 
- .. _arch-pygobject:
+.. _arch-pygobject:
 
 |arch-logo| Arch Linux
 ----------------------
@@ -294,6 +293,19 @@ Additional Steps Per Platform
 .. code:: console
 
     makepkg -s pygobject
+    ./autogen.sh
+    make
+    make check
+
+
+.. _opensuse-pygobject:
+
+|opensuse-logo| openSUSE
+------------------------
+
+.. code:: console
+
+    sudo zypper si -d python3-gobject
     ./autogen.sh
     make
     make check
@@ -312,7 +324,7 @@ Additional Steps Per Platform
     make check
 
 
-.. _macos-pygobject:
+.. _macosx-pygobject:
 
 |macosx-logo| macOS
 -------------------

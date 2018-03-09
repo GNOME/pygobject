@@ -110,7 +110,7 @@ and their dependencies. Follow the instructions for your platform below.
     :scale: 70%
 
 
-.. _pypi:
+.. _pypi-getting-started:
 
 |python-logo| From PyPI
 -----------------------
