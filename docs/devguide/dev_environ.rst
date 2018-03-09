@@ -199,10 +199,21 @@ Items->System->Advanced System Setttings->Environment Variables
 |macosx-logo| macOS
 -------------------
 
+With homebrew:
+
 .. code:: console
 
-    brew install pyenv
-    pyenv install 3.6.4
+    brew install pipenv
+
+With pipsi:
+
+.. code:: console
+
+    curl https://raw.githubusercontent.com/mitsuhiko/pipsi/master/get-pipsi.py | python3 - --src=git+https://github.com/mitsuhiko/pipsi.git\#egg=pipsi
+    echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+    source ~/.bashrc
+    pipsi install pew
+    pipsi install pipenv
 
 
 .. _projects-pygobject-dependencies:
