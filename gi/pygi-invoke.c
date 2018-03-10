@@ -542,9 +542,13 @@ _invoke_marshal_in_args (PyGIInvokeState *state, PyGIFunctionCache *function_cac
             state->args[i].arg_cleanup_data = cleanup_data;
 
             if (!success) {
+                PyObject *error_type, *error_value, *error_traceback;
+
+                PyErr_Fetch (&error_type, &error_value, &error_traceback);
                 pygi_marshal_cleanup_args_from_py_parameter_fail (state,
                                                                   cache,
                                                                   i);
+                PyErr_Restore (error_type, error_value, error_traceback);
                 return FALSE;
             }
 
