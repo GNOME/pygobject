@@ -93,6 +93,11 @@ pygi_marshal_cleanup_args_from_py_marshal_success (PyGIInvokeState   *state,
                                                    PyGICallableCache *cache)
 {
     gssize i;
+    PyObject *error_type, *error_value, *error_traceback;
+    gboolean have_error = !!PyErr_Occurred ();
+
+    if (have_error)
+        PyErr_Fetch (&error_type, &error_value, &error_traceback);
 
     for (i = 0; (gsize)i < _pygi_callable_cache_args_len (cache); i++) {
         PyGIArgCache *arg_cache = _pygi_callable_cache_get_arg (cache, i);
@@ -112,6 +117,9 @@ pygi_marshal_cleanup_args_from_py_marshal_success (PyGIInvokeState   *state,
             state->args[i].arg_cleanup_data = NULL;
         }
     }
+
+    if (have_error)
+        PyErr_Restore (error_type, error_value, error_traceback);
 }
 
 void
@@ -120,6 +128,11 @@ pygi_marshal_cleanup_args_to_py_marshal_success (PyGIInvokeState   *state,
 {
     GSList *cache_item;
     guint i = 0;
+    PyObject *error_type, *error_value, *error_traceback;
+    gboolean have_error = !!PyErr_Occurred ();
+
+    if (have_error)
+        PyErr_Fetch (&error_type, &error_value, &error_traceback);
 
     /* clean up the return if available */
     if (cache->return_cache != NULL) {
@@ -156,6 +169,9 @@ pygi_marshal_cleanup_args_to_py_marshal_success (PyGIInvokeState   *state,
         i++;
         cache_item = cache_item->next;
     }
+
+    if (have_error)
+        PyErr_Restore (error_type, error_value, error_traceback);
 }
 
 void
@@ -164,6 +180,11 @@ pygi_marshal_cleanup_args_from_py_parameter_fail (PyGIInvokeState   *state,
                                                   gssize failed_arg_index)
 {
     gssize i;
+    PyObject *error_type, *error_value, *error_traceback;
+    gboolean have_error = !!PyErr_Occurred ();
+
+    if (have_error)
+        PyErr_Fetch (&error_type, &error_value, &error_traceback);
 
     state->failed = TRUE;
 
@@ -195,6 +216,9 @@ pygi_marshal_cleanup_args_from_py_parameter_fail (PyGIInvokeState   *state,
         }
         state->args[i].arg_cleanup_data = NULL;
     }
+
+    if (have_error)
+        PyErr_Restore (error_type, error_value, error_traceback);
 }
 
 void
