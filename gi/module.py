@@ -122,10 +122,11 @@ class IntrospectionModule(object):
         self._version = version
         self.__name__ = 'gi.repository.' + namespace
 
-        self.__path__ = repository.get_typelib_path(self._namespace)
+        path = repository.get_typelib_path(self._namespace)
+        self.__path__ = [path]
         if _have_py3:
             # get_typelib_path() delivers bytes, not a string
-            self.__path__ = self.__path__.decode('UTF-8')
+            self.__path__ = [path.decode('UTF-8')]
 
         if self._version is None:
             self._version = repository.get_version(self._namespace)
