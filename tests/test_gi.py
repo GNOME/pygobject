@@ -13,7 +13,6 @@ import os
 import gc
 import weakref
 import warnings
-from io import StringIO, BytesIO
 
 import gi
 import gi.overrides
@@ -24,7 +23,7 @@ from gi.repository import GObject, GLib, Gio
 from gi.repository import GIMarshallingTests
 
 from .compathelper import PY2, PY3
-from .helper import capture_exceptions
+from .helper import capture_exceptions, capture_output
 
 
 CONSTANT_UTF8 = "const ♥ utf8"
@@ -2996,16 +2995,9 @@ class TestModule(unittest.TestCase):
             self.assertTrue(hasattr(item, '__class__'))
 
     def test_help(self):
-        orig_stdout = sys.stdout
-        try:
-            if sys.version_info < (3, 0):
-                sys.stdout = BytesIO()
-            else:
-                sys.stdout = StringIO()
+        with capture_output() as (stdout, stderr):
             help(GIMarshallingTests)
-            output = sys.stdout.getvalue()
-        finally:
-            sys.stdout = orig_stdout
+        output = stdout.getvalue()
 
         self.assertTrue('SimpleStruct' in output, output)
         self.assertTrue('Interface2' in output, output)
