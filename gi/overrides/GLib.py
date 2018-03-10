@@ -126,7 +126,9 @@ class _VariantCreator(object):
             builder.add_value(self._create(gvtype.element().dup_string(), value))
             return builder.end()
 
-        if not isinstance(value, (dict, tuple, list)):
+        try:
+            iter(value)
+        except TypeError:
             raise TypeError("Could not create array, tuple or dictionary entry from non iterable value %s %s" %
                             (format, value))
 
