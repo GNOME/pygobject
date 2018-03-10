@@ -142,6 +142,22 @@ class TestGVariant(unittest.TestCase):
         self.assertEqual(variant.get_type_string(), 'aai')
         self.assertEqual(variant.unpack(), [[1, 2], [3, 4, 5]])
 
+    def test_create_array_guchar(self):
+        variant = GLib.Variant('ay', [97, 97, 97])
+        assert variant.unpack() == [97, 97, 97]
+
+        variant = GLib.Variant('ay', b'aaa')
+        assert variant.unpack() == [97, 97, 97]
+
+        variant = GLib.Variant('ay', iter([1, 2, 3]))
+        assert variant.unpack() == [1, 2, 3]
+
+        with self.assertRaises(TypeError):
+            GLib.Variant('ay', u'aaa')
+
+        with self.assertRaises(TypeError):
+            GLib.Variant('ay', object())
+
     def test_create_maybe(self):
         variant = GLib.Variant('mai', None)
         self.assertEqual(variant.get_type_string(), 'mai')
