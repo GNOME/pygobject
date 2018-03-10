@@ -2973,8 +2973,10 @@ class TestKeywords(unittest.TestCase):
 
 class TestModule(unittest.TestCase):
     def test_path(self):
-        self.assertTrue(GIMarshallingTests.__path__.endswith('GIMarshallingTests-1.0.typelib'),
-                        GIMarshallingTests.__path__)
+        path = GIMarshallingTests.__path__
+        assert isinstance(path, list)
+        assert len(path) == 1
+        assert path[0].endswith('GIMarshallingTests-1.0.typelib')
 
     def test_str(self):
         self.assertTrue("'GIMarshallingTests' from '" in str(GIMarshallingTests),
