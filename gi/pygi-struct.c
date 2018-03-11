@@ -61,7 +61,14 @@ out:
 static void
 _struct_dealloc (PyGIStruct *self)
 {
-    GIBaseInfo *info = _struct_get_info ( (PyObject *) self );
+    GIBaseInfo *info;
+    PyObject *error_type, *error_value, *error_traceback;
+    gboolean have_error = !!PyErr_Occurred ();
+
+    if (have_error)
+        PyErr_Fetch (&error_type, &error_value, &error_traceback);
+
+    info = _struct_get_info ( (PyObject *) self );
 
     if (info != NULL && g_struct_info_is_foreign ( (GIStructInfo *) info)) {
         pygi_struct_foreign_release (info, pyg_pointer_get_ptr (self));
@@ -72,6 +79,9 @@ _struct_dealloc (PyGIStruct *self)
     if (info != NULL) {
         g_base_info_unref (info);
     }
+
+    if (have_error)
+        PyErr_Restore (error_type, error_value, error_traceback);
 
     Py_TYPE (self)->tp_free ((PyObject *)self);
 }
