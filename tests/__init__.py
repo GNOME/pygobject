@@ -6,6 +6,7 @@ import unittest
 import signal
 import subprocess
 import atexit
+import warnings
 
 
 def init_test_environ():
@@ -95,6 +96,10 @@ def init_test_environ():
         "Gio": "2.0",
         "GObject": "2.0",
     })
+
+    # It's disabled for stable releases by default, this makes sure it's
+    # always on for the tests.
+    warnings.simplefilter('default', gi.PyGIDeprecationWarning)
 
 
 init_test_environ()
