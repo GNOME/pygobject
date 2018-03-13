@@ -86,7 +86,7 @@ _pygi_argument_from_g_value(const GValue *value,
             arg.v_double = g_value_get_double (value);
             break;
         case GI_TYPE_TAG_GTYPE:
-            arg.v_long = g_value_get_gtype (value);
+            arg.v_size = g_value_get_gtype (value);
             break;
         case GI_TYPE_TAG_UTF8:
         case GI_TYPE_TAG_FILENAME:
