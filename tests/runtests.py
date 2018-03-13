@@ -16,6 +16,11 @@ def main(argv):
 
     mydir = os.path.dirname(os.path.abspath(__file__))
 
+    verbosity_args = []
+
+    if 'PYGI_TEST_VERBOSE' in os.environ:
+        verbosity_args += ['-v', '--capture=no']
+
     if 'TEST_NAMES' in os.environ:
         names = os.environ['TEST_NAMES'].split()
     elif 'TEST_FILES' in os.environ:
@@ -27,14 +32,14 @@ def main(argv):
         for filename in argv[1:]:
             names.append(filename.replace('.py', ''))
     else:
-        return pytest.main([mydir])
+        return pytest.main([mydir] + verbosity_args)
 
     def unittest_to_pytest_name(name):
         parts = name.split(".")
         parts[0] = os.path.join(mydir, parts[0] + ".py")
         return "::".join(parts)
 
-    return pytest.main([unittest_to_pytest_name(n) for n in names])
+    return pytest.main([unittest_to_pytest_name(n) for n in names] + verbosity_args)
 
 
 if __name__ == "__main__":
