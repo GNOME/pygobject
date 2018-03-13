@@ -35,6 +35,9 @@ Using Autotools
     make check TEST_NAMES=test_gi.TestUtf8
     make check TEST_NAMES=test_gi.TestUtf8.test_utf8_full_return
 
+    # To display stdout and pytest verbose output:
+    PYGI_TEST_VERBOSE=yes make check
+
     # To execute all the tests in a gdb session
     make check.gdb
 
@@ -66,6 +69,9 @@ Using Setuptools
     TEST_NAMES=test_gi python3 python3 setup.py test
     TEST_NAMES=test_gi.TestUtf8 python3 setup.py test
     TEST_NAMES=test_gi.TestUtf8.test_utf8_full_return python3 setup.py test
+
+    # To display stdout and pytest verbose output:
+    PYGI_TEST_VERBOSE=yes python3 setup.py test
 
     # using pytest directly
     py.test-3 tests/test_gi.py
