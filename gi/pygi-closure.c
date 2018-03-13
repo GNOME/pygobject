@@ -84,7 +84,7 @@ _pygi_closure_assign_pyobj_to_retval (gpointer retval,
            *((gdouble *) retval) = arg->v_double;
            break;
         case GI_TYPE_TAG_GTYPE:
-           *((ffi_arg *) retval) = arg->v_ulong;
+           *((ffi_arg *) retval) = arg->v_size;
            break;
         case GI_TYPE_TAG_UNICHAR:
             *((ffi_arg *) retval) = arg->v_uint32;
@@ -149,7 +149,7 @@ _pygi_closure_assign_pyobj_to_out_argument (gpointer out_arg,
            *((gint64 *) out_arg) = arg->v_int64;
            break;
         case GI_TYPE_TAG_UINT64:
-           *((glong *) out_arg) = arg->v_uint64;
+           *((guint64 *) out_arg) = arg->v_uint64;
            break;
         case GI_TYPE_TAG_FLOAT:
            *((gfloat *) out_arg) = arg->v_float;
@@ -158,7 +158,7 @@ _pygi_closure_assign_pyobj_to_out_argument (gpointer out_arg,
            *((gdouble *) out_arg) = arg->v_double;
            break;
         case GI_TYPE_TAG_GTYPE:
-           *((gulong *) out_arg) = arg->v_ulong;
+           *((GType *) out_arg) = arg->v_size;
            break;
         case GI_TYPE_TAG_UNICHAR:
             *((guint32 *) out_arg) = arg->v_uint32;
@@ -245,10 +245,10 @@ _pygi_closure_convert_ffi_arguments (PyGIInvokeArgState *state,
                 state[i].arg_value.v_uint32 = * (guint32 *) arg_pointer;
                 break;
             case GI_TYPE_TAG_INT64:
-                state[i].arg_value.v_int64 = * (glong *) arg_pointer;
+                state[i].arg_value.v_int64 = * (gint64 *) arg_pointer;
                 break;
             case GI_TYPE_TAG_UINT64:
-                state[i].arg_value.v_uint64 = * (glong *) arg_pointer;
+                state[i].arg_value.v_uint64 = * (guint64 *) arg_pointer;
                 break;
             case GI_TYPE_TAG_FLOAT:
                 state[i].arg_value.v_float = * (gfloat *) arg_pointer;
