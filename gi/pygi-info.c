@@ -600,12 +600,7 @@ _function_info_call (PyGICallableInfo *self, PyObject *args, PyObject *kwargs)
                 py_str_name = tmp;
             }
 
-#if PY_VERSION_HEX < 0x03000000
-            str_name = PyString_AsString (py_str_name);
-#else
-            str_name = PyBytes_AsString (py_str_name);
-#endif
-
+            str_name = PYGLIB_PyBytes_AsString (py_str_name);
             if (strcmp (str_name, _safe_base_info_get_name (container_info))) {
                 PyErr_Format (PyExc_TypeError,
                               "%s constructor cannot be used to create instances of "
