@@ -28,6 +28,14 @@ except ImportError:
     Gdk = None
 
 
+def gtkver():
+    if Gtk is None:
+        return (0, 0, 0)
+    return (Gtk.get_major_version(),
+            Gtk.get_minor_version(),
+            Gtk.get_micro_version())
+
+
 @contextlib.contextmanager
 def realized(widget):
     """Makes sure the widget is realized.
@@ -1988,6 +1996,7 @@ class TestTextBuffer(unittest.TestCase):
         self.assertEqual(buffer.get_property('text'),
                          'first line\nsecond line\n')
 
+    @unittest.skipIf(gtkver() < (3, 20, 0), "broken with older gtk")
     def test_backward_find_char(self):
         buffer = Gtk.TextBuffer()
         buffer.set_text('abc')

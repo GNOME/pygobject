@@ -1,8 +1,3 @@
-services:
-  - docker
-
-image: lazka/pygobject:pyenv
-
 stages:
   - build_and_test
   - coverage
@@ -13,6 +8,7 @@ cache:
 
 .defaults: &defaults
   stage: build_and_test
+  image: lazka/pygobject:pyenv
   artifacts:
     paths:
       - coverage/
@@ -32,6 +28,7 @@ cache:
 
 coverage:
   stage: coverage
+  image: lazka/pygobject:pyenv
   artifacts:
     paths:
       - coverage/
@@ -92,3 +89,9 @@ python3.7:
   variables:
     PYENV_VERSION: "3.7.0b2"
   <<: *defaults
+
+xenial-i386-py2:
+  stage: build_and_test
+  image: lazka/pygobject:pyenv-old
+  script:
+   - bash -x ./.gitlab-ci/test-docker-old.sh
