@@ -27,6 +27,7 @@ from .helper import capture_exceptions, capture_output
 
 
 CONSTANT_UTF8 = "const ♥ utf8"
+CONSTANT_UCS4 = u"const ♥ utf8"
 
 
 class Number(object):
@@ -654,6 +655,12 @@ class TestGType(unittest.TestCase):
 
 class TestUtf8(unittest.TestCase):
 
+    def test_utf8_as_uint8array_in(self):
+        data = CONSTANT_UTF8
+        if not isinstance(data, bytes):
+            data = data.encode("utf-8")
+        GIMarshallingTests.utf8_as_uint8array_in(data)
+
     def test_utf8_none_return(self):
         self.assertEqual(CONSTANT_UTF8, GIMarshallingTests.utf8_none_return())
 
@@ -690,6 +697,9 @@ class TestFilename(unittest.TestCase):
 
     def tearDown(self):
         shutil.rmtree(self.workdir)
+
+    def tests_filename_list_return(self):
+        assert GIMarshallingTests.filename_list_return() == []
 
     @unittest.skipIf(os.name == "nt", "fixme")
     def test_filename_in(self):
@@ -897,6 +907,46 @@ class TestFilename(unittest.TestCase):
 
 
 class TestArray(unittest.TestCase):
+
+    @unittest.skipUnless(
+        hasattr(GIMarshallingTests, "array_bool_in"), "too old gi")
+    def test_array_bool_in(self):
+        GIMarshallingTests.array_bool_in([True, False, True, True])
+
+    @unittest.skipUnless(
+        hasattr(GIMarshallingTests, "array_bool_out"), "too old gi")
+    def test_array_bool_out(self):
+        assert GIMarshallingTests.array_bool_out() == [True, False, True, True]
+
+    @unittest.skipUnless(
+        hasattr(GIMarshallingTests, "array_int64_in"), "too old gi")
+    def test_array_int64_in(self):
+        GIMarshallingTests.array_int64_in([-1, 0, 1, 2])
+
+    @unittest.skipUnless(
+        hasattr(GIMarshallingTests, "array_uint64_in"), "too old gi")
+    def test_array_uint64_in(self):
+        GIMarshallingTests.array_uint64_in([GLib.MAXUINT64, 0, 1, 2])
+
+    @unittest.skipUnless(
+        hasattr(GIMarshallingTests, "array_unichar_in"), "too old gi")
+    def test_array_unichar_in(self):
+        GIMarshallingTests.array_unichar_in(list(CONSTANT_UCS4))
+        GIMarshallingTests.array_unichar_in(CONSTANT_UCS4)
+
+    @unittest.skipUnless(
+        hasattr(GIMarshallingTests, "array_unichar_out"), "too old gi")
+    def test_array_unichar_out(self):
+        if PY2:
+            result = [c.encode("utf-8") for c in list(CONSTANT_UCS4)]
+        else:
+            result = list(CONSTANT_UCS4)
+        assert GIMarshallingTests.array_unichar_out() == result
+
+    @unittest.skip("broken")
+    def test_array_zero_terminated_return_unichar(self):
+        assert GIMarshallingTests.array_zero_terminated_return_unichar() == \
+            list(CONSTANT_UCS4)
 
     def test_array_fixed_int_return(self):
         self.assertEqual([-1, 0, 1, 2], GIMarshallingTests.array_fixed_int_return())
@@ -1138,6 +1188,17 @@ class TestArrayGVariant(unittest.TestCase):
 
 
 class TestGArray(unittest.TestCase):
+
+    @unittest.skipUnless(
+        hasattr(GIMarshallingTests, "garray_bool_none_in"), "too old gi")
+    def test_garray_bool_none_in(self):
+        GIMarshallingTests.garray_bool_none_in([True, False, True, True])
+
+    @unittest.skipUnless(
+        hasattr(GIMarshallingTests, "garray_unichar_none_in"), "too old gi")
+    def test_garray_unichar_none_in(self):
+        GIMarshallingTests.garray_unichar_none_in(CONSTANT_UCS4)
+        GIMarshallingTests.garray_unichar_none_in(list(CONSTANT_UCS4))
 
     def test_garray_int_none_return(self):
         self.assertEqual([-1, 0, 1, 2], GIMarshallingTests.garray_int_none_return())
@@ -1396,6 +1457,26 @@ class TestGSList(unittest.TestCase):
 
 class TestGHashTable(unittest.TestCase):
 
+    @unittest.skip("broken")
+    def test_ghashtable_double_in(self):
+        GIMarshallingTests.ghashtable_double_in(
+            {"-1": -0.1, "0": 0.0, "1": 0.1, "2": 0.2})
+
+    @unittest.skip("broken")
+    def test_ghashtable_float_in(self):
+        GIMarshallingTests.ghashtable_float_in(
+            {"-1": -0.1, "0": 0.0, "1": 0.1, "2": 0.2})
+
+    @unittest.skip("broken")
+    def test_ghashtable_int64_in(self):
+        GIMarshallingTests.ghashtable_int64_in(
+            {"-1": GLib.MAXUINT32 + 1, "0": 0, "1": 1, "2": 2})
+
+    @unittest.skip("broken")
+    def test_ghashtable_uint64_in(self):
+        GIMarshallingTests.ghashtable_uint64_in(
+            {"-1": GLib.MAXUINT32 + 1, "0": 0, "1": 1, "2": 2})
+
     def test_ghashtable_int_none_return(self):
         self.assertEqual({-1: 1, 0: 0, 1: -1, 2: -2}, GIMarshallingTests.ghashtable_int_none_return())
 
@@ -1597,8 +1678,8 @@ class TestGValue(unittest.TestCase):
         gc.collect()
         self.assertEqual(ref(), None)
 
-    # FIXME: crashes
-    def disabled_test_gvalue_flat_array_round_trip(self):
+    @unittest.skip("broken")
+    def test_gvalue_flat_array_round_trip(self):
         self.assertEqual([42, '42', True],
                          GIMarshallingTests.gvalue_flat_array_round_trip(42, '42', True))
 
@@ -2596,6 +2677,11 @@ class TestInterfaces(unittest.TestCase):
 
     def setUp(self):
         self.instance = self.TestInterfaceImpl()
+
+    def test_iface_impl(self):
+        instance = GIMarshallingTests.InterfaceImpl()
+        assert instance.get_as_interface() is instance
+        instance.test_int8_in(42)
 
     def test_wrapper(self):
         self.assertTrue(issubclass(GIMarshallingTests.Interface, GObject.GInterface))
