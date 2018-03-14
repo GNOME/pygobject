@@ -29,7 +29,7 @@ from email import parser
 import pkg_resources
 from setuptools import setup, find_packages
 from distutils.core import Extension, Distribution, Command
-from distutils.errors import DistutilsSetupError
+from distutils.errors import DistutilsSetupError, DistutilsOptionError
 from distutils.ccompiler import new_compiler
 from distutils.sysconfig import get_python_lib
 from distutils import dir_util, log
@@ -441,13 +441,19 @@ class build_tests(Command):
 
 
 class test(Command):
-    user_options = []
+    user_options = [
+        ("valgrind", None, "run tests under valgrind"),
+        ("valgrind-log-file=", None, "save logs instead of printing them"),
+    ]
 
     def initialize_options(self):
-        pass
+        self.valgrind = None
+        self.valgrind_log_file = None
 
     def finalize_options(self):
-        pass
+        self.valgrind = bool(self.valgrind)
+        if self.valgrind_log_file and not self.valgrind:
+            raise DistutilsOptionError("valgrind not enabled")
 
     def run(self):
         cmd = self.reinitialize_command("build_tests")
@@ -461,8 +467,38 @@ class test(Command):
         env["MALLOC_CHECK_"] = "3"
         env["G_SLICE"] = "debug-blocks"
 
+        def get_suppression_files():
+            files = []
+            if sys.version_info[0] == 2:
+                files.append(os.path.join(
+                    sys.prefix, "lib", "valgrind", "python.supp"))
+            else:
+                files.append(os.path.join(
+                    sys.prefix, "lib", "valgrind", "python3.supp"))
+            files.append(os.path.join(
+                sys.prefix, "share", "glib-2.0", "valgrind", "glib.supp"))
+            return [f for f in files if os.path.isfile(f)]
+
+        if self.valgrind:
+            env["G_SLICE"] = "always-malloc"
+            env["G_DEBUG"] = "gc-friendly"
+            env["PYTHONMALLOC"] = "malloc"
+
+            pre_args = [
+                "valgrind", "--leak-check=full", "--show-possibly-lost=no",
+                "--num-callers=20", "--child-silent-after-fork=yes",
+            ] + ["--suppressions=" + f for f in get_suppression_files()]
+
+            if self.valgrind_log_file:
+                pre_args += ["--log-file=" + self.valgrind_log_file]
+        else:
+            pre_args = []
+
+        if pre_args:
+            log.info(" ".join(pre_args))
+
         tests_dir = os.path.join(get_script_dir(), "tests")
-        sys.exit(subprocess.call([
+        sys.exit(subprocess.call(pre_args + [
             sys.executable,
             os.path.join(tests_dir, "runtests.py"),
         ], env=env))
