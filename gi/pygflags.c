@@ -431,9 +431,15 @@ pyg_flags_get_value_names(PyGFlags *self, void *closure)
   g_assert(G_IS_FLAGS_CLASS(flags_class));
 
   retval = PyList_New(0);
-  for (i = 0; i < flags_class->n_values; i++)
-      if ((PYGLIB_PyLong_AsUnsignedLong(self) & flags_class->values[i].value) == flags_class->values[i].value)
-	  PyList_Append(retval, PYGLIB_PyUnicode_FromString(flags_class->values[i].value_name));
+  for (i = 0; i < flags_class->n_values; i++) {
+      PyObject *value_name;
+
+      if ((PYGLIB_PyLong_AsUnsignedLong (self) & flags_class->values[i].value) == flags_class->values[i].value) {
+        value_name = PYGLIB_PyUnicode_FromString (flags_class->values[i].value_name);
+        PyList_Append (retval, value_name);
+        Py_DECREF (value_name);
+      }
+  }
 
   g_type_class_unref(flags_class);
 
