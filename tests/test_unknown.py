@@ -6,7 +6,7 @@ import unittest
 
 from gi.repository import GObject
 
-from . import testhelper
+import testhelper
 
 
 TestInterface = GObject.GType.from_name('TestInterface')

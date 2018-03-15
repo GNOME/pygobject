@@ -9,7 +9,7 @@ import pytest
 from gi.repository import GLib, GObject
 from gi._compat import PY3
 
-from . import testhelper
+import testhelper
 
 
 class PyGObject(GObject.GObject):

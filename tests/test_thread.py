@@ -6,7 +6,7 @@ import unittest
 
 from gi.repository import GLib
 
-from . import testhelper
+import testhelper
 
 
 class TestThread(unittest.TestCase):

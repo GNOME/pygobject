@@ -14,7 +14,7 @@ from gi import _signalhelper as signalhelper
 from gi.module import repository as repo
 from gi._compat import PY3, long_
 
-from . import testhelper
+import testhelper
 from .helper import capture_glib_warnings, capture_gi_deprecation_warnings
 
 

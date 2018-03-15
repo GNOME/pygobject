@@ -7,6 +7,27 @@ import signal
 import subprocess
 import atexit
 import warnings
+import importlib
+import sys
+import imp
+
+
+class GIImport:
+    def find_module(self, fullname, path=None):
+        if fullname == 'gi._gi':
+            return self
+        return None
+
+    def load_module(self, name):
+        if name in sys.modules:
+            return sys.modules[name]
+        module_info = imp.find_module('_gi')
+        module = imp.load_module(name, *module_info)
+        sys.modules[name] = module
+        return module
+
+
+sys.meta_path.insert(0, GIImport())
 
 
 def init_test_environ():
@@ -46,6 +67,7 @@ def init_test_environ():
     tests_srcdir = os.path.abspath(os.path.dirname(__file__))
     srcdir = os.path.dirname(tests_srcdir)
 
+    sys.path.insert(0, os.path.join(builddir, 'gi'))
     sys.path.insert(0, tests_srcdir)
     sys.path.insert(0, srcdir)
     sys.path.insert(0, tests_builddir)

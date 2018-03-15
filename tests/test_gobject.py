@@ -12,7 +12,7 @@ from gi import PyGIDeprecationWarning
 from gi.module import get_introspection_module
 from gi import _gi
 
-from . import testhelper
+import testhelper
 
 
 class TestGObjectAPI(unittest.TestCase):
