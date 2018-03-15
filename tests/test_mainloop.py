@@ -44,6 +44,7 @@ class TestMainLoop(unittest.TestCase):
         assert exc[0].value.args[0] == "deadbabe"
 
     @unittest.skipUnless(hasattr(os, "fork"), "no os.fork available")
+    @unittest.skipIf(os.environ.get("PYGI_TEST_GDB"), "SIGINT stops gdb")
     def test_sigint(self):
         r, w = os.pipe()
         pid = os.fork()

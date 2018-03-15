@@ -444,16 +444,19 @@ class test(Command):
     user_options = [
         ("valgrind", None, "run tests under valgrind"),
         ("valgrind-log-file=", None, "save logs instead of printing them"),
+        ("gdb", None, "run tests under gdb"),
     ]
 
     def initialize_options(self):
         self.valgrind = None
         self.valgrind_log_file = None
+        self.gdb = None
 
     def finalize_options(self):
         self.valgrind = bool(self.valgrind)
         if self.valgrind_log_file and not self.valgrind:
             raise DistutilsOptionError("valgrind not enabled")
+        self.gdb = bool(self.gdb)
 
     def run(self):
         cmd = self.reinitialize_command("build_tests")
@@ -479,20 +482,24 @@ class test(Command):
                 sys.prefix, "share", "glib-2.0", "valgrind", "glib.supp"))
             return [f for f in files if os.path.isfile(f)]
 
+        pre_args = []
+
         if self.valgrind:
             env["G_SLICE"] = "always-malloc"
             env["G_DEBUG"] = "gc-friendly"
             env["PYTHONMALLOC"] = "malloc"
 
-            pre_args = [
+            pre_args += [
                 "valgrind", "--leak-check=full", "--show-possibly-lost=no",
                 "--num-callers=20", "--child-silent-after-fork=yes",
             ] + ["--suppressions=" + f for f in get_suppression_files()]
 
             if self.valgrind_log_file:
                 pre_args += ["--log-file=" + self.valgrind_log_file]
-        else:
-            pre_args = []
+
+        if self.gdb:
+            env["PYGI_TEST_GDB"] = "1"
+            pre_args += ["gdb", "--args"]
 
         if pre_args:
             log.info(" ".join(pre_args))
