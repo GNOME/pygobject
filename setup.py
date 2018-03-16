@@ -27,7 +27,7 @@ import sysconfig
 from email import parser
 
 import pkg_resources
-from setuptools import setup, find_packages
+from setuptools import setup
 from distutils.core import Extension, Distribution, Command
 from distutils.errors import DistutilsSetupError, DistutilsOptionError
 from distutils.ccompiler import new_compiler
@@ -956,7 +956,12 @@ def main():
         long_description=long_description,
         platforms=pkginfo.get_all("Platform"),
         classifiers=pkginfo.get_all("Classifier"),
-        packages=find_packages(script_dir),
+        packages=[
+            "pygtkcompat",
+            "gi",
+            "gi.repository",
+            "gi.overrides",
+        ],
         ext_modules=[
             gi_ext,
             gi_cairo_ext,
