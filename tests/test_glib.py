@@ -14,6 +14,8 @@ import pytest
 from gi.repository import GLib
 from gi import PyGIDeprecationWarning
 
+from .compathelper import PY3
+
 
 class TestGLib(unittest.TestCase):
 
@@ -76,13 +78,30 @@ class TestGLib(unittest.TestCase):
         self.assertEqual(GLib.filename_display_name('foo'), 'foo')
         self.assertEqual(GLib.filename_display_basename('bar/foo'), 'foo')
 
+        def glibfsencode(f):
+            # the annotations of filename_from_utf8() was changed in
+            # https://bugzilla.gnome.org/show_bug.cgi?id=756128
+            if isinstance(f, bytes):
+                return f
+            if os.name == "nt":
+                if PY3:
+                    return f.encode("utf-8", "surrogatepass")
+                else:
+                    return f.encode("utf-8")
+            else:
+                assert PY3
+                return os.fsencode(f)
+
         # this is locale dependent, so we cannot completely verify the result
         res = GLib.filename_from_utf8(u'aäb')
+        res = glibfsencode(res)
         self.assertTrue(isinstance(res, bytes))
         self.assertGreaterEqual(len(res), 3)
 
         # with explicit length argument
-        self.assertEqual(GLib.filename_from_utf8(u'aäb', 1), b'a')
+        res = GLib.filename_from_utf8(u'aäb', 1)
+        res = glibfsencode(res)
+        self.assertEqual(res, b'a')
 
     def test_uri_extract(self):
         res = GLib.uri_list_extract_uris('''# some comment
