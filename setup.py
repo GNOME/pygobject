@@ -31,7 +31,7 @@ from setuptools import setup, find_packages
 from distutils.core import Extension, Distribution, Command
 from distutils.errors import DistutilsSetupError, DistutilsOptionError
 from distutils.ccompiler import new_compiler
-from distutils.sysconfig import get_python_lib
+from distutils.sysconfig import get_python_lib, customize_compiler
 from distutils import dir_util, log
 
 
@@ -137,6 +137,59 @@ def pkg_config_parse(opt, pkg):
         output = ret
     opt = opt[-2:]
     return [x.lstrip(opt) for x in output.split()]
+
+
+def filter_compiler_arguments(compiler, args):
+    """Given a compiler instance and a list of compiler warning flags
+    returns the list of supported flags.
+    """
+
+    if compiler.compiler_type == "msvc":
+        # TODO
+        return []
+
+    extra = []
+
+    def check_arguments(compiler, args):
+        p = subprocess.Popen(
+            [compiler.compiler[0]] + args + extra + ["-x", "c", "-E", "-"],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE)
+        stdout, stderr = p.communicate(b"int i;\n")
+        if p.returncode != 0:
+            text = stderr.decode("ascii", "replace")
+            return False, [a for a in args if a in text]
+        else:
+            return True, []
+
+    def check_argument(compiler, arg):
+        return check_arguments(compiler, [arg])[0]
+
+    # clang doesn't error out for unknown options, force it to
+    if check_argument(compiler, '-Werror=unknown-warning-option'):
+        extra += ['-Werror=unknown-warning-option']
+    if check_argument(compiler, '-Werror=unused-command-line-argument'):
+        extra += ['-Werror=unused-command-line-argument']
+
+    # first try to remove all arguments contained in the error message
+    supported = list(args)
+    while 1:
+        ok, maybe_unknown = check_arguments(compiler, supported)
+        if ok:
+            return supported
+        elif not maybe_unknown:
+            break
+        for unknown in maybe_unknown:
+            if not check_argument(compiler, unknown):
+                supported.remove(unknown)
+
+    # hm, didn't work, try each argument one by one
+    supported = []
+    for arg in args:
+        if check_argument(compiler, arg):
+            supported.append(arg)
+    return supported
 
 
 du_sdist = get_command_class("sdist")
@@ -246,9 +299,6 @@ class build_tests(Command):
         cmd.inplace = True
         cmd.ensure_finalized()
         cmd.run()
-
-        from distutils.ccompiler import new_compiler
-        from distutils.sysconfig import customize_compiler
 
         gidatadir = pkg_config_parse(
             "--variable=gidatadir", "gobject-introspection-1.0")[0]
@@ -432,10 +482,12 @@ class build_tests(Command):
         add_ext_pkg_config_dep(ext, compiler.compiler_type, "glib-2.0")
         add_ext_pkg_config_dep(ext, compiler.compiler_type, "gio-2.0")
         add_ext_pkg_config_dep(ext, compiler.compiler_type, "cairo")
+        add_ext_warn_flags(ext, compiler)
 
         dist = Distribution({"ext_modules": [ext]})
         cmd = dist.get_command_obj("build_ext")
         cmd.inplace = True
+        cmd.force = self.force
         cmd.ensure_finalized()
         cmd.run()
 
@@ -656,6 +708,67 @@ def add_ext_pkg_config_dep(ext, compiler_type, name):
         ext.libraries += pkg_config_parse("--libs-only-l", name)
 
 
+def add_ext_warn_flags(ext, compiler, _cache={}):
+    cache_key = compiler.compiler[0]
+    if cache_key not in _cache:
+
+        args = [
+            "-Wall",
+            "-Warray-bounds",
+            # "-Wcast-align",
+            # "-Wdeclaration-after-statement",
+            # "-Wdouble-promotion",
+            "-Wduplicated-branches",
+            # "-Wduplicated-cond",
+            "-Wextra",
+            "-Wformat=2",
+            "-Wformat-nonliteral",
+            "-Wformat-security",
+            "-Wimplicit-function-declaration",
+            "-Winit-self",
+            "-Winline",
+            # "-Wjump-misses-init",
+            # "-Wlogical-op",
+            "-Wmissing-declarations",
+            "-Wmissing-format-attribute",
+            "-Wmissing-include-dirs",
+            "-Wmissing-noreturn",
+            "-Wmissing-prototypes",
+            "-Wnested-externs",
+            # "-Wnull-dereference",
+            "-Wold-style-definition",
+            "-Wpacked",
+            "-Wpointer-arith",
+            "-Wredundant-decls",
+            "-Wrestrict",
+            "-Wreturn-type",
+            "-Wshadow",
+            "-Wsign-compare",
+            "-Wstrict-aliasing",
+            "-Wstrict-prototypes",
+            "-Wswitch-default",
+            "-Wundef",
+            "-Wunused-but-set-variable",
+            "-Wwrite-strings",
+        ]
+
+        args += [
+            "-Wno-incompatible-pointer-types-discards-qualifiers",
+            "-Wno-missing-field-initializers",
+            "-Wno-unused-parameter",
+            "-Wno-discarded-qualifiers",
+        ]
+
+        # silence clang for unused gcc CFLAGS added by Debian
+        args += [
+            "-Wno-unused-command-line-argument",
+        ]
+
+        _cache[cache_key] = filter_compiler_arguments(compiler, args)
+
+    ext.extra_compile_args += _cache[cache_key]
+
+
 du_build_ext = get_command_class("build_ext")
 
 
@@ -690,8 +803,11 @@ class build_ext(du_build_ext):
     def _setup_extensions(self):
         ext = {e.name: e for e in self.extensions}
 
+        compiler = new_compiler(compiler=self.compiler)
+        customize_compiler(compiler)
+
         def add_dependency(ext, name):
-            add_ext_pkg_config_dep(ext, self.compiler_type, name)
+            add_ext_pkg_config_dep(ext, compiler.compiler_type, name)
 
         def add_pycairo(ext):
             ext.include_dirs += [get_pycairo_include_dir()]
@@ -701,6 +817,7 @@ class build_ext(du_build_ext):
         add_dependency(gi_ext, "gio-2.0")
         add_dependency(gi_ext, "gobject-introspection-1.0")
         add_dependency(gi_ext, "libffi")
+        add_ext_warn_flags(gi_ext, compiler)
 
         gi_cairo_ext = ext["gi._gi_cairo"]
         add_dependency(gi_cairo_ext, "glib-2.0")
@@ -710,6 +827,7 @@ class build_ext(du_build_ext):
         add_dependency(gi_cairo_ext, "cairo")
         add_dependency(gi_cairo_ext, "cairo-gobject")
         add_pycairo(gi_cairo_ext)
+        add_ext_warn_flags(gi_cairo_ext, compiler)
 
     def run(self):
         self._write_config_h()
