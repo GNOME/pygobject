@@ -177,8 +177,9 @@ else:
     Window = override(Window)
     __all__.append('Window')
 
-Gdk.EventType._2BUTTON_PRESS = getattr(Gdk.EventType, "2BUTTON_PRESS")
-Gdk.EventType._3BUTTON_PRESS = getattr(Gdk.EventType, "3BUTTON_PRESS")
+if Gdk._version in ("2.0", "3.0"):
+    Gdk.EventType._2BUTTON_PRESS = getattr(Gdk.EventType, "2BUTTON_PRESS")
+    Gdk.EventType._3BUTTON_PRESS = getattr(Gdk.EventType, "3BUTTON_PRESS")
 
 
 class Event(Gdk.Event):
@@ -188,8 +189,6 @@ class Event(Gdk.Event):
         Gdk.EventType.EXPOSE: 'expose',
         Gdk.EventType.MOTION_NOTIFY: 'motion',
         Gdk.EventType.BUTTON_PRESS: 'button',
-        Gdk.EventType._2BUTTON_PRESS: 'button',
-        Gdk.EventType._3BUTTON_PRESS: 'button',
         Gdk.EventType.BUTTON_RELEASE: 'button',
         Gdk.EventType.KEY_PRESS: 'key',
         Gdk.EventType.KEY_RELEASE: 'key',
@@ -199,21 +198,27 @@ class Event(Gdk.Event):
         Gdk.EventType.CONFIGURE: 'configure',
         Gdk.EventType.MAP: 'any',
         Gdk.EventType.UNMAP: 'any',
-        Gdk.EventType.PROPERTY_NOTIFY: 'property',
-        Gdk.EventType.SELECTION_CLEAR: 'selection',
-        Gdk.EventType.SELECTION_REQUEST: 'selection',
-        Gdk.EventType.SELECTION_NOTIFY: 'selection',
         Gdk.EventType.PROXIMITY_IN: 'proximity',
         Gdk.EventType.PROXIMITY_OUT: 'proximity',
         Gdk.EventType.DRAG_ENTER: 'dnd',
         Gdk.EventType.DRAG_LEAVE: 'dnd',
         Gdk.EventType.DRAG_MOTION: 'dnd',
-        Gdk.EventType.DRAG_STATUS: 'dnd',
         Gdk.EventType.DROP_START: 'dnd',
-        Gdk.EventType.DROP_FINISHED: 'dnd',
-        Gdk.EventType.CLIENT_EVENT: 'client',
-        Gdk.EventType.VISIBILITY_NOTIFY: 'visibility',
     }
+
+    if Gdk._version in ("2.0", "3.0"):
+        _UNION_MEMBERS.update({
+            Gdk.EventType._2BUTTON_PRESS: 'button',
+            Gdk.EventType._3BUTTON_PRESS: 'button',
+            Gdk.EventType.PROPERTY_NOTIFY: 'property',
+            Gdk.EventType.SELECTION_CLEAR: 'selection',
+            Gdk.EventType.SELECTION_REQUEST: 'selection',
+            Gdk.EventType.SELECTION_NOTIFY: 'selection',
+            Gdk.EventType.DRAG_STATUS: 'dnd',
+            Gdk.EventType.DROP_FINISHED: 'dnd',
+            Gdk.EventType.CLIENT_EVENT: 'client',
+            Gdk.EventType.VISIBILITY_NOTIFY: 'visibility',
+        })
 
     if Gdk._version == '2.0':
         _UNION_MEMBERS[Gdk.EventType.NO_EXPOSE] = 'no_expose'
@@ -258,7 +263,6 @@ module = sys.modules[modname]
 # field info so manually list the class names
 event_member_classes = ['EventAny',
                         'EventExpose',
-                        'EventVisibility',
                         'EventMotion',
                         'EventButton',
                         'EventScroll',
@@ -266,14 +270,20 @@ event_member_classes = ['EventAny',
                         'EventCrossing',
                         'EventFocus',
                         'EventConfigure',
-                        'EventProperty',
-                        'EventSelection',
-                        'EventOwnerChange',
                         'EventProximity',
                         'EventDND',
-                        'EventWindowState',
                         'EventSetting',
                         'EventGrabBroken']
+
+if Gdk._version in ("2.0", "3.0"):
+    event_member_classes.extend([
+        'EventVisibility',
+        'EventProperty',
+        'EventSelection',
+        'EventOwnerChange',
+        'EventWindowState',
+        'EventVisibility',
+    ])
 
 if Gdk._version == '2.0':
     event_member_classes.append('EventNoExpose')
@@ -391,12 +401,13 @@ def _gdk_atom_repr(atom):
     return '<Gdk.Atom(%i)>' % hash(atom)
 
 
-Gdk.Atom.__str__ = _gdk_atom_str
-Gdk.Atom.__repr__ = _gdk_atom_repr
+if Gdk._version in ("2.0", "3.0"):
+    Gdk.Atom.__str__ = _gdk_atom_str
+    Gdk.Atom.__repr__ = _gdk_atom_repr
 
 
 # constants
-if Gdk._version >= '3.0':
+if Gdk._version == '3.0':
     SELECTION_PRIMARY = Gdk.atom_intern('PRIMARY', True)
     __all__.append('SELECTION_PRIMARY')
 

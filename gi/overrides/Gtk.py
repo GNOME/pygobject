@@ -634,17 +634,17 @@ if Gtk._version in ("2.0", "3.0"):
     __all__.append('FontSelectionDialog')
 
 
-class RecentChooserDialog(Gtk.RecentChooserDialog):
-    # Note, the "manager" keyword must work across the entire 3.x series because
-    # "recent_manager" is not backwards compatible with PyGObject versions prior to 3.10.
-    __init__ = deprecated_init(Gtk.RecentChooserDialog.__init__,
-                               arg_names=('title', 'parent', 'recent_manager', 'buttons'),
-                               deprecated_aliases={'recent_manager': 'manager'},
-                               category=PyGTKDeprecationWarning)
+if Gtk._version in ("2.0", "3.0"):
+    class RecentChooserDialog(Gtk.RecentChooserDialog):
+        # Note, the "manager" keyword must work across the entire 3.x series because
+        # "recent_manager" is not backwards compatible with PyGObject versions prior to 3.10.
+        __init__ = deprecated_init(Gtk.RecentChooserDialog.__init__,
+                                   arg_names=('title', 'parent', 'recent_manager', 'buttons'),
+                                   deprecated_aliases={'recent_manager': 'manager'},
+                                   category=PyGTKDeprecationWarning)
 
-
-RecentChooserDialog = override(RecentChooserDialog)
-__all__.append('RecentChooserDialog')
+    RecentChooserDialog = override(RecentChooserDialog)
+    __all__.append('RecentChooserDialog')
 
 
 class IconView(Gtk.IconView):
