@@ -1,3 +1,15 @@
+3.28.1 - 2018-03-17
+-------------------
+
+* Fix a GValue leak (regression). :issue:`176`
+  (:user:`Mathieu Duponchelle<mathieudu>`)
+* setup.py: don't install the tests package
+* Various fixes for 64bit Windows. :mr:`34`
+  (:user:`Mathieu Duponchelle<mathieudu>`)
+* Fix tests with glib 2.56.0
+* Various fixes for Python 3.7. :issue:`170` :mr:`28`
+
+
 3.28.0 - 2018-03-12
 -------------------
 
