@@ -436,6 +436,7 @@ class build_tests(Command):
         dist = Distribution({"ext_modules": [ext]})
         cmd = dist.get_command_obj("build_ext")
         cmd.inplace = True
+        cmd.force = self.force
         cmd.ensure_finalized()
         cmd.run()
 
