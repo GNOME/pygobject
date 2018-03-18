@@ -1193,7 +1193,7 @@ class TreePath(Gtk.TreePath):
         super(TreePath, self).__init__()
 
     def __str__(self):
-        return self.to_string()
+        return self.to_string() or ""
 
     def __lt__(self, other):
         return other is not None and self.compare(other) < 0

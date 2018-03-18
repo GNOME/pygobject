@@ -1393,6 +1393,10 @@ class TestTreeModel(unittest.TestCase):
         self.assertEqual(p1[2], 3)
         self.assertRaises(IndexError, p1.__getitem__, 3)
 
+    def test_tree_path_empty(self):
+        p1 = Gtk.TreePath.new()
+        assert str(p1) == ""
+
     def test_tree_model(self):
         tree_store = Gtk.TreeStore(int, str)
 
