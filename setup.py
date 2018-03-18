@@ -221,12 +221,16 @@ class build_tests(Command):
 
     def initialize_options(self):
         self.build_temp = None
+        self.build_base = None
         self.force = False
 
     def finalize_options(self):
         self.set_undefined_options(
             'build_ext',
             ('build_temp', 'build_temp'))
+        self.set_undefined_options(
+            'build',
+            ('build_base', 'build_base'))
 
     def _newer_group(self, sources, *targets):
         assert targets
@@ -434,6 +438,11 @@ class build_tests(Command):
         add_ext_pkg_config_dep(ext, compiler.compiler_type, "cairo")
 
         dist = Distribution({"ext_modules": [ext]})
+
+        build_cmd = dist.get_command_obj("build")
+        build_cmd.build_base = os.path.join(self.build_base, "pygobject_tests")
+        build_cmd.ensure_finalized()
+
         cmd = dist.get_command_obj("build_ext")
         cmd.inplace = True
         cmd.force = self.force
