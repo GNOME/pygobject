@@ -50,4 +50,7 @@ GIMarshallingTestsExtraEnum * gi_marshalling_tests_enum_array_return_type (gsize
 
 void gi_marshalling_tests_extra_flags_large_in (GIMarshallingTestsExtraFlags value);
 
+gchar *gi_marshalling_tests_extra_utf8_full_return_invalid (void);
+void gi_marshalling_tests_extra_utf8_full_out_invalid (gchar **utf8);
+
 #endif /* EXTRA_TESTS */

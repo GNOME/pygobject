@@ -154,3 +154,24 @@ gi_marshalling_tests_extra_flags_large_in (GIMarshallingTestsExtraFlags value)
 {
   g_assert_cmpint (value, ==, GI_MARSHALLING_TESTS_EXTRA_FLAGS_VALUE2);
 }
+
+
+/**
+ * gi_marshalling_tests_extra_utf8_full_return_invalid:
+ */
+gchar *
+gi_marshalling_tests_extra_utf8_full_return_invalid (void)
+{
+  return g_strdup ("invalid utf8 \xff\xfe");
+}
+
+
+/**
+ * gi_marshalling_tests_extra_utf8_full_out_invalid:
+ * @utf8: (out) (transfer full):
+ */
+void
+gi_marshalling_tests_extra_utf8_full_out_invalid (gchar **utf8)
+{
+  *utf8 = g_strdup ("invalid utf8 \xff\xfe");
+}

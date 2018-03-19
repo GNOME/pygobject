@@ -19,8 +19,8 @@ import gi.overrides
 from gi import PyGIWarning
 from gi import PyGIDeprecationWarning
 from gi.repository import GObject, GLib, Gio
-
 from gi.repository import GIMarshallingTests
+import pytest
 
 from .compathelper import PY2, PY3
 from .helper import capture_exceptions, capture_output
@@ -666,6 +666,18 @@ class TestUtf8(unittest.TestCase):
 
     def test_utf8_full_return(self):
         self.assertEqual(CONSTANT_UTF8, GIMarshallingTests.utf8_full_return())
+
+    def test_extra_utf8_full_return_invalid(self):
+        with pytest.raises(UnicodeDecodeError):
+            value = GIMarshallingTests.extra_utf8_full_return_invalid()
+            if PY2:
+                value.decode("utf-8")
+
+    def test_extra_utf8_full_out_invalid(self):
+        with pytest.raises(UnicodeDecodeError):
+            value = GIMarshallingTests.extra_utf8_full_out_invalid()
+            if PY2:
+                value.decode("utf-8")
 
     def test_utf8_none_in(self):
         GIMarshallingTests.utf8_none_in(CONSTANT_UTF8)
