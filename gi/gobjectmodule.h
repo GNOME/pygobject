@@ -22,7 +22,6 @@ PyObject *  pyg_signal_new                      (PyObject *self, PyObject *args)
 PyObject *  pyg_object_class_list_properties    (PyObject *self, PyObject *args);
 PyObject *  pyg_object_new                      (PyGObject *self, PyObject *args,
                                                  PyObject *kwargs);
-PyObject *  pyg_signal_accumulator_true_handled (PyObject *unused, PyObject *args);
 PyObject *  pyg_add_emission_hook               (PyGObject *self, PyObject *args);
 PyObject *  pyg__install_metaclass              (PyObject *dummy,
                                                  PyTypeObject *metaclass);

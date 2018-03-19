@@ -650,8 +650,6 @@ static PyMethodDef _gi_functions[] = {
       pyg_object_class_list_properties, METH_VARARGS },
     { "new",
       (PyCFunction)pyg_object_new, METH_VARARGS|METH_KEYWORDS },
-    { "signal_accumulator_true_handled",
-      (PyCFunction)pyg_signal_accumulator_true_handled, METH_VARARGS },
     { "add_emission_hook",
       (PyCFunction)pyg_add_emission_hook, METH_VARARGS },
     { "_install_metaclass",

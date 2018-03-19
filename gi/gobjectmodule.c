@@ -1425,15 +1425,6 @@ pygobject_enable_threads(void)
     return 0;
 }
 
-PyObject *
-pyg_signal_accumulator_true_handled(PyObject *unused, PyObject *args)
-{
-    PyErr_SetString(PyExc_TypeError,
-		    "signal_accumulator_true_handled can only"
-                    " be used as accumulator argument when registering signals");
-    return NULL;
-}
-
 static gboolean
 marshal_emission_hook(GSignalInvocationHint *ihint,
 		      guint n_param_values,
