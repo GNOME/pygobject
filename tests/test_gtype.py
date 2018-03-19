@@ -51,3 +51,64 @@ class TestTypeModuleLevelFunctions(unittest.TestCase):
         self.assertEqual(GObject.type_parent(CustomChild), CustomBase.__gtype__)
         self.assertEqual(GObject.type_parent(CustomBase), GObject.TYPE_OBJECT)
         self.assertRaises(RuntimeError, GObject.type_parent, GObject.GObject)
+
+
+def test_gtype_has_value_table():
+    assert CustomBase.__gtype__.has_value_table()
+    assert not GIMarshallingTests.Interface.__gtype__.has_value_table()
+    assert CustomChild.__gtype__.has_value_table()
+
+
+def test_gtype_is_abstract():
+    assert not CustomBase.__gtype__.is_abstract()
+    assert not GIMarshallingTests.Interface.__gtype__.is_abstract()
+    assert not CustomChild.__gtype__.is_abstract()
+
+
+def test_gtype_is_classed():
+    assert CustomBase.__gtype__.is_classed()
+    assert not GIMarshallingTests.Interface.__gtype__.is_classed()
+    assert CustomChild.__gtype__.is_classed()
+
+
+def test_gtype_is_deep_derivable():
+    assert CustomBase.__gtype__.is_deep_derivable()
+    assert not GIMarshallingTests.Interface.__gtype__.is_deep_derivable()
+    assert CustomChild.__gtype__.is_deep_derivable()
+
+
+def test_gtype_is_derivable():
+    assert CustomBase.__gtype__.is_derivable()
+    assert GIMarshallingTests.Interface.__gtype__.is_derivable()
+    assert CustomChild.__gtype__.is_derivable()
+
+
+def test_gtype_is_value_abstract():
+    assert not CustomBase.__gtype__.is_value_abstract()
+    assert not GIMarshallingTests.Interface.__gtype__.is_value_abstract()
+    assert not CustomChild.__gtype__.is_value_abstract()
+
+
+def test_gtype_is_value_type():
+    assert CustomBase.__gtype__.is_value_type()
+    assert not GIMarshallingTests.Interface.__gtype__.is_value_type()
+    assert CustomChild.__gtype__.is_value_type()
+
+
+def test_gtype_children():
+    assert CustomBase.__gtype__.children == [CustomChild.__gtype__]
+    assert GIMarshallingTests.Interface.__gtype__.children == []
+    assert CustomChild.__gtype__.children == []
+
+
+def test_gtype_depth():
+    assert CustomBase.__gtype__.depth == 2
+    assert GIMarshallingTests.Interface.__gtype__.depth == 2
+    assert CustomChild.__gtype__.depth == 3
+
+
+def test_gtype_interfaces():
+    assert CustomBase.__gtype__.interfaces == []
+    assert GIMarshallingTests.Interface.__gtype__.interfaces == []
+    assert CustomChild.__gtype__.interfaces == \
+        [GIMarshallingTests.Interface.__gtype__]
