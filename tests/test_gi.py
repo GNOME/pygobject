@@ -13,6 +13,7 @@ import os
 import gc
 import weakref
 import warnings
+import pickle
 
 import gi
 import gi.overrides
@@ -1843,6 +1844,12 @@ class TestGEnum(unittest.TestCase):
         self.assertTrue(isinstance(GIMarshallingTests.GEnum.VALUE2, GIMarshallingTests.GEnum))
         self.assertTrue(isinstance(GIMarshallingTests.GEnum.VALUE3, GIMarshallingTests.GEnum))
         self.assertEqual(42, GIMarshallingTests.GEnum.VALUE3)
+
+    def test_pickle(self):
+        v = GIMarshallingTests.GEnum.VALUE3
+        new_v = pickle.loads(pickle.dumps(v))
+        assert new_v == v
+        assert isinstance(new_v, GIMarshallingTests.GEnum)
 
     def test_value_nick_and_name(self):
         self.assertEqual(GIMarshallingTests.GEnum.VALUE1.value_nick, 'value1')
