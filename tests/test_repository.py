@@ -106,6 +106,9 @@ class Test(unittest.TestCase):
         self.assertFalse(info is info2)
         self.assertEqual(info, info2)
         self.assertTrue(info.equal(info2))
+        assert isinstance(info.is_deprecated(), bool)
+        assert isinstance(info.get_type(), int)
+        assert info.get_attribute("nopenope") is None
 
     def test_object_info(self):
         info = repo.find_by_name('GIMarshallingTests', 'Object')
@@ -122,6 +125,9 @@ class Test(unittest.TestCase):
         self.assertEqual(info.get_type_init(), 'gi_marshalling_tests_object_get_type')
         self.assertFalse(info.get_fundamental())
         self.assertEqual(info.get_parent(), repo.find_by_name('GObject', 'Object'))
+        assert info.find_vfunc("nopenope") is None
+        vfunc = info.find_vfunc("method_int8_out")
+        assert isinstance(vfunc, GIRepository.VFuncInfo)
 
     def test_callable_inheritance(self):
         self.assertTrue(issubclass(GIRepository.CallableInfo, GIRepository.BaseInfo))
@@ -167,6 +173,8 @@ class Test(unittest.TestCase):
 
         iface = info.get_iface_struct()
         self.assertEqual(iface, repo.find_by_name('GIMarshallingTests', 'InterfaceIface'))
+
+        assert info.find_signal("nopenope") is None
 
     def test_struct_info(self):
         info = repo.find_by_name('GIMarshallingTests', 'InterfaceIface')
