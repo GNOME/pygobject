@@ -332,9 +332,9 @@ set_property_from_pspec(GObject *obj,
 
     g_value_init(&value, G_PARAM_SPEC_VALUE_TYPE(pspec));
     if (pyg_param_gvalue_from_pyobject(&value, pvalue, pspec) < 0) {
-        PyObject *pvalue_str = PyObject_Str(pvalue);
+        PyObject *pvalue_str = PyObject_Repr(pvalue);
 	PyErr_Format(PyExc_TypeError,
-	             "could not convert '%s' to type '%s' when setting property '%s.%s'",
+	             "could not convert %s to type '%s' when setting property '%s.%s'",
 	             PYGLIB_PyUnicode_AsString(pvalue_str),
 	             g_type_name(G_PARAM_SPEC_VALUE_TYPE(pspec)),
 	             G_OBJECT_TYPE_NAME(obj),

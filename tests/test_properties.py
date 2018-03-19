@@ -10,6 +10,8 @@ import types
 import unittest
 import tempfile
 
+import pytest
+
 from gi.repository import GObject
 from gi.repository.GObject import ParamFlags, GType, new
 from gi.repository.GObject import \
@@ -29,7 +31,7 @@ from gi.repository import GIMarshallingTests
 from gi.repository import Regress
 from gi import _propertyhelper as propertyhelper
 
-from .compathelper import _long
+from .compathelper import _long, PY3
 from .helper import capture_glib_warnings, capture_output
 
 
@@ -177,6 +179,14 @@ class TestPropertyObject(unittest.TestCase):
         self.assertEqual(obj.props.construct, test_utf8)
         obj.props.normal = unicode_utf8
         self.assertEqual(obj.props.normal, test_utf8)
+
+    def test_utf8_lone_surrogate(self):
+        obj = PropertyObject()
+        if PY3:
+            with pytest.raises(TypeError):
+                obj.set_property('construct', '\ud83d')
+        else:
+            obj.set_property('construct', '\ud83d')
 
     def test_int_to_str(self):
         obj = new(PropertyObject, construct_only=1)
