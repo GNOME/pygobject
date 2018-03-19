@@ -100,3 +100,146 @@ regress_test_glist_boxed_full_return (guint count)
     }
     return list;
 }
+
+
+#ifndef _GI_DISABLE_CAIRO
+
+/**
+ * regress_test_cairo_context_none_return:
+ *
+ * Returns: (transfer none):
+ */
+cairo_t *
+regress_test_cairo_context_none_return (void)
+{
+    static cairo_t *cr;
+
+    if (cr == NULL) {
+        cairo_surface_t *surface;
+        surface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, 10, 10);
+        cr = cairo_create (surface);
+        cairo_surface_destroy (surface);
+    }
+
+    return cr;
+}
+
+/**
+ * regress_test_cairo_context_full_in:
+ * @context: (transfer full):
+ */
+void
+regress_test_cairo_context_full_in (cairo_t *context)
+{
+    cairo_destroy (context);
+}
+
+
+/**
+ * regress_test_cairo_path_full_return:
+ *
+ * Returns: (transfer full):
+ */
+cairo_path_t *
+regress_test_cairo_path_full_return (void)
+{
+    cairo_t *cr = regress_test_cairo_context_none_return ();
+
+    return cairo_copy_path (cr);
+}
+
+/**
+ * regress_test_cairo_path_none_in:
+ * @path: (transfer none):
+ */
+void
+regress_test_cairo_path_none_in (cairo_path_t *path)
+{
+    cairo_t *cr = regress_test_cairo_context_full_return ();
+    cairo_append_path (cr, path);
+    g_assert (cairo_status (cr) == CAIRO_STATUS_SUCCESS);
+    cairo_destroy (cr);
+}
+
+/**
+ * regress_test_cairo_path_full_in_full_return:
+ * @path: (transfer full):
+ *
+ * Returns: (transfer full):
+ */
+cairo_path_t *
+regress_test_cairo_path_full_in_full_return (cairo_path_t *path)
+{
+    return path;
+}
+
+/**
+ * regress_test_cairo_region_full_in:
+ * @region: (transfer full):
+ */
+void
+regress_test_cairo_region_full_in (cairo_region_t *region)
+{
+    cairo_region_destroy (region);
+}
+
+/**
+ * regress_test_cairo_surface_full_in:
+ * @surface: (transfer full):
+ */
+void
+regress_test_cairo_surface_full_in (cairo_surface_t *surface)
+{
+    g_assert (cairo_image_surface_get_format (surface) == CAIRO_FORMAT_ARGB32);
+    g_assert (cairo_image_surface_get_width (surface) == 10);
+    g_assert (cairo_image_surface_get_height (surface) == 10);
+    cairo_surface_destroy (surface);
+}
+
+/**
+ * regress_test_cairo_font_options_full_return:
+ *
+ * Returns: (transfer full):
+ */
+cairo_font_options_t *
+regress_test_cairo_font_options_full_return (void)
+{
+    return cairo_font_options_create ();
+}
+
+/**
+ * regress_test_cairo_font_options_none_return:
+ *
+ * Returns: (transfer none):
+ */
+cairo_font_options_t *
+regress_test_cairo_font_options_none_return (void)
+{
+    static cairo_font_options_t *options;
+
+    if (options == NULL)
+        options = cairo_font_options_create ();
+
+    return options;
+}
+
+/**
+ * regress_test_cairo_font_options_full_in:
+ * @options: (transfer full):
+ */
+void
+regress_test_cairo_font_options_full_in (cairo_font_options_t *options)
+{
+    cairo_font_options_destroy (options);
+}
+
+/**
+ * regress_test_cairo_font_options_none_in:
+ * @options: (transfer none):
+ */
+void
+regress_test_cairo_font_options_none_in (cairo_font_options_t *options)
+{
+}
+
+#endif

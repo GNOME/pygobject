@@ -37,6 +37,56 @@ class Test(unittest.TestCase):
         context = cairo.Context(surface)
         Regress.test_cairo_context_none_in(context)
 
+    def test_cairo_context_full_in(self):
+        surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, 10, 10)
+        context = cairo.Context(surface)
+        Regress.test_cairo_context_full_in(context)
+
+    def test_cairo_context_none_return(self):
+        context = Regress.test_cairo_context_none_return()
+        self.assertTrue(isinstance(context, cairo.Context))
+
+    def test_cairo_path_full_return(self):
+        path = Regress.test_cairo_path_full_return()
+        assert isinstance(path, cairo.Path)
+
+    def test_cairo_path_none_in(self):
+        surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, 10, 10)
+        context = cairo.Context(surface)
+        path = context.copy_path()
+        Regress.test_cairo_path_none_in(path)
+        surface.finish()
+
+    def test_cairo_path_full_in_full_return(self):
+        surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, 10, 10)
+        context = cairo.Context(surface)
+        context.move_to(10, 10)
+        context.curve_to(10, 10, 3, 4, 5, 6)
+        path = context.copy_path()
+        new_path = Regress.test_cairo_path_full_in_full_return(path)
+        assert list(path) == list(new_path)
+        surface.finish()
+
+    def test_cairo_font_options_full_return(self):
+        options = Regress.test_cairo_font_options_full_return()
+        assert isinstance(options, cairo.FontOptions)
+
+    def test_cairo_font_options_none_return(self):
+        options = Regress.test_cairo_font_options_none_return()
+        assert isinstance(options, cairo.FontOptions)
+
+    def test_cairo_font_options_full_in(self):
+        options = cairo.FontOptions()
+        Regress.test_cairo_font_options_full_in(options)
+
+    def test_cairo_font_options_none_in(self):
+        options = cairo.FontOptions()
+        Regress.test_cairo_font_options_none_in(options)
+
+    def test_cairo_region_full_in(self):
+        region = cairo.Region()
+        Regress.test_cairo_region_full_in(region)
+
     def test_cairo_surface(self):
         surface = Regress.test_cairo_surface_none_return()
         self.assertTrue(isinstance(surface, cairo.ImageSurface))
@@ -61,6 +111,10 @@ class Test(unittest.TestCase):
         self.assertEqual(surface.get_format(), cairo.FORMAT_ARGB32)
         self.assertEqual(surface.get_width(), 10)
         self.assertEqual(surface.get_height(), 10)
+
+    def test_cairo_surface_full_in(self):
+        surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, 10, 10)
+        Regress.test_cairo_surface_full_in(surface)
 
     def test_require_foreign(self):
         self.assertEqual(gi.require_foreign('cairo'), None)

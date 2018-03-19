@@ -52,12 +52,13 @@ cairo_context_to_arg (PyObject        *value,
 {
     cairo_t *cr;
 
-    g_assert (transfer == GI_TRANSFER_NOTHING);
-
     cr = PycairoContext_GET (value);
     if (!cr) {
         return NULL;
     }
+
+    if (transfer != GI_TRANSFER_NOTHING)
+        cr = cairo_reference (cr);
 
     arg->v_pointer = cr;
     Py_RETURN_NONE;
@@ -124,13 +125,14 @@ cairo_surface_to_arg (PyObject        *value,
 {
     cairo_surface_t *surface;
 
-    g_assert (transfer == GI_TRANSFER_NOTHING);
-
     surface = ( (PycairoSurface*) value)->surface;
     if (!surface) {
         PyErr_SetString (PyExc_ValueError, "Surface instance wrapping a NULL surface");
         return NULL;
     }
+
+    if (transfer != GI_TRANSFER_NOTHING)
+        surface = cairo_surface_reference (surface);
 
     arg->v_pointer = surface;
     Py_RETURN_NONE;
@@ -188,6 +190,22 @@ cairo_surface_from_gvalue (const GValue *value)
  * cairo_path_t marshaling
  */
 
+static cairo_path_t *
+_cairo_path_copy (cairo_path_t *path) {
+    cairo_t *cr;
+    cairo_surface_t *surface;
+    cairo_path_t *copy;
+
+    surface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, 0, 0);
+    cr = cairo_create (surface);
+    cairo_append_path (cr, path);
+    copy = cairo_copy_path (cr);
+    cairo_destroy (cr);
+    cairo_surface_destroy (surface);
+
+    return copy;
+}
+
 static PyObject *
 cairo_path_to_arg (PyObject        *value,
                    GIInterfaceInfo *interface_info,
@@ -196,13 +214,14 @@ cairo_path_to_arg (PyObject        *value,
 {
     cairo_path_t *path;
 
-    g_assert (transfer == GI_TRANSFER_NOTHING);
-
     path = ( (PycairoPath*) value)->path;
     if (!path) {
         PyErr_SetString (PyExc_ValueError, "Path instance wrapping a NULL path");
         return NULL;
     }
+
+    if (transfer != GI_TRANSFER_NOTHING)
+        path = _cairo_path_copy (path);
 
     arg->v_pointer = path;
     Py_RETURN_NONE;
@@ -272,13 +291,14 @@ cairo_font_options_to_arg (PyObject        *value,
 {
     cairo_font_options_t *font_options;
 
-    g_assert (transfer == GI_TRANSFER_NOTHING);
-
     font_options = ( (PycairoFontOptions*) value)->font_options;
     if (!font_options) {
         PyErr_SetString (PyExc_ValueError, "FontOptions instance wrapping a NULL font_options");
         return NULL;
     }
+
+    if (transfer != GI_TRANSFER_NOTHING)
+        font_options = cairo_font_options_copy (font_options);
 
     arg->v_pointer = font_options;
     Py_RETURN_NONE;
@@ -377,13 +397,14 @@ cairo_region_to_arg (PyObject        *value,
 {
     cairo_region_t *region;
 
-    g_assert (transfer == GI_TRANSFER_NOTHING);
-
     region = ( (PycairoRegion*) value)->region;
     if (!region) {
         PyErr_SetString (PyExc_ValueError, "Region instance wrapping a NULL region");
         return NULL;
     }
+
+    if (transfer != GI_TRANSFER_NOTHING)
+        region = cairo_region_copy (region);
 
     arg->v_pointer = region;
     Py_RETURN_NONE;

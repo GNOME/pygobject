@@ -21,4 +21,20 @@ GList *regress_test_glist_boxed_none_return (guint count);
 _GI_TEST_EXTERN
 GList *regress_test_glist_boxed_full_return (guint count);
 
+#ifndef _GI_DISABLE_CAIRO
+
+cairo_t *regress_test_cairo_context_none_return (void);
+void regress_test_cairo_context_full_in (cairo_t *context);
+cairo_path_t *regress_test_cairo_path_full_return (void);
+void regress_test_cairo_path_none_in (cairo_path_t *path);
+cairo_path_t * regress_test_cairo_path_full_in_full_return (cairo_path_t *path);
+cairo_font_options_t *regress_test_cairo_font_options_full_return (void);
+cairo_font_options_t *regress_test_cairo_font_options_none_return (void);
+void regress_test_cairo_font_options_full_in (cairo_font_options_t *options);
+void regress_test_cairo_font_options_none_in (cairo_font_options_t *options);
+void regress_test_cairo_region_full_in (cairo_region_t *region);
+void regress_test_cairo_surface_full_in (cairo_surface_t *surface);
+
+#endif
+
 #endif /* REGRESS_EXTRA_H */
