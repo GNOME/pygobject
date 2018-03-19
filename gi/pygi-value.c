@@ -500,6 +500,10 @@ pyg_value_from_pyobject_with_error(GValue *value, PyObject *obj)
                 g_value_set_string(value, PyString_AsString(tmp_str));
 #else
                 tmp = PyUnicode_AsUTF8String(tmp_str);
+                if (tmp == NULL) {
+                    Py_DECREF (tmp_str);
+                    return -1;
+                }
                 g_value_set_string(value, PyBytes_AsString(tmp));
                 Py_DECREF(tmp);
 #endif
