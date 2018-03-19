@@ -596,7 +596,30 @@ _wrap_test_floating_and_sunk_get_instance_list (PyObject *self)
     return py_list;
 }
 
+
+static PyObject *
+_wrap_test_parse_constructor_args (PyObject *self, PyObject *args)
+{
+    char *arg_names[] = {"label", NULL};
+    char *prop_names[] = {"label", NULL};
+    GParameter params[1] = {{0}};
+    PyObject *parsed_args[1];
+    guint nparams = 0;
+
+    if (!PyArg_ParseTuple(args, "O", &(parsed_args[0])))
+        return NULL;
+
+    if (!pyg_parse_constructor_args (
+            TYPE_TEST, arg_names, prop_names, params, &nparams, parsed_args)) {
+        return NULL;
+    }
+
+    return PYGLIB_PyLong_FromLong (nparams);
+}
+
+
 static PyMethodDef testhelper_functions[] = {
+    { "test_parse_constructor_args", (PyCFunction)_wrap_test_parse_constructor_args, METH_VARARGS },
     { "get_test_thread", (PyCFunction)_wrap_get_test_thread, METH_NOARGS },
     { "get_unknown", (PyCFunction)_wrap_get_unknown, METH_NOARGS },
     { "create_test_type", (PyCFunction)_wrap_create_test_type, METH_NOARGS },

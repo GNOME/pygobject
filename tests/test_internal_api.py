@@ -31,6 +31,10 @@ class PyGObject(GObject.GObject):
         return self._props[name]
 
 
+def test_parse_constructor_args():
+    assert testhelper.test_parse_constructor_args("foo") == 1
+
+
 class TestObject(unittest.TestCase):
     def test_create_ctor(self):
         o = PyGObject()
