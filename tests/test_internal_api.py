@@ -7,14 +7,35 @@ import unittest
 from gi.repository import GLib, GObject
 
 from . import testhelper
-from . import testmodule
+
+
+class PyGObject(GObject.GObject):
+    __gtype_name__ = 'PyGObject'
+    __gproperties__ = {
+        'label': (GObject.TYPE_STRING,
+                  'label property',
+                  'the label of the object',
+                  'default',
+                  GObject.ParamFlags.READABLE | GObject.ParamFlags.WRITABLE),
+        }
+
+    def __init__(self):
+        self._props = {}
+        GObject.GObject.__init__(self)
+        self.set_property('label', 'hello')
+
+    def do_set_property(self, name, value):
+        self._props[name] = value
+
+    def do_get_property(self, name):
+        return self._props[name]
 
 
 class TestObject(unittest.TestCase):
     def test_create_ctor(self):
-        o = testmodule.PyGObject()
+        o = PyGObject()
         self.assertTrue(isinstance(o, GObject.Object))
-        self.assertTrue(isinstance(o, testmodule.PyGObject))
+        self.assertTrue(isinstance(o, PyGObject))
 
         # has expected property
         self.assertEqual(o.props.label, 'hello')
@@ -24,7 +45,7 @@ class TestObject(unittest.TestCase):
 
     def test_pyobject_new_test_type(self):
         o = testhelper.create_test_type()
-        self.assertTrue(isinstance(o, testmodule.PyGObject))
+        self.assertTrue(isinstance(o, PyGObject))
 
         # has expected property
         self.assertEqual(o.props.label, 'hello')

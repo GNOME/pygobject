@@ -108,7 +108,6 @@ EXTRA_DIST = \
 	helper.py \
 	compathelper.py \
 	runtests.py \
-	testmodule.py \
 	test-floating.h \
 	test-thread.h \
 	test-unknown.h \
