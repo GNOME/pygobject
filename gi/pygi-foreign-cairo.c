@@ -387,8 +387,6 @@ cairo_pattern_from_gvalue (const GValue *value)
     return PycairoPattern_FromPattern (pattern, NULL);
 }
 
-#if defined(PycairoRegion_Type)
-
 static PyObject *
 cairo_region_to_arg (PyObject        *value,
                      GIInterfaceInfo *interface_info,
@@ -430,7 +428,6 @@ cairo_region_release (GIBaseInfo *base_info,
     cairo_region_destroy ( (cairo_region_t*) struct_);
     Py_RETURN_NONE;
 }
-#endif
 
 static PyMethodDef _gi_cairo_functions[] = { {0,} };
 PYGLIB_MODULE_START(_gi_cairo, "_gi_cairo")
@@ -470,13 +467,11 @@ PYGLIB_MODULE_START(_gi_cairo, "_gi_cairo")
                                   cairo_font_options_from_arg,
                                   cairo_font_options_release);
 
-#if defined(PycairoRegion_Type)
     pygi_register_foreign_struct ("cairo",
                                   "Region",
                                   cairo_region_to_arg,
                                   cairo_region_from_arg,
                                   cairo_region_release);
-#endif
 
     pyg_register_gtype_custom (CAIRO_GOBJECT_TYPE_CONTEXT,
                                cairo_context_from_gvalue,
