@@ -87,6 +87,18 @@ class Test(unittest.TestCase):
         region = cairo.Region()
         Regress.test_cairo_region_full_in(region)
 
+    def test_cairo_matrix_none_in(self):
+        matrix = cairo.Matrix()
+        Regress.test_cairo_matrix_none_in(matrix)
+
+    def test_cairo_matrix_none_return(self):
+        matrix = Regress.test_cairo_matrix_none_return()
+        assert matrix == cairo.Matrix()
+
+    def test_cairo_matrix_out_caller_allocates(self):
+        matrix = Regress.test_cairo_matrix_out_caller_allocates()
+        assert matrix == cairo.Matrix()
+
     def test_cairo_surface(self):
         surface = Regress.test_cairo_surface_none_return()
         self.assertTrue(isinstance(surface, cairo.ImageSurface))

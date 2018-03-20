@@ -429,6 +429,48 @@ cairo_region_release (GIBaseInfo *base_info,
     Py_RETURN_NONE;
 }
 
+static PyObject *
+cairo_matrix_from_arg (GIInterfaceInfo *interface_info,
+                       GITransfer transfer,
+                       gpointer data)
+{
+    cairo_matrix_t *matrix = (cairo_matrix_t*) data;
+
+    if (transfer != GI_TRANSFER_NOTHING) {
+        PyErr_SetString(PyExc_TypeError, "Unsupported annotation (transfer full) for cairo.Matrix");
+        return NULL;
+    }
+
+    if (matrix == NULL) {
+        /* NULL in case of caller-allocates */
+        cairo_matrix_t temp = {0};
+        return PycairoMatrix_FromMatrix (&temp);
+    }
+
+    return PycairoMatrix_FromMatrix (matrix);
+}
+
+static PyObject *
+cairo_matrix_to_arg (PyObject        *value,
+                     GIInterfaceInfo *interface_info,
+                     GITransfer       transfer,
+                     GIArgument      *arg)
+{
+    cairo_matrix_t *matrix;
+
+    matrix = &(( (PycairoMatrix*) value)->matrix);
+
+    arg->v_pointer = matrix;
+    Py_RETURN_NONE;
+}
+
+static PyObject *
+cairo_matrix_release (GIBaseInfo *base_info,
+                      gpointer    struct_)
+{
+    Py_RETURN_NONE;
+}
+
 static PyMethodDef _gi_cairo_functions[] = { {0,} };
 PYGLIB_MODULE_START(_gi_cairo, "_gi_cairo")
 {
@@ -442,6 +484,12 @@ PYGLIB_MODULE_START(_gi_cairo, "_gi_cairo")
         return PYGLIB_MODULE_ERROR_RETURN;
 
     pygobject_init (3, 13, 2);
+
+    pygi_register_foreign_struct ("cairo",
+                                  "Matrix",
+                                  cairo_matrix_to_arg,
+                                  cairo_matrix_from_arg,
+                                  cairo_matrix_release);
 
     pygi_register_foreign_struct ("cairo",
                                   "Context",

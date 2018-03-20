@@ -34,6 +34,9 @@ void regress_test_cairo_font_options_full_in (cairo_font_options_t *options);
 void regress_test_cairo_font_options_none_in (cairo_font_options_t *options);
 void regress_test_cairo_region_full_in (cairo_region_t *region);
 void regress_test_cairo_surface_full_in (cairo_surface_t *surface);
+void regress_test_cairo_matrix_none_in (const cairo_matrix_t *matrix);
+cairo_matrix_t *regress_test_cairo_matrix_none_return (void);
+void regress_test_cairo_matrix_out_caller_allocates (cairo_matrix_t *matrix);
 
 #endif
 

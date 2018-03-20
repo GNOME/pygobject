@@ -242,4 +242,45 @@ regress_test_cairo_font_options_none_in (cairo_font_options_t *options)
 {
 }
 
+
+/**
+ * regress_test_cairo_matrix_none_in:
+ * @matrix: (transfer none):
+ */
+void
+regress_test_cairo_matrix_none_in (const cairo_matrix_t *matrix)
+{
+    cairo_matrix_t m = *matrix;
+    g_assert (m.x0 == 0);
+    g_assert (m.y0 == 0);
+    g_assert (m.xx == 1);
+    g_assert (m.xy == 0);
+    g_assert (m.yy == 1);
+    g_assert (m.yx == 0);
+}
+
+/**
+ * regress_test_cairo_matrix_none_return:
+ * Returns: (transfer none):
+ */
+cairo_matrix_t *
+regress_test_cairo_matrix_none_return (void)
+{
+    static cairo_matrix_t matrix;
+    cairo_matrix_init_identity (&matrix);
+    return &matrix;
+}
+
+/**
+ * regress_test_cairo_matrix_out_caller_allocates:
+ * @matrix: (out):
+ */
+void
+regress_test_cairo_matrix_out_caller_allocates (cairo_matrix_t *matrix)
+{
+    cairo_matrix_t m;
+    cairo_matrix_init_identity (&m);
+    *matrix = m;
+}
+
 #endif
