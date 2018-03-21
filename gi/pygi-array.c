@@ -350,36 +350,37 @@ _pygi_marshal_from_py_array (PyGIInvokeState   *state,
         }
 
         success_count++;
-        continue;
-err:
-        if (sequence_cache->item_cache->from_py_cleanup != NULL) {
-            gsize j;
-            PyGIMarshalCleanupFunc cleanup_func =
-                sequence_cache->item_cache->from_py_cleanup;
+    }
+    goto array_success;
 
-            /* Only attempt per item cleanup on pointer items */
-            if (sequence_cache->item_cache->is_pointer) {
-                for(j = 0; j < success_count; j++) {
-                    PyObject *py_seq_item = PySequence_GetItem (py_arg, j);
-                    cleanup_func (state,
-                                  sequence_cache->item_cache,
-                                  py_seq_item,
-                                  is_ptr_array ?
-                                          g_ptr_array_index ((GPtrArray *)array_, j) :
-                                          g_array_index (array_, gpointer, j),
-                                  TRUE);
-                    Py_DECREF (py_seq_item);
-                }
+err:
+    if (sequence_cache->item_cache->from_py_cleanup != NULL) {
+        gsize j;
+        PyGIMarshalCleanupFunc cleanup_func =
+            sequence_cache->item_cache->from_py_cleanup;
+
+        /* Only attempt per item cleanup on pointer items */
+        if (sequence_cache->item_cache->is_pointer) {
+            for(j = 0; j < success_count; j++) {
+                PyObject *py_seq_item = PySequence_GetItem (py_arg, j);
+                cleanup_func (state,
+                              sequence_cache->item_cache,
+                              py_seq_item,
+                              is_ptr_array ?
+                                      g_ptr_array_index ((GPtrArray *)array_, j) :
+                                      g_array_index (array_, gpointer, j),
+                              TRUE);
+                Py_DECREF (py_seq_item);
             }
         }
-
-        if (is_ptr_array)
-            g_ptr_array_free ( ( GPtrArray *)array_, TRUE);
-        else
-            g_array_free (array_, TRUE);
-        _PyGI_ERROR_PREFIX ("Item %i: ", i);
-        return FALSE;
     }
+
+    if (is_ptr_array)
+        g_ptr_array_free ( ( GPtrArray *)array_, TRUE);
+    else
+        g_array_free (array_, TRUE);
+    _PyGI_ERROR_PREFIX ("Item %i: ", i);
+    return FALSE;
 
 array_success:
     if (array_cache->len_arg_index >= 0) {

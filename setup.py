@@ -738,7 +738,7 @@ def add_ext_warn_flags(ext, compiler, _cache={}):
             "-Wimplicit-function-declaration",
             "-Winit-self",
             "-Winline",
-            # "-Wjump-misses-init",
+            "-Wjump-misses-init",
             # "-Wlogical-op",
             "-Wmissing-declarations",
             "-Wmissing-format-attribute",
