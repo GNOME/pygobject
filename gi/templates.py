@@ -136,6 +136,9 @@ class Template(object):
             self.init_template()
             self.button.set_label('Click here!')
 
+    The signals handlers that are specified in the UI file are connected
+    automatically in the same way as when using Gtk.Builder.connect_signals().
+
     The Template decorator supports loading templates from multiple sources:
 
     * ``@Template.from_file('path/to/file.ui')`` loads a template from a file.
