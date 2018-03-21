@@ -642,7 +642,6 @@ static PyMethodDef _gi_functions[] = {
       "Execute a child program asynchronously within a glib.MainLoop()\n"
       "See the reference manual for a complete reference.\n" },
     { "type_name", pyg_type_name, METH_VARARGS },
-    { "type_from_name", pyg_type_from_name, METH_VARARGS },
     { "type_register", _wrap_pyg_type_register, METH_VARARGS },
     { "signal_new", pyg_signal_new, METH_VARARGS },
     { "list_properties",

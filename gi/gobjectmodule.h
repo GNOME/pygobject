@@ -14,7 +14,6 @@ void        pygobject_register_version_tuples   (PyObject *d);
 void        pygobject_register_warnings         (PyObject *d);
 
 PyObject *  pyg_type_name                       (PyObject *self, PyObject *args);
-PyObject *  pyg_type_from_name                  (PyObject *self, PyObject *args);
 PyObject *  _wrap_pyg_type_register             (PyObject *self, PyObject *args);
 PyObject *  pyg_signal_new                      (PyObject *self, PyObject *args);
 PyObject *  pyg_object_class_list_properties    (PyObject *self, PyObject *args);

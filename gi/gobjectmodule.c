@@ -113,31 +113,6 @@ pyg_type_name (PyObject *self, PyObject *args)
     return NULL;
 }
 
-PyObject *
-pyg_type_from_name (PyObject *self, PyObject *args)
-{
-    const gchar *name;
-    GType type;
-    PyObject *repr = NULL;
-#if 0
-    if (PyErr_Warn(PyExc_DeprecationWarning,
-		   "gobject.type_from_name is deprecated; "
-		   "use GType.from_name instead"))
-        return NULL;
-#endif
-    if (!PyArg_ParseTuple(args, "s:gobject.type_from_name", &name))
-	return NULL;
-    type = g_type_from_name(name);
-    if (type != 0)
-	return pyg_type_wrapper_new(type);
-    repr = PyObject_Repr((PyObject*)self);
-    PyErr_Format(PyExc_RuntimeError, "%s: unknown type name: %s",
-         PYGLIB_PyUnicode_AsString(repr),
-		 name);
-    Py_DECREF(repr);
-    return NULL;
-}
-
 static void
 pyg_object_set_property (GObject *object, guint property_id,
 			 const GValue *value, GParamSpec *pspec)
