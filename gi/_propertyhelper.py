@@ -210,7 +210,7 @@ class Property(object):
     def __repr__(self):
         return '<GObject Property %s (%s)>' % (
             self.name or '(uninitialized)',
-            _gi.type_name(self.type))
+            self.type.name)
 
     def __get__(self, instance, klass):
         if instance is None:

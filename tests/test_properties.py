@@ -255,6 +255,10 @@ class TestPropertyObject(unittest.TestCase):
         self.assertRaises(TypeError, GObject.Property, type=Gio.SocketType,
                           default=1)
 
+    def test_repr(self):
+        prop = GObject.Property(type=int)
+        assert repr(prop) == "<GObject Property (uninitialized) (gint)>"
+
     def test_flags(self):
         obj = new(PropertyObject)
         self.assertEqual(obj.props.flags, GIMarshallingTests.Flags.VALUE1)

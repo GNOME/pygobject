@@ -88,31 +88,6 @@ pyg_destroy_notify(gpointer user_data)
 
 /* ---------------- gobject module functions -------------------- */
 
-PyObject *
-pyg_type_name (PyObject *self, PyObject *args)
-{
-    PyObject *gtype;
-    GType type;
-    const gchar *name;
-
-#if 0
-    if (PyErr_Warn(PyExc_DeprecationWarning,
-		   "gobject.type_name is deprecated; "
-		   "use GType.name instead"))
-        return NULL;
-#endif
-
-    if (!PyArg_ParseTuple(args, "O:gobject.type_name", &gtype))
-	return NULL;
-    if ((type = pyg_type_from_object(gtype)) == 0)
-	return NULL;
-    name = g_type_name(type);
-    if (name)
-	return PYGLIB_PyUnicode_FromString(name);
-    PyErr_SetString(PyExc_RuntimeError, "unknown typecode");
-    return NULL;
-}
-
 static void
 pyg_object_set_property (GObject *object, guint property_id,
 			 const GValue *value, GParamSpec *pspec)
