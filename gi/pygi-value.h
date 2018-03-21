@@ -45,6 +45,9 @@ PyObject *pygi_value_to_py_structured_type (const GValue *value,
                                             GType fundamental,
                                             gboolean copy_boxed);
 
+PyObject *pyg__gvalue_get(PyObject *module, PyObject *pygvalue);
+PyObject *pyg__gvalue_set(PyObject *module, PyObject *args);
+
 G_END_DECLS
 
 #endif /* __PYGI_VALUE_H__ */

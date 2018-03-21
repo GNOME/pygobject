@@ -9,6 +9,7 @@
 G_BEGIN_DECLS
 
 PyObject * pyg_integer_richcompare(PyObject *v, PyObject *w, int op);
+const gchar * pyg_constant_strip_prefix(const gchar *name, const gchar *strip_prefix);
 
 #if PY_VERSION_HEX >= 0x03000000
 

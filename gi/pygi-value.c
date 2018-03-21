@@ -999,3 +999,37 @@ error:
     g_free (argv);
     return -1;
 }
+
+PyObject *
+pyg__gvalue_get(PyObject *module, PyObject *pygvalue)
+{
+    if (!pyg_boxed_check (pygvalue, G_TYPE_VALUE)) {
+        PyErr_SetString (PyExc_TypeError, "Expected GValue argument.");
+        return NULL;
+    }
+
+    return pyg_value_as_pyobject (pyg_boxed_get(pygvalue, GValue),
+                                  /*copy_boxed=*/ TRUE);
+}
+
+PyObject *
+pyg__gvalue_set(PyObject *module, PyObject *args)
+{
+    PyObject *pygvalue;
+    PyObject *pyobject;
+
+    if (!PyArg_ParseTuple (args, "OO:_gi._gvalue_set",
+                           &pygvalue, &pyobject))
+        return NULL;
+
+    if (!pyg_boxed_check (pygvalue, G_TYPE_VALUE)) {
+        PyErr_SetString (PyExc_TypeError, "Expected GValue argument.");
+        return NULL;
+    }
+
+    if (pyg_value_from_pyobject_with_error (pyg_boxed_get (pygvalue, GValue),
+                                            pyobject) == -1)
+        return NULL;
+
+    Py_RETURN_NONE;
+}

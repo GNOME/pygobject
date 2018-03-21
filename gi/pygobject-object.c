@@ -26,7 +26,7 @@
 #include "pygparamspec.h"
 #include "pygtype.h"
 #include "pygboxed.h"
-#include "gobjectmodule.h"
+#include "gimodule.h"
 
 #include "pygi-value.h"
 #include "pygi-type.h"
@@ -2433,4 +2433,61 @@ pygobject_object_register_types(PyObject *d)
     if (PyType_Ready(&PyGObjectWeakRef_Type) < 0)
         return;
     PyDict_SetItemString(d, "GObjectWeakRef", (PyObject *) &PyGObjectWeakRef_Type);
+}
+
+PyObject *
+pyg_object_new (PyGObject *self, PyObject *args, PyObject *kwargs)
+{
+    PyObject *pytype;
+    GType type;
+    GObject *obj = NULL;
+    GObjectClass *class;
+    guint n_params = 0, i;
+    GParameter *params = NULL;
+
+    if (!PyArg_ParseTuple (args, "O:gobject.new", &pytype)) {
+	return NULL;
+    }
+
+    if ((type = pyg_type_from_object (pytype)) == 0)
+	return NULL;
+
+    if (G_TYPE_IS_ABSTRACT(type)) {
+	PyErr_Format(PyExc_TypeError, "cannot create instance of abstract "
+		     "(non-instantiable) type `%s'", g_type_name(type));
+	return NULL;
+    }
+
+    if ((class = g_type_class_ref (type)) == NULL) {
+	PyErr_SetString(PyExc_TypeError,
+			"could not get a reference to type class");
+	return NULL;
+    }
+
+    if (!pygobject_prepare_construct_properties (class, kwargs, &n_params, &params))
+        goto cleanup;
+
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+    obj = g_object_newv(type, n_params, params);
+G_GNUC_END_IGNORE_DEPRECATIONS
+
+    if (!obj)
+	PyErr_SetString (PyExc_RuntimeError, "could not create object");
+
+ cleanup:
+    for (i = 0; i < n_params; i++) {
+	g_free((gchar *) params[i].name);
+	g_value_unset(&params[i].value);
+    }
+    g_free(params);
+    g_type_class_unref(class);
+
+    if (obj) {
+        pygobject_sink (obj);
+	self = (PyGObject *) pygobject_new((GObject *)obj);
+        g_object_unref(obj);
+    } else
+        self = NULL;
+
+    return (PyObject *) self;
 }

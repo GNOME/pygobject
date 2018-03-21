@@ -34,8 +34,6 @@ pygidir = $(pyexecdir)/gi
 pygi_LTLIBRARIES = _gi.la
 
 _gi_la_SOURCES = \
-	gobjectmodule.c \
-	gobjectmodule.h \
 	pygboxed.c \
 	pygboxed.h \
 	pygenum.c \
