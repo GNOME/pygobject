@@ -138,26 +138,6 @@ pyg_type_from_name (PyObject *self, PyObject *args)
     return NULL;
 }
 
-PyObject *
-pyg_type_is_a (PyObject *self, PyObject *args)
-{
-    PyObject *gtype, *gparent;
-    GType type, parent;
-#if 0
-    if (PyErr_Warn(PyExc_DeprecationWarning,
-		   "gobject.type_is_a is deprecated; "
-		   "use GType.is_a instead"))
-        return NULL;
-#endif
-    if (!PyArg_ParseTuple(args, "OO:gobject.type_is_a", &gtype, &gparent))
-	return NULL;
-    if ((type = pyg_type_from_object(gtype)) == 0)
-	return NULL;
-    if ((parent = pyg_type_from_object(gparent)) == 0)
-	return NULL;
-    return PyBool_FromLong(g_type_is_a(type, parent));
-}
-
 static void
 pyg_object_set_property (GObject *object, guint property_id,
 			 const GValue *value, GParamSpec *pspec)

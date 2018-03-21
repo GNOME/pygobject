@@ -308,24 +308,24 @@ class Property(object):
         elif ptype == TYPE_GTYPE:
             if default is not None:
                 raise TypeError("GType types does not have default values")
-        elif _gi.type_is_a(ptype, TYPE_ENUM):
+        elif ptype.is_a(TYPE_ENUM):
             if default is None:
                 raise TypeError("enum properties needs a default value")
-            elif not _gi.type_is_a(default, ptype):
+            elif not _gi.GType(default).is_a(ptype):
                 raise TypeError("enum value %s must be an instance of %r" %
                                 (default, ptype))
-        elif _gi.type_is_a(ptype, TYPE_FLAGS):
-            if not _gi.type_is_a(default, ptype):
+        elif ptype.is_a(TYPE_FLAGS):
+            if not _gi.GType(default).is_a(ptype):
                 raise TypeError("flags value %s must be an instance of %r" %
                                 (default, ptype))
-        elif _gi.type_is_a(ptype, TYPE_STRV) and default is not None:
+        elif ptype.is_a(TYPE_STRV) and default is not None:
             if not isinstance(default, list):
                 raise TypeError("Strv value %s must be a list" % repr(default))
             for val in default:
                 if type(val) not in (str, bytes):
                     raise TypeError("Strv value %s must contain only strings" % str(default))
-        elif _gi.type_is_a(ptype, TYPE_VARIANT) and default is not None:
-            if not hasattr(default, '__gtype__') or not _gi.type_is_a(default, TYPE_VARIANT):
+        elif ptype.is_a(TYPE_VARIANT) and default is not None:
+            if not hasattr(default, '__gtype__') or not _gi.GType(default).is_a(TYPE_VARIANT):
                 raise TypeError("variant value %s must be an instance of %r" %
                                 (default, ptype))
 
