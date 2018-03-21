@@ -1943,18 +1943,6 @@ pygobject_register_constants(PyObject *m)
     PyModule_AddObject(m, "TYPE_GSTRING", pyg_type_wrapper_new(G_TYPE_GSTRING));
 }
 
-/* features */
-void
-pygobject_register_features(PyObject *d)
-{
-    PyObject *features;
-
-    features = PyDict_New();
-    PyDict_SetItemString(features, "generic-c-marshaller", Py_True);
-    PyDict_SetItemString(d, "features", features);
-    Py_DECREF(features);
-}
-
 void
 pygobject_register_version_tuples(PyObject *d)
 {

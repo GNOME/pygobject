@@ -658,13 +658,9 @@ class _TestCMarshaller:
                          "hello")
 
 
-if 'generic-c-marshaller' in GObject.features:
-    class TestCMarshaller(_TestCMarshaller, unittest.TestCase):
-        pass
-else:
-    print()
-    print('** WARNING: LIBFFI disabled, not testing')
-    print()
+class TestCMarshaller(_TestCMarshaller, unittest.TestCase):
+    pass
+
 
 # Test for 374653
 

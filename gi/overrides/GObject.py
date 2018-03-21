@@ -199,7 +199,7 @@ __all__ += ['GBoxed', 'GEnum', 'GFlags', 'GInterface', 'GObject',
             'Warning']
 
 
-features = _gi.features
+features = {'generic-c-marshaller': True}
 list_properties = _gi.list_properties
 new = _gi.new
 pygobject_version = _gi.pygobject_version

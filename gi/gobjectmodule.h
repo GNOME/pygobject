@@ -10,7 +10,6 @@ int           pygobject_constructv (PyGObject   *self,
 
 void        pygobject_register_api              (PyObject *d);
 void        pygobject_register_constants        (PyObject *m);
-void        pygobject_register_features         (PyObject *d);
 void        pygobject_register_version_tuples   (PyObject *d);
 void        pygobject_register_warnings         (PyObject *d);
 

@@ -694,7 +694,6 @@ PYGLIB_MODULE_START(_gi, "_gi")
 
     pygobject_register_api (module_dict);
     pygobject_register_constants (module);
-    pygobject_register_features (module_dict);
     pygobject_register_version_tuples (module_dict);
     pygobject_register_warnings (module_dict);
     pygobject_type_register_types (module_dict);
