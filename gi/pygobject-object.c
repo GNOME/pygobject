@@ -37,11 +37,9 @@ extern PyObject *PyGIDeprecationWarning;
 
 static void pygobject_dealloc(PyGObject *self);
 static int  pygobject_traverse(PyGObject *self, visitproc visit, void *arg);
-static int  pygobject_clear(PyGObject *self);
 static PyObject * pyg_type_get_bases(GType gtype);
 static inline int pygobject_clear(PyGObject *self);
 static PyObject * pygobject_weak_ref_new(GObject *obj, PyObject *callback, PyObject *user_data);
-static inline PyGObjectData * pyg_object_peek_inst_data(GObject *obj);
 static void pygobject_inherit_slots(PyTypeObject *type, PyObject *bases,
 				    gboolean check_for_present);
 static void pygobject_find_slot_for(PyTypeObject *type, PyObject *bases, int slot_offset,
@@ -104,12 +102,11 @@ pygobject_data_free(PyGObjectData *data)
      * free the memory. */
     PyGILState_STATE state;
     PyThreadState *_save = NULL;
-    gboolean state_saved = FALSE;
-
+    gboolean state_saved;
     GSList *closures, *tmp;
 
-    if (Py_IsInitialized()) {
-	state_saved = TRUE;
+    state_saved = Py_IsInitialized();
+    if (state_saved) {
 	state = PyGILState_Ensure();
 	Py_DECREF(data->type);
 	/* We cannot use Py_BEGIN_ALLOW_THREADS here because this is inside
