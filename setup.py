@@ -951,14 +951,12 @@ def main():
         name='gi._gi',
         sources=sources,
         include_dirs=[script_dir, gi_dir],
-        define_macros=[("HAVE_CONFIG_H", None)],
     )
 
     gi_cairo_ext = Extension(
         name='gi._gi_cairo',
         sources=cairo_sources,
         include_dirs=[script_dir, gi_dir],
-        define_macros=[("HAVE_CONFIG_H", None)],
     )
 
     setup(
