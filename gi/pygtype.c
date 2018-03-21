@@ -630,11 +630,12 @@ pyg_type_lookup(GType type)
 {
     GType	ptype = type;
     PyGTypeMarshal	*tm = NULL;
+    marshal_helper_data_e marshal_helper;
 
     if (type == G_TYPE_INVALID)
 	return NULL;
 
-    marshal_helper_data_e marshal_helper = GPOINTER_TO_INT (
+    marshal_helper = GPOINTER_TO_INT (
 	g_type_get_qdata(type, pyg_type_marshal_helper_key));
 
     /* If we called this function before with @type and nothing was found,

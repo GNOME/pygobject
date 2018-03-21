@@ -727,7 +727,7 @@ def add_ext_warn_flags(ext, compiler, _cache={}):
             "-Wall",
             "-Warray-bounds",
             # "-Wcast-align",
-            # "-Wdeclaration-after-statement",
+            "-Wdeclaration-after-statement",
             # "-Wdouble-promotion",
             "-Wduplicated-branches",
             # "-Wduplicated-cond",
