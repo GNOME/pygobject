@@ -24,6 +24,7 @@ import errno
 import subprocess
 import tarfile
 import sysconfig
+import platform
 from email import parser
 
 import pkg_resources
@@ -329,13 +330,14 @@ class build_tests(Command):
 
         if os.name == "nt":
             compiler.shared_lib_extension = ".dll"
-
-        if sys.platform == "darwin":
+        elif sys.platform == "darwin":
             compiler.shared_lib_extension = ".dylib"
             if "-bundle" in compiler.linker_so:
                 compiler.linker_so = list(compiler.linker_so)
                 i = compiler.linker_so.index("-bundle")
                 compiler.linker_so[i] = "-dynamiclib"
+        else:
+            compiler.shared_lib_extension = ".so"
 
         def build_ext(ext):
             if compiler.compiler_type == "msvc":
@@ -772,6 +774,13 @@ def add_ext_warn_flags(ext, compiler, _cache={}):
         args += [
             "-Wno-unused-command-line-argument",
         ]
+
+        args += [
+            "-fno-strict-aliasing",
+        ]
+
+        if platform.python_implementation() == "PyPy":
+            args.append("-Wno-redundant-decls")
 
         _cache[cache_key] = filter_compiler_arguments(compiler, args)
 
