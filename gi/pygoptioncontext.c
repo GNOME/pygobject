@@ -20,11 +20,46 @@
 
 #include <config.h>
 
-#include <pyglib.h>
 #include "pygoptioncontext.h"
 #include "pygi-error.h"
+#include "pygi-util.h"
 
 PYGLIB_DEFINE_TYPE("gi._gi.OptionContext", PyGOptionContext_Type, PyGOptionContext)
+
+/**
+ * pyg_option_group_transfer_group:
+ * @group: a GOptionGroup wrapper
+ *
+ * This is used to transfer the GOptionGroup to a GOptionContext. After this
+ * is called, the calle must handle the release of the GOptionGroup.
+ *
+ * When #NULL is returned, the GOptionGroup was already transfered.
+ *
+ * Returns: Either #NULL or the wrapped GOptionGroup.
+ */
+static GOptionGroup *
+pyglib_option_group_transfer_group(PyObject *obj)
+{
+    PyGOptionGroup *self = (PyGOptionGroup*)obj;
+
+    if (self->is_in_context)
+	return NULL;
+
+    self->is_in_context = TRUE;
+    
+    /* Here we increase the reference count of the PyGOptionGroup, because now
+     * the GOptionContext holds an reference to us (it is the userdata passed
+     * to g_option_group_new().
+     *
+     * The GOptionGroup is freed with the GOptionContext.
+     *
+     * We set it here because if we would do this in the init method we would
+     * hold two references and the PyGOptionGroup would never be freed.
+     */
+    Py_INCREF(self);
+
+    return self->group;
+}
 
 /**
  * pyg_option_context_new:
@@ -293,9 +328,9 @@ static PyObject*
 pyg_option_context_richcompare(PyObject *self, PyObject *other, int op)
 {
     if (Py_TYPE(self) == Py_TYPE(other) && Py_TYPE(self) == &PyGOptionContext_Type)
-        return _pyglib_generic_ptr_richcompare(((PyGOptionContext*)self)->context,
-                                               ((PyGOptionContext*)other)->context,
-                                               op);
+        return pyg_ptr_richcompare(((PyGOptionContext*)self)->context,
+                                   ((PyGOptionContext*)other)->context,
+                                   op);
     else {
        Py_INCREF(Py_NotImplemented);
        return Py_NotImplemented;

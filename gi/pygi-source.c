@@ -23,10 +23,10 @@
  * IN THE SOFTWARE.
  */
 
+#include "pyglib-python-compat.h"
 #include "pygi-info.h"
 #include "pygi-boxed.h"
 #include "pygi-type.h"
-#include "pyglib.h"
 #include "pygboxed.h"
 #include "pygi-source.h"
 
@@ -179,6 +179,51 @@ static GSourceFuncs pyg_source_funcs =
     pyg_source_dispatch,
     pyg_source_finalize
 };
+
+/**
+ * _pyglib_destroy_notify:
+ * @user_data: a PyObject pointer.
+ *
+ * A function that can be used as a GDestroyNotify callback that will
+ * call Py_DECREF on the data.
+ */
+static void
+_pyglib_destroy_notify(gpointer user_data)
+{
+    PyObject *obj = (PyObject *)user_data;
+    PyGILState_STATE state;
+
+    state = PyGILState_Ensure();
+    Py_DECREF(obj);
+    PyGILState_Release(state);
+}
+
+static gboolean
+_pyglib_handler_marshal(gpointer user_data)
+{
+    PyObject *tuple, *ret;
+    gboolean res;
+    PyGILState_STATE state;
+
+    g_return_val_if_fail(user_data != NULL, FALSE);
+
+    state = PyGILState_Ensure();
+
+    tuple = (PyObject *)user_data;
+    ret = PyObject_CallObject(PyTuple_GetItem(tuple, 0),
+			      PyTuple_GetItem(tuple, 1));
+    if (!ret) {
+	PyErr_Print();
+	res = FALSE;
+    } else {
+	res = PyObject_IsTrue(ret);
+	Py_DECREF(ret);
+    }
+    
+    PyGILState_Release(state);
+
+    return res;
+}
 
 PyObject *
 pyg_source_set_callback(PyGObject *self_module, PyObject *args)

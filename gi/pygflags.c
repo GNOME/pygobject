@@ -21,7 +21,6 @@
 
 #include <config.h>
 
-#include <pyglib.h>
 #include "pygi-type.h"
 #include "pygi-util.h"
 #include "pygtype.h"

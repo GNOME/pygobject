@@ -27,7 +27,6 @@
 #include "pygobject-internal.h"
 
 #include <pyglib-python-compat.h>
-#include <pyglib.h>
 #include <pygenum.h>
 #include <pygflags.h>
 

@@ -20,8 +20,6 @@
 
 #include <config.h>
 
-#include <pyglib.h>
-
 #include "pygobject-object.h"
 #include "pygboxed.h"
 #include "pygenum.h"
@@ -44,12 +42,59 @@ typedef struct {
 PYGLIB_DEFINE_TYPE("gobject.GType", PyGTypeWrapper_Type, PyGTypeWrapper);
 
 static PyObject*
+generic_long_richcompare(long a, long b, int op)
+{
+    PyObject *res;
+
+    switch (op) {
+
+      case Py_EQ:
+        res = (a == b) ? Py_True : Py_False;
+        Py_INCREF(res);
+        break;
+
+      case Py_NE:
+        res = (a != b) ? Py_True : Py_False;
+        Py_INCREF(res);
+        break;
+
+
+      case Py_LT:
+        res = (a < b) ? Py_True : Py_False;
+        Py_INCREF(res);
+        break;
+
+      case Py_LE:
+        res = (a <= b) ? Py_True : Py_False;
+        Py_INCREF(res);
+        break;
+
+      case Py_GT:
+        res = (a > b) ? Py_True : Py_False;
+        Py_INCREF(res);
+        break;
+
+      case Py_GE:
+        res = (a >= b) ? Py_True : Py_False;
+        Py_INCREF(res);
+        break;
+
+      default:
+        res = Py_NotImplemented;
+        Py_INCREF(res);
+        break;
+    }
+
+    return res;
+}
+
+static PyObject*
 pyg_type_wrapper_richcompare(PyObject *self, PyObject *other, int op)
 {
     if (Py_TYPE(self) == Py_TYPE(other) && Py_TYPE(self) == &PyGTypeWrapper_Type)
-        return _pyglib_generic_long_richcompare(((PyGTypeWrapper*)self)->type,
-                                                ((PyGTypeWrapper*)other)->type,
-                                                op);
+        return generic_long_richcompare(((PyGTypeWrapper*)self)->type,
+                                        ((PyGTypeWrapper*)other)->type,
+                                        op);
     else {
         Py_INCREF(Py_NotImplemented);
         return Py_NotImplemented;

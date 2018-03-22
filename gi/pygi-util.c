@@ -39,6 +39,39 @@ pyg_integer_richcompare(PyObject *v, PyObject *w, int op)
     return result;
 }
 
+PyObject*
+pyg_ptr_richcompare(void* a, void *b, int op)
+{
+    PyObject *res;
+
+    switch (op) {
+      case Py_EQ:
+        res = (a == b) ? Py_True : Py_False;
+        break;
+      case Py_NE:
+        res = (a != b) ? Py_True : Py_False;
+        break;
+      case Py_LT:
+        res = (a < b) ? Py_True : Py_False;
+        break;
+      case Py_LE:
+        res = (a <= b) ? Py_True : Py_False;
+        break;
+      case Py_GT:
+        res = (a > b) ? Py_True : Py_False;
+        break;
+      case Py_GE:
+        res = (a >= b) ? Py_True : Py_False;
+        break;
+      default:
+        res = Py_NotImplemented;
+        break;
+    }
+
+    Py_INCREF(res);
+    return res;
+}
+
 /**
  * pyg_constant_strip_prefix:
  * @name: the constant name.

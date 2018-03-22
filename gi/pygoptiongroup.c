@@ -20,9 +20,9 @@
 
 #include <config.h>
 
-#include <pyglib.h>
 #include "pygoptiongroup.h"
 #include "pygi-error.h"
+#include "pygi-util.h"
 
 PYGLIB_DEFINE_TYPE("gi._gi.OptionGroup", PyGOptionGroup_Type, PyGOptionGroup)
 
@@ -269,9 +269,9 @@ pyg_option_group_richcompare(PyObject *self, PyObject *other, int op)
 {
     if (Py_TYPE(self) == Py_TYPE(other) && 
           Py_TYPE(self) == &PyGOptionGroup_Type) {
-        return _pyglib_generic_ptr_richcompare(((PyGOptionGroup*)self)->group,
-                                               ((PyGOptionGroup*)other)->group,
-                                               op);
+        return pyg_ptr_richcompare(((PyGOptionGroup*)self)->group,
+                                   ((PyGOptionGroup*)other)->group,
+                                   op);
     } else {
         Py_INCREF(Py_NotImplemented);
         return Py_NotImplemented;

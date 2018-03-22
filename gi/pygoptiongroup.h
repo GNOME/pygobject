@@ -20,6 +20,9 @@
 #ifndef __PYG_OPTIONGROUP_H__
 #define __PYG_OPTIONGROUP_H__
 
+#include <Python.h>
+#include <glib.h>
+
 extern PyTypeObject PyGOptionGroup_Type;
 
 typedef struct {

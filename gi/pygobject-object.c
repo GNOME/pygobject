@@ -20,7 +20,6 @@
 
 #include <config.h>
 
-#include <pyglib.h>
 #include "pygobject-object.h"
 #include "pyginterface.h"
 #include "pygparamspec.h"
@@ -28,6 +27,7 @@
 #include "pygboxed.h"
 #include "gimodule.h"
 
+#include "pygi-util.h"
 #include "pygi-value.h"
 #include "pygi-type.h"
 #include "pygi-property.h"
@@ -1115,9 +1115,9 @@ pygobject_richcompare(PyObject *self, PyObject *other, int op)
         return Py_NotImplemented;
     }
 
-    return _pyglib_generic_ptr_richcompare(((PyGObject*)self)->obj,
-                                           ((PyGObject*)other)->obj,
-                                           op);
+    return pyg_ptr_richcompare(((PyGObject*)self)->obj,
+                               ((PyGObject*)other)->obj,
+                               op);
 }
 
 static PYGLIB_Py_hash_t

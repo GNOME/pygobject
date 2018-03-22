@@ -25,10 +25,8 @@
 #include <glib-object.h>
 
 #include "config.h"
-#include "pyglib.h"
 #include "pyginterface.h"
 #include "pygi-repository.h"
-#include "pyglib.h"
 #include "pygtype.h"
 #include "pygenum.h"
 #include "pygboxed.h"

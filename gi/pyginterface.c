@@ -22,7 +22,7 @@
 
 #include <Python.h>
 #include <glib-object.h>
-#include "pyglib.h"
+#include "pyglib-python-compat.h"
 
 #include "pyginterface.h"
 #include "pygtype.h"

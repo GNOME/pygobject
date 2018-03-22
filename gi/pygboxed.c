@@ -23,11 +23,10 @@
 #include <Python.h>
 #include <glib-object.h>
 
-#include <pyglib.h>
 #include "pygboxed.h"
 #include "pygtype.h"
-
 #include "pygi-type.h"
+#include "pygi-util.h"
 
 GQuark pygboxed_type_key;
 GQuark pygboxed_marshal_key;
@@ -51,9 +50,9 @@ pyg_boxed_richcompare(PyObject *self, PyObject *other, int op)
 {
     if (Py_TYPE(self) == Py_TYPE(other) &&
         PyObject_IsInstance(self, (PyObject*)&PyGBoxed_Type))
-        return _pyglib_generic_ptr_richcompare (pyg_boxed_get_ptr (self),
-                                                pyg_boxed_get_ptr (other),
-                                                op);
+        return pyg_ptr_richcompare (pyg_boxed_get_ptr (self),
+                                    pyg_boxed_get_ptr (other),
+                                    op);
     else {
         Py_INCREF(Py_NotImplemented);
         return Py_NotImplemented;

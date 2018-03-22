@@ -22,8 +22,7 @@
 #include <Python.h>
 #include <glib.h>
 
-#include "pyglib.h"
-
+#include "pyglib-python-compat.h"
 #include "pygspawn.h"
 #include "pygi-error.h"
 

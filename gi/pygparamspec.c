@@ -21,13 +21,13 @@
 
 #include <config.h>
 
-#include <pyglib.h>
 #include <glib-object.h>
 
 #include "pygenum.h"
 #include "pygflags.h"
 #include "pygtype.h"
 #include "pygparamspec.h"
+#include "pygi-util.h"
 
 PYGLIB_DEFINE_TYPE("gobject.GParamSpec", PyGParamSpec_Type, PyGParamSpec);
 
@@ -35,9 +35,9 @@ static PyObject*
 pyg_param_spec_richcompare(PyObject *self, PyObject *other, int op)
 {
     if (Py_TYPE(self) == Py_TYPE(other) && Py_TYPE(self) == &PyGParamSpec_Type)
-        return _pyglib_generic_ptr_richcompare (pyg_param_spec_get (self),
-                                                pyg_param_spec_get (other),
-                                                op);
+        return pyg_ptr_richcompare (pyg_param_spec_get (self),
+                                    pyg_param_spec_get (other),
+                                    op);
     else {
         Py_INCREF(Py_NotImplemented);
         return Py_NotImplemented;

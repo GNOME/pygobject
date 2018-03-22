@@ -20,12 +20,12 @@
 
 #include <config.h>
 
-#include <pyglib.h>
 #include <glib-object.h>
 #include "pygpointer.h"
 #include "pygtype.h"
 
 #include "pygi-type.h"
+#include "pygi-util.h"
 
 
 GQuark pygpointer_class_key;
@@ -42,9 +42,9 @@ static PyObject*
 pyg_pointer_richcompare(PyObject *self, PyObject *other, int op)
 {
     if (Py_TYPE(self) == Py_TYPE(other))
-        return _pyglib_generic_ptr_richcompare (pyg_pointer_get_ptr (self),
-                                                pyg_pointer_get_ptr (other),
-                                                op);
+        return pyg_ptr_richcompare (pyg_pointer_get_ptr (self),
+                                    pyg_pointer_get_ptr (other),
+                                    op);
     else {
         Py_INCREF(Py_NotImplemented);
         return Py_NotImplemented;

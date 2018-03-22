@@ -20,6 +20,8 @@
 #ifndef __PYGOBJECT_ENUM_H__ 
 #define __PYGOBJECT_ENUM_H__
 
+#include "pyglib-python-compat.h"
+
 extern GQuark pygenum_class_key;
 
 #define PyGEnum_Check(x) (PyObject_IsInstance((PyObject *)x, (PyObject *)&PyGEnum_Type) && g_type_is_a(((PyGFlags*)x)->gtype, G_TYPE_ENUM))

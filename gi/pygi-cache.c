@@ -21,7 +21,7 @@
 #include <Python.h>
 #include <girepository.h>
 
-#include "pyglib.h"
+#include "pyglib-python-compat.h"
 #include "pygtype.h"
 #include "pygi-info.h"
 #include "pygi-cache.h"
