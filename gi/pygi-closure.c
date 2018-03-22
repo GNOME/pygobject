@@ -33,6 +33,7 @@ typedef struct _PyGICallbackCache
     gssize destroy_notify_index;
     GIScopeType scope;
     GIInterfaceInfo *interface_info;
+    PyGIClosureCache *closure_cache;
 } PyGICallbackCache;
 
 /* This maintains a list of closures which can be free'd whenever
@@ -566,12 +567,8 @@ _pygi_closure_handle (ffi_cif *cif,
       may be executing python code */
     py_state = PyGILState_Ensure ();
 
-    if (closure->cache == NULL) {
-        closure->cache = pygi_closure_cache_new ((GICallableInfo *) closure->info);
-
-        if (closure->cache == NULL)
-            goto end;
-    }
+    if (closure->cache == NULL)
+        goto end;
 
     state.user_data = closure->user_data;
 
@@ -641,8 +638,7 @@ void _pygi_invoke_closure_free (gpointer data)
     if (invoke_closure->info)
         g_base_info_unref ( (GIBaseInfo*) invoke_closure->info);
 
-    if (invoke_closure->cache != NULL)
-        pygi_callable_cache_free ((PyGICallableCache *) invoke_closure->cache);
+    invoke_closure->cache = NULL;
 
     _pygi_invoke_closure_clear_py_data(invoke_closure);
 
@@ -652,6 +648,7 @@ void _pygi_invoke_closure_free (gpointer data)
 
 PyGICClosure*
 _pygi_make_native_closure (GICallableInfo* info,
+                           PyGIClosureCache *cache,
                            GIScopeType scope,
                            PyObject *py_function,
                            gpointer py_user_data)
@@ -668,6 +665,7 @@ _pygi_make_native_closure (GICallableInfo* info,
     closure->info = (GICallableInfo *) g_base_info_ref ( (GIBaseInfo *) info);
     closure->function = py_function;
     closure->user_data = py_user_data;
+    closure->cache = cache;
 
     Py_INCREF (py_function);
     Py_XINCREF (closure->user_data);
@@ -750,7 +748,9 @@ _pygi_marshal_from_py_interface_callback (PyGIInvokeState   *state,
 
     callable_info = (GICallableInfo *)callback_cache->interface_info;
 
-    closure = _pygi_make_native_closure (callable_info, callback_cache->scope, py_arg, py_user_data);
+    closure = _pygi_make_native_closure (
+        callable_info, callback_cache->closure_cache, callback_cache->scope,
+        py_arg, py_user_data);
     arg->v_pointer = closure->closure;
 
     /* always decref the user data as _pygi_make_native_closure adds its own ref */
@@ -836,6 +836,11 @@ _callback_cache_free_func (PyGICallbackCache *cache)
         if (cache->interface_info != NULL)
             g_base_info_unref ( (GIBaseInfo *)cache->interface_info);
 
+        if (cache->closure_cache != NULL) {
+            pygi_callable_cache_free ((PyGICallableCache *) cache->closure_cache);
+            cache->closure_cache = NULL;
+        }
+
         g_slice_free (PyGICallbackCache, cache);
     }
 }
@@ -909,6 +914,7 @@ pygi_arg_callback_setup_from_info (PyGICallbackCache  *arg_cache,
     arg_cache->interface_info = iface_info;
 
     if (direction & PYGI_DIRECTION_FROM_PYTHON) {
+        arg_cache->closure_cache = pygi_closure_cache_new (arg_cache->interface_info);
         cache->from_py_marshaller = _pygi_marshal_from_py_interface_callback;
         cache->from_py_cleanup = _pygi_marshal_cleanup_from_py_interface_callback;
     }

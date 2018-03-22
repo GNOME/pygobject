@@ -1752,6 +1752,7 @@ _wrap_pyg_hook_up_vfunc_implementation (PyObject *self, PyObject *args)
     GIFieldInfo *field_info = NULL;
     gpointer *method_ptr = NULL;
     PyGICClosure *closure = NULL;
+    PyGIClosureCache *cache = NULL;
 
     if (!PyArg_ParseTuple (args, "O!O!O:hook_up_vfunc_implementation",
                            &PyGIBaseInfo_Type, &py_info,
@@ -1778,7 +1779,8 @@ _wrap_pyg_hook_up_vfunc_implementation (PyObject *self, PyObject *args)
         offset = g_field_info_get_offset (field_info);
         method_ptr = G_STRUCT_MEMBER_P (implementor_vtable, offset);
 
-        closure = _pygi_make_native_closure ( (GICallableInfo*) callback_info,
+        cache = pygi_closure_cache_new (callback_info);
+        closure = _pygi_make_native_closure ( (GICallableInfo*) callback_info, cache,
                                               GI_SCOPE_TYPE_NOTIFIED, py_function, NULL);
 
         *method_ptr = closure->closure;

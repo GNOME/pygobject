@@ -50,6 +50,7 @@ void _pygi_closure_handle (ffi_cif *cif, void *result, void
 void _pygi_invoke_closure_free (gpointer user_data);
 
 PyGICClosure* _pygi_make_native_closure (GICallableInfo* info,
+                                         PyGIClosureCache *cache,
                                          GIScopeType scope,
                                          PyObject *function,
                                          gpointer user_data);
