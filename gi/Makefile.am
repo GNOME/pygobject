@@ -58,8 +58,6 @@ _gi_la_SOURCES = \
 	pygoptiongroup.h \
 	pygspawn.c \
 	pygspawn.h \
-	pyglib.c \
-	pyglib.h \
 	pyglib-python-compat.h \
 	gimodule.c \
 	pygi-repository.c \
