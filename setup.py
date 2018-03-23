@@ -24,7 +24,6 @@ import errno
 import subprocess
 import tarfile
 import sysconfig
-import platform
 from email import parser
 
 import pkg_resources
@@ -484,6 +483,7 @@ class build_tests(Command):
                 os.path.join(tests_dir, "test-unknown.h"),
                 os.path.join(tests_dir, "test-floating.h"),
             ],
+            define_macros=[("PY_SSIZE_T_CLEAN", None)],
         )
         add_ext_pkg_config_dep(ext, compiler.compiler_type, "glib-2.0")
         add_ext_pkg_config_dep(ext, compiler.compiler_type, "gio-2.0")
@@ -750,7 +750,6 @@ def add_ext_warn_flags(ext, compiler, _cache={}):
             "-Wold-style-definition",
             "-Wpacked",
             "-Wpointer-arith",
-            "-Wredundant-decls",
             "-Wrestrict",
             "-Wreturn-type",
             "-Wshadow",
@@ -778,9 +777,6 @@ def add_ext_warn_flags(ext, compiler, _cache={}):
         args += [
             "-fno-strict-aliasing",
         ]
-
-        if platform.python_implementation() == "PyPy":
-            args.append("-Wno-redundant-decls")
 
         _cache[cache_key] = filter_compiler_arguments(compiler, args)
 
@@ -951,12 +947,14 @@ def main():
         name='gi._gi',
         sources=sources,
         include_dirs=[script_dir, gi_dir],
+        define_macros=[("PY_SSIZE_T_CLEAN", None)],
     )
 
     gi_cairo_ext = Extension(
         name='gi._gi_cairo',
         sources=cairo_sources,
         include_dirs=[script_dir, gi_dir],
+        define_macros=[("PY_SSIZE_T_CLEAN", None)],
     )
 
     setup(
