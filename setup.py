@@ -139,6 +139,10 @@ def pkg_config_parse(opt, pkg):
     return [x.lstrip(opt) for x in output.split()]
 
 
+def list_headers(d):
+    return [os.path.join(d, e) for e in os.listdir(d) if e.endswith(".h")]
+
+
 def filter_compiler_arguments(compiler, args):
     """Given a compiler instance and a list of compiler warning flags
     returns the list of supported flags.
@@ -301,6 +305,7 @@ class build_tests(Command):
     def run(self):
         cmd = self.reinitialize_command("build_ext")
         cmd.inplace = True
+        cmd.force = self.force
         cmd.ensure_finalized()
         cmd.run()
 
@@ -312,6 +317,7 @@ class build_tests(Command):
             "--variable=g_ir_compiler", "gobject-introspection-1.0")[0]
 
         script_dir = get_script_dir()
+        gi_dir = os.path.join(script_dir, "gi")
         tests_dir = os.path.join(script_dir, "tests")
         gi_tests_dir = os.path.join(gidatadir, "tests")
 
@@ -475,14 +481,10 @@ class build_tests(Command):
                 os.path.join(tests_dir, "test-unknown.c"),
             ],
             include_dirs=[
-                os.path.join(script_dir, "gi"),
+                gi_dir,
                 tests_dir,
             ],
-            depends=[
-                os.path.join(tests_dir, "test-thread.h"),
-                os.path.join(tests_dir, "test-unknown.h"),
-                os.path.join(tests_dir, "test-floating.h"),
-            ],
+            depends=list_headers(gi_dir) + list_headers(tests_dir),
             define_macros=[("PY_SSIZE_T_CLEAN", None)],
         )
         add_ext_pkg_config_dep(ext, compiler.compiler_type, "glib-2.0")
@@ -800,8 +802,7 @@ class build_ext(du_build_ext):
         script_dir = get_script_dir()
         target = os.path.join(script_dir, "config.h")
         versions = parse_versions(script_dir)
-        with io.open(target, 'w', encoding="utf-8") as h:
-            h.write("""
+        content = """
 /* Configuration header created by setup.py - do not edit */
 #ifndef _CONFIG_H
 #define _CONFIG_H 1
@@ -812,7 +813,14 @@ class build_ext(du_build_ext):
 #define VERSION "%(VERSION)s"
 
 #endif /* _CONFIG_H */
-""" % versions)
+""" % versions
+
+        with io.open(target, 'r', encoding="utf-8") as h:
+            if h.read() == content:
+                return
+
+        with io.open(target, 'w', encoding="utf-8") as h:
+            h.write(content)
 
     def _setup_extensions(self):
         ext = {e.name: e for e in self.extensions}
@@ -947,6 +955,7 @@ def main():
         name='gi._gi',
         sources=sources,
         include_dirs=[script_dir, gi_dir],
+        depends=list_headers(script_dir) + list_headers(gi_dir),
         define_macros=[("PY_SSIZE_T_CLEAN", None)],
     )
 
@@ -954,6 +963,7 @@ def main():
         name='gi._gi_cairo',
         sources=cairo_sources,
         include_dirs=[script_dir, gi_dir],
+        depends=list_headers(script_dir) + list_headers(gi_dir),
         define_macros=[("PY_SSIZE_T_CLEAN", None)],
     )
 
