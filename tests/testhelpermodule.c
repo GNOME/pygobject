@@ -5,7 +5,7 @@
 #include "test-unknown.h"
 #include "test-floating.h"
 
-#include <pyglib-python-compat.h>
+#include "pygi-python-compat.h"
 
 static PyObject * _wrap_TestInterface__do_iface_method(PyObject *cls,
 						       PyObject *args,

@@ -21,7 +21,7 @@
 
 #include <config.h>
 
-#include "pyglib-python-compat.h"
+#include "pygi-python-compat.h"
 #include "pygi-type.h"
 #include "pygi-util.h"
 

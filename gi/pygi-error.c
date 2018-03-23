@@ -22,7 +22,7 @@
 
 #include "pygi-error.h"
 #include "pygtype.h"
-#include <pyglib-python-compat.h>
+#include "pygi-python-compat.h"
 
 
 PyObject *PyGError = NULL;

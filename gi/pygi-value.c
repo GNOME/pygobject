@@ -19,7 +19,7 @@
 #include <Python.h>
 #include "pygi-value.h"
 #include "pygi-struct.h"
-#include "pyglib-python-compat.h"
+#include "pygi-python-compat.h"
 #include "pygobject-object.h"
 #include "pygtype.h"
 #include "pygenum.h"

@@ -20,8 +20,8 @@
 
 #include <Python.h>
 #include <glib.h>
-#include <pyglib-python-compat.h>
 
+#include "pygi-python-compat.h"
 #include "pygi-object.h"
 #include "pygobject-object.h"
 #include "pygparamspec.h"

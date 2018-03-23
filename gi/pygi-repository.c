@@ -21,8 +21,7 @@
 
 #include "pygi-repository.h"
 #include "pygi-info.h"
-
-#include <pyglib-python-compat.h>
+#include "pygi-python-compat.h"
 
 PyObject *PyGIRepositoryError;
 

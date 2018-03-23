@@ -21,8 +21,7 @@
 
 #include "pygtype.h"
 #include "pygi-type.h"
-
-#include <pyglib-python-compat.h>
+#include "pygi-python-compat.h"
 
 
 PyObject *

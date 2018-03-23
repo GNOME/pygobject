@@ -25,9 +25,9 @@
 #include "pygi-type.h"
 #include "pygtype.h"
 #include "pygpointer.h"
+#include "pygi-python-compat.h"
 
 #include <girepository.h>
-#include <pyglib-python-compat.h>
 
 
 static GIBaseInfo *

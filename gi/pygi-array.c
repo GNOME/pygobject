@@ -20,8 +20,8 @@
 
 #include <Python.h>
 #include <glib.h>
-#include <pyglib-python-compat.h>
 
+#include "pygi-python-compat.h"
 #include "pygi-array.h"
 #include "pygi-info.h"
 #include "pygi-marshal-cleanup.h"

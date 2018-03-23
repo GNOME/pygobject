@@ -4,7 +4,7 @@
 #include <Python.h>
 #include <glib.h>
 #include "pygobject-internal.h"
-#include <pyglib-python-compat.h>
+#include "pygi-python-compat.h"
 
 G_BEGIN_DECLS
 

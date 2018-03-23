@@ -23,7 +23,7 @@
  * IN THE SOFTWARE.
  */
 
-#include "pyglib-python-compat.h"
+#include "pygi-python-compat.h"
 #include "pygi-info.h"
 #include "pygi-boxed.h"
 #include "pygi-type.h"

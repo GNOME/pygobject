@@ -19,8 +19,7 @@
  */
 
 #include <Python.h>
-#include <pyglib-python-compat.h>
-
+#include "pygi-python-compat.h"
 #include "pygtype.h"
 #include "pygi-basictype.h"
 #include "pygi-argument.h"

@@ -52,8 +52,7 @@
 #include "pygi-property.h"
 #include "pygi-util.h"
 #include "gimodule.h"
-
-#include <pyglib-python-compat.h>
+#include "pygi-python-compat.h"
 
 PyObject *PyGIWarning;
 PyObject *PyGIDeprecationWarning;

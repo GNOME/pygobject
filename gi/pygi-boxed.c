@@ -23,9 +23,9 @@
 #include "pygi-info.h"
 #include "pygboxed.h"
 #include "pygtype.h"
+#include "pygi-python-compat.h"
 
 #include <girepository.h>
-#include <pyglib-python-compat.h>
 
 static void
 _boxed_dealloc (PyGIBoxed *self)

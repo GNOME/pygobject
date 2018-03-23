@@ -20,8 +20,8 @@
 
 #include <Python.h>
 #include <glib.h>
-#include <pyglib-python-compat.h>
 
+#include "pygi-python-compat.h"
 #include "pygi-enum-marshal.h"
 #include "pygi-type.h"
 #include "pygenum.h"

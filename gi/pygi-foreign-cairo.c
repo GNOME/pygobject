@@ -38,7 +38,7 @@ static Pycairo_CAPI_t *Pycairo_CAPI;
  * shared library that interacts with PyGI through a PyCapsule API at runtime.
  */
 #include <pygi-foreign-api.h>
-#include <pyglib-python-compat.h>
+#include "pygi-python-compat.h"
 
 /*
  * cairo_t marshaling

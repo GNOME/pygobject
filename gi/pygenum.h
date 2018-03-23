@@ -20,7 +20,7 @@
 #ifndef __PYGOBJECT_ENUM_H__ 
 #define __PYGOBJECT_ENUM_H__
 
-#include "pyglib-python-compat.h"
+#include "pygi-python-compat.h"
 
 extern GQuark pygenum_class_key;
 

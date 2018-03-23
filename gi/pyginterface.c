@@ -22,8 +22,8 @@
 
 #include <Python.h>
 #include <glib-object.h>
-#include "pyglib-python-compat.h"
 
+#include "pygi-python-compat.h"
 #include "pyginterface.h"
 #include "pygtype.h"
 

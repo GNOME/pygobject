@@ -3,7 +3,7 @@
 
 #include <Python.h>
 #include <glib-object.h>
-#include "pyglib-python-compat.h"
+#include "pygi-python-compat.h"
 #include "pygobject-internal.h"
 
 /* Data that belongs to the GObject instance, not the Python wrapper */

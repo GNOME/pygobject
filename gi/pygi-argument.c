@@ -26,10 +26,10 @@
 
 #include "pygobject-internal.h"
 
-#include <pyglib-python-compat.h>
 #include <pygenum.h>
 #include <pygflags.h>
 
+#include "pygi-python-compat.h"
 #include "pygi-argument.h"
 #include "pygi-info.h"
 #include "pygi-value.h"

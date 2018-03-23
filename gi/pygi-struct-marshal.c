@@ -20,8 +20,8 @@
 
 #include <Python.h>
 #include <glib.h>
-#include <pyglib-python-compat.h>
 
+#include "pygi-python-compat.h"
 #include "pygi-struct-marshal.h"
 #include "pygi-struct.h"
 #include "pygi-foreign.h"
