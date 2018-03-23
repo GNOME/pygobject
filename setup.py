@@ -815,9 +815,12 @@ class build_ext(du_build_ext):
 #endif /* _CONFIG_H */
 """ % versions
 
-        with io.open(target, 'r', encoding="utf-8") as h:
-            if h.read() == content:
-                return
+        try:
+            with io.open(target, 'r', encoding="utf-8") as h:
+                if h.read() == content:
+                    return
+        except EnvironmentError:
+            pass
 
         with io.open(target, 'w', encoding="utf-8") as h:
             h.write(content)
