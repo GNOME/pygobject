@@ -23,6 +23,10 @@ extension_ldflags = \
 	-module \
 	-shrext $(PYTHON_SO)
 
+extension_cppflags = \
+	$(PYTHON_INCLUDES) \
+	-DPY_SSIZE_T_CLEAN
+
 nodist_libgimarshallingtests_la_SOURCES = \
 	$(GI_DATADIR)/tests/gimarshallingtests.c \
 	$(GI_DATADIR)/tests/gimarshallingtests.h
@@ -84,8 +88,8 @@ CLEANFILES += Regress-1.0.gir Regress-1.0.typelib GIMarshallingTests-1.0.gir GIM
 
 extension_ltlibraries += testhelper.la
 
-testhelper_la_CFLAGS = $(CODE_COVERAGE_CFLAGS) $(WARN_CFLAGS) -I$(top_srcdir)/gi $(PYTHON_INCLUDES) $(GLIB_CFLAGS)
-testhelper_la_CPPFLAGS = $(CODE_COVERAGE_CPPFLAGS)
+testhelper_la_CFLAGS = $(CODE_COVERAGE_CFLAGS) $(WARN_CFLAGS) -I$(top_srcdir)/gi $(extension_cppflags) $(GLIB_CFLAGS)
+testhelper_la_CPPFLAGS = $(CODE_COVERAGE_CPPFLAGS) $(extension_cppflags)
 testhelper_la_LDFLAGS = $(WARN_LDFLAGS) $(extension_ldflags)
 testhelper_la_LIBADD = $(CODE_COVERAGE_LIBS) $(GLIB_LIBS) $(extension_libadd)
 
