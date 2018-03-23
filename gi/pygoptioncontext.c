@@ -356,8 +356,11 @@ static PyMethodDef pyg_option_context_methods[] = {
     { NULL, NULL, 0 },
 };
 
-void
-pyglib_option_context_register_types(PyObject *d)
+/**
+ * Returns 0 on success, or -1 and sets an exception.
+ */
+int
+pygi_option_context_register_types(PyObject *d)
 {
     PyGOptionContext_Type.tp_dealloc = (destructor)pyg_option_context_dealloc;
     PyGOptionContext_Type.tp_richcompare = pyg_option_context_richcompare;
@@ -365,4 +368,6 @@ pyglib_option_context_register_types(PyObject *d)
     PyGOptionContext_Type.tp_methods = pyg_option_context_methods;
     PyGOptionContext_Type.tp_init = (initproc)pyg_option_context_init;
     PYGLIB_REGISTER_TYPE(d, PyGOptionContext_Type, "OptionContext");
+
+    return 0;
 }

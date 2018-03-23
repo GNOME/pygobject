@@ -41,6 +41,6 @@ extern PyObject * pyg_flags_from_gtype (GType        gtype,
 
 gint pyg_flags_get_value (GType flag_type, PyObject *obj, guint *val);
 
-void pygobject_flags_register_types(PyObject *d);
+int pygi_flags_register_types(PyObject *d);
 
 #endif /* __PYGOBJECT_FLAGS_H__ */

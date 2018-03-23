@@ -29,6 +29,6 @@ void       pyg_register_boxed (PyObject *dict, const gchar *class_name,
 PyObject * pyg_boxed_new      (GType boxed_type, gpointer boxed,
                                gboolean copy_boxed, gboolean own_ref);
 
-void pygobject_boxed_register_types(PyObject *d);
+int pygi_gboxed_register_types(PyObject *d);
 
 #endif /* __PYGOBJECT_BOXED_H__ */

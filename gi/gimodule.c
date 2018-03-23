@@ -1385,16 +1385,23 @@ disable_warning_redirections(void)
     }
 }
 
-static void
-pygobject_register_warnings(PyObject *d)
+/**
+ * Returns 0 on success, or -1 and sets an exception.
+ */
+static int
+pygi_register_warnings(PyObject *d)
 {
     PyObject *warning;
 
     warning = PyErr_NewException("gobject.Warning", PyExc_Warning, NULL);
+    if (warning == NULL)
+        return -1;
     PyDict_SetItemString(d, "Warning", warning);
     add_warning_redirection("GLib", warning);
     add_warning_redirection("GLib-GObject", warning);
     add_warning_redirection("GThread", warning);
+
+    return 0;
 }
 
 static PyObject *
@@ -2317,19 +2324,27 @@ struct _PyGObject_Functions pygobject_api_functions = {
   pyg_value_from_pyobject_with_error
 };
 
-static void
-pygobject_register_api(PyObject *d)
+/**
+ * Returns 0 on success, or -1 and sets an exception.
+ */
+static int
+pygi_register_api(PyObject *d)
 {
     PyObject *api;
 
     api = PYGLIB_CPointer_WrapPointer(&pygobject_api_functions, "gobject._PyGObject_API");
+    if (api == NULL)
+        return -1;
     PyDict_SetItemString(d, "_PyGObject_API", api);
     Py_DECREF(api);
+    return 0;
 }
 
-/* some constants */
-static void
-pygobject_register_constants(PyObject *m)
+/**
+ * Returns 0 on success, or -1 and sets an exception.
+ */
+static int
+pygi_register_constants(PyObject *m)
 {
     /* PyFloat_ return a new ref, and add object takes the ref */
     PyModule_AddObject(m,       "G_MINFLOAT", PyFloat_FromDouble(G_MINFLOAT));
@@ -2357,20 +2372,26 @@ pygobject_register_constants(PyObject *m)
     /* The rest of the types are set in __init__.py */
     PyModule_AddObject(m, "TYPE_INVALID", pyg_type_wrapper_new(G_TYPE_INVALID));
     PyModule_AddObject(m, "TYPE_GSTRING", pyg_type_wrapper_new(G_TYPE_GSTRING));
+
+    return 0;
 }
 
-static void
-pygobject_register_version_tuples(PyObject *d)
+/**
+ * Returns 0 on success, or -1 and sets an exception.
+ */
+static int
+pygi_register_version_tuples(PyObject *d)
 {
     PyObject *tuple;
 
     /* pygobject version */
     tuple = Py_BuildValue ("(iii)",
-			   PYGOBJECT_MAJOR_VERSION,
-			   PYGOBJECT_MINOR_VERSION,
-			   PYGOBJECT_MICRO_VERSION);
+                           PYGOBJECT_MAJOR_VERSION,
+                           PYGOBJECT_MINOR_VERSION,
+                           PYGOBJECT_MICRO_VERSION);
     PyDict_SetItemString(d, "pygobject_version", tuple);
     Py_DECREF (tuple);
+    return 0;
 }
 
 PYGLIB_MODULE_START(_gi, "_gi")
@@ -2387,33 +2408,58 @@ PYGLIB_MODULE_START(_gi, "_gi")
 
     PyModule_AddStringConstant(module, "__package__", "gi._gi");
 
-    pygi_foreign_init ();
-    pygi_error_register_types (module);
-    _pygi_repository_register_types (module);
-    _pygi_info_register_types (module);
-    _pygi_struct_register_types (module);
-    _pygi_boxed_register_types (module);
-    _pygi_ccallback_register_types (module);
-    pygi_resulttuple_register_types (module);
+    if (pygi_foreign_init () < 0)
+        return PYGLIB_MODULE_ERROR_RETURN;
+    if (pygi_error_register_types (module) < 0)
+        return PYGLIB_MODULE_ERROR_RETURN;
+    if (pygi_repository_register_types (module) < 0)
+        return PYGLIB_MODULE_ERROR_RETURN;
+    if (pygi_info_register_types (module) < 0)
+        return PYGLIB_MODULE_ERROR_RETURN;
+    if (pygi_struct_register_types (module) < 0)
+        return PYGLIB_MODULE_ERROR_RETURN;
+    if (pygi_boxed_register_types (module) < 0)
+        return PYGLIB_MODULE_ERROR_RETURN;
+    if (pygi_ccallback_register_types (module) < 0)
+        return PYGLIB_MODULE_ERROR_RETURN;
+    if (pygi_resulttuple_register_types (module) < 0)
+        return PYGLIB_MODULE_ERROR_RETURN;
 
-    pyglib_spawn_register_types (module_dict);
-    pyglib_option_context_register_types (module_dict);
-    pyglib_option_group_register_types (module_dict);
+    if (pygi_spawn_register_types (module_dict) < 0)
+        return PYGLIB_MODULE_ERROR_RETURN;
+    if (pygi_option_context_register_types (module_dict) < 0)
+        return PYGLIB_MODULE_ERROR_RETURN;
+    if (pygi_option_group_register_types (module_dict) < 0)
+        return PYGLIB_MODULE_ERROR_RETURN;
 
-    pygobject_register_api (module_dict);
-    pygobject_register_constants (module);
-    pygobject_register_version_tuples (module_dict);
-    pygobject_register_warnings (module_dict);
-    pygobject_type_register_types (module_dict);
-    pygobject_object_register_types (module_dict);
-    pygobject_interface_register_types (module_dict);
-    pygobject_paramspec_register_types (module_dict);
-    pygobject_boxed_register_types (module_dict);
-    pygobject_pointer_register_types (module_dict);
-    pygobject_enum_register_types (module_dict);
-    pygobject_flags_register_types (module_dict);
+    if (pygi_register_api (module_dict) < 0)
+        return PYGLIB_MODULE_ERROR_RETURN;
+    if (pygi_register_constants (module) < 0)
+        return PYGLIB_MODULE_ERROR_RETURN;
+    if (pygi_register_version_tuples (module_dict) < 0)
+        return PYGLIB_MODULE_ERROR_RETURN;
+    if (pygi_register_warnings (module_dict) < 0)
+        return PYGLIB_MODULE_ERROR_RETURN;
+    if (pygi_type_register_types (module_dict) < 0)
+        return PYGLIB_MODULE_ERROR_RETURN;
+    if (pyi_object_register_types (module_dict) < 0)
+        return PYGLIB_MODULE_ERROR_RETURN;
+    if (pygi_interface_register_types (module_dict) < 0)
+        return PYGLIB_MODULE_ERROR_RETURN;
+    if (pygi_paramspec_register_types (module_dict) < 0)
+        return PYGLIB_MODULE_ERROR_RETURN;
+    if (pygi_gboxed_register_types (module_dict) < 0)
+        return PYGLIB_MODULE_ERROR_RETURN;
+    if (pygi_pointer_register_types (module_dict) < 0)
+        return PYGLIB_MODULE_ERROR_RETURN;
+    if (pygi_enum_register_types (module_dict) < 0)
+        return PYGLIB_MODULE_ERROR_RETURN;
+    if (pygi_flags_register_types (module_dict) < 0)
+        return PYGLIB_MODULE_ERROR_RETURN;
 
     PyGIWarning = PyErr_NewException ("gi.PyGIWarning", PyExc_Warning, NULL);
+    if (PyGIWarning == NULL)
+        return PYGLIB_MODULE_ERROR_RETURN;
 
     /* Use RuntimeWarning as the base class of PyGIDeprecationWarning
      * for unstable (odd minor version) and use DeprecationWarning for

@@ -44,7 +44,7 @@ void * _pygi_boxed_alloc (GIBaseInfo *info,
 
 void _pygi_boxed_copy_in_place  (PyGIBoxed *self);
 
-void _pygi_boxed_register_types (PyObject *m);
+int pygi_boxed_register_types (PyObject *m);
 
 G_END_DECLS
 

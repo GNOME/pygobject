@@ -226,8 +226,11 @@ static PyMethodDef boxed_methods[] = {
     { NULL, NULL, 0 }
 };
 
-void
-_pygi_boxed_register_types (PyObject *m)
+/**
+ * Returns 0 on success, or -1 and sets an exception.
+ */
+int
+pygi_boxed_register_types (PyObject *m)
 {
     Py_TYPE(&PyGIBoxed_Type) = &PyType_Type;
     PyGIBoxed_Type.tp_base = &PyGBoxed_Type;
@@ -238,8 +241,13 @@ _pygi_boxed_register_types (PyObject *m)
     PyGIBoxed_Type.tp_getset = pygi_boxed_getsets;
     PyGIBoxed_Type.tp_methods = boxed_methods;
 
-    if (PyType_Ready (&PyGIBoxed_Type))
-        return;
-    if (PyModule_AddObject (m, "Boxed", (PyObject *) &PyGIBoxed_Type))
-        return;
+    if (PyType_Ready (&PyGIBoxed_Type) < 0)
+        return -1;
+    Py_INCREF ((PyObject *) &PyGIBoxed_Type);
+    if (PyModule_AddObject (m, "Boxed", (PyObject *) &PyGIBoxed_Type) < 0) {
+        Py_DECREF ((PyObject *) &PyGIBoxed_Type);
+        return -1;
+    }
+
+    return 0;
 }

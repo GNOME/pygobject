@@ -1255,8 +1255,11 @@ pyg_gtype_is_custom(GType gtype)
     return g_type_get_qdata (gtype, pygobject_custom_key) != NULL;
 }
 
-void
-pygobject_type_register_types(PyObject *d)
+/**
+ * Returns 0 on success, or -1 and sets an exception.
+ */
+int
+pygi_type_register_types(PyObject *d)
 {
     PyGTypeWrapper_Type.tp_dealloc = (destructor)pyg_type_wrapper_dealloc;
     PyGTypeWrapper_Type.tp_richcompare = pyg_type_wrapper_richcompare;
@@ -1274,6 +1277,8 @@ pygobject_type_register_types(PyObject *d)
     PyGObjectDoc_Type.tp_descr_get = (descrgetfunc)object_doc_descr_get;
 
     pyg_register_gtype_custom(G_TYPE_STRV,
-			      pyg_strv_from_gvalue,
-			      pyg_strv_to_gvalue);
+                              pyg_strv_from_gvalue,
+                              pyg_strv_to_gvalue);
+
+    return 0;
 }

@@ -119,7 +119,7 @@ PyTypeObject symbol = {                                 \
     if (!type.tp_new)                                   \
 	type.tp_new = PyType_GenericNew;                \
     if (PyType_Ready(&type))                            \
-	return;                                         \
+	return -1;                                         \
     PyDict_SetItemString(d, name, (PyObject *)&type);
 
 #else
@@ -161,7 +161,7 @@ PyTypeObject symbol = {                                 \
     if (!type.tp_new)                                   \
 	    type.tp_new = PyType_GenericNew;                \
     if (PyType_Ready(&type))                            \
-	    return;                                         \
+	    return -1;                                         \
     PyDict_SetItemString(d, name, (PyObject *)&type);
 
 #define PYGLIB_PyBaseString_Check PyUnicode_Check

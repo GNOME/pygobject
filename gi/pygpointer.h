@@ -30,6 +30,6 @@ void       pyg_register_pointer (PyObject *dict, const gchar *class_name,
                                  GType pointer_type, PyTypeObject *type);
 PyObject * pyg_pointer_new      (GType pointer_type, gpointer pointer);
 
-void pygobject_pointer_register_types(PyObject *d);
+int pygi_pointer_register_types(PyObject *d);
 
 #endif /* __PYGOBJECT_POINTER_H__ */

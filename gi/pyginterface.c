@@ -101,8 +101,11 @@ pyg_lookup_interface_info(GType gtype)
     return g_type_get_qdata(gtype, pyginterface_info_key);
 }
 
-void
-pygobject_interface_register_types(PyObject *d)
+/**
+ * Returns 0 on success, or -1 and sets an exception.
+ */
+int
+pygi_interface_register_types(PyObject *d)
 {
   pyginterface_type_key = g_quark_from_static_string("PyGInterface::type");
   pyginterface_info_key = g_quark_from_static_string("PyGInterface::info");
@@ -117,5 +120,6 @@ pygobject_interface_register_types(PyObject *d)
 		       pyg_object_descr_doc_get());
   PyDict_SetItemString(PyGInterface_Type.tp_dict, "__gdoc__",
 		       pyg_object_descr_doc_get());
-  
+
+  return 0;
 }

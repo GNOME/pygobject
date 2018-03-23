@@ -180,8 +180,11 @@ pyg_pointer_new(GType pointer_type, gpointer pointer)
     return (PyObject *)self;
 }
 
-void
-pygobject_pointer_register_types(PyObject *d)
+/**
+ * Returns 0 on success, or -1 and sets an exception.
+ */
+int
+pygi_pointer_register_types(PyObject *d)
 {
     pygpointer_class_key     = g_quark_from_static_string("PyGPointer::class");
 
@@ -192,5 +195,7 @@ pygobject_pointer_register_types(PyObject *d)
     PyGPointer_Type.tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE;
     PyGPointer_Type.tp_init = (initproc)pyg_pointer_init;
     PyGPointer_Type.tp_free = (freefunc)pyg_pointer_free;
-    PYGOBJECT_REGISTER_GTYPE(d, PyGPointer_Type, "GPointer", G_TYPE_POINTER); 
+    PYGOBJECT_REGISTER_GTYPE(d, PyGPointer_Type, "GPointer", G_TYPE_POINTER);
+
+    return 0;
 }

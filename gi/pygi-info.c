@@ -2277,8 +2277,11 @@ _pygi_g_base_info_get_fullname (GIBaseInfo *info)
 }
 
 
-void
-_pygi_info_register_types (PyObject *m)
+/**
+ * Returns 0 on success, or -1 and sets an exception.
+ */
+int
+pygi_info_register_types (PyObject *m)
 {
 #define _PyGI_REGISTER_TYPE(m, type, cname, base) \
     Py_TYPE(&type) = &PyType_Type; \
@@ -2286,10 +2289,13 @@ _pygi_info_register_types (PyObject *m)
     type.tp_weaklistoffset = offsetof(PyGIBaseInfo, inst_weakreflist); \
     type.tp_methods = _PyGI##cname##_methods; \
     type.tp_base = &base; \
-    if (PyType_Ready(&type)) \
-        return; \
-    if (PyModule_AddObject(m, #cname, (PyObject *)&type)) \
-        return
+    if (PyType_Ready(&type) < 0) \
+        return -1; \
+    Py_INCREF ((PyObject *)&type); \
+    if (PyModule_AddObject(m, #cname, (PyObject *)&type) < 0) { \
+        Py_DECREF ((PyObject *)&type); \
+        return -1; \
+    };
 
     Py_TYPE(&PyGIBaseInfo_Type) = &PyType_Type;
 
@@ -2302,10 +2308,13 @@ _pygi_info_register_types (PyObject *m)
     PyGIBaseInfo_Type.tp_getset = _base_info_getsets;
     PyGIBaseInfo_Type.tp_getattro = (getattrofunc) _base_info_getattro;
 
-    if (PyType_Ready(&PyGIBaseInfo_Type))
-        return;
-    if (PyModule_AddObject(m, "BaseInfo", (PyObject *)&PyGIBaseInfo_Type))
-        return;
+    if (PyType_Ready(&PyGIBaseInfo_Type) < 0)
+        return -1;
+    Py_INCREF ((PyObject *)&PyGIBaseInfo_Type);
+    if (PyModule_AddObject(m, "BaseInfo", (PyObject *)&PyGIBaseInfo_Type) < 0) {
+        Py_DECREF ((PyObject *)&PyGIBaseInfo_Type);
+        return -1;
+    }
 
     _PyGI_REGISTER_TYPE (m, PyGICallableInfo_Type, CallableInfo,
                          PyGIBaseInfo_Type);
@@ -2369,10 +2378,10 @@ _pygi_info_register_types (PyObject *m)
 
 #define _PyGI_ENUM_ADD_VALUE(prefix, name) \
             __enum_value = PYGLIB_PyLong_FromLong (prefix##_##name); \
-            if (PyDict_SetItemString(__enum_instance_dict, #name, __enum_value)) { \
+            if (PyDict_SetItemString(__enum_instance_dict, #name, __enum_value) < 0) { \
                 Py_DECREF (__enum_instance_dict); \
                 Py_DECREF (__enum_value); \
-                return; \
+                return -1; \
             } \
             Py_DECREF (__enum_value);
 
@@ -2498,4 +2507,5 @@ _pygi_info_register_types (PyObject *m)
 #undef _PyGI_ENUM_ADD_VALUE
 #undef _PyGI_ENUM_END
 
+    return 0;
 }

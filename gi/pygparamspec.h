@@ -26,6 +26,6 @@
 extern PyTypeObject PyGParamSpec_Type;
 PyObject * pyg_param_spec_new (GParamSpec *pspec);
 
-void pygobject_paramspec_register_types(PyObject *d);
+int pygi_paramspec_register_types(PyObject *d);
 
 #endif /* __PYGOBJECT_PARAMSPEC_H__ */

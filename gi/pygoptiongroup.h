@@ -36,7 +36,7 @@ typedef struct {
 
 PyObject* pyg_option_group_new(GOptionGroup *group);
 
-void pyglib_option_group_register_types(PyObject *d);
+int pygi_option_group_register_types(PyObject *d);
 
 #endif /* __PYG_OPTIONGROUP_H__ */
 

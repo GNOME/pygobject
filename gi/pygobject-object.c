@@ -2350,8 +2350,11 @@ pyobject_free(gpointer boxed)
     PyGILState_Release(state);
 }
 
-void
-pygobject_object_register_types(PyObject *d)
+/**
+ * Returns 0 on success, or -1 and sets an exception.
+ */
+int
+pyi_object_register_types(PyObject *d)
 {
     PyObject *o, *descr;
 
@@ -2402,13 +2405,13 @@ pygobject_object_register_types(PyObject *d)
     PyGProps_Type.tp_iter = (getiterfunc)pygobject_props_get_iter;
     PyGProps_Type.tp_methods = pygobject_props_methods;
     if (PyType_Ready(&PyGProps_Type) < 0)
-        return;
+        return -1;
 
     /* GPropsDescr */
     PyGPropsDescr_Type.tp_flags = Py_TPFLAGS_DEFAULT;
     PyGPropsDescr_Type.tp_descr_get = pyg_props_descr_descr_get;
     if (PyType_Ready(&PyGPropsDescr_Type) < 0)
-        return;
+        return -1;
     descr = PyObject_New(PyObject, &PyGPropsDescr_Type);
     PyDict_SetItemString(PyGObject_Type.tp_dict, "props", descr);
     PyDict_SetItemString(PyGObject_Type.tp_dict, "__module__",
@@ -2421,7 +2424,7 @@ pygobject_object_register_types(PyObject *d)
     PyGPropsIter_Type.tp_doc = "GObject properties iterator";
     PyGPropsIter_Type.tp_iternext = (iternextfunc)pygobject_props_iter_next;
     if (PyType_Ready(&PyGPropsIter_Type) < 0)
-        return;
+        return -1;
 
     PyGObjectWeakRef_Type.tp_dealloc = (destructor)pygobject_weak_ref_dealloc;
     PyGObjectWeakRef_Type.tp_call = (ternaryfunc)pygobject_weak_ref_call;
@@ -2431,8 +2434,10 @@ pygobject_object_register_types(PyObject *d)
     PyGObjectWeakRef_Type.tp_clear = (inquiry)pygobject_weak_ref_clear;
     PyGObjectWeakRef_Type.tp_methods = pygobject_weak_ref_methods;
     if (PyType_Ready(&PyGObjectWeakRef_Type) < 0)
-        return;
+        return -1;
     PyDict_SetItemString(d, "GObjectWeakRef", (PyObject *) &PyGObjectWeakRef_Type);
+
+    return 0;
 }
 
 PyObject *

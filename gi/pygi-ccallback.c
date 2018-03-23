@@ -85,8 +85,11 @@ _ccallback_dealloc (PyGICCallback *self)
     Py_TYPE (self)->tp_free ((PyObject *)self);
 }
 
-void
-_pygi_ccallback_register_types (PyObject *m)
+/**
+ * Returns 0 on success, or -1 and sets an exception.
+ */
+int
+pygi_ccallback_register_types (PyObject *m)
 {
     Py_TYPE(&PyGICCallback_Type) = &PyType_Type;
     PyGICCallback_Type.tp_flags = (Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE);
@@ -94,8 +97,13 @@ _pygi_ccallback_register_types (PyObject *m)
     PyGICCallback_Type.tp_call = (ternaryfunc) _ccallback_call;
 
 
-    if (PyType_Ready (&PyGICCallback_Type))
-        return;
-    if (PyModule_AddObject (m, "CCallback", (PyObject *) &PyGICCallback_Type))
-        return;
+    if (PyType_Ready (&PyGICCallback_Type) < 0)
+        return -1;
+    Py_INCREF ((PyObject *) &PyGICCallback_Type);
+    if (PyModule_AddObject (m, "CCallback", (PyObject *) &PyGICCallback_Type) < 0) {
+        Py_INCREF ((PyObject *) &PyGICCallback_Type);
+        return -1;
+    }
+
+    return 0;
 }

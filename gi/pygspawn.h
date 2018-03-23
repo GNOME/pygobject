@@ -21,7 +21,7 @@
 #define __PYG_PID_H__
 
 PyObject * pyg_pid_new(GPid pid);
-void pyglib_spawn_register_types(PyObject *d);
+int pygi_spawn_register_types(PyObject *d);
 
 PyObject * pyglib_spawn_async(PyObject *self, PyObject *args, PyObject *kwargs);
 

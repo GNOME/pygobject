@@ -496,8 +496,11 @@ static PyNumberMethods pyg_flags_as_number = {
 	(binaryfunc)pyg_flags_or,		/* nb_or */
 };
 
-void
-pygobject_flags_register_types(PyObject *d)
+/**
+ * Returns 0 on success, or -1 and sets an exception.
+ */
+int
+pygi_flags_register_types(PyObject *d)
 {
     pygflags_class_key = g_quark_from_static_string("PyGFlags::class");
 
@@ -515,4 +518,6 @@ pygobject_flags_register_types(PyObject *d)
     PyGFlags_Type.tp_richcompare = (richcmpfunc)pyg_flags_richcompare;
     PyGFlags_Type.tp_getset = pyg_flags_getsets;
     PYGOBJECT_REGISTER_GTYPE(d, PyGFlags_Type, "GFlags", G_TYPE_FLAGS);
+
+    return 0;
 }

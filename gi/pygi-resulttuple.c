@@ -341,12 +341,12 @@ int pygi_resulttuple_register_types(PyObject *module) {
     PyGIResultTuple_Type.tp_methods = resulttuple_methods;
     PyGIResultTuple_Type.tp_dealloc = (destructor)resulttuple_dealloc;
 
-    if (PyType_Ready (&PyGIResultTuple_Type))
+    if (PyType_Ready (&PyGIResultTuple_Type) < 0)
         return -1;
 
     Py_INCREF (&PyGIResultTuple_Type);
     if (PyModule_AddObject (module, "ResultTuple",
-                            (PyObject *)&PyGIResultTuple_Type)) {
+                            (PyObject *)&PyGIResultTuple_Type) < 0) {
         Py_DECREF (&PyGIResultTuple_Type);
         return -1;
     }

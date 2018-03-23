@@ -368,25 +368,36 @@ static PyMethodDef _PyGIRepository_methods[] = {
     { NULL, NULL, 0 }
 };
 
-void
-_pygi_repository_register_types (PyObject *m)
+/**
+ * Returns 0 on success, or -1 and sets an exception.
+ */
+int
+pygi_repository_register_types (PyObject *m)
 {
     Py_TYPE(&PyGIRepository_Type) = &PyType_Type;
 
     PyGIRepository_Type.tp_flags = Py_TPFLAGS_DEFAULT;
     PyGIRepository_Type.tp_methods = _PyGIRepository_methods;
 
-    if (PyType_Ready (&PyGIRepository_Type)) {
-        return;
-    }
+    if (PyType_Ready (&PyGIRepository_Type) < 0)
+        return -1;
 
-    if (PyModule_AddObject (m, "Repository", (PyObject *) &PyGIRepository_Type)) {
-        return;
+    Py_INCREF ((PyObject *) &PyGIRepository_Type);
+    if (PyModule_AddObject (m, "Repository", (PyObject *) &PyGIRepository_Type) < 0) {
+        Py_DECREF ((PyObject *) &PyGIRepository_Type);
+        return -1;
     }
 
     PyGIRepositoryError = PyErr_NewException ("gi.RepositoryError", NULL, NULL);
-    if (PyModule_AddObject (m, "RepositoryError", PyGIRepositoryError)) {
-        return;
+    if (PyGIRepositoryError == NULL)
+        return -1;
+
+    Py_INCREF (PyGIRepositoryError);
+    if (PyModule_AddObject (m, "RepositoryError", PyGIRepositoryError) < 0) {
+        Py_DECREF (PyGIRepositoryError);
+        return -1;
     }
+
+    return 0;
 }
 

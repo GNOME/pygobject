@@ -284,8 +284,11 @@ static PyMethodDef pyg_option_group_methods[] = {
     { NULL, NULL, 0 },
 };
 
-void
-pyglib_option_group_register_types(PyObject *d)
+/**
+ * Returns 0 on success, or -1 and sets an exception.
+ */
+int
+pygi_option_group_register_types(PyObject *d)
 {
     PyGOptionGroup_Type.tp_dealloc = (destructor)pyg_option_group_dealloc;
     PyGOptionGroup_Type.tp_richcompare = pyg_option_group_richcompare;
@@ -293,4 +296,6 @@ pyglib_option_group_register_types(PyObject *d)
     PyGOptionGroup_Type.tp_methods = pyg_option_group_methods;
     PyGOptionGroup_Type.tp_init = (initproc)pyg_option_group_init;
     PYGLIB_REGISTER_TYPE(d, PyGOptionGroup_Type, "OptionGroup");
+
+    return 0;
 }

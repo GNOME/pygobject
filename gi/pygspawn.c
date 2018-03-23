@@ -259,8 +259,11 @@ pyglib_spawn_async(PyObject *object, PyObject *args, PyObject *kwargs)
     return Py_BuildValue("NNNN", pyg_pid_new(child_pid), pystdin, pystdout, pystderr);
 }
 
-void
-pyglib_spawn_register_types(PyObject *d)
+/**
+ * Returns 0 on success, or -1 and sets an exception.
+ */
+int
+pygi_spawn_register_types(PyObject *d)
 {
     PyGPid_Type.tp_base = &PYGLIB_PyLong_Type;
     PyGPid_Type.tp_flags = Py_TPFLAGS_DEFAULT;
@@ -269,4 +272,6 @@ pyglib_spawn_register_types(PyObject *d)
     PyGPid_Type.tp_free = (freefunc)pyg_pid_free;
     PyGPid_Type.tp_new = PYGLIB_PyLong_Type.tp_new;
     PYGLIB_REGISTER_TYPE(d, PyGPid_Type, "Pid");
+
+    return 0;
 }

@@ -43,7 +43,7 @@ PyObject * _pygi_ccallback_new (GCallback       callback,
                                 GIFunctionInfo *info,
                                 GDestroyNotify  destroy_notify);
 
-void _pygi_ccallback_register_types (PyObject *m);
+int pygi_ccallback_register_types (PyObject *m);
 
 G_END_DECLS
 

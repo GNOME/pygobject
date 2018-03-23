@@ -227,8 +227,11 @@ _struct_repr(PyGIStruct *self)
     return repr;
 }
 
-void
-_pygi_struct_register_types (PyObject *m)
+/**
+ * Returns 0 on success, or -1 and sets an exception.
+ */
+int
+pygi_struct_register_types (PyObject *m)
 {
     Py_TYPE(&PyGIStruct_Type) = &PyType_Type;
     PyGIStruct_Type.tp_base = &PyGPointer_Type;
@@ -238,8 +241,13 @@ _pygi_struct_register_types (PyObject *m)
     PyGIStruct_Type.tp_flags = (Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE);
     PyGIStruct_Type.tp_repr = (reprfunc)_struct_repr;
 
-    if (PyType_Ready (&PyGIStruct_Type))
-        return;
-    if (PyModule_AddObject (m, "Struct", (PyObject *) &PyGIStruct_Type))
-        return;
+    if (PyType_Ready (&PyGIStruct_Type) < 0)
+        return -1;
+    Py_INCREF ((PyObject *) &PyGIStruct_Type);
+    if (PyModule_AddObject (m, "Struct", (PyObject *) &PyGIStruct_Type) < 0) {
+        Py_DECREF ((PyObject *) &PyGIStruct_Type);
+        return -1;
+    }
+
+    return 0;
 }

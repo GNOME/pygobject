@@ -52,7 +52,7 @@ void pyg_register_gtype_custom(GType gtype,
                                fromvaluefunc from_func,
                                tovaluefunc to_func);
 
-void pygobject_type_register_types(PyObject *d);
+int pygi_type_register_types(PyObject *d);
 
 PyObject *pyg_object_descr_doc_get(void);
 PyObject *pyg_type_wrapper_new (GType type);

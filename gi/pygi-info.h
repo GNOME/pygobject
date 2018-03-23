@@ -86,7 +86,7 @@ gchar* _pygi_g_base_info_get_fullname (GIBaseInfo *info);
 gsize _pygi_g_type_tag_size (GITypeTag type_tag);
 gsize _pygi_g_type_info_size (GITypeInfo *type_info);
 
-void _pygi_info_register_types (PyObject *m);
+int pygi_info_register_types (PyObject *m);
 
 gboolean _pygi_is_python_keyword (const gchar *name);
 

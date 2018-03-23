@@ -398,8 +398,11 @@ pyg_param_spec_new(GParamSpec *pspec)
     return (PyObject *)self;
 }
 
-void
-pygobject_paramspec_register_types(PyObject *d)
+/**
+ * Returns 0 on success, or -1 and sets an exception.
+ */
+int
+pygi_paramspec_register_types(PyObject *d)
 {
     Py_TYPE(&PyGParamSpec_Type) = &PyType_Type;
     PyGParamSpec_Type.tp_dealloc = (destructor)pyg_param_spec_dealloc;
@@ -410,8 +413,9 @@ pygobject_paramspec_register_types(PyObject *d)
     PyGParamSpec_Type.tp_hash = (hashfunc)pyg_param_spec_hash;
     PyGParamSpec_Type.tp_methods = pyg_param_spec_methods;
 
-
     if (PyType_Ready(&PyGParamSpec_Type))
-	return;
+        return -1;
     PyDict_SetItemString(d, "GParamSpec", (PyObject *)&PyGParamSpec_Type);
+
+    return 0;
 }

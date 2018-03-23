@@ -205,10 +205,15 @@ pygi_require_foreign (PyObject *self, PyObject *args, PyObject *kwargs)
     Py_RETURN_NONE;
 }
 
-void
+/**
+ * Returns 0 on success, or -1 and sets an exception.
+ */
+int
 pygi_foreign_init (void)
 {
     if (foreign_structs == NULL) {
         init_foreign_structs ();
     }
+
+    return 0;
 }

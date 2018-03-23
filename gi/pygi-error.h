@@ -46,7 +46,7 @@ PyGIArgCache* pygi_arg_gerror_new_from_info (GITypeInfo    *type_info,
                                              GITransfer     transfer,
                                              PyGIDirection  direction);
 
-void          pygi_error_register_types     (PyObject *module);
+int           pygi_error_register_types     (PyObject *module);
 
 G_END_DECLS
 

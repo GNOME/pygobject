@@ -372,19 +372,27 @@ pygerror_to_gvalue (GValue *value, PyObject *pyerror)
     return -1;
 }
 
-void
+/**
+ * Returns 0 on success, or -1 and sets an exception.
+ */
+int
 pygi_error_register_types (PyObject *module)
 {
     PyObject *error_module = PYGLIB_PyImport_ImportModule ("gi._error");
     if (!error_module) {
-        return;
+        return -1;
     }
 
     /* Stash a reference to the Python implemented gi._error.GError. */
     PyGError = PyObject_GetAttrString (error_module, "GError");
+    Py_DECREF (error_module);
+    if (PyGError == NULL)
+        return -1;
 
     pyg_register_gtype_custom (G_TYPE_ERROR,
                                pygerror_from_gvalue,
                                pygerror_to_gvalue);
+
+    return 0;
 }
 

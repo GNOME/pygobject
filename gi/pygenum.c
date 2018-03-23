@@ -368,8 +368,11 @@ static PyGetSetDef pyg_enum_getsets[] = {
     { NULL, 0, 0 }
 };
 
-void
-pygobject_enum_register_types(PyObject *d)
+/**
+ * Returns 0 on success, or -1 and sets an exception.
+ */
+int
+pygi_enum_register_types(PyObject *d)
 {
     pygenum_class_key        = g_quark_from_static_string("PyGEnum::class");
 
@@ -387,4 +390,6 @@ pygobject_enum_register_types(PyObject *d)
     PyGEnum_Type.tp_methods = pyg_enum_methods;
     PyGEnum_Type.tp_getset = pyg_enum_getsets;
     PYGOBJECT_REGISTER_GTYPE(d, PyGEnum_Type, "GEnum", G_TYPE_ENUM);
+
+    return 0;
 }
