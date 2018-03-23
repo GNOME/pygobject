@@ -432,6 +432,7 @@ class build_tests(Command):
                 os.path.join(tests_dir, "test-unknown.h"),
                 os.path.join(tests_dir, "test-floating.h"),
             ],
+            define_macros=[("PY_SSIZE_T_CLEAN", None)],
         )
         add_ext_pkg_config_dep(ext, compiler.compiler_type, "glib-2.0")
         add_ext_pkg_config_dep(ext, compiler.compiler_type, "gio-2.0")
@@ -782,14 +783,14 @@ def main():
         name='gi._gi',
         sources=sources,
         include_dirs=[script_dir, gi_dir],
-        define_macros=[("HAVE_CONFIG_H", None)],
+        define_macros=[("HAVE_CONFIG_H", None), ("PY_SSIZE_T_CLEAN", None)],
     )
 
     gi_cairo_ext = Extension(
         name='gi._gi_cairo',
         sources=cairo_sources,
         include_dirs=[script_dir, gi_dir],
-        define_macros=[("HAVE_CONFIG_H", None)],
+        define_macros=[("HAVE_CONFIG_H", None), ("PY_SSIZE_T_CLEAN", None)],
     )
 
     setup(

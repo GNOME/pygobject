@@ -19,6 +19,12 @@
 #ifndef __PYGLIB_PYTHON_COMPAT_H__
 #define __PYGLIB_PYTHON_COMPAT_H__
 
+#ifndef PY_SSIZE_T_CLEAN
+#error "PY_SSIZE_T_CLEAN not defined"
+#endif
+
+#include <Python.h>
+
 # define PYGLIB_CPointer_Check PyCapsule_CheckExact
 # define PYGLIB_CPointer_WrapPointer(ptr, typename) \
     PyCapsule_New(ptr, typename, NULL)
