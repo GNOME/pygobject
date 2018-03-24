@@ -24,6 +24,7 @@ import errno
 import subprocess
 import tarfile
 import sysconfig
+import tempfile
 from email import parser
 
 try:
@@ -199,6 +200,34 @@ def filter_compiler_arguments(compiler, args):
     return supported
 
 
+class sdist_gnome(Command):
+    description = "Create a source tarball for GNOME"
+    user_options = []
+
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        dist_dir = tempfile.mkdtemp()
+        try:
+            cmd = self.reinitialize_command("sdist")
+            cmd.dist_dir = dist_dir
+            cmd.ensure_finalized()
+            cmd.run()
+
+            base_name = self.distribution.get_fullname().lower()
+            cmd.make_release_tree(base_name, cmd.filelist.files)
+            try:
+                self.make_archive(base_name, "xztar", base_dir=base_name)
+            finally:
+                dir_util.remove_tree(base_name)
+        finally:
+            dir_util.remove_tree(dist_dir)
+
+
 du_sdist = get_command_class("sdist")
 
 
@@ -228,7 +257,8 @@ class distcheck(du_sdist):
 
         tracked_files = out.splitlines()
         for ignore in [".gitignore"]:
-            tracked_files.remove(ignore)
+            if ignore in tracked_files:
+                tracked_files.remove(ignore)
 
         diff = set(tracked_files) - set(included_files)
         assert not diff, (
@@ -1005,6 +1035,7 @@ def main():
         cmdclass={
             "build_ext": build_ext,
             "distcheck": distcheck,
+            "sdist_gnome": sdist_gnome,
             "build_tests": build_tests,
             "test": test,
             "quality": quality,
