@@ -26,8 +26,11 @@ import tarfile
 import sysconfig
 from email import parser
 
-import pkg_resources
-from setuptools import setup
+try:
+    from setuptools import setup
+except ImportError:
+    from distutils.core import setup
+
 from distutils.core import Extension, Distribution, Command
 from distutils.errors import DistutilsSetupError, DistutilsOptionError
 from distutils.ccompiler import new_compiler
@@ -609,6 +612,7 @@ def get_pycairo_include_dir():
     script_dir = get_script_dir()
     pkg_config_name = get_pycairo_pkg_config_name()
     min_version = get_version_requirement(script_dir, pkg_config_name)
+    min_version_info = tuple(int(p) for p in min_version.split("."))
 
     def check_path(include_dir):
         log.info("pycairo: trying include directory: %r" % include_dir)
@@ -628,12 +632,10 @@ def get_pycairo_include_dir():
         log.info("pycairo: new API")
         import cairo
 
-        pkg_version = pkg_resources.parse_version(cairo.version)
-        pkg_min_version = pkg_resources.parse_version(min_version)
-        if pkg_version < pkg_min_version:
+        if cairo.version_info < min_version_info:
             raise DistutilsSetupError(
-                "pycairo >=%s required, %s found." % (
-                    pkg_min_version, pkg_version))
+                "pycairo >= %s required, %s found." % (
+                    min_version, ".".join(map(str, cairo.version_info))))
 
         if hasattr(cairo, "get_include"):
             return [cairo.get_include()]
@@ -642,8 +644,16 @@ def get_pycairo_include_dir():
 
     def find_old_api():
         log.info("pycairo: old API")
-        dist = pkg_resources.get_distribution("pycairo>=%s" % min_version)
-        log.info("pycairo: found %r" % dist)
+
+        import cairo
+
+        if cairo.version_info < min_version_info:
+            raise DistutilsSetupError(
+                "pycairo >= %s required, %s found." % (
+                    min_version, ".".join(map(str, cairo.version_info))))
+
+        location = os.path.dirname(os.path.abspath(cairo.__path__[0]))
+        log.info("pycairo: found %r" % location)
 
         def samefile(src, dst):
             # Python 2 on Windows doesn't have os.path.samefile, so we have to
@@ -655,9 +665,8 @@ def get_pycairo_include_dir():
             return (os.path.normcase(os.path.abspath(src)) ==
                     os.path.normcase(os.path.abspath(dst)))
 
-        def get_sys_path(dist, name):
+        def get_sys_path(location, name):
             # Returns the sysconfig path for a distribution, or None
-            location = dist.location
             for scheme in sysconfig.get_scheme_names():
                 for path_type in ["platlib", "purelib"]:
                     path = sysconfig.get_path(path_type, scheme)
@@ -667,7 +676,7 @@ def get_pycairo_include_dir():
                     except EnvironmentError:
                         pass
 
-        data_path = get_sys_path(dist, "data") or sys.prefix
+        data_path = get_sys_path(location, "data") or sys.prefix
         return [os.path.join(data_path, "include", "pycairo")]
 
     def find_pkg_config():
