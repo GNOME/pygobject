@@ -234,6 +234,7 @@ int
 pygi_struct_register_types (PyObject *m)
 {
     Py_TYPE(&PyGIStruct_Type) = &PyType_Type;
+    g_assert (Py_TYPE (&PyGPointer_Type) != NULL);
     PyGIStruct_Type.tp_base = &PyGPointer_Type;
     PyGIStruct_Type.tp_new = (newfunc) _struct_new;
     PyGIStruct_Type.tp_init = (initproc) _struct_init;

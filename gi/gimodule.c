@@ -2416,7 +2416,13 @@ PYGLIB_MODULE_START(_gi, "_gi")
         return PYGLIB_MODULE_ERROR_RETURN;
     if (pygi_info_register_types (module) < 0)
         return PYGLIB_MODULE_ERROR_RETURN;
+    if (pygi_type_register_types (module_dict) < 0)
+        return PYGLIB_MODULE_ERROR_RETURN;
+    if (pygi_pointer_register_types (module_dict) < 0)
+        return PYGLIB_MODULE_ERROR_RETURN;
     if (pygi_struct_register_types (module) < 0)
+        return PYGLIB_MODULE_ERROR_RETURN;
+    if (pygi_gboxed_register_types (module_dict) < 0)
         return PYGLIB_MODULE_ERROR_RETURN;
     if (pygi_boxed_register_types (module) < 0)
         return PYGLIB_MODULE_ERROR_RETURN;
@@ -2440,17 +2446,11 @@ PYGLIB_MODULE_START(_gi, "_gi")
         return PYGLIB_MODULE_ERROR_RETURN;
     if (pygi_register_warnings (module_dict) < 0)
         return PYGLIB_MODULE_ERROR_RETURN;
-    if (pygi_type_register_types (module_dict) < 0)
-        return PYGLIB_MODULE_ERROR_RETURN;
     if (pyi_object_register_types (module_dict) < 0)
         return PYGLIB_MODULE_ERROR_RETURN;
     if (pygi_interface_register_types (module_dict) < 0)
         return PYGLIB_MODULE_ERROR_RETURN;
     if (pygi_paramspec_register_types (module_dict) < 0)
-        return PYGLIB_MODULE_ERROR_RETURN;
-    if (pygi_gboxed_register_types (module_dict) < 0)
-        return PYGLIB_MODULE_ERROR_RETURN;
-    if (pygi_pointer_register_types (module_dict) < 0)
         return PYGLIB_MODULE_ERROR_RETURN;
     if (pygi_enum_register_types (module_dict) < 0)
         return PYGLIB_MODULE_ERROR_RETURN;

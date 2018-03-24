@@ -233,6 +233,7 @@ int
 pygi_boxed_register_types (PyObject *m)
 {
     Py_TYPE(&PyGIBoxed_Type) = &PyType_Type;
+    g_assert (Py_TYPE (&PyGBoxed_Type) != NULL);
     PyGIBoxed_Type.tp_base = &PyGBoxed_Type;
     PyGIBoxed_Type.tp_new = (newfunc) _boxed_new;
     PyGIBoxed_Type.tp_init = (initproc) _boxed_init;

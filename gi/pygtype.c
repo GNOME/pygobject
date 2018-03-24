@@ -388,6 +388,7 @@ pyg_type_wrapper_new(GType type)
 {
     PyGTypeWrapper *self;
 
+    g_assert (Py_TYPE (&PyGTypeWrapper_Type) != NULL);
     self = (PyGTypeWrapper *)PyObject_NEW(PyGTypeWrapper,
 					  &PyGTypeWrapper_Type);
     if (self == NULL)

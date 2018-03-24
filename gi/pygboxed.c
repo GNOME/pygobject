@@ -159,6 +159,7 @@ pyg_register_boxed(PyObject *dict, const gchar *class_name,
     if (!type->tp_dealloc)  type->tp_dealloc  = (destructor)pyg_boxed_dealloc;
 
     Py_TYPE(type) = &PyType_Type;
+    g_assert (Py_TYPE (&PyGBoxed_Type) != NULL);
     type->tp_base = &PyGBoxed_Type;
 
     if (PyType_Ready(type) < 0) {
