@@ -2316,19 +2316,19 @@ pygi_info_register_types (PyObject *m)
         return -1;
     }
 
-    _PyGI_REGISTER_TYPE (m, PyGICallableInfo_Type, CallableInfo,
-                         PyGIBaseInfo_Type);
     PyGICallableInfo_Type.tp_call = (ternaryfunc) _callable_info_call;
     PyGICallableInfo_Type.tp_dealloc = (destructor) _callable_info_dealloc;
+    _PyGI_REGISTER_TYPE (m, PyGICallableInfo_Type, CallableInfo,
+                         PyGIBaseInfo_Type);
 
-    _PyGI_REGISTER_TYPE (m, PyGIFunctionInfo_Type, FunctionInfo,
-                         PyGICallableInfo_Type);
     PyGIFunctionInfo_Type.tp_call = (ternaryfunc) _function_info_call;
     PyGIFunctionInfo_Type.tp_descr_get = (descrgetfunc) _function_info_descr_get;
+    _PyGI_REGISTER_TYPE (m, PyGIFunctionInfo_Type, FunctionInfo,
+                         PyGICallableInfo_Type);
 
+    PyGIVFuncInfo_Type.tp_descr_get = (descrgetfunc) _vfunc_info_descr_get;
     _PyGI_REGISTER_TYPE (m, PyGIVFuncInfo_Type, VFuncInfo,
                          PyGICallableInfo_Type);
-    PyGIVFuncInfo_Type.tp_descr_get = (descrgetfunc) _vfunc_info_descr_get;
 
     _PyGI_REGISTER_TYPE (m, PyGISignalInfo_Type, SignalInfo,
                          PyGICallableInfo_Type);
