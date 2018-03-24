@@ -61,6 +61,7 @@ _gi_la_SOURCES = \
 	pygi-python-compat.c \
 	pygi-python-compat.h \
 	gimodule.c \
+	gimodule.h \
 	pygi-repository.c \
 	pygi-repository.h \
 	pygi-info.c \
