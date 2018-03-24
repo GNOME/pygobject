@@ -140,6 +140,9 @@ def wakeup_on_signal():
 
 
 def create_pythonapi():
+    if not hasattr(ctypes, "PyDLL"):
+        # PyPy
+        return
     # We need our own instance of ctypes.pythonapi so we don't modify the
     # global shared one. Adapted from the ctypes source.
     if os.name == "nt":
@@ -151,9 +154,13 @@ def create_pythonapi():
 
 
 pydll = create_pythonapi()
-PyOS_getsig = pydll.PyOS_getsig
-PyOS_getsig.restype = ctypes.c_void_p
-PyOS_getsig.argtypes = [ctypes.c_int]
+if pydll is None:
+    PyOS_getsig = lambda s: -1
+else:
+    PyOS_getsig = pydll.PyOS_getsig
+    PyOS_getsig.restype = ctypes.c_void_p
+    PyOS_getsig.argtypes = [ctypes.c_int]
+
 
 # We save the signal pointer so we can detect if glib has changed the
 # signal handler behind Python's back (GLib.unix_signal_add)
