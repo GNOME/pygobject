@@ -8,17 +8,11 @@ python --version
 mkdir -p _ccache
 export CCACHE_BASEDIR="$(pwd)"
 export CCACHE_DIR="${CCACHE_BASEDIR}/_ccache"
-
-python -m pip install git+https://github.com/pygobject/pycairo.git
-python -m pip install flake8 pytest pytest-faulthandler coverage
-
 PYVER=$(python -c "import sys; sys.stdout.write(''.join(map(str, sys.version_info[:3])))")
+PYIMPL=$(python -c "import sys, platform; sys.stdout.write(platform.python_implementation())")
 SOURCE_DIR="$(pwd)"
 PY_PREFIX="$(python -c 'import sys; sys.stdout.write(sys.prefix)')"
 COV_DIR="${SOURCE_DIR}/coverage"
-
-mkdir -p "${COV_DIR}"
-
 export PKG_CONFIG_PATH="${PY_PREFIX}/lib/pkgconfig"
 export MALLOC_CHECK_=3
 export MALLOC_PERTURB_=$((${RANDOM} % 255 + 1))
@@ -26,6 +20,21 @@ export G_SLICE="debug-blocks"
 export COVERAGE_FILE="${COV_DIR}/.coverage.${PYVER}"
 export CFLAGS="-coverage -ftest-coverage -fprofile-arcs"
 
+if [[ "${PYIMPL}" == "PyPy" ]]; then
+    # https://bitbucket.org/pypy/pypy/issues/2776
+    export MALLOC_CHECK_=
+    python -m pip install pycairo pytest
+else
+    python -m pip install git+https://github.com/pygobject/pycairo.git
+    python -m pip install flake8 pytest pytest-faulthandler coverage
+fi;
+
+if [[ "${PYIMPL}" == "PyPy" ]]; then
+    python setup.py build_tests
+    exit 0;
+fi;
+
+mkdir -p "${COV_DIR}"
 rm -Rf /tmp/build
 mkdir /tmp/build
 cd /tmp/build

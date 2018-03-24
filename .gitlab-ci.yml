@@ -90,6 +90,11 @@ python3.7:
     PYENV_VERSION: "3.7.0b2"
   <<: *defaults
 
+pypy2:
+  variables:
+    PYENV_VERSION: "pypy2.7-5.10.0"
+  <<: *defaults
+
 xenial-i386-py2:
   stage: build_and_test
   image: lazka/pygobject:pyenv-old
