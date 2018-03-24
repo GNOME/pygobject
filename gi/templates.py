@@ -21,12 +21,13 @@
 import sys
 from gi.repository import GLib
 from gi.repository import GObject
+from gi.repository import Gio
 from gi.repository import Gtk
 
 __all__ = ['Template', 'Child']
 
-def _template_connect_func(builder, obj, signal_name, handler_name,
-                           connect_object, flags, cls):
+def template_connect_func(builder, obj, signal_name, handler_name,
+                          connect_object, flags, cls):
     self = builder.get_object(cls.__gtype__.name)
     extra = () if connect_object is None else (connect_object,)
     if not hasattr(self, handler_name):
@@ -37,6 +38,31 @@ def _template_connect_func(builder, obj, signal_name, handler_name,
         obj.connect_after(signal_name, handler, *extra)
     else:
         obj.connect(signal_name, handler, *extra)
+
+def set_child(self, name, child):
+    if child is None:
+        raise RuntimeError('widget template for class %r is '
+                           'missing an object with ID %r' %
+                           (type(self).__name__, name))
+    setattr(self, name, child)
+
+def create_init_template(cls):
+    def init_template(self):
+        super(type(self), self).init_template()
+        for name in self.__template_children__:
+            child = self.get_template_child(type(self), name)
+            set_child(self, name, child)
+    return init_template
+
+def init_template_non_composite(self):
+    template = self.__template__
+    string = template._string
+    length = template._length
+    builder = Gtk.Builder.new_from_string(string, length)
+    builder.connect_signals(self)
+    for name in self.__template_children__:
+        child = builder.get_object(name)
+        set_child(self, name, child)
 
 class Child(object):
     """
@@ -152,36 +178,67 @@ class Template(object):
 
     * ``@Template(bytes)`` loads a template from a bytes or a GLib.Bytes object
       which contains the template XML in UTF-8.
+
+    Non-composite templates are also supported:
+
+    .. code-block:: python
+
+        from gi.templates import Template, Child
+
+        @Template.from_file('window.ui', composite=False)
+        class Window(Gtk.Window):
+            box = Child()
+            label = Child()
+
+            def __init__(self, **kwargs):
+                super().__init__(**kwargs)
+                self.set_title('My Window')
+                self.add(self.box)
+                self.init_template()
+
+            def button_clicked(self, button):
+                self.label.set_text('Thanks!')
     """
 
-    def __init__(self, data):
+    def __init__(self, data, composite=True):
         """Creates a template from UTF-8 XML bytes or GLib.Bytes."""
+
+        if not isinstance(composite, bool):
+            raise ValueError("'composite' must be a boolean")
+
+        self._composite = composite
+
         if isinstance(data, bytes):
-            self.data = GLib.Bytes(bytes)
+            self._data = GLib.Bytes(bytes)
         elif isinstance(data, GLib.Bytes):
-            self.data = data
+            self._data = data
         else:
             raise ValueError("'data' must be bytes or GLib.Bytes")
 
+        if not self._composite:
+            self._string = self._data.get_data().decode('utf-8')
+            self._length = self._data.get_size()
+            del self._data
+
     @staticmethod
-    def from_file(path):
+    def from_file(path, composite=True):
         """Loads a template from a file."""
         with open(path, 'rb') as f:
-            return Template(GLib.Bytes(f.read()))
+            return Template(GLib.Bytes(f.read()), composite)
 
     @staticmethod
-    def from_resource(path):
+    def from_resource(path, composite=True):
         """Loads a template from a GIO resource."""
         data = Gio.resources_lookup_data(path, Gio.ResourceLookupFlags.NONE)
-        return Template(data)
+        return Template(data, composite)
 
     @staticmethod
-    def from_string(string):
+    def from_string(string, composite=True):
         """Creates a template from an XML string."""
         if sys.version_info >= (3, 0) or isinstance(string, unicode):
-            return Template(string.encode('utf-8'))
+            return Template(string.encode('utf-8'), composite)
         else:
-            return Template(string)
+            return Template(string, composite)
 
     def __call__(self, cls):
         """Applies the template for to a widget class."""
@@ -190,36 +247,29 @@ class Template(object):
             raise TypeError('class %r is not a subclass of '
                             'Gtk.Widget' % (cls.__name__,))
 
-        if getattr(cls, '__template_class__', None) is cls:
+        if hasattr(cls, '__template__'):
             raise ValueError('class %r already has a widget '
                              'template' % (cls.__name__,))
 
-        if not hasattr(cls, '__gtype_name__'):
+        if self._composite and not hasattr(cls, '__gtype_name__'):
             raise ValueError('class %r is missing a '
                              '__gtype_name__' % (cls.__name__,))
 
-        cls.set_template(self.data)
-        cls.set_connect_func(_template_connect_func, cls)
-
-        cls.__template_class__ = cls
+        cls.__template__ = self
         cls.__template_children__ = set()
 
         for name in dir(cls):
             attr = getattr(cls, name, None)
             if isinstance(attr, Child):
                 cls.__template_children__.add(name)
+
+        if self._composite:
+            cls.set_template(self._data)
+            cls.set_connect_func(template_connect_func, cls)
+            cls.init_template = create_init_template(cls)
+            for name in cls.__template_children__:
                 cls.bind_template_child_full(name, True, 0)
-
-        def init_template(self):
-            super(type(self), self).init_template()
-            for name in self.__template_children__:
-                child = self.get_template_child(cls, name)
-                if child is None:
-                    raise RuntimeError('widget template for class %r is '
-                                       'missing an object with ID %r' %
-                                       (cls.__name__, name))
-                setattr(self, name, child)
-
-        cls.init_template = init_template
+        else:
+            cls.init_template = init_template_non_composite
 
         return cls
