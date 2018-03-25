@@ -1084,7 +1084,9 @@ pygobject_dealloc(PyGObject *self)
      * object. */
     PyObject_GC_UnTrack((PyObject *)self);
 
-    PyObject_ClearWeakRefs((PyObject *)self);
+    if (self->weakreflist != NULL)
+        PyObject_ClearWeakRefs((PyObject *)self);
+
       /* this forces inst_data->type to be updated, which could prove
        * important if a new wrapper has to be created and it is of a
        * unregistered type */
