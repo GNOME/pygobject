@@ -153,7 +153,6 @@ EXTRA_DIST = \
 	test_ossig.py \
 	conftest.py \
 	__init__.py \
-	gi/__init__.py \
 	gi/overrides/__init__.py \
 	gi/overrides/Regress.py \
 	$(NULL)
