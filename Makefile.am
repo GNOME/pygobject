@@ -20,6 +20,7 @@ EXTRA_DIST = \
 	setup.py \
 	setup.cfg \
 	MANIFEST.in \
+	pyproject.toml \
 	README.rst \
 	docs
 
