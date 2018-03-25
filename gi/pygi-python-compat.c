@@ -20,7 +20,7 @@
 PyObject *
 PYGLIB_PyImport_ImportModule(const char *name)
 {
-#if PY_VERSION_HEX < 0x03000000
+#if PY_VERSION_HEX < 0x03000000 && !defined(PYPY_VERSION)
     /* see PyImport_ImportModuleNoBlock
      * https://github.com/python/cpython/blob/2.7/Python/import.c#L2166-L2206 */
     PyObject *result = PyImport_ImportModuleNoBlock(name);
