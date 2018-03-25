@@ -19,7 +19,7 @@ def main(argv):
     verbosity_args = []
 
     if 'PYGI_TEST_VERBOSE' in os.environ:
-        verbosity_args += ['-v', '--capture=no']
+        verbosity_args += ['--capture=no']
 
     if 'TEST_NAMES' in os.environ:
         names = os.environ['TEST_NAMES'].split()

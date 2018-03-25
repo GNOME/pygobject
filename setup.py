@@ -543,18 +543,21 @@ class test(Command):
         ("valgrind", None, "run tests under valgrind"),
         ("valgrind-log-file=", None, "save logs instead of printing them"),
         ("gdb", None, "run tests under gdb"),
+        ("no-capture", "s", "don't capture test output"),
     ]
 
     def initialize_options(self):
         self.valgrind = None
         self.valgrind_log_file = None
         self.gdb = None
+        self.no_capture = None
 
     def finalize_options(self):
         self.valgrind = bool(self.valgrind)
         if self.valgrind_log_file and not self.valgrind:
             raise DistutilsOptionError("valgrind not enabled")
         self.gdb = bool(self.gdb)
+        self.no_capture = bool(self.no_capture)
 
     def run(self):
         cmd = self.reinitialize_command("build_tests")
@@ -563,6 +566,9 @@ class test(Command):
 
         env = os.environ.copy()
         env.pop("MSYSTEM", None)
+
+        if self.no_capture:
+            env["PYGI_TEST_VERBOSE"] = "1"
 
         env["MALLOC_PERTURB_"] = "85"
         env["MALLOC_CHECK_"] = "3"
