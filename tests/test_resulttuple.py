@@ -37,8 +37,10 @@ class TestResultTuple(unittest.TestCase):
         self.assertTrue(issubclass(ResultTuple, tuple))
 
     def test_create(self):
-        new = ResultTuple._new_type([None, "foo", None, "bar"])
-        self.assertTrue(issubclass(new, ResultTuple))
+        names = [None, "foo", None, "bar"]
+        for i in range(10):
+            new = ResultTuple._new_type(names)
+            self.assertTrue(issubclass(new, ResultTuple))
 
     def test_repr_dir(self):
         new = ResultTuple._new_type([None, "foo", None, "bar"])

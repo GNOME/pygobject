@@ -149,13 +149,11 @@ resulttuple_new_type(PyObject *self, PyObject *args) {
         return NULL;
 
     if (!PyList_Check (tuple_names)) {
-        Py_DECREF (tuple_names);
         PyErr_SetString (PyExc_TypeError, "not a list");
         return NULL;
     }
 
     new_type = (PyObject *)pygi_resulttuple_new_type (tuple_names);
-    Py_DECREF (tuple_names);
     return new_type;
 }
 
