@@ -18,7 +18,6 @@
 
 import io
 import os
-import re
 import sys
 import errno
 import subprocess
@@ -39,6 +38,13 @@ from distutils.sysconfig import get_python_lib, customize_compiler
 from distutils import dir_util, log
 
 
+PYGOBJECT_VERISON = "3.29.0"
+GLIB_VERSION_REQUIRED = "2.38.0"
+GI_VERSION_REQUIRED = "1.46.0"
+PYCAIRO_VERSION_REQUIRED = "1.11.1"
+LIBFFI_VERSION_REQUIRED = "3.0"
+
+
 def get_command_class(name):
     # Returns the right class for either distutils or setuptools
     return Distribution({}).get_command_class(name)
@@ -48,36 +54,25 @@ def get_pycairo_pkg_config_name():
     return "py3cairo" if sys.version_info[0] == 3 else "pycairo"
 
 
-def get_version_requirement(conf_dir, pkg_config_name):
+def get_version_requirement(pkg_config_name):
     """Given a pkg-config module name gets the minimum version required"""
 
-    if pkg_config_name in ["cairo", "cairo-gobject"]:
-        return "0"
-
-    mapping = {
-        "gobject-introspection-1.0": "introspection",
-        "glib-2.0": "glib",
-        "gio-2.0": "gio",
-        get_pycairo_pkg_config_name(): "pycairo",
-        "libffi": "libffi",
+    versions = {
+        "gobject-introspection-1.0": GI_VERSION_REQUIRED,
+        "glib-2.0": GLIB_VERSION_REQUIRED,
+        "gio-2.0": GLIB_VERSION_REQUIRED,
+        get_pycairo_pkg_config_name(): PYCAIRO_VERSION_REQUIRED,
+        "libffi": LIBFFI_VERSION_REQUIRED,
+        "cairo": "0",
+        "cairo-gobject": "0",
     }
-    assert pkg_config_name in mapping
 
-    configure_ac = os.path.join(conf_dir, "configure.ac")
-    with io.open(configure_ac, "r", encoding="utf-8") as h:
-        text = h.read()
-        conf_name = mapping[pkg_config_name]
-        res = re.findall(
-            r"%s_required_version,\s*([\d\.]+)\)" % conf_name, text)
-        assert len(res) == 1
-        return res[0]
+    return versions[pkg_config_name]
 
 
-def parse_versions(conf_dir):
-    configure_ac = os.path.join(conf_dir, "configure.ac")
-    with io.open(configure_ac, "r", encoding="utf-8") as h:
-        version = re.findall(r"pygobject_[^\s]+_version,\s*(\d+)\)", h.read())
-        assert len(version) == 3
+def get_versions():
+    version = PYGOBJECT_VERISON.split(".")
+    assert len(version) == 3
 
     versions = {
         "PYGOBJECT_MAJOR_VERSION": version[0],
@@ -90,10 +85,10 @@ def parse_versions(conf_dir):
 
 def parse_pkg_info(conf_dir):
     """Returns an email.message.Message instance containing the content
-    of the PKG-INFO file. The version info is parsed from configure.ac
+    of the PKG-INFO file.
     """
 
-    versions = parse_versions(conf_dir)
+    versions = get_versions()
 
     pkg_info = os.path.join(conf_dir, "PKG-INFO.in")
     with io.open(pkg_info, "r", encoding="utf-8") as h:
@@ -645,9 +640,8 @@ def get_pycairo_include_dir():
     Raises if pycairo isn't found or it's too old.
     """
 
-    script_dir = get_script_dir()
     pkg_config_name = get_pycairo_pkg_config_name()
-    min_version = get_version_requirement(script_dir, pkg_config_name)
+    min_version = get_version_requirement(pkg_config_name)
     min_version_info = tuple(int(p) for p in min_version.split("."))
 
     def check_path(include_dir):
@@ -741,8 +735,6 @@ def get_pycairo_include_dir():
 
 
 def add_ext_pkg_config_dep(ext, compiler_type, name):
-    script_dir = get_script_dir()
-
     msvc_libraries = {
         "glib-2.0": ["glib-2.0"],
         "gio-2.0": ["gio-2.0", "gobject-2.0", "glib-2.0"],
@@ -759,7 +751,7 @@ def add_ext_pkg_config_dep(ext, compiler_type, name):
         # assume that INCLUDE and LIB contains the right paths
         ext.libraries += fallback_libs
     else:
-        min_version = get_version_requirement(script_dir, name)
+        min_version = get_version_requirement(name)
         pkg_config_version_check(name, min_version)
         ext.include_dirs += pkg_config_parse("--cflags-only-I", name)
         ext.library_dirs += pkg_config_parse("--libs-only-L", name)
@@ -846,7 +838,7 @@ class build_ext(du_build_ext):
     def _write_config_h(self):
         script_dir = get_script_dir()
         target = os.path.join(script_dir, "config.h")
-        versions = parse_versions(script_dir)
+        versions = get_versions()
         content = """
 /* Configuration header created by setup.py - do not edit */
 #ifndef _CONFIG_H
@@ -1050,7 +1042,7 @@ def main():
         },
         install_requires=[
             "pycairo>=%s" % get_version_requirement(
-                script_dir, get_pycairo_pkg_config_name()),
+                get_pycairo_pkg_config_name()),
         ],
         data_files=[
             ('include/pygobject-3.0', ['gi/pygobject.h']),
