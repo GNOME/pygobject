@@ -4,21 +4,20 @@ set -e
 
 python --version
 
-# ccache setup
-mkdir -p _ccache
-export CCACHE_BASEDIR="$(pwd)"
-export CCACHE_DIR="${CCACHE_BASEDIR}/_ccache"
 PYVER=$(python -c "import sys; sys.stdout.write(''.join(map(str, sys.version_info[:3])))")
 PYIMPL=$(python -c "import sys, platform; sys.stdout.write(platform.python_implementation())")
 SOURCE_DIR="$(pwd)"
-PY_PREFIX="$(python -c 'import sys; sys.stdout.write(sys.prefix)')"
 COV_DIR="${SOURCE_DIR}/coverage"
-export PKG_CONFIG_PATH="${PY_PREFIX}/lib/pkgconfig"
 export MALLOC_CHECK_=3
 export MALLOC_PERTURB_=$((${RANDOM} % 255 + 1))
 export G_SLICE="debug-blocks"
 export COVERAGE_FILE="${COV_DIR}/.coverage.${PYVER}"
 export CFLAGS="-coverage -ftest-coverage -fprofile-arcs"
+export CCACHE_BASEDIR="$(pwd)"
+export CCACHE_DIR="${CCACHE_BASEDIR}/_ccache"
+
+mkdir -p "${CCACHE_DIR}"
+mkdir -p "${COV_DIR}"
 
 if [[ "${PYIMPL}" == "PyPy" ]]; then
     # https://bitbucket.org/pypy/pypy/issues/2776
@@ -34,22 +33,8 @@ if [[ "${PYIMPL}" == "PyPy" ]]; then
     exit 0;
 fi;
 
-mkdir -p "${COV_DIR}"
-rm -Rf /tmp/build
-mkdir /tmp/build
-cd /tmp/build
-
-# BUILD
-"${SOURCE_DIR}"/autogen.sh --with-python=python
-make -j8
-
-# TESTS
-xvfb-run -a make check
-
-# CODE QUALITY CHECKS
-make check.quality
-
-cd "${SOURCE_DIR}"
+# CODE QUALITY
+python -m flake8
 
 # DOCUMENTATION CHECKS
 if [[ "${PYENV_VERSION}" == "2.7.14" ]]; then
