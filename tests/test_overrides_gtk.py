@@ -1368,6 +1368,223 @@ class TestTreeModel(unittest.TestCase):
         list_store.set(tree_iter, (0, 1), (20, True))
         self.assertEqual(signals, ['row-inserted', 'row-changed'])
 
+    def test_list_store_insert_before(self):
+        store = Gtk.ListStore(object)
+        signals = []
+
+        def on_row_inserted(store, tree_path, tree_iter, signal_list):
+            signal_list.append('row-inserted')
+
+        def on_row_changed(store, tree_path, tree_iter, signal_list):
+            signal_list.append('row-changed')
+
+        store.connect('row-inserted', on_row_inserted, signals)
+        store.connect('row-changed', on_row_changed, signals)
+
+        iter_ = store.append([0])
+        assert store.get_value(iter_, 0) == 0
+        assert signals == ['row-inserted']
+        del signals[:]
+
+        # append empty
+        iter_ = store.insert_before(None)
+        assert store.get_path(iter_).get_indices() == [1]
+        assert store.get_value(iter_, 0) is None
+        assert signals == ['row-inserted']
+        del signals[:]
+
+        # insert empty
+        iter_ = store.insert_before(iter_)
+        assert store.get_path(iter_).get_indices() == [1]
+        assert store.get_value(iter_, 0) is None
+        assert signals == ['row-inserted']
+        del signals[:]
+
+        # append non-empty
+        iter_ = store.insert_before(None, [1234])
+        assert store.get_path(iter_).get_indices() == [3]
+        assert store.get_value(iter_, 0) == 1234
+        assert signals == ['row-inserted', 'row-changed']
+        del signals[:]
+
+        # insert non-empty
+        iter_ = store.insert_before(iter_, [4321])
+        assert store.get_path(iter_).get_indices() == [3]
+        assert store.get_value(iter_, 0) == 4321
+        assert signals == ['row-inserted', 'row-changed']
+        del signals[:]
+
+        assert [r[0] for r in store] == [0, None, None, 4321, 1234]
+
+    def test_list_store_insert_after(self):
+        store = Gtk.ListStore(object)
+        signals = []
+
+        def on_row_inserted(store, tree_path, tree_iter, signal_list):
+            signal_list.append('row-inserted')
+
+        def on_row_changed(store, tree_path, tree_iter, signal_list):
+            signal_list.append('row-changed')
+
+        store.connect('row-inserted', on_row_inserted, signals)
+        store.connect('row-changed', on_row_changed, signals)
+
+        iter_ = store.append([0])
+        assert store.get_value(iter_, 0) == 0
+        assert signals == ['row-inserted']
+        del signals[:]
+
+        # prepend empty
+        iter_ = store.insert_after(None)
+        assert store.get_path(iter_).get_indices() == [0]
+        assert store.get_value(iter_, 0) is None
+        assert signals == ['row-inserted']
+        del signals[:]
+
+        # insert empty
+        iter_ = store.insert_after(iter_)
+        assert store.get_path(iter_).get_indices() == [1]
+        assert store.get_value(iter_, 0) is None
+        assert signals == ['row-inserted']
+        del signals[:]
+
+        # prepend non-empty
+        iter_ = store.insert_after(None, [1234])
+        assert store.get_path(iter_).get_indices() == [0]
+        assert store.get_value(iter_, 0) == 1234
+        assert signals == ['row-inserted', 'row-changed']
+        del signals[:]
+
+        # insert non-empty
+        iter_ = store.insert_after(iter_, [4321])
+        assert store.get_path(iter_).get_indices() == [1]
+        assert store.get_value(iter_, 0) == 4321
+        assert signals == ['row-inserted', 'row-changed']
+        del signals[:]
+
+        assert [r[0] for r in store] == [1234, 4321, None, None, 0]
+
+    def test_tree_store_insert_before(self):
+        store = Gtk.TreeStore(object)
+        signals = []
+
+        def on_row_inserted(store, tree_path, tree_iter, signal_list):
+            signal_list.append('row-inserted')
+
+        def on_row_changed(store, tree_path, tree_iter, signal_list):
+            signal_list.append('row-changed')
+
+        store.connect('row-inserted', on_row_inserted, signals)
+        store.connect('row-changed', on_row_changed, signals)
+
+        parent = store.append(None, [-1])
+        assert signals == ['row-inserted']
+        del signals[:]
+
+        iter_ = store.append(parent, [0])
+        assert store.get_path(iter_).get_indices() == [0, 0]
+        assert store.get_value(iter_, 0) == 0
+        assert signals == ['row-inserted']
+        del signals[:]
+
+        # append empty
+        iter_ = store.insert_before(parent, None)
+        assert store.get_path(iter_).get_indices() == [0, 1]
+        assert store.get_value(iter_, 0) is None
+        assert signals == ['row-inserted']
+        del signals[:]
+
+        # insert empty
+        iter_ = store.insert_before(parent, iter_)
+        assert store.get_path(iter_).get_indices() == [0, 1]
+        assert store.get_value(iter_, 0) is None
+        assert signals == ['row-inserted']
+        del signals[:]
+
+        # append non-empty
+        iter_ = store.insert_before(parent, None, [1234])
+        assert store.get_path(iter_).get_indices() == [0, 3]
+        assert store.get_value(iter_, 0) == 1234
+        assert signals == ['row-inserted', 'row-changed']
+        del signals[:]
+
+        # insert non-empty
+        iter_ = store.insert_before(parent, iter_, [4321])
+        assert store.get_path(iter_).get_indices() == [0, 3]
+        assert store.get_value(iter_, 0) == 4321
+        assert signals == ['row-inserted', 'row-changed']
+        del signals[:]
+
+        def func(model, path, iter_, rows):
+            rows.append((path.get_indices(), model[iter_][:]))
+
+        rows = []
+        store.foreach(func, rows)
+        assert rows == [
+            ([0], [-1]), ([0, 0], [0]), ([0, 1], [None]), ([0, 2], [None]),
+            ([0, 3], [4321]), ([0, 4], [1234])]
+
+    def test_tree_store_insert_after(self):
+        store = Gtk.TreeStore(object)
+        signals = []
+
+        def on_row_inserted(store, tree_path, tree_iter, signal_list):
+            signal_list.append('row-inserted')
+
+        def on_row_changed(store, tree_path, tree_iter, signal_list):
+            signal_list.append('row-changed')
+
+        store.connect('row-inserted', on_row_inserted, signals)
+        store.connect('row-changed', on_row_changed, signals)
+
+        parent = store.append(None, [-1])
+        assert signals == ['row-inserted']
+        del signals[:]
+
+        iter_ = store.append(parent, [0])
+        assert store.get_path(iter_).get_indices() == [0, 0]
+        assert store.get_value(iter_, 0) == 0
+        assert signals == ['row-inserted']
+        del signals[:]
+
+        # append empty
+        iter_ = store.insert_after(parent, None)
+        assert store.get_path(iter_).get_indices() == [0, 0]
+        assert store.get_value(iter_, 0) is None
+        assert signals == ['row-inserted']
+        del signals[:]
+
+        # insert empty
+        iter_ = store.insert_after(parent, iter_)
+        assert store.get_path(iter_).get_indices() == [0, 1]
+        assert store.get_value(iter_, 0) is None
+        assert signals == ['row-inserted']
+        del signals[:]
+
+        # append non-empty
+        iter_ = store.insert_after(parent, None, [1234])
+        assert store.get_path(iter_).get_indices() == [0, 0]
+        assert store.get_value(iter_, 0) == 1234
+        assert signals == ['row-inserted', 'row-changed']
+        del signals[:]
+
+        # insert non-empty
+        iter_ = store.insert_after(parent, iter_, [4321])
+        assert store.get_path(iter_).get_indices() == [0, 1]
+        assert store.get_value(iter_, 0) == 4321
+        assert signals == ['row-inserted', 'row-changed']
+        del signals[:]
+
+        def func(model, path, iter_, rows):
+            rows.append((path.get_indices(), model[iter_][:]))
+
+        rows = []
+        store.foreach(func, rows)
+
+        assert rows == [
+            ([0], [-1]), ([0, 0], [1234]), ([0, 1], [4321]),
+            ([0, 2], [None]), ([0, 3], [None]), ([0, 4], [0])]
+
     def test_tree_path(self):
         p1 = Gtk.TreePath()
         p2 = Gtk.TreePath.new_first()
