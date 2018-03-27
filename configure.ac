@@ -18,7 +18,7 @@ m4_define(python3_min_ver, 3.4)
 dnl the pygobject version number
 m4_define(pygobject_major_version, 3)
 m4_define(pygobject_minor_version, 28)
-m4_define(pygobject_micro_version, 2)
+m4_define(pygobject_micro_version, 3)
 m4_define(pygobject_version, pygobject_major_version.pygobject_minor_version.pygobject_micro_version)
 
 dnl versions of packages we require ...
