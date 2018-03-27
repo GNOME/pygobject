@@ -1,3 +1,14 @@
+3.28.2 - 2018-03-27
+-------------------
+
+* setup.py: Don't install the test C extension when it's built. :issue:`181`
+* setup.py: Always define PY_SSIZE_T_CLEAN. :issue:`185`
+* Fix __str__ return type of Gtk.TreePath with depth == 0. :issue:`143`
+* Fix a crash when setting a str property with a value containing surrogates.
+  :issue:`169`
+* tests: Fix a potential crash during tests
+
+
 3.28.1 - 2018-03-17
 -------------------
 
