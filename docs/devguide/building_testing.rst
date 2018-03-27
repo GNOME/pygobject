@@ -11,43 +11,6 @@ To pass extra arguments to pytest you can set "PYTEST_ADDOPTS":
     python3 setup.py test
 
 
-Using Autotools
----------------
-
-.. code:: shell
-
-    # Building for Python 2
-    ./autogen.sh --with-python=python2
-    make
-
-    # Building for Python 3
-    ./autogen.sh --with-python=python3
-    make
-
-    # Executing some code after the build
-    PYTHONPATH=. python3 foo.py
-
-    # To run the test suite
-    make check
-
-    # To test only a specific file/class/function::
-    make check TEST_NAMES=test_gi
-    make check TEST_NAMES=test_gi.TestUtf8
-    make check TEST_NAMES=test_gi.TestUtf8.test_utf8_full_return
-
-    # To display stdout and pytest verbose output:
-    PYGI_TEST_VERBOSE=yes make check
-
-    # To execute all the tests in a gdb session
-    make check.gdb
-
-    # To executes all the tests in valgrind
-    make check.valgrind
-
-    # To execute flake8 tests
-    make check.quality
-
-
 Using Setuptools
 ----------------
 
@@ -72,9 +35,20 @@ Using Setuptools
 
     # To display stdout and pytest verbose output:
     PYGI_TEST_VERBOSE=yes python3 setup.py test
+    # or:
+    python3 setup.py test -s
 
     # using pytest directly
     py.test-3 tests/test_gi.py
 
     # Running flake8 tests
     python3 setup.py quality
+
+    # Run under gdb
+    python3 setup.py test --gdb
+
+    # Run under valgrind
+    python3 setup.py test --valgrind --valgrind-log-file=valgrind.log
+
+    # Create a release tarball for GNOME
+    python3 setup.py sdist_gnome

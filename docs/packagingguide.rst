@@ -6,19 +6,17 @@ Some notes on how to package PyGObject
 Source packages can be found at
 https://ftp.gnome.org/pub/GNOME/sources/pygobject
 
-
 Existing Packages:
 
 * https://www.archlinux.org/packages/extra/x86_64/python-gobject
-* https://packages.qa.debian.org/p/pygobject.html
+* https://tracker.debian.org/pkg/pygobject
 * https://github.com/Alexpux/MINGW-packages/tree/master/mingw-w64-pygobject
-
 
 Building::
 
-    ./configure --with-python=${PYTHON} --prefix="${PREFIX}"
-    make check # if you want to run the test suite
-    make DESTDIR="${PKGDIR}" install
+    python3 setup.py build
+    python3 setup.py test # if you want to run the test suite
+    python3 setup.py install --prefix="${PREFIX}" --root="${PKGDIR}"
 
 Runtime dependencies:
 
@@ -37,15 +35,7 @@ Build dependencies:
     * cairo (optional)
     * pycairo (optional)
     * pkg-config
-
-    If autotools is used:
-
-        * gnome-common for PyGObject < 3.26
-        * autoconf-archive for PyGObject >= 3.26
-
-    If setup.py is used:
-
-        * setuptools
+    * setuptools (optional)
 
 Test Suite dependencies:
 
