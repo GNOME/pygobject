@@ -986,27 +986,25 @@ class ListStore(Gtk.ListStore, TreeModel, TreeSortable):
     def insert(self, position, row=None):
         return self._do_insert(position, row)
 
-    # FIXME: sends two signals; check if this can use an atomic
-    # insert_with_valuesv()
-
     def insert_before(self, sibling, row=None):
-        treeiter = Gtk.ListStore.insert_before(self, sibling)
-
         if row is not None:
-            self.set_row(treeiter, row)
+            if sibling is None:
+                position = -1
+            else:
+                position = self.get_path(sibling).get_indices()[-1]
+            return self._do_insert(position, row)
 
-        return treeiter
-
-    # FIXME: sends two signals; check if this can use an atomic
-    # insert_with_valuesv()
+        return Gtk.ListStore.insert_before(self, sibling)
 
     def insert_after(self, sibling, row=None):
-        treeiter = Gtk.ListStore.insert_after(self, sibling)
-
         if row is not None:
-            self.set_row(treeiter, row)
+            if sibling is None:
+                position = 0
+            else:
+                position = self.get_path(sibling).get_indices()[-1] + 1
+            return self._do_insert(position, row)
 
-        return treeiter
+        return Gtk.ListStore.insert_after(self, sibling)
 
     def set_value(self, treeiter, column, value):
         value = self._convert_value(column, value)
@@ -1250,27 +1248,25 @@ class TreeStore(Gtk.TreeStore, TreeModel, TreeSortable):
     def insert(self, parent, position, row=None):
         return self._do_insert(parent, position, row)
 
-    # FIXME: sends two signals; check if this can use an atomic
-    # insert_with_valuesv()
-
     def insert_before(self, parent, sibling, row=None):
-        treeiter = Gtk.TreeStore.insert_before(self, parent, sibling)
-
         if row is not None:
-            self.set_row(treeiter, row)
+            if sibling is None:
+                position = -1
+            else:
+                position = self.get_path(sibling).get_indices()[-1]
+            return self._do_insert(parent, position, row)
 
-        return treeiter
-
-    # FIXME: sends two signals; check if this can use an atomic
-    # insert_with_valuesv()
+        return Gtk.TreeStore.insert_before(self, parent, sibling)
 
     def insert_after(self, parent, sibling, row=None):
-        treeiter = Gtk.TreeStore.insert_after(self, parent, sibling)
-
         if row is not None:
-            self.set_row(treeiter, row)
+            if sibling is None:
+                position = 0
+            else:
+                position = self.get_path(sibling).get_indices()[-1] + 1
+            return self._do_insert(parent, position, row)
 
-        return treeiter
+        return Gtk.TreeStore.insert_after(self, parent, sibling)
 
     def set_value(self, treeiter, column, value):
         value = self._convert_value(column, value)

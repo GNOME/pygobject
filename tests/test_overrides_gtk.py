@@ -1404,14 +1404,14 @@ class TestTreeModel(unittest.TestCase):
         iter_ = store.insert_before(None, [1234])
         assert store.get_path(iter_).get_indices() == [3]
         assert store.get_value(iter_, 0) == 1234
-        assert signals == ['row-inserted', 'row-changed']
+        assert signals == ['row-inserted']
         del signals[:]
 
         # insert non-empty
         iter_ = store.insert_before(iter_, [4321])
         assert store.get_path(iter_).get_indices() == [3]
         assert store.get_value(iter_, 0) == 4321
-        assert signals == ['row-inserted', 'row-changed']
+        assert signals == ['row-inserted']
         del signals[:]
 
         assert [r[0] for r in store] == [0, None, None, 4321, 1234]
@@ -1452,14 +1452,14 @@ class TestTreeModel(unittest.TestCase):
         iter_ = store.insert_after(None, [1234])
         assert store.get_path(iter_).get_indices() == [0]
         assert store.get_value(iter_, 0) == 1234
-        assert signals == ['row-inserted', 'row-changed']
+        assert signals == ['row-inserted']
         del signals[:]
 
         # insert non-empty
         iter_ = store.insert_after(iter_, [4321])
         assert store.get_path(iter_).get_indices() == [1]
         assert store.get_value(iter_, 0) == 4321
-        assert signals == ['row-inserted', 'row-changed']
+        assert signals == ['row-inserted']
         del signals[:]
 
         assert [r[0] for r in store] == [1234, 4321, None, None, 0]
@@ -1505,14 +1505,14 @@ class TestTreeModel(unittest.TestCase):
         iter_ = store.insert_before(parent, None, [1234])
         assert store.get_path(iter_).get_indices() == [0, 3]
         assert store.get_value(iter_, 0) == 1234
-        assert signals == ['row-inserted', 'row-changed']
+        assert signals == ['row-inserted']
         del signals[:]
 
         # insert non-empty
         iter_ = store.insert_before(parent, iter_, [4321])
         assert store.get_path(iter_).get_indices() == [0, 3]
         assert store.get_value(iter_, 0) == 4321
-        assert signals == ['row-inserted', 'row-changed']
+        assert signals == ['row-inserted']
         del signals[:]
 
         def func(model, path, iter_, rows):
@@ -1565,14 +1565,14 @@ class TestTreeModel(unittest.TestCase):
         iter_ = store.insert_after(parent, None, [1234])
         assert store.get_path(iter_).get_indices() == [0, 0]
         assert store.get_value(iter_, 0) == 1234
-        assert signals == ['row-inserted', 'row-changed']
+        assert signals == ['row-inserted']
         del signals[:]
 
         # insert non-empty
         iter_ = store.insert_after(parent, iter_, [4321])
         assert store.get_path(iter_).get_indices() == [0, 1]
         assert store.get_value(iter_, 0) == 4321
-        assert signals == ['row-inserted', 'row-changed']
+        assert signals == ['row-inserted']
         del signals[:]
 
         def func(model, path, iter_, rows):
