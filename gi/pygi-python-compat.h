@@ -37,6 +37,12 @@ PyObject * PYGLIB_PyImport_ImportModule(const char *name);
 
 #define PYGLIB_MODULE_ERROR_RETURN NULL
 
+#ifdef __GNUC__
+#define PYGI_MODINIT_FUNC __attribute__((visibility("default"))) PyMODINIT_FUNC
+#else
+#define PYGI_MODINIT_FUNC PyMODINIT_FUNC
+#endif
+
 /* Compilation on Python 2.x */
 #if PY_VERSION_HEX < 0x03000000
 
@@ -93,8 +99,8 @@ PyObject * PYGLIB_PyImport_ImportModule(const char *name);
 
 #define PYGLIB_MODULE_START(symbol, modname)	        \
 PyObject * pyglib_##symbol##_module_create(void);       \
-DL_EXPORT(void) init##symbol(void);                     \
-DL_EXPORT(void) init##symbol(void) {                    \
+PYGI_MODINIT_FUNC init##symbol(void);                   \
+PYGI_MODINIT_FUNC init##symbol(void) {                  \
     pyglib_##symbol##_module_create();                  \
 };                                                      \
 PyObject * pyglib_##symbol##_module_create(void)        \
@@ -137,8 +143,8 @@ PyTypeObject symbol = {                                 \
     NULL                                                \
 };                                                      \
 PyObject * pyglib_##symbol##_module_create(void);       \
-PyMODINIT_FUNC PyInit_##symbol(void);                   \
-PyMODINIT_FUNC PyInit_##symbol(void) {                  \
+PYGI_MODINIT_FUNC PyInit_##symbol(void);                \
+PYGI_MODINIT_FUNC PyInit_##symbol(void) {               \
     return pyglib_##symbol##_module_create();           \
 };                                                      \
 PyObject * pyglib_##symbol##_module_create(void)        \

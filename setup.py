@@ -518,7 +518,7 @@ class build_tests(Command):
         add_ext_pkg_config_dep(ext, compiler.compiler_type, "glib-2.0")
         add_ext_pkg_config_dep(ext, compiler.compiler_type, "gio-2.0")
         add_ext_pkg_config_dep(ext, compiler.compiler_type, "cairo")
-        add_ext_warn_flags(ext, compiler)
+        add_ext_compiler_flags(ext, compiler)
 
         dist = Distribution({"ext_modules": [ext]})
 
@@ -758,7 +758,7 @@ def add_ext_pkg_config_dep(ext, compiler_type, name):
         ext.libraries += pkg_config_parse("--libs-only-l", name)
 
 
-def add_ext_warn_flags(ext, compiler, _cache={}):
+def add_ext_compiler_flags(ext, compiler, _cache={}):
     cache_key = compiler.compiler[0]
     if cache_key not in _cache:
 
@@ -815,6 +815,7 @@ def add_ext_warn_flags(ext, compiler, _cache={}):
 
         args += [
             "-fno-strict-aliasing",
+            "-fvisibility=hidden",
         ]
 
         _cache[cache_key] = filter_compiler_arguments(compiler, args)
@@ -879,7 +880,7 @@ class build_ext(du_build_ext):
         add_dependency(gi_ext, "gio-2.0")
         add_dependency(gi_ext, "gobject-introspection-1.0")
         add_dependency(gi_ext, "libffi")
-        add_ext_warn_flags(gi_ext, compiler)
+        add_ext_compiler_flags(gi_ext, compiler)
 
         gi_cairo_ext = ext["gi._gi_cairo"]
         add_dependency(gi_cairo_ext, "glib-2.0")
@@ -889,7 +890,7 @@ class build_ext(du_build_ext):
         add_dependency(gi_cairo_ext, "cairo")
         add_dependency(gi_cairo_ext, "cairo-gobject")
         add_pycairo(gi_cairo_ext)
-        add_ext_warn_flags(gi_cairo_ext, compiler)
+        add_ext_compiler_flags(gi_cairo_ext, compiler)
 
     def run(self):
         self._write_config_h()
