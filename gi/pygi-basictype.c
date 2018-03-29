@@ -813,6 +813,8 @@ _pygi_marshal_from_py_basic_type (PyObject   *object,   /* in */
             return FALSE;
 
         default:
+            PyErr_Format (PyExc_TypeError, "Type tag %d not supported",
+                          type_tag);
             return FALSE;
     }
 
@@ -986,10 +988,10 @@ _pygi_marshal_to_py_basic_type (GIArgument  *arg,
             return pygi_filename_to_py (arg->v_string);
 
         default:
-            break;
+            PyErr_Format (PyExc_TypeError, "Type tag %d not supported",
+                          type_tag);
+            return NULL;
     }
-
-    return NULL;
 }
 
 PyObject *

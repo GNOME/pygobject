@@ -334,12 +334,6 @@ _pygi_argument_from_object (PyObject   *object,
     memset(&arg, 0, sizeof(GIArgument));
     type_tag = g_type_info_get_tag (type_info);
 
-    /* Ignores cleanup data for now. */
-    if (_pygi_marshal_from_py_basic_type (object, &arg, type_tag, transfer, &cleanup_data) ||
-            PyErr_Occurred()) {
-        return arg;
-    }
-
     switch (type_tag) {
         case GI_TYPE_TAG_ARRAY:
         {
@@ -684,7 +678,9 @@ hash_table_release:
             /* TODO */
             break;
         default:
-            g_assert_not_reached ();
+            /* Ignores cleanup data for now. */
+            _pygi_marshal_from_py_basic_type (object, &arg, type_tag, transfer, &cleanup_data);
+            break;
     }
 
     return arg;
@@ -711,9 +707,6 @@ _pygi_argument_to_object (GIArgument  *arg,
     PyObject *object = NULL;
 
     type_tag = g_type_info_get_tag (type_info);
-    object = _pygi_marshal_to_py_basic_type (arg, type_tag, transfer);
-    if (object)
-        return object;
 
     switch (type_tag) {
         case GI_TYPE_TAG_VOID:
@@ -1000,7 +993,7 @@ _pygi_argument_to_object (GIArgument  *arg,
         }
         default:
         {
-            g_assert_not_reached();
+            object = _pygi_marshal_to_py_basic_type (arg, type_tag, transfer);
         }
     }
 
