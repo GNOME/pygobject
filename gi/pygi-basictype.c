@@ -1062,8 +1062,6 @@ pygi_arg_basic_type_new_from_info (GITypeInfo   *type_info,
 {
     gboolean res = FALSE;
     PyGIArgCache *arg_cache = pygi_arg_cache_alloc ();
-    if (arg_cache == NULL)
-        return NULL;
 
     res = arg_basic_type_setup_from_info (arg_cache,
                                           type_info,

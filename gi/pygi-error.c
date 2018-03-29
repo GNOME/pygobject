@@ -328,11 +328,9 @@ pygi_arg_gerror_new_from_info (GITypeInfo   *type_info,
                                PyGIDirection direction)
 {
     gboolean res = FALSE;
-    PyGIArgCache *arg_cache = NULL;
+    PyGIArgCache *arg_cache;
 
     arg_cache = pygi_arg_cache_alloc ();
-    if (arg_cache == NULL)
-        return NULL;
 
     res = pygi_arg_gerror_setup_from_info (arg_cache,
                                            type_info,
