@@ -67,12 +67,12 @@ pygi_gpointer_from_py (PyObject *py_arg, gpointer *result)
 }
 
 static gboolean
-_pygi_marshal_from_py_void (PyGIInvokeState   *state,
-                            PyGICallableCache *callable_cache,
-                            PyGIArgCache      *arg_cache,
-                            PyObject          *py_arg,
-                            GIArgument        *arg,
-                            gpointer          *cleanup_data)
+marshal_from_py_void (PyGIInvokeState   *state,
+                      PyGICallableCache *callable_cache,
+                      PyGIArgCache      *arg_cache,
+                      PyObject          *py_arg,
+                      GIArgument        *arg,
+                      gpointer          *cleanup_data)
 {
     g_warn_if_fail (arg_cache->transfer == GI_TRANSFER_NOTHING);
 
@@ -744,11 +744,11 @@ pygi_guint64_to_py (guint64 value)
 }
 
 gboolean
-_pygi_marshal_from_py_basic_type (PyObject   *object,   /* in */
-                                  GIArgument *arg,      /* out */
-                                  GITypeTag   type_tag,
-                                  GITransfer  transfer,
-                                  gpointer   *cleanup_data /* out */)
+pygi_marshal_from_py_basic_type (PyObject   *object,   /* in */
+                                 GIArgument *arg,      /* out */
+                                 GITypeTag   type_tag,
+                                 GITransfer  transfer,
+                                 gpointer   *cleanup_data /* out */)
 {
     switch (type_tag) {
         case GI_TYPE_TAG_VOID:
@@ -822,65 +822,38 @@ _pygi_marshal_from_py_basic_type (PyObject   *object,   /* in */
 }
 
 gboolean
-_pygi_marshal_from_py_basic_type_cache_adapter (PyGIInvokeState   *state,
-                                                PyGICallableCache *callable_cache,
-                                                PyGIArgCache      *arg_cache,
-                                                PyObject          *py_arg,
-                                                GIArgument        *arg,
-                                                gpointer          *cleanup_data)
+pygi_marshal_from_py_basic_type_cache_adapter (PyGIInvokeState   *state,
+                                               PyGICallableCache *callable_cache,
+                                               PyGIArgCache      *arg_cache,
+                                               PyObject          *py_arg,
+                                               GIArgument        *arg,
+                                               gpointer          *cleanup_data)
 {
-    return _pygi_marshal_from_py_basic_type (py_arg,
-                                             arg,
-                                             arg_cache->type_tag,
-                                             arg_cache->transfer,
-                                             cleanup_data);
+    return pygi_marshal_from_py_basic_type (py_arg,
+                                            arg,
+                                            arg_cache->type_tag,
+                                            arg_cache->transfer,
+                                            cleanup_data);
 }
 
 static void
-_pygi_marshal_cleanup_from_py_utf8 (PyGIInvokeState *state,
-                                    PyGIArgCache    *arg_cache,
-                                    PyObject        *py_arg,
-                                    gpointer         data,
-                                    gboolean         was_processed)
+marshal_cleanup_from_py_utf8 (PyGIInvokeState *state,
+                              PyGIArgCache    *arg_cache,
+                              PyObject        *py_arg,
+                              gpointer         data,
+                              gboolean         was_processed)
 {
     /* We strdup strings so free unless ownership is transferred to C. */
     if (was_processed && arg_cache->transfer == GI_TRANSFER_NOTHING)
         g_free (data);
 }
 
-static void
-_arg_cache_from_py_void_setup (PyGIArgCache *arg_cache)
-{
-    arg_cache->from_py_marshaller = _pygi_marshal_from_py_void;
-}
-
-
-static void
-_arg_cache_from_py_basic_type_setup (PyGIArgCache *arg_cache)
-{
-    arg_cache->from_py_marshaller = _pygi_marshal_from_py_basic_type_cache_adapter;
-}
-
-static void
-_arg_cache_from_py_utf8_setup (PyGIArgCache *arg_cache,
-                               GITransfer transfer)
-{
-    arg_cache->from_py_marshaller = _pygi_marshal_from_py_basic_type_cache_adapter;
-    arg_cache->from_py_cleanup = _pygi_marshal_cleanup_from_py_utf8;
-}
-
-
-/*
- * To Python Marshaling
- */
-
-
 static PyObject *
-_pygi_marshal_to_py_void (PyGIInvokeState   *state,
-                          PyGICallableCache *callable_cache,
-                          PyGIArgCache      *arg_cache,
-                          GIArgument        *arg,
-                          gpointer          *cleanup_data)
+marshal_to_py_void (PyGIInvokeState   *state,
+                    PyGICallableCache *callable_cache,
+                    PyGIArgCache      *arg_cache,
+                    GIArgument        *arg,
+                    gpointer          *cleanup_data)
 {
     if (arg_cache->is_pointer) {
         return PyLong_FromVoidPtr (arg->v_pointer);
@@ -923,7 +896,7 @@ pygi_filename_to_py (gchar *value)
 }
 
 /**
- * _pygi_marshal_to_py_basic_type:
+ * pygi_marshal_to_py_basic_type:
  * @arg: The argument to convert to an object.
  * @type_tag: Type tag for @arg
  * @transfer: Transfer annotation
@@ -937,9 +910,9 @@ pygi_filename_to_py (gchar *value)
  *          the argument.
  */
 PyObject *
-_pygi_marshal_to_py_basic_type (GIArgument  *arg,
-                                GITypeTag type_tag,
-                                GITransfer transfer)
+pygi_marshal_to_py_basic_type (GIArgument  *arg,
+                               GITypeTag type_tag,
+                               GITransfer transfer)
 {
     switch (type_tag) {
         case GI_TYPE_TAG_BOOLEAN:
@@ -995,23 +968,23 @@ _pygi_marshal_to_py_basic_type (GIArgument  *arg,
 }
 
 PyObject *
-_pygi_marshal_to_py_basic_type_cache_adapter (PyGIInvokeState   *state,
-                                              PyGICallableCache *callable_cache,
-                                              PyGIArgCache      *arg_cache,
-                                              GIArgument        *arg,
-                                              gpointer          *cleanup_data)
+pygi_marshal_to_py_basic_type_cache_adapter (PyGIInvokeState   *state,
+                                             PyGICallableCache *callable_cache,
+                                             PyGIArgCache      *arg_cache,
+                                             GIArgument        *arg,
+                                             gpointer          *cleanup_data)
 {
-    return _pygi_marshal_to_py_basic_type (arg,
-                                            arg_cache->type_tag,
-                                            arg_cache->transfer);
+    return pygi_marshal_to_py_basic_type (arg,
+                                          arg_cache->type_tag,
+                                          arg_cache->transfer);
 }
 
 static void
-_pygi_marshal_cleanup_to_py_utf8 (PyGIInvokeState *state,
-                                  PyGIArgCache    *arg_cache,
-                                  gpointer         cleanup_data,
-                                  gpointer         data,
-                                  gboolean         was_processed)
+marshal_cleanup_to_py_utf8 (PyGIInvokeState *state,
+                            PyGIArgCache    *arg_cache,
+                            gpointer         cleanup_data,
+                            gpointer         data,
+                            gboolean         was_processed)
 {
     /* Python copies the string so we need to free it
        if the interface is transfering ownership, 
@@ -1020,38 +993,12 @@ _pygi_marshal_cleanup_to_py_utf8 (PyGIInvokeState *state,
         g_free (data);
 }
 
-
-
-static void
-_arg_cache_to_py_basic_type_setup (PyGIArgCache *arg_cache)
-{
-    arg_cache->to_py_marshaller = _pygi_marshal_to_py_basic_type_cache_adapter;
-}
-
-static void
-_arg_cache_to_py_void_setup (PyGIArgCache *arg_cache)
-{
-    arg_cache->to_py_marshaller = _pygi_marshal_to_py_void;
-}
-
-static void
-_arg_cache_to_py_utf8_setup (PyGIArgCache *arg_cache,
-                               GITransfer transfer)
-{
-    arg_cache->to_py_marshaller = _pygi_marshal_to_py_basic_type_cache_adapter;
-    arg_cache->to_py_cleanup = _pygi_marshal_cleanup_to_py_utf8;
-}
-
-/*
- * Basic Type Interface
- */
-
 static gboolean
-pygi_arg_basic_type_setup_from_info (PyGIArgCache  *arg_cache,
-                                     GITypeInfo    *type_info,
-                                     GIArgInfo     *arg_info,
-                                     GITransfer     transfer,
-                                     PyGIDirection  direction)
+arg_basic_type_setup_from_info (PyGIArgCache  *arg_cache,
+                                GITypeInfo    *type_info,
+                                GIArgInfo     *arg_info,
+                                GITransfer     transfer,
+                                PyGIDirection  direction)
 {
     GITypeTag type_tag = g_type_info_get_tag (type_info);
 
@@ -1061,10 +1008,10 @@ pygi_arg_basic_type_setup_from_info (PyGIArgCache  *arg_cache,
     switch (type_tag) {
        case GI_TYPE_TAG_VOID:
            if (direction & PYGI_DIRECTION_FROM_PYTHON)
-               _arg_cache_from_py_void_setup (arg_cache);
+                arg_cache->from_py_marshaller = marshal_from_py_void;
 
            if (direction & PYGI_DIRECTION_TO_PYTHON)
-               _arg_cache_to_py_void_setup (arg_cache);
+                arg_cache->to_py_marshaller = marshal_to_py_void;
 
            break;
        case GI_TYPE_TAG_BOOLEAN:
@@ -1081,19 +1028,23 @@ pygi_arg_basic_type_setup_from_info (PyGIArgCache  *arg_cache,
        case GI_TYPE_TAG_UNICHAR:
        case GI_TYPE_TAG_GTYPE:
            if (direction & PYGI_DIRECTION_FROM_PYTHON)
-               _arg_cache_from_py_basic_type_setup (arg_cache);
+               arg_cache->from_py_marshaller = pygi_marshal_from_py_basic_type_cache_adapter;
 
            if (direction & PYGI_DIRECTION_TO_PYTHON)
-               _arg_cache_to_py_basic_type_setup (arg_cache);
+               arg_cache->to_py_marshaller = pygi_marshal_to_py_basic_type_cache_adapter;
 
            break;
        case GI_TYPE_TAG_UTF8:
        case GI_TYPE_TAG_FILENAME:
-           if (direction & PYGI_DIRECTION_FROM_PYTHON)
-               _arg_cache_from_py_utf8_setup (arg_cache, transfer);
+           if (direction & PYGI_DIRECTION_FROM_PYTHON) {
+                arg_cache->from_py_marshaller = pygi_marshal_from_py_basic_type_cache_adapter;
+                arg_cache->from_py_cleanup = marshal_cleanup_from_py_utf8;
+           }
 
-           if (direction & PYGI_DIRECTION_TO_PYTHON)
-               _arg_cache_to_py_utf8_setup (arg_cache, transfer);
+           if (direction & PYGI_DIRECTION_TO_PYTHON) {
+                arg_cache->to_py_marshaller = pygi_marshal_to_py_basic_type_cache_adapter;
+                arg_cache->to_py_cleanup = marshal_cleanup_to_py_utf8;
+           }
 
            break;
        default:
@@ -1114,11 +1065,11 @@ pygi_arg_basic_type_new_from_info (GITypeInfo   *type_info,
     if (arg_cache == NULL)
         return NULL;
 
-    res = pygi_arg_basic_type_setup_from_info (arg_cache,
-                                               type_info,
-                                               arg_info,
-                                               transfer,
-                                               direction);
+    res = arg_basic_type_setup_from_info (arg_cache,
+                                          type_info,
+                                          arg_info,
+                                          transfer,
+                                          direction);
     if (res) {
         return arg_cache;
     } else {

@@ -679,7 +679,7 @@ hash_table_release:
             break;
         default:
             /* Ignores cleanup data for now. */
-            _pygi_marshal_from_py_basic_type (object, &arg, type_tag, transfer, &cleanup_data);
+            pygi_marshal_from_py_basic_type (object, &arg, type_tag, transfer, &cleanup_data);
             break;
     }
 
@@ -993,7 +993,7 @@ _pygi_argument_to_object (GIArgument  *arg,
         }
         default:
         {
-            object = _pygi_marshal_to_py_basic_type (arg, type_tag, transfer);
+            object = pygi_marshal_to_py_basic_type (arg, type_tag, transfer);
         }
     }
 
