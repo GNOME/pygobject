@@ -38,10 +38,33 @@ static const unsigned long __nan[2] = {0xffffffff, 0x7fffffff};
 
 #endif
 
+static gboolean
+pygi_gpointer_from_py (PyObject *py_arg, gpointer *result)
+{
+    void* temp;
 
-/*
- * From Python Marshaling
- */
+    if (py_arg == Py_None) {
+        *result = NULL;
+        return TRUE;
+    } else if (PYGLIB_CPointer_Check(py_arg)) {
+        temp = PYGLIB_CPointer_GetPointer (py_arg, NULL);
+        if (temp == NULL)
+            return FALSE;
+        *result = temp;
+        return TRUE;
+    } else if (PYGLIB_PyLong_Check(py_arg) || PyLong_Check(py_arg)) {
+        temp = PyLong_AsVoidPtr (py_arg);
+        if (PyErr_Occurred ())
+            return FALSE;
+        *result = temp;
+        return TRUE;
+    } else {
+        PyErr_SetString(PyExc_ValueError,
+                        "Pointer arguments are restricted to integers, capsules, and None. "
+                        "See: https://bugzilla.gnome.org/show_bug.cgi?id=683599");
+        return FALSE;
+    }
+}
 
 static gboolean
 _pygi_marshal_from_py_void (PyGIInvokeState   *state,
@@ -53,44 +76,19 @@ _pygi_marshal_from_py_void (PyGIInvokeState   *state,
 {
     g_warn_if_fail (arg_cache->transfer == GI_TRANSFER_NOTHING);
 
-    if (py_arg == Py_None) {
-        arg->v_pointer = NULL;
-    } else if (PYGLIB_CPointer_Check(py_arg)) {
-        arg->v_pointer = PYGLIB_CPointer_GetPointer (py_arg, NULL);
-    } else if (PYGLIB_PyLong_Check(py_arg) || PyLong_Check(py_arg)) {
-        arg->v_pointer = PyLong_AsVoidPtr (py_arg);
-    } else {
-        PyErr_SetString(PyExc_ValueError,
-                        "Pointer arguments are restricted to integers, capsules, and None. "
-                        "See: https://bugzilla.gnome.org/show_bug.cgi?id=683599");
-        return FALSE;
+    if (pygi_gpointer_from_py (py_arg, &(arg->v_pointer))) {
+        *cleanup_data = arg->v_pointer;
+        return TRUE;
     }
 
-    *cleanup_data = arg->v_pointer;
-    return TRUE;
+    return FALSE;
 }
 
 static gboolean
-check_valid_double (double x, double min, double max)
-{
-    char buf[100];
-
-    if ((x < min || x > max) && x != INFINITY && x != -INFINITY && x != NAN) {
-        if (PyErr_Occurred())
-            PyErr_Clear ();
-
-        /* we need this as PyErr_Format() does not support float types */
-        snprintf (buf, sizeof (buf), "%g not in range %g to %g", x, min, max);
-        PyErr_SetString (PyExc_OverflowError, buf);
-        return FALSE;
-    }
-    return TRUE;
-}
-
-static gboolean
-_pygi_py_arg_to_double (PyObject *py_arg, double *double_)
+pygi_gdouble_from_py (PyObject *py_arg, gdouble *double_)
 {
     PyObject *py_float;
+    gdouble temp;
 
     if (!PyNumber_Check (py_arg)) {
         PyErr_Format (PyExc_TypeError, "Must be number, not %s",
@@ -99,57 +97,64 @@ _pygi_py_arg_to_double (PyObject *py_arg, double *double_)
     }
 
     py_float = PyNumber_Float (py_arg);
-    if (!py_float)
+    if (py_float == NULL)
         return FALSE;
 
-    *double_ = PyFloat_AsDouble (py_float);
+    temp = PyFloat_AsDouble (py_float);
     Py_DECREF (py_float);
 
+    if (PyErr_Occurred ())
+        return FALSE;
+
+    *double_ = temp;
 
     return TRUE;
 }
 
-static gboolean
-_pygi_marshal_from_py_float (PyObject          *py_arg,
-                             GIArgument        *arg)
+static PyObject *
+pygi_gdouble_to_py (gdouble double_)
 {
-    double double_;
-
-    if (!_pygi_py_arg_to_double (py_arg, &double_))
-        return FALSE;
-
-    if (PyErr_Occurred () || !check_valid_double (double_, -G_MAXFLOAT, G_MAXFLOAT))
-        return FALSE;
-
-    arg->v_float = double_;
-    return TRUE;
+    return PyFloat_FromDouble (double_);
 }
 
 static gboolean
-_pygi_marshal_from_py_double (PyObject          *py_arg,
-                              GIArgument        *arg)
+pygi_gfloat_from_py (PyObject *py_arg, gfloat *float_)
 {
-    double double_;
+    gdouble double_;
 
-    if (!_pygi_py_arg_to_double (py_arg, &double_))
+    if (!pygi_gdouble_from_py (py_arg, &double_))
         return FALSE;
 
-    if (PyErr_Occurred () || !check_valid_double (double_, -G_MAXDOUBLE, G_MAXDOUBLE))
-        return FALSE;
+    if ((double_ < -G_MAXFLOAT || double_ > G_MAXFLOAT) &&
+            double_ != INFINITY && double_ != -INFINITY && double_ != NAN) {
+        char buf[100];
 
-    arg->v_double = double_;
+        /* we need this as PyErr_Format() does not support float types */
+        snprintf (buf, sizeof (buf), "%g not in range %g to %g",
+                  double_, -G_MAXFLOAT, G_MAXFLOAT);
+        PyErr_SetString (PyExc_OverflowError, buf);
+        return FALSE;
+    }
+
+    *float_ = (gfloat)double_;
+
     return TRUE;
 }
 
+static PyObject *
+pygi_gfloat_to_py (gfloat float_)
+{
+    return PyFloat_FromDouble (float_);
+}
+
 static gboolean
-_pygi_marshal_from_py_unichar (PyObject          *py_arg,
-                               GIArgument        *arg)
+pygi_gunichar_from_py (PyObject *py_arg, gunichar *result)
 {
     Py_ssize_t size;
     gchar *string_;
 
     if (py_arg == Py_None) {
-        arg->v_uint32 = 0;
+        *result = 0;
         return FALSE;
     }
 
@@ -187,37 +192,59 @@ _pygi_marshal_from_py_unichar (PyObject          *py_arg,
        return FALSE;
     }
 
-    arg->v_uint32 = g_utf8_get_char (string_);
+    *result = g_utf8_get_char (string_);
     g_free (string_);
 
     return TRUE;
 }
 
-static gboolean
-_pygi_marshal_from_py_gtype (PyObject          *py_arg,
-                             GIArgument        *arg)
+static PyObject *
+pygi_gunichar_to_py (gunichar value)
 {
-    GType type_ = pyg_type_from_object (py_arg);
+    PyObject *py_obj = NULL;
 
-    if (type_ == 0) {
+    /* Preserve the bidirectional mapping between 0 and "" */
+    if (value == 0) {
+        py_obj = PYGLIB_PyUnicode_FromString ("");
+    } else if (g_unichar_validate (value)) {
+        gchar utf8[6];
+        gint bytes;
+
+        bytes = g_unichar_to_utf8 (value, utf8);
+        py_obj = PYGLIB_PyUnicode_FromStringAndSize ((char*)utf8, bytes);
+    } else {
+        /* TODO: Convert the error to an exception. */
+        PyErr_Format (PyExc_TypeError,
+                      "Invalid unicode codepoint %" G_GUINT32_FORMAT,
+                      value);
+    }
+
+    return py_obj;
+}
+
+static gboolean
+pygi_gtype_from_py (PyObject *py_arg, GType *type)
+{
+    GType temp = pyg_type_from_object (py_arg);
+
+    if (temp == 0) {
         PyErr_Format (PyExc_TypeError, "Must be gobject.GType, not %s",
                       py_arg->ob_type->tp_name);
         return FALSE;
     }
 
-    arg->v_size = type_;
+    *type = temp;
+
     return TRUE;
 }
 
 static gboolean
-_pygi_marshal_from_py_utf8 (PyObject          *py_arg,
-                            GIArgument        *arg,
-                            gpointer          *cleanup_data)
+pygi_utf8_from_py (PyObject *py_arg, gchar **result)
 {
     gchar *string_;
 
     if (py_arg == Py_None) {
-        arg->v_pointer = NULL;
+        *result = NULL;
         return TRUE;
     }
 
@@ -240,20 +267,18 @@ _pygi_marshal_from_py_utf8 (PyObject          *py_arg,
         return FALSE;
     }
 
-    arg->v_string = string_;
-    *cleanup_data = arg->v_string;
+    *result = string_;
     return TRUE;
 }
 
-G_GNUC_UNUSED static gboolean
-_pygi_marshal_from_py_filename_unix (PyObject          *py_arg,
-                                     GIArgument        *arg,
-                                     gpointer          *cleanup_data)
+G_GNUC_UNUSED
+static gboolean
+filename_from_py_unix (PyObject *py_arg, gchar **result)
 {
     gchar *filename;
 
     if (py_arg == Py_None) {
-        arg->v_pointer = NULL;
+        *result = NULL;
         return TRUE;
     }
 
@@ -291,20 +316,18 @@ _pygi_marshal_from_py_filename_unix (PyObject          *py_arg,
         return FALSE;
     }
 
-    arg->v_string = filename;
-    *cleanup_data = filename;
+    *result = filename;
     return TRUE;
 }
 
-G_GNUC_UNUSED static gboolean
-_pygi_marshal_from_py_filename_win32 (PyObject          *py_arg,
-                                      GIArgument        *arg,
-                                      gpointer          *cleanup_data)
+G_GNUC_UNUSED
+static gboolean
+filename_from_py_win32 (PyObject *py_arg, gchar **result)
 {
     gchar *filename;
 
     if (py_arg == Py_None) {
-        arg->v_pointer = NULL;
+        *result = NULL;
         return TRUE;
     }
 
@@ -339,7 +362,7 @@ _pygi_marshal_from_py_filename_win32 (PyObject          *py_arg,
 #else
     if (PYGLIB_PyBytes_Check (py_arg)) {
         PyObject *uni_arg;
-        gboolean result;
+        gboolean temp_result;
         char *buffer;
 
         if (PYGLIB_PyBytes_AsStringAndSize (py_arg, &buffer, NULL) == -1)
@@ -348,9 +371,9 @@ _pygi_marshal_from_py_filename_win32 (PyObject          *py_arg,
         uni_arg = PyUnicode_DecodeFSDefault (buffer);
         if (!uni_arg)
             return FALSE;
-        result = _pygi_marshal_from_py_filename_win32 (uni_arg, arg, cleanup_data);
+        temp_result = filename_from_py_win32 (uni_arg, result);
         Py_DECREF (uni_arg);
-        return result;
+        return temp_result;
     } else if (PyUnicode_Check (py_arg)) {
         PyObject *bytes, *temp_uni;
         char *buffer;
@@ -388,35 +411,29 @@ _pygi_marshal_from_py_filename_win32 (PyObject          *py_arg,
     }
 #endif
 
-    arg->v_string = filename;
-    *cleanup_data = filename;
+    *result = filename;
     return TRUE;
 }
 
 static gboolean
-_pygi_marshal_from_py_filename (PyObject          *py_arg,
-                                GIArgument        *arg,
-                                gpointer          *cleanup_data)
+pygi_filename_from_py (PyObject *py_arg, gchar **result)
 {
 #ifdef G_OS_WIN32
-    return _pygi_marshal_from_py_filename_win32 (py_arg, arg, cleanup_data);
+    return filename_from_py_win32 (py_arg, result);
 #else
-    return _pygi_marshal_from_py_filename_unix (py_arg, arg, cleanup_data);
+    return filename_from_py_unix (py_arg, result);
 #endif
 }
 
-static gboolean
-_pygi_marshal_from_py_long (PyObject   *object,   /* in */
-                            GIArgument *arg,      /* out */
-                            GITypeTag   type_tag,
-                            GITransfer  transfer)
+static PyObject *
+base_number_checks (PyObject *object)
 {
     PyObject *number;
 
     if (!PyNumber_Check (object)) {
         PyErr_Format (PyExc_TypeError, "Must be number, not %s",
                       object->ob_type->tp_name);
-        return FALSE;
+        return NULL;
     }
 
 #if PY_MAJOR_VERSION < 3
@@ -435,117 +452,295 @@ _pygi_marshal_from_py_long (PyObject   *object,   /* in */
 
     if (number == NULL) {
         PyErr_SetString (PyExc_TypeError, "expected int argument");
-        return FALSE;
+        return NULL;
     }
 
-    switch (type_tag) {
-        case GI_TYPE_TAG_INT8:
-        {
-            long long_value = PyLong_AsLong (number);
-            if (PyErr_Occurred()) {
-                break;
-            } else if (long_value < G_MININT8 || long_value > G_MAXINT8) {
-                PyErr_Format (PyExc_OverflowError, "%ld not in range %ld to %ld",
-                              long_value, (long)G_MININT8, (long)G_MAXINT8);
-            } else {
-                arg->v_int8 = long_value;
-            }
-            break;
-        }
+    return number;
+}
 
-        case GI_TYPE_TAG_UINT8:
-        {
-            long long_value = PyLong_AsLong (number);
-            if (PyErr_Occurred()) {
-                break;
-            } else if (long_value < 0 || long_value > G_MAXUINT8) {
-                PyErr_Format (PyExc_OverflowError, "%ld not in range %ld to %ld",
-                              long_value, (long)0, (long)G_MAXUINT8);
-            } else {
-                arg->v_uint8 = long_value;
-            }
-            break;
-        }
-
-        case GI_TYPE_TAG_INT16:
-        {
-            long long_value = PyLong_AsLong (number);
-            if (PyErr_Occurred()) {
-                break;
-            } else if (long_value < G_MININT16 || long_value > G_MAXINT16) {
-                PyErr_Format (PyExc_OverflowError, "%ld not in range %ld to %ld",
-                              long_value, (long)G_MININT16, (long)G_MAXINT16);
-            } else {
-                arg->v_int16 = long_value;
-            }
-            break;
-        }
-
-        case GI_TYPE_TAG_UINT16:
-        {
-            long long_value = PyLong_AsLong (number);
-            if (PyErr_Occurred()) {
-                break;
-            } else if (long_value < 0 || long_value > G_MAXUINT16) {
-                PyErr_Format (PyExc_OverflowError, "%ld not in range %ld to %ld",
-                              long_value, (long)0, (long)G_MAXUINT16);
-            } else {
-                arg->v_uint16 = long_value;
-            }
-            break;
-        }
-
-        case GI_TYPE_TAG_INT32:
-        {
-            long long_value = PyLong_AsLong (number);
-            if (PyErr_Occurred()) {
-                break;
-            } else if (long_value < G_MININT32 || long_value > G_MAXINT32) {
-                PyErr_Format (PyExc_OverflowError, "%ld not in range %ld to %ld",
-                              long_value, (long)G_MININT32, (long)G_MAXINT32);
-            } else {
-                arg->v_int32 = long_value;
-            }
-            break;
-        }
-
-        case GI_TYPE_TAG_UINT32:
-        {
-            PY_LONG_LONG long_value = PyLong_AsLongLong (number);
-            if (PyErr_Occurred()) {
-                break;
-            } else if (long_value < 0 || long_value > G_MAXUINT32) {
-                PyErr_Format (PyExc_OverflowError, "%lld not in range %ld to %lu",
-                              long_value, (long)0, (unsigned long)G_MAXUINT32);
-            } else {
-                arg->v_uint32 = long_value;
-            }
-            break;
-        }
-
-        case GI_TYPE_TAG_INT64:
-        {
-            /* Rely on Python overflow error and convert to ValueError for 64 bit values */
-            arg->v_int64 = PyLong_AsLongLong (number);
-            break;
-        }
-
-        case GI_TYPE_TAG_UINT64:
-        {
-            /* Rely on Python overflow error and convert to ValueError for 64 bit values */
-            arg->v_uint64 = PyLong_AsUnsignedLongLong (number);
-            break;
-        }
-
-        default:
-            g_assert_not_reached ();
-    }
-
-    Py_DECREF (number);
-
-    if (PyErr_Occurred())
+static gboolean
+pygi_gboolean_from_py (PyObject *object, gboolean *result)
+{
+    int value = PyObject_IsTrue (object);
+    if (value == -1)
         return FALSE;
+    *result = (gboolean)value;
     return TRUE;
+}
+
+static PyObject *
+pygi_gboolean_to_py (gboolean value)
+{
+    return PyBool_FromLong (value);
+}
+
+static gboolean
+pygi_gint8_from_py (PyObject *object, gint8 *result)
+{
+    long long_value;
+    PyObject *number;
+
+    if (PYGLIB_PyBytes_Check (object)) {
+        if (PYGLIB_PyBytes_Size (object) != 1) {
+            PyErr_Format (PyExc_TypeError, "Must be a single character");
+            return FALSE;
+        }
+
+        *result = (gint8)(PYGLIB_PyBytes_AsString (object)[0]);
+        return TRUE;
+    }
+
+    number = base_number_checks (object);
+    if (number == NULL)
+        return FALSE;
+
+    long_value = PyLong_AsLong (number);
+    Py_DECREF (number);
+    if (long_value == -1 && PyErr_Occurred())
+        return FALSE;
+
+    if (long_value < G_MININT8 || long_value > G_MAXINT8) {
+        PyErr_Format (PyExc_OverflowError, "%ld not in range %ld to %ld",
+                      long_value, (long)G_MININT8, (long)G_MAXINT8);
+        return FALSE;
+    }
+
+    *result = (gint8)long_value;
+    return TRUE;
+}
+
+static PyObject *
+pygi_gint8_to_py (gint8 value)
+{
+    return PYGLIB_PyLong_FromLong (value);
+}
+
+static gboolean
+pygi_guint8_from_py (PyObject *object, guint8 *result)
+{
+    long long_value;
+    PyObject *number;
+
+    if (PYGLIB_PyBytes_Check (object)) {
+        if (PYGLIB_PyBytes_Size (object) != 1) {
+            PyErr_Format (PyExc_TypeError, "Must be a single character");
+            return FALSE;
+        }
+
+        *result = (guint8)(PYGLIB_PyBytes_AsString (object)[0]);
+        return TRUE;
+    }
+
+    number = base_number_checks (object);
+    if (number == NULL)
+        return FALSE;
+
+    long_value = PyLong_AsLong (number);
+    Py_DECREF (number);
+    if (long_value == -1 && PyErr_Occurred())
+        return FALSE;
+
+    if (long_value < 0 || long_value > G_MAXUINT8) {
+        PyErr_Format (PyExc_OverflowError, "%ld not in range %ld to %ld",
+                      long_value, (long)0, (long)G_MAXUINT8);
+        return FALSE;
+    }
+
+    *result = (guint8)long_value;
+    return TRUE;
+}
+
+static PyObject *
+pygi_guint8_to_py (guint8 value)
+{
+    return PYGLIB_PyLong_FromLong (value);
+}
+
+static gboolean
+pygi_gint16_from_py (PyObject *object, gint16 *result)
+{
+    long long_value;
+    PyObject *number;
+
+    number = base_number_checks (object);
+    if (number == NULL)
+        return FALSE;
+
+    long_value = PyLong_AsLong (number);
+    Py_DECREF (number);
+    if (long_value == -1 && PyErr_Occurred())
+        return FALSE;
+
+    if (long_value < G_MININT16 || long_value > G_MAXINT16) {
+        PyErr_Format (PyExc_OverflowError, "%ld not in range %ld to %ld",
+                      long_value, (long)G_MININT16, (long)G_MAXINT16);
+        return FALSE;
+    }
+
+    *result = (gint16)long_value;
+    return TRUE;
+}
+
+static PyObject *
+pygi_gint16_to_py (gint16 value)
+{
+    return PYGLIB_PyLong_FromLong (value);
+}
+
+static gboolean
+pygi_guint16_from_py (PyObject *object, guint16 *result)
+{
+    long long_value;
+    PyObject *number;
+
+    number = base_number_checks (object);
+    if (number == NULL)
+        return FALSE;
+
+    long_value = PyLong_AsLong (number);
+    Py_DECREF (number);
+    if (long_value == -1 && PyErr_Occurred())
+        return FALSE;
+
+    if (long_value < 0 || long_value > G_MAXUINT16) {
+        PyErr_Format (PyExc_OverflowError, "%ld not in range %ld to %ld",
+                      long_value, (long)0, (long)G_MAXUINT16);
+        return FALSE;
+    }
+
+    *result = (guint16)long_value;
+    return TRUE;
+}
+
+static PyObject *
+pygi_guint16_to_py (guint16 value)
+{
+    return PYGLIB_PyLong_FromLong (value);
+}
+
+static gboolean
+pygi_gint32_from_py (PyObject *object, gint32 *result)
+{
+    long long_value;
+    PyObject *number;
+
+    number = base_number_checks (object);
+    if (number == NULL)
+        return FALSE;
+
+    long_value = PyLong_AsLong (number);
+    Py_DECREF (number);
+    if (long_value == -1 && PyErr_Occurred())
+        return FALSE;
+
+    if (long_value < G_MININT32 || long_value > G_MAXINT32) {
+        PyErr_Format (PyExc_OverflowError, "%ld not in range %ld to %ld",
+                      long_value, (long)G_MININT32, (long)G_MAXINT32);
+        return FALSE;
+    }
+
+    *result = (gint32)long_value;
+    return TRUE;
+}
+
+static PyObject *
+pygi_gint32_to_py (gint32 value)
+{
+    return PYGLIB_PyLong_FromLong (value);
+}
+
+static gboolean
+pygi_guint32_from_py (PyObject *object, guint32 *result)
+{
+    long long long_value;
+    PyObject *number;
+
+    number = base_number_checks (object);
+    if (number == NULL)
+        return FALSE;
+
+    long_value = PyLong_AsLongLong (number);
+    Py_DECREF (number);
+    if (PyErr_Occurred ())
+        return FALSE;
+
+    if (long_value < 0 || long_value > G_MAXUINT32) {
+        PyErr_Format (PyExc_OverflowError, "%lld not in range %ld to %lu",
+                      long_value, (long)0, (unsigned long)G_MAXUINT32);
+        return FALSE;
+    }
+
+    *result = (guint32)long_value;
+    return TRUE;
+}
+
+static PyObject *
+pygi_guint32_to_py (guint32 value)
+{
+    return PyLong_FromLongLong (value);
+}
+
+static gboolean
+pygi_gint64_from_py (PyObject *object, gint64 *result)
+{
+    long long long_value;
+    PyObject *number;
+
+    number = base_number_checks (object);
+    if (number == NULL)
+        return FALSE;
+
+    long_value = PyLong_AsLongLong (number);
+    Py_DECREF (number);
+    if (PyErr_Occurred ())
+        return FALSE;
+
+    if (long_value < G_MININT64 || long_value > G_MAXINT64) {
+        PyErr_Format (PyExc_OverflowError, "%lld not in range %lld to %lld",
+                      long_value, (long long)G_MININT64, (long long)G_MAXINT64);
+        return FALSE;
+    }
+
+    *result = (gint64)long_value;
+    return TRUE;
+}
+
+static PyObject *
+pygi_gint64_to_py (gint64 value)
+{
+    return PyLong_FromLongLong (value);
+}
+
+static gboolean
+pygi_guint64_from_py (PyObject *object, guint64 *result)
+{
+    unsigned long long long_value;
+    PyObject *number;
+
+    number = base_number_checks (object);
+    if (number == NULL)
+        return FALSE;
+
+    long_value = PyLong_AsUnsignedLongLong (number);
+    Py_DECREF (number);
+    if (PyErr_Occurred ())
+        return FALSE;
+
+    if (long_value > G_MAXUINT64) {
+        PyErr_Format (PyExc_OverflowError, "%llu not in range %llu to %llu",
+                      long_value,
+                      (unsigned long long)0, (unsigned long long)G_MAXUINT64);
+        return FALSE;
+    }
+
+    *result = (guint64)long_value;
+    return TRUE;
+}
+
+static PyObject *
+pygi_guint64_to_py (guint64 value)
+{
+    return PyLong_FromUnsignedLongLong (value);
 }
 
 gboolean
@@ -558,69 +753,68 @@ _pygi_marshal_from_py_basic_type (PyObject   *object,   /* in */
     switch (type_tag) {
         case GI_TYPE_TAG_VOID:
             g_warn_if_fail (transfer == GI_TRANSFER_NOTHING);
-            if (object == Py_None) {
-                arg->v_pointer = NULL;
-            } else if (!PYGLIB_PyLong_Check(object)  && !PyLong_Check(object)) {
-                PyErr_SetString(PyExc_TypeError,
-                    "Pointer assignment is restricted to integer values. "
-                    "See: https://bugzilla.gnome.org/show_bug.cgi?id=683599");
-            } else {
-                arg->v_pointer = PyLong_AsVoidPtr (object);
+            if (pygi_gpointer_from_py (object, &(arg->v_pointer))) {
                 *cleanup_data = arg->v_pointer;
+                return TRUE;
             }
-            break;
+            return FALSE;
+
         case GI_TYPE_TAG_INT8:
+            return pygi_gint8_from_py (object, &(arg->v_int8));
+
         case GI_TYPE_TAG_UINT8:
-            if (PYGLIB_PyBytes_Check (object)) {
-                if (PYGLIB_PyBytes_Size (object) != 1) {
-                    PyErr_Format (PyExc_TypeError, "Must be a single character");
-                    return FALSE;
-                }
-                if (type_tag == GI_TYPE_TAG_INT8) {
-                    arg->v_int8 = (gint8)(PYGLIB_PyBytes_AsString (object)[0]);
-                } else {
-                    arg->v_uint8 = (guint8)(PYGLIB_PyBytes_AsString (object)[0]);
-                }
-            } else {
-                return _pygi_marshal_from_py_long (object, arg, type_tag, transfer);
-            }
-            break;
+            return pygi_guint8_from_py (object, &(arg->v_uint8));
+
         case GI_TYPE_TAG_INT16:
+            return pygi_gint16_from_py (object, &(arg->v_int16));
+
         case GI_TYPE_TAG_UINT16:
+            return pygi_guint16_from_py (object, &(arg->v_uint16));
+
         case GI_TYPE_TAG_INT32:
+            return pygi_gint32_from_py (object, &(arg->v_int32));
+
         case GI_TYPE_TAG_UINT32:
+            return pygi_guint32_from_py (object, &(arg->v_uint32));
+
         case GI_TYPE_TAG_INT64:
+            return pygi_gint64_from_py (object, &(arg->v_int64));
+
         case GI_TYPE_TAG_UINT64:
-            return _pygi_marshal_from_py_long (object, arg, type_tag, transfer);
+            return pygi_guint64_from_py (object, &(arg->v_uint64));
 
         case GI_TYPE_TAG_BOOLEAN:
-            arg->v_boolean = PyObject_IsTrue (object);
-            break;
+            return pygi_gboolean_from_py (object, &(arg->v_boolean));
 
         case GI_TYPE_TAG_FLOAT:
-            return _pygi_marshal_from_py_float (object, arg);
+            return pygi_gfloat_from_py (object, &(arg->v_float));
 
         case GI_TYPE_TAG_DOUBLE:
-            return _pygi_marshal_from_py_double (object, arg);
+            return pygi_gdouble_from_py (object, &(arg->v_double));
 
         case GI_TYPE_TAG_GTYPE:
-            return _pygi_marshal_from_py_gtype (object, arg);
+            return pygi_gtype_from_py (object, &(arg->v_size));
 
         case GI_TYPE_TAG_UNICHAR:
-            return _pygi_marshal_from_py_unichar (object, arg);
+            return pygi_gunichar_from_py (object, &(arg->v_uint32));
 
         case GI_TYPE_TAG_UTF8:
-            return _pygi_marshal_from_py_utf8 (object, arg, cleanup_data);
+            if (pygi_utf8_from_py (object, &(arg->v_string))) {
+                *cleanup_data = arg->v_string;
+                return TRUE;
+            }
+            return FALSE;
 
         case GI_TYPE_TAG_FILENAME:
-            return _pygi_marshal_from_py_filename (object, arg, cleanup_data);
+            if (pygi_filename_from_py (object, &(arg->v_string))) {
+                *cleanup_data = arg->v_string;
+                return TRUE;
+            }
+            return FALSE;
 
         default:
             return FALSE;
     }
-
-    if (PyErr_Occurred())
-        return FALSE;
 
     return TRUE;
 }
@@ -693,65 +887,38 @@ _pygi_marshal_to_py_void (PyGIInvokeState   *state,
 }
 
 static PyObject *
-_pygi_marshal_to_py_unichar (GIArgument *arg)
+pygi_utf8_to_py (gchar *value)
 {
-    PyObject *py_obj = NULL;
-
-    /* Preserve the bidirectional mapping between 0 and "" */
-    if (arg->v_uint32 == 0) {
-        py_obj = PYGLIB_PyUnicode_FromString ("");
-    } else if (g_unichar_validate (arg->v_uint32)) {
-        gchar utf8[6];
-        gint bytes;
-
-        bytes = g_unichar_to_utf8 (arg->v_uint32, utf8);
-        py_obj = PYGLIB_PyUnicode_FromStringAndSize ((char*)utf8, bytes);
-    } else {
-        /* TODO: Convert the error to an exception. */
-        PyErr_Format (PyExc_TypeError,
-                      "Invalid unicode codepoint %" G_GUINT32_FORMAT,
-                      arg->v_uint32);
-    }
-
-    return py_obj;
-}
-
-static PyObject *
-_pygi_marshal_to_py_utf8 (GIArgument *arg)
-{
-    PyObject *py_obj = NULL;
-    if (arg->v_string == NULL) {
+    if (value == NULL) {
         Py_RETURN_NONE;
      }
 
-    py_obj = PYGLIB_PyUnicode_FromString (arg->v_string);
-    return py_obj;
+    return PYGLIB_PyUnicode_FromString (value);
 }
 
 static PyObject *
-_pygi_marshal_to_py_filename (GIArgument *arg)
+pygi_filename_to_py (gchar *value)
 {
     PyObject *py_obj;
 
-    if (arg->v_string == NULL) {
+    if (value == NULL) {
         Py_RETURN_NONE;
     }
 
 #if PY_VERSION_HEX < 0x03000000
     /* On PY2 we return str as is */
-    py_obj = PyString_FromString (arg->v_string);
+    py_obj = PyString_FromString (value);
 #else
 #ifdef G_OS_WIN32
-    py_obj = PyUnicode_DecodeUTF8 (arg->v_string, strlen(arg->v_string),
+    py_obj = PyUnicode_DecodeUTF8 (value, strlen(value),
                                    "surrogatepass");
 #else
-    py_obj = PyUnicode_DecodeFSDefault (arg->v_string);
+    py_obj = PyUnicode_DecodeFSDefault (value);
 #endif
 #endif
 
     return py_obj;
 }
-
 
 /**
  * _pygi_marshal_to_py_basic_type:
@@ -774,53 +941,54 @@ _pygi_marshal_to_py_basic_type (GIArgument  *arg,
 {
     switch (type_tag) {
         case GI_TYPE_TAG_BOOLEAN:
-            return PyBool_FromLong (arg->v_boolean);
+            return pygi_gboolean_to_py (arg->v_boolean);
 
         case GI_TYPE_TAG_INT8:
-            return PYGLIB_PyLong_FromLong (arg->v_int8);
+            return pygi_gint8_to_py (arg->v_int8);
 
         case GI_TYPE_TAG_UINT8:
-            return PYGLIB_PyLong_FromLong (arg->v_uint8);
+            return pygi_guint8_to_py (arg->v_uint8);
 
         case GI_TYPE_TAG_INT16:
-            return PYGLIB_PyLong_FromLong (arg->v_int16);
+            return pygi_gint16_to_py (arg->v_int16);
 
         case GI_TYPE_TAG_UINT16:
-            return PYGLIB_PyLong_FromLong (arg->v_uint16);
+            return pygi_guint16_to_py (arg->v_uint16);
 
         case GI_TYPE_TAG_INT32:
-            return PYGLIB_PyLong_FromLong (arg->v_int32);
+            return pygi_gint32_to_py (arg->v_int32);
 
         case GI_TYPE_TAG_UINT32:
-            return PyLong_FromLongLong (arg->v_uint32);
+            return pygi_guint32_to_py (arg->v_uint32);
 
         case GI_TYPE_TAG_INT64:
-            return PyLong_FromLongLong (arg->v_int64);
+            return pygi_gint64_to_py (arg->v_int64);
 
         case GI_TYPE_TAG_UINT64:
-            return PyLong_FromUnsignedLongLong (arg->v_uint64);
+            return pygi_guint64_to_py (arg->v_uint64);
 
         case GI_TYPE_TAG_FLOAT:
-            return PyFloat_FromDouble (arg->v_float);
+            return pygi_gfloat_to_py (arg->v_float);
 
         case GI_TYPE_TAG_DOUBLE:
-            return PyFloat_FromDouble (arg->v_double);
+            return pygi_gdouble_to_py (arg->v_double);
 
         case GI_TYPE_TAG_GTYPE:
             return pyg_type_wrapper_new ( (GType) arg->v_size);
 
         case GI_TYPE_TAG_UNICHAR:
-            return _pygi_marshal_to_py_unichar (arg);
+            return pygi_gunichar_to_py (arg->v_uint32);
 
         case GI_TYPE_TAG_UTF8:
-            return _pygi_marshal_to_py_utf8 (arg);
+            return pygi_utf8_to_py (arg->v_string);
 
         case GI_TYPE_TAG_FILENAME:
-            return _pygi_marshal_to_py_filename (arg);
+            return pygi_filename_to_py (arg->v_string);
 
         default:
-            return NULL;
+            break;
     }
+
     return NULL;
 }
 
