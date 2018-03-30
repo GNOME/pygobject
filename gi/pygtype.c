@@ -31,6 +31,7 @@
 
 #include "pygi-type.h"
 #include "pygi-value.h"
+#include "pygi-basictype.h"
 
 /* -------------- __gtype__ objects ---------------------------- */
 
@@ -1256,6 +1257,63 @@ pyg_gtype_is_custom(GType gtype)
     return g_type_get_qdata (gtype, pygobject_custom_key) != NULL;
 }
 
+static PyObject *
+strv_from_gvalue(const GValue *value)
+{
+    gchar **argv;
+    PyObject  *py_argv;
+    gsize i;
+
+    argv = (gchar **) g_value_get_boxed (value);
+    py_argv = PyList_New (0);
+
+    for (i = 0; argv && argv[i]; i++) {
+        int res;
+        PyObject *item = pygi_utf8_to_py (argv[i]);
+        if (item == NULL) {
+            Py_DECREF (py_argv);
+            return NULL;
+        }
+        res = PyList_Append (py_argv, item);
+        Py_DECREF (item);
+        if (res == -1) {
+            Py_DECREF (py_argv);
+            return NULL;
+        }
+    }
+
+    return py_argv;
+}
+
+static int
+strv_to_gvalue(GValue *value, PyObject *obj)
+{
+    Py_ssize_t argc, i;
+    gchar **argv;
+
+    if (!(PyTuple_Check (obj) || PyList_Check (obj)))
+        return -1;
+
+    argc = PySequence_Length (obj);
+    argv = g_new (gchar *, argc + 1);
+    for (i = 0; i < argc; ++i) {
+        PyObject* item = PySequence_Fast_GET_ITEM (obj, i);
+        if (!pygi_utf8_from_py (item, &(argv[i])))
+            goto error;
+    }
+
+    argv[i] = NULL;
+    g_value_take_boxed (value, argv);
+    return 0;
+
+error:
+    for (i = i - 1; i >= 0; i--) {
+        g_free (argv[i]);
+    }
+    g_free (argv);
+    return -1;
+}
+
 /**
  * Returns 0 on success, or -1 and sets an exception.
  */
@@ -1277,9 +1335,9 @@ pygi_type_register_types(PyObject *d)
     PyGObjectDoc_Type.tp_flags = Py_TPFLAGS_DEFAULT;
     PyGObjectDoc_Type.tp_descr_get = (descrgetfunc)object_doc_descr_get;
 
-    pyg_register_gtype_custom(G_TYPE_STRV,
-                              pyg_strv_from_gvalue,
-                              pyg_strv_to_gvalue);
+    pyg_register_gtype_custom (G_TYPE_STRV,
+                               strv_from_gvalue,
+                               strv_to_gvalue);
 
     return 0;
 }

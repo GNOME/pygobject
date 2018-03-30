@@ -892,67 +892,6 @@ pyg_param_gvalue_as_pyobject(const GValue* gvalue,
 }
 
 PyObject *
-pyg_strv_from_gvalue(const GValue *value)
-{
-    gchar    **argv = (gchar **) g_value_get_boxed(value);
-    int        argc = 0, i;
-    PyObject  *py_argv;
-
-    if (argv) {
-        while (argv[argc])
-            argc++;
-    }
-    py_argv = PyList_New(argc);
-    for (i = 0; i < argc; ++i)
-	PyList_SET_ITEM(py_argv, i, PYGLIB_PyUnicode_FromString(argv[i]));
-    return py_argv;
-}
-
-int
-pyg_strv_to_gvalue(GValue *value, PyObject *obj)
-{
-    Py_ssize_t argc, i;
-    gchar **argv;
-
-    if (!(PyTuple_Check (obj) || PyList_Check (obj)))
-        return -1;
-
-    argc = PySequence_Length (obj);
-    argv = g_new (gchar *, argc + 1);
-    for (i = 0; i < argc; ++i) {
-        PyObject* item = PySequence_Fast_GET_ITEM (obj, i);
-        /* same as _pygi_marshal_from_py_utf8 */
-        if (PyUnicode_Check (item)) {
-            PyObject *pystr_obj = PyUnicode_AsUTF8String (item);
-            if (!pystr_obj) {
-                goto error;
-            }
-            argv[i] = g_strdup (PYGLIB_PyBytes_AsString (pystr_obj));
-            Py_DECREF (pystr_obj);
-        }
-#if PY_VERSION_HEX < 0x03000000
-        else if (PyString_Check (item)) {
-            argv[i] = g_strdup (PyString_AsString (item));
-        }
-#endif
-        else {
-            goto error;
-        }
-    }
-
-    argv[i] = NULL;
-    g_value_take_boxed (value, argv);
-    return 0;
-
-error:
-    for (i = i - 1; i >= 0; i--) {
-        g_free (argv[i]);
-    }
-    g_free (argv);
-    return -1;
-}
-
-PyObject *
 pyg__gvalue_get(PyObject *module, PyObject *pygvalue)
 {
     if (!pyg_boxed_check (pygvalue, G_TYPE_VALUE)) {
