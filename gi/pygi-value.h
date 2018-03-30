@@ -40,10 +40,8 @@ PyObject *pyg_strv_from_gvalue(const GValue *value);
 int       pyg_strv_to_gvalue(GValue *value, PyObject *obj);
 
 PyObject *pygi_value_to_py_basic_type      (const GValue *value,
-                                            GType fundamental);
-PyObject *pygi_value_to_py_structured_type (const GValue *value,
                                             GType fundamental,
-                                            gboolean copy_boxed);
+                                            gboolean *handled);
 
 PyObject *pyg__gvalue_get(PyObject *module, PyObject *pygvalue);
 PyObject *pyg__gvalue_set(PyObject *module, PyObject *args);

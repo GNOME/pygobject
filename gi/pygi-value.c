@@ -660,6 +660,7 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
 /**
  * pygi_value_to_py_basic_type:
  * @value: the GValue object.
+ * @handled: (out): TRUE if the return value is defined
  *
  * This function creates/returns a Python wrapper object that
  * represents the GValue passed as an argument limited to supporting basic types
@@ -668,8 +669,9 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
  * Returns: a PyObject representing the value.
  */
 PyObject *
-pygi_value_to_py_basic_type (const GValue *value, GType fundamental)
+pygi_value_to_py_basic_type (const GValue *value, GType fundamental, gboolean *handled)
 {
+    *handled = TRUE;
     switch (fundamental) {
         case G_TYPE_CHAR:
             return PYGLIB_PyLong_FromLong (g_value_get_schar (value));
@@ -702,23 +704,26 @@ pygi_value_to_py_basic_type (const GValue *value, GType fundamental)
         case G_TYPE_STRING:
             return pygi_utf8_to_py (g_value_get_string (value));
         default:
+            *handled = FALSE;
             return NULL;
     }
 }
 
 /**
- * pygi_value_to_py_structured_type:
+ * value_to_py_structured_type:
  * @value: the GValue object.
  * @copy_boxed: true if boxed values should be copied.
  *
  * This function creates/returns a Python wrapper object that
  * represents the GValue passed as an argument.
  *
- * Returns: a PyObject representing the value.
+ * Returns: a PyObject representing the value or NULL and sets an error;
  */
-PyObject *
-pygi_value_to_py_structured_type (const GValue *value, GType fundamental, gboolean copy_boxed)
+static PyObject *
+value_to_py_structured_type (const GValue *value, GType fundamental, gboolean copy_boxed)
 {
+    const gchar *type_name;
+
     switch (fundamental) {
     case G_TYPE_INTERFACE:
         if (g_type_is_a(G_VALUE_TYPE(value), G_TYPE_OBJECT))
@@ -798,6 +803,11 @@ pygi_value_to_py_structured_type (const GValue *value, GType fundamental, gboole
     }
     }
 
+    type_name = g_type_name (G_VALUE_TYPE (value));
+    if (type_name == NULL) {
+        type_name = "(null)";
+    }
+    PyErr_Format (PyExc_TypeError, "unknown type %s", type_name);
     return NULL;
 }
 
@@ -816,7 +826,7 @@ PyObject *
 pyg_value_as_pyobject (const GValue *value, gboolean copy_boxed)
 {
     PyObject *pyobj;
-    const gchar *type_name;
+    gboolean handled;
     GType fundamental = G_TYPE_FUNDAMENTAL (G_VALUE_TYPE (value));
 
     /* HACK: special case char and uchar to return PyBytes intstead of integers
@@ -831,26 +841,12 @@ pyg_value_as_pyobject (const GValue *value, gboolean copy_boxed)
         return PYGLIB_PyBytes_FromStringAndSize ((char *)&val, 1);
     }
 
-    pyobj = pygi_value_to_py_basic_type (value, fundamental);
-    if (pyobj) {
+    pyobj = pygi_value_to_py_basic_type (value, fundamental, &handled);
+    if (handled)
         return pyobj;
-    }
 
-    pyobj = pygi_value_to_py_structured_type (value, fundamental, copy_boxed);
-    if (pyobj) {
-        return pyobj;
-    }
-
-    if (!PyErr_Occurred ()) {
-        type_name = g_type_name (G_VALUE_TYPE (value));
-        if (type_name == NULL) {
-            type_name = "(null)";
-        }
-        PyErr_Format (PyExc_TypeError, "unknown type %s", type_name);
-    }
-
-    return NULL;
-
+    pyobj = value_to_py_structured_type (value, fundamental, copy_boxed);
+    return pyobj;
 }
 
 

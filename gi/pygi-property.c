@@ -126,6 +126,7 @@ pygi_get_property_value (PyGObject *instance, GParamSpec *pspec)
     GValue value = { 0, };
     PyObject *py_value = NULL;
     GType fundamental;
+    gboolean handled;
 
     if (!(pspec->flags & G_PARAM_READABLE)) {
         PyErr_Format(PyExc_TypeError, "property %s is not readable",
@@ -147,8 +148,8 @@ pygi_get_property_value (PyGObject *instance, GParamSpec *pspec)
 
 
     /* Fast path basic types which don't need GI type info. */
-    py_value = pygi_value_to_py_basic_type (&value, fundamental);
-    if (py_value) {
+    py_value = pygi_value_to_py_basic_type (&value, fundamental, &handled);
+    if (handled) {
         goto out;
     }
 
