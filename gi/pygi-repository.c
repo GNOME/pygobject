@@ -21,6 +21,7 @@
 
 #include "pygi-repository.h"
 #include "pygi-info.h"
+#include "pygi-basictype.h"
 #include "pygi-python-compat.h"
 
 PyObject *PyGIRepositoryError;
@@ -46,7 +47,7 @@ _wrap_g_irepository_enumerate_versions (PyGIRepository *self,
     ret = PyList_New(0);
     for (item = versions; item; item = item->next) {
         char *version = item->data;
-        PyObject *py_version = PYGLIB_PyUnicode_FromString (version);
+        PyObject *py_version = pygi_utf8_to_py (version);
         PyList_Append(ret, py_version);
         Py_DECREF(py_version);
         g_free (version);
@@ -121,8 +122,8 @@ _wrap_g_irepository_is_registered (PyGIRepository *self,
         return NULL;
     }
 
-    return PyBool_FromLong (g_irepository_is_registered (self->repository,
-                                                         namespace_, version));
+    return pygi_gboolean_to_py (g_irepository_is_registered (self->repository,
+                                                             namespace_, version));
 }
 
 static PyObject *
@@ -237,7 +238,7 @@ _wrap_g_irepository_get_typelib_path (PyGIRepository *self,
         return NULL;
     }
 
-    return PYGLIB_PyBytes_FromString (typelib_path);
+    return pygi_filename_to_py (typelib_path);
 }
 
 static PyObject *
@@ -260,7 +261,7 @@ _wrap_g_irepository_get_version (PyGIRepository *self,
         return NULL;
     }
 
-    return PYGLIB_PyUnicode_FromString (version);
+    return pygi_utf8_to_py (version);
 }
 
 static PyObject *
@@ -274,7 +275,7 @@ _wrap_g_irepository_get_loaded_namespaces (PyGIRepository *self)
 
     py_namespaces = PyList_New (0);
     for (i = 0; namespaces[i] != NULL; i++) {
-        PyObject *py_namespace = PYGLIB_PyUnicode_FromString (namespaces[i]);
+        PyObject *py_namespace = pygi_utf8_to_py (namespaces[i]);
         PyList_Append (py_namespaces, py_namespace);
         Py_DECREF(py_namespace);
         g_free (namespaces[i]);
@@ -309,7 +310,7 @@ _wrap_g_irepository_get_dependencies (PyGIRepository *self,
     }
 
     for (i = 0; namespaces[i] != NULL; i++) {
-        PyObject *py_namespace = PYGLIB_PyUnicode_FromString (namespaces[i]);
+        PyObject *py_namespace = pygi_utf8_to_py (namespaces[i]);
         PyList_Append (py_namespaces, py_namespace);
         Py_DECREF(py_namespace);
     }
@@ -342,7 +343,7 @@ _wrap_g_irepository_get_immediate_dependencies (PyGIRepository *self,
                                                            namespace_);
 
     for (i = 0; namespaces[i] != NULL; i++) {
-        PyObject *py_namespace = PYGLIB_PyUnicode_FromString (namespaces[i]);
+        PyObject *py_namespace = pygi_utf8_to_py (namespaces[i]);
         PyList_Append (py_namespaces, py_namespace);
         Py_DECREF (py_namespace);
     }
@@ -400,4 +401,3 @@ pygi_repository_register_types (PyObject *m)
 
     return 0;
 }
-

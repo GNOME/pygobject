@@ -1003,7 +1003,7 @@ pygi_utf8_to_py (gchar *value)
     return PYGLIB_PyUnicode_FromString (value);
 }
 
-static PyObject *
+PyObject *
 pygi_filename_to_py (gchar *value)
 {
     PyObject *py_obj;

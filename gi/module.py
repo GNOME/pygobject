@@ -22,10 +22,7 @@
 
 from __future__ import absolute_import
 
-import sys
 import importlib
-
-_have_py3 = (sys.version_info[0] >= 3)
 
 try:
     maketrans = ''.maketrans
@@ -124,9 +121,6 @@ class IntrospectionModule(object):
 
         path = repository.get_typelib_path(self._namespace)
         self.__path__ = [path]
-        if _have_py3:
-            # get_typelib_path() delivers bytes, not a string
-            self.__path__ = [path.decode('UTF-8')]
 
         if self._version is None:
             self._version = repository.get_version(self._namespace)
@@ -239,9 +233,6 @@ class IntrospectionModule(object):
 
     def __repr__(self):
         path = repository.get_typelib_path(self._namespace)
-        if _have_py3:
-            # get_typelib_path() delivers bytes, not a string
-            path = path.decode('UTF-8')
         return "<IntrospectionModule %r from %r>" % (self._namespace, path)
 
     def __dir__(self):
