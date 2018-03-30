@@ -20,6 +20,7 @@
 #include "pygi-value.h"
 #include "pygi-struct.h"
 #include "pygi-python-compat.h"
+#include "pygi-basictype.h"
 #include "pygobject-object.h"
 #include "pygtype.h"
 #include "pygenum.h"
@@ -27,6 +28,7 @@
 #include "pygboxed.h"
 #include "pygflags.h"
 #include "pygparamspec.h"
+
 
 GIArgument
 _pygi_argument_from_g_value(const GValue *value,
@@ -383,79 +385,68 @@ pyg_value_from_pyobject_with_error(GValue *value, PyObject *obj)
         }
         break;
     case G_TYPE_BOOLEAN:
-        g_value_set_boolean(value, PyObject_IsTrue(obj));
-        break;
+    {
+        gboolean temp;
+        if (pygi_gboolean_from_py (obj, &temp)) {
+            g_value_set_boolean (value, temp);
+            return 0;
+        } else
+            return -1;
+    }
     case G_TYPE_INT:
     {
-        glong val = PYGLIB_PyLong_AsLong(obj);
-        if (val == -1 && PyErr_Occurred ())
+        gint temp;
+        if (pygi_gint_from_py (obj, &temp)) {
+            g_value_set_int (value, temp);
+            return 0;
+        } else
             return -1;
-        if (val > G_MAXINT || val < G_MININT) {
-            PyErr_SetString(PyExc_OverflowError, "out of range for int property");
-            return -1;
-        }
-        g_value_set_int(value, (gint)val);
-        break;
     }
     case G_TYPE_UINT:
     {
-        if (PYGLIB_PyLong_Check(obj)) {
-            gulong val;
-
-            /* check that number is not negative */
-            if (PyLong_AsLongLong(obj) < 0)
-                return -1;
-
-            val = PyLong_AsUnsignedLong(obj);
-            if (val <= G_MAXUINT)
-                g_value_set_uint(value, (guint) val);
-            else
-                return -1;
-        } else {
-            g_value_set_uint(value, PyLong_AsUnsignedLong(obj));
-        }
+        guint temp;
+        if (pygi_guint_from_py (obj, &temp)) {
+            g_value_set_uint (value, temp);
+            return 0;
+        } else
+            return -1;
     }
-    break;
     case G_TYPE_LONG:
-        g_value_set_long(value, PYGLIB_PyLong_AsLong(obj));
-        break;
+    {
+        glong temp;
+        if (pygi_glong_from_py (obj, &temp)) {
+            g_value_set_long (value, temp);
+            return 0;
+        } else
+            return -1;
+    }
     case G_TYPE_ULONG:
-#if PY_VERSION_HEX < 0x03000000
-        if (PyInt_Check(obj)) {
-            long val;
-
-            val = PYGLIB_PyLong_AsLong(obj);
-            if (val < 0) {
-                PyErr_SetString(PyExc_OverflowError, "negative value not allowed for uint64 property");
-                return -1;
-            }
-            g_value_set_ulong(value, (gulong)val);
+    {
+        gulong temp;
+        if (pygi_gulong_from_py (obj, &temp)) {
+            g_value_set_ulong (value, temp);
+            return 0;
         } else
-#endif
-            if (PyLong_Check(obj))
-                g_value_set_ulong(value, PyLong_AsUnsignedLong(obj));
-            else
-                return -1;
-        break;
+            return -1;
+    }
     case G_TYPE_INT64:
-        g_value_set_int64(value, PyLong_AsLongLong(obj));
-        break;
-    case G_TYPE_UINT64:
-#if PY_VERSION_HEX < 0x03000000
-        if (PyInt_Check(obj)) {
-            long v = PyInt_AsLong(obj);
-            if (v < 0) {
-                PyErr_SetString(PyExc_OverflowError, "negative value not allowed for uint64 property");
-                return -1;
-            }
-            g_value_set_uint64(value, v);
+    {
+        gint64 temp;
+        if (pygi_gint64_from_py (obj, &temp)) {
+            g_value_set_int64 (value, temp);
+            return 0;
         } else
-#endif
-            if (PyLong_Check(obj))
-                g_value_set_uint64(value, PyLong_AsUnsignedLongLong(obj));
-            else
-                return -1;
-        break;
+            return -1;
+    }
+    case G_TYPE_UINT64:
+    {
+        guint64 temp;
+        if (pygi_guint64_from_py (obj, &temp)) {
+            g_value_set_uint64 (value, temp);
+            return 0;
+        } else
+            return -1;
+    }
     case G_TYPE_ENUM:
     {
         gint val = 0;
@@ -472,45 +463,49 @@ pyg_value_from_pyobject_with_error(GValue *value, PyObject *obj)
             return -1;
         }
         g_value_set_flags(value, val);
+        return 0;
     }
     break;
     case G_TYPE_FLOAT:
-        g_value_set_float(value, PyFloat_AsDouble(obj));
-        break;
+    {
+        gfloat temp;
+        if (pygi_gfloat_from_py (obj, &temp)) {
+            g_value_set_float (value, temp);
+            return 0;
+        } else
+            return -1;
+    }
     case G_TYPE_DOUBLE:
-        g_value_set_double(value, PyFloat_AsDouble(obj));
-        break;
+    {
+        gdouble temp;
+        if (pygi_gdouble_from_py (obj, &temp)) {
+            g_value_set_double (value, temp);
+            return 0;
+        } else
+            return -1;
+    }
     case G_TYPE_STRING:
-        if (obj == Py_None) {
-            g_value_set_string(value, NULL);
+    {
+        gchar *temp;
+        if (pygi_utf8_from_py (obj, &temp)) {
+            g_value_set_string (value, temp);
+            return 0;
         } else {
-            PyObject* tmp_str = PyObject_Str(obj);
-            if (tmp_str == NULL) {
-                PyErr_Clear();
-                if (PyUnicode_Check(obj)) {
-                    tmp = PyUnicode_AsUTF8String(obj);
-                    g_value_set_string(value, PYGLIB_PyBytes_AsString(tmp));
-                    Py_DECREF(tmp);
-                } else {
-                    PyErr_SetString(PyExc_TypeError, "Expected string");
-                    return -1;
-                }
-            } else {
-#if PY_VERSION_HEX < 0x03000000
-                g_value_set_string(value, PyString_AsString(tmp_str));
-#else
-                tmp = PyUnicode_AsUTF8String(tmp_str);
-                if (tmp == NULL) {
-                    Py_DECREF (tmp_str);
-                    return -1;
-                }
-                g_value_set_string(value, PyBytes_AsString(tmp));
-                Py_DECREF(tmp);
-#endif
+            /* also allows setting anything implementing __str__ */
+            PyObject* str;
+            PyErr_Clear ();
+            str = PyObject_Str (obj);
+            if (str == NULL)
+                return -1;
+            if (pygi_utf8_from_py (str, &temp)) {
+                Py_DECREF (str);
+                g_value_set_string (value, temp);
+                return 0;
             }
-            Py_XDECREF(tmp_str);
+            Py_DECREF (str);
+            return -1;
         }
-        break;
+    }
     case G_TYPE_POINTER:
         if (obj == Py_None)
             g_value_set_pointer(value, NULL);
@@ -676,77 +671,38 @@ PyObject *
 pygi_value_to_py_basic_type (const GValue *value, GType fundamental)
 {
     switch (fundamental) {
-    case G_TYPE_CHAR:
-        return PYGLIB_PyLong_FromLong (g_value_get_schar (value));
-
-    case G_TYPE_UCHAR:
-        return PYGLIB_PyLong_FromLong (g_value_get_uchar (value));
-
-    case G_TYPE_BOOLEAN: {
-        return PyBool_FromLong(g_value_get_boolean(value));
-    }
-    case G_TYPE_INT:
-        return PYGLIB_PyLong_FromLong(g_value_get_int(value));
-    case G_TYPE_UINT:
-    {
-        /* in Python, the Int object is backed by a long.  If a
-	       long can hold the whole value of an unsigned int, use
-	       an Int.  Otherwise, use a Long object to avoid overflow.
-	       This matches the ULongArg behavior in codegen/argtypes.h */
-#if (G_MAXUINT <= G_MAXLONG)
-        return PYGLIB_PyLong_FromLong((glong) g_value_get_uint(value));
-#else
-        return PyLong_FromUnsignedLong((gulong) g_value_get_uint(value));
-#endif
-    }
-    case G_TYPE_LONG:
-        return PYGLIB_PyLong_FromLong(g_value_get_long(value));
-    case G_TYPE_ULONG:
-    {
-        gulong val = g_value_get_ulong(value);
-
-        if (val <= G_MAXLONG)
-            return PYGLIB_PyLong_FromLong((glong) val);
-        else
-            return PyLong_FromUnsignedLong(val);
-    }
-    case G_TYPE_INT64:
-    {
-        gint64 val = g_value_get_int64(value);
-
-        if (G_MINLONG <= val && val <= G_MAXLONG)
-            return PYGLIB_PyLong_FromLong((glong) val);
-        else
-            return PyLong_FromLongLong(val);
-    }
-    case G_TYPE_UINT64:
-    {
-        guint64 val = g_value_get_uint64(value);
-
-        if (val <= G_MAXLONG)
-            return PYGLIB_PyLong_FromLong((glong) val);
-        else
-            return PyLong_FromUnsignedLongLong(val);
-    }
-    case G_TYPE_ENUM:
-        return pyg_enum_from_gtype(G_VALUE_TYPE(value), g_value_get_enum(value));
-    case G_TYPE_FLAGS:
-        return pyg_flags_from_gtype(G_VALUE_TYPE(value), g_value_get_flags(value));
-    case G_TYPE_FLOAT:
-        return PyFloat_FromDouble(g_value_get_float(value));
-    case G_TYPE_DOUBLE:
-        return PyFloat_FromDouble(g_value_get_double(value));
-    case G_TYPE_STRING:
-    {
-        const gchar *str = g_value_get_string(value);
-
-        if (str)
-            return PYGLIB_PyUnicode_FromString(str);
-        Py_INCREF(Py_None);
-        return Py_None;
-    }
-    default:
-        return NULL;
+        case G_TYPE_CHAR:
+            return PYGLIB_PyLong_FromLong (g_value_get_schar (value));
+        case G_TYPE_UCHAR:
+            return PYGLIB_PyLong_FromLong (g_value_get_uchar (value));
+        case G_TYPE_BOOLEAN:
+            return pygi_gboolean_to_py (g_value_get_boolean (value));
+        case G_TYPE_INT:
+            return pygi_gint_to_py (g_value_get_int (value));
+        case G_TYPE_UINT:
+            return pygi_guint_to_py (g_value_get_uint (value));
+        case G_TYPE_LONG:
+            return pygi_glong_to_py (g_value_get_long(value));
+        case G_TYPE_ULONG:
+            return pygi_gulong_to_py (g_value_get_ulong (value));
+        case G_TYPE_INT64:
+            return pygi_gint64_to_py (g_value_get_int64 (value));
+        case G_TYPE_UINT64:
+            return pygi_guint64_to_py (g_value_get_uint64 (value));
+        case G_TYPE_ENUM:
+            return pyg_enum_from_gtype (G_VALUE_TYPE (value),
+                                        g_value_get_enum (value));
+        case G_TYPE_FLAGS:
+            return pyg_flags_from_gtype (G_VALUE_TYPE (value),
+                                         g_value_get_flags (value));
+        case G_TYPE_FLOAT:
+            return pygi_gfloat_to_py (g_value_get_float (value));
+        case G_TYPE_DOUBLE:
+            return pygi_gdouble_to_py (g_value_get_double (value));
+        case G_TYPE_STRING:
+            return pygi_utf8_to_py (g_value_get_string (value));
+        default:
+            return NULL;
     }
 }
 

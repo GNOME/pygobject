@@ -50,6 +50,31 @@ PyGIArgCache *pygi_arg_basic_type_new_from_info        (GITypeInfo    *type_info
                                                         GIArgInfo     *arg_info,   /* may be null */
                                                         GITransfer     transfer,
                                                         PyGIDirection  direction);
+
+PyObject *pygi_gint64_to_py (gint64 value);
+PyObject *pygi_guint64_to_py (guint64 value);
+PyObject *pygi_gfloat_to_py (gfloat value);
+PyObject *pygi_gdouble_to_py (gdouble value);
+PyObject *pygi_gboolean_to_py (gboolean value);
+PyObject *pygi_gint8_to_py (gint8 value);
+PyObject *pygi_guint8_to_py (guint8 value);
+PyObject *pygi_utf8_to_py (gchar *value);
+PyObject *pygi_gint_to_py (gint value);
+PyObject *pygi_glong_to_py (glong value);
+PyObject *pygi_guint_to_py (guint value);
+PyObject *pygi_gulong_to_py (gulong value);
+
+gboolean pygi_gboolean_from_py (PyObject *object, gboolean *result);
+gboolean pygi_gint64_from_py (PyObject *object, gint64 *result);
+gboolean pygi_guint64_from_py (PyObject *object, guint64 *result);
+gboolean pygi_gfloat_from_py (PyObject *py_arg, gfloat *result);
+gboolean pygi_gdouble_from_py (PyObject *py_arg, gdouble *result);
+gboolean pygi_utf8_from_py (PyObject *py_arg, gchar **result);
+gboolean pygi_glong_from_py (PyObject *object, glong *result);
+gboolean pygi_gulong_from_py (PyObject *object, gulong *result);
+gboolean pygi_gint_from_py (PyObject *object, gint *result);
+gboolean pygi_guint_from_py (PyObject *object, guint *result);
+
 G_END_DECLS
 
 #endif /*__PYGI_ARG_BASICTYPE_H__*/

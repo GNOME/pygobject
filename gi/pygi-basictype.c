@@ -84,8 +84,8 @@ marshal_from_py_void (PyGIInvokeState   *state,
     return FALSE;
 }
 
-static gboolean
-pygi_gdouble_from_py (PyObject *py_arg, gdouble *double_)
+gboolean
+pygi_gdouble_from_py (PyObject *py_arg, gdouble *result)
 {
     PyObject *py_float;
     gdouble temp;
@@ -106,19 +106,19 @@ pygi_gdouble_from_py (PyObject *py_arg, gdouble *double_)
     if (PyErr_Occurred ())
         return FALSE;
 
-    *double_ = temp;
+    *result = temp;
 
     return TRUE;
 }
 
-static PyObject *
-pygi_gdouble_to_py (gdouble double_)
+PyObject *
+pygi_gdouble_to_py (gdouble value)
 {
-    return PyFloat_FromDouble (double_);
+    return PyFloat_FromDouble (value);
 }
 
-static gboolean
-pygi_gfloat_from_py (PyObject *py_arg, gfloat *float_)
+gboolean
+pygi_gfloat_from_py (PyObject *py_arg, gfloat *result)
 {
     gdouble double_;
 
@@ -136,15 +136,15 @@ pygi_gfloat_from_py (PyObject *py_arg, gfloat *float_)
         return FALSE;
     }
 
-    *float_ = (gfloat)double_;
+    *result = (gfloat)double_;
 
     return TRUE;
 }
 
-static PyObject *
-pygi_gfloat_to_py (gfloat float_)
+PyObject *
+pygi_gfloat_to_py (gfloat value)
 {
-    return PyFloat_FromDouble (float_);
+    return PyFloat_FromDouble (value);
 }
 
 static gboolean
@@ -238,7 +238,7 @@ pygi_gtype_from_py (PyObject *py_arg, GType *type)
     return TRUE;
 }
 
-static gboolean
+gboolean
 pygi_utf8_from_py (PyObject *py_arg, gchar **result)
 {
     gchar *string_;
@@ -458,7 +458,7 @@ base_number_checks (PyObject *object)
     return number;
 }
 
-static gboolean
+gboolean
 pygi_gboolean_from_py (PyObject *object, gboolean *result)
 {
     int value = PyObject_IsTrue (object);
@@ -468,10 +468,129 @@ pygi_gboolean_from_py (PyObject *object, gboolean *result)
     return TRUE;
 }
 
-static PyObject *
+PyObject *
 pygi_gboolean_to_py (gboolean value)
 {
     return PyBool_FromLong (value);
+}
+
+gboolean
+pygi_gint_from_py (PyObject *object, gint *result)
+{
+    long long_value;
+    PyObject *number;
+
+    number = base_number_checks (object);
+    if (number == NULL)
+        return FALSE;
+
+    long_value = PYGLIB_PyLong_AsLong (number);
+    Py_DECREF (number);
+    if (PyErr_Occurred ())
+        return FALSE;
+
+    if (long_value < G_MININT || long_value > G_MAXINT) {
+        PyErr_Format (PyExc_OverflowError, "%ld not in range %d to %d",
+                      long_value, (int)G_MININT8, (int)G_MAXINT8);
+        return FALSE;
+    }
+
+    *result = (gint)long_value;
+    return TRUE;
+}
+
+PyObject *
+pygi_gint_to_py (gint value)
+{
+    return PYGLIB_PyLong_FromLong (value);
+}
+
+gboolean
+pygi_guint_from_py (PyObject *object, guint *result)
+{
+    long long_value;
+    PyObject *number;
+
+    number = base_number_checks (object);
+    if (number == NULL)
+        return FALSE;
+
+    long_value = PyLong_AsUnsignedLong (number);
+    Py_DECREF (number);
+    if (PyErr_Occurred ())
+        return FALSE;
+
+    if (long_value > G_MAXUINT) {
+        PyErr_Format (PyExc_OverflowError, "%ld not in range %ld to %lu",
+                      long_value, (long)0, (unsigned long)G_MAXUINT);
+        return FALSE;
+    }
+
+    *result = (gint)long_value;
+    return TRUE;
+}
+
+PyObject *
+pygi_guint_to_py (guint value)
+{
+#if (G_MAXUINT <= LONG_MAX)
+    return PYGLIB_PyLong_FromLong ((long) value);
+#else
+    return PyLong_FromUnsignedLong (value);
+#endif
+}
+
+gboolean
+pygi_glong_from_py (PyObject *object, glong *result)
+{
+    long long_value;
+    PyObject *number;
+
+    number = base_number_checks (object);
+    if (number == NULL)
+        return FALSE;
+
+    long_value = PyLong_AsLong (number);
+    Py_DECREF (number);
+    if (long_value == -1 && PyErr_Occurred ())
+        return FALSE;
+
+    *result = (glong)long_value;
+    return TRUE;
+}
+
+PyObject *
+pygi_glong_to_py (glong value)
+{
+    return PYGLIB_PyLong_FromLong (value);
+}
+
+gboolean
+pygi_gulong_from_py (PyObject *object, gulong *result)
+{
+    unsigned long long_value;
+    PyObject *number;
+
+    number = base_number_checks (object);
+    if (number == NULL)
+        return FALSE;
+
+    long_value = PyLong_AsUnsignedLong (number);
+    Py_DECREF (number);
+    if (PyErr_Occurred ())
+        return FALSE;
+
+    *result = (gulong)long_value;
+    return TRUE;
+}
+
+PyObject *
+pygi_gulong_to_py (gulong value)
+{
+    if (value <= LONG_MAX)
+        return PYGLIB_PyLong_FromLong ((long) value);
+    else
+        return PyLong_FromUnsignedLong (value);
 }
 
 static gboolean
@@ -509,7 +628,7 @@ pygi_gint8_from_py (PyObject *object, gint8 *result)
     return TRUE;
 }
 
-static PyObject *
+PyObject *
 pygi_gint8_to_py (gint8 value)
 {
     return PYGLIB_PyLong_FromLong (value);
@@ -550,7 +669,7 @@ pygi_guint8_from_py (PyObject *object, guint8 *result)
     return TRUE;
 }
 
-static PyObject *
+PyObject *
 pygi_guint8_to_py (guint8 value)
 {
     return PYGLIB_PyLong_FromLong (value);
@@ -677,10 +796,17 @@ pygi_guint32_from_py (PyObject *object, guint32 *result)
 static PyObject *
 pygi_guint32_to_py (guint32 value)
 {
-    return PyLong_FromLongLong (value);
+#if (G_MAXUINT <= LONG_MAX)
+    return PYGLIB_PyLong_FromLong (value);
+#else
+    if (value <= LONG_MAX)
+        return PYGLIB_PyLong_FromLong((long) value);
+    else
+        return PyLong_FromLongLong (value);
+#endif
 }
 
-static gboolean
+gboolean
 pygi_gint64_from_py (PyObject *object, gint64 *result)
 {
     long long long_value;
@@ -705,13 +831,16 @@ pygi_gint64_from_py (PyObject *object, gint64 *result)
     return TRUE;
 }
 
-static PyObject *
+PyObject *
 pygi_gint64_to_py (gint64 value)
 {
-    return PyLong_FromLongLong (value);
+    if (LONG_MIN <= value && value <= LONG_MAX)
+        return PYGLIB_PyLong_FromLong((long) value);
+    else
+        return PyLong_FromLongLong (value);
 }
 
-static gboolean
+gboolean
 pygi_guint64_from_py (PyObject *object, guint64 *result)
 {
     unsigned long long long_value;
@@ -737,10 +866,13 @@ pygi_guint64_from_py (PyObject *object, guint64 *result)
     return TRUE;
 }
 
-static PyObject *
+PyObject *
 pygi_guint64_to_py (guint64 value)
 {
-    return PyLong_FromUnsignedLongLong (value);
+    if (value <= LONG_MAX)
+        return PYGLIB_PyLong_FromLong((long) value);
+    else
+        return PyLong_FromUnsignedLongLong (value);
 }
 
 gboolean
@@ -861,7 +993,7 @@ marshal_to_py_void (PyGIInvokeState   *state,
     Py_RETURN_NONE;
 }
 
-static PyObject *
+PyObject *
 pygi_utf8_to_py (gchar *value)
 {
     if (value == NULL) {
