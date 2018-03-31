@@ -29,7 +29,6 @@
 #include "pygi-util.h"
 
 GQuark pygboxed_type_key;
-GQuark pygboxed_marshal_key;
 
 PYGLIB_DEFINE_TYPE("gobject.GBoxed", PyGBoxed_Type, PyGBoxed);
 
@@ -246,7 +245,6 @@ int
 pygi_gboxed_register_types(PyObject *d)
 {
     pygboxed_type_key        = g_quark_from_static_string("PyGBoxed::class");
-    pygboxed_marshal_key     = g_quark_from_static_string("PyGBoxed::marshal");
 
     PyGBoxed_Type.tp_dealloc = (destructor)gboxed_dealloc;
     PyGBoxed_Type.tp_richcompare = gboxed_richcompare;
