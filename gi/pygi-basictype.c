@@ -84,6 +84,12 @@ marshal_from_py_void (PyGIInvokeState   *state,
     return FALSE;
 }
 
+PyObject *
+pygi_gsize_to_py (gsize value)
+{
+    return PYGLIB_PyLong_FromSize_t (value);
+}
+
 gboolean
 pygi_gdouble_from_py (PyObject *py_arg, gdouble *result)
 {
@@ -536,6 +542,8 @@ pygi_guint_to_py (guint value)
 #if (G_MAXUINT <= LONG_MAX)
     return PYGLIB_PyLong_FromLong ((long) value);
 #else
+    if (value <= LONG_MAX)
+        return PYGLIB_PyLong_FromLong ((long) value);
     return PyLong_FromUnsignedLong (value);
 #endif
 }

@@ -64,6 +64,7 @@ PyObject *pygi_glong_to_py (glong value);
 PyObject *pygi_guint_to_py (guint value);
 PyObject *pygi_gulong_to_py (gulong value);
 PyObject *pygi_filename_to_py (gchar *value);
+PyObject *pygi_gsize_to_py (gsize value);
 
 gboolean pygi_gboolean_from_py (PyObject *object, gboolean *result);
 gboolean pygi_gint64_from_py (PyObject *object, gint64 *result);
