@@ -687,14 +687,17 @@ class TestCallbacks(unittest.TestCase):
             TestCallbacks.called = True
             return 44
 
-        ud_refcount = sys.getrefcount(ud)
-        callback_refcount = sys.getrefcount(callback)
+        if hasattr(sys, "getrefcount"):
+            ud_refcount = sys.getrefcount(ud)
+            callback_refcount = sys.getrefcount(callback)
 
         self.assertEqual(Everything.test_callback_async(callback, ud), None)
         # Callback should not have run and the ref count is increased by 1
         self.assertEqual(TestCallbacks.called, False)
-        self.assertEqual(sys.getrefcount(callback), callback_refcount + 1)
-        self.assertEqual(sys.getrefcount(ud), ud_refcount + 1)
+
+        if hasattr(sys, "getrefcount"):
+            self.assertEqual(sys.getrefcount(callback), callback_refcount + 1)
+            self.assertEqual(sys.getrefcount(ud), ud_refcount + 1)
 
         # test_callback_thaw_async will run the callback previously supplied.
         # references should be auto decremented after this call.
@@ -702,8 +705,9 @@ class TestCallbacks(unittest.TestCase):
         self.assertTrue(TestCallbacks.called)
 
         # Make sure refcounts are returned to normal
-        self.assertEqual(sys.getrefcount(callback), callback_refcount)
-        self.assertEqual(sys.getrefcount(ud), ud_refcount)
+        if hasattr(sys, "getrefcount"):
+            self.assertEqual(sys.getrefcount(callback), callback_refcount)
+            self.assertEqual(sys.getrefcount(ud), ud_refcount)
 
     def test_callback_scope_call_multi(self):
         # This tests a callback that gets called multiple times from a
@@ -714,12 +718,15 @@ class TestCallbacks(unittest.TestCase):
             TestCallbacks.called += 1
             return TestCallbacks.called
 
-        refcount = sys.getrefcount(callback)
+        if hasattr(sys, "getrefcount"):
+            refcount = sys.getrefcount(callback)
         result = Everything.test_multi_callback(callback)
         # first callback should give 1, second 2, and the function sums them up
         self.assertEqual(result, 3)
         self.assertEqual(TestCallbacks.called, 2)
-        self.assertEqual(sys.getrefcount(callback), refcount)
+
+        if hasattr(sys, "getrefcount"):
+            self.assertEqual(sys.getrefcount(callback), refcount)
 
     def test_callback_scope_call_array(self):
         # This tests a callback that gets called multiple times from a
@@ -732,13 +739,16 @@ class TestCallbacks(unittest.TestCase):
             TestCallbacks.callargs.append((one, two))
             return len(TestCallbacks.callargs)
 
-        refcount = sys.getrefcount(callback)
+        if hasattr(sys, "getrefcount"):
+            refcount = sys.getrefcount(callback)
         result = Everything.test_array_callback(callback)
         # first callback should give 1, second 2, and the function sums them up
         self.assertEqual(result, 3)
         self.assertEqual(TestCallbacks.callargs,
                          [([-1, 0, 1, 2], ['one', 'two', 'three'])] * 2)
-        self.assertEqual(sys.getrefcount(callback), refcount)
+
+        if hasattr(sys, "getrefcount"):
+            self.assertEqual(sys.getrefcount(callback), refcount)
 
     @unittest.skipUnless(hasattr(Everything, 'test_array_inout_callback'),
                          'Requires newer version of GI')
@@ -751,13 +761,15 @@ class TestCallbacks(unittest.TestCase):
             TestCallbacks.callargs.append(ints)
             return ints[1:], len(ints[1:])
 
-        refcount = sys.getrefcount(callback)
+        if hasattr(sys, "getrefcount"):
+            refcount = sys.getrefcount(callback)
         result = Everything.test_array_inout_callback(callback)
         self.assertEqual(TestCallbacks.callargs,
                          [[-2, -1, 0, 1, 2], [-1, 0, 1, 2]])
         # first callback should give 4, second 3
         self.assertEqual(result, 3)
-        self.assertEqual(sys.getrefcount(callback), refcount)
+        if hasattr(sys, "getrefcount"):
+            self.assertEqual(sys.getrefcount(callback), refcount)
 
     def test_callback_userdata(self):
         TestCallbacks.called = 0
@@ -889,8 +901,9 @@ class TestCallbacks(unittest.TestCase):
             TestCallbacks.called += 1
             return 33
 
-        value_refcount = sys.getrefcount(ud)
-        callback_refcount = sys.getrefcount(callback)
+        if hasattr(sys, "getrefcount"):
+            value_refcount = sys.getrefcount(ud)
+            callback_refcount = sys.getrefcount(callback)
 
         # Callback is immediately called.
         for i in range(100):
@@ -898,14 +911,16 @@ class TestCallbacks(unittest.TestCase):
             self.assertEqual(res, 33)
 
         self.assertEqual(TestCallbacks.called, 100)
-        self.assertEqual(sys.getrefcount(callback), callback_refcount + 100)
-        self.assertEqual(sys.getrefcount(ud), value_refcount + 100)
+        if hasattr(sys, "getrefcount"):
+            self.assertEqual(sys.getrefcount(callback), callback_refcount + 100)
+            self.assertEqual(sys.getrefcount(ud), value_refcount + 100)
 
         # thaw will call the callback again, this time resources should be freed
         self.assertEqual(Everything.test_callback_thaw_notifications(), 33 * 100)
         self.assertEqual(TestCallbacks.called, 200)
-        self.assertEqual(sys.getrefcount(callback), callback_refcount)
-        self.assertEqual(sys.getrefcount(ud), value_refcount)
+        if hasattr(sys, "getrefcount"):
+            self.assertEqual(sys.getrefcount(callback), callback_refcount)
+            self.assertEqual(sys.getrefcount(ud), value_refcount)
 
     def test_callback_scope_notified_with_destroy_no_user_data(self):
         TestCallbacks.called = 0
@@ -915,7 +930,8 @@ class TestCallbacks(unittest.TestCase):
             TestCallbacks.called += 1
             return 34
 
-        callback_refcount = sys.getrefcount(callback)
+        if hasattr(sys, "getrefcount"):
+            callback_refcount = sys.getrefcount(callback)
 
         # Run with warning as exception
         with warnings.catch_warnings(record=True) as w:
@@ -925,7 +941,8 @@ class TestCallbacks(unittest.TestCase):
                               callback)
 
         self.assertEqual(TestCallbacks.called, 0)
-        self.assertEqual(sys.getrefcount(callback), callback_refcount)
+        if hasattr(sys, "getrefcount"):
+            self.assertEqual(sys.getrefcount(callback), callback_refcount)
 
         # Run with warning as warning
         with warnings.catch_warnings(record=True) as w:
@@ -940,13 +957,15 @@ class TestCallbacks(unittest.TestCase):
 
         self.assertEqual(res, 34)
         self.assertEqual(TestCallbacks.called, 1)
-        self.assertEqual(sys.getrefcount(callback), callback_refcount + 1)
+        if hasattr(sys, "getrefcount"):
+            self.assertEqual(sys.getrefcount(callback), callback_refcount + 1)
 
         # thaw will call the callback again,
         # refcount will not go down without user_data parameter
         self.assertEqual(Everything.test_callback_thaw_notifications(), 34)
         self.assertEqual(TestCallbacks.called, 2)
-        self.assertEqual(sys.getrefcount(callback), callback_refcount + 1)
+        if hasattr(sys, "getrefcount"):
+            self.assertEqual(sys.getrefcount(callback), callback_refcount + 1)
 
     def test_callback_in_methods(self):
         object_ = Everything.TestObj()

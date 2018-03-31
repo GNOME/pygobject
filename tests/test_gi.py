@@ -1651,6 +1651,7 @@ class TestGValue(unittest.TestCase):
         gc.collect()
         self.assertEqual(ref(), None)
 
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), "no sys.getrefcount")
     def test_gvalue_boxed_ref_counts(self):
         # Tests a boxed type wrapping a python object pointer (TYPE_PYOBJECT)
         # held by a GValue
@@ -2542,6 +2543,7 @@ class TestPythonGObject(unittest.TestCase):
         object_.method_with_default_implementation(84)
         self.assertEqual(object_.props.int, 84)
 
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), "no sys.getrefcount")
     def test_vfunc_return_ref_count(self):
         obj = self.Object(int=42)
         ref_count = sys.getrefcount(obj.return_for_caller_allocated_out_parameter)
@@ -2554,6 +2556,12 @@ class TestPythonGObject(unittest.TestCase):
         self.assertFalse(ret is obj.return_for_caller_allocated_out_parameter)
         self.assertEqual(sys.getrefcount(obj.return_for_caller_allocated_out_parameter),
                          ref_count)
+
+    def test_vfunc_return_no_ref_count(self):
+        obj = self.Object(int=42)
+        ret = obj.vfunc_caller_allocated_out_parameter()
+        self.assertEqual(ret, obj.return_for_caller_allocated_out_parameter)
+        self.assertFalse(ret is obj.return_for_caller_allocated_out_parameter)
 
     def test_subobject_parent_vfunc(self):
         object_ = self.SubObject(int=81)
