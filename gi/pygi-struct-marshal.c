@@ -399,9 +399,9 @@ pygi_arg_struct_to_py_marshaller (GIArgument *arg,
             g_warn_if_fail (transfer == GI_TRANSFER_NOTHING);
             py_obj = pyg_pointer_new (g_type, arg->v_pointer);
         } else {
-            py_obj = _pygi_struct_new ( (PyTypeObject *) py_type,
-                                       arg->v_pointer,
-                                       transfer == GI_TRANSFER_EVERYTHING);
+            py_obj = pygi_struct_new ( (PyTypeObject *) py_type,
+                                      arg->v_pointer,
+                                      transfer == GI_TRANSFER_EVERYTHING);
         }
     } else if (g_type_is_a (g_type, G_TYPE_VARIANT)) {
         /* Note: sink the variant (add a ref) only if we are not transfered ownership.
@@ -411,15 +411,15 @@ pygi_arg_struct_to_py_marshaller (GIArgument *arg,
             if (transfer == GI_TRANSFER_NOTHING) {
                 g_variant_ref_sink (arg->v_pointer);
             }
-            py_obj = _pygi_struct_new ((PyTypeObject *) py_type,
-                                       arg->v_pointer,
-                                       FALSE);
+            py_obj = pygi_struct_new ((PyTypeObject *) py_type,
+                                      arg->v_pointer,
+                                      FALSE);
         }
     } else if (g_type == G_TYPE_NONE) {
         if (py_type) {
-            py_obj = _pygi_struct_new ((PyTypeObject *) py_type,
-                                       arg->v_pointer,
-                                       transfer == GI_TRANSFER_EVERYTHING || is_allocated);
+            py_obj = pygi_struct_new ((PyTypeObject *) py_type,
+                                      arg->v_pointer,
+                                      transfer == GI_TRANSFER_EVERYTHING || is_allocated);
         }
     } else {
         PyErr_Format (PyExc_NotImplementedError,

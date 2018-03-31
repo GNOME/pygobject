@@ -792,7 +792,7 @@ value_to_py_structured_type (const GValue *value, GType fundamental, gboolean co
             Py_INCREF(Py_None);
             return Py_None;
         }
-        return _pygi_struct_new_from_g_type (G_TYPE_VARIANT, g_variant_ref(v), FALSE);
+        return pygi_struct_new_from_g_type (G_TYPE_VARIANT, g_variant_ref(v), FALSE);
     }
     default:
     {
