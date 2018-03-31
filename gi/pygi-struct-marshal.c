@@ -387,11 +387,11 @@ pygi_arg_struct_to_py_marshaller (GIArgument *arg,
                                                               arg->v_pointer);
     } else if (g_type_is_a (g_type, G_TYPE_BOXED)) {
         if (py_type) {
-            py_obj = _pygi_boxed_new ((PyTypeObject *) py_type,
-                                      arg->v_pointer,
-                                      transfer == GI_TRANSFER_EVERYTHING || is_allocated,
-                                      is_allocated ?
-                                              g_struct_info_get_size(interface_info) : 0);
+            py_obj = pygi_boxed_new ((PyTypeObject *) py_type,
+                                     arg->v_pointer,
+                                     transfer == GI_TRANSFER_EVERYTHING || is_allocated,
+                                     is_allocated ?
+                                            g_struct_info_get_size(interface_info) : 0);
         }
     } else if (g_type_is_a (g_type, G_TYPE_POINTER)) {
         if (py_type == NULL ||
@@ -442,7 +442,7 @@ pygi_arg_struct_to_py_marshal (GIArgument *arg,
     PyObject *ret = pygi_arg_struct_to_py_marshaller (arg, interface_info, g_type, py_type, transfer, is_allocated, is_foreign);
 
     if (ret && PyObject_IsInstance (ret, (PyObject *) &PyGIBoxed_Type) && transfer == GI_TRANSFER_NOTHING)
-        _pygi_boxed_copy_in_place ((PyGIBoxed *) ret);
+        pygi_boxed_copy_in_place ((PyGIBoxed *) ret);
 
     return ret;
 };
@@ -492,7 +492,7 @@ arg_boxed_to_py_cleanup (PyGIInvokeState *state,
                            gboolean         was_processed)
 {
     if (arg_cache->transfer == GI_TRANSFER_NOTHING)
-        _pygi_boxed_copy_in_place ((PyGIBoxed *) cleanup_data);
+        pygi_boxed_copy_in_place ((PyGIBoxed *) cleanup_data);
 }
 
 static gboolean

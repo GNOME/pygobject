@@ -334,7 +334,7 @@ _caller_alloc (PyGIArgCache *arg_cache, GIArgument *arg)
         arg->v_pointer = NULL;
         if (g_type_is_a (iface_cache->g_type, G_TYPE_BOXED)) {
             arg->v_pointer =
-                _pygi_boxed_alloc (iface_cache->interface_info, NULL);
+                pygi_boxed_alloc (iface_cache->interface_info, NULL);
         } else if (iface_cache->g_type == G_TYPE_VALUE) {
             arg->v_pointer = g_slice_new0 (GValue);
         } else if (iface_cache->is_foreign) {

@@ -287,7 +287,7 @@ pyg_source_new (void)
 
     py_type = pygi_type_import_by_name ("GLib", "Source");
     /* g_source_new uses malloc, not slices */
-    source->obj = _pygi_boxed_new ( (PyTypeObject *) py_type, source, FALSE, 0);
+    source->obj = pygi_boxed_new ( (PyTypeObject *) py_type, source, FALSE, 0);
 
     return source->obj;
 }
