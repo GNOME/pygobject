@@ -21,7 +21,7 @@
  */
 
 #include "pygi-error.h"
-#include "pygtype.h"
+#include "pygi-type.h"
 #include "pygi-python-compat.h"
 
 

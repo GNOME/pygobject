@@ -22,8 +22,7 @@
 
 #include <glib-object.h>
 #include "pygpointer.h"
-#include "pygtype.h"
-
+#include "pygi-type.h"
 #include "pygi-type.h"
 #include "pygi-util.h"
 

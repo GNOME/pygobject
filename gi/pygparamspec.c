@@ -25,7 +25,7 @@
 
 #include "pygenum.h"
 #include "pygflags.h"
-#include "pygtype.h"
+#include "pygi-type.h"
 #include "pygparamspec.h"
 #include "pygi-util.h"
 

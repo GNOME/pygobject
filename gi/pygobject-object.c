@@ -23,7 +23,7 @@
 #include "pygobject-object.h"
 #include "pyginterface.h"
 #include "pygparamspec.h"
-#include "pygtype.h"
+#include "pygi-type.h"
 #include "pygboxed.h"
 #include "gimodule.h"
 

@@ -20,7 +20,7 @@
 
 #include <Python.h>
 #include "pygi-python-compat.h"
-#include "pygtype.h"
+#include "pygi-type.h"
 #include "pygi-basictype.h"
 #include "pygi-argument.h"
 

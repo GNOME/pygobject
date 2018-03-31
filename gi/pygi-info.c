@@ -28,7 +28,7 @@
 #include "pygi-argument.h"
 #include "pygi-util.h"
 #include "pygi-basictype.h"
-#include "pygtype.h"
+#include "pygi-type.h"
 
 /* _generate_doc_string
  *
@@ -1831,9 +1831,9 @@ _pygi_g_registered_type_info_check_object (GIRegisteredTypeInfo *info,
 
     g_type = g_registered_type_info_get_g_type (info);
     if (g_type != G_TYPE_NONE) {
-        py_type = _pygi_type_get_from_g_type (g_type);
+        py_type = pygi_type_get_from_g_type (g_type);
     } else {
-        py_type = _pygi_type_import_by_gi_info ( (GIBaseInfo *) info);
+        py_type = pygi_type_import_by_gi_info ( (GIBaseInfo *) info);
     }
 
     if (py_type == NULL) {

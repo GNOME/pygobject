@@ -24,8 +24,7 @@
 #include "pygi-python-compat.h"
 #include "pygi-type.h"
 #include "pygi-util.h"
-
-#include "pygtype.h"
+#include "pygi-type.h"
 #include "pygenum.h"
 #include "pygboxed.h"
 

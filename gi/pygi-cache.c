@@ -22,7 +22,7 @@
 #include <girepository.h>
 
 #include "pygi-python-compat.h"
-#include "pygtype.h"
+#include "pygi-type.h"
 #include "pygi-info.h"
 #include "pygi-cache.h"
 #include "pygi-marshal-cleanup.h"
@@ -171,7 +171,7 @@ pygi_arg_interface_setup (PyGIInterfaceCache *iface_cache,
     iface_cache->arg_cache.type_tag = GI_TYPE_TAG_INTERFACE;
     iface_cache->type_name = _pygi_g_base_info_get_fullname (iface_info);
     iface_cache->g_type = g_registered_type_info_get_g_type ( (GIRegisteredTypeInfo *)iface_info);
-    iface_cache->py_type = _pygi_type_import_by_gi_info ( (GIBaseInfo *) iface_info);
+    iface_cache->py_type = pygi_type_import_by_gi_info ( (GIBaseInfo *) iface_info);
 
     if (iface_cache->py_type == NULL) {
         return FALSE;

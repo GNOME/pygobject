@@ -23,7 +23,7 @@
 
 #include "pygi-type.h"
 #include "pygi-util.h"
-#include "pygtype.h"
+#include "pygi-type.h"
 #include "pygflags.h"
 #include "pygboxed.h"
 

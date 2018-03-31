@@ -25,7 +25,7 @@
 #include "pygi-value.h"
 #include "pygi-argument.h"
 #include "pygparamspec.h"
-#include "pygtype.h"
+#include "pygi-type.h"
 
 #include <girepository.h>
 

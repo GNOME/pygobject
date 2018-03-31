@@ -22,7 +22,7 @@
 #include "pygi-python-compat.h"
 #include "pygi-basictype.h"
 #include "pygobject-object.h"
-#include "pygtype.h"
+#include "pygi-type.h"
 #include "pygenum.h"
 #include "pygpointer.h"
 #include "pygboxed.h"

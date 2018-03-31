@@ -24,7 +24,7 @@
 #include <glib-object.h>
 
 #include "pygboxed.h"
-#include "pygtype.h"
+#include "pygi-type.h"
 #include "pygi-type.h"
 #include "pygi-util.h"
 

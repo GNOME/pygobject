@@ -451,7 +451,7 @@ array_success:
                                           (g_struct_info_is_foreign ((GIStructInfo *) info));
 
                     g_type = g_registered_type_info_get_g_type ( (GIRegisteredTypeInfo *) info);
-                    py_type = _pygi_type_import_by_gi_info ( (GIBaseInfo *) info);
+                    py_type = pygi_type_import_by_gi_info ( (GIBaseInfo *) info);
 
                     /* Note for G_TYPE_VALUE g_type:
                      * This will currently leak the GValue that is allocated and
@@ -799,9 +799,9 @@ _pygi_argument_to_object (GIArgument  *arg,
 
                     /* Special case variant and none to force loading from py module. */
                     if (g_type == G_TYPE_VARIANT || g_type == G_TYPE_NONE) {
-                        py_type = _pygi_type_import_by_gi_info (info);
+                        py_type = pygi_type_import_by_gi_info (info);
                     } else {
-                        py_type = _pygi_type_get_from_g_type (g_type);
+                        py_type = pygi_type_get_from_g_type (g_type);
                     }
 
                     object = pygi_arg_struct_to_py_marshal (arg,
@@ -824,7 +824,7 @@ _pygi_argument_to_object (GIArgument  *arg,
 
                     if (type == G_TYPE_NONE) {
                         /* An enum with a GType of None is an enum without GType */
-                        PyObject *py_type = _pygi_type_import_by_gi_info (info);
+                        PyObject *py_type = pygi_type_import_by_gi_info (info);
                         PyObject *py_args = NULL;
 
                         if (!py_type)

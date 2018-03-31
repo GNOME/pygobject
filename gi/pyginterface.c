@@ -25,7 +25,7 @@
 
 #include "pygi-python-compat.h"
 #include "pyginterface.h"
-#include "pygtype.h"
+#include "pygi-type.h"
 
 GQuark pyginterface_type_key;
 GQuark pyginterface_info_key;

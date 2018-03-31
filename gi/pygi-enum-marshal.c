@@ -275,7 +275,7 @@ _pygi_marshal_to_py_interface_flags (PyGIInvokeState   *state,
     if (iface_cache->g_type == G_TYPE_NONE) {
         /* An enum with a GType of None is an enum without GType */
 
-        PyObject *py_type = _pygi_type_import_by_gi_info (iface_cache->interface_info);
+        PyObject *py_type = pygi_type_import_by_gi_info (iface_cache->interface_info);
         PyObject *py_args = NULL;
 
         if (!py_type)

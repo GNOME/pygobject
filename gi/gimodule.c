@@ -27,7 +27,7 @@
 #include "config.h"
 #include "pyginterface.h"
 #include "pygi-repository.h"
-#include "pygtype.h"
+#include "pygi-type.h"
 #include "pygenum.h"
 #include "pygboxed.h"
 #include "pygflags.h"
@@ -1852,7 +1852,7 @@ _wrap_pyg_variant_type_from_string (PyObject *self, PyObject *args)
         return NULL;
     }
 
-    py_type = _pygi_type_import_by_name ("GLib", "VariantType");
+    py_type = pygi_type_import_by_name ("GLib", "VariantType");
 
     py_variant = _pygi_boxed_new ( (PyTypeObject *) py_type, type_string, FALSE, 0);
 

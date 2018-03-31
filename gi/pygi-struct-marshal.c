@@ -31,7 +31,7 @@
 #include "pygi-info.h"
 #include "pygpointer.h"
 #include "pygboxed.h"
-#include "pygtype.h"
+#include "pygi-type.h"
 
 /*
  * _is_union_member - check to see if the py_arg is actually a member of the
@@ -66,7 +66,7 @@ _is_union_member (GIInterfaceInfo *interface_info, PyObject *py_arg) {
             PyObject *py_type;
 
             field_iface_info = g_type_info_get_interface (field_type_info);
-            py_type = _pygi_type_import_by_gi_info ((GIBaseInfo *) field_iface_info);
+            py_type = pygi_type_import_by_gi_info ((GIBaseInfo *) field_iface_info);
 
             if (py_type != NULL && PyObject_IsInstance (py_arg, py_type)) {
                 is_member = TRUE;
