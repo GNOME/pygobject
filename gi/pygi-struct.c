@@ -31,12 +31,12 @@
 
 
 static GIBaseInfo *
-_struct_get_info (PyObject *self)
+_struct_get_info (PyTypeObject *type)
 {
     PyObject *py_info;
     GIBaseInfo *info = NULL;
 
-    py_info = PyObject_GetAttrString (self, "__info__");
+    py_info = PyObject_GetAttrString ((PyObject *)type, "__info__");
     if (py_info == NULL) {
         return NULL;
     }
@@ -68,7 +68,7 @@ _struct_dealloc (PyGIStruct *self)
     if (have_error)
         PyErr_Fetch (&error_type, &error_value, &error_traceback);
 
-    info = _struct_get_info ( (PyObject *) self );
+    info = _struct_get_info (Py_TYPE (self));
 
     if (info != NULL && g_struct_info_is_foreign ( (GIStructInfo *) info)) {
         pygi_struct_foreign_release (info, pyg_pointer_get_ptr (self));
@@ -102,7 +102,7 @@ _struct_new (PyTypeObject *type,
         return NULL;
     }
 
-    info = _struct_get_info ( (PyObject *) type );
+    info = _struct_get_info ( type );
     if (info == NULL) {
         if (PyErr_ExceptionMatches (PyExc_AttributeError)) {
             PyErr_Format (PyExc_TypeError, "missing introspection information");
@@ -212,7 +212,7 @@ _struct_repr(PyGIStruct *self)
     GIBaseInfo *info;
     PyGPointer *pointer = (PyGPointer *)self;
 
-    info = _struct_get_info ((PyObject *)self);
+    info = _struct_get_info (Py_TYPE (self));
     if (info == NULL)
         return NULL;
 
