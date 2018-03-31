@@ -10,6 +10,7 @@ import ctypes
 import warnings
 import sys
 import os
+import platform
 
 from gi.repository import Regress as Everything
 from gi.repository import GObject
@@ -542,6 +543,7 @@ class TestEverything(unittest.TestCase):
         Everything.test_ghash_gvalue_in(data)
         data = None
 
+    @unittest.skipIf(platform.python_implementation() == "PyPy", "CPython only")
     def test_struct_gpointer(self):
         glist = GLib.List()
         raw = RawGList.from_wrapped(glist)
