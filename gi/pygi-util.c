@@ -18,6 +18,23 @@
 
 #include "pygi-util.h"
 
+/* Better alternative to PyImport_ImportModule which tries to import from
+ * sys.modules first */
+PyObject *
+pygi_import_module (const char *name)
+{
+#if PY_VERSION_HEX < 0x03000000 && !defined(PYPY_VERSION)
+    /* see PyImport_ImportModuleNoBlock
+     * https://github.com/python/cpython/blob/2.7/Python/import.c#L2166-L2206 */
+    PyObject *result = PyImport_ImportModuleNoBlock(name);
+    if (result)
+        return result;
+
+    PyErr_Clear();
+#endif
+    return PyImport_ImportModule(name);
+}
+
 PyObject *
 pyg_integer_richcompare(PyObject *v, PyObject *w, int op)
 {

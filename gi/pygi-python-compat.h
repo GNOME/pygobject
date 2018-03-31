@@ -33,8 +33,6 @@
 # define PYGLIB_CPointer_Import(module, symbol) \
     PyCapsule_Import(##module##.##symbol##, FALSE)
 
-PyObject * PYGLIB_PyImport_ImportModule(const char *name);
-
 #define PYGLIB_MODULE_ERROR_RETURN NULL
 
 #ifdef __GNUC__

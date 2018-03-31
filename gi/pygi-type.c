@@ -23,7 +23,7 @@
 #include "pygenum.h"
 #include "pygflags.h"
 #include "pygparamspec.h"
-#include "pygi-type.h"
+#include "pygi-util.h"
 #include "pygpointer.h"
 #include "pyginterface.h"
 
@@ -41,7 +41,7 @@ pygi_type_import_by_name (const char *namespace_,
 
     module_name = g_strconcat ("gi.repository.", namespace_, NULL);
 
-    py_module = PYGLIB_PyImport_ImportModule (module_name);
+    py_module = pygi_import_module (module_name);
 
     g_free (module_name);
 
