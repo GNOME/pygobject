@@ -2263,8 +2263,8 @@ struct _PyGObject_Functions pygobject_api_functions = {
   pyg_register_interface,
 
   &PyGBoxed_Type,
-  pyg_register_boxed,
-  pyg_boxed_new,
+  pygi_register_gboxed,
+  pygi_gboxed_new,
 
   &PyGPointer_Type,
   pyg_register_pointer,

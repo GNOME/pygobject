@@ -34,7 +34,7 @@ GQuark pygboxed_marshal_key;
 PYGLIB_DEFINE_TYPE("gobject.GBoxed", PyGBoxed_Type, PyGBoxed);
 
 static void
-pyg_boxed_dealloc(PyGBoxed *self)
+gboxed_dealloc(PyGBoxed *self)
 {
     if (self->free_on_dealloc && pyg_boxed_get_ptr (self)) {
 	PyGILState_STATE state = PyGILState_Ensure();
@@ -46,7 +46,7 @@ pyg_boxed_dealloc(PyGBoxed *self)
 }
 
 static PyObject*
-pyg_boxed_richcompare(PyObject *self, PyObject *other, int op)
+gboxed_richcompare(PyObject *self, PyObject *other, int op)
 {
     if (Py_TYPE(self) == Py_TYPE(other) &&
         PyObject_IsInstance(self, (PyObject*)&PyGBoxed_Type))
@@ -59,15 +59,14 @@ pyg_boxed_richcompare(PyObject *self, PyObject *other, int op)
     }
 }
 
-
 static PYGLIB_Py_hash_t
-pyg_boxed_hash(PyGBoxed *self)
+gboxed_hash(PyGBoxed *self)
 {
     return PYGLIB_Py_hash_t_FromVoidPtr (pyg_boxed_get_ptr (self));
 }
 
 static PyObject *
-pyg_boxed_repr(PyGBoxed *boxed)
+gboxed_repr(PyGBoxed *boxed)
 {
     PyObject *module, *repr, *self = (PyObject *)boxed;
     gchar *module_str, *namespace;
@@ -98,7 +97,7 @@ pyg_boxed_repr(PyGBoxed *boxed)
 }
 
 static int
-pyg_boxed_init(PyGBoxed *self, PyObject *args, PyObject *kwargs)
+gboxed_init(PyGBoxed *self, PyObject *args, PyObject *kwargs)
 {
     gchar buf[512];
 
@@ -116,27 +115,25 @@ pyg_boxed_init(PyGBoxed *self, PyObject *args, PyObject *kwargs)
 }
 
 static void
-pyg_boxed_free(PyObject *op)
+gboxed_free(PyObject *op)
 {
   PyObject_FREE(op);
 }
 
 static PyObject *
-pyg_boxed_copy(PyGBoxed *self)
+gboxed_copy(PyGBoxed *self)
 {
-    return pyg_boxed_new (self->gtype, pyg_boxed_get_ptr (self), TRUE, TRUE);
+    return pygi_gboxed_new (self->gtype, pyg_boxed_get_ptr (self), TRUE, TRUE);
 }
 
-
-
 static PyMethodDef pygboxed_methods[] = {
-    { "copy", (PyCFunction) pyg_boxed_copy, METH_NOARGS },
+    { "copy", (PyCFunction) gboxed_copy, METH_NOARGS },
     { NULL, NULL, 0 }
 };
 
 
 /**
- * pyg_register_boxed:
+ * pygi_register_gboxed:
  * @dict: the module dictionary to store the wrapper class.
  * @class_name: the Python name for the wrapper class.
  * @boxed_type: the GType of the boxed type being wrapped.
@@ -147,8 +144,8 @@ static PyMethodDef pygboxed_methods[] = {
  * will be stored in the provided module dictionary.
  */
 void
-pyg_register_boxed(PyObject *dict, const gchar *class_name,
-		   GType boxed_type, PyTypeObject *type)
+pygi_register_gboxed (PyObject *dict, const gchar *class_name,
+                      GType boxed_type, PyTypeObject *type)
 {
     PyObject *o;
 
@@ -156,7 +153,7 @@ pyg_register_boxed(PyObject *dict, const gchar *class_name,
     g_return_if_fail(class_name != NULL);
     g_return_if_fail(boxed_type != 0);
 
-    if (!type->tp_dealloc)  type->tp_dealloc  = (destructor)pyg_boxed_dealloc;
+    if (!type->tp_dealloc)  type->tp_dealloc  = (destructor)gboxed_dealloc;
 
     Py_TYPE(type) = &PyType_Type;
     g_assert (Py_TYPE (&PyGBoxed_Type) != NULL);
@@ -177,7 +174,7 @@ pyg_register_boxed(PyObject *dict, const gchar *class_name,
 }
 
 /**
- * pyg_boxed_new:
+ * pygi_gboxed_new:
  * @boxed_type: the GType of the boxed value.
  * @boxed: the boxed value.
  * @copy_boxed: whether the new boxed wrapper should hold a copy of the value.
@@ -192,8 +189,8 @@ pyg_register_boxed(PyObject *dict, const gchar *class_name,
  * Returns: the boxed wrapper or %NULL and sets an exception.
  */
 PyObject *
-pyg_boxed_new(GType boxed_type, gpointer boxed, gboolean copy_boxed,
-	      gboolean own_ref)
+pygi_gboxed_new (GType boxed_type, gpointer boxed, gboolean copy_boxed,
+                 gboolean own_ref)
 {
     PyGILState_STATE state;
     PyGBoxed *self;
@@ -251,14 +248,14 @@ pygi_gboxed_register_types(PyObject *d)
     pygboxed_type_key        = g_quark_from_static_string("PyGBoxed::class");
     pygboxed_marshal_key     = g_quark_from_static_string("PyGBoxed::marshal");
 
-    PyGBoxed_Type.tp_dealloc = (destructor)pyg_boxed_dealloc;
-    PyGBoxed_Type.tp_richcompare = pyg_boxed_richcompare;
-    PyGBoxed_Type.tp_repr = (reprfunc)pyg_boxed_repr;
+    PyGBoxed_Type.tp_dealloc = (destructor)gboxed_dealloc;
+    PyGBoxed_Type.tp_richcompare = gboxed_richcompare;
+    PyGBoxed_Type.tp_repr = (reprfunc)gboxed_repr;
     PyGBoxed_Type.tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE;
     PyGBoxed_Type.tp_methods = pygboxed_methods;
-    PyGBoxed_Type.tp_init = (initproc)pyg_boxed_init;
-    PyGBoxed_Type.tp_free = (freefunc)pyg_boxed_free;
-    PyGBoxed_Type.tp_hash = (hashfunc)pyg_boxed_hash;
+    PyGBoxed_Type.tp_init = (initproc)gboxed_init;
+    PyGBoxed_Type.tp_free = (freefunc)gboxed_free;
+    PyGBoxed_Type.tp_hash = (hashfunc)gboxed_hash;
     
     PYGOBJECT_REGISTER_GTYPE(d, PyGBoxed_Type, "GBoxed", G_TYPE_BOXED);
 

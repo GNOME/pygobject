@@ -774,10 +774,10 @@ value_to_py_structured_type (const GValue *value, GType fundamental, gboolean co
             return bm->fromvalue(value);
         } else {
             if (copy_boxed)
-                return pyg_boxed_new(G_VALUE_TYPE(value),
+                return pygi_gboxed_new(G_VALUE_TYPE(value),
                         g_value_get_boxed(value), TRUE, TRUE);
             else
-                return pyg_boxed_new(G_VALUE_TYPE(value),
+                return pygi_gboxed_new(G_VALUE_TYPE(value),
                         g_value_get_boxed(value),FALSE,FALSE);
         }
     }
