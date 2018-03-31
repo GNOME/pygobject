@@ -1814,6 +1814,10 @@ class TestEnum(unittest.TestCase):
         self.assertEqual(GIMarshallingTests.Enum.__module__,
                          "gi.repository.GIMarshallingTests")
 
+    def test_hash(self):
+        assert (hash(GIMarshallingTests.Enum.VALUE1) ==
+                hash(GIMarshallingTests.Enum(GIMarshallingTests.Enum.VALUE1)))
+
     def test_repr(self):
         self.assertEqual(repr(GIMarshallingTests.Enum.VALUE3),
                          "<enum GI_MARSHALLING_TESTS_ENUM_VALUE3 of type "
@@ -1890,6 +1894,10 @@ class TestGEnum(unittest.TestCase):
         self.assertEqual(GIMarshallingTests.GEnum.__module__,
                          "gi.repository.GIMarshallingTests")
 
+    def test_hash(self):
+        assert (hash(GIMarshallingTests.GEnum.VALUE3) ==
+                hash(GIMarshallingTests.GEnum(GIMarshallingTests.GEnum.VALUE3)))
+
     def test_repr(self):
         self.assertEqual(repr(GIMarshallingTests.GEnum.VALUE3),
                          "<enum GI_MARSHALLING_TESTS_GENUM_VALUE3 of type "
@@ -1957,6 +1965,10 @@ class TestGFlags(unittest.TestCase):
         self.assertEqual(repr(GIMarshallingTests.Flags.VALUE2),
                          "<flags GI_MARSHALLING_TESTS_FLAGS_VALUE2 of type "
                          "GIMarshallingTests.Flags>")
+
+    def test_hash(self):
+        assert (hash(GIMarshallingTests.Flags.VALUE2) ==
+                hash(GIMarshallingTests.Flags(GIMarshallingTests.Flags.VALUE2)))
 
     def test_flags_large_in(self):
         GIMarshallingTests.extra_flags_large_in(

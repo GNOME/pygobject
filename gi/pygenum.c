@@ -376,9 +376,7 @@ pygi_enum_register_types(PyObject *d)
 
     PyGEnum_Type.tp_base = &PYGLIB_PyLong_Type;
     PyGEnum_Type.tp_new = pyg_enum_new;
-#if PY_VERSION_HEX >= 0x03000000
     PyGEnum_Type.tp_hash = PyLong_Type.tp_hash;
-#endif
     PyGEnum_Type.tp_repr = (reprfunc)pyg_enum_repr;
     PyGEnum_Type.tp_str = (reprfunc)pyg_enum_repr;
     PyGEnum_Type.tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE;
