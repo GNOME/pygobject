@@ -257,7 +257,6 @@ pyg_enum_add (PyObject *   module,
     }
 
     ((PyTypeObject *)stub)->tp_flags &= ~Py_TPFLAGS_BASETYPE;
-    ((PyTypeObject *)stub)->tp_new = pyg_enum_new;
 
     if (module)
 	PyDict_SetItemString(((PyTypeObject *)stub)->tp_dict,
@@ -376,10 +375,8 @@ pygi_enum_register_types(PyObject *d)
     pygenum_class_key        = g_quark_from_static_string("PyGEnum::class");
 
     PyGEnum_Type.tp_base = &PYGLIB_PyLong_Type;
-#if PY_VERSION_HEX < 0x03000000
     PyGEnum_Type.tp_new = pyg_enum_new;
-#else
-    PyGEnum_Type.tp_new = PyLong_Type.tp_new;
+#if PY_VERSION_HEX >= 0x03000000
     PyGEnum_Type.tp_hash = PyLong_Type.tp_hash;
 #endif
     PyGEnum_Type.tp_repr = (reprfunc)pyg_enum_repr;

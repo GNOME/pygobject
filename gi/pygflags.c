@@ -279,7 +279,6 @@ pyg_flags_add (PyObject *   module,
     }
 
     ((PyTypeObject *)stub)->tp_flags &= ~Py_TPFLAGS_BASETYPE;
-    ((PyTypeObject *)stub)->tp_new = pyg_flags_new;
 
     if (module) {
         PyDict_SetItemString(((PyTypeObject *)stub)->tp_dict,
@@ -505,10 +504,8 @@ pygi_flags_register_types(PyObject *d)
     pygflags_class_key = g_quark_from_static_string("PyGFlags::class");
 
     PyGFlags_Type.tp_base = &PYGLIB_PyLong_Type;
-#if PY_VERSION_HEX < 0x03000000
     PyGFlags_Type.tp_new = pyg_flags_new;
-#else
-    PyGFlags_Type.tp_new = PyLong_Type.tp_new;
+#if PY_VERSION_HEX >= 0x03000000
     PyGFlags_Type.tp_hash = PyLong_Type.tp_hash;    
 #endif
     PyGFlags_Type.tp_repr = (reprfunc)pyg_flags_repr;
