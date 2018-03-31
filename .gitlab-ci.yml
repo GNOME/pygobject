@@ -8,7 +8,7 @@ cache:
 
 .defaults: &defaults
   stage: build_and_test
-  image: lazka/pygobject:pyenv
+  image: lazka/pygobject:v3
   artifacts:
     paths:
       - coverage/
@@ -28,12 +28,12 @@ cache:
 
 coverage:
   stage: coverage
-  image: lazka/pygobject:pyenv
+  image: lazka/pygobject:v3
   artifacts:
     paths:
       - coverage/
   variables:
-    PYENV_VERSION: "3.6.4"
+    PYENV_VERSION: "3.6.5"
   script:
     - bash -x ./.gitlab-ci/coverage-docker.sh
 
@@ -72,7 +72,7 @@ python2.7:
 
 python3.4:
   variables:
-    PYENV_VERSION: "3.4.7"
+    PYENV_VERSION: "3.4.8"
   <<: *defaults
 
 python3.5:
@@ -82,17 +82,22 @@ python3.5:
 
 python3.6:
   variables:
-    PYENV_VERSION: "3.6.4"
+    PYENV_VERSION: "3.6.5"
   <<: *defaults
 
 python3.7:
   variables:
-    PYENV_VERSION: "3.7.0b2"
+    PYENV_VERSION: "3.7.0b3"
   <<: *defaults
 
 pypy2:
   variables:
     PYENV_VERSION: "pypy2.7-5.10.0"
+  <<: *defaults
+
+pypy3:
+  variables:
+    PYENV_VERSION: "pypy3.5-5.10.1"
   <<: *defaults
 
 xenial-i386-py2:
