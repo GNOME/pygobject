@@ -22,11 +22,10 @@ mkdir -p "${COV_DIR}"
 if [[ "${PYIMPL}" == "PyPy" ]]; then
     # https://bitbucket.org/pypy/pypy/issues/2776
     export MALLOC_CHECK_=
-    python -m pip install pycairo pytest
-else
-    python -m pip install git+https://github.com/pygobject/pycairo.git
-    python -m pip install flake8 pytest pytest-faulthandler coverage
 fi;
+
+python -m pip install git+https://github.com/pygobject/pycairo.git
+python -m pip install flake8 pytest pytest-faulthandler coverage
 
 if [[ "${PYIMPL}" == "PyPy" ]]; then
     python setup.py build_tests
