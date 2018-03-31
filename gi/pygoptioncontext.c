@@ -23,6 +23,7 @@
 #include "pygoptioncontext.h"
 #include "pygi-error.h"
 #include "pygi-util.h"
+#include "pygi-basictype.h"
 
 PYGLIB_DEFINE_TYPE("gi._gi.OptionContext", PyGOptionContext_Type, PyGOptionContext)
 
@@ -209,7 +210,7 @@ pyg_option_context_set_help_enabled(PyGOptionContext *self,
 static PyObject *
 pyg_option_context_get_help_enabled(PyGOptionContext *self)
 {
-    return PyBool_FromLong(g_option_context_get_help_enabled(self->context));
+    return pygi_gboolean_to_py (g_option_context_get_help_enabled(self->context));
 }
 
 static PyObject *
@@ -236,7 +237,7 @@ pyg_option_context_set_ignore_unknown_options(PyGOptionContext *self,
 static PyObject *
 pyg_option_context_get_ignore_unknown_options(PyGOptionContext *self)
 {
-    return PyBool_FromLong(
+    return pygi_gboolean_to_py (
         g_option_context_get_ignore_unknown_options(self->context));
 }
 

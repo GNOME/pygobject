@@ -90,6 +90,12 @@ pygi_gsize_to_py (gsize value)
     return PYGLIB_PyLong_FromSize_t (value);
 }
 
+PyObject *
+pygi_gssize_to_py (gssize value)
+{
+    return PYGLIB_PyLong_FromSsize_t (value);
+}
+
 gboolean
 pygi_gdouble_from_py (PyObject *py_arg, gdouble *result)
 {

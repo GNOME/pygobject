@@ -32,6 +32,7 @@
 #include "pygi-type.h"
 #include "pygi-property.h"
 #include "pygi-signal-closure.h"
+#include "pygi-basictype.h"
 
 extern PyObject *PyGIDeprecationWarning;
 
@@ -1665,7 +1666,7 @@ connect_helper(PyGObject *self, gchar *name, PyObject *callback, PyObject *extra
     pygobject_watch_closure((PyObject *)self, closure);
     handlerid = g_signal_connect_closure_by_id(self->obj, sigid, detail,
 					       closure, after);
-    return PyLong_FromUnsignedLong(handlerid);
+    return pygi_gulong_to_py (handlerid);
 }
 
 static PyObject *
@@ -2052,7 +2053,7 @@ pygobject_disconnect_by_func(PyGObject *self, PyObject *args)
 						  0, 0,
 						  closure,
 						  NULL, NULL);
-    return PYGLIB_PyLong_FromLong(retval);
+    return pygi_guint_to_py (retval);
 }
 
 static PyObject *
@@ -2086,7 +2087,7 @@ pygobject_handler_block_by_func(PyGObject *self, PyObject *args)
 					     0, 0,
 					     closure,
 					     NULL, NULL);
-    return PYGLIB_PyLong_FromLong(retval);
+    return pygi_guint_to_py (retval);
 }
 
 static PyObject *
@@ -2120,7 +2121,7 @@ pygobject_handler_unblock_by_func(PyGObject *self, PyObject *args)
 					       0, 0,
 					       closure,
 					       NULL, NULL);
-    return PYGLIB_PyLong_FromLong(retval);
+    return pygi_guint_to_py (retval);
 }
 
 
@@ -2167,7 +2168,7 @@ pygobject_get_refcount(PyGObject *self, void *closure)
         PyErr_Format(PyExc_TypeError, "GObject instance is not yet created");
         return NULL;
     }
-    return PYGLIB_PyLong_FromLong(self->obj->ref_count);
+    return pygi_guint_to_py (self->obj->ref_count);
 }
 
 static PyObject *

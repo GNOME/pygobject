@@ -23,6 +23,7 @@
 #include <glib.h>
 
 #include "pygi-python-compat.h"
+#include "pygi-basictype.h"
 #include "pygspawn.h"
 #include "pygi-error.h"
 
@@ -77,7 +78,7 @@ pyg_pid_new(GPid pid)
 #ifdef G_OS_WIN32
     long_val = PyLong_FromVoidPtr (pid);
 #else
-    long_val = PYGLIB_PyLong_FromLong (pid);
+    long_val = pygi_gint_to_py (pid);
 #endif
     return PyObject_CallMethod((PyObject*)&PyGPid_Type, "__new__", "ON",
                                &PyGPid_Type, long_val);
@@ -236,21 +237,21 @@ pyglib_spawn_async(PyObject *object, PyObject *args, PyObject *kwargs)
     if (envp) g_free(envp);
 
     if (standard_input)
-        pystdin = PYGLIB_PyLong_FromLong(*standard_input);
+        pystdin = pygi_gint_to_py(*standard_input);
     else {
         Py_INCREF(Py_None);
         pystdin = Py_None;
     }
 
     if (standard_output)
-        pystdout = PYGLIB_PyLong_FromLong(*standard_output);
+        pystdout = pygi_gint_to_py(*standard_output);
     else {
         Py_INCREF(Py_None);
         pystdout = Py_None;
     }
 
     if (standard_error)
-        pystderr = PYGLIB_PyLong_FromLong(*standard_error);
+        pystderr = pygi_gint_to_py(*standard_error);
     else {
         Py_INCREF(Py_None);
         pystderr = Py_None;

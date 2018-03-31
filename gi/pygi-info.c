@@ -858,28 +858,28 @@ _wrap_g_arg_info_get_direction (PyGIBaseInfo *self)
 static PyObject *
 _wrap_g_arg_info_is_caller_allocates (PyGIBaseInfo *self)
 {
-    return PyBool_FromLong (
+    return pygi_gboolean_to_py (
 	    g_arg_info_is_caller_allocates ((GIArgInfo*)self->info) );
 }
 
 static PyObject *
 _wrap_g_arg_info_is_return_value (PyGIBaseInfo *self)
 {
-    return PyBool_FromLong (
+    return pygi_gboolean_to_py (
 	    g_arg_info_is_return_value ((GIArgInfo*)self->info) );
 }
 
 static PyObject *
 _wrap_g_arg_info_is_optional (PyGIBaseInfo *self)
 {
-    return PyBool_FromLong (
+    return pygi_gboolean_to_py (
 	    g_arg_info_is_optional ((GIArgInfo*)self->info) );
 }
 
 static PyObject *
 _wrap_g_arg_info_may_be_null (PyGIBaseInfo *self)
 {
-    return PyBool_FromLong (
+    return pygi_gboolean_to_py (
 	    g_arg_info_may_be_null ((GIArgInfo*)self->info) );
 }
 
@@ -938,7 +938,7 @@ PYGLIB_DEFINE_TYPE ("gi.TypeInfo", PyGITypeInfo_Type, PyGIBaseInfo);
 static PyObject *
 _wrap_g_type_info_is_pointer (PyGIBaseInfo *self)
 {
-    return PyBool_FromLong (g_type_info_is_pointer (self->info));
+    return pygi_gboolean_to_py (g_type_info_is_pointer (self->info));
 }
 
 static PyObject *
@@ -1030,7 +1030,7 @@ _wrap_g_function_info_is_constructor (PyGIBaseInfo *self)
     flags = g_function_info_get_flags ( (GIFunctionInfo*) self->info);
     is_constructor = flags & GI_FUNCTION_IS_CONSTRUCTOR;
 
-    return PyBool_FromLong (is_constructor);
+    return pygi_gboolean_to_py (is_constructor);
 }
 
 static PyObject *
@@ -1042,7 +1042,7 @@ _wrap_g_function_info_is_method (PyGIBaseInfo *self)
     flags = g_function_info_get_flags ( (GIFunctionInfo*) self->info);
     is_method = flags & GI_FUNCTION_IS_METHOD;
 
-    return PyBool_FromLong (is_method);
+    return pygi_gboolean_to_py (is_method);
 }
 
 gsize
@@ -1538,7 +1538,7 @@ static PyObject *
 _wrap_g_object_info_get_abstract (PyGIBaseInfo *self)
 {
     gboolean is_abstract  = g_object_info_get_abstract ( (GIObjectInfo*) self->info);
-    return PyBool_FromLong (is_abstract);
+    return pygi_gboolean_to_py (is_abstract);
 }
 
 static PyObject *
@@ -1556,7 +1556,7 @@ _wrap_g_object_info_get_type_init (PyGIBaseInfo *self)
 static PyObject *
 _wrap_g_object_info_get_fundamental (PyGIBaseInfo *self)
 {
-    return PyBool_FromLong (g_object_info_get_fundamental ( (GIObjectInfo*) self->info));
+    return pygi_gboolean_to_py (g_object_info_get_fundamental ( (GIObjectInfo*) self->info));
 }
 
 static PyObject *

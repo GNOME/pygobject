@@ -312,7 +312,7 @@ _wrap_g_type_wrapper__get_interfaces(PyGTypeWrapper *self, void *closure)
 static PyObject *
 _wrap_g_type_wrapper__get_depth(PyGTypeWrapper *self, void *closure)
 {
-  return PYGLIB_PyLong_FromLong(g_type_depth(self->type));
+  return pygi_guint_to_py (g_type_depth (self->type));
 }
 
 static PyGetSetDef _PyGTypeWrapper_getsets[] = {
@@ -329,55 +329,55 @@ static PyGetSetDef _PyGTypeWrapper_getsets[] = {
 static PyObject*
 _wrap_g_type_is_interface(PyGTypeWrapper *self)
 {
-    return PyBool_FromLong(G_TYPE_IS_INTERFACE(self->type));
+    return pygi_gboolean_to_py (G_TYPE_IS_INTERFACE (self->type));
 }
 
 static PyObject*
 _wrap_g_type_is_classed(PyGTypeWrapper *self)
 {
-    return PyBool_FromLong(G_TYPE_IS_CLASSED(self->type));
+    return pygi_gboolean_to_py (G_TYPE_IS_CLASSED (self->type));
 }
 
 static PyObject*
 _wrap_g_type_is_instantiatable(PyGTypeWrapper *self)
 {
-    return PyBool_FromLong(G_TYPE_IS_INSTANTIATABLE(self->type));
+    return pygi_gboolean_to_py (G_TYPE_IS_INSTANTIATABLE(self->type));
 }
 
 static PyObject*
 _wrap_g_type_is_derivable(PyGTypeWrapper *self)
 {
-    return PyBool_FromLong(G_TYPE_IS_DERIVABLE(self->type));
+    return pygi_gboolean_to_py (G_TYPE_IS_DERIVABLE (self->type));
 }
 
 static PyObject*
 _wrap_g_type_is_deep_derivable(PyGTypeWrapper *self)
 {
-    return PyBool_FromLong(G_TYPE_IS_DEEP_DERIVABLE(self->type));
+    return pygi_gboolean_to_py (G_TYPE_IS_DEEP_DERIVABLE (self->type));
 }
 
 static PyObject*
 _wrap_g_type_is_abstract(PyGTypeWrapper *self)
 {
-    return PyBool_FromLong(G_TYPE_IS_ABSTRACT(self->type));
+    return pygi_gboolean_to_py (G_TYPE_IS_ABSTRACT (self->type));
 }
 
 static PyObject*
 _wrap_g_type_is_value_abstract(PyGTypeWrapper *self)
 {
-    return PyBool_FromLong(G_TYPE_IS_VALUE_ABSTRACT(self->type));
+    return pygi_gboolean_to_py (G_TYPE_IS_VALUE_ABSTRACT (self->type));
 }
 
 static PyObject*
 _wrap_g_type_is_value_type(PyGTypeWrapper *self)
 {
-    return PyBool_FromLong(G_TYPE_IS_VALUE_TYPE(self->type));
+    return pygi_gboolean_to_py (G_TYPE_IS_VALUE_TYPE (self->type));
 }
 
 static PyObject*
 _wrap_g_type_has_value_table(PyGTypeWrapper *self)
 {
-    return PyBool_FromLong(G_TYPE_HAS_VALUE_TABLE(self->type));
+    return pygi_gboolean_to_py (G_TYPE_HAS_VALUE_TABLE (self->type));
 }
 
 static PyObject*
@@ -409,7 +409,7 @@ _wrap_g_type_is_a(PyGTypeWrapper *self, PyObject *args)
     else if ((parent = pyg_type_from_object(gparent)) == 0)
 	return NULL;
 
-    return PyBool_FromLong(g_type_is_a(self->type, parent));
+    return pygi_gboolean_to_py (g_type_is_a (self->type, parent));
 }
 
 static PyMethodDef _PyGTypeWrapper_methods[] = {

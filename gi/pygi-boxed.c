@@ -23,6 +23,7 @@
 #include "pygi-info.h"
 #include "pygboxed.h"
 #include "pygi-type.h"
+#include "pygi-basictype.h"
 #include "pygi-python-compat.h"
 
 #include <girepository.h>
@@ -189,7 +190,7 @@ pygi_boxed_new (PyTypeObject *type,
 static PyObject *
 boxed_get_free_on_dealloc(PyGIBoxed *self, void *closure)
 {
-  return PyBool_FromLong( ((PyGBoxed *)self)->free_on_dealloc );
+  return pygi_gboolean_to_py( ((PyGBoxed *)self)->free_on_dealloc );
 }
 
 /**

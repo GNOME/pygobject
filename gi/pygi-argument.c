@@ -831,7 +831,7 @@ _pygi_argument_to_object (GIArgument  *arg,
                             return NULL;
 
                         py_args = PyTuple_New (1);
-                        if (PyTuple_SetItem (py_args, 0, PyLong_FromLong (arg->v_int)) != 0) {
+                        if (PyTuple_SetItem (py_args, 0, pygi_gint_to_py (arg->v_int)) != 0) {
                             Py_DECREF (py_args);
                             Py_DECREF (py_type);
                             return NULL;
