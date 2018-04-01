@@ -1394,6 +1394,7 @@ class _RefCountTestBase(object):
     class PyData(object):
         pass
 
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), "no sys.getrefcount")
     def test_callback_ref_count_del(self):
         def callback(obj, value):
             return value // 2
@@ -1415,6 +1416,7 @@ class _RefCountTestBase(object):
         del obj
         self.assertIsNone(callback_ref())
 
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), "no sys.getrefcount")
     def test_callback_ref_count_disconnect(self):
         def callback(obj, value):
             return value // 2
@@ -1436,6 +1438,7 @@ class _RefCountTestBase(object):
         obj.disconnect(handler_id)
         self.assertIsNone(callback_ref())
 
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), "no sys.getrefcount")
     def test_callback_ref_count_disconnect_by_func(self):
         def callback(obj, value):
             return value // 2
@@ -1457,6 +1460,7 @@ class _RefCountTestBase(object):
         obj.disconnect_by_func(callback_ref())
         self.assertIsNone(callback_ref())
 
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), "no sys.getrefcount")
     def test_user_data_ref_count(self):
         def callback(obj, value, data):
             return value // 2
@@ -1479,6 +1483,7 @@ class _RefCountTestBase(object):
         del obj
         self.assertIsNone(data_ref())
 
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), "no sys.getrefcount")
     @unittest.expectedFailure  # https://bugzilla.gnome.org/show_bug.cgi?id=688064
     def test_object_ref_count(self):
         # connect_object() should only weakly reference the object passed in
