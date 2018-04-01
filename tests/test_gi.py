@@ -1614,6 +1614,15 @@ class TestGValue(unittest.TestCase):
         values = GIMarshallingTests.return_gvalue_flat_array()
         self.assertEqual(values, [42, '42', True])
 
+    def test_gvalue_gobject_ref_counts_simple(self):
+        obj = GObject.Object()
+        grefcount = obj.__grefcount__
+        value = GObject.Value(GObject.TYPE_OBJECT, obj)
+        del value
+        gc.collect()
+        gc.collect()
+        assert obj.__grefcount__ == grefcount
+
     def test_gvalue_gobject_ref_counts(self):
         # Tests a GObject held by a GValue
         obj = GObject.Object()
@@ -1644,6 +1653,7 @@ class TestGValue(unittest.TestCase):
         # refcount back to where we started
         del res
         del value
+        gc.collect()
         gc.collect()
         self.assertEqual(obj.__grefcount__, grefcount)
 
