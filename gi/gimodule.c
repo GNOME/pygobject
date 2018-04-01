@@ -2200,6 +2200,17 @@ pyg__install_metaclass(PyObject *dummy, PyTypeObject *metaclass)
     return Py_None;
 }
 
+static PyObject *
+_wrap_pyig_pyos_getsig (PyObject *self, PyObject *args)
+{
+    int sig_num;
+
+    if (!PyArg_ParseTuple (args, "i:pyos_getsig", &sig_num))
+        return NULL;
+
+    return PyLong_FromVoidPtr ((void *)(PyOS_getsig (sig_num)));
+}
+
 static PyMethodDef _gi_functions[] = {
     { "enum_add", (PyCFunction) _wrap_pyg_enum_add, METH_VARARGS | METH_KEYWORDS },
     { "enum_register_new_gtype_and_add", (PyCFunction) _wrap_pyg_enum_register_new_gtype_and_add, METH_VARARGS | METH_KEYWORDS },
@@ -2210,6 +2221,7 @@ static PyMethodDef _gi_functions[] = {
     { "hook_up_vfunc_implementation", (PyCFunction) _wrap_pyg_hook_up_vfunc_implementation, METH_VARARGS },
     { "variant_type_from_string", (PyCFunction) _wrap_pyg_variant_type_from_string, METH_VARARGS },
     { "source_new", (PyCFunction) _wrap_pyg_source_new, METH_NOARGS },
+    { "pyos_getsig", (PyCFunction) _wrap_pyig_pyos_getsig, METH_VARARGS },
     { "source_set_callback", (PyCFunction) pyg_source_set_callback, METH_VARARGS },
     { "io_channel_read", (PyCFunction) pyg_channel_read, METH_VARARGS },
     { "require_foreign", (PyCFunction) pygi_require_foreign, METH_VARARGS | METH_KEYWORDS },

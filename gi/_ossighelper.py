@@ -20,9 +20,10 @@ import os
 import sys
 import socket
 import signal
-import ctypes
 import threading
 from contextlib import closing, contextmanager
+
+from . import _gi
 
 
 def ensure_socket_not_inheritable(sock):
@@ -139,28 +140,7 @@ def wakeup_on_signal():
             _wakeup_fd_is_active = False
 
 
-def create_pythonapi():
-    if not hasattr(ctypes, "PyDLL"):
-        # PyPy
-        return
-    # We need our own instance of ctypes.pythonapi so we don't modify the
-    # global shared one. Adapted from the ctypes source.
-    if os.name == "nt":
-        return ctypes.PyDLL("python dll", None, sys.dllhandle)
-    elif sys.platform == "cygwin":
-        return ctypes.PyDLL("libpython%d.%d.dll" % sys.version_info[:2])
-    else:
-        return ctypes.PyDLL(None)
-
-
-pydll = create_pythonapi()
-if pydll is None:
-    PyOS_getsig = lambda s: -1
-else:
-    PyOS_getsig = pydll.PyOS_getsig
-    PyOS_getsig.restype = ctypes.c_void_p
-    PyOS_getsig.argtypes = [ctypes.c_int]
-
+PyOS_getsig = _gi.pyos_getsig
 
 # We save the signal pointer so we can detect if glib has changed the
 # signal handler behind Python's back (GLib.unix_signal_add)
