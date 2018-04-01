@@ -267,4 +267,4 @@ def register_sigint_fallback(callback):
             yield
         finally:
             if _sigint_called:
-                signal.default_int_handler()
+                signal.default_int_handler(signal.SIGINT, None)
