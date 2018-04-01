@@ -123,9 +123,7 @@ class TestImporter(unittest.TestCase):
         self.assertTrue('InvalidGObjectRepositoryModuleName' in exception_string)
 
         # The message of the custom exception in gi/importer.py is eaten in Python <3.3
-        if sys.version_info < (3, 3):
-            self.assertTrue('introspection typelib' not in exception_string)
-        else:
+        if sys.version_info >= (3, 3):
             self.assertTrue('introspection typelib' in exception_string)
 
     def test_require_version_warning(self):
