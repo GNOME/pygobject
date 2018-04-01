@@ -3,6 +3,7 @@
 from __future__ import absolute_import
 
 import sys
+import gc
 import unittest
 import warnings
 
@@ -128,6 +129,8 @@ class TestSource(unittest.TestCase):
             return s
 
         s = f()
+        gc.collect()
+        gc.collect()
         self.assertTrue(s.is_destroyed())
 
     def test_remove(self):
@@ -222,6 +225,8 @@ class TestSource(unittest.TestCase):
         self.assertFalse(self.finalized)
         self.assertTrue(source.is_destroyed())
         del source
+        gc.collect()
+        gc.collect()
         self.assertTrue(self.finalized)
 
     @unittest.skip('https://bugzilla.gnome.org/show_bug.cgi?id=722387')
