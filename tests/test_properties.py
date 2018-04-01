@@ -834,7 +834,7 @@ class TestProperty(unittest.TestCase):
         GObject.Property(type=GObject.TYPE_DOUBLE, minimum=-1)
 
     # Bug 644039
-
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), "no sys.getrefcount")
     def test_reference_count(self):
         # We can check directly if an object gets finalized, so we will
         # observe it indirectly through the refcount of a member object.
