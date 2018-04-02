@@ -53,6 +53,11 @@ GQuark pygobject_wrapper_key;
 GQuark pygobject_has_updated_constructor_key;
 GQuark pygobject_instance_data_key;
 
+/* PyPy doesn't support tp_dictoffset, so we have to work around it */
+#ifndef PYPY_VERSION
+#define PYGI_OBJECT_USE_CUSTOM_DICT
+#endif
+
 GClosure *
 gclosure_from_pyfunc(PyGObject *object, PyObject *func)
 {
@@ -619,18 +624,49 @@ pyg_toggle_notify (gpointer data, GObject *object, gboolean is_last_ref)
     PyGILState_Release(state);
 }
 
+static inline gboolean
+pygobject_toggle_ref_is_required (PyGObject *self)
+{
+#ifdef PYGI_OBJECT_USE_CUSTOM_DICT
+    return self->inst_dict != NULL;
+#else
+    PyObject *dict;
+    gboolean result;
+    dict = PyObject_GetAttrString ((PyObject *)self, "__dict__");
+    if (!dict) {
+        PyErr_Clear ();
+        return FALSE;
+    }
+    result = PyDict_Size (dict) != 0;
+    Py_DECREF (dict);
+    return result;
+#endif
+}
+
+static inline gboolean
+pygobject_toggle_ref_is_active (PyGObject *self)
+{
+    return self->private_flags.flags & PYGOBJECT_USING_TOGGLE_REF;
+}
+
   /* Called when the inst_dict is first created; switches the 
      reference counting strategy to start using toggle ref to keep the
      wrapper alive while the GObject lives.  In contrast, while
      inst_dict was NULL the python wrapper is allowed to die at
      will and is recreated on demand. */
 static inline void
-pygobject_switch_to_toggle_ref(PyGObject *self)
+pygobject_toggle_ref_ensure (PyGObject *self)
 {
-    g_assert(self->obj->ref_count >= 1);
+    if (pygobject_toggle_ref_is_active (self))
+        return;
 
-    if (self->private_flags.flags & PYGOBJECT_USING_TOGGLE_REF)
-        return; /* already using toggle ref */
+    if (!pygobject_toggle_ref_is_required (self))
+        return;
+
+    if (self->obj == NULL)
+        return;
+
+    g_assert(self->obj->ref_count >= 1);
     self->private_flags.flags |= PYGOBJECT_USING_TOGGLE_REF;
       /* Note that add_toggle_ref will never immediately call back into 
          pyg_toggle_notify */
@@ -686,8 +722,8 @@ pygobject_register_wrapper(PyObject *self)
     g_assert(gself->obj->ref_count >= 1);
       /* save wrapper pointer so we can access it later */
     g_object_set_qdata_full(gself->obj, pygobject_wrapper_key, gself, NULL);
-    if (gself->inst_dict)
-        pygobject_switch_to_toggle_ref(gself);
+
+    pygobject_toggle_ref_ensure (gself);
 }
 
 static PyObject *
@@ -1196,7 +1232,7 @@ pygobject_clear(PyGObject *self)
 {
     if (self->obj) {
         g_object_set_qdata_full(self->obj, pygobject_wrapper_key, NULL, NULL);
-        if (self->inst_dict) {
+        if (pygobject_toggle_ref_is_active (self)) {
             g_object_remove_toggle_ref(self->obj, pyg_toggle_notify, NULL);
             self->private_flags.flags &= ~PYGOBJECT_USING_TOGGLE_REF;
         } else {
@@ -2146,20 +2182,18 @@ static PyMethodDef pygobject_methods[] = {
     { NULL, NULL, 0 }
 };
 
-
+#ifdef PYGI_OBJECT_USE_CUSTOM_DICT
 static PyObject *
 pygobject_get_dict(PyGObject *self, void *closure)
 {
     if (self->inst_dict == NULL) {
-	self->inst_dict = PyDict_New();
-	if (self->inst_dict == NULL)
-	    return NULL;
-        if (G_LIKELY(self->obj))
-            pygobject_switch_to_toggle_ref(self);
+        self->inst_dict = PyDict_New();
+        pygobject_toggle_ref_ensure (self);
     }
     Py_INCREF(self->inst_dict);
     return self->inst_dict;
 }
+#endif
 
 static PyObject *
 pygobject_get_refcount(PyGObject *self, void *closure)
@@ -2181,19 +2215,15 @@ static int
 pygobject_setattro(PyObject *self, PyObject *name, PyObject *value)
 {
     int res;
-    PyGObject *gself = (PyGObject *) self;
-    PyObject *inst_dict_before = gself->inst_dict;
-      /* call parent type's setattro */
     res = PyGObject_Type.tp_base->tp_setattro(self, name, value);
-    if (inst_dict_before == NULL && gself->inst_dict != NULL) {
-        if (G_LIKELY(gself->obj))
-            pygobject_switch_to_toggle_ref(gself);
-    }
+    pygobject_toggle_ref_ensure ((PyGObject *) self);
     return res;
 }
 
 static PyGetSetDef pygobject_getsets[] = {
+#ifdef PYGI_OBJECT_USE_CUSTOM_DICT
     { "__dict__", (getter)pygobject_get_dict, (setter)0 },
+#endif
     { "__grefcount__", (getter)pygobject_get_refcount, (setter)0, },
     { "__gpointer__", (getter)pygobject_get_pointer, (setter)0, },
     { NULL, 0, 0 }
@@ -2386,7 +2416,9 @@ pyi_object_register_types(PyObject *d)
     PyGObject_Type.tp_weaklistoffset = offsetof(PyGObject, weakreflist);
     PyGObject_Type.tp_methods = pygobject_methods;
     PyGObject_Type.tp_getset = pygobject_getsets;
+#ifdef PYGI_OBJECT_USE_CUSTOM_DICT
     PyGObject_Type.tp_dictoffset = offsetof(PyGObject, inst_dict);
+#endif
     PyGObject_Type.tp_init = (initproc)pygobject_init;
     PyGObject_Type.tp_free = (freefunc)pygobject_free;
     PyGObject_Type.tp_alloc = PyType_GenericAlloc;
