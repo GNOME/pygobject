@@ -110,7 +110,8 @@ class TestVFuncsWithObjectArg(unittest.TestCase):
         vfuncs.get_ref_info_for_vfunc_return_object_transfer_full()  # Use any vfunc to test this.
 
         gc.collect()
-        self.assertEqual(sys.getrefcount(vfuncs), 2)
+        if hasattr(sys, "getrefcount"):
+            self.assertEqual(sys.getrefcount(vfuncs), 2)
         self.assertEqual(vfuncs.__grefcount__, 1)
 
         del vfuncs

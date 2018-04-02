@@ -24,6 +24,7 @@ import gc
 import sys
 import weakref
 import unittest
+import platform
 
 # pygobject
 from gi.repository import GObject
@@ -137,6 +138,7 @@ class TestReferences(unittest.TestCase):
     def setUp(self):
         pass
 
+    @unittest.skipIf(platform.python_implementation() == "PyPy", "not with PyPy")
     def test_c_tree_iter_user_data_as_pyobject(self):
         obj = object()
         obj_id = id(obj)
@@ -154,24 +156,28 @@ class TestReferences(unittest.TestCase):
         model = ATesterModel()
         obj_ref = weakref.ref(model.root)
         # Initial refcount is 1 for model.root + the temporary
-        self.assertEqual(sys.getrefcount(model.root), 2)
+        if hasattr(sys, "getrefcount"):
+            self.assertEqual(sys.getrefcount(model.root), 2)
 
         # Iter increases by 1 do to assignment to iter.user_data
         res, it = model.do_get_iter([0])
         self.assertEqual(id(model.root), it.user_data)
-        self.assertEqual(sys.getrefcount(model.root), 3)
+        if hasattr(sys, "getrefcount"):
+            self.assertEqual(sys.getrefcount(model.root), 3)
 
         # Verify getting a TreeIter more then once does not further increase
         # the ref count.
         res2, it2 = model.do_get_iter([0])
         self.assertEqual(id(model.root), it2.user_data)
-        self.assertEqual(sys.getrefcount(model.root), 3)
+        if hasattr(sys, "getrefcount"):
+            self.assertEqual(sys.getrefcount(model.root), 3)
 
         # Deleting the iter does not decrease refcount because references
         # leak by default (they are stored in the held_refs pool)
         del it
         gc.collect()
-        self.assertEqual(sys.getrefcount(model.root), 3)
+        if hasattr(sys, "getrefcount"):
+            self.assertEqual(sys.getrefcount(model.root), 3)
 
         # Deleting a model should free all held references to user data
         # stored by TreeIters
@@ -183,17 +189,20 @@ class TestReferences(unittest.TestCase):
         model = ATesterModel()
         obj_ref = weakref.ref(model.root)
         # Initial refcount is 1 for model.root + the temporary
-        self.assertEqual(sys.getrefcount(model.root), 2)
+        if hasattr(sys, "getrefcount"):
+            self.assertEqual(sys.getrefcount(model.root), 2)
 
         # Iter increases by 1 do to assignment to iter.user_data
         res, it = model.do_get_iter([0])
         self.assertEqual(id(model.root), it.user_data)
-        self.assertEqual(sys.getrefcount(model.root), 3)
+        if hasattr(sys, "getrefcount"):
+            self.assertEqual(sys.getrefcount(model.root), 3)
 
         # Notifying the underlying model of a row_deleted should decrease the
         # ref count.
         model.row_deleted(Gtk.TreePath('0'), model.root)
-        self.assertEqual(sys.getrefcount(model.root), 2)
+        if hasattr(sys, "getrefcount"):
+            self.assertEqual(sys.getrefcount(model.root), 2)
 
         # Finally deleting the actual object should collect it completely
         del model.root
@@ -206,18 +215,21 @@ class TestReferences(unittest.TestCase):
 
         obj_ref = weakref.ref(model.root)
         # Initial refcount is 1 for model.root + the temporary
-        self.assertEqual(sys.getrefcount(model.root), 2)
+        if hasattr(sys, "getrefcount"):
+            self.assertEqual(sys.getrefcount(model.root), 2)
 
         # Iter does not increas count by 1 when leak_references is false
         res, it = model.do_get_iter([0])
         self.assertEqual(id(model.root), it.user_data)
-        self.assertEqual(sys.getrefcount(model.root), 2)
+        if hasattr(sys, "getrefcount"):
+            self.assertEqual(sys.getrefcount(model.root), 2)
 
         # Deleting the iter does not decrease refcount because assigning user_data
         # eats references and does not release them.
         del it
         gc.collect()
-        self.assertEqual(sys.getrefcount(model.root), 2)
+        if hasattr(sys, "getrefcount"):
+            self.assertEqual(sys.getrefcount(model.root), 2)
 
         # Deleting the model decreases the final ref, and the object is collected
         del model
@@ -242,14 +254,16 @@ class TestReferences(unittest.TestCase):
         #   4 - ref held by the root/children graph itself
         #   5 - ref held by the model "held_refs" instance var
         for node in nodes:
-            self.assertEqual(sys.getrefcount(node), 5)
+            if hasattr(sys, "getrefcount"):
+                self.assertEqual(sys.getrefcount(node), 5)
 
         # A second iteration and storage of the nodes in a new list
         # should only increase refcounts by 1 even though new
         # iterators are created and assigned.
         nodes2 = [node for node in model.iter_depth_first()]
         for node in nodes2:
-            self.assertEqual(sys.getrefcount(node), 6)
+            if hasattr(sys, "getrefcount"):
+                self.assertEqual(sys.getrefcount(node), 6)
 
         # Hold weak refs and start verifying ref collection.
         node_refs = [weakref.ref(node) for node in nodes]
@@ -258,14 +272,16 @@ class TestReferences(unittest.TestCase):
         del nodes2
         gc.collect()
         for node in nodes:
-            self.assertEqual(sys.getrefcount(node), 5)
+            if hasattr(sys, "getrefcount"):
+                self.assertEqual(sys.getrefcount(node), 5)
 
         # Second round of collection, no more local lists of nodes.
         del nodes
         gc.collect()
         for ref in node_refs:
             node = ref()
-            self.assertEqual(sys.getrefcount(node), 4)
+            if hasattr(sys, "getrefcount"):
+                self.assertEqual(sys.getrefcount(node), 4)
 
         # Using invalidate_iters or row_deleted(path, node) will clear out
         # the pooled refs held internal to the GenericTreeModel implementation.
@@ -274,7 +290,8 @@ class TestReferences(unittest.TestCase):
         gc.collect()
         for ref in node_refs:
             node = ref()
-            self.assertEqual(sys.getrefcount(node), 3)
+            if hasattr(sys, "getrefcount"):
+                self.assertEqual(sys.getrefcount(node), 3)
 
         # Deleting the root node at this point should allow all nodes to be collected
         # as there is no longer a way to reach the children

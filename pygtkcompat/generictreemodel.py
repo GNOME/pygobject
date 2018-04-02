@@ -23,6 +23,7 @@ import sys
 import random
 import collections
 import ctypes
+import platform
 
 # GObject
 from gi.repository import GObject
@@ -41,9 +42,13 @@ class _CTreeIter(ctypes.Structure):
         return ctypes.POINTER(cls).from_address(id(iter) + offset)
 
 
-def _get_user_data_as_pyobject(iter):
-    citer = _CTreeIter.from_iter(iter)
-    return ctypes.cast(citer.contents.user_data, ctypes.py_object).value
+if platform.python_implementation() == "PyPy":
+    def _get_user_data_as_pyobject(iter):
+        raise NotImplementedError("Not yet supported under PyPy")
+else:
+    def _get_user_data_as_pyobject(iter):
+        citer = _CTreeIter.from_iter(iter)
+        return ctypes.cast(citer.contents.user_data, ctypes.py_object).value
 
 
 def handle_exception(default_return):

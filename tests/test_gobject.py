@@ -244,19 +244,23 @@ class TestPythonReferenceCounting(unittest.TestCase):
 
     def test_new_instance_has_two_refs(self):
         obj = GObject.GObject()
-        self.assertEqual(sys.getrefcount(obj), 2)
+        if hasattr(sys, "getrefcount"):
+            self.assertEqual(sys.getrefcount(obj), 2)
 
     def test_new_instance_has_two_refs_using_gobject_new(self):
         obj = GObject.new(GObject.GObject)
-        self.assertEqual(sys.getrefcount(obj), 2)
+        if hasattr(sys, "getrefcount"):
+            self.assertEqual(sys.getrefcount(obj), 2)
 
     def test_new_subclass_instance_has_two_refs(self):
         obj = A()
-        self.assertEqual(sys.getrefcount(obj), 2)
+        if hasattr(sys, "getrefcount"):
+            self.assertEqual(sys.getrefcount(obj), 2)
 
     def test_new_subclass_instance_has_two_refs_using_gobject_new(self):
         obj = GObject.new(A)
-        self.assertEqual(sys.getrefcount(obj), 2)
+        if hasattr(sys, "getrefcount"):
+            self.assertEqual(sys.getrefcount(obj), 2)
 
 
 class TestContextManagers(unittest.TestCase):
@@ -281,14 +285,16 @@ class TestContextManagers(unittest.TestCase):
         self.assertEqual(self.tracking, [1, 2])
         self.assertEqual(self.obj.__grefcount__, 1)
 
-        pyref_count = sys.getrefcount(self.obj)
+        if hasattr(sys, "getrefcount"):
+            pyref_count = sys.getrefcount(self.obj)
 
         # Using the context manager the tracking list should not be affected.
         # The GObject reference count should stay the same and the python
         # object ref-count should go up.
         with self.obj.freeze_notify():
             self.assertEqual(self.obj.__grefcount__, 1)
-            self.assertEqual(sys.getrefcount(self.obj), pyref_count + 1)
+            if hasattr(sys, "getrefcount"):
+                self.assertEqual(sys.getrefcount(self.obj), pyref_count + 1)
             self.obj.props.prop = 3
             self.assertEqual(self.obj.props.prop, 3)
             self.assertEqual(self.tracking, [1, 2])
@@ -300,7 +306,8 @@ class TestContextManagers(unittest.TestCase):
         self.assertEqual(self.obj.props.prop, 3)
         self.assertEqual(self.tracking, [1, 2, 3])
         self.assertEqual(self.obj.__grefcount__, 1)
-        self.assertEqual(sys.getrefcount(self.obj), pyref_count)
+        if hasattr(sys, "getrefcount"):
+            self.assertEqual(sys.getrefcount(self.obj), pyref_count)
 
     def test_handler_block_context(self):
         # Verify prop tracking list
@@ -311,14 +318,16 @@ class TestContextManagers(unittest.TestCase):
         self.assertEqual(self.tracking, [1, 2])
         self.assertEqual(self.obj.__grefcount__, 1)
 
-        pyref_count = sys.getrefcount(self.obj)
+        if hasattr(sys, "getrefcount"):
+            pyref_count = sys.getrefcount(self.obj)
 
         # Using the context manager the tracking list should not be affected.
         # The GObject reference count should stay the same and the python
         # object ref-count should go up.
         with self.obj.handler_block(self.handler):
             self.assertEqual(self.obj.__grefcount__, 1)
-            self.assertEqual(sys.getrefcount(self.obj), pyref_count + 1)
+            if hasattr(sys, "getrefcount"):
+                self.assertEqual(sys.getrefcount(self.obj), pyref_count + 1)
             self.obj.props.prop = 3
             self.assertEqual(self.obj.props.prop, 3)
             self.assertEqual(self.tracking, [1, 2])
@@ -330,7 +339,8 @@ class TestContextManagers(unittest.TestCase):
         self.assertEqual(self.obj.props.prop, 3)
         self.assertEqual(self.tracking, [1, 2])
         self.assertEqual(self.obj.__grefcount__, 1)
-        self.assertEqual(sys.getrefcount(self.obj), pyref_count)
+        if hasattr(sys, "getrefcount"):
+            self.assertEqual(sys.getrefcount(self.obj), pyref_count)
 
     def test_freeze_notify_context_nested(self):
         self.assertEqual(self.tracking, [])
@@ -513,17 +523,19 @@ class TestPropertyBindings(unittest.TestCase):
             self.assertEqual(user_data, test_data)
             return value // 2
 
-        test_data_ref_count = sys.getrefcount(test_data)
-        transform_to_ref_count = sys.getrefcount(transform_to)
-        transform_from_ref_count = sys.getrefcount(transform_from)
+        if hasattr(sys, "getrefcount"):
+            test_data_ref_count = sys.getrefcount(test_data)
+            transform_to_ref_count = sys.getrefcount(transform_to)
+            transform_from_ref_count = sys.getrefcount(transform_from)
 
         # bidirectional bindings
         binding = self.source.bind_property('int_prop', self.target, 'int_prop',
                                             GObject.BindingFlags.BIDIRECTIONAL,
                                             transform_to, transform_from, test_data)
         binding = binding  # PyFlakes
-        binding_ref_count = sys.getrefcount(binding)
-        binding_gref_count = binding.__grefcount__
+        if hasattr(sys, "getrefcount"):
+            binding_ref_count = sys.getrefcount(binding)
+            binding_gref_count = binding.__grefcount__
 
         self.source.int_prop = 1
         self.assertEqual(self.source.int_prop, 1)
@@ -533,13 +545,15 @@ class TestPropertyBindings(unittest.TestCase):
         self.assertEqual(self.source.int_prop, 2)
         self.assertEqual(self.target.int_prop, 4)
 
-        self.assertEqual(sys.getrefcount(binding), binding_ref_count)
-        self.assertEqual(binding.__grefcount__, binding_gref_count)
+        if hasattr(sys, "getrefcount"):
+            self.assertEqual(sys.getrefcount(binding), binding_ref_count)
+            self.assertEqual(binding.__grefcount__, binding_gref_count)
 
         # test_data ref count increases by 2, once for each callback.
-        self.assertEqual(sys.getrefcount(test_data), test_data_ref_count + 2)
-        self.assertEqual(sys.getrefcount(transform_to), transform_to_ref_count + 1)
-        self.assertEqual(sys.getrefcount(transform_from), transform_from_ref_count + 1)
+        if hasattr(sys, "getrefcount"):
+            self.assertEqual(sys.getrefcount(test_data), test_data_ref_count + 2)
+            self.assertEqual(sys.getrefcount(transform_to), transform_to_ref_count + 1)
+            self.assertEqual(sys.getrefcount(transform_from), transform_from_ref_count + 1)
 
         # Unbind should clear out the binding and its transforms
         binding.unbind()
@@ -550,9 +564,10 @@ class TestPropertyBindings(unittest.TestCase):
         self.assertEqual(self.target.int_prop, 3)
         self.assertEqual(self.source.int_prop, 5)
 
-        self.assertEqual(sys.getrefcount(test_data), test_data_ref_count)
-        self.assertEqual(sys.getrefcount(transform_to), transform_to_ref_count)
-        self.assertEqual(sys.getrefcount(transform_from), transform_from_ref_count)
+        if hasattr(sys, "getrefcount"):
+            self.assertEqual(sys.getrefcount(test_data), test_data_ref_count)
+            self.assertEqual(sys.getrefcount(transform_to), transform_to_ref_count)
+            self.assertEqual(sys.getrefcount(transform_from), transform_from_ref_count)
 
     def test_explicit_unbind_clears_connection(self):
         self.assertEqual(self.source.int_prop, 0)
