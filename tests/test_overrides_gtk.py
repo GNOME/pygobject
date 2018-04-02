@@ -8,6 +8,7 @@ import contextlib
 import unittest
 import time
 import sys
+import gc
 import warnings
 
 from .helper import ignore_gi_deprecation_warnings, capture_glib_warnings
@@ -66,6 +67,27 @@ def realized(widget):
 
     while Gtk.events_pending():
         Gtk.main_iteration()
+
+
+@unittest.skipUnless(Gtk, 'Gtk not available')
+def test_wrapper_toggle_refs():
+    class MyButton(Gtk.Button):
+        def __init__(self, height):
+            Gtk.Button.__init__(self)
+            self._height = height
+
+        def do_get_preferred_height(self):
+            return (self._height, self._height)
+
+    height = 142
+    w = Gtk.Window()
+    b = MyButton(height)
+    w.add(b)
+    b.show_all()
+    del b
+    gc.collect()
+    gc.collect()
+    assert w.get_preferred_size().minimum_size.height == height
 
 
 @unittest.skipUnless(Gtk, 'Gtk not available')
