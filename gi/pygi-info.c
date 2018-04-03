@@ -1742,7 +1742,7 @@ PYGLIB_DEFINE_TYPE ("gi.ValueInfo", PyGIValueInfo_Type, PyGIBaseInfo);
 static PyObject *
 _wrap_g_value_info_get_value (PyGIBaseInfo *self)
 {
-    glong value;
+    gint64 value;
 
     value = g_value_info_get_value ( (GIValueInfo *) self->info);
 
