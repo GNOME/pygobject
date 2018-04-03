@@ -1031,6 +1031,7 @@ pygobject__g_instance_init(GTypeInstance   *instance,
 {
     GObject *object = (GObject *) instance;
     PyObject *wrapper, *args, *kwargs;
+    PyGILState_STATE state;
 
     wrapper = g_object_get_qdata(object, pygobject_wrapper_key);
     if (wrapper == NULL) {
@@ -1041,12 +1042,13 @@ pygobject__g_instance_init(GTypeInstance   *instance,
         }
     }
     pygobject_init_wrapper_set(NULL);
+
+    state = PyGILState_Ensure();
+
     if (wrapper == NULL) {
           /* this looks like a python object created through
            * g_object_new -> we have no python wrapper, so create it
            * now */
-        PyGILState_STATE state;
-        state = PyGILState_Ensure();
         wrapper = pygobject_new_full(object,
                                      /*steal=*/ FALSE,
                                      g_class);
@@ -1062,8 +1064,19 @@ pygobject__g_instance_init(GTypeInstance   *instance,
 
         Py_DECREF(args);
         Py_DECREF(kwargs);
-        PyGILState_Release(state);
     }
+
+    /* XXX: used for Gtk.Template */
+    if (PyObject_HasAttrString (wrapper, "__dontuse_ginstance_init__")) {
+        PyObject *result;
+        result = PyObject_CallMethod (wrapper, "__dontuse_ginstance_init__", NULL);
+        if (result == NULL)
+            PyErr_Print ();
+        else
+            Py_DECREF (result);
+    }
+
+    PyGILState_Release(state);
 }
 
 /*  This implementation is bad, see bug 566571 for an example why.

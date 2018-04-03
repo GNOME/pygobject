@@ -25,6 +25,7 @@ import warnings
 
 from gi.repository import GObject
 from .._ossighelper import wakeup_on_signal, register_sigint_fallback
+from .._gtktemplate import Template
 from ..overrides import override, strip_boolean_result, deprecated_init
 from ..module import get_introspection_module
 from .._compat import string_types
@@ -34,6 +35,10 @@ from gi import PyGIDeprecationWarning
 Gtk = get_introspection_module('Gtk')
 
 __all__ = []
+
+
+Template = Template
+__all__.append('Template')
 
 if Gtk._version == '2.0':
     warn_msg = "You have imported the Gtk 2.0 module.  Because Gtk 2.0 \
