@@ -561,17 +561,22 @@ class TestGVariant(unittest.TestCase):
                                 42, source_str)
 
         gerror = GLib.Error(message=42)  # not a string
-        self.assertRaisesRegexp(ValueError, ".*must have a 'message'.*",
+        self.assertRaisesRegexp(TypeError, ".*Must be string, not int.*",
                                 GLib.Variant.parse_error_print_context,
                                 gerror, source_str)
 
         gerror = GLib.Error(domain=42)  # not a string
-        self.assertRaisesRegexp(ValueError, ".*must have a 'domain'.*",
+        self.assertRaisesRegexp(TypeError, ".*Must be string, not int.*",
                                 GLib.Variant.parse_error_print_context,
                                 gerror, source_str)
 
         gerror = GLib.Error(code='not an int')
-        self.assertRaisesRegexp(ValueError, ".*must have a 'code' int.*",
+        self.assertRaisesRegexp(TypeError, ".*Must be number, not str.*",
+                                GLib.Variant.parse_error_print_context,
+                                gerror, source_str)
+
+        gerror = GLib.Error(code=GLib.MAXUINT)
+        self.assertRaisesRegexp(OverflowError, ".*not in range.*",
                                 GLib.Variant.parse_error_print_context,
                                 gerror, source_str)
 

@@ -24,6 +24,7 @@
 #include "pygi-type.h"
 #include "pygi-python-compat.h"
 #include "pygi-util.h"
+#include "pygi-basictype.h"
 
 
 PyObject *PyGError = NULL;
@@ -121,6 +122,9 @@ pygi_error_check (GError **error)
 gboolean
 pygi_error_marshal_from_py (PyObject *pyerr, GError **error)
 {
+    gint code;
+    gchar *message = NULL;
+    gchar *domain = NULL;
     gboolean res = FALSE;
     PyObject *py_message = NULL,
              *py_domain = NULL,
@@ -133,33 +137,44 @@ pygi_error_marshal_from_py (PyObject *pyerr, GError **error)
     }
 
     py_message = PyObject_GetAttrString (pyerr, "message");
-    if (!py_message || !PYGLIB_PyUnicode_Check (py_message)) {
+    if (!py_message) {
         PyErr_SetString (PyExc_ValueError,
                          "GLib.Error instances must have a 'message' string attribute");
         goto cleanup;
     }
 
+    if (!pygi_utf8_from_py (py_message, &message))
+        goto cleanup;
+
     py_domain = PyObject_GetAttrString (pyerr, "domain");
-    if (!py_domain || !PYGLIB_PyUnicode_Check (py_domain)) {
+    if (!py_domain) {
         PyErr_SetString (PyExc_ValueError,
                          "GLib.Error instances must have a 'domain' string attribute");
         goto cleanup;
     }
 
+    if (!pygi_utf8_from_py (py_domain, &domain))
+        goto cleanup;
+
     py_code = PyObject_GetAttrString (pyerr, "code");
-    if (!py_code || !PYGLIB_PyLong_Check (py_code)) {
+    if (!py_code) {
         PyErr_SetString (PyExc_ValueError,
                          "GLib.Error instances must have a 'code' int attribute");
         goto cleanup;
     }
 
+    if (!pygi_gint_from_py (py_code, &code))
+        goto cleanup;
+
     res = TRUE;
     g_set_error_literal (error,
-                         g_quark_from_string (PYGLIB_PyUnicode_AsString (py_domain)),
-                         PYGLIB_PyLong_AsLong (py_code),
-                         PYGLIB_PyUnicode_AsString (py_message));
+                         g_quark_from_string (domain),
+                         code,
+                         message);
 
 cleanup:
+    g_free (message);
+    g_free (domain);
     Py_XDECREF (py_message);
     Py_XDECREF (py_code);
     Py_XDECREF (py_domain);
