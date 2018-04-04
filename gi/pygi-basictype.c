@@ -503,7 +503,7 @@ pygi_gint_from_py (PyObject *object, gint *result)
 
     if (long_value < G_MININT || long_value > G_MAXINT) {
         PyErr_Format (PyExc_OverflowError, "%ld not in range %d to %d",
-                      long_value, (int)G_MININT8, (int)G_MAXINT8);
+                      long_value, (int)G_MININT, (int)G_MAXINT);
         return FALSE;
     }
 
