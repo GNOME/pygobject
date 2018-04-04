@@ -1610,9 +1610,10 @@ class TestGValue(unittest.TestCase):
         self.assertRaises(OverflowError, GIMarshallingTests.gvalue_flat_array,
                           [GLib.MININT - 1, "42", True])
 
-        with pytest.raises(OverflowError,
-                           match=r'.*not in range %d to %d.*' % (
-                               GLib.MININT, GLib.MAXINT)):
+        with pytest.raises(
+                OverflowError,
+                match=r'.*(not in range %d to %d|too large to convert).*' % (
+                    GLib.MININT, GLib.MAXINT)):
             GIMarshallingTests.gvalue_flat_array([GLib.MAXINT + 1, "42", True])
 
     def test_gvalue_flat_array_out(self):
