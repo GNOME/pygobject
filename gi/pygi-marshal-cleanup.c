@@ -188,7 +188,7 @@ pygi_marshal_cleanup_args_from_py_parameter_fail (PyGIInvokeState   *state,
 
     state->failed = TRUE;
 
-    for (i = 0; i < _pygi_callable_cache_args_len (cache)  && i <= failed_arg_index; i++) {
+    for (i = 0; i < _pygi_callable_cache_args_len (cache)  && i <= (guint)failed_arg_index; i++) {
         PyGIArgCache *arg_cache = _pygi_callable_cache_get_arg (cache, i);
         PyGIMarshalCleanupFunc cleanup_func = arg_cache->from_py_cleanup;
         gpointer cleanup_data = state->args[i].arg_cleanup_data;
@@ -205,7 +205,7 @@ pygi_marshal_cleanup_args_from_py_parameter_fail (PyGIInvokeState   *state,
                           arg_cache,
                           py_arg,
                           cleanup_data,
-                          i < failed_arg_index);
+                          i < (guint)failed_arg_index);
 
         } else if (arg_cache->is_caller_allocates && cleanup_data != NULL) {
             _cleanup_caller_allocates (state,

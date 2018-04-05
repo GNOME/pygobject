@@ -73,10 +73,22 @@ pygi_argument_to_gssize (GIArgument *arg_in,
           *gssize_out = arg_in->v_uint32;
           return TRUE;
       case GI_TYPE_TAG_INT64:
-          *gssize_out = arg_in->v_int64;
+          if (arg_in->v_int64 > G_MAXSSIZE || arg_in->v_int64 < G_MINSSIZE) {
+              PyErr_Format (PyExc_TypeError,
+                            "Unable to marshal %s to gssize",
+                            g_type_tag_to_string(type_tag));
+              return FALSE;
+          }
+          *gssize_out = (gssize)arg_in->v_int64;
           return TRUE;
       case GI_TYPE_TAG_UINT64:
-          *gssize_out = arg_in->v_uint64;
+          if (arg_in->v_uint64 > G_MAXSSIZE) {
+              PyErr_Format (PyExc_TypeError,
+                            "Unable to marshal %s to gssize",
+                            g_type_tag_to_string(type_tag));
+              return FALSE;
+          }
+          *gssize_out = (gssize)arg_in->v_uint64;
           return TRUE;
       default:
           PyErr_Format (PyExc_TypeError,
@@ -361,16 +373,11 @@ _pygi_argument_from_object (PyObject   *object,
             }
 
             py_length = PySequence_Length (object);
-            if (py_length < 0) {
+            if (py_length < 0)
                 break;
-            }
 
-            if (py_length > G_MAXUINT) {
-                PyErr_SetString (PyExc_ValueError, "array too large");
+            if (!pygi_guint_from_pyssize (py_length, &length))
                 break;
-            }
-
-            length = (guint)py_length;
 
             is_zero_terminated = g_type_info_is_zero_terminated (type_info);
             item_type_info = g_type_info_get_param_type (type_info, 0);

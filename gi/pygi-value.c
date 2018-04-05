@@ -875,18 +875,25 @@ pyg_param_gvalue_from_pyobject(GValue* value,
 PyObject*
 pyg_param_gvalue_as_pyobject(const GValue* gvalue,
                              gboolean copy_boxed,
-			     const GParamSpec* pspec)
+                             const GParamSpec* pspec)
 {
     if (G_IS_PARAM_SPEC_UNICHAR(pspec)) {
-	gunichar u;
-	Py_UNICODE uni_buffer[2] = { 0, 0 };
+        gunichar u;
+        gchar *encoded;
+        PyObject *retval;
 
-	u = g_value_get_uint(gvalue);
-	uni_buffer[0] = u;
-	return PyUnicode_FromUnicode(uni_buffer, 1);
+        u = g_value_get_uint (gvalue);
+        encoded = g_ucs4_to_utf8 (&u, 1, NULL, NULL, NULL);
+        if (encoded == NULL) {
+            PyErr_SetString (PyExc_ValueError, "Failed to decode");
+            return NULL;
+        }
+        retval = PyUnicode_FromString (encoded);
+        g_free (encoded);
+        return retval;
     }
     else {
-	return pyg_value_as_pyobject(gvalue, copy_boxed);
+        return pyg_value_as_pyobject(gvalue, copy_boxed);
     }
 }
 

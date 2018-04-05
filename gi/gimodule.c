@@ -763,12 +763,10 @@ create_signal (GType instance_type, const gchar *signal_name, PyObject *tuple)
     }
     py_n_params = PySequence_Length(py_param_types);
     if (py_n_params < 0)
-	return FALSE;
-    if (py_n_params > G_MAXUINT) {
-	PyErr_SetString(PyExc_TypeError, "too many params");
-	return FALSE;
-    }
-    n_params = (guint)py_n_params;
+        return FALSE;
+
+    if (!pygi_guint_from_pyssize (py_n_params, &n_params))
+        return FALSE;
 
     param_types = g_new(GType, n_params);
     for (i = 0; i < n_params; i++) {
@@ -2121,12 +2119,10 @@ pyg_signal_new(PyObject *self, PyObject *args)
 
     py_n_params = PySequence_Length(py_param_types);
     if (py_n_params < 0)
-	return FALSE;
-    if (py_n_params > G_MAXUINT) {
-	PyErr_SetString(PyExc_TypeError, "too many params");
-	return FALSE;
-    }
-    n_params = (guint)py_n_params;
+        return FALSE;
+
+    if (!pygi_guint_from_pyssize (py_n_params, &n_params))
+        return FALSE;
 
     param_types = g_new(GType, n_params);
     for (i = 0; i < n_params; i++) {

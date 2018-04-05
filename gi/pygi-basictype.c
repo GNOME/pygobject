@@ -520,7 +520,7 @@ pygi_gint_to_py (gint value)
 gboolean
 pygi_guint_from_py (PyObject *object, guint *result)
 {
-    long long_value;
+    unsigned long long_value;
     PyObject *number;
 
     number = base_number_checks (object);
@@ -533,7 +533,7 @@ pygi_guint_from_py (PyObject *object, guint *result)
         return FALSE;
 
     if (long_value > G_MAXUINT) {
-        PyErr_Format (PyExc_OverflowError, "%ld not in range %ld to %lu",
+        PyErr_Format (PyExc_OverflowError, "%lu not in range %ld to %lu",
                       long_value, (long)0, (unsigned long)G_MAXUINT);
         return FALSE;
     }

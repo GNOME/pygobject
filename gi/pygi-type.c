@@ -114,7 +114,7 @@ typedef struct {
 PYGLIB_DEFINE_TYPE("gobject.GType", PyGTypeWrapper_Type, PyGTypeWrapper);
 
 static PyObject*
-generic_long_richcompare(long a, long b, int op)
+generic_gsize_richcompare(gsize a, gsize b, int op)
 {
     PyObject *res;
 
@@ -164,7 +164,7 @@ static PyObject*
 pyg_type_wrapper_richcompare(PyObject *self, PyObject *other, int op)
 {
     if (Py_TYPE(self) == Py_TYPE(other) && Py_TYPE(self) == &PyGTypeWrapper_Type)
-        return generic_long_richcompare(((PyGTypeWrapper*)self)->type,
+        return generic_gsize_richcompare(((PyGTypeWrapper*)self)->type,
                                         ((PyGTypeWrapper*)other)->type,
                                         op);
     else {
@@ -997,7 +997,8 @@ pyg_signal_class_closure_marshal(GClosure *closure,
     gchar *method_name, *tmp;
     PyObject *method;
     PyObject *params, *ret;
-    Py_ssize_t i, len;
+    Py_ssize_t py_len;
+    guint i, len;
 
     state = PyGILState_Ensure();
 
@@ -1049,7 +1050,8 @@ pyg_signal_class_closure_marshal(GClosure *closure,
 
     /* Copy boxed values if others ref them, this needs to be done regardless of
        exception status. */
-    len = PyTuple_Size(params);
+    py_len = PyTuple_Size(params);
+    len = (guint)py_len;
     for (i = 0; i < len; i++) {
 	PyObject *item = PyTuple_GetItem(params, i);
 	if (item != NULL && PyObject_TypeCheck(item, &PyGBoxed_Type)

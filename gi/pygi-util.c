@@ -18,6 +18,20 @@
 
 #include "pygi-util.h"
 
+gboolean
+pygi_guint_from_pyssize (Py_ssize_t pyval, guint *result)
+{
+    if (pyval < 0) {
+        PyErr_SetString (PyExc_ValueError, "< 0");
+        return FALSE;
+    } else if (G_MAXUINT < PY_SSIZE_T_MAX && pyval > (Py_ssize_t)G_MAXUINT) {
+        PyErr_SetString (PyExc_ValueError, "too large");
+        return FALSE;
+    }
+    *result = (guint)pyval;
+    return TRUE;
+}
+
 /* Better alternative to PyImport_ImportModule which tries to import from
  * sys.modules first */
 PyObject *

@@ -162,10 +162,22 @@ gi_argument_to_gsize (GIArgument *arg_in,
           *gsize_out = arg_in->v_uint32;
           return TRUE;
       case GI_TYPE_TAG_INT64:
-          *gsize_out = arg_in->v_int64;
+          if (arg_in->v_uint64 > G_MAXSIZE) {
+              PyErr_Format (PyExc_TypeError,
+                            "Unable to marshal %s to gsize",
+                            g_type_tag_to_string (type_tag));
+              return FALSE;
+          }
+          *gsize_out = (gsize)arg_in->v_int64;
           return TRUE;
       case GI_TYPE_TAG_UINT64:
-          *gsize_out = arg_in->v_uint64;
+          if (arg_in->v_uint64 > G_MAXSIZE) {
+              PyErr_Format (PyExc_TypeError,
+                            "Unable to marshal %s to gsize",
+                            g_type_tag_to_string (type_tag));
+              return FALSE;
+          }
+          *gsize_out = (gsize)arg_in->v_uint64;
           return TRUE;
       default:
           PyErr_Format (PyExc_TypeError,
@@ -211,15 +223,11 @@ _pygi_marshal_from_py_array (PyGIInvokeState   *state,
     if (py_length < 0)
         return FALSE;
 
-    if (py_length > G_MAXUINT) {
-        PyErr_SetString (PyExc_ValueError, "Sequence too large");
+    if (!pygi_guint_from_pyssize (py_length, &length))
         return FALSE;
-    }
-
-    length = (guint)py_length;
 
     if (array_cache->fixed_size >= 0 &&
-            array_cache->fixed_size != length) {
+            (guint)array_cache->fixed_size != length) {
         PyErr_Format (PyExc_ValueError, "Must contain %zd items, not %u",
                       array_cache->fixed_size, length);
 

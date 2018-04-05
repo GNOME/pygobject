@@ -91,10 +91,22 @@ gi_argument_to_c_long (GIArgument *arg_in,
           *c_long_out = arg_in->v_uint32;
           return TRUE;
       case GI_TYPE_TAG_INT64:
-          *c_long_out = arg_in->v_int64;
+          if (arg_in->v_int64 > G_MAXLONG || arg_in->v_int64 < G_MINLONG) {
+              PyErr_Format (PyExc_TypeError,
+                            "Unable to marshal %s to C long",
+                            g_type_tag_to_string(type_tag));
+              return FALSE;
+          }
+          *c_long_out = (glong)arg_in->v_int64;
           return TRUE;
       case GI_TYPE_TAG_UINT64:
-          *c_long_out = arg_in->v_uint64;
+          if (arg_in->v_uint64 > G_MAXLONG) {
+              PyErr_Format (PyExc_TypeError,
+                            "Unable to marshal %s to C long",
+                            g_type_tag_to_string(type_tag));
+              return FALSE;
+          }
+          *c_long_out = (glong)arg_in->v_uint64;
           return TRUE;
       default:
           PyErr_Format (PyExc_TypeError,
@@ -150,7 +162,7 @@ _pygi_marshal_from_py_interface_enum (PyGIInvokeState   *state,
         for (i = 0; i < g_enum_info_get_n_values (iface_cache->interface_info); i++) {
             GIValueInfo *value_info =
                 g_enum_info_get_value (iface_cache->interface_info, i);
-            glong enum_value = g_value_info_get_value (value_info);
+            gint64 enum_value = g_value_info_get_value (value_info);
             g_base_info_unref ( (GIBaseInfo *)value_info);
             if (c_long == enum_value) {
                 is_found = TRUE;
