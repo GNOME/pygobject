@@ -709,7 +709,7 @@ _pygi_marshal_from_py_interface_callback (PyGIInvokeState   *state,
     callback_cache = (PyGICallbackCache *)arg_cache;
 
     if (callback_cache->user_data_index > 0) {
-        user_data_cache = _pygi_callable_cache_get_arg (callable_cache, callback_cache->user_data_index);
+        user_data_cache = _pygi_callable_cache_get_arg (callable_cache, (guint)callback_cache->user_data_index);
         if (user_data_cache->py_arg_index < state->n_py_in_args) {
             /* py_user_data is a borrowed reference. */
             py_user_data = PyTuple_GetItem (state->py_in_args, user_data_cache->py_arg_index);
@@ -771,7 +771,7 @@ _pygi_marshal_from_py_interface_callback (PyGIInvokeState   *state,
      * later on in _pygi_destroy_notify_callback_closure.
      */
     if (callback_cache->destroy_notify_index > 0) {
-        destroy_cache = _pygi_callable_cache_get_arg (callable_cache, callback_cache->destroy_notify_index);
+        destroy_cache = _pygi_callable_cache_get_arg (callable_cache, (guint)callback_cache->destroy_notify_index);
     }
 
     if (destroy_cache) {
@@ -897,7 +897,7 @@ pygi_arg_callback_setup_from_info (PyGICallbackCache  *arg_cache,
         user_data_arg_cache->meta_type = PYGI_META_ARG_TYPE_CHILD_WITH_PYARG;
         user_data_arg_cache->direction = direction;
         user_data_arg_cache->has_default = TRUE; /* always allow user data with a NULL default. */
-        _pygi_callable_cache_set_arg (callable_cache, arg_cache->user_data_index,
+        _pygi_callable_cache_set_arg (callable_cache, (guint)arg_cache->user_data_index,
                                       user_data_arg_cache);
     }
 
@@ -905,7 +905,7 @@ pygi_arg_callback_setup_from_info (PyGICallbackCache  *arg_cache,
         PyGIArgCache *destroy_arg_cache = pygi_arg_cache_alloc ();
         destroy_arg_cache->meta_type = PYGI_META_ARG_TYPE_CHILD;
         destroy_arg_cache->direction = direction;
-        _pygi_callable_cache_set_arg (callable_cache, arg_cache->destroy_notify_index,
+        _pygi_callable_cache_set_arg (callable_cache, (guint)arg_cache->destroy_notify_index,
                                       destroy_arg_cache);
     }
 

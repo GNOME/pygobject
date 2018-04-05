@@ -238,8 +238,8 @@ _pygi_marshal_to_py_glist (PyGIInvokeState   *state,
                            gpointer          *cleanup_data)
 {
     GList *list_;
-    gsize length;
-    gsize i;
+    guint length;
+    guint i;
     GPtrArray *item_cleanups;
 
     PyGIMarshalToPyFunc item_to_py_marshaller;
@@ -278,7 +278,7 @@ _pygi_marshal_to_py_glist (PyGIInvokeState   *state,
 
         if (py_item == NULL) {
             Py_CLEAR (py_obj);
-            _PyGI_ERROR_PREFIX ("Item %zu: ", i);
+            _PyGI_ERROR_PREFIX ("Item %u: ", i);
             g_ptr_array_unref (item_cleanups);
             return NULL;
         }
@@ -297,8 +297,8 @@ _pygi_marshal_to_py_gslist (PyGIInvokeState   *state,
                             gpointer *cleanup_data)
 {
     GSList *list_;
-    gsize length;
-    gsize i;
+    guint length;
+    guint i;
     GPtrArray *item_cleanups;
 
     PyGIMarshalToPyFunc item_to_py_marshaller;
@@ -336,7 +336,7 @@ _pygi_marshal_to_py_gslist (PyGIInvokeState   *state,
         g_ptr_array_index (item_cleanups, i) = item_cleanup_data;
         if (py_item == NULL) {
             Py_CLEAR (py_obj);
-            _PyGI_ERROR_PREFIX ("Item %zu: ", i);
+            _PyGI_ERROR_PREFIX ("Item %u: ", i);
             g_ptr_array_unref (item_cleanups);
             return NULL;
         }

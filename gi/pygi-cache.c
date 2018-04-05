@@ -464,8 +464,8 @@ static gboolean
 _callable_cache_generate_args_cache_real (PyGICallableCache *callable_cache,
                                           GICallableInfo *callable_info)
 {
-    gssize i;
-    gssize arg_index;
+    gint i;
+    guint arg_index;
     GITypeInfo *return_info;
     GITransfer return_transfer;
     PyGIArgCache *return_cache;
@@ -500,8 +500,8 @@ _callable_cache_generate_args_cache_real (PyGICallableCache *callable_cache,
 
     callable_cache->user_data_index = -1;
 
-    for (i = 0, arg_index = callable_cache->args_offset;
-         (gsize)arg_index < _pygi_callable_cache_args_len (callable_cache);
+    for (i = 0, arg_index = (guint)callable_cache->args_offset;
+         arg_index < _pygi_callable_cache_args_len (callable_cache);
          i++, arg_index++) {
         PyGIArgCache *arg_cache = NULL;
         GIArgInfo *arg_info;
@@ -609,7 +609,7 @@ _callable_cache_generate_args_cache_real (PyGICallableCache *callable_cache,
 
     /* Reverse loop through all the arguments to setup arg_name_list/hash
      * and find the number of required arguments */
-    for (i=((gssize)_pygi_callable_cache_args_len (callable_cache))-1; i >= 0; i--) {
+    for (i=(_pygi_callable_cache_args_len (callable_cache))-1; i >= 0; i--) {
         PyGIArgCache *arg_cache = _pygi_callable_cache_get_arg (callable_cache, i);
 
         if (arg_cache->meta_type != PYGI_META_ARG_TYPE_CHILD &&
@@ -734,7 +734,7 @@ _callable_cache_init (PyGICallableCache *cache,
         g_free (warning);
     }
 
-    n_args = cache->args_offset + g_callable_info_get_n_args (callable_info);
+    n_args = (gint)cache->args_offset + g_callable_info_get_n_args (callable_info);
 
     if (n_args >= 0) {
         cache->args_cache = g_ptr_array_new_full (n_args, (GDestroyNotify) pygi_arg_cache_free);

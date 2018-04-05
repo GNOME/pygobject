@@ -115,22 +115,22 @@ _pygi_hash_pointer_to_arg (GIArgument *arg,
 
     switch (type_tag) {
         case GI_TYPE_TAG_INT8:
-            arg->v_int8 = GPOINTER_TO_INT (arg->v_pointer);
+            arg->v_int8 = (gint8)GPOINTER_TO_INT (arg->v_pointer);
             break;
         case GI_TYPE_TAG_INT16:
-            arg->v_int16 = GPOINTER_TO_INT (arg->v_pointer);
+            arg->v_int16 = (gint16)GPOINTER_TO_INT (arg->v_pointer);
             break;
         case GI_TYPE_TAG_INT32:
-            arg->v_int32 = GPOINTER_TO_INT (arg->v_pointer);
+            arg->v_int32 = (gint32)GPOINTER_TO_INT (arg->v_pointer);
             break;
         case GI_TYPE_TAG_UINT8:
-            arg->v_uint8 = GPOINTER_TO_UINT (arg->v_pointer);
+            arg->v_uint8 = (guint8)GPOINTER_TO_UINT (arg->v_pointer);
             break;
         case GI_TYPE_TAG_UINT16:
-            arg->v_uint16 = GPOINTER_TO_UINT (arg->v_pointer);
+            arg->v_uint16 = (guint16)GPOINTER_TO_UINT (arg->v_pointer);
             break;
         case GI_TYPE_TAG_UINT32:
-            arg->v_uint32 = GPOINTER_TO_UINT (arg->v_pointer);
+            arg->v_uint32 = (guint32)GPOINTER_TO_UINT (arg->v_pointer);
             break;
         case GI_TYPE_TAG_GTYPE:
             arg->v_size = GPOINTER_TO_SIZE (arg->v_pointer);
@@ -198,7 +198,7 @@ _pygi_argument_array_length_marshal (gsize length_arg_index,
     GValue *values = (GValue *)user_data1;
     GICallableInfo *callable_info = (GICallableInfo *)user_data2;
 
-    g_callable_info_load_arg (callable_info, length_arg_index, &length_arg_info);
+    g_callable_info_load_arg (callable_info, (gint)length_arg_index, &length_arg_info);
     g_arg_info_load_type (&length_arg_info, &length_type_info);
 
     length_arg = _pygi_argument_from_g_value (&(values[length_arg_index]),
@@ -271,7 +271,7 @@ _pygi_argument_to_array (GIArgument  *arg,
                     if (G_UNLIKELY (array_length_policy == NULL)) {
                         g_critical ("Unable to determine array length for %p",
                                     arg->v_pointer);
-                        g_array = g_array_new (is_zero_terminated, FALSE, item_size);
+                        g_array = g_array_new (is_zero_terminated, FALSE, (guint)item_size);
                         *out_free_array = TRUE;
                         return g_array;
                     }
@@ -288,11 +288,11 @@ _pygi_argument_to_array (GIArgument  *arg,
 
             g_assert (length >= 0);
 
-            g_array = g_array_new (is_zero_terminated, FALSE, item_size);
+            g_array = g_array_new (is_zero_terminated, FALSE, (guint)item_size);
 
             g_free (g_array->data);
             g_array->data = arg->v_pointer;
-            g_array->len = length;
+            g_array->len = (guint)length;
             *out_free_array = TRUE;
             break;
         case GI_ARRAY_TYPE_ARRAY:
@@ -337,13 +337,13 @@ _pygi_argument_from_object (PyObject   *object,
     switch (type_tag) {
         case GI_TYPE_TAG_ARRAY:
         {
-            Py_ssize_t length;
+            Py_ssize_t py_length;
+            guint length, i;
             gboolean is_zero_terminated;
             GITypeInfo *item_type_info;
             gsize item_size;
             GArray *array;
             GITransfer item_transfer;
-            Py_ssize_t i;
 
             if (object == Py_None) {
                 arg.v_pointer = NULL;
@@ -360,10 +360,17 @@ _pygi_argument_from_object (PyObject   *object,
                 break;
             }
 
-            length = PySequence_Length (object);
-            if (length < 0) {
+            py_length = PySequence_Length (object);
+            if (py_length < 0) {
                 break;
             }
+
+            if (py_length > G_MAXUINT) {
+                PyErr_SetString (PyExc_ValueError, "array too large");
+                break;
+            }
+
+            length = (guint)py_length;
 
             is_zero_terminated = g_type_info_is_zero_terminated (type_info);
             item_type_info = g_type_info_get_param_type (type_info, 0);
@@ -374,7 +381,7 @@ _pygi_argument_from_object (PyObject   *object,
             else
                item_size = sizeof (GIArgument);
 
-            array = g_array_sized_new (is_zero_terminated, FALSE, item_size, length);
+            array = g_array_sized_new (is_zero_terminated, FALSE, (guint)item_size, length);
             if (array == NULL) {
                 g_base_info_unref ( (GIBaseInfo *) item_type_info);
                 PyErr_NoMemory();
@@ -418,7 +425,7 @@ array_item_error:
                                          GI_TRANSFER_NOTHING, GI_DIRECTION_IN);
                 array = NULL;
 
-                _PyGI_ERROR_PREFIX ("Item %zd: ", i);
+                _PyGI_ERROR_PREFIX ("Item %u: ", i);
                 break;
             }
 
@@ -477,16 +484,8 @@ array_success:
                 case GI_INFO_TYPE_ENUM:
                 case GI_INFO_TYPE_FLAGS:
                 {
-                    PyObject *int_;
-
-                    int_ = PYGLIB_PyNumber_Long (object);
-                    if (int_ == NULL) {
+                    if (!pygi_gint_from_py (object, &arg.v_int))
                         break;
-                    }
-
-                    arg.v_int = PYGLIB_PyLong_AsLong (int_);
-
-                    Py_DECREF (int_);
 
                     break;
                 }

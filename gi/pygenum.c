@@ -25,6 +25,7 @@
 #include "pygi-type.h"
 #include "pygi-util.h"
 #include "pygi-type.h"
+#include "pygi-basictype.h"
 #include "pygenum.h"
 #include "pygboxed.h"
 
@@ -324,13 +325,17 @@ pyg_enum_get_value_name(PyGEnum *self, void *closure)
   GEnumClass *enum_class;
   GEnumValue *enum_value;
   PyObject *retval;
+  gint intvalue;
+
+  if (!pygi_gint_from_py ((PyObject*) self, &intvalue))
+    return NULL;
 
   enum_class = g_type_class_ref(self->gtype);
   g_assert(G_IS_ENUM_CLASS(enum_class));
 
-  enum_value = g_enum_get_value(enum_class, PYGLIB_PyLong_AS_LONG(self));
+  enum_value = g_enum_get_value(enum_class, intvalue);
 
-  retval = PYGLIB_PyUnicode_FromString(enum_value->value_name);
+  retval = pygi_utf8_to_py (enum_value->value_name);
   g_type_class_unref(enum_class);
 
   return retval;
@@ -342,13 +347,18 @@ pyg_enum_get_value_nick(PyGEnum *self, void *closure)
   GEnumClass *enum_class;
   GEnumValue *enum_value;
   PyObject *retval;
+  gint intvalue;
+
+  if (!pygi_gint_from_py ((PyObject*) self, &intvalue))
+    return NULL;
 
   enum_class = g_type_class_ref(self->gtype);
   g_assert(G_IS_ENUM_CLASS(enum_class));
 
-  enum_value = g_enum_get_value(enum_class, PYGLIB_PyLong_AS_LONG(self));
+  enum_value = g_enum_get_value(enum_class, intvalue);
 
-  retval = PYGLIB_PyUnicode_FromString(enum_value->value_nick);
+  retval = pygi_utf8_to_py (enum_value->value_nick);
+
   g_type_class_unref(enum_class);
 
   return retval;

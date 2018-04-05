@@ -105,7 +105,7 @@ pyg_flags_repr(PyGFlags *self)
     char *tmp, *retval, *module_str, *namespace;
     PyObject *pyretval, *module;
 
-    tmp = generate_repr(self->gtype, PYGLIB_PyLong_AsUnsignedLong(self));
+    tmp = generate_repr(self->gtype, (guint)PYGLIB_PyLong_AsUnsignedLong(self));
 
     module = PyObject_GetAttrString ((PyObject *)self, "__module__");
     if (module == NULL)
@@ -338,7 +338,7 @@ pyg_flags_and(PyGFlags *a, PyGFlags *b)
 						       (PyObject*)b);
 
 	return pyg_flags_from_gtype(a->gtype,
-				    PYGLIB_PyLong_AsUnsignedLong(a) & PYGLIB_PyLong_AsUnsignedLong(b));
+				    (guint)(PYGLIB_PyLong_AsUnsignedLong(a) & PYGLIB_PyLong_AsUnsignedLong(b)));
 }
 
 static PyObject *
@@ -348,7 +348,7 @@ pyg_flags_or(PyGFlags *a, PyGFlags *b)
 		return PYGLIB_PyLong_Type.tp_as_number->nb_or((PyObject*)a,
 						      (PyObject*)b);
 
-	return pyg_flags_from_gtype(a->gtype, PYGLIB_PyLong_AsUnsignedLong(a) | PYGLIB_PyLong_AsUnsignedLong(b));
+	return pyg_flags_from_gtype(a->gtype, (guint)(PYGLIB_PyLong_AsUnsignedLong(a) | PYGLIB_PyLong_AsUnsignedLong(b)));
 }
 
 static PyObject *
@@ -359,7 +359,7 @@ pyg_flags_xor(PyGFlags *a, PyGFlags *b)
 						       (PyObject*)b);
 
 	return pyg_flags_from_gtype(a->gtype,
-				    PYGLIB_PyLong_AsUnsignedLong(a) ^ PYGLIB_PyLong_AsUnsignedLong(b));
+				    (guint)(PYGLIB_PyLong_AsUnsignedLong(a) ^ PYGLIB_PyLong_AsUnsignedLong(b)));
 
 }
 
@@ -382,7 +382,7 @@ pyg_flags_get_first_value_name(PyGFlags *self, void *closure)
 
   flags_class = g_type_class_ref(self->gtype);
   g_assert(G_IS_FLAGS_CLASS(flags_class));
-  flags_value = g_flags_get_first_value(flags_class, PYGLIB_PyLong_AsUnsignedLong(self));
+  flags_value = g_flags_get_first_value(flags_class, (guint)PYGLIB_PyLong_AsUnsignedLong(self));
   if (flags_value)
       retval = PYGLIB_PyUnicode_FromString(flags_value->value_name);
   else {
@@ -404,7 +404,7 @@ pyg_flags_get_first_value_nick(PyGFlags *self, void *closure)
   flags_class = g_type_class_ref(self->gtype);
   g_assert(G_IS_FLAGS_CLASS(flags_class));
 
-  flags_value = g_flags_get_first_value(flags_class, PYGLIB_PyLong_AsUnsignedLong(self));
+  flags_value = g_flags_get_first_value(flags_class, (guint)PYGLIB_PyLong_AsUnsignedLong(self));
   if (flags_value)
       retval = PYGLIB_PyUnicode_FromString(flags_value->value_nick);
   else {

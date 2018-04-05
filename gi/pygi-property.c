@@ -33,7 +33,7 @@ static GIPropertyInfo *
 lookup_property_from_object_info (GIObjectInfo *info, const gchar *attr_name)
 {
     gssize n_infos;
-    gssize i;
+    gint i;
 
     n_infos = g_object_info_get_n_properties (info);
     for (i = 0; i < n_infos; i++) {
@@ -57,7 +57,7 @@ lookup_property_from_interface_info (GIInterfaceInfo *info,
                                      const gchar *attr_name)
 {
     gssize n_infos;
-    gssize i;
+    gint i;
 
     n_infos = g_interface_info_get_n_properties (info);
     for (i = 0; i < n_infos; i++) {

@@ -47,7 +47,7 @@ gi_argument_from_py_ssize_t (GIArgument   *arg_out,
 
     case GI_TYPE_TAG_INT8:
         if (size_in >= G_MININT8 && size_in <= G_MAXINT8) {
-            arg_out->v_int8 = size_in;
+            arg_out->v_int8 = (gint8)size_in;
             return TRUE;
         } else {
             goto overflow;
@@ -55,7 +55,7 @@ gi_argument_from_py_ssize_t (GIArgument   *arg_out,
 
     case GI_TYPE_TAG_UINT8:
         if (size_in >= 0 && size_in <= G_MAXUINT8) {
-            arg_out->v_uint8 = size_in;
+            arg_out->v_uint8 = (guint8)size_in;
             return TRUE;
         } else {
             goto overflow;
@@ -63,7 +63,7 @@ gi_argument_from_py_ssize_t (GIArgument   *arg_out,
 
     case GI_TYPE_TAG_INT16:
         if (size_in >= G_MININT16 && size_in <= G_MAXINT16) {
-            arg_out->v_int16 = size_in;
+            arg_out->v_int16 = (gint16)size_in;
             return TRUE;
         } else {
             goto overflow;
@@ -71,7 +71,7 @@ gi_argument_from_py_ssize_t (GIArgument   *arg_out,
 
     case GI_TYPE_TAG_UINT16:
         if (size_in >= 0 && size_in <= G_MAXUINT16) {
-            arg_out->v_uint16 = size_in;
+            arg_out->v_uint16 = (guint16)size_in;
             return TRUE;
         } else {
             goto overflow;
@@ -80,7 +80,7 @@ gi_argument_from_py_ssize_t (GIArgument   *arg_out,
         /* Ranges assume two's complement */
     case GI_TYPE_TAG_INT32:
         if (size_in >= G_MININT32 && size_in <= G_MAXINT32) {
-            arg_out->v_int32 = size_in;
+            arg_out->v_int32 = (gint32)size_in;
             return TRUE;
         } else {
             goto overflow;
@@ -88,7 +88,7 @@ gi_argument_from_py_ssize_t (GIArgument   *arg_out,
 
     case GI_TYPE_TAG_UINT32:
         if (size_in >= 0 && (gsize)size_in <= G_MAXUINT32) {
-            arg_out->v_uint32 = size_in;
+            arg_out->v_uint32 = (guint32)size_in;
             return TRUE;
         } else {
             goto overflow;
@@ -184,10 +184,11 @@ _pygi_marshal_from_py_array (PyGIInvokeState   *state,
                              gpointer          *cleanup_data)
 {
     PyGIMarshalFromPyFunc from_py_marshaller;
-    int i = 0;
+    guint i = 0;
     gsize success_count = 0;
-    Py_ssize_t length;
-    gssize item_size;
+    Py_ssize_t py_length;
+    guint length;
+    guint item_size;
     gboolean is_ptr_array;
     GArray *array_ = NULL;
     PyGISequenceCache *sequence_cache = (PyGISequenceCache *)arg_cache;
@@ -206,19 +207,26 @@ _pygi_marshal_from_py_array (PyGIInvokeState   *state,
         return FALSE;
     }
 
-    length = PySequence_Length (py_arg);
-    if (length < 0)
+    py_length = PySequence_Length (py_arg);
+    if (py_length < 0)
         return FALSE;
+
+    if (py_length > G_MAXUINT) {
+        PyErr_SetString (PyExc_ValueError, "Sequence too large");
+        return FALSE;
+    }
+
+    length = (guint)py_length;
 
     if (array_cache->fixed_size >= 0 &&
             array_cache->fixed_size != length) {
-        PyErr_Format (PyExc_ValueError, "Must contain %zd items, not %zd",
+        PyErr_Format (PyExc_ValueError, "Must contain %zd items, not %u",
                       array_cache->fixed_size, length);
 
         return FALSE;
     }
 
-    item_size = array_cache->item_size;
+    item_size = (guint)array_cache->item_size;
     is_ptr_array = (array_cache->array_type == GI_ARRAY_TYPE_PTR_ARRAY);
     if (is_ptr_array) {
         array_ = (GArray *)g_ptr_array_sized_new (length);
@@ -379,14 +387,14 @@ err:
         g_ptr_array_free ( ( GPtrArray *)array_, TRUE);
     else
         g_array_free (array_, TRUE);
-    _PyGI_ERROR_PREFIX ("Item %i: ", i);
+    _PyGI_ERROR_PREFIX ("Item %u: ", i);
     return FALSE;
 
 array_success:
     if (array_cache->len_arg_index >= 0) {
         /* we have an child arg to handle */
         PyGIArgCache *child_cache =
-            _pygi_callable_cache_get_arg (callable_cache, array_cache->len_arg_index);
+            _pygi_callable_cache_get_arg (callable_cache, (guint)array_cache->len_arg_index);
 
         if (!gi_argument_from_py_ssize_t (&state->args[child_cache->c_arg_index].arg_value,
                                           length,
@@ -513,7 +521,7 @@ _pygi_marshal_to_py_array (PyGIInvokeState   *state,
     PyObject *py_obj = NULL;
     PyGISequenceCache *seq_cache = (PyGISequenceCache *)arg_cache;
     PyGIArgGArray *array_cache = (PyGIArgGArray *)arg_cache;
-    gsize processed_items = 0;
+    guint processed_items = 0;
 
      /* GArrays make it easier to iterate over arrays
       * with different element sizes but requires that
@@ -535,7 +543,7 @@ _pygi_marshal_to_py_array (PyGIInvokeState   *state,
         } else {
             GIArgument *len_arg = &state->args[array_cache->len_arg_index].arg_value;
             PyGIArgCache *sub_cache = _pygi_callable_cache_get_arg (callable_cache,
-                                                                    array_cache->len_arg_index);
+                                                                    (guint)array_cache->len_arg_index);
 
             if (!gi_argument_to_gsize (len_arg, &len, sub_cache->type_tag)) {
                 return NULL;
@@ -544,7 +552,7 @@ _pygi_marshal_to_py_array (PyGIInvokeState   *state,
 
         array_ = g_array_new (FALSE,
                               FALSE,
-                              array_cache->item_size);
+                              (guint)array_cache->item_size);
         if (array_ == NULL) {
             PyErr_NoMemory ();
 
@@ -557,7 +565,7 @@ _pygi_marshal_to_py_array (PyGIInvokeState   *state,
         if (array_->data != NULL)
             g_free (array_->data);
         array_->data = arg->v_pointer;
-        array_->len = len;
+        array_->len = (guint)len;
     } else {
         array_ = arg->v_pointer;
     }
@@ -707,14 +715,14 @@ _wrap_c_array (PyGIInvokeState   *state,
 
     array_ = g_array_new (FALSE,
                           FALSE,
-                          array_cache->item_size);
+                          (guint)array_cache->item_size);
 
     if (array_ == NULL)
         return NULL;
 
     g_free (array_->data);
     array_->data = data;
-    array_->len = len;
+    array_->len = (guint)len;
 
     return array_;
 }
@@ -811,7 +819,7 @@ pygi_arg_garray_len_arg_setup (PyGIArgCache *arg_cache,
         PyGIArgCache *child_cache = NULL;
 
         child_cache = _pygi_callable_cache_get_arg (callable_cache,
-                                                    seq_cache->len_arg_index);
+                                                    (guint)seq_cache->len_arg_index);
         if (child_cache == NULL) {
             child_cache = pygi_arg_cache_alloc ();
         } else {
@@ -851,11 +859,11 @@ pygi_arg_garray_len_arg_setup (PyGIArgCache *arg_cache,
          * indexes of arguments after the index argument.
          */
         if (seq_cache->len_arg_index < arg_index && direction & PYGI_DIRECTION_FROM_PYTHON) {
-            gssize i;
+            guint i;
             (*py_arg_index) -= 1;
             callable_cache->n_py_args -= 1;
 
-            for (i = seq_cache->len_arg_index + 1;
+            for (i = (guint)seq_cache->len_arg_index + 1;
                    (gsize)i < _pygi_callable_cache_args_len (callable_cache); i++) {
                 PyGIArgCache *update_cache = _pygi_callable_cache_get_arg (callable_cache, i);
                 if (update_cache == NULL)
@@ -865,7 +873,7 @@ pygi_arg_garray_len_arg_setup (PyGIArgCache *arg_cache,
             }
         }
 
-        _pygi_callable_cache_set_arg (callable_cache, seq_cache->len_arg_index, child_cache);
+        _pygi_callable_cache_set_arg (callable_cache, (guint)seq_cache->len_arg_index, child_cache);
         return child_cache;
     }
 

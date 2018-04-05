@@ -29,8 +29,8 @@ test_type_get_type(void)
 	type_info = (GTypeInfo *)g_new0(GTypeInfo, 1);
 	
         g_type_query(parent_type, &query);
-        type_info->class_size = query.class_size;
-        type_info->instance_size = query.instance_size;
+        type_info->class_size = (guint16)query.class_size;
+        type_info->instance_size = (guint16)query.instance_size;
 	
         gtype = g_type_register_static(parent_type,
 				       "TestType", type_info, 0);

@@ -52,9 +52,9 @@ _pygi_argument_from_g_value(const GValue *value,
         case GI_TYPE_TAG_INT16:
         case GI_TYPE_TAG_INT32:
 	    if (g_type_is_a (G_VALUE_TYPE (value), G_TYPE_LONG))
-		arg.v_int = g_value_get_long (value);
+		arg.v_int32 = (gint32)g_value_get_long (value);
 	    else
-		arg.v_int = g_value_get_int (value);
+		arg.v_int32 = (gint32)g_value_get_int (value);
             break;
         case GI_TYPE_TAG_INT64:
 	    if (g_type_is_a (G_VALUE_TYPE (value), G_TYPE_LONG))
@@ -68,9 +68,9 @@ _pygi_argument_from_g_value(const GValue *value,
         case GI_TYPE_TAG_UINT16:
         case GI_TYPE_TAG_UINT32:
 	    if (g_type_is_a (G_VALUE_TYPE (value), G_TYPE_ULONG))
-		arg.v_uint = g_value_get_ulong (value);
+		arg.v_uint32 = (guint32)g_value_get_ulong (value);
 	    else
-		arg.v_uint = g_value_get_uint (value);
+		arg.v_uint32 = (guint32)g_value_get_uint (value);
             break;
         case GI_TYPE_TAG_UINT64:
 	    if (g_type_is_a (G_VALUE_TYPE (value), G_TYPE_ULONG))
@@ -245,9 +245,8 @@ static int
 pyg_array_from_pyobject(GValue *value,
                         PyObject *obj)
 {
-    int len;
+    Py_ssize_t len, i;
     GArray *array;
-    int i;
 
     len = PySequence_Length(obj);
     if (len == -1) {

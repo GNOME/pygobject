@@ -1323,8 +1323,8 @@ gboolean
 pygi_g_struct_info_is_simple (GIStructInfo *struct_info)
 {
     gboolean is_simple;
-    gsize n_field_infos;
-    gsize i;
+    gint n_field_infos;
+    gint i;
 
     is_simple = TRUE;
 
@@ -1771,13 +1771,13 @@ _struct_field_array_length_marshal (gsize length_index,
 
     switch (g_base_info_get_type (container_info)) {
         case GI_INFO_TYPE_UNION:
-            array_len_field = g_union_info_get_field ((GIUnionInfo *)container_info, length_index);
+            array_len_field = g_union_info_get_field ((GIUnionInfo *)container_info, (gint)length_index);
             break;
         case GI_INFO_TYPE_STRUCT:
-            array_len_field = g_struct_info_get_field ((GIStructInfo *)container_info, length_index);
+            array_len_field = g_struct_info_get_field ((GIStructInfo *)container_info, (gint)length_index);
             break;
         case GI_INFO_TYPE_OBJECT:
-            array_len_field = g_object_info_get_field ((GIObjectInfo *)container_info, length_index);
+            array_len_field = g_object_info_get_field ((GIObjectInfo *)container_info, (gint)length_index);
             break;
         default:
             /* Other types don't have fields. */

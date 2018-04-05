@@ -27,6 +27,7 @@
 #include "pygi-info.h"
 #include "pygi-boxed.h"
 #include "pygi-type.h"
+#include "pygi-basictype.h"
 #include "pygboxed.h"
 #include "pygi-source.h"
 
@@ -65,13 +66,16 @@ pyg_source_prepare(GSource *source, gint *timeout)
 	goto bail;
     }
 
-    ret = PyObject_IsTrue(PyTuple_GET_ITEM(t, 0));
-	*timeout = PYGLIB_PyLong_AsLong(PyTuple_GET_ITEM(t, 1));
+    if (!pygi_gboolean_from_py (PyTuple_GET_ITEM(t, 0), &ret)) {
+        ret = FALSE;
+        goto bail;
+    }
 
-	if (*timeout == -1 && PyErr_Occurred()) {
-	    ret = FALSE;
-	    goto bail;
-	}
+    if (!pygi_gint_from_py (PyTuple_GET_ITEM(t, 1), timeout))
+    {
+        ret = FALSE;
+        goto bail;
+    }
 
     got_err = FALSE;
 
@@ -229,7 +233,7 @@ PyObject *
 pyg_source_set_callback(PyGObject *self_module, PyObject *args)
 {
     PyObject *self, *first, *callback, *cbargs = NULL, *data;
-    gint len;
+    Py_ssize_t len;
 
     len = PyTuple_Size (args);
     if (len < 2) {

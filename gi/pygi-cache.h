@@ -316,7 +316,10 @@ pygi_vfunc_cache_new        (GICallableInfo *info);
 PyGIClosureCache *
 pygi_closure_cache_new      (GICallableInfo *info);
 
-#define _pygi_callable_cache_args_len(cache) ((cache)->args_cache)->len
+inline static guint
+_pygi_callable_cache_args_len (PyGICallableCache *cache) {
+    return ((cache)->args_cache)->len;
+}
 
 inline static PyGIArgCache *
 _pygi_callable_cache_get_arg (PyGICallableCache *cache, guint index) {

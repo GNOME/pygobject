@@ -409,12 +409,13 @@ create_property (const gchar  *prop_name,
 static GParamSpec *
 pyg_param_spec_from_object (PyObject *tuple)
 {
-    gint val_length;
+    Py_ssize_t val_length;
     const gchar *prop_name;
     GType prop_type;
     const gchar *nick, *blurb;
     PyObject *slice, *item, *py_prop_type;
     GParamSpec *pspec;
+    gint intvalue;
 
     val_length = PyTuple_Size(tuple);
     if (val_length < 4) {
@@ -447,11 +448,14 @@ pyg_param_spec_from_object (PyObject *tuple)
 	return NULL;
     }
 
+    if (!pygi_gint_from_py (item, &intvalue))
+	return NULL;
+
     /* slice is the extra items in the tuple */
     slice = PySequence_GetSlice(tuple, 4, val_length-1);
     pspec = create_property(prop_name, prop_type,
 			    nick, blurb, slice,
-			    PYGLIB_PyLong_AsLong(item));
+			    intvalue);
 
     return pspec;
 }
@@ -551,7 +555,7 @@ add_properties (GObjectClass *klass, PyObject *properties)
 	GType prop_type;
 	const gchar *nick, *blurb;
 	GParamFlags flags;
-	gint val_length;
+	Py_ssize_t val_length;
 	PyObject *slice, *item, *py_prop_type;
 	GParamSpec *pspec;
 
@@ -602,7 +606,10 @@ add_properties (GObjectClass *klass, PyObject *properties)
 	    ret = FALSE;
 	    break;
 	}
-	flags = PYGLIB_PyLong_AsLong(item);
+	if (!pygi_gint_from_py (item, &flags)) {
+	    ret = FALSE;
+	    break;
+	}
 
 	/* slice is the extra items in the tuple */
 	slice = PySequence_GetSlice(value, 3, val_length-1);
@@ -714,6 +721,7 @@ create_signal (GType instance_type, const gchar *signal_name, PyObject *tuple)
     PyObject *py_return_type, *py_param_types;
     GType return_type;
     guint n_params, i;
+    Py_ssize_t py_n_params;
     GType *param_types;
     guint signal_id;
     GSignalAccumulator accumulator = NULL;
@@ -753,7 +761,15 @@ create_signal (GType instance_type, const gchar *signal_name, PyObject *tuple)
 	PyErr_SetString(PyExc_TypeError, buf);
 	return FALSE;
     }
-    n_params = PySequence_Length(py_param_types);
+    py_n_params = PySequence_Length(py_param_types);
+    if (py_n_params < 0)
+	return FALSE;
+    if (py_n_params > G_MAXUINT) {
+	PyErr_SetString(PyExc_TypeError, "too many params");
+	return FALSE;
+    }
+    n_params = (guint)py_n_params;
+
     param_types = g_new(GType, n_params);
     for (i = 0; i < n_params; i++) {
 	PyObject *item = PySequence_GetItem(py_param_types, i);
@@ -1222,8 +1238,8 @@ pyg_type_register(PyTypeObject *class, const char *type_name)
 
     /* fill in missing values of GTypeInfo struct */
     g_type_query(parent_type, &query);
-    type_info.class_size = query.class_size;
-    type_info.instance_size = query.instance_size;
+    type_info.class_size = (guint16)query.class_size;
+    type_info.instance_size = (guint16)query.instance_size;
 
     /* create new typecode */
     instance_type = g_type_register_static(parent_type, new_type_name,
@@ -1477,7 +1493,7 @@ _wrap_pyg_enum_register_new_gtype_and_add (PyObject *self,
 
         enum_value = &g_enum_values[i];
         enum_value->value_nick = g_strdup (name);
-        enum_value->value = g_value_info_get_value (value_info);
+        enum_value->value = (gint)g_value_info_get_value (value_info);
 
         if (c_identifier == NULL) {
             enum_value->value_name = enum_value->value_nick;
@@ -1596,7 +1612,7 @@ _wrap_pyg_flags_register_new_gtype_and_add (PyObject *self,
 
         flags_value = &g_flags_values[i];
         flags_value->value_nick = g_strdup (name);
-        flags_value->value = g_value_info_get_value (value_info);
+        flags_value->value = (guint)g_value_info_get_value (value_info);
 
         if (c_identifier == NULL) {
             flags_value->value_name = flags_value->value_nick;
@@ -2073,7 +2089,8 @@ pyg_signal_new(PyObject *self, PyObject *args)
     PyObject *py_return_type, *py_param_types;
 
     GType instance_type = 0;
-    Py_ssize_t n_params, i;
+    Py_ssize_t py_n_params;
+    guint n_params, i;
     GType *param_types;
 
     guint signal_id;
@@ -2101,7 +2118,16 @@ pyg_signal_new(PyObject *self, PyObject *args)
 			"argument 5 must be a sequence of GType codes");
 	return NULL;
     }
-    n_params = PySequence_Length(py_param_types);
+
+    py_n_params = PySequence_Length(py_param_types);
+    if (py_n_params < 0)
+	return FALSE;
+    if (py_n_params > G_MAXUINT) {
+	PyErr_SetString(PyExc_TypeError, "too many params");
+	return FALSE;
+    }
+    n_params = (guint)py_n_params;
+
     param_types = g_new(GType, n_params);
     for (i = 0; i < n_params; i++) {
 	PyObject *item = PySequence_GetItem(py_param_types, i);

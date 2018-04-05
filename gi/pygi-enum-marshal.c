@@ -34,28 +34,28 @@ gi_argument_from_c_long (GIArgument *arg_out,
 {
     switch (type_tag) {
       case GI_TYPE_TAG_INT8:
-          arg_out->v_int8 = c_long_in;
+          arg_out->v_int8 = (gint8)c_long_in;
           return TRUE;
       case GI_TYPE_TAG_UINT8:
-          arg_out->v_uint8 = c_long_in;
+          arg_out->v_uint8 = (guint8)c_long_in;
           return TRUE;
       case GI_TYPE_TAG_INT16:
-          arg_out->v_int16 = c_long_in;
+          arg_out->v_int16 = (gint16)c_long_in;
           return TRUE;
       case GI_TYPE_TAG_UINT16:
-          arg_out->v_uint16 = c_long_in;
+          arg_out->v_uint16 = (guint16)c_long_in;
           return TRUE;
       case GI_TYPE_TAG_INT32:
-          arg_out->v_int32 = c_long_in;
+          arg_out->v_int32 = (gint32)c_long_in;
           return TRUE;
       case GI_TYPE_TAG_UINT32:
-          arg_out->v_uint32 = c_long_in;
+          arg_out->v_uint32 = (guint32)c_long_in;
           return TRUE;
       case GI_TYPE_TAG_INT64:
-          arg_out->v_int64 = c_long_in;
+          arg_out->v_int64 = (gint64)c_long_in;
           return TRUE;
       case GI_TYPE_TAG_UINT64:
-          arg_out->v_uint64 = c_long_in;
+          arg_out->v_uint64 = (guint64)c_long_in;
           return TRUE;
       default:
           PyErr_Format (PyExc_TypeError,
@@ -244,7 +244,7 @@ _pygi_marshal_to_py_interface_enum (PyGIInvokeState   *state,
     if (iface_cache->g_type == G_TYPE_NONE) {
         py_obj = PyObject_CallFunction (iface_cache->py_type, "l", c_long);
     } else {
-        py_obj = pyg_enum_from_gtype (iface_cache->g_type, c_long);
+        py_obj = pyg_enum_from_gtype (iface_cache->g_type, (gint)c_long);
     }
     g_base_info_unref (interface);
     return py_obj;
@@ -293,7 +293,7 @@ _pygi_marshal_to_py_interface_flags (PyGIInvokeState   *state,
         Py_DECREF (py_args);
         Py_DECREF (py_type);
     } else {
-        py_obj = pyg_flags_from_gtype (iface_cache->g_type, c_long);
+        py_obj = pyg_flags_from_gtype (iface_cache->g_type, (guint)c_long);
     }
 
     return py_obj;

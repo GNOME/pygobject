@@ -896,8 +896,8 @@ pygobject_find_slot_for(PyTypeObject *type, PyObject *bases, int slot_offset,
 #define TYPE_SLOT(type)  (* (void **) (((char *) (type)) + slot_offset))
 
     void *found_slot = NULL;
-    int num_bases = PyTuple_Size(bases);
-    int i;
+    Py_ssize_t num_bases = PyTuple_Size(bases);
+    Py_ssize_t i;
 
     if (check_for_present && TYPE_SLOT(type) != NULL) {
 	/* We are requested to check if there is any custom slot value
@@ -1375,7 +1375,7 @@ pygobject_get_property (PyGObject *self, PyObject *args)
 static PyObject *
 pygobject_get_properties(PyGObject *self, PyObject *args)
 {
-    int len, i;
+    Py_ssize_t len, i;
     PyObject *tuple;
 
     if ((len = PyTuple_Size(args)) < 1) {
@@ -1710,7 +1710,7 @@ pygobject_connect(PyGObject *self, PyObject *args)
 {
     PyObject *first, *callback, *extra_args, *ret;
     gchar *name;
-    guint len;
+    Py_ssize_t len;
 
     len = PyTuple_Size(args);
     if (len < 2) {
@@ -2024,7 +2024,7 @@ pygobject_chain_from_overridden(PyGObject *self, PyObject *args)
 static PyObject *
 pygobject_weak_ref(PyGObject *self, PyObject *args)
 {
-    int len;
+    Py_ssize_t len;
     PyObject *callback = NULL, *user_data = NULL;
     PyObject *retval;
 

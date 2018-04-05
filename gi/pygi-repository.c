@@ -181,7 +181,7 @@ _wrap_g_irepository_get_infos (PyGIRepository *self,
     const char *namespace_;
     gssize n_infos;
     PyObject *infos;
-    gssize i;
+    gint i;
 
     if (!PyArg_ParseTupleAndKeywords (args, kwargs, "s:Repository.get_infos",
                                       kwlist, &namespace_)) {

@@ -799,6 +799,7 @@ def add_ext_compiler_flags(ext, compiler, _cache={}):
             "-Wundef",
             "-Wunused-but-set-variable",
             "-Wwrite-strings",
+            "-Wconversion",
         ]
 
         args += [
@@ -806,6 +807,7 @@ def add_ext_compiler_flags(ext, compiler, _cache={}):
             "-Wno-missing-field-initializers",
             "-Wno-unused-parameter",
             "-Wno-discarded-qualifiers",
+            "-Wno-sign-conversion",
         ]
 
         # silence clang for unused gcc CFLAGS added by Debian

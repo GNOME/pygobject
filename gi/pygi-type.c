@@ -595,8 +595,10 @@ pyg_enum_get_value(GType enum_type, PyObject *obj, gint *val)
 	*val = 0;
 	res = 0;
     } else if (PYGLIB_PyLong_Check(obj)) {
-	*val = PYGLIB_PyLong_AsLong(obj);
-	res = 0;
+	if (!pygi_gint_from_py (obj, val))
+	    res = -1;
+	else
+	    res = 0;
 
 	if (PyObject_TypeCheck(obj, &PyGEnum_Type) && ((PyGEnum *) obj)->gtype != enum_type) {
 	    g_warning("expected enumeration type %s, but got %s instead",
@@ -605,8 +607,10 @@ pyg_enum_get_value(GType enum_type, PyObject *obj, gint *val)
 	}
     /* Dumb code duplication, but probably not worth it to have yet another macro. */
     } else if (PyLong_Check(obj)) {
-	*val = PyLong_AsLong(obj);
-	res = 0;
+	if (!pygi_gint_from_py (obj, val))
+	    res = -1;
+	else
+	    res = 0;
 
 	if (PyObject_TypeCheck(obj, &PyGEnum_Type) && ((PyGEnum *) obj)->gtype != enum_type) {
 	    g_warning("expected enumeration type %s, but got %s instead",
@@ -668,11 +672,11 @@ pyg_flags_get_value(GType flag_type, PyObject *obj, guint *val)
 	*val = 0;
 	res = 0;
     } else if (PYGLIB_PyLong_Check(obj)) {
-	*val = PYGLIB_PyLong_AsUnsignedLong(obj);
-	res = 0;
+	if (pygi_guint_from_py (obj, val))
+	    res = 0;
     } else if (PyLong_Check(obj)) {
-        *val = PyLong_AsLongLong(obj);
-        res = 0;
+	if (pygi_guint_from_py (obj, val))
+	    res = 0;
     } else if (PYGLIB_PyUnicode_Check(obj)) {
 	GFlagsValue *info;
 	char *str = PYGLIB_PyUnicode_AsString(obj);
@@ -696,7 +700,7 @@ pyg_flags_get_value(GType flag_type, PyObject *obj, guint *val)
 	    res = -1;
 	}
     } else if (PyTuple_Check(obj)) {
-	int i, len;
+	Py_ssize_t i, len;
 
 	len = PyTuple_Size(obj);
 	*val = 0;
@@ -993,7 +997,7 @@ pyg_signal_class_closure_marshal(GClosure *closure,
     gchar *method_name, *tmp;
     PyObject *method;
     PyObject *params, *ret;
-    guint i, len;
+    Py_ssize_t i, len;
 
     state = PyGILState_Ensure();
 

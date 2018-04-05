@@ -105,8 +105,7 @@ pyg_ptr_richcompare(void* a, void *b, int op)
 const gchar *
 pyg_constant_strip_prefix(const gchar *name, const gchar *strip_prefix)
 {
-    size_t prefix_len;
-    guint i;
+    size_t prefix_len, i;
 
     prefix_len = strlen(strip_prefix);
 
