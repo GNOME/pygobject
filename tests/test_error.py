@@ -25,6 +25,7 @@
 from __future__ import absolute_import
 
 import unittest
+import pickle
 
 from gi.repository import GLib
 from gi.repository import GIMarshallingTests
@@ -64,6 +65,22 @@ class TestType(unittest.TestCase):
 
     def test_inheritance(self):
         self.assertTrue(issubclass(GLib.Error, RuntimeError))
+
+    def test_pickle(self):
+
+        def check_pickle(e):
+            assert isinstance(e, GLib.Error)
+            new_e = pickle.loads(pickle.dumps(e))
+            assert type(new_e) is type(e)
+            assert repr(e) == repr(new_e)
+
+        e = GLib.Error('test message', 'mydomain', 42)
+        check_pickle(e)
+
+        try:
+            GLib.file_get_contents("")
+        except Exception as e:
+            check_pickle(e)
 
 
 class ObjectWithVFuncException(GIMarshallingTests.Object):
