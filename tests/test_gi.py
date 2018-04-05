@@ -14,6 +14,7 @@ import gc
 import weakref
 import warnings
 import pickle
+import platform
 
 import gi
 import gi.overrides
@@ -633,8 +634,13 @@ class TestGType(unittest.TestCase):
         def check_readonly(gtype):
             gtype.name = "foo"
 
-        self.assertRaises(AttributeError, check_readonly, GObject.TYPE_NONE)
-        self.assertRaises(AttributeError, check_readonly, GObject.TYPE_STRING)
+        errors = (AttributeError,)
+        if platform.python_implementation() == "PyPy":
+            # https://bitbucket.org/pypy/pypy/issues/2788
+            errors = (AttributeError, TypeError)
+
+        self.assertRaises(errors, check_readonly, GObject.TYPE_NONE)
+        self.assertRaises(errors, check_readonly, GObject.TYPE_STRING)
 
     def test_gtype_return(self):
         self.assertEqual(GObject.TYPE_NONE, GIMarshallingTests.gtype_return())
