@@ -28,7 +28,6 @@
 
 
 PyObject *PyGError = NULL;
-static PyObject *exception_table = NULL;
 
 /**
  * pygi_error_marshal_to_py:
@@ -55,13 +54,6 @@ pygi_error_marshal_to_py (GError **error)
     state = PyGILState_Ensure();
 
     exc_type = PyGError;
-    if (exception_table != NULL)
-    {
-        PyObject *item;
-        item = PyDict_GetItem(exception_table, PYGLIB_PyLong_FromLong((*error)->domain));
-        if (item != NULL)
-            exc_type = item;
-    }
 
     if ((*error)->domain) {
         domain = g_quark_to_string ((*error)->domain);
@@ -224,35 +216,6 @@ pygi_gerror_exception_check (GError **error)
     Py_DECREF(value);
     return res;
 
-}
-
-/**
- * pygi_register_exception_for_domain:
- * @name: name of the exception
- * @error_domain: error domain
- *
- * Registers a new GLib.Error exception subclass called #name for
- * a specific #domain. This exception will be raised when a GError
- * of the same domain is passed in to pygi_error_check().
- *
- * Returns: the new exception
- */
-PyObject *
-pygi_register_exception_for_domain (gchar *name,
-                                    gint error_domain)
-{
-    PyObject *exception;
-
-    exception = PyErr_NewException(name, PyGError, NULL);
-
-    if (exception_table == NULL)
-        exception_table = PyDict_New();
-
-    PyDict_SetItem(exception_table,
-                   PYGLIB_PyLong_FromLong(error_domain),
-                   exception);
-
-    return exception;
 }
 
 static gboolean
