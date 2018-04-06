@@ -115,7 +115,7 @@ class Signal(str):
 
         def disconnect(self, handler_id):
             """Same as GObject.Object.disconnect."""
-            self.instance.disconnect(handler_id)
+            self.gobj.disconnect(handler_id)
 
         def emit(self, *args, **kargs):
             """Same as GObject.Object.emit except there is no need to specify
