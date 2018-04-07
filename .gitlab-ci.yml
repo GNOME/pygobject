@@ -37,6 +37,20 @@ coverage:
   script:
     - bash -x ./.gitlab-ci/coverage-docker.sh
 
+pages:
+  stage: coverage
+  image: lazka/pygobject:v3
+  dependencies:
+    - coverage
+  script:
+    - mv coverage/ public/
+  artifacts:
+    paths:
+      - public
+    expire_in: 30 days
+  only:
+    - master
+
 python2-mingw32:
   variables:
     PYTHON: "python2"

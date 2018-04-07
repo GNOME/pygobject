@@ -24,3 +24,14 @@ rm -f *.lcov
 
 ln -s report-python/index.html index-python.html
 ln -s report-c/index.html index-c.html
+
+cat >index.html <<EOL
+<html>
+<body>
+<ul>
+<li><a href="report-python/index.html">C Coverage</a></li>
+<li><a href="report-c/index.html">Python Coverage</a></li>
+</ul>
+</body>
+</html>
+EOL
