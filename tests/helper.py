@@ -11,8 +11,7 @@ from collections import namedtuple
 import gi
 from gi import PyGIDeprecationWarning
 from gi.repository import GLib
-
-from .compathelper import StringIO
+from gi._compat import StringIO
 
 
 ExceptionInfo = namedtuple("ExceptionInfo", ["type", "value", "traceback"])

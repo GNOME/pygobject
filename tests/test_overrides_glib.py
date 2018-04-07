@@ -8,7 +8,7 @@ import unittest
 
 import gi
 from gi.repository import GLib
-from .compathelper import _long
+from gi._compat import long_, integer_types
 
 
 class TestGVariant(unittest.TestCase):
@@ -62,7 +62,7 @@ class TestGVariant(unittest.TestCase):
         # nested tuples
         variant = GLib.Variant('((si)(ub))', (('hello', -1), (42, True)))
         self.assertEqual(variant.get_type_string(), '((si)(ub))')
-        self.assertEqual(variant.unpack(), (('hello', -1), (_long(42), True)))
+        self.assertEqual(variant.unpack(), (('hello', -1), (long_(42), True)))
 
     def test_new_tuple_sink(self):
         # https://bugzilla.gnome.org/show_bug.cgi?id=735166
@@ -586,4 +586,4 @@ class TestConstants(unittest.TestCase):
 
     def test_basic_types_limits(self):
         self.assertTrue(isinstance(GLib.MINFLOAT, float))
-        self.assertTrue(isinstance(GLib.MAXLONG, (int, _long)))
+        self.assertTrue(isinstance(GLib.MAXLONG, integer_types))

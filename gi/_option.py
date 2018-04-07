@@ -32,13 +32,7 @@ import optparse
 from optparse import OptParseError, OptionError, OptionValueError, \
     BadOptionError, OptionConflictError
 from .module import get_introspection_module
-
-if sys.version_info >= (3, 0):
-    _basestring = str
-    _bytes = lambda s: s.encode()
-else:
-    _basestring = basestring
-    _bytes = str
+from ._compat import string_types
 
 from gi import _gi
 from gi._error import GError
@@ -137,10 +131,13 @@ class Option(optparse.Option):
             flags |= GLib.OptionFlags.FILENAME
 
         for (long_name, short_name) in zip(self._long_opts, self._short_opts):
-            yield (long_name[2:], _bytes(short_name[1]), flags, self.help, self.metavar)
+            short_bytes = short_name[1]
+            if not isinstance(short_bytes, bytes):
+                short_bytes = short_bytes.encode()
+            yield (long_name[2:], short_bytes, flags, self.help, self.metavar)
 
         for long_name in self._long_opts[len(self._short_opts):]:
-            yield (long_name[2:], _bytes('\0'), flags, self.help, self.metavar)
+            yield (long_name[2:], b'\0', flags, self.help, self.metavar)
 
 
 class OptionGroup(optparse.OptionGroup):
@@ -233,7 +230,7 @@ class OptionGroup(optparse.OptionGroup):
     def set_values_to_defaults(self):
         for option in self.option_list:
             default = self.defaults.get(option.dest)
-            if isinstance(default, _basestring):
+            if isinstance(default, string_types):
                 opt_str = option.get_opt_string()
                 self.defaults[option.dest] = option.check_value(
                     opt_str, default)
@@ -313,7 +310,7 @@ class OptionParser(optparse.OptionParser):
         return context
 
     def add_option_group(self, *args, **kwargs):
-        if isinstance(args[0], _basestring):
+        if isinstance(args[0], string_types):
             optparse.OptionParser.add_option_group(self,
                                                    OptionGroup(self, *args, **kwargs))
             return

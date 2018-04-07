@@ -13,8 +13,7 @@ import subprocess
 import pytest
 from gi.repository import GLib
 from gi import PyGIDeprecationWarning
-
-from .compathelper import PY3
+from gi._compat import PY3
 
 
 class TestGLib(unittest.TestCase):

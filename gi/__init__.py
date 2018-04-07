@@ -44,6 +44,7 @@ from ._gi import _API
 from ._gi import Repository
 from ._gi import PyGIDeprecationWarning
 from ._gi import PyGIWarning
+from ._compat import string_types
 
 _API = _API  # pyflakes
 PyGIDeprecationWarning = PyGIDeprecationWarning
@@ -108,12 +109,8 @@ def require_version(namespace, version):
     """
     repository = Repository.get_default()
 
-    if sys.version_info[0] <= 2:
-        if not isinstance(version, basestring):
-            raise ValueError('Namespace version needs to be a string.')
-    else:
-        if not isinstance(version, str):
-            raise ValueError('Namespace version needs to be a string.')
+    if not isinstance(version, string_types):
+        raise ValueError('Namespace version needs to be a string.')
 
     if namespace in repository.get_loaded_namespaces():
         loaded_version = repository.get_version(namespace)

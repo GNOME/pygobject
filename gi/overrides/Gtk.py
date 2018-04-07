@@ -27,12 +27,9 @@ from gi.repository import GObject
 from .._ossighelper import wakeup_on_signal, register_sigint_fallback
 from ..overrides import override, strip_boolean_result, deprecated_init
 from ..module import get_introspection_module
+from .._compat import string_types
 from gi import PyGIDeprecationWarning
 
-if sys.version_info >= (3, 0):
-    _basestring = str
-else:
-    _basestring = basestring
 
 Gtk = get_introspection_module('Gtk')
 
@@ -388,7 +385,7 @@ if Gtk._version in ("2.0", "3.0"):
 
     class UIManager(Gtk.UIManager):
         def add_ui_from_string(self, buffer):
-            if not isinstance(buffer, _basestring):
+            if not isinstance(buffer, string_types):
                 raise TypeError('buffer must be a string')
 
             length = len(buffer.encode('UTF-8'))
@@ -457,7 +454,7 @@ class Builder(Gtk.Builder):
         self.connect_signals_full(_builder_connect_callback, obj_or_map)
 
     def add_from_string(self, buffer):
-        if not isinstance(buffer, _basestring):
+        if not isinstance(buffer, string_types):
             raise TypeError('buffer must be a string')
 
         length = len(buffer)
@@ -465,7 +462,7 @@ class Builder(Gtk.Builder):
         return Gtk.Builder.add_from_string(self, buffer, length)
 
     def add_objects_from_string(self, buffer, object_ids):
-        if not isinstance(buffer, _basestring):
+        if not isinstance(buffer, string_types):
             raise TypeError('buffer must be a string')
 
         length = len(buffer)
@@ -731,7 +728,7 @@ class TextBuffer(Gtk.TextBuffer):
         Gtk.TextBuffer.set_text(self, text, length)
 
     def insert(self, iter, text, length=-1):
-        if not isinstance(text, _basestring):
+        if not isinstance(text, string_types):
             raise TypeError('text must be a string, not %s' % type(text))
 
         Gtk.TextBuffer.insert(self, iter, text, length)
@@ -760,7 +757,7 @@ class TextBuffer(Gtk.TextBuffer):
         self.insert_with_tags(iter, text, *tag_objs)
 
     def insert_at_cursor(self, text, length=-1):
-        if not isinstance(text, _basestring):
+        if not isinstance(text, string_types):
             raise TypeError('text must be a string, not %s' % type(text))
 
         Gtk.TextBuffer.insert_at_cursor(self, text, length)
@@ -1177,7 +1174,7 @@ class TreePath(Gtk.TreePath):
     def __new__(cls, path=0):
         if isinstance(path, int):
             path = str(path)
-        elif not isinstance(path, _basestring):
+        elif not isinstance(path, string_types):
             path = ":".join(str(val) for val in path)
 
         if len(path) == 0:

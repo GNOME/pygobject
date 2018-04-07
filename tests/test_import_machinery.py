@@ -9,6 +9,7 @@ import unittest
 import gi.overrides
 import gi.module
 import gi.importer
+from gi._compat import PY2, PY3
 
 from gi.repository import Regress
 
@@ -146,9 +147,10 @@ class TestImporter(unittest.TestCase):
             gi.require_version('GLib', 2.0)
 
         # Test that unicode strings work in python 2
-        if sys.version_info[0] <= 2:
+        if PY2:
             gi.require_version('GLib', unicode('2.0'))
-        else:
+
+        if PY3:
             with self.assertRaises(ValueError):
                 gi.require_version('GLib', b'2.0')
 

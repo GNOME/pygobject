@@ -17,11 +17,10 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library; if not, see <http://www.gnu.org/licenses/>.
 
-import sys
 import traceback
 
 from . import _gi
-
+from ._compat import string_types, long_
 from ._constants import \
     TYPE_NONE, TYPE_INTERFACE, TYPE_CHAR, TYPE_UCHAR, \
     TYPE_BOOLEAN, TYPE_INT, TYPE_UINT, TYPE_LONG, \
@@ -38,13 +37,6 @@ G_MAXUINT = _gi.G_MAXUINT
 G_MINLONG = _gi.G_MINLONG
 G_MAXLONG = _gi.G_MAXLONG
 G_MAXULONG = _gi.G_MAXULONG
-
-if sys.version_info >= (3, 0):
-    _basestring = str
-    _long = int
-else:
-    _basestring = basestring
-    _long = long
 
 
 class Property(object):
@@ -104,7 +96,7 @@ class Property(object):
     """
     _type_from_pytype_lookup = {
         # Put long_ first in case long_ and int are the same so int clobbers long_
-        _long: TYPE_LONG,
+        long_: TYPE_LONG,
         int: TYPE_INT,
         bool: TYPE_BOOLEAN,
         float: TYPE_DOUBLE,
@@ -162,11 +154,11 @@ class Property(object):
         self.default = self._get_default(default)
         self._check_default()
 
-        if not isinstance(nick, _basestring):
+        if not isinstance(nick, string_types):
             raise TypeError("nick must be a string")
         self.nick = nick
 
-        if not isinstance(blurb, _basestring):
+        if not isinstance(blurb, string_types):
             raise TypeError("blurb must be a string")
         self.blurb = blurb
         # Always clobber __doc__ with blurb even if blurb is empty because

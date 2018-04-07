@@ -4,7 +4,7 @@ import sys
 
 import pytest
 
-from .compathelper import reraise
+from gi._compat import reraise
 
 
 @pytest.hookimpl(hookwrapper=True)

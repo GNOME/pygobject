@@ -22,9 +22,9 @@ from gi import PyGIWarning
 from gi import PyGIDeprecationWarning
 from gi.repository import GObject, GLib, Gio
 from gi.repository import GIMarshallingTests
+from gi._compat import PY2, PY3
 import pytest
 
-from .compathelper import PY2, PY3
 from .helper import capture_exceptions, capture_output
 
 
@@ -688,7 +688,7 @@ class TestUtf8(unittest.TestCase):
 
     def test_utf8_none_in(self):
         GIMarshallingTests.utf8_none_in(CONSTANT_UTF8)
-        if sys.version_info < (3, 0):
+        if PY2:
             GIMarshallingTests.utf8_none_in(CONSTANT_UTF8.decode("utf-8"))
 
         self.assertRaises(TypeError, GIMarshallingTests.utf8_none_in, 42)
@@ -2891,7 +2891,7 @@ class TestMRO(unittest.TestCase):
             # style mixin.
             type('GIWithOldStyleMixin', (GIMarshallingTests.Object, Mixin), {})
 
-            if sys.version_info < (3, 0):
+            if PY2:
                 self.assertTrue(issubclass(warn[0].category, RuntimeWarning))
             else:
                 self.assertEqual(len(warn), 0)

@@ -16,6 +16,7 @@ from gi.repository import Regress as Everything
 from gi.repository import GObject
 from gi.repository import GLib
 from gi.repository import Gio
+from gi._compat import PY3, PY2
 
 try:
     from gi.repository import Gtk
@@ -23,11 +24,10 @@ try:
 except:
     Gtk = None
 
-from .compathelper import PY3
 from .helper import capture_exceptions
 
 
-if sys.version_info < (3, 0):
+if PY2:
     UNICHAR = "\xe2\x99\xa5"
     PY2_UNICODE_UNICHAR = unicode(UNICHAR, 'UTF-8')
 else:
@@ -35,7 +35,7 @@ else:
 
 
 const_str = b'const \xe2\x99\xa5 utf8'
-if sys.version_info >= (3, 0):
+if PY3:
     const_str = const_str.decode('UTF-8')
 noconst_str = 'non' + const_str
 
@@ -181,7 +181,7 @@ class TestEverything(unittest.TestCase):
     def test_unichar(self):
         self.assertEqual("c", Everything.test_unichar("c"))
 
-        if sys.version_info < (3, 0):
+        if PY2:
             self.assertEqual(UNICHAR, Everything.test_unichar(PY2_UNICODE_UNICHAR))
         self.assertEqual(UNICHAR, Everything.test_unichar(UNICHAR))
         self.assertRaises(TypeError, Everything.test_unichar, "")
@@ -403,7 +403,7 @@ class TestEverything(unittest.TestCase):
         self.assertEqual(Everything.test_array_int_inout([]), [])
 
     def test_array_gint8_in(self):
-        if sys.version_info >= (3, 0):
+        if PY3:
             self.assertEqual(Everything.test_array_gint8_in(b'\x01\x03\x05'), 9)
         self.assertEqual(Everything.test_array_gint8_in([1, 3, 5, -50]), -41)
 

@@ -21,7 +21,6 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
 # USA
 
-import sys
 import warnings
 from collections import namedtuple
 
@@ -30,6 +29,7 @@ import gi.module
 from gi.overrides import override, deprecated_attr
 from gi.repository import GLib
 from gi import PyGIDeprecationWarning
+from gi._compat import PY2
 
 from gi import _propertyhelper as propertyhelper
 from gi import _signalhelper as signalhelper
@@ -263,7 +263,7 @@ class Value(GObjectModule.Value):
         elif gtype == TYPE_STRING:
             if isinstance(py_value, str):
                 py_value = str(py_value)
-            elif sys.version_info < (3, 0):
+            elif PY2:
                 if isinstance(py_value, unicode):
                     py_value = py_value.encode('UTF-8')
                 else:

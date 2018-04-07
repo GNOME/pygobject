@@ -12,9 +12,9 @@ import time
 from gi.repository import GObject, GLib, Regress, Gio
 from gi import _signalhelper as signalhelper
 from gi.module import repository as repo
+from gi._compat import PY3, long_
 
 from . import testhelper
-from .compathelper import _long
 from .helper import capture_glib_warnings, capture_gi_deprecation_warnings
 
 
@@ -523,7 +523,7 @@ class CM(GObject.GObject):
         test2=(GObject.SignalFlags.RUN_LAST, None, (str,)),
         test3=(GObject.SignalFlags.RUN_LAST, int, (GObject.TYPE_DOUBLE,)),
         test4=(GObject.SignalFlags.RUN_FIRST, None,
-               (bool, _long, GObject.TYPE_FLOAT, GObject.TYPE_DOUBLE, int,
+               (bool, long_, GObject.TYPE_FLOAT, GObject.TYPE_DOUBLE, int,
                 GObject.TYPE_UINT, GObject.TYPE_ULONG)),
         test_float=(GObject.SignalFlags.RUN_LAST, GObject.TYPE_FLOAT, (GObject.TYPE_FLOAT,)),
         test_double=(GObject.SignalFlags.RUN_LAST, GObject.TYPE_DOUBLE, (GObject.TYPE_DOUBLE,)),
@@ -555,7 +555,7 @@ class _TestCMarshaller:
         self.assertEqual(rv, 20)
 
     def test_test4(self):
-        self.obj.emit("test4", True, _long(10), 3.14, 1.78, 20, _long(30), _long(31))
+        self.obj.emit("test4", True, long_(10), 3.14, 1.78, 20, long_(30), long_(31))
 
     def test_float(self):
         rv = self.obj.emit("test-float", 1.234)
@@ -1005,8 +1005,7 @@ class AnnotatedSignalClass(GObject.GObject):
 """
 
 
-@unittest.skipUnless(sys.version_info >= (3, 0),
-                     'Argument annotations require Python 3')
+@unittest.skipUnless(PY3, 'Argument annotations require Python 3')
 class TestPython3Signals(unittest.TestCase):
     AnnotatedClass = None
 
