@@ -22,7 +22,6 @@
 
 from __future__ import absolute_import
 
-import sys
 import warnings
 import re
 
@@ -43,11 +42,6 @@ StructInfo, GInterface  # pyflakes
 
 from . import _propertyhelper as propertyhelper
 from . import _signalhelper as signalhelper
-
-if (3, 0) <= sys.version_info < (3, 3):
-    # callable not available for python 3.0 thru 3.2
-    def callable(obj):
-        return hasattr(obj, '__call__')
 
 
 def snake_case(name):

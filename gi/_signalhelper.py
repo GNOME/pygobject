@@ -17,17 +17,7 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library; if not, see <http://www.gnu.org/licenses/>.
 
-import sys
-
 from . import _gi
-
-# Callable went away in python 3.0 and came back in 3.2.
-# Use versioning to figure out when to define it, otherwise we have to deal with
-# the complexity of using __builtin__ or builtin between python versions to
-# check if callable exists which PyFlakes will also complain about.
-if (3, 0) <= sys.version_info < (3, 2):
-    def callable(fn):
-        return hasattr(fn, '__call__')
 
 
 class Signal(str):
