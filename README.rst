@@ -1,3 +1,6 @@
+.. image:: https://gitlab.gnome.org/GNOME/pygobject/badges/master/coverage.svg
+    :target: https://gnome.pages.gitlab.gnome.org/pygobject
+
 .. image:: https://pygobject.readthedocs.io/en/latest/_images/pygobject.svg
    :align: center
    :width: 400px

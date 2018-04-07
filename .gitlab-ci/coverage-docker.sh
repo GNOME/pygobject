@@ -29,8 +29,8 @@ cat >index.html <<EOL
 <html>
 <body>
 <ul>
-<li><a href="report-python/index.html">C Coverage</a></li>
-<li><a href="report-c/index.html">Python Coverage</a></li>
+<li><a href="report-c/index.html">C Coverage</a></li>
+<li><a href="report-python/index.html">Python Coverage</a></li>
 </ul>
 </body>
 </html>
