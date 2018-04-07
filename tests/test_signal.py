@@ -692,6 +692,10 @@ class TestSignalDecorator(unittest.TestCase):
         def pulled(self):
             self.value -= 1
 
+        @GObject.Signal(flags=GObject.SignalFlags.DETAILED)
+        def detailed(self):
+            self.value -= 1
+
         stomped = GObject.Signal('stomped', arg_types=(int,), doc='this will stomp')
         unnamed = GObject.Signal()
 
@@ -712,6 +716,26 @@ class TestSignalDecorator(unittest.TestCase):
 
     def onUnnamed(self, obj):
         self.unnamedCalled = True
+
+    def test_disconnect(self):
+        decorated = self.Decorated()
+        id_ = decorated.pushed.connect(lambda *args: None)
+        decorated.pushed.disconnect(id_)
+
+    def test_signal_repr(self):
+        decorated = self.Decorated()
+        assert repr(decorated.pushed) == 'BoundSignal("pushed")'
+
+    def test_signal_call(self):
+        decorated = self.Decorated()
+        assert decorated.value == 0
+        decorated.pushed()
+        assert decorated.value == 1
+
+    def test_connect_detailed(self):
+        decorated = self.Decorated()
+        id_ = decorated.detailed.connect_detailed(lambda *args: None, "foo")
+        decorated.pushed.disconnect(id_)
 
     def test_get_signal_args(self):
         self.assertEqual(self.Decorated.pushed.get_signal_args(),
