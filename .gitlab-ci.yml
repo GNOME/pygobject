@@ -1,6 +1,7 @@
 stages:
   - build_and_test
   - coverage
+  - deploy
 
 cache:
   paths:
@@ -38,7 +39,7 @@ coverage:
     - bash -x ./.gitlab-ci/coverage-docker.sh
 
 pages:
-  stage: coverage
+  stage: deploy
   image: lazka/pygobject:v3
   dependencies:
     - coverage
