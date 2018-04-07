@@ -119,11 +119,9 @@ class Signal(str):
 
     def __init__(self, name='', func=None, flags=_gi.SIGNAL_RUN_FIRST,
                  return_type=None, arg_types=None, doc='', accumulator=None, accu_data=None):
-        if func and not name:
-            name = func.__name__
-        elif callable(name):
+        if func is None and callable(name):
             func = name
-            name = func.__name__
+
         if func and not doc:
             doc = func.__doc__
 
@@ -170,8 +168,7 @@ class Signal(str):
 
     def copy(self, newName=None):
         """Returns a renamed copy of the Signal."""
-        if newName is None:
-            newName = self.name
+
         return type(self)(name=newName, func=self.func, flags=self.flags,
                           return_type=self.return_type, arg_types=self.arg_types,
                           doc=self.__doc__, accumulator=self.accumulator, accu_data=self.accu_data)
