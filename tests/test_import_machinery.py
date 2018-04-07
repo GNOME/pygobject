@@ -148,7 +148,7 @@ class TestImporter(unittest.TestCase):
 
         # Test that unicode strings work in python 2
         if PY2:
-            gi.require_version('GLib', unicode('2.0'))
+            gi.require_version('GLib', u'2.0')
 
         if PY3:
             with self.assertRaises(ValueError):

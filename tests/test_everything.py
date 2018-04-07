@@ -27,13 +27,6 @@ except:
 from .helper import capture_exceptions
 
 
-if PY2:
-    UNICHAR = "\xe2\x99\xa5"
-    PY2_UNICODE_UNICHAR = unicode(UNICHAR, 'UTF-8')
-else:
-    UNICHAR = "♥"
-
-
 const_str = b'const \xe2\x99\xa5 utf8'
 if PY3:
     const_str = const_str.decode('UTF-8')
@@ -182,8 +175,10 @@ class TestEverything(unittest.TestCase):
         self.assertEqual("c", Everything.test_unichar("c"))
 
         if PY2:
-            self.assertEqual(UNICHAR, Everything.test_unichar(PY2_UNICODE_UNICHAR))
-        self.assertEqual(UNICHAR, Everything.test_unichar(UNICHAR))
+            self.assertEqual(b"\xe2\x99\xa5", Everything.test_unichar(u"♥"))
+            self.assertEqual(b"\xe2\x99\xa5", Everything.test_unichar(b"\xe2\x99\xa5"))
+        else:
+            self.assertEqual(u"♥", Everything.test_unichar(u"♥"))
         self.assertRaises(TypeError, Everything.test_unichar, "")
         self.assertRaises(TypeError, Everything.test_unichar, "morethanonechar")
 

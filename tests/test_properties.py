@@ -875,7 +875,7 @@ class TestProperty(unittest.TestCase):
         tester = GObject.Property()
         self.assertEqual(tester._type_from_python(int), GObject.TYPE_INT)
         if PY2:
-            self.assertEqual(tester._type_from_python(long), GObject.TYPE_LONG)
+            self.assertEqual(tester._type_from_python(long_), GObject.TYPE_LONG)
         self.assertEqual(tester._type_from_python(bool), GObject.TYPE_BOOLEAN)
         self.assertEqual(tester._type_from_python(float), GObject.TYPE_DOUBLE)
         self.assertEqual(tester._type_from_python(str), GObject.TYPE_STRING)

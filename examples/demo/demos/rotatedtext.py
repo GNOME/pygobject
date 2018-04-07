@@ -29,20 +29,13 @@ cairo drawing operations instead of the Unicode heart character.
 
 from gi.repository import Gtk, Pango, PangoCairo, Gdk
 import cairo
-import sys
 import math
 
-# Python 2 and 3 handle UTF8 differently
-if sys.version_info < (3, 0):
-    BYTES_TEXT = "I \xe2\x99\xa5 GTK+"
-    UTF8_TEXT = unicode(BYTES_TEXT, 'UTF-8')
-    BYTES_HEART = "\xe2\x99\xa5"
-    HEART = unicode(BYTES_HEART, 'UTF-8')
-else:
-    UTF8_TEXT = "I ♥ GTK+"
-    BYTES_TEXT = bytes(UTF8_TEXT, 'utf-8')
-    HEART = "♥"
-    BYTES_HEART = bytes(HEART, 'utf-8')
+
+UTF8_TEXT = u"I ♥ GTK+"
+HEART = u"♥"
+BYTES_TEXT = UTF8_TEXT.encode()
+BYTES_HEART = HEART.encode()
 
 
 class RotatedTextApp:

@@ -29,7 +29,7 @@ import gi.module
 from gi.overrides import override, deprecated_attr
 from gi.repository import GLib
 from gi import PyGIDeprecationWarning
-from gi._compat import PY2
+from gi._compat import PY2, text_type
 
 from gi import _propertyhelper as propertyhelper
 from gi import _signalhelper as signalhelper
@@ -264,7 +264,7 @@ class Value(GObjectModule.Value):
             if isinstance(py_value, str):
                 py_value = str(py_value)
             elif PY2:
-                if isinstance(py_value, unicode):
+                if isinstance(py_value, text_type):
                     py_value = py_value.encode('UTF-8')
                 else:
                     raise ValueError("Expected string or unicode but got %s%s" %

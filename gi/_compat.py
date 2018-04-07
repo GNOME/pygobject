@@ -23,11 +23,12 @@ if sys.version_info[0] == 2:
     from UserList import UserList
     UserList
 
-    long_ = long
-    integer_types = (int, long)
-    string_types = (basestring,)
+    long_ = eval("long")
+    integer_types = eval("(int, long)")
+    string_types = eval("(basestring,)")
+    text_type = eval("unicode")
 
-    exec("reload = reload")
+    reload = eval("reload")
 
     exec("def reraise(tp, value, tb):\n raise tp, value, tb")
 else:
@@ -42,6 +43,7 @@ else:
     long_ = int
     integer_types = (int,)
     string_types = (str,)
+    text_type = str
 
     from importlib import reload
     reload
