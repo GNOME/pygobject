@@ -133,7 +133,7 @@ class Option(optparse.Option):
         for (long_name, short_name) in zip(self._long_opts, self._short_opts):
             short_bytes = short_name[1]
             if not isinstance(short_bytes, bytes):
-                short_bytes = short_bytes.encode()
+                short_bytes = short_bytes.encode("utf-8")
             yield (long_name[2:], short_bytes, flags, self.help, self.metavar)
 
         for long_name in self._long_opts[len(self._short_opts):]:
