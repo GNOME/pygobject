@@ -36,6 +36,7 @@ from distutils.errors import DistutilsSetupError, DistutilsOptionError
 from distutils.ccompiler import new_compiler
 from distutils.sysconfig import get_python_lib, customize_compiler
 from distutils import dir_util, log
+from distutils.spawn import find_executable
 
 
 PYGOBJECT_VERISON = "3.29.0"
@@ -101,7 +102,47 @@ def parse_pkg_info(conf_dir):
     return message
 
 
-def _run_pkg_config(args, _cache={}):
+def pkg_config_get_install_hint(pkg_name):
+    """Returns an installation hint for a pkg-config name or None"""
+
+    if not sys.platform.startswith("linux"):
+        return
+
+    if find_executable("apt"):
+        dev_packages = {
+            "gobject-introspection-1.0": "libgirepository1.0-dev",
+            "glib-2.0": "libglib2.0-dev",
+            "gio-2.0": "libglib2.0-dev",
+            "cairo": "libcairo2-dev",
+            "cairo-gobject": "libcairo2-dev",
+            "libffi": "libffi-dev",
+        }
+        if pkg_name in dev_packages:
+            return "sudo apt install %s" % dev_packages[pkg_name]
+    elif find_executable("dnf"):
+        dev_packages = {
+            "gobject-introspection-1.0": "gobject-introspection-devel",
+            "glib-2.0": "glib2-devel",
+            "gio-2.0": "glib2-devel",
+            "cairo": "cairo-devel",
+            "cairo-gobject": "cairo-gobject-devel",
+            "libffi": "libffi-devel",
+        }
+        if pkg_name in dev_packages:
+            return "sudo dnf install %s" % dev_packages[pkg_name]
+
+
+class PkgConfigError(Exception):
+    pass
+
+
+class PkgConfigMissingPackageError(PkgConfigError):
+    pass
+
+
+def _run_pkg_config(pkg_name, args, _cache={}):
+    """Raises PkgConfigError"""
+
     command = tuple(["pkg-config"] + args)
 
     if command not in _cache:
@@ -109,27 +150,47 @@ def _run_pkg_config(args, _cache={}):
             result = subprocess.check_output(command)
         except OSError as e:
             if e.errno == errno.ENOENT:
-                raise SystemExit(
+                raise PkgConfigError(
                     "%r not found.\nArguments: %r" % (command[0], command))
-            raise SystemExit(e)
+            raise PkgConfigError(e)
         except subprocess.CalledProcessError as e:
-            raise SystemExit(e)
+            try:
+                subprocess.check_output(["pkg-config", "--exists", pkg_name])
+            except (subprocess.CalledProcessError, OSError):
+                raise PkgConfigMissingPackageError(e)
+            else:
+                raise PkgConfigError(e)
         else:
             _cache[command] = result
 
     return _cache[command]
 
 
-def pkg_config_version_check(pkg, version):
-    _run_pkg_config([
+def _run_pkg_config_or_exit(pkg_name, args):
+    try:
+        return _run_pkg_config(pkg_name, args)
+    except PkgConfigMissingPackageError as e:
+        hint = pkg_config_get_install_hint(pkg_name)
+        if hint:
+            raise SystemExit(
+                "%s\n\nTry installing it with: %r" % (e, hint))
+        else:
+            raise SystemExit(e)
+    except PkgConfigError as e:
+        raise SystemExit(e)
+
+
+def pkg_config_version_check(pkg_name, version):
+    _run_pkg_config_or_exit(pkg_name, [
         "--print-errors",
         "--exists",
-        '%s >= %s' % (pkg, version),
+        '%s >= %s' % (pkg_name, version),
     ])
 
 
-def pkg_config_parse(opt, pkg):
-    ret = _run_pkg_config([opt, pkg])
+def pkg_config_parse(opt, pkg_name):
+    ret = _run_pkg_config_or_exit(pkg_name, [opt, pkg_name])
+
     if sys.version_info[0] == 3:
         output = ret.decode()
     else:
