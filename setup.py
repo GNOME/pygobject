@@ -46,6 +46,11 @@ PYCAIRO_VERSION_REQUIRED = "1.11.1"
 LIBFFI_VERSION_REQUIRED = "3.0"
 
 
+def is_dev_version():
+    version = tuple(map(int, PYGOBJECT_VERISON.split(".")))
+    return version[1] % 2 != 0
+
+
 def get_command_class(name):
     # Returns the right class for either distutils or setuptools
     return Distribution({}).get_command_class(name)
@@ -267,6 +272,9 @@ class sdist_gnome(Command):
         pass
 
     def run(self):
+        # Don't use PEP 440 pre-release versions for GNOME releases
+        self.distribution.metadata.version = PYGOBJECT_VERISON
+
         dist_dir = tempfile.mkdtemp()
         try:
             cmd = self.reinitialize_command("sdist")
@@ -1014,7 +1022,7 @@ class install_pkgconfig(Command):
             "includedir": "${prefix}/include",
             "datarootdir": "${prefix}/share",
             "datadir": "${datarootdir}",
-            "VERSION": self.distribution.get_version(),
+            "VERSION": PYGOBJECT_VERISON,
         }
         for key, value in config.items():
             content = content.replace("@%s@" % key, value)
@@ -1071,9 +1079,15 @@ def main():
         define_macros=[("PY_SSIZE_T_CLEAN", None)],
     )
 
+    version = pkginfo["Version"]
+    if is_dev_version():
+        # This makes it a PEP 440 pre-release and pip will only install it from
+        # PyPI in case --pre is passed.
+        version += ".dev"
+
     setup(
         name=pkginfo["Name"],
-        version=pkginfo["Version"],
+        version=version,
         description=pkginfo["Summary"],
         url=pkginfo["Home-page"],
         author=pkginfo["Author"],
