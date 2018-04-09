@@ -1083,7 +1083,7 @@ def main():
     if is_dev_version():
         # This makes it a PEP 440 pre-release and pip will only install it from
         # PyPI in case --pre is passed.
-        version += ".dev"
+        version += ".dev0"
 
     setup(
         name=pkginfo["Name"],
