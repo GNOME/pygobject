@@ -602,6 +602,58 @@ class build_tests(Command):
         cmd.run()
 
 
+def get_suppression_files_for_prefix(prefix):
+    """Returns a list of valgrind suppression files for a given prefix"""
+
+    # Most specific first (/usr/share/doc is Fedora, /usr/lib is Debian)
+    # Take the first one found
+    major = str(sys.version_info[0])
+    minor = str(sys.version_info[1])
+    pyfiles = []
+    pyfiles.append(
+        os.path.join(
+            prefix, "share", "doc", "python%s%s" % (major, minor),
+            "valgrind-python.supp"))
+    pyfiles.append(
+        os.path.join(prefix, "lib", "valgrind", "python%s.supp" % major))
+    pyfiles.append(
+        os.path.join(
+            prefix, "share", "doc", "python%s-devel" % major,
+            "valgrind-python.supp"))
+    pyfiles.append(os.path.join(prefix, "lib", "valgrind", "python.supp"))
+
+    files = []
+    for f in pyfiles:
+        if os.path.isfile(f):
+            files.append(f)
+            break
+
+    files.append(os.path.join(
+        prefix, "share", "glib-2.0", "valgrind", "glib.supp"))
+    return [f for f in files if os.path.isfile(f)]
+
+
+def get_real_prefix():
+    """Returns the base Python prefix, even in a virtualenv/venv"""
+
+    return getattr(sys, "base_prefix", getattr(sys, "real_prefix", sys.prefix))
+
+
+def get_suppression_files():
+    """Returns a list of valgrind suppression files"""
+
+    prefixes = [
+        sys.prefix,
+        get_real_prefix(),
+        pkg_config_parse("--variable=prefix", "glib-2.0")[0],
+    ]
+
+    files = []
+    for prefix in prefixes:
+        files.extend(get_suppression_files_for_prefix(prefix))
+    return sorted(set(files))
+
+
 class test(Command):
     user_options = [
         ("valgrind", None, "run tests under valgrind"),
@@ -637,18 +689,6 @@ class test(Command):
         env["MALLOC_PERTURB_"] = "85"
         env["MALLOC_CHECK_"] = "3"
         env["G_SLICE"] = "debug-blocks"
-
-        def get_suppression_files():
-            files = []
-            if sys.version_info[0] == 2:
-                files.append(os.path.join(
-                    sys.prefix, "lib", "valgrind", "python.supp"))
-            else:
-                files.append(os.path.join(
-                    sys.prefix, "lib", "valgrind", "python3.supp"))
-            files.append(os.path.join(
-                sys.prefix, "share", "glib-2.0", "valgrind", "glib.supp"))
-            return [f for f in files if os.path.isfile(f)]
 
         pre_args = []
 
