@@ -77,6 +77,7 @@ gboolean pygi_glong_from_py (PyObject *object, glong *result);
 gboolean pygi_gulong_from_py (PyObject *object, gulong *result);
 gboolean pygi_gint_from_py (PyObject *object, gint *result);
 gboolean pygi_guint_from_py (PyObject *object, guint *result);
+gboolean pygi_gunichar_from_py (PyObject *py_arg, gunichar *result);
 
 G_END_DECLS
 
