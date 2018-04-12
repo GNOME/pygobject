@@ -893,7 +893,7 @@ static void
 pygobject_find_slot_for(PyTypeObject *type, PyObject *bases, int slot_offset,
 			gboolean check_for_present)
 {
-#define TYPE_SLOT(type)  (* (void **) (((char *) (type)) + slot_offset))
+#define TYPE_SLOT(type)  (* (void **)  (void *) (((char *) (type)) + slot_offset))
 
     void *found_slot = NULL;
     Py_ssize_t num_bases = PyTuple_Size(bases);

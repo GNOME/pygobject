@@ -334,7 +334,7 @@ _pygi_marshal_from_py_array (PyGIInvokeState   *state,
 
                     if (g_type_is_a (item_iface_cache->g_type, G_TYPE_VALUE)) {
                         /* Special case GValue flat arrays to properly init and copy the contents. */
-                        GValue* dest = (GValue*) (array_->data + (i * item_size));
+                        GValue* dest = (GValue*)(void*)(array_->data + (i * item_size));
                         if (item.v_pointer != NULL) {
                             memset (dest, 0, item_size);
                             g_value_init (dest, G_VALUE_TYPE ((GValue*) item.v_pointer));
