@@ -617,10 +617,25 @@ _wrap_test_parse_constructor_args (PyObject *self, PyObject *args)
     return PYGLIB_PyLong_FromLong (nparams);
 }
 
+static PyObject *
+_wrap_test_to_unichar_conv (PyObject * self, PyObject *args)
+{
+    PyObject *obj;
+    gunichar result;
+
+    if (!PyArg_ParseTuple(args, "O", &obj))
+      return NULL;
+
+    if (!pyg_pyobj_to_unichar_conv (obj, &result))
+        return NULL;
+
+    return PYGLIB_PyLong_FromLong (result);
+}
 
 static PyMethodDef testhelper_functions[] = {
     { "test_parse_constructor_args", (PyCFunction)_wrap_test_parse_constructor_args, METH_VARARGS },
     { "get_test_thread", (PyCFunction)_wrap_get_test_thread, METH_NOARGS },
+    { "test_to_unichar_conv", (PyCFunction)_wrap_test_to_unichar_conv, METH_VARARGS },
     { "get_unknown", (PyCFunction)_wrap_get_unknown, METH_NOARGS },
     { "create_test_type", (PyCFunction)_wrap_create_test_type, METH_NOARGS },
     { "test_g_object_new", (PyCFunction)_wrap_test_g_object_new, METH_NOARGS },
