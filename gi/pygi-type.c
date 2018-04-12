@@ -1297,35 +1297,9 @@ pyg_object_descr_doc_get(void)
  */
 int pyg_pyobj_to_unichar_conv(PyObject* py_obj, void* ptr)
 {
-    gunichar* u = ptr;
-    const Py_UNICODE* uni_buffer;
-    PyObject* tmp_uni = NULL;
-
-    if (PyUnicode_Check(py_obj)) {
-	tmp_uni = py_obj;
-	Py_INCREF(tmp_uni);
-    }
-    else {
-	tmp_uni = PyUnicode_FromObject(py_obj);
-	if (tmp_uni == NULL)
-	    goto failure;
-    }
-
-    if ( PyUnicode_GetSize(tmp_uni) != 1) {
-	PyErr_SetString(PyExc_ValueError, "unicode character value must be 1 character uniode string");
-	goto failure;
-    }
-    uni_buffer = PyUnicode_AsUnicode(tmp_uni);
-    if ( uni_buffer == NULL)
-	goto failure;
-    *u = uni_buffer[0];
-
-    Py_DECREF(tmp_uni);
+    if (!pygi_gunichar_from_py (py_obj, ptr))
+        return 0;
     return 1;
-
-  failure:
-    Py_XDECREF(tmp_uni);
-    return 0;
 }
 
 gboolean
