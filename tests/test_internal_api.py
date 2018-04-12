@@ -1,10 +1,13 @@
+# -*- coding: utf-8 -*-
 # -*- Mode: Python -*-
 
 from __future__ import absolute_import
 
 import unittest
+import pytest
 
 from gi.repository import GLib, GObject
+from gi._compat import PY3
 
 from . import testhelper
 
@@ -94,3 +97,22 @@ class TestErrors(unittest.TestCase):
     def test_no_gerror(self):
         callable_ = lambda: GLib.file_get_contents(__file__)
         self.assertEqual(testhelper.test_gerror_exception(callable_), None)
+
+
+def test_to_unichar_conv():
+    assert testhelper.test_to_unichar_conv(u"A") == 65
+    assert testhelper.test_to_unichar_conv(u"Ä") == 196
+
+    if PY3:
+        with pytest.raises(TypeError):
+            assert testhelper.test_to_unichar_conv(b"\x65")
+    else:
+        assert testhelper.test_to_unichar_conv(b"\x65") == 0x65
+        with pytest.raises(ValueError):
+            assert testhelper.test_to_unichar_conv(b"\xff")
+
+    with pytest.raises(TypeError):
+        testhelper.test_to_unichar_conv(object())
+
+    with pytest.raises(TypeError):
+        testhelper.test_to_unichar_conv(u"AA")

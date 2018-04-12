@@ -159,7 +159,7 @@ pygi_gfloat_to_py (gfloat value)
     return PyFloat_FromDouble (value);
 }
 
-static gboolean
+gboolean
 pygi_gunichar_from_py (PyObject *py_arg, gunichar *result)
 {
     Py_ssize_t size;
