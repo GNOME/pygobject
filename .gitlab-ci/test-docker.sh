@@ -12,7 +12,7 @@ export MALLOC_CHECK_=3
 export MALLOC_PERTURB_=$((${RANDOM} % 255 + 1))
 export G_SLICE="debug-blocks"
 export COVERAGE_FILE="${COV_DIR}/.coverage.${PYVER}"
-export CFLAGS="-coverage -ftest-coverage -fprofile-arcs"
+export CFLAGS="-coverage -ftest-coverage -fprofile-arcs -Werror"
 export CCACHE_BASEDIR="$(pwd)"
 export CCACHE_DIR="${CCACHE_BASEDIR}/_ccache"
 
