@@ -929,6 +929,10 @@ def add_ext_compiler_flags(ext, compiler, _cache={}):
             "-fvisibility=hidden",
         ]
 
+        # force GCC to use colors
+        if hasattr(sys.stdout, "isatty") and sys.stdout.isatty():
+            args.append("-fdiagnostics-color")
+
         _cache[cache_key] = filter_compiler_arguments(compiler, args)
 
     ext.extra_compile_args += _cache[cache_key]
