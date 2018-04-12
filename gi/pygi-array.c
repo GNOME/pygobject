@@ -467,9 +467,12 @@ _pygi_marshal_cleanup_from_py_array (PyGIInvokeState *state,
         /* clean up items first */
         if (sequence_cache->item_cache->from_py_cleanup != NULL) {
             gsize i;
-            guint len = (array_ != NULL) ? array_->len : ptr_array_->len;
+            guint len;
             PyGIMarshalCleanupFunc cleanup_func =
                 sequence_cache->item_cache->from_py_cleanup;
+
+            g_assert (array_ || ptr_array_);
+            len = (array_ != NULL) ? array_->len : ptr_array_->len;
 
             for (i = 0; i < len; i++) {
                 gpointer item;
@@ -773,9 +776,12 @@ _pygi_marshal_cleanup_to_py_array (PyGIInvokeState *state,
     if (sequence_cache->item_cache->to_py_cleanup != NULL) {
         GPtrArray *item_cleanups = (GPtrArray *) cleanup_data;
         gsize i;
-        guint len = (array_ != NULL) ? array_->len : ptr_array_->len;
-
+        guint len;
         PyGIMarshalToPyCleanupFunc cleanup_func = sequence_cache->item_cache->to_py_cleanup;
+
+        g_assert (array_ || ptr_array_);
+        len = (array_ != NULL) ? array_->len : ptr_array_->len;
+
         for (i = 0; i < len; i++) {
             cleanup_func (state,
                           sequence_cache->item_cache,

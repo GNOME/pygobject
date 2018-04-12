@@ -894,7 +894,7 @@ def add_ext_compiler_flags(ext, compiler, _cache={}):
             "-Wmissing-noreturn",
             "-Wmissing-prototypes",
             "-Wnested-externs",
-            # "-Wnull-dereference",
+            "-Wnull-dereference",
             "-Wold-style-definition",
             "-Wpacked",
             "-Wpointer-arith",
