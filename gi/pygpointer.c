@@ -20,6 +20,7 @@
 
 #include <config.h>
 
+#include <Python.h>
 #include <glib-object.h>
 #include "pygpointer.h"
 #include "pygi-type.h"

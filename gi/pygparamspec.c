@@ -21,6 +21,7 @@
 
 #include <config.h>
 
+#include <Python.h>
 #include <glib-object.h>
 
 #include "pygenum.h"
