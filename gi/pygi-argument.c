@@ -41,12 +41,6 @@
 #include "pygi-type.h"
 #include "pygi-util.h"
 
-/* Redefine g_array_index because we want it to return the i-th element, casted
- * to the type t, of the array a, and not the i-th element of the array a
- * casted to the type t. */
-#define _g_array_index(a,t,i) \
-    *(t *)((a)->data + g_array_get_element_size(a) * (i))
-
 
 gboolean
 pygi_argument_to_gssize (GIArgument *arg_in,
@@ -1066,9 +1060,9 @@ _pygi_argument_release (GIArgument   *arg,
 
                 /* Free the items */
                 for (i = 0; i < array->len; i++) {
-                    GIArgument *item;
-                    item = &_g_array_index (array, GIArgument, i);
-                    _pygi_argument_release (item, item_type_info, item_transfer, direction);
+                    GIArgument item;
+                    memcpy (&item, array->data + (g_array_get_element_size (array) * i), sizeof (GIArgument));
+                    _pygi_argument_release (&item, item_type_info, item_transfer, direction);
                 }
 
                 g_base_info_unref ( (GIBaseInfo *) item_type_info);
