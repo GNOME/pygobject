@@ -1101,6 +1101,7 @@ pygobject_watch_closure(PyObject *self, GClosure *closure)
 
     gself = (PyGObject *)self;
     data = pygobject_get_inst_data(gself);
+    g_return_if_fail(data != NULL);
     g_return_if_fail(g_slist_find(data->closures, closure) == NULL);
     data->closures = g_slist_prepend(data->closures, closure);
     g_closure_add_invalidate_notifier(closure, data, pygobject_unwatch_closure);
