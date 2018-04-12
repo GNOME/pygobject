@@ -12,7 +12,6 @@ export MALLOC_CHECK_=3
 export MALLOC_PERTURB_=$((${RANDOM} % 255 + 1))
 export G_SLICE="debug-blocks"
 export COVERAGE_FILE="${COV_DIR}/.coverage.${PYVER}"
-export CFLAGS="-coverage -ftest-coverage -fprofile-arcs"
 export CCACHE_BASEDIR="$(pwd)"
 export CCACHE_DIR="${CCACHE_BASEDIR}/_ccache"
 
@@ -26,6 +25,8 @@ fi;
 
 python -m pip install git+https://github.com/pygobject/pycairo.git
 python -m pip install flake8 pytest pytest-faulthandler coverage
+
+export CFLAGS="-coverage -ftest-coverage -fprofile-arcs -Werror"
 
 if [[ "${PYIMPL}" == "PyPy" ]]; then
     python setup.py build_tests
