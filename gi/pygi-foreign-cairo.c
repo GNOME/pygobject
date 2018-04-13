@@ -52,6 +52,11 @@ cairo_context_to_arg (PyObject        *value,
 {
     cairo_t *cr;
 
+    if (!PyObject_TypeCheck (value, &PycairoContext_Type)) {
+        PyErr_SetString (PyExc_TypeError, "Expected cairo.Context");
+        return NULL;
+    }
+
     cr = PycairoContext_GET (value);
     if (!cr) {
         return NULL;
@@ -89,7 +94,14 @@ cairo_context_release (GIBaseInfo *base_info,
 static int
 cairo_context_to_gvalue (GValue *value, PyObject *obj)
 {
-    cairo_t *cr = PycairoContext_GET (obj);
+    cairo_t *cr;
+
+    if (!PyObject_TypeCheck (obj, &PycairoContext_Type)) {
+        PyErr_SetString (PyExc_TypeError, "Expected cairo.Context");
+        return -1;
+    }
+
+    cr = PycairoContext_GET (obj);
     if (!cr) {
         return -1;
     }
@@ -124,6 +136,11 @@ cairo_surface_to_arg (PyObject        *value,
                       GIArgument      *arg)
 {
     cairo_surface_t *surface;
+
+    if (!PyObject_TypeCheck (value, &PycairoSurface_Type)) {
+        PyErr_SetString (PyExc_TypeError, "Expected cairo.Surface");
+        return NULL;
+    }
 
     surface = ( (PycairoSurface*) value)->surface;
     if (!surface) {
@@ -162,7 +179,14 @@ cairo_surface_release (GIBaseInfo *base_info,
 static int
 cairo_surface_to_gvalue (GValue *value, PyObject *obj)
 {
-    cairo_surface_t *surface = ((PycairoSurface*) obj)->surface;
+    cairo_surface_t *surface;
+
+    if (!PyObject_TypeCheck (obj, &PycairoSurface_Type)) {
+        PyErr_SetString (PyExc_TypeError, "Expected cairo.Surface");
+        return -1;
+    }
+
+    surface = ((PycairoSurface*) obj)->surface;
     if (!surface) {
         return -1;
     }
@@ -214,6 +238,11 @@ cairo_path_to_arg (PyObject        *value,
 {
     cairo_path_t *path;
 
+    if (!PyObject_TypeCheck (value, &PycairoPath_Type)) {
+        PyErr_SetString (PyExc_TypeError, "Expected cairo.Path");
+        return NULL;
+    }
+
     path = ( (PycairoPath*) value)->path;
     if (!path) {
         PyErr_SetString (PyExc_ValueError, "Path instance wrapping a NULL path");
@@ -258,7 +287,14 @@ cairo_path_release (GIBaseInfo *base_info,
 static int
 cairo_font_face_to_gvalue (GValue *value, PyObject *obj)
 {
-    cairo_font_face_t *font_face = ((PycairoFontFace*) obj)->font_face;
+    cairo_font_face_t *font_face;
+
+    if (!PyObject_TypeCheck (obj, &PycairoFontFace_Type)) {
+        PyErr_SetString (PyExc_TypeError, "Expected cairo.FontFace");
+        return -1;
+    }
+
+    font_face = ((PycairoFontFace*) obj)->font_face;
     if (!font_face) {
         return -1;
     }
@@ -290,6 +326,11 @@ cairo_font_options_to_arg (PyObject        *value,
                            GIArgument      *arg)
 {
     cairo_font_options_t *font_options;
+
+    if (!PyObject_TypeCheck (value, &PycairoFontOptions_Type)) {
+        PyErr_SetString (PyExc_TypeError, "Expected cairo.FontOptions");
+        return NULL;
+    }
 
     font_options = ( (PycairoFontOptions*) value)->font_options;
     if (!font_options) {
@@ -333,7 +374,14 @@ cairo_font_options_release (GIBaseInfo *base_info,
 static int
 cairo_scaled_font_to_gvalue (GValue *value, PyObject *obj)
 {
-    cairo_scaled_font_t *scaled_font = ((PycairoScaledFont*) obj)->scaled_font;
+    cairo_scaled_font_t *scaled_font;
+
+    if (!PyObject_TypeCheck (obj, &PycairoScaledFont_Type)) {
+        PyErr_SetString (PyExc_TypeError, "Expected cairo.ScaledFont");
+        return -1;
+    }
+
+    scaled_font = ((PycairoScaledFont*) obj)->scaled_font;
     if (!scaled_font) {
         return -1;
     }
@@ -364,7 +412,14 @@ cairo_scaled_font_from_gvalue (const GValue *value)
 static int
 cairo_pattern_to_gvalue (GValue *value, PyObject *obj)
 {
-    cairo_pattern_t *pattern = ((PycairoPattern*) obj)->pattern;
+    cairo_pattern_t *pattern;
+
+    if (!PyObject_TypeCheck (obj, &PycairoPattern_Type)) {
+        PyErr_SetString (PyExc_TypeError, "Expected cairo.Pattern");
+        return -1;
+    }
+
+    pattern = ((PycairoPattern*) obj)->pattern;
     if (!pattern) {
         return -1;
     }
@@ -394,6 +449,11 @@ cairo_region_to_arg (PyObject        *value,
                      GIArgument      *arg)
 {
     cairo_region_t *region;
+
+    if (!PyObject_TypeCheck (value, &PycairoRegion_Type)) {
+        PyErr_SetString (PyExc_TypeError, "Expected cairo.Region");
+        return NULL;
+    }
 
     region = ( (PycairoRegion*) value)->region;
     if (!region) {
@@ -457,6 +517,11 @@ cairo_matrix_to_arg (PyObject        *value,
                      GIArgument      *arg)
 {
     cairo_matrix_t *matrix;
+
+    if (!PyObject_TypeCheck (value, &PycairoMatrix_Type)) {
+        PyErr_SetString (PyExc_TypeError, "Expected cairo.Matrix");
+        return NULL;
+    }
 
     matrix = &(( (PycairoMatrix*) value)->matrix);
 
