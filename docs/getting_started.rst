@@ -102,7 +102,7 @@ and their dependencies. Follow the instructions for your platform below.
 
 1) Go to https://brew.sh/ and install homebrew
 2) Open a terminal
-3) Execute ``brew install pygobject3 --with-python3 gtk+3`` to install for both python2 and python3
+3) Execute ``brew install pygobject3 --with-python@2 gtk+3`` to install for both python2 and python3
 4) Change the directory to where your ``hello.py`` script can be found (e.g. ``cd Desktop``)
 5) Run ``python3 hello.py``
 
