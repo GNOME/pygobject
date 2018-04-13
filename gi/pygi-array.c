@@ -789,8 +789,10 @@ _pygi_marshal_cleanup_to_py_array (PyGIInvokeState *state,
                           (array_ != NULL) ? g_array_index (array_, gpointer, i) : g_ptr_array_index (ptr_array_, i),
                           was_processed);
         }
-        g_ptr_array_unref (item_cleanups);
     }
+
+    if (cleanup_data)
+         g_ptr_array_unref ((GPtrArray *) cleanup_data);
 
     if (free_array) {
         if (array_ != NULL)
