@@ -10,6 +10,7 @@ import ctypes
 import warnings
 import sys
 import os
+import re
 import platform
 
 import pytest
@@ -377,6 +378,12 @@ class TestEverything(unittest.TestCase):
         self.assertEqual(Everything.test_float(GLib.MINFLOAT),
                          GLib.MINFLOAT)
         self.assertRaises(OverflowError, Everything.test_float, GLib.MAXFLOAT * 2)
+
+        with pytest.raises(
+                OverflowError,
+                match=re.escape("%s not in range %s to %s" % (
+                    GLib.MAXFLOAT * 2, -GLib.MAXFLOAT, GLib.MAXFLOAT))):
+            Everything.test_float(GLib.MAXFLOAT * 2)
 
     def test_double(self):
         self.assertEqual(Everything.test_double(GLib.MAXDOUBLE),

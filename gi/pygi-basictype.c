@@ -97,19 +97,25 @@ pygi_gssize_to_py (gssize value)
     return PYGLIB_PyLong_FromSsize_t (value);
 }
 
+static PyObject *
+base_float_checks (PyObject *object)
+{
+    if (!PyNumber_Check (object)) {
+        PyErr_Format (PyExc_TypeError, "Must be number, not %s",
+                      object->ob_type->tp_name);
+        return NULL;
+    }
+
+    return PyNumber_Float (object);
+}
+
 gboolean
 pygi_gdouble_from_py (PyObject *py_arg, gdouble *result)
 {
     PyObject *py_float;
     gdouble temp;
 
-    if (!PyNumber_Check (py_arg)) {
-        PyErr_Format (PyExc_TypeError, "Must be number, not %s",
-                      py_arg->ob_type->tp_name);
-        return FALSE;
-    }
-
-    py_float = PyNumber_Float (py_arg);
+    py_float = base_float_checks (py_arg);
     if (py_float == NULL)
         return FALSE;
 
@@ -134,21 +140,34 @@ gboolean
 pygi_gfloat_from_py (PyObject *py_arg, gfloat *result)
 {
     gdouble double_;
+    PyObject *py_float;
 
-    if (!pygi_gdouble_from_py (py_arg, &double_))
+    py_float = base_float_checks (py_arg);
+    if (py_float == NULL)
         return FALSE;
 
-    if ((double_ < -G_MAXFLOAT || double_ > G_MAXFLOAT) &&
-            double_ != INFINITY && double_ != -INFINITY && double_ != NAN) {
-        char buf[100];
-
-        /* we need this as PyErr_Format() does not support float types */
-        snprintf (buf, sizeof (buf), "%g not in range %g to %g",
-                  double_, -G_MAXFLOAT, G_MAXFLOAT);
-        PyErr_SetString (PyExc_OverflowError, buf);
+    double_ = PyFloat_AsDouble (py_float);
+    if (PyErr_Occurred ()) {
+        Py_DECREF (py_float);
         return FALSE;
     }
 
+    if ((double_ < -G_MAXFLOAT || double_ > G_MAXFLOAT) &&
+            double_ != INFINITY && double_ != -INFINITY && double_ != NAN) {
+        PyObject *min, *max;
+
+        min = pygi_gfloat_to_py (-G_MAXFLOAT);
+        max = pygi_gfloat_to_py (G_MAXFLOAT);
+        pygi_pyerr_format (
+            PyExc_OverflowError, "%S not in range %S to %S",
+            py_float, min, max);
+        Py_DECREF (min);
+        Py_DECREF (max);
+        Py_DECREF (py_float);
+        return FALSE;
+    }
+
+    Py_DECREF (py_float);
     *result = (gfloat)double_;
 
     return TRUE;
