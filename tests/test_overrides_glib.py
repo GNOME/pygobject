@@ -577,7 +577,7 @@ class TestGVariant(unittest.TestCase):
 
         gerror = GLib.Error(code=GLib.MAXUINT)
         self.assertRaisesRegexp(OverflowError,
-                                ".*(not in range|too large to convert).*",
+                                ".*not in range.*",
                                 GLib.Variant.parse_error_print_context,
                                 gerror, source_str)
 

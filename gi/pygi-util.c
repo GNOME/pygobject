@@ -18,6 +18,38 @@
 
 #include "pygi-util.h"
 
+/**
+ * Like PyErr_Format, but supports the format syntax of
+ * PyUnicode_FromFormat also under Python 2.
+ * Note: Python 2 doesn't support %lld and %llo there.
+ */
+PyObject*
+pygi_pyerr_format (PyObject *exception, const char *format, ...)
+{
+    PyObject *text;
+    va_list argp;
+    va_start(argp, format);
+    text = PyUnicode_FromFormatV (format, argp);
+    va_end(argp);
+
+    if (text != NULL) {
+#if PY_MAJOR_VERSION < 3
+        PyObject *str;
+        str = PyUnicode_AsUTF8String (text);
+        Py_DECREF (text);
+        if (str) {
+            PyErr_SetObject (exception, str);
+            Py_DECREF (str);
+        }
+#else
+        PyErr_SetObject (exception, text);
+        Py_DECREF (text);
+#endif
+    }
+
+    return NULL;
+}
+
 gboolean
 pygi_guint_from_pyssize (Py_ssize_t pyval, guint *result)
 {
