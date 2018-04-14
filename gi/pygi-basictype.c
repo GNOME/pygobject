@@ -23,6 +23,7 @@
 #include "pygi-type.h"
 #include "pygi-basictype.h"
 #include "pygi-argument.h"
+#include "pygi-util.h"
 
 #ifdef G_OS_WIN32
 #include <math.h>
@@ -497,18 +498,25 @@ pygi_gint_from_py (PyObject *object, gint *result)
         return FALSE;
 
     long_value = PYGLIB_PyLong_AsLong (number);
-    Py_DECREF (number);
-    if (PyErr_Occurred ())
+    if (PyErr_Occurred ()) {
+        if (PyErr_ExceptionMatches (PyExc_OverflowError))
+            goto overflow;
+        Py_DECREF (number);
         return FALSE;
-
-    if (long_value < G_MININT || long_value > G_MAXINT) {
-        PyErr_Format (PyExc_OverflowError, "%ld not in range %d to %d",
-                      long_value, (int)G_MININT, (int)G_MAXINT);
-        return FALSE;
+    } else if (long_value < G_MININT || long_value > G_MAXINT) {
+        goto overflow;
     }
 
+    Py_DECREF (number);
     *result = (gint)long_value;
     return TRUE;
+
+overflow:
+    pygi_pyerr_format (
+        PyExc_OverflowError, "%S not in range %d to %d",
+        number, (int)G_MININT, (int)G_MAXINT);
+    Py_DECREF (number);
+    return FALSE;
 }
 
 PyObject *
@@ -528,18 +536,25 @@ pygi_guint_from_py (PyObject *object, guint *result)
         return FALSE;
 
     long_value = PyLong_AsUnsignedLong (number);
-    Py_DECREF (number);
-    if (PyErr_Occurred ())
+    if (PyErr_Occurred ()) {
+        if (PyErr_ExceptionMatches (PyExc_OverflowError))
+            goto overflow;
+        Py_DECREF (number);
         return FALSE;
-
-    if (long_value > G_MAXUINT) {
-        PyErr_Format (PyExc_OverflowError, "%lu not in range %ld to %lu",
-                      long_value, (long)0, (unsigned long)G_MAXUINT);
-        return FALSE;
+    } else if (long_value > G_MAXUINT) {
+        goto overflow;
     }
 
+    Py_DECREF (number);
     *result = (gint)long_value;
     return TRUE;
+
+overflow:
+    pygi_pyerr_format (
+        PyExc_OverflowError, "%S not in range %ld to %lu",
+        number, (long)0, (unsigned long)G_MAXUINT);
+    Py_DECREF (number);
+    return FALSE;
 }
 
 PyObject *
@@ -565,12 +580,23 @@ pygi_glong_from_py (PyObject *object, glong *result)
         return FALSE;
 
     long_value = PyLong_AsLong (number);
-    Py_DECREF (number);
-    if (long_value == -1 && PyErr_Occurred ())
+    if (long_value == -1 && PyErr_Occurred ()) {
+        if (PyErr_ExceptionMatches (PyExc_OverflowError))
+            goto overflow;
+        Py_DECREF (number);
         return FALSE;
+    }
 
+    Py_DECREF (number);
     *result = (glong)long_value;
     return TRUE;
+
+overflow:
+    pygi_pyerr_format (
+        PyExc_OverflowError, "%S not in range %ld to %ld",
+        number, (long)G_MINLONG, (long)G_MAXLONG);
+    Py_DECREF (number);
+    return FALSE;
 }
 
 PyObject *
@@ -590,12 +616,23 @@ pygi_gulong_from_py (PyObject *object, gulong *result)
         return FALSE;
 
     long_value = PyLong_AsUnsignedLong (number);
-    Py_DECREF (number);
-    if (PyErr_Occurred ())
+    if (PyErr_Occurred ()) {
+        if (PyErr_ExceptionMatches (PyExc_OverflowError))
+            goto overflow;
+        Py_DECREF (number);
         return FALSE;
+    }
 
+    Py_DECREF (number);
     *result = (gulong)long_value;
     return TRUE;
+
+overflow:
+    pygi_pyerr_format (
+        PyExc_OverflowError, "%S not in range %ld to %lu",
+        number, (long)0, (unsigned long)G_MAXULONG);
+    Py_DECREF (number);
+    return FALSE;
 }
 
 PyObject *
@@ -628,18 +665,25 @@ pygi_gint8_from_py (PyObject *object, gint8 *result)
         return FALSE;
 
     long_value = PyLong_AsLong (number);
-    Py_DECREF (number);
-    if (long_value == -1 && PyErr_Occurred())
+    if (long_value == -1 && PyErr_Occurred()) {
+        if (PyErr_ExceptionMatches (PyExc_OverflowError))
+            goto overflow;
+        Py_DECREF (number);
         return FALSE;
-
-    if (long_value < G_MININT8 || long_value > G_MAXINT8) {
-        PyErr_Format (PyExc_OverflowError, "%ld not in range %ld to %ld",
-                      long_value, (long)G_MININT8, (long)G_MAXINT8);
-        return FALSE;
+    } else if (long_value < G_MININT8 || long_value > G_MAXINT8) {
+        goto overflow;
     }
 
+    Py_DECREF (number);
     *result = (gint8)long_value;
     return TRUE;
+
+overflow:
+    pygi_pyerr_format (
+        PyExc_OverflowError, "%S not in range %ld to %ld",
+        number, (long)G_MININT8, (long)G_MAXINT8);
+    Py_DECREF (number);
+    return FALSE;
 }
 
 PyObject *
@@ -669,18 +713,25 @@ pygi_guint8_from_py (PyObject *object, guint8 *result)
         return FALSE;
 
     long_value = PyLong_AsLong (number);
-    Py_DECREF (number);
-    if (long_value == -1 && PyErr_Occurred())
+    if (long_value == -1 && PyErr_Occurred()) {
+        if (PyErr_ExceptionMatches (PyExc_OverflowError))
+            goto overflow;
+        Py_DECREF (number);
         return FALSE;
-
-    if (long_value < 0 || long_value > G_MAXUINT8) {
-        PyErr_Format (PyExc_OverflowError, "%ld not in range %ld to %ld",
-                      long_value, (long)0, (long)G_MAXUINT8);
-        return FALSE;
+    } else if (long_value < 0 || long_value > G_MAXUINT8) {
+        goto overflow;
     }
 
+    Py_DECREF (number);
     *result = (guint8)long_value;
     return TRUE;
+
+overflow:
+    pygi_pyerr_format (
+        PyExc_OverflowError, "%S not in range %ld to %ld",
+        number, (long)0, (long)G_MAXUINT8);
+    Py_DECREF (number);
+    return FALSE;
 }
 
 PyObject *
@@ -700,18 +751,25 @@ pygi_gint16_from_py (PyObject *object, gint16 *result)
         return FALSE;
 
     long_value = PyLong_AsLong (number);
-    Py_DECREF (number);
-    if (long_value == -1 && PyErr_Occurred())
+    if (long_value == -1 && PyErr_Occurred()) {
+        if (PyErr_ExceptionMatches (PyExc_OverflowError))
+            goto overflow;
+        Py_DECREF (number);
         return FALSE;
-
-    if (long_value < G_MININT16 || long_value > G_MAXINT16) {
-        PyErr_Format (PyExc_OverflowError, "%ld not in range %ld to %ld",
-                      long_value, (long)G_MININT16, (long)G_MAXINT16);
-        return FALSE;
+    } else if (long_value < G_MININT16 || long_value > G_MAXINT16) {
+        goto overflow;
     }
 
+    Py_DECREF (number);
     *result = (gint16)long_value;
     return TRUE;
+
+overflow:
+    pygi_pyerr_format (
+        PyExc_OverflowError, "%S not in range %ld to %ld",
+        number, (long)G_MININT16, (long)G_MAXINT16);
+    Py_DECREF (number);
+    return FALSE;
 }
 
 static PyObject *
@@ -731,18 +789,25 @@ pygi_guint16_from_py (PyObject *object, guint16 *result)
         return FALSE;
 
     long_value = PyLong_AsLong (number);
-    Py_DECREF (number);
-    if (long_value == -1 && PyErr_Occurred())
+    if (long_value == -1 && PyErr_Occurred()) {
+        if (PyErr_ExceptionMatches (PyExc_OverflowError))
+            goto overflow;
+        Py_DECREF (number);
         return FALSE;
-
-    if (long_value < 0 || long_value > G_MAXUINT16) {
-        PyErr_Format (PyExc_OverflowError, "%ld not in range %ld to %ld",
-                      long_value, (long)0, (long)G_MAXUINT16);
-        return FALSE;
+    } else if (long_value < 0 || long_value > G_MAXUINT16) {
+        goto overflow;
     }
 
+    Py_DECREF (number);
     *result = (guint16)long_value;
     return TRUE;
+
+overflow:
+    pygi_pyerr_format (
+        PyExc_OverflowError, "%S not in range %ld to %ld",
+        number, (long)0, (long)G_MAXUINT16);
+    Py_DECREF (number);
+    return FALSE;
 }
 
 static PyObject *
@@ -762,18 +827,25 @@ pygi_gint32_from_py (PyObject *object, gint32 *result)
         return FALSE;
 
     long_value = PyLong_AsLong (number);
-    Py_DECREF (number);
-    if (long_value == -1 && PyErr_Occurred())
+    if (long_value == -1 && PyErr_Occurred()) {
+        if (PyErr_ExceptionMatches (PyExc_OverflowError))
+            goto overflow;
+        Py_DECREF (number);
         return FALSE;
-
-    if (long_value < G_MININT32 || long_value > G_MAXINT32) {
-        PyErr_Format (PyExc_OverflowError, "%ld not in range %ld to %ld",
-                      long_value, (long)G_MININT32, (long)G_MAXINT32);
-        return FALSE;
+    } else if (long_value < G_MININT32 || long_value > G_MAXINT32) {
+        goto overflow;
     }
 
+    Py_DECREF (number);
     *result = (gint32)long_value;
     return TRUE;
+
+overflow:
+    pygi_pyerr_format (
+        PyExc_OverflowError, "%S not in range %ld to %ld",
+        number, (long)G_MININT32, (long)G_MAXINT32);
+    Py_DECREF (number);
+    return FALSE;
 }
 
 static PyObject *
@@ -793,18 +865,25 @@ pygi_guint32_from_py (PyObject *object, guint32 *result)
         return FALSE;
 
     long_value = PyLong_AsLongLong (number);
-    Py_DECREF (number);
-    if (PyErr_Occurred ())
+    if (PyErr_Occurred ()) {
+        if (PyErr_ExceptionMatches (PyExc_OverflowError))
+            goto overflow;
+        Py_DECREF (number);
         return FALSE;
-
-    if (long_value < 0 || long_value > G_MAXUINT32) {
-        PyErr_Format (PyExc_OverflowError, "%lld not in range %ld to %lu",
-                      long_value, (long)0, (unsigned long)G_MAXUINT32);
-        return FALSE;
+    } else if (long_value < 0 || long_value > G_MAXUINT32) {
+        goto overflow;
     }
 
+    Py_DECREF (number);
     *result = (guint32)long_value;
     return TRUE;
+
+overflow:
+    pygi_pyerr_format (
+        PyExc_OverflowError, "%S not in range %ld to %lu",
+        number, (long)0, (unsigned long)G_MAXUINT32);
+    Py_DECREF (number);
+    return FALSE;
 }
 
 static PyObject *
@@ -824,25 +903,36 @@ gboolean
 pygi_gint64_from_py (PyObject *object, gint64 *result)
 {
     long long long_value;
-    PyObject *number;
+    PyObject *number, *min, *max;
 
     number = base_number_checks (object);
     if (number == NULL)
         return FALSE;
 
     long_value = PyLong_AsLongLong (number);
-    Py_DECREF (number);
-    if (PyErr_Occurred ())
+    if (PyErr_Occurred ()) {
+        if (PyErr_ExceptionMatches (PyExc_OverflowError))
+            goto overflow;
+        Py_DECREF (number);
         return FALSE;
-
-    if (long_value < G_MININT64 || long_value > G_MAXINT64) {
-        PyErr_Format (PyExc_OverflowError, "%lld not in range %lld to %lld",
-                      long_value, (long long)G_MININT64, (long long)G_MAXINT64);
-        return FALSE;
+    } else if (long_value < G_MININT64 || long_value > G_MAXINT64) {
+        goto overflow;
     }
 
+    Py_DECREF (number);
     *result = (gint64)long_value;
     return TRUE;
+
+overflow:
+    min = pygi_gint64_to_py (G_MININT64);
+    max = pygi_gint64_to_py (G_MAXINT64);
+    pygi_pyerr_format (
+        PyExc_OverflowError, "%S not in range %S to %S",
+        number, min, max);
+    Py_DECREF (number);
+    Py_DECREF (min);
+    Py_DECREF (max);
+    return FALSE;
 }
 
 PyObject *
@@ -858,26 +948,34 @@ gboolean
 pygi_guint64_from_py (PyObject *object, guint64 *result)
 {
     unsigned long long long_value;
-    PyObject *number;
+    PyObject *number, *max;
 
     number = base_number_checks (object);
     if (number == NULL)
         return FALSE;
 
     long_value = PyLong_AsUnsignedLongLong (number);
-    Py_DECREF (number);
-    if (PyErr_Occurred ())
+    if (PyErr_Occurred ()) {
+        if (PyErr_ExceptionMatches (PyExc_OverflowError))
+            goto overflow;
+        Py_DECREF (number);
         return FALSE;
-
-    if (long_value > G_MAXUINT64) {
-        PyErr_Format (PyExc_OverflowError, "%llu not in range %llu to %llu",
-                      long_value,
-                      (unsigned long long)0, (unsigned long long)G_MAXUINT64);
-        return FALSE;
+    } else if (long_value > G_MAXUINT64) {
+        goto overflow;
     }
 
+    Py_DECREF (number);
     *result = (guint64)long_value;
     return TRUE;
+
+overflow:
+    max = pygi_guint64_to_py (G_MAXUINT64);
+    pygi_pyerr_format (
+        PyExc_OverflowError, "%S not in range %ld to %S",
+        number, (long)0, max);
+    Py_DECREF (number);
+    Py_DECREF (max);
+    return FALSE;
 }
 
 PyObject *

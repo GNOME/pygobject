@@ -12,6 +12,8 @@ import sys
 import os
 import platform
 
+import pytest
+
 from gi.repository import Regress as Everything
 from gi.repository import GObject
 from gi.repository import GLib
@@ -70,76 +72,214 @@ class TestEverything(unittest.TestCase):
                          GLib.MININT8)
         self.assertRaises(OverflowError, Everything.test_int8, GLib.MAXINT8 + 1)
 
+        with pytest.raises(
+                OverflowError,
+                match="%s not in range %s to %s" % (
+                    GLib.MAXINT8 + 1, GLib.MININT8, GLib.MAXINT8)):
+            Everything.test_int8(GLib.MAXINT8 + 1)
+
+        with pytest.raises(
+                OverflowError,
+                match="%s not in range %s to %s" % (
+                    GLib.MAXUINT64 * 2, GLib.MININT8, GLib.MAXINT8)):
+            Everything.test_int8(GLib.MAXUINT64 * 2)
+
+    def test_uint8(self):
         self.assertEqual(Everything.test_uint8(GLib.MAXUINT8),
                          GLib.MAXUINT8)
         self.assertEqual(Everything.test_uint8(0), 0)
         self.assertRaises(OverflowError, Everything.test_uint8, -1)
         self.assertRaises(OverflowError, Everything.test_uint8, GLib.MAXUINT8 + 1)
 
+        with pytest.raises(
+                OverflowError,
+                match="%s not in range 0 to %s" % (
+                    GLib.MAXUINT8 + 1, GLib.MAXUINT8)):
+            Everything.test_uint8(GLib.MAXUINT8 + 1)
+
+        with pytest.raises(
+                OverflowError,
+                match="%s not in range 0 to %s" % (
+                    GLib.MAXUINT64 * 2, GLib.MAXUINT8)):
+            Everything.test_uint8(GLib.MAXUINT64 * 2)
+
     def test_int16(self):
         self.assertEqual(Everything.test_int16(GLib.MAXINT16),
                          GLib.MAXINT16)
         self.assertEqual(Everything.test_int16(GLib.MININT16),
                          GLib.MININT16)
-        self.assertRaises(OverflowError, Everything.test_int16, GLib.MAXINT16 + 1)
 
+        with pytest.raises(
+                OverflowError,
+                match="32768 not in range -32768 to 32767"):
+            Everything.test_int16(GLib.MAXINT16 + 1)
+
+        with pytest.raises(
+                OverflowError,
+                match="36893488147419103230 not in range -32768 to 32767"):
+            Everything.test_int16(GLib.MAXUINT64 * 2)
+
+    def test_uint16(self):
         self.assertEqual(Everything.test_uint16(GLib.MAXUINT16),
                          GLib.MAXUINT16)
         self.assertEqual(Everything.test_uint16(0), 0)
         self.assertRaises(OverflowError, Everything.test_uint16, -1)
-        self.assertRaises(OverflowError, Everything.test_uint16, GLib.MAXUINT16 + 1)
+
+        with pytest.raises(
+                OverflowError,
+                match="%s not in range 0 to %s" % (
+                    GLib.MAXUINT16 + 1, GLib.MAXUINT16)):
+            Everything.test_uint16(GLib.MAXUINT16 + 1)
+
+        with pytest.raises(
+                OverflowError,
+                match="%s not in range 0 to %s" % (
+                    GLib.MAXUINT64 * 2, GLib.MAXUINT16)):
+            Everything.test_uint16(GLib.MAXUINT64 * 2)
 
     def test_int32(self):
         self.assertEqual(Everything.test_int32(GLib.MAXINT32),
                          GLib.MAXINT32)
         self.assertEqual(Everything.test_int32(GLib.MININT32),
                          GLib.MININT32)
-        self.assertRaises(OverflowError, Everything.test_int32, GLib.MAXINT32 + 1)
 
+        with pytest.raises(
+                OverflowError,
+                match="2147483648 not in range -2147483648 to 2147483647"):
+            Everything.test_int32(GLib.MAXINT32 + 1)
+
+        with pytest.raises(
+                OverflowError,
+                match="%s not in range -2147483648 to 2147483647" % (
+                    GLib.MAXINT64 + 1,)):
+            Everything.test_int32(GLib.MAXINT64 + 1)
+
+    def test_uint32(self):
         self.assertEqual(Everything.test_uint32(GLib.MAXUINT32),
                          GLib.MAXUINT32)
         self.assertEqual(Everything.test_uint32(0), 0)
         self.assertRaises(OverflowError, Everything.test_uint32, -1)
-        self.assertRaises(OverflowError, Everything.test_uint32, GLib.MAXUINT32 + 1)
+
+        with pytest.raises(
+                OverflowError,
+                match="%s not in range 0 to %s" % (
+                    GLib.MAXUINT32 + 1, GLib.MAXUINT32)):
+            Everything.test_uint32(GLib.MAXUINT32 + 1)
+
+        with pytest.raises(
+                OverflowError,
+                match="%s not in range 0 to %s" % (
+                    GLib.MAXUINT64 * 2, GLib.MAXUINT32)):
+            Everything.test_uint32(GLib.MAXUINT64 * 2)
 
     def test_int64(self):
         self.assertEqual(Everything.test_int64(GLib.MAXINT64),
                          GLib.MAXINT64)
         self.assertEqual(Everything.test_int64(GLib.MININT64),
                          GLib.MININT64)
-        self.assertRaises(OverflowError, Everything.test_int64, GLib.MAXINT64 + 1)
 
+        with pytest.raises(
+                OverflowError,
+                match="%s not in range %s to %s" % (
+                    GLib.MAXINT64 + 1, GLib.MININT64, GLib.MAXINT64)):
+            Everything.test_int64(GLib.MAXINT64 + 1)
+
+        with pytest.raises(
+                OverflowError,
+                match="%s not in range %s to %s" % (
+                    GLib.MAXUINT64 * 2, GLib.MININT64, GLib.MAXINT64)):
+            Everything.test_int64(GLib.MAXUINT64 * 2)
+
+    def test_uint64(self):
         self.assertEqual(Everything.test_uint64(GLib.MAXUINT64),
                          GLib.MAXUINT64)
         self.assertEqual(Everything.test_uint64(0), 0)
         self.assertRaises(OverflowError, Everything.test_uint64, -1)
         self.assertRaises(OverflowError, Everything.test_uint64, GLib.MAXUINT64 + 1)
 
+        with pytest.raises(
+                OverflowError,
+                match="%s not in range 0 to %s" % (
+                    GLib.MAXUINT64 + 1, GLib.MAXUINT64)):
+            Everything.test_uint64(GLib.MAXUINT64 + 1)
+
+        with pytest.raises(
+                OverflowError,
+                match="%s not in range 0 to %s" % (
+                    GLib.MAXUINT64 * 2, GLib.MAXUINT64)):
+            Everything.test_uint64(GLib.MAXUINT64 * 2)
+
     def test_int(self):
         self.assertEqual(Everything.test_int(GLib.MAXINT),
                          GLib.MAXINT)
         self.assertEqual(Everything.test_int(GLib.MININT),
                          GLib.MININT)
-        self.assertRaises(OverflowError, Everything.test_int, GLib.MAXINT + 1)
 
+        with pytest.raises(
+                OverflowError,
+                match="%s not in range %s to %s" % (
+                    GLib.MAXINT + 1, GLib.MININT, GLib.MAXINT)):
+            Everything.test_int(GLib.MAXINT + 1)
+
+        with pytest.raises(
+                OverflowError,
+                match="%s not in range %s to %s" % (
+                    GLib.MAXUINT64 * 2, GLib.MININT, GLib.MAXINT)):
+            Everything.test_int(GLib.MAXUINT64 * 2)
+
+    def test_uint(self):
         self.assertEqual(Everything.test_uint(GLib.MAXUINT),
                          GLib.MAXUINT)
         self.assertEqual(Everything.test_uint(0), 0)
         self.assertRaises(OverflowError, Everything.test_uint, -1)
-        self.assertRaises(OverflowError, Everything.test_uint, GLib.MAXUINT + 1)
+
+        with pytest.raises(
+                OverflowError,
+                match="%s not in range 0 to %s" % (
+                    GLib.MAXUINT + 1, GLib.MAXUINT)):
+            Everything.test_uint(GLib.MAXUINT + 1)
+
+        with pytest.raises(
+                OverflowError,
+                match="%s not in range 0 to %s" % (
+                    GLib.MAXUINT64 * 2, GLib.MAXUINT)):
+            Everything.test_uint(GLib.MAXUINT64 * 2)
 
     def test_short(self):
         self.assertEqual(Everything.test_short(GLib.MAXSHORT),
                          GLib.MAXSHORT)
         self.assertEqual(Everything.test_short(GLib.MINSHORT),
                          GLib.MINSHORT)
-        self.assertRaises(OverflowError, Everything.test_short, GLib.MAXSHORT + 1)
 
+        with pytest.raises(
+                OverflowError,
+                match="%s not in range %s to %s" % (
+                    GLib.MAXSHORT + 1, GLib.MINSHORT, GLib.MAXSHORT)):
+            Everything.test_short(GLib.MAXSHORT + 1)
+
+        with pytest.raises(
+                OverflowError,
+                match="%s not in range %s to %s" % (
+                    GLib.MAXUINT64 * 2, GLib.MINSHORT, GLib.MAXSHORT)):
+            Everything.test_short(GLib.MAXUINT64 * 2)
+
+    def test_ushort(self):
         self.assertEqual(Everything.test_ushort(GLib.MAXUSHORT),
                          GLib.MAXUSHORT)
         self.assertEqual(Everything.test_ushort(0), 0)
         self.assertRaises(OverflowError, Everything.test_ushort, -1)
-        self.assertRaises(OverflowError, Everything.test_ushort, GLib.MAXUSHORT + 1)
+
+        with pytest.raises(
+                OverflowError,
+                match="%s not in range 0 to %s" % (
+                    GLib.MAXUSHORT + 1, GLib.MAXUSHORT)):
+            Everything.test_ushort(GLib.MAXUSHORT + 1)
+
+        with pytest.raises(
+                OverflowError,
+                match="%s not in range 0 to %s" % (
+                    GLib.MAXUINT64 * 2, GLib.MAXUSHORT)):
+            Everything.test_ushort(GLib.MAXUINT64 * 2)
 
     def test_long(self):
         self.assertEqual(Everything.test_long(GLib.MAXLONG),
@@ -148,24 +288,73 @@ class TestEverything(unittest.TestCase):
                          GLib.MINLONG)
         self.assertRaises(OverflowError, Everything.test_long, GLib.MAXLONG + 1)
 
+        with pytest.raises(
+                OverflowError,
+                match="%s not in range %s to %s" % (
+                    GLib.MAXLONG + 1, GLib.MINLONG, GLib.MAXLONG)):
+            Everything.test_long(GLib.MAXLONG + 1)
+
+        with pytest.raises(
+                OverflowError,
+                match="%s not in range %s to %s" % (
+                    GLib.MAXUINT64 * 2, GLib.MINLONG, GLib.MAXLONG)):
+            Everything.test_long(GLib.MAXUINT64 * 2)
+
+    def test_ulong(self):
         self.assertEqual(Everything.test_ulong(GLib.MAXULONG),
                          GLib.MAXULONG)
         self.assertEqual(Everything.test_ulong(0), 0)
         self.assertRaises(OverflowError, Everything.test_ulong, -1)
-        self.assertRaises(OverflowError, Everything.test_ulong, GLib.MAXULONG + 1)
 
-    def test_size(self):
+        with pytest.raises(
+                OverflowError,
+                match="%s not in range 0 to %s" % (
+                    GLib.MAXULONG + 1, GLib.MAXULONG)):
+            Everything.test_ulong(GLib.MAXULONG + 1)
+
+        with pytest.raises(
+                OverflowError,
+                match="%s not in range 0 to %s" % (
+                    GLib.MAXUINT64 * 2, GLib.MAXULONG)):
+            Everything.test_ulong(GLib.MAXUINT64 * 2)
+
+    def test_ssize(self):
         self.assertEqual(Everything.test_ssize(GLib.MAXSSIZE),
                          GLib.MAXSSIZE)
         self.assertEqual(Everything.test_ssize(GLib.MINSSIZE),
                          GLib.MINSSIZE)
         self.assertRaises(OverflowError, Everything.test_ssize, GLib.MAXSSIZE + 1)
 
+        with pytest.raises(
+                OverflowError,
+                match="%s not in range %s to %s" % (
+                    GLib.MAXSSIZE + 1, GLib.MINSSIZE, GLib.MAXSSIZE)):
+            Everything.test_ssize(GLib.MAXSSIZE + 1)
+
+        with pytest.raises(
+                OverflowError,
+                match="%s not in range %s to %s" % (
+                    GLib.MAXUINT64 * 2, GLib.MINSSIZE, GLib.MAXSSIZE)):
+            Everything.test_ssize(GLib.MAXUINT64 * 2)
+
+    def test_size(self):
         self.assertEqual(Everything.test_size(GLib.MAXSIZE),
                          GLib.MAXSIZE)
         self.assertEqual(Everything.test_size(0), 0)
         self.assertRaises(OverflowError, Everything.test_size, -1)
         self.assertRaises(OverflowError, Everything.test_size, GLib.MAXSIZE + 1)
+
+        with pytest.raises(
+                OverflowError,
+                match="%s not in range 0 to %s" % (
+                    GLib.MAXSIZE + 1, GLib.MAXSIZE)):
+            Everything.test_size(GLib.MAXSIZE + 1)
+
+        with pytest.raises(
+                OverflowError,
+                match="%s not in range 0 to %s" % (
+                    GLib.MAXUINT64 * 2, GLib.MAXSIZE)):
+            Everything.test_size(GLib.MAXUINT64 * 2)
 
     def test_timet(self):
         self.assertEqual(Everything.test_timet(42), 42)

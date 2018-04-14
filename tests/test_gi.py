@@ -1618,9 +1618,20 @@ class TestGValue(unittest.TestCase):
 
         with pytest.raises(
                 OverflowError,
-                match=r'.*(not in range %d to %d|too large to convert).*' % (
-                    GLib.MININT, GLib.MAXINT)):
+                match='Item 0: %d not in range %d to %d' % (
+                    GLib.MAXINT + 1, GLib.MININT, GLib.MAXINT)):
             GIMarshallingTests.gvalue_flat_array([GLib.MAXINT + 1, "42", True])
+
+        if PY2:
+            min_, max_ = GLib.MINLONG, GLib.MAXLONG
+        else:
+            min_, max_ = GLib.MININT, GLib.MAXINT
+
+        with pytest.raises(
+                OverflowError,
+                match='Item 0: %d not in range %d to %d' % (
+                    GLib.MAXUINT64 * 2, min_, max_)):
+            GIMarshallingTests.gvalue_flat_array([GLib.MAXUINT64 * 2, "42", True])
 
     def test_gvalue_flat_array_out(self):
         values = GIMarshallingTests.return_gvalue_flat_array()

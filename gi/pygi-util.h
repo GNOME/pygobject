@@ -12,6 +12,7 @@ PyObject * pyg_integer_richcompare(PyObject *v, PyObject *w, int op);
 PyObject * pyg_ptr_richcompare(void* a, void *b, int op);
 const gchar * pyg_constant_strip_prefix(const gchar *name, const gchar *strip_prefix);
 PyObject * pygi_import_module (const char *name);
+PyObject * pygi_pyerr_format (PyObject *exception, const char *format, ...);
 
 gboolean pygi_guint_from_pyssize (Py_ssize_t pyval, guint *result);
 
