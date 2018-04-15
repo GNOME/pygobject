@@ -1,3 +1,29 @@
+3.29.1 - 2018-??-??
+-------------------
+
+* Support for `PyPy <https://pypy.org/>`__ and PyPy3. :issue:`180`
+* cairo: support :class:`cairo.Matrix` conversion. :issue:`16`
+* Speed up repeated closure creation by caching the closure cache in the
+  argument cache :issue:`103` (:user:`Garrett Regier <gregier>`\,
+  :user:`Christoph Reiter <creiter>`)
+* setup.py: make setuptools/pkg_resources optional. :issue:`186`
+* setup.py: print installation instructions in case a dependency is missing.
+  :issue:`194`
+* Remove autotools build system.
+* overrides: Make :meth:`Gtk.ListStore.insert_before`,
+  :meth:`Gtk.ListStore.insert_after`, :meth:`Gtk.TreeStore.insert_before` and
+  :meth:`Gtk.TreeStore.insert_after` atomic.
+* Make :class:`GLib.Error` picklable. :issue:`145`
+* Add basic support for template based widgets through :class:`Gtk.Template`.
+  :issue:`52`
+* Various documentation improvements. :mr:`29` (:user:`Dan Yeaw <danyeaw>`)
+* Add PEP518/pyproject.toml file. :mr:`44` (:user:`James Tocknell <aragilar>`)
+* Avoid truncating value returned from g_value_info_get_value. :mr:`51`
+  (:user:`Tomasz Miąsko <tmiasko>`)
+* Fix typo in BoundSignal disconnect. :mr:`55`
+  (:user:`Vladislav Glinsky <cl0ne>`)
+
+
 3.28.2 - 2018-03-27
 -------------------
 

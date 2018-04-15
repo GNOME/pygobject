@@ -14,6 +14,7 @@ intersphinx_mapping = {
     'gio': ('https://lazka.github.io/pgi-docs/Gio-2.0', None),
     'python2': ('https://docs.python.org/2.7', None),
     'python3': ('https://docs.python.org/3', None),
+    'cairo': ('https://pycairo.readthedocs.io/en/latest', None),
 }
 
 source_suffix = '.rst'
