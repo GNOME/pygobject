@@ -25,18 +25,18 @@
 #include "pygi-argument.h"
 #include "pygi-util.h"
 
-#ifdef G_OS_WIN32
+#if defined(G_OS_WIN32)
+#include <float.h>
+static gboolean
+pygi_isfinite (gdouble value) {
+    return _finite (value);
+}
+#else
 #include <math.h>
-
-#ifndef NAN
-static const unsigned long __nan[2] = {0xffffffff, 0x7fffffff};
-#define NAN (*(const float *) __nan)
-#endif
-
-#ifndef INFINITY
-#define INFINITY HUGE_VAL
-#endif
-
+static gboolean
+pygi_isfinite (gdouble value) {
+    return isfinite (value);
+}
 #endif
 
 static gboolean
@@ -152,8 +152,7 @@ pygi_gfloat_from_py (PyObject *py_arg, gfloat *result)
         return FALSE;
     }
 
-    if ((double_ < -G_MAXFLOAT || double_ > G_MAXFLOAT) &&
-            double_ != INFINITY && double_ != -INFINITY && double_ != NAN) {
+    if (pygi_isfinite (double_) && (double_ < -G_MAXFLOAT || double_ > G_MAXFLOAT)) {
         PyObject *min, *max;
 
         min = pygi_gfloat_to_py (-G_MAXFLOAT);
