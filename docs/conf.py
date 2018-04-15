@@ -52,10 +52,10 @@ html_theme_options = {
 
 extlinks = {
     'bzbug': ('https://bugzilla.gnome.org/show_bug.cgi?id=%s', 'bz#'),
-    'issue': ('https://gitlab.gnome.org/GNOME/pygobject/issues/%s', 'issue#'),
-    'commit': ('https://gitlab.gnome.org/GNOME/pygobject/commit/%s', 'commit#'),
+    'issue': ('https://gitlab.gnome.org/GNOME/pygobject/issues/%s', '#'),
+    'commit': ('https://gitlab.gnome.org/GNOME/pygobject/commit/%s', ''),
     'mr': (
-        'https://gitlab.gnome.org/GNOME/pygobject/merge_requests/%s', 'mr#'),
+        'https://gitlab.gnome.org/GNOME/pygobject/merge_requests/%s', '!'),
     'user': ('https://gitlab.gnome.org/%s', ''),
 }
 
