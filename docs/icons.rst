@@ -39,6 +39,10 @@
 
     <i class="fa fa-github"></i>
 
+.. |git-logo| raw:: html
+
+    <i class="fa fa-git-square"></i>
+
 .. |bug-logo| raw:: html
 
     <i class="fa fa-bug"></i>

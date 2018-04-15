@@ -13,8 +13,8 @@ We use the GNOME GitLab issue tracker:
 * Create a new issue: https://gitlab.gnome.org/GNOME/pygobject/issues/new
 
 
-|github-logo| Git Repo
-----------------------
+|git-logo| Git Repo
+-------------------
 
 PyGObject uses `Git <https://git-scm.com/>`_ for source control and the git
 repo is hosted on the `GNOME Gitlab instance <https://gitlab.gnome.org/>`__:
