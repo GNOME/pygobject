@@ -1,5 +1,4 @@
 include setup.cfg
-include pyproject.toml
 include COPYING
 include *.in
 include NEWS
