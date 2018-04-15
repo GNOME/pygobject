@@ -14,7 +14,7 @@
   :meth:`Gtk.ListStore.insert_after`, :meth:`Gtk.TreeStore.insert_before` and
   :meth:`Gtk.TreeStore.insert_after` atomic.
 * Make :class:`GLib.Error` picklable. :issue:`145`
-* Add basic support for template based widgets through :class:`Gtk.Template`.
+* Add basic support for template based widgets through ``Gtk.Template``.
   :issue:`52`
 * Various documentation improvements. :mr:`29` (:user:`Dan Yeaw <danyeaw>`)
 * Add PEP518/pyproject.toml file. :mr:`44` (:user:`James Tocknell <aragilar>`)
