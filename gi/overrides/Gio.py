@@ -23,6 +23,7 @@ import warnings
 from .._ossighelper import wakeup_on_signal, register_sigint_fallback
 from ..overrides import override, deprecated_init
 from ..module import get_introspection_module
+from .._compat import xrange
 from gi import PyGIWarning
 
 from gi.repository import GLib
@@ -271,3 +272,108 @@ class DBusProxy(Gio.DBusProxy):
 
 DBusProxy = override(DBusProxy)
 __all__.append('DBusProxy')
+
+
+class ListModel(Gio.ListModel):
+
+    def __getitem__(self, key):
+        if isinstance(key, slice):
+            return [self.get_item(i) for i in xrange(*key.indices(len(self)))]
+        elif isinstance(key, int):
+            if key < 0:
+                key += len(self)
+            if key < 0:
+                raise IndexError
+            ret = self.get_item(key)
+            if ret is None:
+                raise IndexError
+            return ret
+        else:
+            raise TypeError
+
+    def __contains__(self, item):
+        pytype = self.get_item_type().pytype
+        if not isinstance(item, pytype):
+            raise TypeError(
+                "Expected type %s.%s" % (pytype.__module__, pytype.__name__))
+        for i in self:
+            if i == item:
+                return True
+        return False
+
+    def __len__(self):
+        return self.get_n_items()
+
+    def __iter__(self):
+        for i in xrange(len(self)):
+            yield self.get_item(i)
+
+
+ListModel = override(ListModel)
+__all__.append('ListModel')
+
+
+class ListStore(Gio.ListStore):
+
+    def __delitem__(self, key):
+        if isinstance(key, slice):
+            start, stop, step = key.indices(len(self))
+            if step == 1:
+                self.splice(start, max(stop - start, 0), [])
+            elif step == -1:
+                self.splice(stop + 1, max(start - stop, 0), [])
+            else:
+                for i in sorted(xrange(start, stop, step), reverse=True):
+                    self.remove(i)
+        elif isinstance(key, int):
+            if key < 0:
+                key += len(self)
+            if key < 0 or key >= len(self):
+                raise IndexError
+            self.remove(key)
+        else:
+            raise TypeError
+
+    def __setitem__(self, key, value):
+        if isinstance(key, slice):
+            pytype = self.get_item_type().pytype
+            valuelist = []
+            for v in value:
+                if not isinstance(v, pytype):
+                    raise TypeError(
+                        "Expected type %s.%s" % (
+                            pytype.__module__, pytype.__name__))
+                valuelist.append(v)
+
+            start, stop, step = key.indices(len(self))
+            if step == 1:
+                self.__delitem__(key)
+                for v in reversed(valuelist):
+                    self.insert(start, v)
+            else:
+                indices = list(xrange(start, stop, step))
+                if len(indices) != len(valuelist):
+                    raise ValueError
+                for i, v in zip(indices, valuelist):
+                    self.remove(i)
+                    self.insert(i, v)
+        elif isinstance(key, int):
+            if key < 0:
+                key += len(self)
+            if key < 0 or key >= len(self):
+                raise IndexError
+
+            pytype = self.get_item_type().pytype
+            if not isinstance(value, pytype):
+                raise TypeError(
+                    "Expected type %s.%s" % (
+                        pytype.__module__, pytype.__name__))
+
+            self.remove(key)
+            self.insert(key, value)
+        else:
+            raise TypeError
+
+
+ListStore = override(ListStore)
+__all__.append('ListStore')

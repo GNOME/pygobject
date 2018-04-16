@@ -29,6 +29,7 @@ if sys.version_info[0] == 2:
     text_type = eval("unicode")
 
     reload = eval("reload")
+    xrange = eval("xrange")
 
     exec("def reraise(tp, value, tb):\n raise tp, value, tb")
 else:
@@ -47,6 +48,7 @@ else:
 
     from importlib import reload
     reload
+    xrange = range
 
     def reraise(tp, value, tb):
         raise tp(value).with_traceback(tb)
