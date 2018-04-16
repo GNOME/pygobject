@@ -480,3 +480,76 @@ def test_constructors():
     Gtk.Template.from_string("bla")
     Gtk.Template.from_resource("foo")
     Gtk.Template.from_file("foo")
+
+
+def test_child_construct():
+    Gtk.Template.Child()
+    Gtk.Template.Child("name")
+    with pytest.raises(TypeError):
+        Gtk.Template.Child("name", True)
+    Gtk.Template.Child("name", internal=True)
+    with pytest.raises(TypeError):
+        Gtk.Template.Child("name", internal=True, something=False)
+
+
+def test_internal_child():
+
+    main_type_name = new_gtype_name()
+
+    xml = """\
+    <interface>
+      <template class="{0}" parent="GtkBox">
+        <child>
+          <object class="GtkBox" id="somechild">
+            <property name="margin">42</property>
+          </object>
+        </child>
+      </template>
+    </interface>
+    """.format(main_type_name)
+
+    @Gtk.Template.from_string(xml)
+    class MainThing(Gtk.Box):
+        __gtype_name__ = main_type_name
+
+        somechild = Gtk.Template.Child(internal=True)
+
+    thing = MainThing()
+    assert thing.somechild.props.margin == 42
+
+    other_type_name = new_gtype_name()
+
+    xml = """\
+    <interface>
+      <template class="{0}" parent="GtkBox">
+        <child>
+          <object class="{1}">
+            <child internal-child="somechild">
+              <object class="GtkBox">
+                <property name="margin">24</property>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="label">foo</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </child>
+      </template>
+    </interface>
+    """.format(other_type_name, main_type_name)
+
+    @Gtk.Template.from_string(xml)
+    class OtherThing(Gtk.Box):
+        __gtype_name__ = other_type_name
+
+    other = OtherThing()
+    child = other.get_children()[0]
+    assert isinstance(child, MainThing)
+    child = child.get_children()[0]
+    assert isinstance(child, Gtk.Box)
+    assert child.props.margin == 24
+    child = child.get_children()[0]
+    assert isinstance(child, Gtk.Label)
+    assert child.props.label == "foo"

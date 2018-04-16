@@ -83,7 +83,7 @@ def register_template(cls):
                         widget_name, attr_name, old_attr_name))
             else:
                 bound_widgets[widget_name] = attr_name
-                cls.bind_template_child_full(widget_name, False, 0)
+                cls.bind_template_child_full(widget_name, obj._internal, 0)
 
     cls.__gtktemplate_methods__ = bound_methods
     cls.__gtktemplate_widgets__ = bound_widgets
@@ -122,8 +122,11 @@ def init_template(self, cls, base_init_template):
 
 class Child(object):
 
-    def __init__(self, name=None):
+    def __init__(self, name=None, **kwargs):
         self._name = name
+        self._internal = kwargs.pop("internal", False)
+        if kwargs:
+            raise TypeError("Unhandled arguments: %r" % kwargs)
 
 
 class CallThing(object):
