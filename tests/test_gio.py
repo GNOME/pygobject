@@ -64,6 +64,11 @@ class TestGSettings(unittest.TestCase):
         self.settings.reset('test-boolean')
         self.settings.reset('test-enum')
 
+    def test_iter(self):
+        assert list(self.settings) == [
+            'test-tuple', 'test-array', 'test-boolean', 'test-string',
+            'test-enum']
+
     def test_native(self):
         self.assertTrue('test-array' in self.settings.list_keys())
 

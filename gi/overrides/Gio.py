@@ -105,6 +105,10 @@ class Settings(Gio.Settings):
     def __len__(self):
         return len(self.list_keys())
 
+    def __iter__(self):
+        for key in self.list_keys():
+            yield key
+
     def __bool__(self):
         # for "if mysettings" we don't want a dictionary-like test here, just
         # if the object isn't None
