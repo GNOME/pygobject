@@ -1,1 +1,2 @@
-The Dockerfile is available at https://hub.docker.com/r/lazka/pygobject/
+The images are available at
+https://gitlab.gnome.org/GNOME/pygobject/container_registry
