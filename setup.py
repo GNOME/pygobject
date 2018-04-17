@@ -651,6 +651,8 @@ def get_suppression_files():
     files = []
     for prefix in prefixes:
         files.extend(get_suppression_files_for_prefix(prefix))
+
+    files.append(os.path.join(get_script_dir(), "tests", "valgrind.supp"))
     return sorted(set(files))
 
 

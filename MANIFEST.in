@@ -8,6 +8,6 @@ include README.rst
 include .gitlab-ci.yml
 recursive-include examples *.py *.png *.css *.ui *.gif *.gresource *.jpg *.xml
 recursive-include gi *.h
-recursive-include tests *.py *.c *.h *.xml
+recursive-include tests *.py *.c *.h *.xml *.supp
 recursive-include docs *.rst *.svg LICENSE *.ico *.png *.css *.py *.dia Makefile
 recursive-include .gitlab-ci *.sh *.rst *.py Dockerfile*

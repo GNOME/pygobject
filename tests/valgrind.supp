@@ -1,0 +1,39 @@
+# https://bugzilla.redhat.com/show_bug.cgi?id=1538073
+
+{
+   <py36-start1>
+   Memcheck:Cond
+   fun:__wcsnlen_sse4_1
+   fun:wcsrtombs
+   fun:wcstombs
+   fun:wcstombs
+   fun:encode_current_locale
+   fun:encode_locale
+   fun:Py_EncodeLocale
+   fun:_Py_wreadlink
+   fun:calculate_path
+   fun:Py_GetProgramFullPath
+   fun:_PySys_Init
+   fun:_Py_InitializeEx_Private.part.8
+   fun:Py_Main
+   fun:main
+}
+
+{
+   <py36-start2>
+   Memcheck:Cond
+   fun:__wcsnlen_sse4_1
+   fun:wcsrtombs
+   fun:wcstombs
+   fun:wcstombs
+   fun:encode_current_locale
+   fun:encode_locale
+   fun:Py_EncodeLocale
+   fun:_Py_wreadlink
+   fun:calculate_path
+   fun:Py_GetProgramFullPath
+   fun:_PySys_Init
+   fun:_Py_InitializeEx_Private.part.8
+   fun:Py_Main
+   fun:main
+}
