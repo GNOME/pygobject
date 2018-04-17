@@ -145,6 +145,13 @@ class Settings(Gio.Settings):
             allowed = v.unpack()
             if value not in allowed:
                 raise ValueError('value %s is not an allowed enum (%s)' % (value, allowed))
+        elif type_ == 'range':
+            tuple_ = v.get_child_value(0)
+            type_str = tuple_.get_child_value(0).get_type_string()
+            min_, max_ = tuple_.unpack()
+            if value < min_ or value > max_:
+                raise ValueError(
+                    'value %s not in range (%s - %s)' % (value, min_, max_))
         else:
             raise NotImplementedError('Cannot handle allowed type range class ' + str(type_))
 

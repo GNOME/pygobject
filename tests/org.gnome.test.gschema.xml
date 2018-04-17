@@ -21,6 +21,10 @@
 	<key name="test-enum" enum="org.gnome.test.FruitType">
 	    <default>'banana'</default>
 	</key>
+	<key name="test-range" type="i">
+	    <range min="7" max="65535"/>
+	    <default>123</default>
+	</key>
     </schema>
 
     <schema id="org.gnome.nopathtest">

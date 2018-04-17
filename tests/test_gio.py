@@ -7,6 +7,8 @@ import os
 import unittest
 import warnings
 
+import pytest
+
 import gi.overrides
 from gi import PyGIWarning
 from gi.repository import GLib, Gio
@@ -67,7 +69,13 @@ class TestGSettings(unittest.TestCase):
     def test_iter(self):
         assert list(self.settings) == [
             'test-tuple', 'test-array', 'test-boolean', 'test-string',
-            'test-enum']
+            'test-enum', 'test-range']
+
+    def test_get_set(self):
+        for key in self.settings:
+            old_value = self.settings[key]
+            self.settings[key] = old_value
+            assert self.settings[key] == old_value
 
     def test_native(self):
         self.assertTrue('test-array' in self.settings.list_keys())
@@ -87,6 +95,9 @@ class TestGSettings(unittest.TestCase):
         v = self.settings.get_value('test-tuple')
         self.assertEqual(v.unpack(), (1, 2))
 
+        v = self.settings.get_value('test-range')
+        assert v.unpack() == 123
+
         # set a value
         self.settings.set_string('test-string', 'World')
         self.assertEqual(self.settings.get_string('test-string'), 'World')
@@ -104,7 +115,7 @@ class TestGSettings(unittest.TestCase):
         self.assertEqual(with_path['np-int'], 42)
 
     def test_dictionary_api(self):
-        self.assertEqual(len(self.settings), 5)
+        self.assertEqual(len(self.settings), 6)
         self.assertTrue('test-array' in self.settings)
         self.assertTrue('test-array' in self.settings.keys())
         self.assertFalse('nonexisting' in self.settings)
@@ -134,6 +145,18 @@ class TestGSettings(unittest.TestCase):
         self.assertRaises(TypeError, self.settings.__setitem__, 'test-string', 1)
         self.assertRaises(ValueError, self.settings.__setitem__, 'test-enum', 'plum')
         self.assertRaises(KeyError, self.settings.__setitem__, 'unknown', 'moo')
+
+    def test_set_range(self):
+        self.settings['test-range'] = 7
+        assert self.settings['test-range'] == 7
+        self.settings['test-range'] = 65535
+        assert self.settings['test-range'] == 65535
+
+        with pytest.raises(ValueError, match=".*7 - 65535.*"):
+            self.settings['test-range'] = 7 - 1
+
+        with pytest.raises(ValueError, match=".*7 - 65535.*"):
+            self.settings['test-range'] = 65535 + 1
 
     def test_empty(self):
         empty = Gio.Settings.new_with_path('org.gnome.empty', '/tests/')
