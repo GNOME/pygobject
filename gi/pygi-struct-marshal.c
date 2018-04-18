@@ -106,7 +106,7 @@ pygi_arg_gvalue_from_py_marshal (PyObject *py_arg,
     GValue *value;
     GType object_type;
 
-    object_type = pyg_type_from_object_strict ( (PyObject *) py_arg->ob_type, FALSE);
+    object_type = pyg_type_from_object_strict ( (PyObject *) Py_TYPE (py_arg), FALSE);
     if (object_type == G_TYPE_INVALID) {
         PyErr_SetString (PyExc_RuntimeError, "unable to retrieve object's GType");
         return FALSE;
@@ -145,7 +145,7 @@ pygi_arg_gvalue_from_py_cleanup (PyGIInvokeState *state,
     /* Note py_arg can be NULL for hash table which is a bug. */
     if (was_processed && py_arg != NULL) {
         GType py_object_type =
-            pyg_type_from_object_strict ( (PyObject *) py_arg->ob_type, FALSE);
+            pyg_type_from_object_strict ( (PyObject *) Py_TYPE (py_arg), FALSE);
 
         /* When a GValue was not passed, it means the marshalers created a new
          * one to pass in, clean this up.
@@ -172,7 +172,7 @@ pygi_arg_gclosure_from_py_marshal (PyObject   *py_arg,
     if ( !(PyCallable_Check(py_arg) ||
            g_type_is_a (object_gtype, G_TYPE_CLOSURE))) {
         PyErr_Format (PyExc_TypeError, "Must be callable, not %s",
-                      py_arg->ob_type->tp_name);
+                      Py_TYPE (py_arg)->tp_name);
         return FALSE;
     }
 
@@ -314,7 +314,7 @@ type_error:
                       type_name,
                       module ? PYGLIB_PyUnicode_AsString(module) : "",
                       module ? "." : "",
-                      py_arg->ob_type->tp_name);
+                      Py_TYPE (py_arg)->tp_name);
         if (module)
             Py_DECREF (module);
         g_free (type_name);

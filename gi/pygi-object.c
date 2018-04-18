@@ -163,7 +163,7 @@ _pygi_marshal_from_py_interface_object (PyGIInvokeState             *state,
                       ( (PyGIInterfaceCache *)arg_cache)->type_name,
                       module ? PYGLIB_PyUnicode_AsString(module) : "",
                       module ? "." : "",
-                      py_arg->ob_type->tp_name);
+                      Py_TYPE (py_arg)->tp_name);
         if (module)
             Py_DECREF (module);
         return FALSE;

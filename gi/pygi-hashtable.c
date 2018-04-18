@@ -70,7 +70,7 @@ _pygi_marshal_from_py_ghash (PyGIInvokeState   *state,
     py_keys = PyMapping_Keys (py_arg);
     if (py_keys == NULL) {
         PyErr_Format (PyExc_TypeError, "Must be mapping, not %s",
-                      py_arg->ob_type->tp_name);
+                      Py_TYPE (py_arg)->tp_name);
         return FALSE;
     }
 

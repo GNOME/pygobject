@@ -125,7 +125,7 @@ pygi_error_marshal_from_py (PyObject *pyerr, GError **error)
 
     if (PyObject_IsInstance (pyerr, PyGError) != 1) {
         PyErr_Format (PyExc_TypeError, "Must be GLib.Error, not %s",
-                      pyerr->ob_type->tp_name);
+                      Py_TYPE (pyerr)->tp_name);
         return FALSE;
     }
 

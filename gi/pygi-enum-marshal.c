@@ -181,7 +181,7 @@ err:
     if (interface)
         g_base_info_unref (interface);
     PyErr_Format (PyExc_TypeError, "Expected a %s, but got %s",
-                  iface_cache->type_name, py_arg->ob_type->tp_name);
+                  iface_cache->type_name, Py_TYPE (py_arg)->tp_name);
     return FALSE;
 }
 
@@ -228,7 +228,7 @@ _pygi_marshal_from_py_interface_flags (PyGIInvokeState   *state,
 
 err:
     PyErr_Format (PyExc_TypeError, "Expected a %s, but got %s",
-                  iface_cache->type_name, py_arg->ob_type->tp_name);
+                  iface_cache->type_name, Py_TYPE (py_arg)->tp_name);
     return FALSE;
 
 }

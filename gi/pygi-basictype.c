@@ -102,7 +102,7 @@ base_float_checks (PyObject *object)
 {
     if (!PyNumber_Check (object)) {
         PyErr_Format (PyExc_TypeError, "Must be number, not %s",
-                      object->ob_type->tp_name);
+                      Py_TYPE (object)->tp_name);
         return NULL;
     }
 
@@ -212,7 +212,7 @@ pygi_gunichar_from_py (PyObject *py_arg, gunichar *result)
 #endif
     } else {
        PyErr_Format (PyExc_TypeError, "Must be string, not %s",
-                     py_arg->ob_type->tp_name);
+                     Py_TYPE (py_arg)->tp_name);
        return FALSE;
     }
 
@@ -260,7 +260,7 @@ pygi_gtype_from_py (PyObject *py_arg, GType *type)
 
     if (temp == 0) {
         PyErr_Format (PyExc_TypeError, "Must be gobject.GType, not %s",
-                      py_arg->ob_type->tp_name);
+                      Py_TYPE (py_arg)->tp_name);
         return FALSE;
     }
 
@@ -294,7 +294,7 @@ pygi_utf8_from_py (PyObject *py_arg, gchar **result)
 #endif
     else {
         PyErr_Format (PyExc_TypeError, "Must be string, not %s",
-                      py_arg->ob_type->tp_name);
+                      Py_TYPE (py_arg)->tp_name);
         return FALSE;
     }
 
@@ -343,7 +343,7 @@ filename_from_py_unix (PyObject *py_arg, gchar **result)
         Py_DECREF (bytes);
     } else {
         PyErr_Format (PyExc_TypeError, "Must be bytes, not %s",
-                      py_arg->ob_type->tp_name);
+                      Py_TYPE (py_arg)->tp_name);
         return FALSE;
     }
 
@@ -387,7 +387,7 @@ filename_from_py_win32 (PyObject *py_arg, gchar **result)
         Py_DECREF (bytes);
     } else {
         PyErr_Format (PyExc_TypeError, "Must be unicode, not %s",
-                      py_arg->ob_type->tp_name);
+                      Py_TYPE (py_arg)->tp_name);
         return FALSE;
     }
 #else
@@ -437,7 +437,7 @@ filename_from_py_win32 (PyObject *py_arg, gchar **result)
         Py_DECREF (bytes);
     } else {
         PyErr_Format (PyExc_TypeError, "Must be str, not %s",
-                      py_arg->ob_type->tp_name);
+                      Py_TYPE (py_arg)->tp_name);
         return FALSE;
     }
 #endif
@@ -463,7 +463,7 @@ base_number_checks (PyObject *object)
 
     if (!PyNumber_Check (object)) {
         PyErr_Format (PyExc_TypeError, "Must be number, not %s",
-                      object->ob_type->tp_name);
+                      Py_TYPE (object)->tp_name);
         return NULL;
     }
 

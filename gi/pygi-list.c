@@ -50,7 +50,7 @@ _pygi_marshal_from_py_glist (PyGIInvokeState   *state,
 
     if (!PySequence_Check (py_arg)) {
         PyErr_Format (PyExc_TypeError, "Must be sequence, not %s",
-                      py_arg->ob_type->tp_name);
+                      Py_TYPE (py_arg)->tp_name);
         return FALSE;
     }
 
@@ -127,7 +127,7 @@ _pygi_marshal_from_py_gslist (PyGIInvokeState   *state,
 
     if (!PySequence_Check (py_arg)) {
         PyErr_Format (PyExc_TypeError, "Must be sequence, not %s",
-                      py_arg->ob_type->tp_name);
+                      Py_TYPE (py_arg)->tp_name);
         return FALSE;
     }
 

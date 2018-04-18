@@ -741,7 +741,7 @@ _pygi_marshal_from_py_interface_callback (PyGIInvokeState   *state,
     if (!PyCallable_Check (py_arg)) {
         PyErr_Format (PyExc_TypeError,
                       "Callback needs to be a function or method not %s",
-                      py_arg->ob_type->tp_name);
+                      Py_TYPE (py_arg)->tp_name);
 
         return FALSE;
     }

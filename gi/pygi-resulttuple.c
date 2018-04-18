@@ -125,7 +125,7 @@ resulttuple_dir(PyObject *self)
     Py_DECREF (mapping_attr);
     if (mapping == NULL)
         goto error;
-    items = PyObject_Dir ((PyObject*)self->ob_type);
+    items = PyObject_Dir ((PyObject*)Py_TYPE (self));
     if (items == NULL)
         goto error;
     mapping_values = PyDict_Keys (mapping);
