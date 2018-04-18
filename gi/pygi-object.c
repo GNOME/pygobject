@@ -96,7 +96,7 @@ pygi_arg_gobject_out_arg_from_py (PyObject *py_arg, /*in*/
      * https://bugzilla.gnome.org/show_bug.cgi?id=693393
      */
     gobj = arg->v_pointer;
-    if (py_arg->ob_refcnt == 1 && gobj->ref_count == 1) {
+    if (Py_REFCNT (py_arg) == 1 && gobj->ref_count == 1) {
         /* If both object ref counts are only 1 at this point (the reference held
          * in a return tuple), we assume the GObject will be free'd before reaching
          * its target and become invalid. So instead of getting invalid object errors

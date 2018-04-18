@@ -1055,7 +1055,7 @@ pyg_signal_class_closure_marshal(GClosure *closure,
     for (i = 0; i < len; i++) {
 	PyObject *item = PyTuple_GetItem(params, i);
 	if (item != NULL && PyObject_TypeCheck(item, &PyGBoxed_Type)
-	    && item->ob_refcnt != 1) {
+	    && Py_REFCNT (item) != 1) {
 	    PyGBoxed* boxed_item = (PyGBoxed*)item;
 	    if (!boxed_item->free_on_dealloc) {
 		gpointer boxed_ptr = pyg_boxed_get_ptr (boxed_item);
