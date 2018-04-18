@@ -47,8 +47,8 @@ pygi_gpointer_from_py (PyObject *py_arg, gpointer *result)
     if (py_arg == Py_None) {
         *result = NULL;
         return TRUE;
-    } else if (PYGLIB_CPointer_Check(py_arg)) {
-        temp = PYGLIB_CPointer_GetPointer (py_arg, NULL);
+    } else if (PyCapsule_CheckExact (py_arg)) {
+        temp = PyCapsule_GetPointer (py_arg, NULL);
         if (temp == NULL)
             return FALSE;
         *result = temp;

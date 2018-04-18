@@ -2209,7 +2209,7 @@ pygobject_get_refcount(PyGObject *self, void *closure)
 static PyObject *
 pygobject_get_pointer(PyGObject *self, void *closure)
 {
-    return PYGLIB_CPointer_WrapPointer (self->obj, NULL);
+    return PyCapsule_New (self->obj, NULL, NULL);
 }
 
 static int

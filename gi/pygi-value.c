@@ -511,8 +511,8 @@ pyg_value_from_pyobject_with_error(GValue *value, PyObject *obj)
         else if (PyObject_TypeCheck(obj, &PyGPointer_Type) &&
                 G_VALUE_HOLDS(value, ((PyGPointer *)obj)->gtype))
             g_value_set_pointer(value, pyg_pointer_get(obj, gpointer));
-        else if (PYGLIB_CPointer_Check(obj))
-            g_value_set_pointer(value, PYGLIB_CPointer_GetPointer(obj, NULL));
+        else if (PyCapsule_CheckExact (obj))
+            g_value_set_pointer(value, PyCapsule_GetPointer (obj, NULL));
         else if (G_VALUE_HOLDS_GTYPE (value))
             g_value_set_gtype (value, pyg_type_from_object (obj));
         else {
@@ -568,8 +568,8 @@ pyg_value_from_pyobject_with_error(GValue *value, PyObject *obj)
         }
         else if ((bm = pyg_type_lookup(G_VALUE_TYPE(value))) != NULL)
             return bm->tovalue(value, obj);
-        else if (PYGLIB_CPointer_Check(obj))
-            g_value_set_boxed(value, PYGLIB_CPointer_GetPointer(obj, NULL));
+        else if (PyCapsule_CheckExact (obj))
+            g_value_set_boxed(value, PyCapsule_GetPointer (obj, NULL));
         else {
             PyErr_SetString(PyExc_TypeError, "Expected Boxed");
             return -1;
@@ -582,7 +582,7 @@ pyg_value_from_pyobject_with_error(GValue *value, PyObject *obj)
         if (G_IS_PARAM_SPEC (pygobject_get (obj)))
             g_value_set_param(value, G_PARAM_SPEC (pygobject_get (obj)));
         else if (pyg_param_spec_check (obj))
-            g_value_set_param(value, PYGLIB_CPointer_GetPointer(obj, NULL));
+            g_value_set_param(value, PyCapsule_GetPointer (obj, NULL));
         else {
             PyErr_SetString(PyExc_TypeError, "Expected ParamSpec");
             return -1;

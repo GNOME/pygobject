@@ -25,14 +25,6 @@
 
 #include <Python.h>
 
-# define PYGLIB_CPointer_Check PyCapsule_CheckExact
-# define PYGLIB_CPointer_WrapPointer(ptr, typename) \
-    PyCapsule_New(ptr, typename, NULL)
-# define PYGLIB_CPointer_GetPointer(obj, typename) \
-    PyCapsule_GetPointer(obj, typename)
-# define PYGLIB_CPointer_Import(module, symbol) \
-    PyCapsule_Import(##module##.##symbol##, FALSE)
-
 #define PYGLIB_MODULE_ERROR_RETURN NULL
 
 #ifdef __GNUC__

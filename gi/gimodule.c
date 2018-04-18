@@ -2380,7 +2380,7 @@ pygi_register_api(PyObject *d)
 {
     PyObject *api;
 
-    api = PYGLIB_CPointer_WrapPointer(&pygobject_api_functions, "gobject._PyGObject_API");
+    api = PyCapsule_New (&pygobject_api_functions, "gobject._PyGObject_API", NULL);
     if (api == NULL)
         return -1;
     PyDict_SetItemString(d, "_PyGObject_API", api);
@@ -2533,7 +2533,7 @@ PYGLIB_MODULE_START(_gi, "_gi")
     Py_INCREF(PyGIDeprecationWarning);
     PyModule_AddObject(module, "PyGIDeprecationWarning", PyGIDeprecationWarning);
 
-    api = PYGLIB_CPointer_WrapPointer ( (void *) &CAPI, "gi._API");
+    api = PyCapsule_New ( (void *) &CAPI, "gi._API", NULL);
     if (api == NULL) {
         return PYGLIB_MODULE_ERROR_RETURN;
     }
