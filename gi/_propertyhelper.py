@@ -17,8 +17,6 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library; if not, see <http://www.gnu.org/licenses/>.
 
-import traceback
-
 from . import _gi
 from ._compat import string_types, long_
 from ._constants import \
@@ -209,19 +207,7 @@ class Property(object):
             return self
 
         self._exc = None
-
-        # Simply return the result of fget directly, no need to go through GObject.
-        # See: https://bugzilla.gnome.org/show_bug.cgi?id=723872
-        # We catch and print any exception occurring within the fget for compatibility
-        # prior to the fast path addition from bug 723872, this should eventually
-        # be removed and exceptions raised directly to the caller as in:
-        # https://bugzilla.gnome.org/show_bug.cgi?id=575652
-        try:
-            value = self.fget(instance)
-        except Exception:
-            traceback.print_exc()
-            value = None
-
+        value = self.fget(instance)
         if self._exc:
             exc = self._exc
             self._exc = None

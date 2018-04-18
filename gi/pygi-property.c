@@ -107,16 +107,8 @@ pygi_call_do_get_property (PyObject *instance, GParamSpec *pspec)
 
     py_pspec = pyg_param_spec_new (pspec);
     retval = PyObject_CallMethod (instance, "do_get_property", "O", py_pspec);
-    if (retval == NULL) {
-        PyErr_Print();
-    }
-
     Py_DECREF (py_pspec);
-    if (retval) {
-        return retval;
-    }
-
-    Py_RETURN_NONE;
+    return retval;
 }
 
 PyObject *
