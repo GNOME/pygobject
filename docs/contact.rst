@@ -17,5 +17,10 @@ Mailing List
     of the GNOME project use the mailing list at
     https://mail.gnome.org/mailman/listinfo/python-hackers-list.
 
+StackOverflow / StackExchange
+    If you have technical questions about PyGObject you can find answers on
+    `Stack Overflow <https://stackoverflow.com/questions/tagged/pygobject>`__.
+    When asking there please use the tag `PyGObject`.
+
 If you are unsure which communication channel to use **please use the issue
 tracker**.
