@@ -514,7 +514,7 @@ __all__.append('MainContext')
 
 class Source(GLib.Source):
     def __new__(cls, *args, **kwargs):
-        # use our custom pyg_source_new() here as g_source_new() is not
+        # use our custom pygi_source_new() here as g_source_new() is not
         # bindable
         source = source_new()
         source.__class__ = cls
@@ -530,7 +530,7 @@ class Source(GLib.Source):
 
     def set_callback(self, fn, user_data=None):
         if hasattr(self, '__pygi_custom_source'):
-            # use our custom pyg_source_set_callback() if for a GSource object
+            # use our custom pygi_source_set_callback() if for a GSource object
             # with custom functions
             source_set_callback(self, fn, user_data)
         else:

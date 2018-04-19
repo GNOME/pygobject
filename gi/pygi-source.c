@@ -38,7 +38,7 @@ typedef struct
 } PyGRealSource;
 
 static gboolean
-pyg_source_prepare(GSource *source, gint *timeout)
+source_prepare(GSource *source, gint *timeout)
 {
     PyGRealSource *pysource = (PyGRealSource *)source;
     PyObject *t;
@@ -91,7 +91,7 @@ bail:
 }
 
 static gboolean
-pyg_source_check(GSource *source)
+source_check(GSource *source)
 {
     PyGRealSource *pysource = (PyGRealSource *)source;
     PyObject *t;
@@ -116,7 +116,7 @@ pyg_source_check(GSource *source)
 }
 
 static gboolean
-pyg_source_dispatch(GSource *source, GSourceFunc callback, gpointer user_data)
+source_dispatch(GSource *source, GSourceFunc callback, gpointer user_data)
 {
     PyGRealSource *pysource = (PyGRealSource *)source;
     PyObject *func, *args, *tuple, *t;
@@ -151,7 +151,7 @@ pyg_source_dispatch(GSource *source, GSourceFunc callback, gpointer user_data)
 }
 
 static void
-pyg_source_finalize(GSource *source)
+source_finalize(GSource *source)
 {
     PyGRealSource *pysource = (PyGRealSource *)source;
     PyObject *func, *t;
@@ -178,10 +178,10 @@ pyg_source_finalize(GSource *source)
 
 static GSourceFuncs pyg_source_funcs =
 {
-    pyg_source_prepare,
-    pyg_source_check,
-    pyg_source_dispatch,
-    pyg_source_finalize
+    source_prepare,
+    source_check,
+    source_dispatch,
+    source_finalize
 };
 
 /**
@@ -192,7 +192,7 @@ static GSourceFuncs pyg_source_funcs =
  * call Py_DECREF on the data.
  */
 static void
-_pyglib_destroy_notify(gpointer user_data)
+destroy_notify(gpointer user_data)
 {
     PyObject *obj = (PyObject *)user_data;
     PyGILState_STATE state;
@@ -203,7 +203,7 @@ _pyglib_destroy_notify(gpointer user_data)
 }
 
 static gboolean
-_pyglib_handler_marshal(gpointer user_data)
+handler_marshal(gpointer user_data)
 {
     PyObject *tuple, *ret;
     gboolean res;
@@ -230,7 +230,7 @@ _pyglib_handler_marshal(gpointer user_data)
 }
 
 PyObject *
-pyg_source_set_callback(PyGObject *self_module, PyObject *args)
+pygi_source_set_callback (PyGObject *self_module, PyObject *args)
 {
     PyObject *self, *first, *callback, *cbargs = NULL, *data;
     Py_ssize_t len;
@@ -268,21 +268,21 @@ pyg_source_set_callback(PyGObject *self_module, PyObject *args)
 	return NULL;
 
     g_source_set_callback(pyg_boxed_get (self, GSource),
-			  _pyglib_handler_marshal, data,
-			  _pyglib_destroy_notify);
+			  handler_marshal, data,
+			  destroy_notify);
 
     Py_INCREF(Py_None);
     return Py_None;
 }
 
 /**
- * pyg_source_new:
+ * pygi_source_new:
  *
  * Wrap the un-bindable g_source_new() and provide wrapper callbacks in the
  * GSourceFuncs which call back to Python.
  */
 PyObject*
-pyg_source_new (void)
+pygi_source_new (void)
 {
     PyGRealSource *source = NULL;
     PyObject      *py_type;
