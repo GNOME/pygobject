@@ -1887,12 +1887,6 @@ _wrap_pyg_variant_type_from_string (PyObject *self, PyObject *args)
     return py_variant;
 }
 
-static PyObject *
-_wrap_pygi_source_new (PyObject *self, PyObject *args)
-{
-    return pygi_source_new ();
-}
-
 #define CHUNK_SIZE 8192
 
 static PyObject*
@@ -2255,7 +2249,7 @@ static PyMethodDef _gi_functions[] = {
     { "register_interface_info", (PyCFunction) _wrap_pyg_register_interface_info, METH_VARARGS },
     { "hook_up_vfunc_implementation", (PyCFunction) _wrap_pyg_hook_up_vfunc_implementation, METH_VARARGS },
     { "variant_type_from_string", (PyCFunction) _wrap_pyg_variant_type_from_string, METH_VARARGS },
-    { "source_new", (PyCFunction) _wrap_pygi_source_new, METH_NOARGS },
+    { "source_new", (PyCFunction) pygi_source_new, METH_NOARGS },
     { "pyos_getsig", (PyCFunction) _wrap_pyig_pyos_getsig, METH_VARARGS },
     { "source_set_callback", (PyCFunction) pygi_source_set_callback, METH_VARARGS },
     { "io_channel_read", (PyCFunction) pyg_channel_read, METH_VARARGS },

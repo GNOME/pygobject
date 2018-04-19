@@ -280,18 +280,30 @@ pygi_source_set_callback (PyGObject *self_module, PyObject *args)
  *
  * Wrap the un-bindable g_source_new() and provide wrapper callbacks in the
  * GSourceFuncs which call back to Python.
+ *
+ * Returns NULL on error and sets an exception.
  */
 PyObject*
-pygi_source_new (void)
+pygi_source_new (PyObject *self, PyObject *args)
 {
-    PyGRealSource *source = NULL;
-    PyObject      *py_type;
+    PyGRealSource *source;
+    PyObject *py_type, *boxed;
 
-    source = (PyGRealSource*) g_source_new (&pyg_source_funcs, sizeof (PyGRealSource));
+    g_assert (args == NULL);
 
     py_type = pygi_type_import_by_name ("GLib", "Source");
+    if (!py_type)
+        return NULL;
+
+    source = (PyGRealSource*) g_source_new (&pyg_source_funcs, sizeof (PyGRealSource));
     /* g_source_new uses malloc, not slices */
-    source->obj = pygi_boxed_new ( (PyTypeObject *) py_type, source, FALSE, 0);
+    boxed = pygi_boxed_new ( (PyTypeObject *) py_type, source, FALSE, 0);
+    Py_DECREF (py_type);
+    if (!boxed) {
+        g_source_unref ((GSource *)source);
+        return NULL;
+    }
+    source->obj = boxed;
 
     return source->obj;
 }
