@@ -96,6 +96,7 @@ _get_child_info_by_name (PyGIBaseInfo *self, PyObject *py_name,
         return NULL;
 
     info = get_child_info_by_name ((GIObjectInfo*)self->info, name);
+    g_free (name);
     if (info == NULL) {
         Py_RETURN_NONE;
     }
@@ -326,6 +327,7 @@ _wrap_g_base_info_get_attribute (PyGIBaseInfo *self, PyObject *arg)
         return NULL;
 
     value = g_base_info_get_attribute (self->info, name);
+    g_free (name);
     if (value == NULL) {
         Py_RETURN_NONE;
     }
@@ -741,10 +743,11 @@ _wrap_g_callable_info_get_return_attribute (PyGIBaseInfo *self, PyObject *py_nam
 
     attr = g_callable_info_get_return_attribute (self->info, name);
     if (attr) {
-        return pygi_utf8_to_py (
-                g_callable_info_get_return_attribute (self->info, name));
+        g_free (name);
+        return pygi_utf8_to_py (attr);
     } else {
         PyErr_Format(PyExc_AttributeError, "return attribute %s not found", name);
+        g_free (name);
         return NULL;
     }
 }

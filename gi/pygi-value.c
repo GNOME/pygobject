@@ -487,7 +487,7 @@ pyg_value_from_pyobject_with_error(GValue *value, PyObject *obj)
     {
         gchar *temp;
         if (pygi_utf8_from_py (obj, &temp)) {
-            g_value_set_string (value, temp);
+            g_value_take_string (value, temp);
             return 0;
         } else {
             /* also allows setting anything implementing __str__ */
@@ -498,7 +498,7 @@ pyg_value_from_pyobject_with_error(GValue *value, PyObject *obj)
                 return -1;
             if (pygi_utf8_from_py (str, &temp)) {
                 Py_DECREF (str);
-                g_value_set_string (value, temp);
+                g_value_take_string (value, temp);
                 return 0;
             }
             Py_DECREF (str);
