@@ -9,3 +9,22 @@
    fun:wcstombs
    fun:encode_current_locale
 }
+
+{
+   <fontconfig>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:FcPatternObjectInsertElt
+   fun:FcPatternObjectAddWithBinding
+}
+
+{
+   <fontconfig-2>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:FcPatternCreate
+   fun:FcParsePattern
+   fun:FcEndElement
+}
