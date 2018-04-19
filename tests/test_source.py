@@ -229,10 +229,9 @@ class TestSource(unittest.TestCase):
         gc.collect()
         self.assertTrue(self.finalized)
 
-    @unittest.skip('https://bugzilla.gnome.org/show_bug.cgi?id=722387')
     def test_python_unref_with_active_source(self):
         # Tests a Python derived Source which is free'd in the context of
-        # Python, but remains active in the MainContext (via source.attach())
+        # Python, but which was attached to a MainContext (via source.attach())
         self.dispatched = False
         self.finalized = False
 
@@ -250,29 +249,22 @@ class TestSource(unittest.TestCase):
             def finalize(s):
                 self.finalized = True
 
+        context = GLib.MainContext.new()
         source = S()
-        id = source.attach()
+        id_ = source.attach(context)
         self.assertFalse(self.finalized)
         self.assertFalse(source.is_destroyed())
 
-        # Delete the source from Python but should still remain
-        # active in the main context.
+        # Delete the source from Python, it should detach
         del source
+        gc.collect()
 
-        context = GLib.MainContext.default()
         while context.iteration(may_block=False):
             pass
 
-        self.assertTrue(self.dispatched)
-        self.assertFalse(self.finalized)
-
-        source = context.find_source_by_id(id)
-        source.destroy()  # Remove from main context.
-        self.assertTrue(source.is_destroyed())
-
-        # Source should be finalized called after del
-        del source
-        self.assertTrue(self.finalized)
+        assert self.finalized
+        assert not self.dispatched
+        assert context.find_source_by_id(id_) is None
 
     def test_extra_init_args(self):
         class SourceWithInitArgs(GLib.Source):
