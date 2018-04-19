@@ -297,7 +297,7 @@ pygi_source_new (PyObject *self, PyObject *args)
 
     source = (PyGRealSource*) g_source_new (&pyg_source_funcs, sizeof (PyGRealSource));
     /* g_source_new uses malloc, not slices */
-    boxed = pygi_boxed_new ( (PyTypeObject *) py_type, source, FALSE, 0);
+    boxed = pygi_boxed_new ( (PyTypeObject *) py_type, source, TRUE, 0);
     Py_DECREF (py_type);
     if (!boxed) {
         g_source_unref ((GSource *)source);
