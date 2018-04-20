@@ -18,15 +18,20 @@ python = pymod.find_installation(get_option('python'), required: true)
 python_dep = python.dependency(required : true)
 python_no_warn_flags = []
 
-gi_dep = dependency('gobject-introspection-1.0', version : '>= 1.55.0', required : true,
+glib_version_req = '>= 2.38.0'
+gi_version_req = '>= 1.46.0'
+pycairo_version_req = '>= 1.11.1'
+libffi_version_req = '>= 3.0'
+
+gi_dep = dependency('gobject-introspection-1.0', version : gi_version_req, required : true,
   fallback: ['gobject-introspection', 'girepo_dep'])
-glib_dep = dependency('glib-2.0', version : '>= 2.55.0', required : true,
+glib_dep = dependency('glib-2.0', version : glib_version_req, required : true,
   fallback: ['glib', 'libglib_dep'])
-gobject_dep = dependency('gobject-2.0', version : '>= 2.55.0', required : true,
+gobject_dep = dependency('gobject-2.0', version : glib_version_req, required : true,
   fallback: ['glib', 'libgobject_dep'])
-gio_dep = dependency('gio-2.0', version : '>= 2.55.0', required : true,
+gio_dep = dependency('gio-2.0', version : glib_version_req, required : true,
   fallback: ['glib', 'libgio_dep'])
-gmodule_dep = dependency('gmodule-2.0', version : '>= 2.55.0',
+gmodule_dep = dependency('gmodule-2.0', version : glib_version_req,
   fallback: ['glib', 'libgmodule_dep'])
 ffi_dep = dependency('libffi', version : '>= 3.0', required : true,
   fallback : ['libffi', 'ffi_dep'])
@@ -35,9 +40,9 @@ cairo_dep = dependency('cairo', required: false)
 cairo_gobject_dep = dependency('cairo-gobject', required: false)
 
 if python.language_version().version_compare('>= 3.0')
-  pycairo_dep = dependency('py3cairo', required: false)
+  pycairo_dep = dependency('py3cairo', version : pycairo_version_req, required: false)
 else
-  pycairo_dep = dependency('pycairo', required: false)
+  pycairo_dep = dependency('pycairo', version : pycairo_version_req, required: false)
 endif
 
 cdata = configuration_data()
