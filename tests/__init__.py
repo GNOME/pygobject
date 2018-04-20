@@ -7,8 +7,6 @@ import signal
 import subprocess
 import atexit
 import warnings
-import importlib
-import sys
 import imp
 
 

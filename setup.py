@@ -510,6 +510,9 @@ class build_tests(Command):
                 "--library=gimarshallingtests",
                 "--pkg=glib-2.0",
                 "--pkg=gio-2.0",
+                "--cflags-begin",
+                "-I%s" % gi_tests_dir,
+                "--cflags-end",
                 "--output=%s" % gir_path,
             ] + ext.sources + ext.depends)
 
