@@ -5,18 +5,65 @@ import random
 import pytest
 
 from gi.repository import Gio, GObject
+from gi._compat import cmp
 
 
 class Item(GObject.Object):
     _id = 0
 
-    def __init__(self):
-        super(Item, self).__init__()
+    def __init__(self, **kwargs):
+        super(Item, self).__init__(**kwargs)
         Item._id += 1
         self._id = self._id
 
     def __repr__(self):
         return str(self._id)
+
+
+class NamedItem(Item):
+
+    name = GObject.Property(type=str, default='')
+
+    def __repr__(self):
+        return self.props.name
+
+
+def test_list_store_sort():
+    store = Gio.ListStore()
+    items = [NamedItem(name=n) for n in "cabx"]
+    sorted_items = sorted(items, key=lambda i: i.props.name)
+
+    user_data = [object(), object()]
+
+    def sort_func(a, b, *args):
+        assert list(args) == user_data
+        assert isinstance(a, NamedItem)
+        assert isinstance(b, NamedItem)
+        return cmp(a.props.name, b.props.name)
+
+    store[:] = items
+    assert store[:] != sorted_items
+    store.sort(sort_func, *user_data)
+    assert store[:] == sorted_items
+
+
+def test_list_store_insert_sorted():
+    store = Gio.ListStore()
+    items = [NamedItem(name=n) for n in "cabx"]
+    sorted_items = sorted(items, key=lambda i: i.props.name)
+
+    user_data = [object(), object()]
+
+    def sort_func(a, b, *args):
+        assert list(args) == user_data
+        assert isinstance(a, NamedItem)
+        assert isinstance(b, NamedItem)
+        return cmp(a.props.name, b.props.name)
+
+    for item in items:
+        index = store.insert_sorted(item, sort_func, *user_data)
+        assert isinstance(index, int)
+    assert store[:] == sorted_items
 
 
 def test_list_model_len():

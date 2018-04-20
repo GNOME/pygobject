@@ -2240,7 +2240,35 @@ _wrap_pyig_pyos_getsig (PyObject *self, PyObject *args)
     return PyLong_FromVoidPtr ((void *)(PyOS_getsig (sig_num)));
 }
 
+static PyObject *
+_wrap_pygobject_new_full (PyObject *self, PyObject *args)
+{
+    PyObject *ptr_value, *long_value;
+    PyObject *steal;
+    GObject *obj;
+    gpointer ptr;
+
+    if (!PyArg_ParseTuple (args, "OO", &ptr_value, &steal))
+        return NULL;
+
+    long_value = PyNumber_Long (ptr_value);
+    if (!long_value) {
+        PyErr_SetString (PyExc_TypeError, "first argument must be an integer");
+        return NULL;
+    }
+    obj = PyLong_AsVoidPtr (long_value);
+    Py_DECREF (long_value);
+
+    if (!G_IS_OBJECT (obj)) {
+        PyErr_SetString (PyExc_TypeError, "pointer is not a GObject");
+        return NULL;
+    }
+
+    return pygobject_new_full (obj, PyObject_IsTrue (steal), NULL);
+}
+
 static PyMethodDef _gi_functions[] = {
+    { "pygobject_new_full", (PyCFunction) _wrap_pygobject_new_full, METH_VARARGS },
     { "enum_add", (PyCFunction) _wrap_pyg_enum_add, METH_VARARGS | METH_KEYWORDS },
     { "enum_register_new_gtype_and_add", (PyCFunction) _wrap_pyg_enum_register_new_gtype_and_add, METH_VARARGS | METH_KEYWORDS },
     { "flags_add", (PyCFunction) _wrap_pyg_flags_add, METH_VARARGS | METH_KEYWORDS },

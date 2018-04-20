@@ -30,6 +30,7 @@ if sys.version_info[0] == 2:
 
     reload = eval("reload")
     xrange = eval("xrange")
+    cmp = eval("cmp")
 
     exec("def reraise(tp, value, tb):\n raise tp, value, tb")
 else:
@@ -49,6 +50,7 @@ else:
     from importlib import reload
     reload
     xrange = range
+    cmp = lambda a, b: (a > b) - (a < b)
 
     def reraise(tp, value, tb):
         raise tp(value).with_traceback(tb)
