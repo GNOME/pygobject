@@ -23,6 +23,8 @@ RUN apt-get update && apt-get install -y \
     locales \
     xauth \
     xvfb \
+    ninja-build \
+    python3-pip \
     && rm -rf /var/lib/apt/lists/*
 
 ARG HOST_USER_ID=5555
@@ -36,6 +38,7 @@ ENV LANG C.UTF-8
 ENV CI true
 ENV PYENV_ROOT /home/user/.pyenv
 ENV PATH="${PYENV_ROOT}/shims:${PYENV_ROOT}/bin:${PATH}"
+ENV PYTHON_CONFIGURE_OPTS="--enable-shared"
 
 RUN curl -L https://raw.githubusercontent.com/pyenv/pyenv-installer/master/bin/pyenv-installer | bash
 
@@ -47,4 +50,6 @@ RUN pyenv install 3.7.0b3
 RUN pyenv install pypy2.7-5.10.0
 RUN pyenv install pypy3.5-5.10.1
 
-ENV PATH="/usr/lib/ccache:${PATH}"
+RUN git clone https://github.com/mesonbuild/meson.git
+
+ENV PATH="/usr/lib/ccache:/home/user/meson/:${PATH}"

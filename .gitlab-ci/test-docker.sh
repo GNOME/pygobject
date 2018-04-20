@@ -16,7 +16,6 @@ export CCACHE_BASEDIR="$(pwd)"
 export CCACHE_DIR="${CCACHE_BASEDIR}/_ccache"
 
 mkdir -p "${CCACHE_DIR}"
-mkdir -p "${COV_DIR}"
 
 if [[ "${PYIMPL}" == "PyPy" ]]; then
     # https://bitbucket.org/pypy/pypy/issues/2776
@@ -27,6 +26,15 @@ python -m pip install git+https://github.com/pygobject/pycairo.git
 python -m pip install flake8 pytest pytest-faulthandler coverage
 
 export CFLAGS="-coverage -ftest-coverage -fprofile-arcs -Werror"
+
+# BUILD AND TEST WITH MESON (why are we yelling though?)
+git clean -fdx
+meson.py builddir -Dpython=`which python`
+ninja -C builddir -v
+xvfb-run -a meson.py test -C builddir -v
+git clean -fdx
+
+mkdir -p "${COV_DIR}"
 
 if [[ "${PYIMPL}" == "PyPy" ]]; then
     python setup.py build_tests
