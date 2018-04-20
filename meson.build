@@ -45,6 +45,14 @@ else
   pycairo_dep = dependency('pycairo', version : pycairo_version_req, required: false)
 endif
 
+cc = meson.get_compiler('c')
+
+supported_arguments = cc.get_supported_arguments([
+  '-Wno-discarded-qualifiers'])
+
+add_project_arguments(supported_arguments, language: 'c')
+
+
 cdata = configuration_data()
 
 cdata.set('PYGOBJECT_MAJOR_VERSION', pygobject_version_major)
