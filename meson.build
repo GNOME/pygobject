@@ -13,7 +13,8 @@ pygobject_version_micro = version_arr[2].to_int()
 platform_version = '@0@.0'.format(pygobject_version_major)
 
 pymod = import('python')
-python = pymod.find_installation(get_option('python'))
+python = pymod.find_installation(get_option('python'), required: true)
+
 python_dep = python.dependency(required : true)
 python_no_warn_flags = []
 
