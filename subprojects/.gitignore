@@ -1,0 +1,5 @@
+glib
+libffi
+proxy-libintl
+zlib
+gobject-introspection
