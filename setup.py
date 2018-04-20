@@ -320,9 +320,9 @@ class distcheck(du_sdist):
         assert process.returncode == 0
 
         tracked_files = out.splitlines()
-        for ignore in [".gitignore"]:
-            if ignore in tracked_files:
-                tracked_files.remove(ignore)
+        tracked_files = [
+            f for f in tracked_files
+            if os.path.basename(f) not in [".gitignore"]]
 
         diff = set(tracked_files) - set(included_files)
         assert not diff, (
