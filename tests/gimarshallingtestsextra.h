@@ -20,6 +20,7 @@
 #define EXTRA_TESTS
 
 #include <glib-object.h>
+#include <gitestmacros.h>
 
 typedef enum
 {
@@ -35,22 +36,34 @@ typedef enum
   GI_MARSHALLING_TESTS_EXTRA_FLAGS_VALUE2 = (gint)(1 << 31),
 } GIMarshallingTestsExtraFlags;
 
+
+_GI_TEST_EXTERN
 GType gi_marshalling_tests_extra_flags_get_type (void) G_GNUC_CONST;
 #define GI_MARSHALLING_TESTS_TYPE_EXTRA_FLAGS (gi_marshalling_tests_extra_flags_get_type ())
 
+_GI_TEST_EXTERN
 void gi_marshalling_tests_compare_two_gerrors_in_gvalue (GValue *v, GValue *v1);
+_GI_TEST_EXTERN
 void gi_marshalling_tests_ghashtable_enum_none_in (GHashTable *hash_table);
+_GI_TEST_EXTERN
 GHashTable * gi_marshalling_tests_ghashtable_enum_none_return (void);
 
+_GI_TEST_EXTERN
 gchar * gi_marshalling_tests_filename_copy (gchar *path_in);
+_GI_TEST_EXTERN
 gboolean gi_marshalling_tests_filename_exists (gchar *path);
+_GI_TEST_EXTERN
 gchar * gi_marshalling_tests_filename_to_glib_repr (gchar *path_in, gsize *len);
 
+_GI_TEST_EXTERN
 GIMarshallingTestsExtraEnum * gi_marshalling_tests_enum_array_return_type (gsize *n_members);
 
+_GI_TEST_EXTERN
 void gi_marshalling_tests_extra_flags_large_in (GIMarshallingTestsExtraFlags value);
 
+_GI_TEST_EXTERN
 gchar *gi_marshalling_tests_extra_utf8_full_return_invalid (void);
+_GI_TEST_EXTERN
 void gi_marshalling_tests_extra_utf8_full_out_invalid (gchar **utf8);
 
 #endif /* EXTRA_TESTS */
