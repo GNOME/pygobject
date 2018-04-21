@@ -70,6 +70,32 @@ def realized(widget):
 
 
 @unittest.skipUnless(Gtk, 'Gtk not available')
+def test_freeze_child_notif():
+
+    events = []
+
+    def on_notify(widget, spec):
+        events.append(spec.name)
+
+    b = Gtk.Box()
+    c = Gtk.Button()
+    c.connect("child-notify", on_notify)
+    c.freeze_child_notify()
+    b.pack_start(c, True, True, 0)
+    b.child_set_property(c, "expand", False)
+    b.child_set_property(c, "expand", True)
+    c.thaw_child_notify()
+    assert events.count("expand") == 1
+    del events[:]
+
+    with c.freeze_child_notify():
+        b.child_set_property(c, "expand", True)
+        b.child_set_property(c, "expand", False)
+
+    assert events.count("expand") == 1
+
+
+@unittest.skipUnless(Gtk, 'Gtk not available')
 def test_wrapper_toggle_refs():
     class MyButton(Gtk.Button):
         def __init__(self, height):

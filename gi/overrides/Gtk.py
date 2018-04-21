@@ -118,9 +118,24 @@ def _builder_connect_callback(builder, gobj, signal_name, handler_name, connect_
             gobj.connect(signal_name, handler, *args)
 
 
+class _FreezeNotifyManager(object):
+    def __init__(self, obj):
+        self.obj = obj
+
+    def __enter__(self):
+        pass
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.obj.thaw_child_notify()
+
+
 class Widget(Gtk.Widget):
 
     translate_coordinates = strip_boolean_result(Gtk.Widget.translate_coordinates)
+
+    def freeze_child_notify(self):
+        super(Widget, self).freeze_child_notify()
+        return _FreezeNotifyManager(self)
 
     def drag_dest_set_target_list(self, target_list):
         if (target_list is not None) and (not isinstance(target_list, Gtk.TargetList)):
