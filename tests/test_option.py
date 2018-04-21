@@ -57,29 +57,53 @@ class TestOption(unittest.TestCase):
         self.parser.add_option_group(group)
         return group
 
-    def test_parse_args(self):
+    def test_integer(self):
+        self._create_group()
         options, args = self.parser.parse_args(
-            ["test_option.py"])
+            ["--test-integer", "42", "bla"])
+        assert options.test_integer == 42
+        assert args == ["bla"]
+
+    def test_file(self):
+        self._create_group()
+
+        options, args = self.parser.parse_args(
+            ["--file", "fn", "bla"])
+        assert options.unit_file == "fn"
+        assert args == ["bla"]
+
+    def test_mixed(self):
+        self._create_group()
+
+        options, args = self.parser.parse_args(
+            ["--file", "fn", "--test-integer", "12", "--test",
+             "--g-fatal-warnings", "nope"])
+
+        assert options.unit_file == "fn"
+        assert options.test_integer == 12
+        assert options.test is False
+        assert options.fatal_warnings is True
+        assert args == ["nope"]
+
+    def test_parse_args(self):
+        options, args = self.parser.parse_args([])
         self.assertFalse(args)
 
-        options, args = self.parser.parse_args(
-            ["test_option.py", "foo"])
-        self.assertEqual(args, [])
+        options, args = self.parser.parse_args(["foo"])
+        self.assertEqual(args, ["foo"])
 
-        options, args = self.parser.parse_args(
-            ["test_option.py", "foo", "bar"])
-        self.assertEqual(args, [])
+        options, args = self.parser.parse_args(["foo", "bar"])
+        self.assertEqual(args, ["foo", "bar"])
 
     def test_parse_args_double_dash(self):
-        options, args = self.parser.parse_args(
-            ["test_option.py", "--", "-xxx"])
-        # self.assertEqual(args, ["-xxx"])
+        options, args = self.parser.parse_args(["--", "-xxx"])
+        self.assertEqual(args, ["--", "-xxx"])
 
     def test_parse_args_group(self):
         group = self._create_group()
 
         options, args = self.parser.parse_args(
-            ["test_option.py", "--test", "-f", "test"])
+            ["--test", "-f", "test"])
 
         self.assertFalse(options.test)
         self.assertEqual(options.unit_file, "test")
@@ -92,12 +116,12 @@ class TestOption(unittest.TestCase):
     def test_option_value_error(self):
         self._create_group()
         self.assertRaises(GLib.option.OptionValueError, self.parser.parse_args,
-                          ["test_option.py", "--test-integer=text"])
+                          ["--test-integer=text"])
 
     def test_bad_option_error(self):
         self.assertRaises(GLib.option.BadOptionError,
                           self.parser.parse_args,
-                          ["test_option.py", "--unknwon-option"])
+                          ["--unknwon-option"])
 
     def test_option_group_constructor(self):
         self.assertRaises(TypeError, GLib.option.OptionGroup)
@@ -106,8 +130,7 @@ class TestOption(unittest.TestCase):
         self._create_group()
 
         with capture_exceptions() as exc:
-            self.parser.parse_args(
-                ["test_option.py", "--callback-failure-test"])
+            self.parser.parse_args(["--callback-failure-test"])
 
         assert len(exc) == 1
         assert exc[0].value.args[0] == "foo"

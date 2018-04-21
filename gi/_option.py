@@ -341,7 +341,6 @@ class OptionParser(optparse.OptionParser):
         rargs[:] = context.parse([sys.argv[0]] + rargs)[1:]
 
     def parse_args(self, args=None, values=None):
-        old_args = args or []
         try:
             options, args = optparse.OptionParser.parse_args(
                 self, args, values)
@@ -362,7 +361,6 @@ class OptionParser(optparse.OptionParser):
             for key, value in group.values.__dict__.items():
                 options.ensure_value(key, value)
 
-        args = args[2:-len(old_args)]
         return options, args
 
 
