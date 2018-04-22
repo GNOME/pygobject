@@ -140,7 +140,7 @@ boxed_init (PyObject *self,
 
     if (!PyArg_ParseTupleAndKeywords (args, kwargs, "", kwlist)) {
         PyErr_Clear ();
-        PyErr_Warn (PyExc_TypeError,
+        PyErr_Warn (PyExc_DeprecationWarning,
                 "Passing arguments to gi.types.Boxed.__init__() is deprecated. "
                 "All arguments passed will be ignored.");
     }
