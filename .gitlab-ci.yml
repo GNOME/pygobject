@@ -106,11 +106,13 @@ python3.7:
   <<: *defaults
 
 pypy2:
+  allow_failure: true
   variables:
     PYENV_VERSION: "pypy2.7-5.10.0"
   <<: *defaults
 
 pypy3:
+  allow_failure: true
   variables:
     PYENV_VERSION: "pypy3.5-5.10.1"
   <<: *defaults
