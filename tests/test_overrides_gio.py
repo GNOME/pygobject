@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 
 import random
+import platform
 
 import pytest
 
@@ -252,6 +253,10 @@ def test_list_store_setitem_simple():
 def test_list_store_setitem_slice():
 
     def do_set(count, key, new_count):
+        if count == 0 and key.step is not None \
+                and platform.python_implementation() == "PyPy":
+            # https://bitbucket.org/pypy/pypy/issues/2804
+            return
         store = Gio.ListStore.new(Item)
         source = [Item() for i in range(count)]
         new = [Item() for i in range(new_count)]
