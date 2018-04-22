@@ -1030,7 +1030,7 @@ pygobject__g_instance_init(GTypeInstance   *instance,
                            gpointer         g_class)
 {
     GObject *object = (GObject *) instance;
-    PyObject *wrapper, *args, *kwargs;
+    PyObject *wrapper, *result;
     PyGILState_STATE state;
 
     wrapper = g_object_get_qdata(object, pygobject_wrapper_key);
@@ -1057,18 +1057,16 @@ pygobject__g_instance_init(GTypeInstance   *instance,
          * so we don't destroy the wrapper. The next call to pygobject_new_full
          * will take the ref */
         pygobject_ref_float ((PyGObject *) wrapper);
-        args = PyTuple_New(0);
-        kwargs = PyDict_New();
-        if (Py_TYPE(wrapper)->tp_init(wrapper, args, kwargs))
-            PyErr_Print();
 
-        Py_DECREF(args);
-        Py_DECREF(kwargs);
+        result = PyObject_CallMethod (wrapper, "__init__", NULL);
+        if (result == NULL)
+            PyErr_Print ();
+        else
+            Py_DECREF (result);
     }
 
     /* XXX: used for Gtk.Template */
     if (PyObject_HasAttrString (wrapper, "__dontuse_ginstance_init__")) {
-        PyObject *result;
         result = PyObject_CallMethod (wrapper, "__dontuse_ginstance_init__", NULL);
         if (result == NULL)
             PyErr_Print ();
