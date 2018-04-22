@@ -258,6 +258,7 @@ class TestSource(unittest.TestCase):
         # Delete the source from Python, it should detach
         del source
         gc.collect()
+        gc.collect()
 
         while context.iteration(may_block=False):
             pass
