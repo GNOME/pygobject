@@ -12,6 +12,7 @@ import sys
 import os
 import re
 import platform
+import gc
 
 import pytest
 
@@ -1353,6 +1354,8 @@ class TestBoxed(unittest.TestCase):
         # - another owned by @obj
         self.assertEqual(obj.refcount, 2)
         del wrapper
+        gc.collect()
+        gc.collect()
         self.assertEqual(obj.refcount, 1)
 
     def test_boxed_c_wrapper_copy(self):
@@ -1367,10 +1370,16 @@ class TestBoxed(unittest.TestCase):
         # - another owned by @obj
         self.assertEqual(obj.refcount, 3)
         del wrapper
+        gc.collect()
+        gc.collect()
         self.assertEqual(obj.refcount, 2)
         del wrapper_copy
+        gc.collect()
+        gc.collect()
         self.assertEqual(obj.refcount, 1)
         del obj
+        gc.collect()
+        gc.collect()
 
     def test_array_fixed_boxed_none_out(self):
         arr = Everything.test_array_fixed_boxed_none_out()

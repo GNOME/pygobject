@@ -128,11 +128,13 @@ class TestVFuncsWithObjectArg(unittest.TestCase):
         with warnings.catch_warnings(record=True) as warn:
             warnings.simplefilter('always')
             ref_count, is_floating = vfuncs.get_ref_info_for_vfunc_out_object_transfer_none()
-            self.assertTrue(issubclass(warn[0].category, RuntimeWarning))
+            if hasattr(sys, "getrefcount"):
+                self.assertTrue(issubclass(warn[0].category, RuntimeWarning))
 
         # The ref count of the GObject returned to the caller (get_ref_info_for_vfunc_return_object_transfer_none)
         # should be a single floating ref
-        self.assertEqual(ref_count, 1)
+        if hasattr(sys, "getrefcount"):
+            self.assertEqual(ref_count, 1)
         self.assertFalse(is_floating)
 
         gc.collect()
@@ -144,9 +146,11 @@ class TestVFuncsWithObjectArg(unittest.TestCase):
         with warnings.catch_warnings(record=True) as warn:
             warnings.simplefilter('always')
             ref_count, is_floating = vfuncs.get_ref_info_for_vfunc_out_object_transfer_none()
-            self.assertTrue(issubclass(warn[0].category, RuntimeWarning))
+            if hasattr(sys, "getrefcount"):
+                self.assertTrue(issubclass(warn[0].category, RuntimeWarning))
 
-        self.assertEqual(ref_count, 1)
+        if hasattr(sys, "getrefcount"):
+            self.assertEqual(ref_count, 1)
         self.assertFalse(is_floating)
 
         gc.collect()
@@ -158,7 +162,8 @@ class TestVFuncsWithObjectArg(unittest.TestCase):
 
         # The vfunc caller receives full ownership of a single ref which should not
         # be floating.
-        self.assertEqual(ref_count, 1)
+        if hasattr(sys, "getrefcount"):
+            self.assertEqual(ref_count, 1)
         self.assertFalse(is_floating)
 
         gc.collect()
@@ -169,7 +174,8 @@ class TestVFuncsWithObjectArg(unittest.TestCase):
         vfuncs = self.VFuncs()
         ref_count, is_floating = vfuncs.get_ref_info_for_vfunc_out_object_transfer_full()
 
-        self.assertEqual(ref_count, 1)
+        if hasattr(sys, "getrefcount"):
+            self.assertEqual(ref_count, 1)
         self.assertFalse(is_floating)
 
         gc.collect()
@@ -183,9 +189,12 @@ class TestVFuncsWithObjectArg(unittest.TestCase):
         self.assertEqual(vfuncs.in_object_grefcount, 2)  # initial + python wrapper
         self.assertFalse(vfuncs.in_object_is_floating)
 
-        self.assertEqual(ref_count, 1)  # ensure python wrapper released
+        if hasattr(sys, "getrefcount"):
+            self.assertEqual(ref_count, 1)  # ensure python wrapper released
         self.assertFalse(is_floating)
 
+        gc.collect()
+        gc.collect()
         self.assertTrue(vfuncs.object_ref() is None)
 
     def test_vfunc_in_object_transfer_full(self):
@@ -199,9 +208,12 @@ class TestVFuncsWithObjectArg(unittest.TestCase):
         self.assertFalse(vfuncs.in_object_is_floating)
 
         # ensure python wrapper took ownership and released, after vfunc was complete
-        self.assertEqual(ref_count, 0)
+        if hasattr(sys, "getrefcount"):
+            self.assertEqual(ref_count, 0)
         self.assertFalse(is_floating)
 
+        gc.collect()
+        gc.collect()
         self.assertTrue(vfuncs.object_ref() is None)
 
 
@@ -213,6 +225,7 @@ class TestVFuncsWithFloatingArg(unittest.TestCase):
         Object = GObject.InitiallyUnowned
         ObjectRef = weakref.ref
 
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), "refcount specific")
     def test_vfunc_return_object_transfer_none_with_floating(self):
         # Python is expected to return a single floating reference without warning.
         vfuncs = self.VFuncs()
@@ -226,6 +239,7 @@ class TestVFuncsWithFloatingArg(unittest.TestCase):
         gc.collect()
         self.assertTrue(vfuncs.object_ref() is None)
 
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), "refcount specific")
     def test_vfunc_out_object_transfer_none_with_floating(self):
         # Same as above except uses out arg instead of return
         vfuncs = self.VFuncs()
@@ -242,7 +256,8 @@ class TestVFuncsWithFloatingArg(unittest.TestCase):
         ref_count, is_floating = vfuncs.get_ref_info_for_vfunc_return_object_transfer_full()
 
         # The vfunc caller receives full ownership of a single ref.
-        self.assertEqual(ref_count, 1)
+        if hasattr(sys, "getrefcount"):
+            self.assertEqual(ref_count, 1)
         self.assertFalse(is_floating)
 
         gc.collect()
@@ -253,7 +268,8 @@ class TestVFuncsWithFloatingArg(unittest.TestCase):
         vfuncs = self.VFuncs()
         ref_count, is_floating = vfuncs.get_ref_info_for_vfunc_out_object_transfer_full()
 
-        self.assertEqual(ref_count, 1)
+        if hasattr(sys, "getrefcount"):
+            self.assertEqual(ref_count, 1)
         self.assertFalse(is_floating)
 
         gc.collect()
@@ -270,9 +286,12 @@ class TestVFuncsWithFloatingArg(unittest.TestCase):
         self.assertTrue(vfuncs.in_object_is_floating)
 
         # vfunc caller should only have a single floating ref after the vfunc finishes
-        self.assertEqual(ref_count, 1)
+        if hasattr(sys, "getrefcount"):
+            self.assertEqual(ref_count, 1)
         self.assertTrue(is_floating)
 
+        gc.collect()
+        gc.collect()
         self.assertTrue(vfuncs.object_ref() is None)
 
     def test_vfunc_in_object_transfer_full_with_floating(self):
@@ -286,9 +305,12 @@ class TestVFuncsWithFloatingArg(unittest.TestCase):
         self.assertFalse(vfuncs.in_object_is_floating)
 
         # ensure python wrapper took ownership and released
-        self.assertEqual(ref_count, 0)
+        if hasattr(sys, "getrefcount"):
+            self.assertEqual(ref_count, 0)
         self.assertFalse(is_floating)
 
+        gc.collect()
+        gc.collect()
         self.assertTrue(vfuncs.object_ref() is None)
 
 
