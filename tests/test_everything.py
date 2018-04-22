@@ -1330,7 +1330,7 @@ class TestBoxed(unittest.TestCase):
         with warnings.catch_warnings(record=True) as warn:
             warnings.simplefilter('always')
             boxed = Everything.TestBoxedB(42, 47)
-            self.assertTrue(issubclass(warn[0].category, TypeError))
+            self.assertTrue(issubclass(warn[0].category, DeprecationWarning))
 
         self.assertEqual(boxed.some_int8, 0)
         self.assertEqual(boxed.some_long, 0)
