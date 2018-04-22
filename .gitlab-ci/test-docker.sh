@@ -28,11 +28,6 @@ python -m pip install flake8 pytest pytest-faulthandler coverage
 
 export CFLAGS="-coverage -ftest-coverage -fprofile-arcs -Werror"
 
-if [[ "${PYIMPL}" == "PyPy" ]]; then
-    python setup.py build_tests
-    exit 0;
-fi;
-
 # CODE QUALITY
 python -m flake8
 
