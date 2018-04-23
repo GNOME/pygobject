@@ -312,7 +312,6 @@ pyg_array_from_pyobject(GValue *value,
 int
 pyg_value_from_pyobject_with_error(GValue *value, PyObject *obj)
 {
-    PyObject *tmp;
     GType value_type = G_VALUE_TYPE(value);
 
     switch (G_TYPE_FUNDAMENTAL(value_type)) {
@@ -339,50 +338,23 @@ pyg_value_from_pyobject_with_error(GValue *value, PyObject *obj)
         }
         break;
     case G_TYPE_CHAR:
-        if (PYGLIB_PyLong_Check(obj)) {
-            glong val;
-            val = PYGLIB_PyLong_AsLong(obj);
-            if (val >= -128 && val <= 127)
-                g_value_set_schar(value, (gchar) val);
-            else
-                return -1;
-        }
-#if PY_VERSION_HEX < 0x03000000
-        else if (PyString_Check(obj)) {
-            g_value_set_schar(value, PyString_AsString(obj)[0]);
-        }
-#endif
-        else if (PyUnicode_Check(obj)) {
-            tmp = PyUnicode_AsUTF8String(obj);
-            g_value_set_schar(value, PYGLIB_PyBytes_AsString(tmp)[0]);
-            Py_DECREF(tmp);
-        } else {
-            PyErr_SetString(PyExc_TypeError, "Cannot convert to TYPE_CHAR");
+    {
+        gint8 temp;
+        if (pygi_gschar_from_py (obj, &temp)) {
+            g_value_set_schar (value, temp);
+            return 0;
+        } else
             return -1;
-        }
-
-        break;
+    }
     case G_TYPE_UCHAR:
-        if (PYGLIB_PyLong_Check(obj)) {
-            glong val;
-            val = PYGLIB_PyLong_AsLong(obj);
-            if (val >= 0 && val <= 255)
-                g_value_set_uchar(value, (guchar) val);
-            else
-                return -1;
-#if PY_VERSION_HEX < 0x03000000
-        } else if (PyString_Check(obj)) {
-            g_value_set_uchar(value, PyString_AsString(obj)[0]);
-#endif
-        } else if (PyUnicode_Check(obj)) {
-            tmp = PyUnicode_AsUTF8String(obj);
-            g_value_set_uchar(value, PYGLIB_PyBytes_AsString(tmp)[0]);
-            Py_DECREF(tmp);
-        } else {
-            PyErr_Clear();
+    {
+        guchar temp;
+        if (pygi_guchar_from_py (obj, &temp)) {
+            g_value_set_uchar (value, temp);
+            return 0;
+        } else
             return -1;
-        }
-        break;
+    }
     case G_TYPE_BOOLEAN:
     {
         gboolean temp;

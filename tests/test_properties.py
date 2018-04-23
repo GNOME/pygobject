@@ -1021,6 +1021,26 @@ class CPropertiesTestBase(object):
         obj = GIMarshallingTests.PropertiesObject(some_char=-42)
         self.assertEqual(self.get_prop(obj, 'some-char'), -42)
 
+        with pytest.raises(OverflowError):
+            self.set_prop(obj, 'some-char', GLib.MAXINT8 + 1)
+        with pytest.raises(OverflowError):
+            self.set_prop(obj, 'some-char', GLib.MININT8 - 1)
+
+        self.set_prop(obj, 'some-char', b"\x44")
+        assert self.get_prop(obj, 'some-char') == 0x44
+
+        self.set_prop(obj, 'some-char', b"\xff")
+        assert self.get_prop(obj, 'some-char') == -1
+
+        obj = GIMarshallingTests.PropertiesObject(some_char=u"\x7f")
+        assert self.get_prop(obj, 'some-char') == 0x7f
+
+        with pytest.raises(TypeError):
+            GIMarshallingTests.PropertiesObject(some_char=u"€")
+
+        with pytest.raises(TypeError):
+            GIMarshallingTests.PropertiesObject(some_char=u"\ud83d")
+
     def test_uchar(self):
         self.assertEqual(self.get_prop(self.obj, 'some-uchar'), 0)
         self.set_prop(self.obj, 'some-uchar', GLib.MAXUINT8)
@@ -1028,6 +1048,26 @@ class CPropertiesTestBase(object):
 
         obj = GIMarshallingTests.PropertiesObject(some_uchar=42)
         self.assertEqual(self.get_prop(obj, 'some-uchar'), 42)
+
+        with pytest.raises(OverflowError):
+            self.set_prop(obj, 'some-uchar', GLib.MAXUINT8 + 1)
+        with pytest.raises(OverflowError):
+            self.set_prop(obj, 'some-uchar', -1)
+
+        self.set_prop(obj, 'some-uchar', b"\x57")
+        assert self.get_prop(obj, 'some-uchar') == 0x57
+
+        self.set_prop(obj, 'some-uchar', b"\xff")
+        assert self.get_prop(obj, 'some-uchar') == 255
+
+        obj = GIMarshallingTests.PropertiesObject(some_uchar=u"\x7f")
+        assert self.get_prop(obj, 'some-uchar') == 127
+
+        with pytest.raises(TypeError):
+            GIMarshallingTests.PropertiesObject(some_uchar=u"\x80")
+
+        with pytest.raises(TypeError):
+            GIMarshallingTests.PropertiesObject(some_uchar=u"\ud83d")
 
     def test_int(self):
         self.assertEqual(self.get_prop(self.obj, 'some_int'), 0)

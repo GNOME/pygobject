@@ -66,6 +66,7 @@ PyObject *pygi_gulong_to_py (gulong value);
 PyObject *pygi_filename_to_py (gchar *value);
 PyObject *pygi_gsize_to_py (gsize value);
 PyObject *pygi_gssize_to_py (gssize value);
+PyObject *pygi_guint32_to_py (guint32 value);
 
 gboolean pygi_gboolean_from_py (PyObject *object, gboolean *result);
 gboolean pygi_gint64_from_py (PyObject *object, gint64 *result);
@@ -78,6 +79,10 @@ gboolean pygi_gulong_from_py (PyObject *object, gulong *result);
 gboolean pygi_gint_from_py (PyObject *object, gint *result);
 gboolean pygi_guint_from_py (PyObject *object, guint *result);
 gboolean pygi_gunichar_from_py (PyObject *py_arg, gunichar *result);
+gboolean pygi_gint8_from_py (PyObject *object, gint8 *result);
+gboolean pygi_gschar_from_py (PyObject *object, gint8 *result);
+gboolean pygi_guint8_from_py (PyObject *object, guint8 *result);
+gboolean pygi_guchar_from_py (PyObject *object, guchar *result);
 
 G_END_DECLS
 

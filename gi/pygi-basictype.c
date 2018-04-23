@@ -505,6 +505,55 @@ pygi_gboolean_to_py (gboolean value)
     return PyBool_FromLong (value);
 }
 
+/* A super set of pygi_gint8_from_py (also handles unicode) */
+gboolean
+pygi_gschar_from_py (PyObject *object, gint8 *result)
+{
+    if (PyUnicode_Check (object)) {
+        gunichar uni;
+        PyObject *temp;
+        gboolean status;
+
+        if (!pygi_gunichar_from_py (object, &uni))
+            return FALSE;
+
+        temp = pygi_guint32_to_py (uni);
+        status = pygi_gint8_from_py (temp, result);
+        Py_DECREF (temp);
+        return status;
+    } else {
+        /* pygi_gint8_from_py handles numbers and bytes */
+        return pygi_gint8_from_py (object, result);
+    }
+
+    return FALSE;
+}
+
+/* A super set of pygi_guint8_from_py (also handles unicode) */
+gboolean
+pygi_guchar_from_py (PyObject *object, guchar *result)
+{
+    if (PyUnicode_Check (object)) {
+        gunichar uni;
+        PyObject *temp;
+        gboolean status;
+        gint8 codepoint;
+
+        if (!pygi_gunichar_from_py (object, &uni))
+            return FALSE;
+
+        temp = pygi_guint32_to_py (uni);
+        status = pygi_gint8_from_py (temp, &codepoint);
+        Py_DECREF (temp);
+        if (status)
+            *result = (guchar)codepoint;
+        return status;
+    } else {
+        /* pygi_guint8_from_py handles numbers and bytes */
+        return pygi_guint8_from_py (object, result);
+    }
+}
+
 gboolean
 pygi_gint_from_py (PyObject *object, gint *result)
 {
@@ -662,7 +711,7 @@ pygi_gulong_to_py (gulong value)
         return PyLong_FromUnsignedLong (value);
 }
 
-static gboolean
+gboolean
 pygi_gint8_from_py (PyObject *object, gint8 *result)
 {
     long long_value;
@@ -710,7 +759,7 @@ pygi_gint8_to_py (gint8 value)
     return PYGLIB_PyLong_FromLong (value);
 }
 
-static gboolean
+gboolean
 pygi_guint8_from_py (PyObject *object, guint8 *result)
 {
     long long_value;
@@ -904,7 +953,7 @@ overflow:
     return FALSE;
 }
 
-static PyObject *
+PyObject *
 pygi_guint32_to_py (guint32 value)
 {
 #if (G_MAXUINT <= LONG_MAX)
