@@ -860,16 +860,21 @@ def add_ext_pkg_config_dep(ext, compiler_type, name):
         "libffi": ["ffi"],
     }
 
+    def add(target, new):
+        for entry in new:
+            if entry not in target:
+                target.append(entry)
+
     fallback_libs = msvc_libraries[name]
     if compiler_type == "msvc":
         # assume that INCLUDE and LIB contains the right paths
-        ext.libraries += fallback_libs
+        add(ext.libraries, fallback_libs)
     else:
         min_version = get_version_requirement(name)
         pkg_config_version_check(name, min_version)
-        ext.include_dirs += pkg_config_parse("--cflags-only-I", name)
-        ext.library_dirs += pkg_config_parse("--libs-only-L", name)
-        ext.libraries += pkg_config_parse("--libs-only-l", name)
+        add(ext.include_dirs, pkg_config_parse("--cflags-only-I", name))
+        add(ext.library_dirs, pkg_config_parse("--libs-only-L", name))
+        add(ext.libraries, pkg_config_parse("--libs-only-l", name))
 
 
 def add_ext_compiler_flags(ext, compiler, _cache={}):
