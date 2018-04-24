@@ -505,6 +505,15 @@ _wrap_test_value(PyObject *self, PyObject *args)
 }
 
 static PyObject *
+_wrap_test_state_ensure_release(PyObject *self, PyObject *args)
+{
+    int state = pyg_gil_state_ensure ();
+    pyg_gil_state_release (state);
+
+    Py_RETURN_NONE;
+}
+
+static PyObject *
 _wrap_test_value_array(PyObject *self, PyObject *args)
 {
   GValue tvalue = {0,}, *value = &tvalue;
@@ -651,6 +660,7 @@ static PyMethodDef testhelper_functions[] = {
     { "test_to_unichar_conv", (PyCFunction)_wrap_test_to_unichar_conv, METH_VARARGS },
     { "get_unknown", (PyCFunction)_wrap_get_unknown, METH_NOARGS },
     { "create_test_type", (PyCFunction)_wrap_create_test_type, METH_NOARGS },
+    { "test_state_ensure_release", (PyCFunction)_wrap_test_state_ensure_release, METH_NOARGS },
     { "test_g_object_new", (PyCFunction)_wrap_test_g_object_new, METH_NOARGS },
     { "connectcallbacks", (PyCFunction)_wrap_connectcallbacks, METH_VARARGS },
     { "test_value", (PyCFunction)_wrap_test_value, METH_VARARGS },      

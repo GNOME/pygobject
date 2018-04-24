@@ -125,3 +125,7 @@ def test_constant_strip_prefix():
     assert testhelper.constant_strip_prefix("ha2foo", "ha") == "a2foo"
     assert testhelper.constant_strip_prefix("2foo", "ha") == "2foo"
     assert testhelper.constant_strip_prefix("bla_foo", "bla") == "_foo"
+
+
+def test_state_ensure_release():
+    testhelper.test_state_ensure_release()
