@@ -200,13 +200,39 @@ __all__ += ['GBoxed', 'GEnum', 'GFlags', 'GInterface', 'GObject',
 
 
 features = {'generic-c-marshaller': True}
-list_properties = _gi.list_properties
 new = _gi.new
 pygobject_version = _gi.pygobject_version
 threads_init = GLib.threads_init
 type_register = _gi.type_register
-__all__ += ['features', 'list_properties', 'new',
+__all__ += ['features', 'new',
             'pygobject_version', 'threads_init', 'type_register']
+
+
+def list_properties(type_):
+    """
+    :param type_: GObject/GInterface subclass or a GType
+    :type type_: :obj:`GObject.Object`
+
+    :returns: a list of :obj:`GObject.ParamSpec`
+    :rtype: [:obj:`GObject.ParamSpec`]
+
+    Takes a GObject/GInterface subclass or a GType and returns a list of
+    GParamSpecs for all properties of `type`.
+    """
+
+    gtype = GType(type_)
+    if gtype.is_interface():
+        iface = GObjectModule.type_default_interface_ref(gtype)
+        if iface is None:
+            raise RuntimeError("could not get a reference to interface type")
+        return GObject.interface_list_properties(iface)
+    elif gtype.is_a(GObject):
+        return GObjectModule.ObjectClass.list_properties(gtype)
+    else:
+        raise TypeError("type must be derived from GObject or an interface")
+
+
+__all__ += ['list_properties']
 
 
 class Value(GObjectModule.Value):
@@ -578,7 +604,6 @@ class Object(GObjectModule.Object):
     compat_control = _unsupported_method
     interface_find_property = _unsupported_method
     interface_install_property = _unsupported_method
-    interface_list_properties = _unsupported_method
     notify_by_pspec = _unsupported_method
     run_dispose = _unsupported_method
     watch_closure = _unsupported_method

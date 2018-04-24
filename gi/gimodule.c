@@ -2158,63 +2158,6 @@ pyg_signal_new(PyObject *self, PyObject *args)
 }
 
 static PyObject *
-pyg_object_class_list_properties (PyObject *self, PyObject *args)
-{
-    GParamSpec **specs;
-    PyObject *py_itype, *list;
-    GType itype;
-    GObjectClass *class = NULL;
-    gpointer iface = NULL;
-    guint nprops;
-    guint i;
-
-    if (!PyArg_ParseTuple(args, "O:gobject.list_properties",
-			  &py_itype))
-	return NULL;
-    if ((itype = pyg_type_from_object(py_itype)) == 0)
-	return NULL;
-
-    if (G_TYPE_IS_INTERFACE(itype)) {
-        iface = g_type_default_interface_ref(itype);
-        if (!iface) {
-            PyErr_SetString(PyExc_RuntimeError,
-                            "could not get a reference to interface type");
-            return NULL;
-        }
-        specs = g_object_interface_list_properties(iface, &nprops);
-    } else if (g_type_is_a(itype, G_TYPE_OBJECT)) {
-        class = g_type_class_ref(itype);
-        if (!class) {
-            PyErr_SetString(PyExc_RuntimeError,
-                            "could not get a reference to type class");
-            return NULL;
-        }
-        specs = g_object_class_list_properties(class, &nprops);
-    } else {
-	PyErr_SetString(PyExc_TypeError,
-                        "type must be derived from GObject or an interface");
-	return NULL;
-    }
-
-    list = PyTuple_New(nprops);
-    if (list == NULL) {
-	g_free(specs);
-	g_type_class_unref(class);
-	return NULL;
-    }
-    for (i = 0; i < nprops; i++) {
-	PyTuple_SetItem(list, i, pyg_param_spec_new(specs[i]));
-    }
-    g_free(specs);
-    if (class)
-        g_type_class_unref(class);
-    else
-        g_type_default_interface_unref(iface);
-
-    return list;
-}
-
-static PyObject *
 pyg__install_metaclass(PyObject *dummy, PyTypeObject *metaclass)
 {
     Py_INCREF(metaclass);
@@ -2290,8 +2233,6 @@ static PyMethodDef _gi_functions[] = {
       "See the reference manual for a complete reference.\n" },
     { "type_register", _wrap_pyg_type_register, METH_VARARGS },
     { "signal_new", pyg_signal_new, METH_VARARGS },
-    { "list_properties",
-      pyg_object_class_list_properties, METH_VARARGS },
     { "new",
       (PyCFunction)pyg_object_new, METH_VARARGS|METH_KEYWORDS },
     { "add_emission_hook",
