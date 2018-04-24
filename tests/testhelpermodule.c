@@ -526,6 +526,19 @@ _wrap_test_value_array(PyObject *self, PyObject *args)
 }
 
 static PyObject *
+_wrap_constant_strip_prefix(PyObject *self, PyObject *args)
+{
+    const char *name, *strip_prefix;
+    const gchar *result;
+
+    if (!PyArg_ParseTuple (args, "ss", &name, &strip_prefix))
+        return NULL;
+
+    result = pyg_constant_strip_prefix (name, strip_prefix);
+    return PYGLIB_PyUnicode_FromString (result);
+}
+
+static PyObject *
 _wrap_test_gerror_exception(PyObject *self, PyObject *args)
 {
     PyObject *py_method;
@@ -642,6 +655,7 @@ static PyMethodDef testhelper_functions[] = {
     { "connectcallbacks", (PyCFunction)_wrap_connectcallbacks, METH_VARARGS },
     { "test_value", (PyCFunction)_wrap_test_value, METH_VARARGS },      
     { "test_value_array", (PyCFunction)_wrap_test_value_array, METH_VARARGS },
+    { "constant_strip_prefix", (PyCFunction)_wrap_constant_strip_prefix, METH_VARARGS },
     { "test_gerror_exception", (PyCFunction)_wrap_test_gerror_exception, METH_VARARGS },
     { "owned_by_library_get_instance_list", (PyCFunction)_wrap_test_owned_by_library_get_instance_list, METH_NOARGS },
     { "floating_and_sunk_get_instance_list", (PyCFunction)_wrap_test_floating_and_sunk_get_instance_list, METH_NOARGS },

@@ -116,3 +116,12 @@ def test_to_unichar_conv():
 
     with pytest.raises(TypeError):
         testhelper.test_to_unichar_conv(u"AA")
+
+
+def test_constant_strip_prefix():
+    assert testhelper.constant_strip_prefix("foo", "bar") == "foo"
+    assert testhelper.constant_strip_prefix("foo", "f") == "oo"
+    assert testhelper.constant_strip_prefix("foo", "f") == "oo"
+    assert testhelper.constant_strip_prefix("ha2foo", "ha") == "a2foo"
+    assert testhelper.constant_strip_prefix("2foo", "ha") == "2foo"
+    assert testhelper.constant_strip_prefix("bla_foo", "bla") == "_foo"
