@@ -7,7 +7,9 @@ import gc
 import unittest
 import warnings
 
-from gi.repository import GObject, GLib
+import pytest
+
+from gi.repository import GObject, GLib, Gio
 from gi import PyGIDeprecationWarning
 from gi.module import get_introspection_module
 from gi import _gi
@@ -711,3 +713,43 @@ class TestGValue(unittest.TestCase):
         value = GObject.Value(GLib.Error)
         self.assertEqual(value.g_type, GObject.type_from_name('GError'))
         self.assertEqual(value.get_value(), None)
+
+
+def test_list_properties():
+
+    def find_param(l, name):
+        for param in l:
+            if param.name == name:
+                return param
+        return
+
+    list_props = GObject.list_properties
+
+    props = list_props(Gio.Action)
+    param = find_param(props, "enabled")
+    assert param
+    assert param.value_type == GObject.TYPE_BOOLEAN
+    assert list_props("GAction") == list_props(Gio.Action)
+    assert list_props(Gio.Action.__gtype__) == list_props(Gio.Action)
+
+    props = list_props(Gio.SimpleAction)
+    assert find_param(props, "enabled")
+
+    def names(l):
+        return [p.name for p in l]
+
+    assert (set(names(list_props(Gio.Action))) <=
+            set(names(list_props(Gio.SimpleAction))))
+
+    props = list_props(Gio.FileIcon)
+    param = find_param(props, "file")
+    assert param
+    assert param.value_type == Gio.File.__gtype__
+
+    assert list_props("GFileIcon") == list_props(Gio.FileIcon)
+    assert list_props(Gio.FileIcon.__gtype__) == list_props(Gio.FileIcon)
+    assert list_props(Gio.FileIcon()) == list_props(Gio.FileIcon)
+
+    for obj in [Gio.ActionEntry, Gio.DBusError, 0, object()]:
+        with pytest.raises(TypeError):
+            list_props(obj)
