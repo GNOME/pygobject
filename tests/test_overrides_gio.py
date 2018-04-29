@@ -310,3 +310,20 @@ def test_list_store_setitem_slice():
     with pytest.raises(TypeError):
         store[:] = [Item(), object()]
     assert len(store) == 0
+
+
+def test_action_map_add_action_entries():
+    actionmap = Gio.SimpleActionGroup()
+
+    def f(*args):
+        pass
+
+    actionmap.add_action_entries((
+        ("simple", f),
+        ("with_type", f, "i"),
+        ("with_state", f, "s", "'left'", f),
+        ("guess_type", f, None, "false", f),
+    ))
+    actionmap.add_action_entries((
+        ("with_user_data", f),
+    ), "user_data")

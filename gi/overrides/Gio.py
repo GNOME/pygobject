@@ -64,6 +64,48 @@ VolumeMonitor = override(VolumeMonitor)
 __all__.append('VolumeMonitor')
 
 
+class ActionMap(Gio.ActionMap):
+    def add_action_entries(self, entries, user_data=None):
+        try:
+            iter(entries)
+        except (TypeError):
+            raise TypeError('entries must be iterable')
+
+        def _process_action(name, activate=None, parameter_type=None,
+                            state=None, change_state=None):
+            if parameter_type:
+                if not GLib.VariantType.string_is_valid(parameter_type):
+                    raise TypeError("The type string '%s' given as the "
+                                    "parameter type for action '%s' is "
+                                    "not a valid GVariant type string. " %
+                                    (parameter_type, name))
+                variant_parameter = GLib.VariantType.new(parameter_type)
+            else:
+                variant_parameter = None
+
+            if state is not None:
+                # stateful action
+                variant_state = GLib.Variant.parse(variant_parameter, state, None, None)
+                action = Gio.SimpleAction.new_stateful(name, variant_parameter,
+                                                       variant_state)
+                if change_state is not None:
+                    action.connect('change-state', change_state, user_data)
+            else:
+                action = Gio.SimpleAction(name=name, parameter_type=variant_parameter)
+
+            if activate is not None:
+                action.connect('activate', activate, user_data)
+            self.add_action(action)
+
+        for entry in entries:
+            # using inner function above since entries can leave out optional arguments
+            _process_action(*entry)
+
+
+ActionMap = override(ActionMap)
+__all__.append('ActionMap')
+
+
 class FileEnumerator(Gio.FileEnumerator):
     def __iter__(self):
         return self
