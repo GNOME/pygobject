@@ -1,7 +1,6 @@
-FROM ubuntu:artful
+FROM ubuntu:bionic
 
 RUN apt-get update && apt-get install -y \
-    autoconf-archive \
     build-essential \
     ccache \
     curl \
@@ -17,10 +16,7 @@ RUN apt-get update && apt-get install -y \
     libglib2.0-dev \
     libgtk-3-0 \
     libreadline-dev \
-    libsqlite3-dev \
     libssl-dev \
-    libtool \
-    locales \
     xauth \
     xvfb \
     && rm -rf /var/lib/apt/lists/*
@@ -40,7 +36,6 @@ ENV PATH="${PYENV_ROOT}/shims:${PYENV_ROOT}/bin:${PATH}"
 RUN curl -L https://raw.githubusercontent.com/pyenv/pyenv-installer/master/bin/pyenv-installer | bash
 
 RUN pyenv install 2.7.14
-RUN pyenv install 3.4.8
 RUN pyenv install 3.5.5
 RUN pyenv install 3.6.5
 RUN pyenv install 3.7.0b3
