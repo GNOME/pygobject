@@ -310,3 +310,36 @@ def test_list_store_setitem_slice():
     with pytest.raises(TypeError):
         store[:] = [Item(), object()]
     assert len(store) == 0
+
+
+def test_action_map_add_action_entries():
+    actionmap = Gio.SimpleActionGroup()
+
+    test_data = []
+    def f(action, parameter, data):
+        test_data.append(True)
+
+    actionmap.add_action_entries((
+        ("simple", f),
+        ("with_type", f, "i"),
+        ("with_state", f, "s", "'left'", f),
+    ))
+    assert actionmap.has_action("simple")
+    assert actionmap.has_action("with_type")
+    assert actionmap.has_action("with_state")
+    actionmap.add_action_entries((
+        ("with_user_data", f),
+    ), "user_data")
+    assert actionmap.has_action("with_user_data")
+
+    with pytest.raises(TypeError):
+        actionmap.add_action_entries((
+            ("invaild_type_string", f, 'asdf'),
+        ))
+    with pytest.raises(ValueError):
+        actionmap.add_action_entries((
+            ("stateless_with_change_state", f, None, None, f),
+        ))
+
+    actionmap.activate_action("simple")
+    assert test_data[0] == True
