@@ -55,7 +55,8 @@ python_sources = [
   '_propertyhelper.py',
   'pygtkcompat.py',
   '_signalhelper.py',
-  'types.py']
+  'types.py',
+  '_compat.py']
 
 python.install_sources(python_sources,
   pure : false,
