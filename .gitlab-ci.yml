@@ -59,6 +59,7 @@ python2-mingw32:
   <<: *mingw-defaults
 
 python2-mingw64:
+  when: manual
   variables:
     PYTHON: "python2"
     MSYSTEM: "MINGW64"
@@ -66,6 +67,7 @@ python2-mingw64:
   <<: *mingw-defaults
 
 python3-mingw32:
+  when: manual
   variables:
     PYTHON: "python3"
     MSYSTEM: "MINGW32"
@@ -85,6 +87,7 @@ python2.7:
   <<: *defaults
 
 python3.5:
+  when: manual
   variables:
     PYENV_VERSION: "3.5.5"
   <<: *defaults
@@ -106,6 +109,7 @@ pypy2:
   <<: *defaults
 
 pypy3:
+  when: manual
   allow_failure: true
   variables:
     PYENV_VERSION: "pypy3.5-5.10.1"
