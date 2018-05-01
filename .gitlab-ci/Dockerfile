@@ -35,11 +35,11 @@ ENV PATH="${PYENV_ROOT}/shims:${PYENV_ROOT}/bin:${PATH}"
 
 RUN curl -L https://raw.githubusercontent.com/pyenv/pyenv-installer/master/bin/pyenv-installer | bash
 
-RUN pyenv install 2.7.14
+RUN pyenv install 2.7.15
 RUN pyenv install 3.5.5
 RUN pyenv install 3.6.5
 RUN pyenv install 3.7.0b3
-RUN pyenv install pypy2.7-5.10.0
-RUN pyenv install pypy3.5-5.10.1
+RUN pyenv install pypy2.7-6.0.0
+RUN pyenv install pypy3.5-6.0.0
 
 ENV PATH="/usr/lib/ccache:${PATH}"

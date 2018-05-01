@@ -1,4 +1,4 @@
-image: registry.gitlab.gnome.org/gnome/pygobject/main:v5
+image: registry.gitlab.gnome.org/gnome/pygobject/main:v6
 
 stages:
   - build_and_test
@@ -83,7 +83,7 @@ python3-mingw64:
 
 python2.7:
   variables:
-    PYENV_VERSION: "2.7.14"
+    PYENV_VERSION: "2.7.15"
   <<: *defaults
 
 python3.5:
@@ -105,14 +105,14 @@ python3.7:
 pypy2:
   allow_failure: true
   variables:
-    PYENV_VERSION: "pypy2.7-5.10.0"
+    PYENV_VERSION: "pypy2.7-6.0.0"
   <<: *defaults
 
 pypy3:
   when: manual
   allow_failure: true
   variables:
-    PYENV_VERSION: "pypy3.5-5.10.1"
+    PYENV_VERSION: "pypy3.5-6.0.0"
   <<: *defaults
 
 xenial-i386-py2:
