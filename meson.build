@@ -89,6 +89,7 @@ main_c_args += [
   '-Wno-unused-parameter',
   '-Wno-discarded-qualifiers',
   '-Wno-sign-conversion',
+  '-Wno-cast-function-type',
 ]
 
 main_c_args += [
