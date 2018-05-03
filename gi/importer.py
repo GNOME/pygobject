@@ -116,21 +116,21 @@ class DynamicImporter(object):
         if path != self.path:
             return
 
-        # is_registered() is faster than enumerate_versions() and
-        # in the common case of a namespace getting loaded before its
-        # dependencies, is_registered() returns True for all dependencies.
-        if repository.is_registered(namespace) or \
-                repository.enumerate_versions(namespace):
-            return self
-        else:
-            raise ImportError('cannot import name %s, '
-                              'introspection typelib not found' % namespace)
+        return self
 
     def load_module(self, fullname):
         if fullname in sys.modules:
             return sys.modules[fullname]
 
         path, namespace = fullname.rsplit('.', 1)
+
+        # is_registered() is faster than enumerate_versions() and
+        # in the common case of a namespace getting loaded before its
+        # dependencies, is_registered() returns True for all dependencies.
+        if not repository.is_registered(namespace) and not \
+                repository.enumerate_versions(namespace):
+            raise ImportError('cannot import name %s, '
+                              'introspection typelib not found' % namespace)
 
         stacklevel = get_import_stacklevel(import_hook=True)
         with _check_require_version(namespace, stacklevel=stacklevel):
