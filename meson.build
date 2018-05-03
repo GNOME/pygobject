@@ -16,7 +16,6 @@ pymod = import('python')
 python = pymod.find_installation(get_option('python'))
 
 python_dep = python.dependency()
-python_no_warn_flags = []
 
 glib_version_req = '>= 2.38.0'
 gi_version_req = '>= 1.46.0'
@@ -47,11 +46,63 @@ endif
 
 cc = meson.get_compiler('c')
 
-supported_arguments = cc.get_supported_arguments([
-  '-Wno-discarded-qualifiers'])
+main_c_args = [
+  '-Wall',
+  '-Warray-bounds',
+  '-Wcast-align',
+  '-Wdeclaration-after-statement',
+  '-Wduplicated-branches',
+  '-Wextra',
+  '-Wformat=2',
+  '-Wformat-nonliteral',
+  '-Wformat-security',
+  '-Wimplicit-function-declaration',
+  '-Winit-self',
+  '-Winline',
+  '-Wjump-misses-init',
+  '-Wlogical-op',
+  '-Wmissing-declarations',
+  '-Wmissing-format-attribute',
+  '-Wmissing-include-dirs',
+  '-Wmissing-noreturn',
+  '-Wmissing-prototypes',
+  '-Wnested-externs',
+  '-Wnull-dereference',
+  '-Wold-style-definition',
+  '-Wpacked',
+  '-Wpointer-arith',
+  '-Wrestrict',
+  '-Wreturn-type',
+  '-Wshadow',
+  '-Wsign-compare',
+  '-Wstrict-aliasing',
+  '-Wstrict-prototypes',
+  '-Wundef',
+  '-Wunused-but-set-variable',
+  '-Wwrite-strings',
+  '-Wconversion',
+]
 
-add_project_arguments(supported_arguments, language: 'c')
+main_c_args += [
+  '-Wno-incompatible-pointer-types-discards-qualifiers',
+  '-Wno-missing-field-initializers',
+  '-Wno-unused-parameter',
+  '-Wno-discarded-qualifiers',
+  '-Wno-sign-conversion',
+]
 
+main_c_args += [
+  '-fno-strict-aliasing',
+  '-fvisibility=hidden',
+]
+
+if not ['3.3', '3.4'].contains(python.language_version())
+  main_c_args += [
+    '-Wswitch-default',
+  ]
+endif
+
+main_c_args = cc.get_supported_arguments(main_c_args)
 
 cdata = configuration_data()
 
