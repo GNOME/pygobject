@@ -44,9 +44,11 @@ headers = [
 install_headers(headers, subdir : 'pygobject-@0@'.format(platform_version))
 
 python_sources = [
+  '_compat.py',
   '_constants.py',
   'docstring.py',
   '_error.py',
+  '_gtktemplate.py',
   'importer.py',
   '__init__.py',
   'module.py',
@@ -56,7 +58,7 @@ python_sources = [
   'pygtkcompat.py',
   '_signalhelper.py',
   'types.py',
-  '_compat.py']
+]
 
 python.install_sources(python_sources,
   pure : false,
