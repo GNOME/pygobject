@@ -16,7 +16,10 @@ RUN apt-get update && apt-get install -y \
     libglib2.0-dev \
     libgtk-3-0 \
     libreadline-dev \
+    libsqlite3-dev \
     libssl-dev \
+    ninja-build \
+    python3-pip \
     xauth \
     xvfb \
     && rm -rf /var/lib/apt/lists/*
@@ -32,6 +35,7 @@ ENV LANG C.UTF-8
 ENV CI true
 ENV PYENV_ROOT /home/user/.pyenv
 ENV PATH="${PYENV_ROOT}/shims:${PYENV_ROOT}/bin:${PATH}"
+ENV PYTHON_CONFIGURE_OPTS="--enable-shared"
 
 RUN curl -L https://raw.githubusercontent.com/pyenv/pyenv-installer/master/bin/pyenv-installer | bash
 
