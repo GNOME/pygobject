@@ -100,7 +100,7 @@ helper_sources = [
 
 helperext = python.extension_module('testhelper', helper_sources,
   dependencies : [python_dep, glib_dep, gobject_dep],
-  c_args: ['-DPY_SSIZE_T_CLEAN'] + main_c_args,
+  c_args: pyext_c_args + main_c_args,
   include_directories: include_directories(join_paths('..', 'gi'))
 )
 

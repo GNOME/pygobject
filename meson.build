@@ -104,6 +104,8 @@ endif
 
 main_c_args = cc.get_supported_arguments(main_c_args)
 
+pyext_c_args = ['-DPY_SSIZE_T_CLEAN']
+
 cdata = configuration_data()
 
 cdata.set('PYGOBJECT_MAJOR_VERSION', pygobject_version_major)
