@@ -28,6 +28,16 @@ python -m pip install flake8 pytest pytest-faulthandler coverage
 
 export CFLAGS="-coverage -ftest-coverage -fprofile-arcs -Werror"
 
+# MESON
+if [[ "${PYIMPL}" != "PyPy" ]]; then
+    # https://github.com/mesonbuild/meson/pull/3445
+    /usr/bin/python3 -m pip install --user meson
+    export PATH="${HOME}/.local/bin:${PATH}"
+    meson _build -Dpython="$(which python)"
+    ninja -C _build
+    rm -Rf _build
+fi;
+
 # CODE QUALITY
 python -m flake8
 
