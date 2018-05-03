@@ -68,13 +68,13 @@ giext = python.extension_module('_gi', sources,
   include_directories: include_directories('..'),
   install: true,
   subdir : 'gi',
-  c_args: ['-DPY_SSIZE_T_CLEAN'] + main_c_args
+  c_args: pyext_c_args + main_c_args
 )
 
 if pycairo_dep.found()
   gicairoext = python.extension_module('_gi_cairo', ['pygi-foreign-cairo.c'],
     dependencies : [python_dep, glib_dep, gi_dep, ffi_dep, pycairo_dep],
-    c_args: ['-DPY_SSIZE_T_CLEAN'] + main_c_args)
+    c_args: pyext_c_args + main_c_args)
 endif
 
 subdir('overrides')
