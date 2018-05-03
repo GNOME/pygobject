@@ -44,8 +44,8 @@ from gi import _gi
 from gi._error import GError
 
 Error = GError
-OptionContext = _gi.OptionContext
-OptionGroup = _gi.OptionGroup
+OptionContext = GLib.OptionContext
+OptionGroup = GLib.OptionGroup
 Pid = _gi.Pid
 spawn_async = _gi.spawn_async
 
