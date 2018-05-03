@@ -65,8 +65,8 @@ pkgconf = configuration_data()
 
 pkgconf.set('prefix', join_paths(get_option('prefix')))
 pkgconf.set('exec_prefix', '${prefix}')
-pkgconf.set('includedir', '${prefix}/include')
-pkgconf.set('datarootdir', '${prefix}/share')
+pkgconf.set('includedir', join_paths('${prefix}', get_option('includedir')))
+pkgconf.set('datarootdir', join_paths('${prefix}', get_option('datadir')))
 pkgconf.set('datadir', '${datarootdir}')
 pkgconf.set('VERSION', pygobject_version)
 
