@@ -44,8 +44,11 @@ from gi import _gi
 from gi._error import GError
 
 Error = GError
-OptionContext = _gi.OptionContext
-OptionGroup = _gi.OptionGroup
+# Do not rename classes!
+# This will cause error on type checking, like
+#    TypeError: argument group: Expected GLib.OptionGroup, but got gi._glib.OptionGroup
+# OptionContext = _gi.OptionContext
+# OptionGroup = _gi.OptionGroup
 Pid = _gi.Pid
 spawn_async = _gi.spawn_async
 
