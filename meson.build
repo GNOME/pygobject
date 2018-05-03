@@ -13,9 +13,9 @@ pygobject_version_micro = version_arr[2].to_int()
 platform_version = '@0@.0'.format(pygobject_version_major)
 
 pymod = import('python')
-python = pymod.find_installation(get_option('python'), required: true)
+python = pymod.find_installation(get_option('python'))
 
-python_dep = python.dependency(required : true)
+python_dep = python.dependency()
 python_no_warn_flags = []
 
 glib_version_req = '>= 2.38.0'
@@ -23,17 +23,17 @@ gi_version_req = '>= 1.46.0'
 pycairo_version_req = '>= 1.11.1'
 libffi_version_req = '>= 3.0'
 
-gi_dep = dependency('gobject-introspection-1.0', version : gi_version_req, required : true,
+gi_dep = dependency('gobject-introspection-1.0', version : gi_version_req,
   fallback: ['gobject-introspection', 'girepo_dep'])
-glib_dep = dependency('glib-2.0', version : glib_version_req, required : true,
+glib_dep = dependency('glib-2.0', version : glib_version_req,
   fallback: ['glib', 'libglib_dep'])
-gobject_dep = dependency('gobject-2.0', version : glib_version_req, required : true,
+gobject_dep = dependency('gobject-2.0', version : glib_version_req,
   fallback: ['glib', 'libgobject_dep'])
-gio_dep = dependency('gio-2.0', version : glib_version_req, required : true,
+gio_dep = dependency('gio-2.0', version : glib_version_req,
   fallback: ['glib', 'libgio_dep'])
 gmodule_dep = dependency('gmodule-2.0', version : glib_version_req,
   fallback: ['glib', 'libgmodule_dep'])
-ffi_dep = dependency('libffi', version : '>= 3.0', required : true,
+ffi_dep = dependency('libffi', version : '>= 3.0',
   fallback : ['libffi', 'ffi_dep'])
 
 cairo_dep = dependency('cairo', required: false)
