@@ -44,3 +44,15 @@ xvfb-run -a python -m coverage run tests/runtests.py
 # COLLECT GCOV COVERAGE
 lcov --rc lcov_branch_coverage=1 --directory . --capture --output-file \
     "${COV_DIR}/${PYVER}.lcov"
+
+if [[ "${PYIMPL}" == "PyPy" ]]; then
+    # https://github.com/mesonbuild/meson/pull/3445
+    exit 0;
+fi;
+
+# MESON
+/usr/bin/python3 -m pip install --user meson
+export PATH="${HOME}/.local/bin:${PATH}"
+git clean -fdx
+meson _build -Dpython="$(which python)"
+ninja -C _build
