@@ -649,6 +649,12 @@ class TestGValue(unittest.TestCase):
         value.set_value(42.0)
         self.assertEqual(value.get_value(), 42)
 
+    def test_multi_del(self):
+        value = GObject.Value(str, 'foo_bar')
+        value.__del__()
+        value.__del__()
+        del value
+
     def test_string(self):
         value = GObject.Value(str, 'foo_bar')
         self.assertEqual(value.g_type, GObject.TYPE_STRING)

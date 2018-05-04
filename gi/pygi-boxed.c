@@ -193,6 +193,12 @@ boxed_get_free_on_dealloc(PyGIBoxed *self, void *closure)
   return pygi_gboolean_to_py( ((PyGBoxed *)self)->free_on_dealloc );
 }
 
+static PyObject *
+boxed_get_is_valid (PyGIBoxed *self, void *closure)
+{
+  return pygi_gboolean_to_py (pyg_boxed_get_ptr (self) != NULL);
+}
+
 /**
  * pygi_boxed_copy_in_place:
  *
@@ -219,6 +225,7 @@ pygi_boxed_copy_in_place (PyGIBoxed *self)
 
 static PyGetSetDef pygi_boxed_getsets[] = {
     { "_free_on_dealloc", (getter)boxed_get_free_on_dealloc, (setter)0 },
+    { "_is_valid", (getter)boxed_get_is_valid, (setter)0 },
     { NULL, 0, 0 }
 };
 
