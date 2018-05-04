@@ -10,3 +10,4 @@ API Reference
     basic_types
     flags_enums
     gobject
+    error_handling
