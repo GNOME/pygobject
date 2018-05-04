@@ -7,22 +7,22 @@ raised as Python exceptions, but with a few small differences.
 
 It's common in Python for exception subclasses to be used (e.g.,
 :obj:`ValueError` versus :obj:`IOError`) to distinguish different types of
-errors. Libraries often define their own :obj:`Exception` subclasses, and library
-users will handle these cases explicitly.
+errors. Libraries often define their own :obj:`Exception` subclasses, and
+library users will handle these cases explicitly.
 
 In GLib-using libraries, errors are all :obj:`GLib.Error` instances, with no
 subclassing for different error types. Instead, every :obj:`GLib.Error`
 instance has attributes that distinguish types of error:
 
-* :attr:`domain` is the error domain, usually a string that you can covert to
-  a `GLib` quark with :func:`GLib.quark_to_string`
-* :attr:`code` identifies a specific error within the domain
-* :attr:`message` is a human-readable description of the error
+* :attr:`GLib.Error.domain` is the error domain, usually a string that you can
+  convert to a ``GLib`` quark with :func:`GLib.quark_to_string`
+* :attr:`GLib.Error.code` identifies a specific error within the domain
+* :attr:`GLib.Error.message` is a human-readable description of the error
 
 Error domains are defined per-module, and you can get an error domain from
-:func:`*_error_quark` functions on the relevant module. For example, IO errors
-from `Gio` are in the domain returned by :func:`Gio.io_error_quark`, and the
-possible values for :attr:`code` are enumerated in :obj:`Gio.IOErrorEnum`.
+``*_error_quark`` functions on the relevant module. For example, IO errors
+from ``Gio`` are in the domain returned by :func:`Gio.io_error_quark`, and
+possible error code values are enumerated in :obj:`Gio.IOErrorEnum`.
 
 Once you've caught a :obj:`GLib.Error`, you can call
 :meth:`GLib.Error.matches` to see whether it matches the specific error you
