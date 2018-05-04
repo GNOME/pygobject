@@ -7,7 +7,7 @@
    fun:wcsrtombs
    fun:wcstombs
    fun:wcstombs
-   fun:encode_current_locale
+   fun:encode_current_locale*
 }
 
 {
