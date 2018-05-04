@@ -257,6 +257,7 @@ additional steps:
     pipenv --python 3
     pipenv install pytest
     pipenv install flake8
+    pipenv install pycairo
     pipenv shell
 
 
