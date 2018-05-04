@@ -15,7 +15,7 @@ subclassing for different error types. Instead, every :obj:`GLib.Error`
 instance has attributes that distinguish types of error:
 
 * :attr:`GLib.Error.domain` is the error domain, usually a string that you can
-  convert to a ``GLib`` quark with :func:`GLib.quark_to_string`
+  convert to a ``GLib`` quark with :func:`GLib.quark_from_string`
 * :attr:`GLib.Error.code` identifies a specific error within the domain
 * :attr:`GLib.Error.message` is a human-readable description of the error
 
