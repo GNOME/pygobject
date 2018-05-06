@@ -67,7 +67,7 @@ regress_headers += ['regressextra.h']
 regress_deps = [glib_dep, gobject_dep, gio_dep, gmodule_dep]
 regress_c_args = []
 
-if cairo_dep.found() and cairo_gobject_dep.found()
+if with_pycairo
   regress_deps += [cairo_dep, cairo_gobject_dep]
 else
   regress_c_args += ['-D_GI_DISABLE_CAIRO']

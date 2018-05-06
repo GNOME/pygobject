@@ -35,13 +35,17 @@ gmodule_dep = dependency('gmodule-2.0', version : glib_version_req,
 ffi_dep = dependency('libffi', version : '>= 3.0',
   fallback : ['libffi', 'ffi_dep'])
 
-cairo_dep = dependency('cairo', required: false)
-cairo_gobject_dep = dependency('cairo-gobject', required: false)
+with_pycairo = get_option('pycairo')
 
-if python.language_version().version_compare('>= 3.0')
-  pycairo_dep = dependency('py3cairo', version : pycairo_version_req, required: false)
-else
-  pycairo_dep = dependency('pycairo', version : pycairo_version_req, required: false)
+if with_pycairo
+  cairo_dep = dependency('cairo')
+  cairo_gobject_dep = dependency('cairo-gobject')
+
+  if python.language_version().version_compare('>= 3.0')
+    pycairo_dep = dependency('py3cairo', version : pycairo_version_req)
+  else
+    pycairo_dep = dependency('pycairo', version : pycairo_version_req)
+  endif
 endif
 
 cc = meson.get_compiler('c')
