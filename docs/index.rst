@@ -78,6 +78,7 @@ Who Is Using PyGObject?
 * `Orca <https://wiki.gnome.org/Projects/Orca>`__ - a flexible and extensible screen reader
 * `Pithos <https://pithos.github.io/>`__ - a Pandora Radio client
 * `Pitivi <http://www.pitivi.org/>`__ - a free and open source video editor
+* `PyChess <http://www.pychess.org/>`__ - a chess client for Linux/Windows
 * `Quod Libet <https://quodlibet.readthedocs.io/>`__ - a music library manager / player
 * `Transmageddon <http://www.linuxrising.org/>`__ - a video transcoder
 
