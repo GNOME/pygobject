@@ -237,8 +237,9 @@ def register_sigint_fallback(callback):
             try:
                 yield
             finally:
+                cb = _callback_stack.pop()
                 if _sigint_called:
-                    _callback_stack.pop()()
+                    cb()
         else:
             # There is a signal handler set by the user, just do nothing
             yield
@@ -255,9 +256,11 @@ def register_sigint_fallback(callback):
         _callback_stack.pop()()
 
     _callback_stack.append(callback)
-    with sigint_handler_set_and_restore_default(sigint_handler):
-        try:
+    try:
+        with sigint_handler_set_and_restore_default(sigint_handler):
             yield
-        finally:
-            if _sigint_called:
-                signal.default_int_handler(signal.SIGINT, None)
+    finally:
+        if _sigint_called:
+            signal.default_int_handler(signal.SIGINT, None)
+        else:
+            _callback_stack.pop()
