@@ -25,12 +25,12 @@ export CFLAGS="-coverage -ftest-coverage -fprofile-arcs -Werror"
 
 # MESON
 if [[ "${PYIMPL}" != "PyPy" ]]; then
-    # https://github.com/mesonbuild/meson/pull/3445
-    /usr/bin/python3 -m pip install --user meson
+    /usr/bin/python3 -m pip install --user git+https://github.com/mesonbuild/meson.git
     export PATH="${HOME}/.local/bin:${PATH}"
     export PKG_CONFIG_PATH="$(python -c 'import sys; sys.stdout.write(sys.prefix)')/lib/pkgconfig"
     meson _build -Dpython="$(which python)"
     ninja -C _build
+    xvfb-run -a meson test -C _build -v
     rm -Rf _build
 fi;
 
