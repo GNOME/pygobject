@@ -1,3 +1,43 @@
+3.29.2 - 2018-05-16
+-------------------
+
+* Add a meson build system. :issue:`165`
+  (:user:`Mathieu Duponchelle<mathieudu>`)
+* Gtk.Template: Allow marking children as "internal-child". :mr:`58`
+* Gio.ListModel: implement most of the mutable sequence protocol.
+  :issue:`115` :mr:`59`
+* Gio.Settings: implement __iter__.
+* Gio.Settings: support range types in __setitem__. :issue:`134`
+* Add overrides for Gio.ListStore.sort and Gio.ListStore.insert_sorted.
+  :issue:`130`
+* Make Gtk.Widget.freeze_child_notify a context manager. :issue:`45`
+* OptionParser.parse_args: return leftover arguments. :issue:`200`
+* Release the GIL when emitting a signal. :mr:`66`
+  (John Bassett <john.bassett@pexip.com>)
+* Add ActionMap and ActionMap.add_action_entries() to overrides.
+  :issue:`29` :mr:`65` (:user:`yangfl`)
+* importer: raise ImportError in load_module() and not find_module().
+  :issue:`213`
+* Don't wrap GValue in GValue when creating GValueArray. :mr:`66`
+  (Stian Selnes <stian@pexip.com>)
+* ossig: Don't leak the callbacks in case the event loops are not stopped
+  through SIGINT. :issue:`219` :mr:`72`
+* Various fixes (Havard Graff <havard.graff@gmail.com>)
+* Destroy custom GLib.Source instances when they get freed. :issue:`193`
+* Revert "Add PEP518/pyproject.toml file", fixes installation with pip 10,
+  see https://github.com/pypa/pip/issues/5244
+* Various fixes/improvements for PyPy.
+* Don't crash on multiple calls to GObject.Value.__del__. :mr:`66`
+
+Documentation:
+  * Added StackOverflow (with PyGObject tag) as an contact resource.
+    (:user:`buhtz`)
+  * Add introduction to handling GLib.Error. :mr:`68`
+    (:user:`Kai Willadsen <kaiw>`)
+  * Add pycairo requires for development setup. :mr:`70`
+    (:user:`Kai Willadsen <kaiw>`)
+
+
 3.29.1 - 2018-04-15
 -------------------
 
