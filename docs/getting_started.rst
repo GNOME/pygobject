@@ -36,13 +36,14 @@ and their dependencies. Follow the instructions for your platform below.
 |windows-logo| Windows
 ----------------------
 
-1) Go to http://www.msys2.org/ and download the x86_64 installer
-2) Follow the instructions on the page for setting up the basic environment
-3) Run ``C:\msys64\mingw32.exe`` - a terminal window should pop up
-4) Execute ``pacman -S mingw-w64-i686-gtk3 mingw-w64-i686-python2-gobject mingw-w64-i686-python3-gobject``
-5) To test that GTK+3 is working you can run ``gtk3-demo``
-6) Copy the ``hello.py`` script you created to ``C:\msys64\home\<username>``
-7) In the mingw32 terminal execute ``python3 hello.py`` - a window should appear.
+#) Go to http://www.msys2.org/ and download the x86_64 installer
+#) Follow the instructions on the page for setting up the basic environment
+#) Run ``C:\msys64\mingw32.exe`` - a terminal window should pop up
+#) Execute ``pacman -Suy``
+#) Execute ``pacman -S mingw-w64-i686-gtk3 mingw-w64-i686-python2-gobject mingw-w64-i686-python3-gobject``
+#) To test that GTK+3 is working you can run ``gtk3-demo``
+#) Copy the ``hello.py`` script you created to ``C:\msys64\home\<username>``
+#) In the mingw32 terminal execute ``python3 hello.py`` - a window should appear.
 
 .. figure:: images/start_windows.png
     :scale: 60%
