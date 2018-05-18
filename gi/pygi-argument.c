@@ -144,6 +144,7 @@ _pygi_hash_pointer_to_arg (GIArgument *arg,
         case GI_TYPE_TAG_UTF8:
         case GI_TYPE_TAG_FILENAME:
         case GI_TYPE_TAG_INTERFACE:
+        case GI_TYPE_TAG_ARRAY:
             break;
         default:
             g_critical ("Unsupported type %s", g_type_tag_to_string(type_tag));
@@ -174,6 +175,7 @@ _pygi_arg_to_hash_pointer (const GIArgument *arg,
         case GI_TYPE_TAG_UTF8:
         case GI_TYPE_TAG_FILENAME:
         case GI_TYPE_TAG_INTERFACE:
+        case GI_TYPE_TAG_ARRAY:
             return arg->v_pointer;
         default:
             g_critical ("Unsupported type %s", g_type_tag_to_string(type_tag));
