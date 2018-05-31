@@ -1,3 +1,12 @@
+3.28.3 - 2018-05-31
+-------------------
+
+* Fix Gio.Application leak in case no signal handler is set before.
+  :issue:`219`
+* Squash critical warning when using array as hash value
+  (:user:`Philip Withnall <pwithnall>`)
+
+
 3.28.2 - 2018-03-27
 -------------------
 
