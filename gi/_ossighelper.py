@@ -145,38 +145,26 @@ PyOS_getsig = _gi.pyos_getsig
 # We save the signal pointer so we can detect if glib has changed the
 # signal handler behind Python's back (GLib.unix_signal_add)
 if signal.getsignal(signal.SIGINT) is signal.default_int_handler:
-    startup_sigint_ptr = PyOS_getsig(signal.SIGINT)
+    _startup_sigint_ptr = PyOS_getsig(signal.SIGINT)
 else:
     # Something has set the handler before import, we can't get a ptr
     # for the default handler so make sure the pointer will never match.
-    startup_sigint_ptr = -1
+    _startup_sigint_ptr = -1
 
 
-def sigint_handler_is_default():
-    """Returns if on SIGINT the default Python handler would be called"""
-
-    return (signal.getsignal(signal.SIGINT) is signal.default_int_handler and
-            PyOS_getsig(signal.SIGINT) == startup_sigint_ptr)
+_callback_stack = [signal.default_int_handler]
+_sigint_called = False
 
 
-@contextmanager
-def sigint_handler_set_and_restore_default(handler):
-    """Context manager for saving/restoring the SIGINT handler default state.
+def _sigint_handler(sig_num, frame):
+    global _callback_stack, _sigint_called, _startup_sigint_ptr
 
-    Will only restore the default handler again if the handler is not changed
-    while the context is active.
-    """
-
-    assert sigint_handler_is_default()
-
-    signal.signal(signal.SIGINT, handler)
-    sig_ptr = PyOS_getsig(signal.SIGINT)
-    try:
-        yield
-    finally:
-        if signal.getsignal(signal.SIGINT) is handler and \
-                PyOS_getsig(signal.SIGINT) == sig_ptr:
-            signal.signal(signal.SIGINT, signal.default_int_handler)
+    # Only execute if no changes to the SIGINT handler
+    if PyOS_getsig(signal.SIGINT) == _startup_sigint_ptr:
+        _sigint_called = True
+        _callback_stack.pop()()
+    else:
+        signal.default_int_handler(sig_num, frame)
 
 
 def is_main_thread():
@@ -185,69 +173,53 @@ def is_main_thread():
     return threading.current_thread().name == "MainThread"
 
 
-_callback_stack = []
-_sigint_called = False
-
-
 @contextmanager
 def register_sigint_fallback(callback):
-    """Installs a SIGINT signal handler in case the default Python one is
-    active which calls 'callback' in case the signal occurs.
+    """Installs a SIGINT signal handler in case the default
+    Python one is active.
+    Also, adds 'callback' to the SIGINT handler callback stack.
 
     Only does something if called from the main thread.
 
     In case of nested context managers the signal handler will be only
-    installed once and the callbacks will be called in the reverse order
-    of their registration.
+    installed once and the callbacks on the stack will be called in the
+    reverse order of their registration.
 
     The old signal handler will be restored in case no signal handler is
     registered while the context is active.
     """
 
     # To handle multiple levels of event loops we need to call the last
-    # callback first, wait until the inner most event loop returns control
+    # callback first, wait until the innermost event loop returns control
     # and only then call the next callback, and so on... until we
     # reach the outer most which manages the signal handler and raises
     # in the end
 
     global _callback_stack, _sigint_called
 
+    assert not _sigint_called
+
     if not is_main_thread():
         yield
         return
 
-    if not sigint_handler_is_default():
-        if _callback_stack:
-            # This is an inner event loop, append our callback
-            # to the stack so the parent context can call it.
-            _callback_stack.append(callback)
-            try:
-                yield
-            finally:
-                cb = _callback_stack.pop()
-                if _sigint_called:
-                    cb()
-        else:
-            # There is a signal handler set by the user, just do nothing
-            yield
-        return
-
-    _sigint_called = False
-
-    def sigint_handler(sig_num, frame):
-        global _callback_stack, _sigint_called
-
-        if _sigint_called:
-            return
-        _sigint_called = True
-        _callback_stack.pop()()
-
     _callback_stack.append(callback)
+    install = signal.getsignal(signal.SIGINT) is signal.default_int_handler \
+        and PyOS_getsig(signal.SIGINT) == _startup_sigint_ptr
+    if install:
+        signal.signal(signal.SIGINT, _sigint_handler)
     try:
-        with sigint_handler_set_and_restore_default(sigint_handler):
-            yield
+        yield
     finally:
+        if install and signal.getsignal(signal.SIGINT) is _sigint_handler:
+            signal.signal(signal.SIGINT, signal.default_int_handler)
+
+        # If _sigint_called is True, then this is the callback of the outer context
+        # If _sigint_called is False, then this is the callback of the current context
+        next_callback = _callback_stack.pop()
+        assert _sigint_called or callback == next_callback
         if _sigint_called:
-            signal.default_int_handler(signal.SIGINT, None)
-        else:
-            _callback_stack.pop()
+            if not _callback_stack:  # Handling is over, revert to initial setting
+                _callback_stack = [signal.default_int_handler]
+                _sigint_called = False
+            next_callback()
