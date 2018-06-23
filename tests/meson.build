@@ -118,7 +118,12 @@ endif
 if host_machine.system() == 'windows'
     envdata.prepend('PATH', join_paths(get_option('prefix'), get_option('bindir')))
 endif
-envdata.append('PYTHONPATH', join_paths(meson.current_build_dir(), '..'))
+
+python_paths = [join_paths(meson.current_build_dir(), '..')]
+if with_pycairo and pycairo_dep.type_name() == 'internal'
+  python_paths += [join_paths(meson.build_root(), 'subprojects', 'pycairo')]
+endif
+envdata.append('PYTHONPATH', python_paths)
 envdata.append('TESTS_BUILDDIR', meson.current_build_dir())
 
 test('pygobject-test-suite', python,
