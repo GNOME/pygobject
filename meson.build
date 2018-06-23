@@ -42,10 +42,17 @@ if with_pycairo
   cairo_gobject_dep = dependency('cairo-gobject')
 
   if python.language_version().version_compare('>= 3.0')
-    pycairo_dep = dependency('py3cairo', version : pycairo_version_req)
+    pycairo_name = 'py3cairo'
   else
-    pycairo_dep = dependency('pycairo', version : pycairo_version_req)
+    pycairo_name = 'pycairo'
   endif
+
+  pycairo_dep = dependency(
+    pycairo_name,
+    version: pycairo_version_req,
+    fallback: ['pycairo', 'pycairo_dep'],
+    default_options: ['python=' + get_option('python')],
+  )
 endif
 
 cc = meson.get_compiler('c')
