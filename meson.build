@@ -142,10 +142,18 @@ configure_file(input : 'pygobject-@0@.pc.in'.format(platform_version),
   configuration : pkgconf,
   install_dir : pkg_install_dir)
 
+if pygobject_version_minor.is_odd()
+  py_version = '@0@.dev0'.format(pygobject_version)
+else
+  py_version = pygobject_version
+endif
+
+pkginfo_conf = configuration_data()
+pkginfo_conf.set('VERSION', py_version)
 configure_file(input : 'PKG-INFO.in',
-  output : 'pygobject-@0@-py@1@.egg-info'.format(pygobject_version, python.language_version()),
-  configuration : pkgconf,
-  install_dir : python.get_install_dir(subdir : 'gi'))
+  output : 'PyGObject-@0@.egg-info'.format(py_version),
+  configuration : pkginfo_conf,
+  install_dir : python.get_install_dir())
 
 subdir('gi')
 subdir('pygtkcompat')
