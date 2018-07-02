@@ -209,13 +209,13 @@ for f in $FILES_TO_CONVERT; do
     -pe "s/Gio.OUTPUT_STREAM_SPLICE_/Gio.OutputStreamSpliceFlags./g;" \
     -pe "s/Gio.vfs_/Gio.Vfs./g;" \
 \
-    -pe "#s/import glib\n/from gi.repository import GLib\n/g;" \
-    -pe "#s/(?<!\.)glib\./GLib\./g;" \
-    -pe "#s/GLib.IO_(ERR|HUP|IN|NVAL|OUT|PRI)/GLib.IOCondition./g;" \
-    -pe "#s/GLib.IO_FLAG_/GLib.IOFlags./g;" \
-    -pe "#s/GLib.OPTION_FLAG_/GLib.OptionFlags./g;" \
-    -pe "#s/GLib.SPAWN_/GLib.SpawnFlags./g;" \
-    -pe "#s/GLib.USER_DIRECTORY_/GLib.UserDirectory.DIRECTORY_/g;" \
+    -pe "s/import glib\n/from gi.repository import GLib\n/g;" \
+    -pe "s/(?<!\.)glib\./GLib\./g;" \
+    -pe "s/GLib.IO_(ERR|HUP|IN|NVAL|OUT|PRI)/GLib.IOCondition./g;" \
+    -pe "s/GLib.IO_FLAG_/GLib.IOFlags./g;" \
+    -pe "s/GLib.OPTION_FLAG_/GLib.OptionFlags./g;" \
+    -pe "s/GLib.SPAWN_/GLib.SpawnFlags./g;" \
+    -pe "s/GLib.USER_DIRECTORY_/GLib.UserDirectory.DIRECTORY_/g;" \
 \
     -pe "s/(?<!\.)gobject\./GObject\./g;" \
     -pe "s/GObject.SIGNAL_/GObject.SignalFlags./g;" \
