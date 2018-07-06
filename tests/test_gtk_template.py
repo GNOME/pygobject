@@ -79,7 +79,44 @@ def test_allow_init_template_call():
             super(Foo, self).__init__()
             self.init_template()
 
+    # Stop current pygobject from handling the initialisation
+    del Foo.__dontuse_ginstance_init__
+
     Foo()
+
+
+def test_init_template_second_instance():
+    type_name = new_gtype_name()
+
+    xml = """\
+<interface>
+  <template class="{0}" parent="GtkBox">
+    <child>
+      <object class="GtkLabel" id="label">
+      </object>
+    </child>
+  </template>
+</interface>
+""".format(type_name)
+
+    @Gtk.Template.from_string(xml)
+    class Foo(Gtk.Box):
+        __gtype_name__ = type_name
+
+        label = Gtk.Template.Child("label")
+
+        def __init__(self):
+            super(Foo, self).__init__()
+            self.init_template()
+
+    # Stop current pygobject from handling the initialisation
+    del Foo.__dontuse_ginstance_init__
+
+    foo = Foo()
+    assert isinstance(foo.label, Gtk.Label)
+
+    foo2 = Foo()
+    assert isinstance(foo2.label, Gtk.Label)
 
 
 def test_main_example():
