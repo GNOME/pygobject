@@ -99,7 +99,7 @@ def register_template(cls):
 
 
 def init_template(self, cls, base_init_template):
-    cls.init_template = lambda s: None
+    self.init_template = lambda s: None
 
     if self.__class__ is not cls:
         raise TypeError(
