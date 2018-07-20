@@ -145,6 +145,18 @@ class Callback(object):
         return CallThing(self._name, func)
 
 
+def validate_resource_path(path):
+    """Raises GLib.Error in case the resource doesn't exist"""
+
+    try:
+        Gio.resources_get_info(path, Gio.ResourceLookupFlags.NONE)
+    except GLib.Error:
+        # resources_get_info() doesn't handle overlays but we keep using it
+        # as a fast path.
+        # https://gitlab.gnome.org/GNOME/pygobject/issues/230
+        Gio.resources_lookup_data(path, Gio.ResourceLookupFlags.NONE)
+
+
 class Template(object):
 
     def __init__(self, **kwargs):
@@ -204,8 +216,7 @@ class Template(object):
             register_template(cls)
             return cls
         elif self.resource_path is not None:
-            Gio.resources_get_info(
-                self.resource_path, Gio.ResourceLookupFlags.NONE)
+            validate_resource_path(self.resource_path)
             cls.set_template_from_resource(self.resource_path)
             register_template(cls)
             return cls
