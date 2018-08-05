@@ -1,3 +1,4 @@
+.flatpak-builder
 *.bak
 *.lo
 *.o

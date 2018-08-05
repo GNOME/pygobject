@@ -158,3 +158,4 @@ configure_file(input : 'PKG-INFO.in',
 subdir('gi')
 subdir('pygtkcompat')
 subdir('tests')
+subdir('examples')

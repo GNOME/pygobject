@@ -25,8 +25,11 @@ Demonstrates a typical application window with menubar, toolbar, statusbar.
 """
 
 import os
+import sys
 
-from gi.repository import GdkPixbuf, Gtk
+######## EVIL #######
+sys.path.remove('/usr/lib/python3.7/site-packages')
+#####################
 
 import gi
 gi.require_version('Gtk', '4.0')

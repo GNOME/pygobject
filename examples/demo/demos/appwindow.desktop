@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=PYGobject App Window Demo
+Comment=A demo of PyGObject .
+Exec=appwindow
+Icon=appwindow
+Terminal=false
+Type=Application
+StartupNotify=true
+Categories=Development;GTK;
+NoDisplay=true
