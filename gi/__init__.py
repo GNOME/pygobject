@@ -22,6 +22,9 @@ from __future__ import absolute_import
 
 # support overrides in different directories than our gi module
 from pkgutil import extend_path
+print("#############################################")
+print (f"path {__path__}")
+print (f"name {__name__}")
 __path__ = extend_path(__path__, __name__)
 
 import sys

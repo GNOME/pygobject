@@ -25,19 +25,11 @@ Demonstrates a typical application window with menubar, toolbar, statusbar.
 """
 
 import os
-
-from gi.repository import GdkPixbuf, Gtk
+import sys
 
 import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk
-
-
-infobar = None
-window = None
-messagelabel = None
-_demoapp = None
-
 
 def widget_destroy(widget, button):
     widget.destroy()
@@ -266,27 +258,25 @@ ui_info = """
 </ui>
 """
 
+def get_content() -> Gtk.Widget:
+    box = Gtk.Box()
+    button = Gtk.Button.new_with_label("Test")
+    box.add(button)
+
+    return box
 
 def _quit(*args):
     Gtk.main_quit()
 
 def main(demoapp=None):
-    global infobar
-    global window
-    global messagelabel
-    global _demoapp
-
-    _demoapp = demoapp
-
     window = Gtk.Window()
     window.set_title('Application Window')
     window.set_icon_name('gtk-open')
     window.set_default_size(200, 200)
     window.connect_after('destroy', _quit)
-    button = Gtk.Button.new_with_label("Test")
-    window.add(button)
+    content = get_content()
+    window.add(content)
 
-    window.show()
     Gtk.main()
 
 
