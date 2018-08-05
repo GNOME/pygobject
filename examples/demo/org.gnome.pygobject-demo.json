@@ -1,0 +1,109 @@
+{
+    "app-id" : "org.gnome.pygobject-demo",
+    "runtime" : "org.gnome.Platform",
+    "runtime-version" : "master",
+    "sdk" : "org.gnome.Sdk",
+    "command" : "pygobject-demo.py",
+    "finish-args" : [
+        "--device=dri",
+        "--share=ipc",
+        "--socket=x11",
+        "--socket=wayland",
+        "--talk-name=org.gnome.OnlineAccounts",
+        "--filesystem=host",
+        "--talk-name=org.gtk.vfs",
+        "--talk-name=org.gtk.vfs.*",
+        "--filesystem=xdg-run/dconf",
+        "--filesystem=~/.config/dconf:ro",
+        "--talk-name=ca.desrt.dconf",
+        "--env=DCONF_USER_CONFIG_DIR=.config/dconf"
+    ],
+    "build-options" : {
+        "build-args" : [
+            "--share=network"
+        ],
+        "cflags" : "-O2 -g",
+        "cxxflags" : "-O2 -g",
+        "env" : {
+            "V" : "1",
+            "GI_TYPELIB_PATH" : "/app/lib/girepository-1.0/",
+            "PYTHONPATH": "/app/lib/python3.7/site-packages"
+        }
+    },
+    "modules" : [
+        {
+            "name" : "pytest",
+            "buildsystem" : "simple",
+            "build-commands" : [
+                "/usr/bin/pip3 --disable-pip-version-check install --prefix=/app --verbose ."
+            ],
+            "sources" : [
+                {
+                    "type" : "git",
+                    "url" : "https://github.com/pytest-dev/pytest",
+                    "tag" : "3.7.2"
+                }
+            ]
+        },
+        {
+            "name" : "wayland",
+            "buildsystem" : "autotools",
+            "builddir" : true,
+            "config-opts" : [
+                "--disable-documentation"
+            ],
+            "sources" : [
+                {
+                    "type" : "git",
+                    "url" : "https://github.com/wayland-project/wayland.git"
+                }
+            ]
+        },
+        {
+            "name" : "graphene",
+            "buildsystem" : "meson",
+            "builddir" : true,
+            "config-opts" : [
+                "--libdir=/app/lib",
+                "-Dtests=false",
+                "-Dbenchmarks=false"
+            ],
+            "sources" : [
+                {
+                    "type" : "git",
+                    "url" : "https://github.com/ebassi/graphene.git"
+                }
+            ]
+        },
+        {
+            "name" : "gtk",
+            "buildsystem" : "meson",
+            "builddir" : true,
+            "config-opts" : [
+                "--libdir=/app/lib"
+            ],
+            "sources" : [
+                {
+                    "type" : "git",
+                    "url" : "https://gitlab.gnome.org/GNOME/gtk.git",
+                    "tag" : "3.94.0"
+                }
+            ]
+        },
+        {
+            "name" : "pygobject-demo.py",
+            "buildsystem" : "meson",
+            "builddir" : true,
+            "config-opts" : [
+                "--libdir=/app/lib",
+                "-Ddemos=true"
+            ],
+            "sources" : [
+                {
+                    "type" : "git",
+                    "url" : "https://gitlab.gnome.org/GNOME/pygobject.git"
+                }
+            ]
+        }
+    ]
+}
