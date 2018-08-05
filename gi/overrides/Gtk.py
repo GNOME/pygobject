@@ -180,7 +180,8 @@ class Container(Gtk.Container, Widget):
     # alias for Python 2.x object protocol
     __nonzero__ = __bool__
 
-    get_focus_chain = strip_boolean_result(Gtk.Container.get_focus_chain)
+    if Gtk._version in ["2.0", "3.0"]:
+        get_focus_chain = strip_boolean_result(Gtk.Container.get_focus_chain)
 
     def child_get_property(self, child, property_name, value=None):
         if value is None:

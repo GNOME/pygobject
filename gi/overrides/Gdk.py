@@ -161,7 +161,7 @@ if Gdk._version == '2.0':
 
     Drawable = override(Drawable)
     __all__.append('Drawable')
-else:
+elif Gdk._version == '3.0':
     class Window(Gdk.Window):
         def __new__(cls, parent, attributes, attributes_mask):
             # Gdk.Window had to be made abstract,
@@ -186,8 +186,6 @@ class Event(Gdk.Event):
     _UNION_MEMBERS = {
         Gdk.EventType.DELETE: 'any',
         Gdk.EventType.DESTROY: 'any',
-        Gdk.EventType.EXPOSE: 'expose',
-        Gdk.EventType.MOTION_NOTIFY: 'motion',
         Gdk.EventType.BUTTON_PRESS: 'button',
         Gdk.EventType.BUTTON_RELEASE: 'button',
         Gdk.EventType.KEY_PRESS: 'key',
@@ -196,8 +194,6 @@ class Event(Gdk.Event):
         Gdk.EventType.LEAVE_NOTIFY: 'crossing',
         Gdk.EventType.FOCUS_CHANGE: 'focus_change',
         Gdk.EventType.CONFIGURE: 'configure',
-        Gdk.EventType.MAP: 'any',
-        Gdk.EventType.UNMAP: 'any',
         Gdk.EventType.PROXIMITY_IN: 'proximity',
         Gdk.EventType.PROXIMITY_OUT: 'proximity',
         Gdk.EventType.DRAG_ENTER: 'dnd',
@@ -218,6 +214,10 @@ class Event(Gdk.Event):
             Gdk.EventType.DROP_FINISHED: 'dnd',
             Gdk.EventType.CLIENT_EVENT: 'client',
             Gdk.EventType.VISIBILITY_NOTIFY: 'visibility',
+            Gdk.EventType.EXPOSE: 'expose',
+            Gdk.EventType.MOTION_NOTIFY: 'motion',
+            Gdk.EventType.MAP: 'any',
+            Gdk.EventType.UNMAP: 'any',
         })
 
     if Gdk._version == '2.0':
@@ -262,7 +262,6 @@ module = sys.modules[modname]
 # right now we can't get the type_info from the
 # field info so manually list the class names
 event_member_classes = ['EventAny',
-                        'EventExpose',
                         'EventMotion',
                         'EventButton',
                         'EventScroll',
@@ -283,6 +282,7 @@ if Gdk._version in ("2.0", "3.0"):
         'EventOwnerChange',
         'EventWindowState',
         'EventVisibility',
+        'EventExpose',
     ])
 
 if Gdk._version == '2.0':
@@ -320,14 +320,14 @@ for event_class in event_member_classes:
 # end GdkEvent overrides
 
 
-class DragContext(Gdk.DragContext):
-    def finish(self, success, del_, time):
-        Gtk = get_introspection_module('Gtk')
-        Gtk.drag_finish(self, success, del_, time)
+if Gdk._version in ["2.0", "3.0"]:
+    class DragContext(Gdk.DragContext):
+        def finish(self, success, del_, time):
+            Gtk = get_introspection_module('Gtk')
+            Gtk.drag_finish(self, success, del_, time)
 
-
-DragContext = override(DragContext)
-__all__.append('DragContext')
+    DragContext = override(DragContext)
+    __all__.append('DragContext')
 
 
 class Cursor(Gdk.Cursor):
