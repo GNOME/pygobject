@@ -28,6 +28,10 @@ import os
 
 from gi.repository import GdkPixbuf, Gtk
 
+import gi
+gi.require_version('Gtk', '4.0')
+from gi.repository import Gtk
+
 
 infobar = None
 window = None
@@ -120,8 +124,7 @@ Boston, MA 02111-1307, USA.
 """
     dirname = os.path.abspath(os.path.dirname(__file__))
     filename = os.path.join(dirname, 'data', 'gtk-logo-rgb.gif')
-    pixbuf = GdkPixbuf.Pixbuf.new_from_file(filename)
-    transparent = pixbuf.add_alpha(True, 0xff, 0xff, 0xff)
+    texture = Gtk.Texture.new_from_file(filename)
 
     about = Gtk.AboutDialog(parent=window,
                             program_name='GTK+ Code Demos',
@@ -132,7 +135,7 @@ Boston, MA 02111-1307, USA.
                             comments='Program to demonstrate PyGI functions.',
                             authors=authors,
                             documenters=documentors,
-                            logo=transparent,
+                            logo=texture,
                             title='About GTK+ Code Demos')
 
     about.connect('response', widget_destroy)
@@ -146,7 +149,7 @@ action_entries = (
     ("ColorMenu", None, "_Color"),              # name, stock id, label
     ("ShapeMenu", None, "_Shape"),              # name, stock id, label
     ("HelpMenu", None, "_Help"),                # name, stock id, label
-    ("New", Gtk.STOCK_NEW,                      # name, stock id
+    ("New", "document-new",                     # name, stock id
      "_New", "<control>N",                      # label, accelerator
      "Create a new file",                       # tooltip
      activate_action),
@@ -154,15 +157,15 @@ action_entries = (
      "File1", None,                             # label, accelerator
      "Open first file",                         # tooltip
      activate_action),
-    ("Save", Gtk.STOCK_SAVE,                    # name, stock id
+    ("Save", "document-save",                    # name, stock id
      "_Save", "<control>S",                     # label, accelerator
      "Save current file",                       # tooltip
      activate_action),
-    ("SaveAs", Gtk.STOCK_SAVE,                  # name, stock id
+    ("SaveAs", "document-save-as",              # name, stock id
      "Save _As...", None,                       # label, accelerator
      "Save to a file",                          # tooltip
      activate_action),
-    ("Quit", Gtk.STOCK_QUIT,                    # name, stock id
+    ("Quit", "application-exit",                # name, stock id
      "_Quit", "<control>Q",                     # label, accelerator
      "Quit",                                    # tooltip
      activate_action),
@@ -177,7 +180,7 @@ action_entries = (
 )
 
 toggle_action_entries = (
-    ("Bold", Gtk.STOCK_BOLD,                    # name, stock id
+    ("Bold", "format-text-bold",                # name, stock id
      "_Bold", "<control>B",                     # label, accelerator
      "Bold",                                    # tooltip
      activate_action,
@@ -267,48 +270,6 @@ ui_info = """
 def _quit(*args):
     Gtk.main_quit()
 
-
-def register_stock_icons():
-    """
-    This function registers our custom toolbar icons, so they can be themed.
-    It's totally optional to do this, you could just manually insert icons
-    and have them not be themeable, especially if you never expect people
-    to theme your app.
-    """
-    '''
-    item = Gtk.StockItem()
-    item.stock_id = 'demo-gtk-logo'
-    item.label = '_GTK!'
-    item.modifier = 0
-    item.keyval = 0
-    item.translation_domain = None
-
-    Gtk.stock_add(item, 1)
-    '''
-    global _demoapp
-
-    factory = Gtk.IconFactory()
-    factory.add_default()
-
-    if _demoapp is None:
-        filename = os.path.join('data', 'gtk-logo-rgb.gif')
-    else:
-        filename = _demoapp.find_file('gtk-logo-rgb.gif')
-
-    pixbuf = GdkPixbuf.Pixbuf.new_from_file(filename)
-    transparent = pixbuf.add_alpha(True, 0xff, 0xff, 0xff)
-    icon_set = Gtk.IconSet.new_from_pixbuf(transparent)
-
-    factory.add('demo-gtk-logo', icon_set)
-
-
-class ToolMenuAction(Gtk.Action):
-    __gtype_name__ = "GtkToolMenuAction"
-
-    def do_create_tool_item(self):
-        return Gtk.MenuToolButton()
-
-
 def main(demoapp=None):
     global infobar
     global window
@@ -317,90 +278,15 @@ def main(demoapp=None):
 
     _demoapp = demoapp
 
-    register_stock_icons()
-
     window = Gtk.Window()
     window.set_title('Application Window')
     window.set_icon_name('gtk-open')
-    window.connect_after('destroy', _quit)
-    table = Gtk.Table(n_rows=1,
-                      n_columns=5,
-                      homogeneous=False)
-    window.add(table)
-
-    action_group = Gtk.ActionGroup(name='AppWindowActions')
-    open_action = ToolMenuAction(name='Open',
-                                 stock_id=Gtk.STOCK_OPEN,
-                                 label='_Open',
-                                 tooltip='Open a file')
-
-    action_group.add_action(open_action)
-    action_group.add_actions(action_entries)
-    action_group.add_toggle_actions(toggle_action_entries)
-    action_group.add_radio_actions(color_action_entries,
-                                   COLOR_RED,
-                                   activate_radio_action)
-    action_group.add_radio_actions(shape_action_entries,
-                                   SHAPE_SQUARE,
-                                   activate_radio_action)
-
-    merge = Gtk.UIManager()
-    merge.insert_action_group(action_group, 0)
-    window.add_accel_group(merge.get_accel_group())
-
-    merge.add_ui_from_string(ui_info)
-
-    bar = merge.get_widget('/MenuBar')
-    bar.show()
-    table.attach(bar, 0, 1, 0, 1,
-                 Gtk.AttachOptions.EXPAND | Gtk.AttachOptions.FILL,
-                 0, 0, 0)
-
-    bar = merge.get_widget('/ToolBar')
-    bar.show()
-    table.attach(bar, 0, 1, 1, 2,
-                 Gtk.AttachOptions.EXPAND | Gtk.AttachOptions.FILL,
-                 0, 0, 0)
-
-    infobar = Gtk.InfoBar()
-    infobar.set_no_show_all(True)
-    messagelabel = Gtk.Label()
-    messagelabel.show()
-    infobar.get_content_area().pack_start(messagelabel, True, True, 0)
-    infobar.add_button(Gtk.STOCK_OK, Gtk.ResponseType.OK)
-    infobar.connect('response', lambda a, b: Gtk.Widget.hide(a))
-
-    table.attach(infobar, 0, 1, 2, 3,
-                 Gtk.AttachOptions.EXPAND | Gtk.AttachOptions.FILL,
-                 0, 0, 0)
-
-    sw = Gtk.ScrolledWindow(hadjustment=None,
-                            vadjustment=None)
-    sw.set_shadow_type(Gtk.ShadowType.IN)
-    table.attach(sw, 0, 1, 3, 4,
-                 Gtk.AttachOptions.EXPAND | Gtk.AttachOptions.FILL,
-                 Gtk.AttachOptions.EXPAND | Gtk.AttachOptions.FILL,
-                 0, 0)
-
-    contents = Gtk.TextView()
-    contents.grab_focus()
-    sw.add(contents)
-
-    # Create statusbar
-    statusbar = Gtk.Statusbar()
-    table.attach(statusbar, 0, 1, 4, 5,
-                 Gtk.AttachOptions.EXPAND | Gtk.AttachOptions.FILL,
-                 0, 0, 0)
-
-    # show text widget info in the statusbar
-    buffer = contents.get_buffer()
-    buffer.connect('changed', update_statusbar, statusbar)
-    buffer.connect('mark_set', mark_set_callback, statusbar)
-
-    update_statusbar(buffer, statusbar)
-
     window.set_default_size(200, 200)
-    window.show_all()
+    window.connect_after('destroy', _quit)
+    button = Gtk.Button.new_with_label("Test")
+    window.add(button)
+
+    window.show()
     Gtk.main()
 
 
