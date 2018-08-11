@@ -1646,6 +1646,7 @@ class TestGValue(unittest.TestCase):
         gc.collect()
         assert obj.__grefcount__ == grefcount
 
+    @unittest.skipIf(platform.python_implementation() == "PyPy" and PY3, "fixme")
     def test_gvalue_gobject_ref_counts(self):
         # Tests a GObject held by a GValue
         obj = GObject.Object()
