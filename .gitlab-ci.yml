@@ -2,8 +2,6 @@ image: registry.gitlab.gnome.org/gnome/pygobject/main:v7
 
 stages:
   - build_and_test
-  - coverage
-  - deploy
 
 cache:
   paths:
@@ -28,91 +26,8 @@ cache:
     - C:\msys64\usr\bin\pacman --noconfirm -Syyuu
     - C:\msys64\usr\bin\bash -lc "bash -x ./.gitlab-ci/test-msys2.sh"
 
-coverage:
-  stage: coverage
-  artifacts:
-    paths:
-      - coverage/
-  variables:
-    PYENV_VERSION: "3.6.6"
-  script:
-    - bash -x ./.gitlab-ci/coverage-docker.sh
-
-pages:
-  stage: deploy
-  dependencies:
-    - coverage
-  script:
-    - mv coverage/ public/
-  artifacts:
-    paths:
-      - public
-    expire_in: 30 days
-  only:
-    - master
-
-python2-mingw32:
-  variables:
-    PYTHON: "python2"
-    MSYSTEM: "MINGW32"
-    CHERE_INVOKING: "yes"
-  <<: *mingw-defaults
-
-python2-mingw64:
-  variables:
-    PYTHON: "python2"
-    MSYSTEM: "MINGW64"
-    CHERE_INVOKING: "yes"
-  <<: *mingw-defaults
-
-python3-mingw32:
-  variables:
-    PYTHON: "python3"
-    MSYSTEM: "MINGW32"
-    CHERE_INVOKING: "yes"
-  <<: *mingw-defaults
-
-python3-mingw64:
-  variables:
-    PYTHON: "python3"
-    MSYSTEM: "MINGW64"
-    CHERE_INVOKING: "yes"
-  <<: *mingw-defaults
-
-python2.7:
-  variables:
-    PYENV_VERSION: "2.7.15"
-  <<: *defaults
-
-python3.5:
-  variables:
-    PYENV_VERSION: "3.5.5"
-  <<: *defaults
-
-python3.6:
-  variables:
-    PYENV_VERSION: "3.6.6"
-  <<: *defaults
-
-python3.7:
-  variables:
-    PYENV_VERSION: "3.7.0"
-  <<: *defaults
-
-pypy2:
-  allow_failure: true
-  variables:
-    PYENV_VERSION: "pypy2.7-6.0.0"
-  <<: *defaults
-
-pypy3:
-  allow_failure: true
-  variables:
-    PYENV_VERSION: "pypy3.5-6.0.0"
-  <<: *defaults
-
-xenial-i386-py2:
+gnome-master:
   stage: build_and_test
-  image: registry.gitlab.gnome.org/gnome/pygobject/old:v2
+  image: registry.gitlab.gnome.org/gnome/gnome-runtime-images/gnome:master
   script:
-   - bash -x ./.gitlab-ci/test-docker-old.sh
+    - xvfb-run -a flatpak run --filesystem=host --share=network org.gnome.Sdk//master --command bash -x .gitlab-ci/test-flatpak.sh
