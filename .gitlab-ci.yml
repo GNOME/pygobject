@@ -116,3 +116,10 @@ xenial-i386-py2:
   image: registry.gitlab.gnome.org/gnome/pygobject/old:v2
   script:
    - bash -x ./.gitlab-ci/test-docker-old.sh
+
+gnome-master:
+  allow_failure: true
+  stage: build_and_test
+  image: registry.gitlab.gnome.org/gnome/gnome-runtime-images/gnome:master
+  script:
+    - xvfb-run -a flatpak run --filesystem=host --share=network --socket=x11 --command=bash org.gnome.Sdk//master -x .gitlab-ci/test-flatpak.sh
