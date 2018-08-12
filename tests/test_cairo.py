@@ -52,7 +52,8 @@ class Test(unittest.TestCase):
 
     def test_cairo_path_full_return(self):
         path = Regress.test_cairo_path_full_return()
-        assert isinstance(path, cairo.Path)
+        if hasattr(cairo, "Path"):  # pycairo 1.15.1+
+            assert isinstance(path, cairo.Path)
 
     def test_cairo_path_none_in(self):
         surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, 10, 10)
