@@ -579,6 +579,7 @@ pygi_gint_from_py (PyObject *object, gint *result)
     return TRUE;
 
 overflow:
+    PyErr_Clear ();
     pygi_pyerr_format (
         PyExc_OverflowError, "%S not in range %d to %d",
         number, (int)G_MININT, (int)G_MAXINT);
@@ -617,6 +618,7 @@ pygi_guint_from_py (PyObject *object, guint *result)
     return TRUE;
 
 overflow:
+    PyErr_Clear ();
     pygi_pyerr_format (
         PyExc_OverflowError, "%S not in range %ld to %lu",
         number, (long)0, (unsigned long)G_MAXUINT);
@@ -659,6 +661,7 @@ pygi_glong_from_py (PyObject *object, glong *result)
     return TRUE;
 
 overflow:
+    PyErr_Clear ();
     pygi_pyerr_format (
         PyExc_OverflowError, "%S not in range %ld to %ld",
         number, (long)G_MINLONG, (long)G_MAXLONG);
@@ -695,6 +698,7 @@ pygi_gulong_from_py (PyObject *object, gulong *result)
     return TRUE;
 
 overflow:
+    PyErr_Clear ();
     pygi_pyerr_format (
         PyExc_OverflowError, "%S not in range %ld to %lu",
         number, (long)0, (unsigned long)G_MAXULONG);
@@ -746,6 +750,7 @@ pygi_gint8_from_py (PyObject *object, gint8 *result)
     return TRUE;
 
 overflow:
+    PyErr_Clear ();
     pygi_pyerr_format (
         PyExc_OverflowError, "%S not in range %ld to %ld",
         number, (long)G_MININT8, (long)G_MAXINT8);
@@ -794,6 +799,7 @@ pygi_guint8_from_py (PyObject *object, guint8 *result)
     return TRUE;
 
 overflow:
+    PyErr_Clear ();
     pygi_pyerr_format (
         PyExc_OverflowError, "%S not in range %ld to %ld",
         number, (long)0, (long)G_MAXUINT8);
@@ -832,6 +838,7 @@ pygi_gint16_from_py (PyObject *object, gint16 *result)
     return TRUE;
 
 overflow:
+    PyErr_Clear ();
     pygi_pyerr_format (
         PyExc_OverflowError, "%S not in range %ld to %ld",
         number, (long)G_MININT16, (long)G_MAXINT16);
@@ -870,6 +877,7 @@ pygi_guint16_from_py (PyObject *object, guint16 *result)
     return TRUE;
 
 overflow:
+    PyErr_Clear ();
     pygi_pyerr_format (
         PyExc_OverflowError, "%S not in range %ld to %ld",
         number, (long)0, (long)G_MAXUINT16);
@@ -908,6 +916,7 @@ pygi_gint32_from_py (PyObject *object, gint32 *result)
     return TRUE;
 
 overflow:
+    PyErr_Clear ();
     pygi_pyerr_format (
         PyExc_OverflowError, "%S not in range %ld to %ld",
         number, (long)G_MININT32, (long)G_MAXINT32);
@@ -946,6 +955,7 @@ pygi_guint32_from_py (PyObject *object, guint32 *result)
     return TRUE;
 
 overflow:
+    PyErr_Clear ();
     pygi_pyerr_format (
         PyExc_OverflowError, "%S not in range %ld to %lu",
         number, (long)0, (unsigned long)G_MAXUINT32);
@@ -991,6 +1001,7 @@ pygi_gint64_from_py (PyObject *object, gint64 *result)
     return TRUE;
 
 overflow:
+    PyErr_Clear ();
     min = pygi_gint64_to_py (G_MININT64);
     max = pygi_gint64_to_py (G_MAXINT64);
     pygi_pyerr_format (
@@ -1036,6 +1047,7 @@ pygi_guint64_from_py (PyObject *object, guint64 *result)
     return TRUE;
 
 overflow:
+    PyErr_Clear ();
     max = pygi_guint64_to_py (G_MAXUINT64);
     pygi_pyerr_format (
         PyExc_OverflowError, "%S not in range %ld to %S",
