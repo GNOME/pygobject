@@ -19,9 +19,13 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
 # USA
 
-import collections
 import sys
 import warnings
+
+if sys.version_info[0] == 2:
+    import collections as abc
+else:
+    from collections import abc
 
 from gi.repository import GObject
 from .._ossighelper import wakeup_on_signal, register_sigint_fallback
@@ -77,7 +81,7 @@ __all__.append('_construct_target_list')
 
 def _extract_handler_and_args(obj_or_map, handler_name):
     handler = None
-    if isinstance(obj_or_map, collections.Mapping):
+    if isinstance(obj_or_map, abc.Mapping):
         handler = obj_or_map.get(handler_name, None)
     else:
         handler = getattr(obj_or_map, handler_name, None)
@@ -86,7 +90,7 @@ def _extract_handler_and_args(obj_or_map, handler_name):
         raise AttributeError('Handler %s not found' % handler_name)
 
     args = ()
-    if isinstance(handler, collections.Sequence):
+    if isinstance(handler, abc.Sequence):
         if len(handler) == 0:
             raise TypeError("Handler %s tuple can not be empty" % handler)
         args = handler[1:]
