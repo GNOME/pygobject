@@ -893,7 +893,6 @@ def add_ext_compiler_flags(ext, compiler, _cache={}):
             "-Wformat-security",
             "-Wimplicit-function-declaration",
             "-Winit-self",
-            "-Winline",
             "-Wjump-misses-init",
             "-Wlogical-op",
             "-Wmissing-declarations",

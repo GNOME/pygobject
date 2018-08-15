@@ -69,7 +69,6 @@ main_c_args = [
   '-Wformat-security',
   '-Wimplicit-function-declaration',
   '-Winit-self',
-  '-Winline',
   '-Wjump-misses-init',
   '-Wlogical-op',
   '-Wmissing-declarations',
