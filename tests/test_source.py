@@ -212,8 +212,7 @@ class TestSource(unittest.TestCase):
                 self.finalized = True
 
         source = S()
-        id = source.attach()
-        print('source id:', id)
+        source.attach()
         self.assertFalse(self.finalized)
         self.assertFalse(source.is_destroyed())
 
