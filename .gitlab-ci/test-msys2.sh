@@ -45,6 +45,9 @@ COV_KEY="${MSYSTEM}.${PYVER}"
 mkdir -p "${COV_DIR}"
 export COVERAGE_FILE="${COV_DIR}/.coverage.${COV_KEY}"
 
+# https://docs.python.org/3/using/cmdline.html#envvar-PYTHONDEVMODE
+export PYTHONDEVMODE=1
+
 $PYTHON setup.py build_tests
 MSYSTEM= $PYTHON -m coverage run tests/runtests.py
 
