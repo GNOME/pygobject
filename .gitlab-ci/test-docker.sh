@@ -15,6 +15,9 @@ export COVERAGE_FILE="${COV_DIR}/.coverage.${CI_JOB_NAME}"
 export CCACHE_BASEDIR="$(pwd)"
 export CCACHE_DIR="${CCACHE_BASEDIR}/_ccache"
 
+# https://docs.python.org/3/using/cmdline.html#envvar-PYTHONDEVMODE
+export PYTHONDEVMODE=1
+
 mkdir -p "${CCACHE_DIR}"
 mkdir -p "${COV_DIR}"
 
