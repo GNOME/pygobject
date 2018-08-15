@@ -13,6 +13,7 @@ import os
 import re
 import platform
 import gc
+import timeit
 
 import pytest
 
@@ -1406,44 +1407,43 @@ class TestBoxed(unittest.TestCase):
 
 class TestTortureProfile(unittest.TestCase):
     def test_torture_profile(self):
-        import time
         total_time = 0
         print("")
         object_ = Everything.TestObj()
         sys.stdout.write("\ttorture test 1 (10000 iterations): ")
 
-        start_time = time.clock()
+        start_time = timeit.default_timer()
         for i in range(10000):
             (y, z, q) = object_.torture_signature_0(5000,
                                                     "Torture Test 1",
                                                     12345)
 
-        end_time = time.clock()
+        end_time = timeit.default_timer()
         delta_time = end_time - start_time
         total_time += delta_time
         print("%f secs" % delta_time)
 
         sys.stdout.write("\ttorture test 2 (10000 iterations): ")
 
-        start_time = time.clock()
+        start_time = timeit.default_timer()
         for i in range(10000):
             (y, z, q) = Everything.TestObj().torture_signature_0(
                 5000, "Torture Test 2", 12345)
 
-        end_time = time.clock()
+        end_time = timeit.default_timer()
         delta_time = end_time - start_time
         total_time += delta_time
         print("%f secs" % delta_time)
 
         sys.stdout.write("\ttorture test 3 (10000 iterations): ")
-        start_time = time.clock()
+        start_time = timeit.default_timer()
         for i in range(10000):
             try:
                 (y, z, q) = object_.torture_signature_1(
                     5000, "Torture Test 3", 12345)
             except:
                 pass
-        end_time = time.clock()
+        end_time = timeit.default_timer()
         delta_time = end_time - start_time
         total_time += delta_time
         print("%f secs" % delta_time)
@@ -1454,11 +1454,11 @@ class TestTortureProfile(unittest.TestCase):
             return 0
 
         userdata = [1, 2, 3, 4]
-        start_time = time.clock()
+        start_time = timeit.default_timer()
         for i in range(10000):
             (y, z, q) = Everything.test_torture_signature_2(
                 5000, callback, userdata, "Torture Test 4", 12345)
-        end_time = time.clock()
+        end_time = timeit.default_timer()
         delta_time = end_time - start_time
         total_time += delta_time
         print("%f secs" % delta_time)
