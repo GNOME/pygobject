@@ -9,7 +9,7 @@ import pytest
 from gi._compat import reraise
 
 
-@pytest.hookimpl(hookwrapper=True)
+@pytest.hookimpl(hookwrapper=True, tryfirst=True)
 def pytest_runtest_call(item):
     """A pytest hook which takes over sys.excepthook and raises any uncaught
     exception (with PyGObject this happesn often when we get called from C,
