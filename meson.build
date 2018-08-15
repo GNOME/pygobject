@@ -142,6 +142,12 @@ configure_file(input : 'pygobject-@0@.pc.in'.format(platform_version),
   configuration : pkgconf,
   install_dir : pkg_install_dir)
 
+pygobject_dep = declare_dependency(
+  include_directories: include_directories('gi'),
+  dependencies: [gobject_dep, ffi_dep],
+  version: meson.project_version(),
+)
+
 if pygobject_version_minor.is_odd()
   py_version = '@0@.dev0'.format(pygobject_version)
 else
