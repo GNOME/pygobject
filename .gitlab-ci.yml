@@ -1,4 +1,4 @@
-image: registry.gitlab.gnome.org/gnome/pygobject/main:v7
+image: registry.gitlab.gnome.org/gnome/pygobject/main:v8
 
 stages:
   - build_and_test
@@ -96,7 +96,7 @@ python3.6:
 
 python3.7:
   variables:
-    PYENV_VERSION: "3.7.0"
+    PYENV_VERSION: "3.7.0-debug"
   <<: *defaults
 
 pypy2:
