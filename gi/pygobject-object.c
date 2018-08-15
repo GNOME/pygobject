@@ -106,7 +106,7 @@ pygobject_data_free(PyGObjectData *data)
     /* This function may be called after the python interpreter has already
      * been shut down. If this happens, we cannot do any python calls, so just
      * free the memory. */
-    PyGILState_STATE state;
+    PyGILState_STATE state = 0;
     PyThreadState *_save = NULL;
     gboolean state_saved;
     GSList *closures, *tmp;
