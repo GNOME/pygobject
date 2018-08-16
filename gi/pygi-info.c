@@ -2308,10 +2308,18 @@ pygi_info_register_types (PyObject *m)
     _PyGI_REGISTER_TYPE (m, PyGICallableInfo_Type, CallableInfo,
                          PyGIBaseInfo_Type);
 
-    PyGIFunctionInfo_Type.tp_call = (ternaryfunc) _function_info_call;
-    PyGIFunctionInfo_Type.tp_descr_get = (descrgetfunc) _function_info_descr_get;
+    // FIXME: this is to work around a pylint issue
+    // https://gitlab.gnome.org/GNOME/pygobject/issues/217
+#ifndef PYPY_VERSION
     _PyGI_REGISTER_TYPE (m, PyGIFunctionInfo_Type, FunctionInfo,
                          PyGICallableInfo_Type);
+#endif
+    PyGIFunctionInfo_Type.tp_call = (ternaryfunc) _function_info_call;
+    PyGIFunctionInfo_Type.tp_descr_get = (descrgetfunc) _function_info_descr_get;
+#ifdef PYPY_VERSION
+    _PyGI_REGISTER_TYPE (m, PyGIFunctionInfo_Type, FunctionInfo,
+                         PyGICallableInfo_Type);
+#endif
 
     PyGIVFuncInfo_Type.tp_descr_get = (descrgetfunc) _vfunc_info_descr_get;
     _PyGI_REGISTER_TYPE (m, PyGIVFuncInfo_Type, VFuncInfo,
