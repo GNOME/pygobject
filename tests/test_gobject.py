@@ -589,8 +589,16 @@ class TestPropertyBindings(unittest.TestCase):
         self.assertEqual(self.source.int_prop, 10)
         self.assertEqual(self.target.int_prop, 1)
 
-        # An already unbound BindingWeakRef will raise if unbind is attempted a second time.
-        self.assertRaises(ValueError, binding.unbind)
+        glib_version = (GLib.MAJOR_VERSION, GLib.MINOR_VERSION, GLib.MICRO_VERSION)
+
+        # calling unbind() on an already unbound binding
+        if glib_version >= (2, 57, 2):
+            # Fixed in newer glib:
+            # https://gitlab.gnome.org/GNOME/glib/merge_requests/244
+            for i in range(10):
+                binding.unbind()
+        else:
+            self.assertRaises(ValueError, binding.unbind)
 
     def test_reference_counts(self):
         self.assertEqual(self.source.__grefcount__, 1)

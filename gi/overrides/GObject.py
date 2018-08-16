@@ -706,6 +706,10 @@ class Binding(GObjectModule.Binding):
         return self
 
     def unbind(self):
+        # Fixed in newer glib
+        if (GLib.MAJOR_VERSION, GLib.MINOR_VERSION, GLib.MICRO_VERSION) >= (2, 57, 2):
+            return super(Binding, self).unbind()
+
         if hasattr(self, '_unbound'):
             raise ValueError('binding has already been cleared out')
         else:
