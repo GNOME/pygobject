@@ -1,3 +1,30 @@
+3.29.3 - 2018-08-16
+-------------------
+
+* meson: Support building pycairo as a subproject. :mr:`76`
+* meson: Declare_dependency for use by potential superprojects
+  (:user:`Mathieu Duponchelle <mathieudu>`)
+* meson: Update glib wrap file. :mr:`80` (:user:`Carlos Soriano <csoriano>`)
+* meson: Fix the Python 2 build not not use the system pycairo extension when
+  running tests. :issue:`242`
+* pygi-convert.sh: Various fixes and updates. :mr:`77` :mr:`78`
+  (:user:`Sander Sweers <infirit>`)
+* Gtk.Template: Fix instantiation error when using the new code with older
+  PyGObject. :mr:`79` (:user:`Kai Willadsen <kaiw>`)
+* Gtk.Template: Don't error out when loading a resource that is only available
+  in an overlay. :issue:`230`
+* Fix various crashes when running against a debug Python 3.7 build. :mr:`82`
+  (:user:`Simon McVittie <smcv>`)
+* overrides: Allow calling GObject.Binding.unbind() multiple times with
+  GLib 2.58+. :issue:`240`
+* overrides: Gio.ListStore overrides use splice() when adding/removing many
+  items with GLib 2.58+. :issue:`115` :mr:`83`
+* Work around pylint reporting bogus warnings regarding a missing self
+  argument for normal functions. :issue:`217`
+* Add override for GdkPixbuf.Pixbuf.new_from_data() to wrap new_from_bytes()
+  to work around a use after free. :issue:`225` :mr:`74`
+
+
 3.28.3 - 2018-05-31
 -------------------
 
