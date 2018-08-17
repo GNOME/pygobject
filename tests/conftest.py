@@ -16,18 +16,16 @@ def pytest_runtest_call(item):
     like any signal handler, vfuncs tc)
     """
 
-    assert sys.excepthook is sys.__excepthook__
-
     exceptions = []
 
     def on_hook(type_, value, tback):
         exceptions.append((type_, value, tback))
 
+    orig_excepthook = sys.excepthook
     sys.excepthook = on_hook
     try:
         yield
     finally:
-        assert sys.excepthook in (on_hook, sys.__excepthook__)
-        sys.excepthook = sys.__excepthook__
+        sys.excepthook = orig_excepthook
         if exceptions:
             reraise(*exceptions[0])
