@@ -89,6 +89,9 @@ def init_test_environ():
     os.environ['GSETTINGS_SCHEMA_DIR'] = tests_builddir
     os.environ['G_FILENAME_ENCODING'] = 'UTF-8'
 
+    # Force the default theme so broken themes don't affect the tests
+    os.environ['GTK_THEME'] = 'Adwaita'
+
     import gi
     gi.require_version("GIRepository", "2.0")
     from gi.repository import GIRepository
