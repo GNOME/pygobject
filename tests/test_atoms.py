@@ -98,4 +98,3 @@ class TestGdkAtom(unittest.TestCase):
         axes = device.list_axes()
         axes_names = [atom.name() for atom in axes]
         self.assertNotEqual(axes_names, [])
-        self.assertTrue('Rel X' in axes_names)
