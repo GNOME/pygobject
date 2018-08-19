@@ -592,7 +592,7 @@ class TestPropertyBindings(unittest.TestCase):
         glib_version = (GLib.MAJOR_VERSION, GLib.MINOR_VERSION, GLib.MICRO_VERSION)
 
         # calling unbind() on an already unbound binding
-        if glib_version >= (2, 57, 2):
+        if glib_version >= (2, 57, 3):
             # Fixed in newer glib:
             # https://gitlab.gnome.org/GNOME/glib/merge_requests/244
             for i in range(10):
