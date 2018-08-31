@@ -31,6 +31,9 @@ pacman --noconfirm -S --needed \
     git \
     perl
 
+# https://github.com/Alexpux/MINGW-packages/issues/4333
+pacman --noconfirm -S --needed mingw-w64-$MSYS2_ARCH-$PYTHON-pathlib2
+
 # ccache setup
 export PATH="$MSYSTEM/lib/ccache/bin:$PATH"
 mkdir -p _ccache
