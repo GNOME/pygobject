@@ -65,8 +65,15 @@ python.install_sources(python_sources,
   subdir : 'gi'
 )
 
+# https://github.com/mesonbuild/meson/issues/4117
+if host_machine.system() == 'windows'
+  python_ext_dep = python_dep
+else
+  python_ext_dep = python_dep.partial_dependency(compile_args: true)
+endif
+
 giext = python.extension_module('_gi', sources,
-  dependencies : [python_dep, glib_dep, gi_dep, ffi_dep],
+  dependencies : [python_ext_dep, glib_dep, gi_dep, ffi_dep],
   include_directories: include_directories('..'),
   install: true,
   subdir : 'gi',
@@ -75,7 +82,7 @@ giext = python.extension_module('_gi', sources,
 
 if with_pycairo
   gicairoext = python.extension_module('_gi_cairo', ['pygi-foreign-cairo.c'],
-    dependencies : [python_dep, glib_dep, gi_dep, ffi_dep, pycairo_dep, cairo_dep, cairo_gobject_dep],
+    dependencies : [python_ext_dep, glib_dep, gi_dep, ffi_dep, pycairo_dep, cairo_dep, cairo_gobject_dep],
     install: true,
     subdir : 'gi',
     c_args: pyext_c_args + main_c_args)
