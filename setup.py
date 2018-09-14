@@ -914,7 +914,6 @@ def add_ext_compiler_flags(ext, compiler, _cache={}):
             "-Wundef",
             "-Wunused-but-set-variable",
             "-Wwrite-strings",
-            "-Wconversion",
         ]
 
         if sys.version_info[:2] != (3, 4):
@@ -929,6 +928,7 @@ def add_ext_compiler_flags(ext, compiler, _cache={}):
             "-Wno-discarded-qualifiers",
             "-Wno-sign-conversion",
             "-Wno-cast-function-type",
+            "-Wno-int-conversion",
         ]
 
         # silence clang for unused gcc CFLAGS added by Debian
