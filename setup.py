@@ -929,6 +929,7 @@ def add_ext_compiler_flags(ext, compiler, _cache={}):
             "-Wno-discarded-qualifiers",
             "-Wno-sign-conversion",
             "-Wno-cast-function-type",
+            "-Wno-int-conversion",
         ]
 
         # silence clang for unused gcc CFLAGS added by Debian

@@ -100,6 +100,7 @@ main_c_args += [
   '-Wno-discarded-qualifiers',
   '-Wno-sign-conversion',
   '-Wno-cast-function-type',
+  '-Wno-int-conversion',
 ]
 
 main_c_args += [

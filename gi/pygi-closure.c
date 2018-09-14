@@ -52,31 +52,31 @@ _pygi_closure_assign_pyobj_to_retval (gpointer retval,
 
     switch (arg_cache->type_tag) {
         case GI_TYPE_TAG_BOOLEAN:
-           *((gboolean *) retval) = arg->v_boolean;
+           *((ffi_sarg *) retval) = arg->v_boolean;
            break;
         case GI_TYPE_TAG_INT8:
-           *((gint8 *) retval) = arg->v_int8;
+           *((ffi_sarg *) retval) = arg->v_int8;
            break;
         case GI_TYPE_TAG_UINT8:
-           *((guint8 *) retval) = arg->v_uint8;
+           *((ffi_arg *) retval) = arg->v_uint8;
            break;
         case GI_TYPE_TAG_INT16:
-           *((gint16 *) retval) = arg->v_int16;
+           *((ffi_sarg *) retval) = arg->v_int16;
            break;
         case GI_TYPE_TAG_UINT16:
-           *((guint16 *) retval) = arg->v_uint16;
+           *((ffi_arg *) retval) = arg->v_uint16;
            break;
         case GI_TYPE_TAG_INT32:
-           *((gint32 *) retval) = arg->v_int32;
+           *((ffi_sarg *) retval) = arg->v_int32;
            break;
         case GI_TYPE_TAG_UINT32:
-           *((guint32 *) retval) = arg->v_uint32;
+           *((ffi_arg *) retval) = arg->v_uint32;
            break;
         case GI_TYPE_TAG_INT64:
-           *((gint64 *) retval) = arg->v_int64;
+           *((ffi_sarg *) retval) = arg->v_int64;
            break;
         case GI_TYPE_TAG_UINT64:
-           *((guint64 *) retval) = arg->v_uint64;
+           *((ffi_arg *) retval) = arg->v_uint64;
            break;
         case GI_TYPE_TAG_FLOAT:
            *((gfloat *) retval) = arg->v_float;
@@ -85,10 +85,10 @@ _pygi_closure_assign_pyobj_to_retval (gpointer retval,
            *((gdouble *) retval) = arg->v_double;
            break;
         case GI_TYPE_TAG_GTYPE:
-           *((gsize *) retval) = arg->v_size;
+           *((ffi_arg *) retval) = arg->v_size;
            break;
         case GI_TYPE_TAG_UNICHAR:
-            *((guint32 *) retval) = arg->v_uint32;
+            *((ffi_arg *) retval) = arg->v_uint32;
             break;
         case GI_TYPE_TAG_INTERFACE:
             {
@@ -98,20 +98,20 @@ _pygi_closure_assign_pyobj_to_retval (gpointer retval,
 
                 switch (g_base_info_get_type (interface_info)) {
                 case GI_INFO_TYPE_ENUM:
-                    *(gint *) retval = arg->v_int;
+                    *(ffi_sarg *) retval = arg->v_int;
                     break;
                 case GI_INFO_TYPE_FLAGS:
-                    *(guint *) retval = arg->v_uint;
+                    *(ffi_arg *) retval = arg->v_uint;
                     break;
                 default:
-                    *(gpointer *) retval = arg->v_pointer;
+                    *(ffi_arg *) retval = arg->v_pointer;
                     break;
                 }
 
                 break;
             }
         default:
-            *(gpointer *) retval = arg->v_pointer;
+            *(ffi_arg *) retval = arg->v_pointer;
             break;
       }
 }
