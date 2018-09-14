@@ -90,7 +90,6 @@ main_c_args = [
   '-Wundef',
   '-Wunused-but-set-variable',
   '-Wwrite-strings',
-  '-Wconversion',
 ]
 
 main_c_args += [
