@@ -539,6 +539,8 @@ cairo_matrix_release (GIBaseInfo *base_info,
 static PyMethodDef _gi_cairo_functions[] = { {0,} };
 PYGLIB_MODULE_START(_gi_cairo, "_gi_cairo")
 {
+    PyObject *gobject_mod;
+
 #if PY_VERSION_HEX < 0x03000000
     Pycairo_IMPORT;
 #else
@@ -548,7 +550,10 @@ PYGLIB_MODULE_START(_gi_cairo, "_gi_cairo")
     if (Pycairo_CAPI == NULL)
         return PYGLIB_MODULE_ERROR_RETURN;
 
-    pygobject_init (3, 13, 2);
+    gobject_mod = pygobject_init (3, 13, 2);
+    if (gobject_mod == NULL)
+        return PYGLIB_MODULE_ERROR_RETURN;
+    Py_DECREF (gobject_mod);
 
     pygi_register_foreign_struct ("cairo",
                                   "Matrix",
