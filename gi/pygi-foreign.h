@@ -50,4 +50,6 @@ PyObject *pygi_require_foreign    (PyObject *self,
 
 int pygi_foreign_init (void);
 
+PyObject *pygi_register_foreign (PyObject *self, PyObject *args);
+
 #endif /* __PYGI_FOREIGN_H__ */

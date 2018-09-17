@@ -2279,6 +2279,7 @@ static PyMethodDef _gi_functions[] = {
     { "source_set_callback", (PyCFunction) pygi_source_set_callback, METH_VARARGS },
     { "io_channel_read", (PyCFunction) pyg_channel_read, METH_VARARGS },
     { "require_foreign", (PyCFunction) pygi_require_foreign, METH_VARARGS | METH_KEYWORDS },
+    { "register_foreign", (PyCFunction) pygi_register_foreign, METH_NOARGS },
     { "spawn_async",
       (PyCFunction)pyglib_spawn_async, METH_VARARGS|METH_KEYWORDS,
       "spawn_async(argv, envp=None, working_directory=None,\n"
