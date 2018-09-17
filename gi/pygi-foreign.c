@@ -217,3 +217,19 @@ pygi_foreign_init (void)
 
     return 0;
 }
+
+
+PyObject *pygi_register_foreign (PyObject *self, PyObject *args)
+{
+    /* We need to try loading the foreign modules upfront so the GType
+     * converters are registered:
+     * https://gitlab.gnome.org/GNOME/pygobject/issues/260
+     */
+    PyObject *mod = pygi_struct_foreign_load_module ("cairo");
+    if (mod == NULL)
+        PyErr_Clear ();
+    else
+        Py_DECREF (mod);
+
+    Py_RETURN_NONE;
+}
