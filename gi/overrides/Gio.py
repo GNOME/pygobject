@@ -52,8 +52,11 @@ VolumeMonitor = override(VolumeMonitor)
 __all__.append('VolumeMonitor')
 
 
+DEFAULT = type('Default', (), { '__repr__': lambda x: 'DEFAULT' })()
+
+
 class ActionMap(Gio.ActionMap):
-    def add_action_entries(self, entries, user_data=None):
+    def add_action_entries(self, entries, user_data=DEFAULT):
         """
         The add_action_entries() method is a convenience function for creating
         multiple Gio.SimpleAction instances and adding them to a Gio.ActionMap.
@@ -83,7 +86,9 @@ class ActionMap(Gio.ActionMap):
                   stateless actions should not.
 
         :param user_data:
-            The user data for signal connections, or None
+            The user data for signal connections. If unset, your callback will
+            not receive the user_data parameter. Parameter `None' is considered
+            set.
         """
         try:
             iter(entries)
@@ -108,7 +113,10 @@ class ActionMap(Gio.ActionMap):
                 action = Gio.SimpleAction.new_stateful(name, variant_parameter,
                                                        variant_state)
                 if change_state is not None:
-                    action.connect('change-state', change_state, user_data)
+                    if user_data is DEFAULT:
+                        action.connect('change-state', change_state)
+                    else:
+                        action.connect('change-state', change_state, user_data)
             else:
                 # stateless action
                 if change_state is not None:
@@ -118,7 +126,10 @@ class ActionMap(Gio.ActionMap):
                 action = Gio.SimpleAction(name=name, parameter_type=variant_parameter)
 
             if activate is not None:
-                action.connect('activate', activate, user_data)
+                if user_data is DEFAULT:
+                    action.connect('activate', activate)
+                else:
+                    action.connect('activate', activate, user_data)
             self.add_action(action)
 
         for entry in entries:
