@@ -317,8 +317,11 @@ def test_action_map_add_action_entries():
 
     test_data = []
 
-    def f(action, parameter, data):
-        test_data.append('test back')
+    def f(action, parameter):
+        test_data.append('f called')
+
+    def f_with_data(action, parameter, data):
+        test_data.append('f_with_data called')
 
     actionmap.add_action_entries((
         ("simple", f),
@@ -328,10 +331,6 @@ def test_action_map_add_action_entries():
     assert actionmap.has_action("simple")
     assert actionmap.has_action("with_type")
     assert actionmap.has_action("with_state")
-    actionmap.add_action_entries((
-        ("with_user_data", f),
-    ), "user_data")
-    assert actionmap.has_action("with_user_data")
 
     with pytest.raises(TypeError):
         actionmap.add_action_entries((
@@ -343,4 +342,16 @@ def test_action_map_add_action_entries():
         ))
 
     actionmap.activate_action("simple")
-    assert test_data[0] == 'test back'
+    assert 'f called' in test_data
+
+    actionmap.add_action_entries((
+        ("missing_user_data", f_with_data),
+    ))
+    with pytest.raises(TypeError):
+        actionmap.activate_action("missing_user_data")
+
+    actionmap.add_action_entries((
+        ("with_user_data", f_with_data),
+    ), "user_data")
+    actionmap.activate_action("with_user_data")
+    assert 'f_with_data called' in test_data
