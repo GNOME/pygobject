@@ -36,18 +36,6 @@ Gio = get_introspection_module('Gio')
 __all__ = []
 
 
-class Application(Gio.Application):
-
-    def run(self, *args, **kwargs):
-        with register_sigint_fallback(self.quit):
-            with wakeup_on_signal():
-                return Gio.Application.run(self, *args, **kwargs)
-
-
-Application = override(Application)
-__all__.append('Application')
-
-
 class VolumeMonitor(Gio.VolumeMonitor):
 
     def __init__(self, *args, **kwargs):
@@ -140,6 +128,18 @@ class ActionMap(Gio.ActionMap):
 
 ActionMap = override(ActionMap)
 __all__.append('ActionMap')
+
+
+class Application(Gio.Application, ActionMap):
+
+    def run(self, *args, **kwargs):
+        with register_sigint_fallback(self.quit):
+            with wakeup_on_signal():
+                return Gio.Application.run(self, *args, **kwargs)
+
+
+Application = override(Application)
+__all__.append('Application')
 
 
 class FileEnumerator(Gio.FileEnumerator):
