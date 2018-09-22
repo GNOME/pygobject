@@ -123,3 +123,10 @@ gnome-master:
   image: registry.gitlab.gnome.org/gnome/gnome-runtime-images/gnome:master
   script:
     - xvfb-run -a flatpak run --filesystem=host --share=network --socket=x11 --command=bash org.gnome.Sdk//master -x .gitlab-ci/test-flatpak.sh
+
+gnome-master-gtk4:
+  allow_failure: true
+  stage: build_and_test
+  image: registry.gitlab.gnome.org/gnome/gnome-runtime-images/gnome:master
+  script:
+    - xvfb-run -a flatpak run --env=TEST_GTK_VERSION=4.0 --filesystem=host --share=network --socket=x11 --command=bash org.gnome.Sdk//master -x .gitlab-ci/test-flatpak.sh
