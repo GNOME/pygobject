@@ -62,6 +62,8 @@ _gobject.pygobject_version = _gi.pygobject_version
 version_info = _gi.pygobject_version[:]
 __version__ = "{0}.{1}.{2}".format(*version_info)
 
+_gi.register_foreign()
+
 
 class _DummyStaticModule(types.ModuleType):
     __path__ = None
