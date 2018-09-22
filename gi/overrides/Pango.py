@@ -50,6 +50,9 @@ class Layout(Pango.Layout):
     def set_markup(self, text, length=-1):
         super(Layout, self).set_markup(text, length)
 
+    def set_text(self, text, length=-1):
+        super(Layout, self).set_text(text, length)
+
 
 Layout = override(Layout)
 __all__.append('Layout')
