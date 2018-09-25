@@ -117,6 +117,13 @@ xenial-i386-py2:
   script:
    - bash -x ./.gitlab-ci/test-docker-old.sh
 
+gtk4:
+  allow_failure: true
+  stage: build_and_test
+  image: registry.gitlab.gnome.org/gnome/pygobject/gtk4:v1
+  script:
+   - bash -x ./.gitlab-ci/test-docker-gtk4.sh
+
 gnome-master:
   allow_failure: true
   stage: build_and_test
