@@ -1,5 +1,5 @@
 project('pygobject', 'c',
-  version : '3.30.2',
+  version : '3.30.1',
   meson_version : '>= 0.46.0',
   default_options : [ 'warning_level=1',
                       'buildtype=debugoptimized'])
@@ -37,9 +37,18 @@ ffi_dep = dependency('libffi', version : '>= 3.0',
 
 with_pycairo = get_option('pycairo')
 
+cc = meson.get_compiler('c')
+
 if with_pycairo
-  cairo_dep = dependency('cairo')
-  cairo_gobject_dep = dependency('cairo-gobject')
+  cairo_dep = dependency('cairo', required: cc.get_id() != 'msvc')
+  cairo_gobject_dep = dependency('cairo-gobject', required: cc.get_id() != 'msvc')
+
+  if cc.get_id() == 'msvc' and (not cairo_gobject_dep.found() or not cairo_dep.found())
+    if cc.has_header('cairo.h') and cc.has_header ('cairo-gobject.h')
+      cairo_dep = cc.find_library ('cairo')
+      cairo_gobject_dep = cc.find_library ('cairo-gobject')
+    endif
+  endif
 
   if python.language_version().version_compare('>= 3.0')
     pycairo_name = 'py3cairo'
@@ -55,65 +64,68 @@ if with_pycairo
   )
 endif
 
-cc = meson.get_compiler('c')
-
-main_c_args = [
-  '-Wall',
-  '-Warray-bounds',
-  '-Wcast-align',
-  '-Wdeclaration-after-statement',
-  '-Wduplicated-branches',
-  '-Wextra',
-  '-Wformat=2',
-  '-Wformat-nonliteral',
-  '-Wformat-security',
-  '-Wimplicit-function-declaration',
-  '-Winit-self',
-  '-Wjump-misses-init',
-  '-Wlogical-op',
-  '-Wmissing-declarations',
-  '-Wmissing-format-attribute',
-  '-Wmissing-include-dirs',
-  '-Wmissing-noreturn',
-  '-Wmissing-prototypes',
-  '-Wnested-externs',
-  '-Wnull-dereference',
-  '-Wold-style-definition',
-  '-Wpacked',
-  '-Wpointer-arith',
-  '-Wrestrict',
-  '-Wreturn-type',
-  '-Wshadow',
-  '-Wsign-compare',
-  '-Wstrict-aliasing',
-  '-Wstrict-prototypes',
-  '-Wundef',
-  '-Wunused-but-set-variable',
-  '-Wwrite-strings',
-]
-
-main_c_args += [
-  '-Wno-incompatible-pointer-types-discards-qualifiers',
-  '-Wno-missing-field-initializers',
-  '-Wno-unused-parameter',
-  '-Wno-discarded-qualifiers',
-  '-Wno-sign-conversion',
-  '-Wno-cast-function-type',
-  '-Wno-int-conversion',
-]
-
-main_c_args += [
-  '-fno-strict-aliasing',
-  '-fvisibility=hidden',
-]
-
-if not ['3.3', '3.4'].contains(python.language_version())
+main_c_args = []
+if cc.get_id() == 'msvc'
+  main_c_args += [ '-FImsvc_recommended_pragmas.h' ]
+else
   main_c_args += [
-    '-Wswitch-default',
+    '-Wall',
+    '-Warray-bounds',
+    '-Wcast-align',
+    '-Wdeclaration-after-statement',
+    '-Wduplicated-branches',
+    '-Wextra',
+    '-Wformat=2',
+    '-Wformat-nonliteral',
+    '-Wformat-security',
+    '-Wimplicit-function-declaration',
+    '-Winit-self',
+    '-Wjump-misses-init',
+    '-Wlogical-op',
+    '-Wmissing-declarations',
+    '-Wmissing-format-attribute',
+    '-Wmissing-include-dirs',
+    '-Wmissing-noreturn',
+    '-Wmissing-prototypes',
+    '-Wnested-externs',
+    '-Wnull-dereference',
+    '-Wold-style-definition',
+    '-Wpacked',
+    '-Wpointer-arith',
+    '-Wrestrict',
+    '-Wreturn-type',
+    '-Wshadow',
+    '-Wsign-compare',
+    '-Wstrict-aliasing',
+    '-Wstrict-prototypes',
+    '-Wundef',
+    '-Wunused-but-set-variable',
+    '-Wwrite-strings',
   ]
-endif
 
-main_c_args = cc.get_supported_arguments(main_c_args)
+  main_c_args += [
+    '-Wno-incompatible-pointer-types-discards-qualifiers',
+    '-Wno-missing-field-initializers',
+    '-Wno-unused-parameter',
+    '-Wno-discarded-qualifiers',
+    '-Wno-sign-conversion',
+    '-Wno-cast-function-type',
+    '-Wno-int-conversion',
+  ]
+
+  main_c_args += [
+    '-fno-strict-aliasing',
+    '-fvisibility=hidden',
+  ]
+
+  if not ['3.3', '3.4'].contains(python.language_version())
+    main_c_args += [
+      '-Wswitch-default',
+    ]
+  endif
+
+  main_c_args = cc.get_supported_arguments(main_c_args)
+endif
 
 pyext_c_args = ['-DPY_SSIZE_T_CLEAN']
 
