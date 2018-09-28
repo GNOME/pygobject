@@ -24,6 +24,8 @@ import subprocess
 import tarfile
 import sysconfig
 import tempfile
+import posixpath
+
 from email import parser
 
 try:
@@ -214,7 +216,7 @@ def filter_compiler_arguments(compiler, args):
     """
 
     if compiler.compiler_type == "msvc":
-        # TODO
+        # TODO, not much of need for now.
         return []
 
     extra = []
@@ -377,6 +379,7 @@ class build_tests(Command):
         self.build_temp = None
         self.build_base = None
         self.force = False
+        self.extra_defines = []
 
     def finalize_options(self):
         self.set_undefined_options(
@@ -442,24 +445,39 @@ class build_tests(Command):
             compiler.shared_lib_extension = ".so"
 
         def build_ext(ext):
-            if compiler.compiler_type == "msvc":
-                raise Exception("MSVC support not implemented")
 
             libname = compiler.shared_object_filename(ext.name)
             ext_paths = [os.path.join(tests_dir, libname)]
             if os.name == "nt":
-                implibname = libname + ".a"
+                if compiler.compiler_type == "msvc":
+                    # MSVC: Get rid of the 'lib' prefix and the .dll
+                    #       suffix from libname, and append .lib so
+                    #       that we get the right .lib filename to
+                    #       pass to g-ir-scanner with --library
+                    implibname = libname[3:libname.rfind(".dll")] + '.lib'
+                else:
+                    implibname = libname + ".a"
                 ext_paths.append(os.path.join(tests_dir, implibname))
 
             if self._newer_group(ext.sources + ext.depends, *ext_paths):
+                # MSVC: We need to define _GI_EXTERN explcitly so that
+                #       symbols get exported properly
+                if compiler.compiler_type == "msvc":
+                    self.extra_defines = [('_GI_EXTERN',
+                                           '__declspec(dllexport)extern')]
                 objects = compiler.compile(
                     ext.sources,
                     output_dir=self.build_temp,
-                    include_dirs=ext.include_dirs)
+                    include_dirs=ext.include_dirs,
+                    macros=self.extra_defines)
 
                 if os.name == "nt":
-                    postargs = ["-Wl,--out-implib=%s" %
-                                os.path.join(tests_dir, implibname)]
+                    if compiler.compiler_type == "msvc":
+                        postargs = ["-implib:%s" %
+                                    os.path.join(tests_dir, implibname)]
+                    else:
+                        postargs = ["-Wl,--out-implib=%s" %
+                                    os.path.join(tests_dir, implibname)]
                 else:
                     postargs = []
 
@@ -492,29 +510,39 @@ class build_tests(Command):
         add_ext_pkg_config_dep(ext, compiler.compiler_type, "gio-2.0")
         ext_paths = build_ext(ext)
 
-        gir_path = os.path.join(tests_dir, "GIMarshallingTests-1.0.gir")
-        typelib_path = os.path.join(
+        # We want to always use POSIX-style paths for g-ir-compiler
+        # because it expects the input .gir file and .typelib file to use
+        # POSIX-style paths, otherwise it fails
+        gir_path = posixpath.join(
+            tests_dir, "GIMarshallingTests-1.0.gir")
+        typelib_path = posixpath.join(
             tests_dir, "GIMarshallingTests-1.0.typelib")
 
+        gimarshal_g_ir_scanner_cmd = [
+            g_ir_scanner,
+            "--no-libtool",
+            "--include=Gio-2.0",
+            "--namespace=GIMarshallingTests",
+            "--nsversion=1.0",
+            "--symbol-prefix=gi_marshalling_tests",
+            "--warn-all",
+            "--warn-error",
+            "--library-path=%s" % tests_dir,
+            "--library=gimarshallingtests",
+            "--pkg=glib-2.0",
+            "--pkg=gio-2.0",
+            "--cflags-begin",
+            "-I%s" % gi_tests_dir,
+            "--cflags-end",
+            "--output=%s" % gir_path,
+        ]
+
+        if compiler.compiler_type == "msvc":
+            gimarshal_g_ir_scanner_cmd = [sys.executable] + gimarshal_g_ir_scanner_cmd
+
         if self._newer_group(ext_paths, gir_path):
-            subprocess.check_call([
-                g_ir_scanner,
-                "--no-libtool",
-                "--include=Gio-2.0",
-                "--namespace=GIMarshallingTests",
-                "--nsversion=1.0",
-                "--symbol-prefix=gi_marshalling_tests",
-                "--warn-all",
-                "--warn-error",
-                "--library-path=%s" % tests_dir,
-                "--library=gimarshallingtests",
-                "--pkg=glib-2.0",
-                "--pkg=gio-2.0",
-                "--cflags-begin",
-                "-I%s" % gi_tests_dir,
-                "--cflags-end",
-                "--output=%s" % gir_path,
-            ] + ext.sources + ext.depends)
+            subprocess.check_call(gimarshal_g_ir_scanner_cmd +
+                                  ext.sources + ext.depends)
 
         if self._newer_group([gir_path], typelib_path):
             subprocess.check_call([
@@ -543,27 +571,47 @@ class build_tests(Command):
         add_ext_pkg_config_dep(ext, compiler.compiler_type, "cairo-gobject")
         ext_paths = build_ext(ext)
 
-        gir_path = os.path.join(tests_dir, "Regress-1.0.gir")
-        typelib_path = os.path.join(tests_dir, "Regress-1.0.typelib")
+        # We want to always use POSIX-style paths for g-ir-compiler
+        # because it expects the input .gir file and .typelib file to use
+        # POSIX-style paths, otherwise it fails
+        gir_path = posixpath.join(tests_dir, "Regress-1.0.gir")
+        typelib_path = posixpath.join(tests_dir, "Regress-1.0.typelib")
+        regress_g_ir_scanner_cmd = [
+            g_ir_scanner,
+            "--no-libtool",
+            "--include=cairo-1.0",
+            "--include=Gio-2.0",
+            "--namespace=Regress",
+            "--nsversion=1.0",
+            "--warn-all",
+            "--warn-error",
+            "--library-path=%s" % tests_dir,
+            "--library=regress",
+            "--pkg=glib-2.0",
+            "--pkg=gio-2.0"]
 
+        if compiler.compiler_type == "msvc":
+            regress_g_ir_scanner_cmd = [sys.executable] + regress_g_ir_scanner_cmd
         if self._newer_group(ext_paths, gir_path):
-            subprocess.check_call([
-                g_ir_scanner,
-                "--no-libtool",
-                "--include=cairo-1.0",
-                "--include=Gio-2.0",
-                "--namespace=Regress",
-                "--nsversion=1.0",
-                "--warn-all",
-                "--warn-error",
-                "--library-path=%s" % tests_dir,
-                "--library=regress",
-                "--pkg=glib-2.0",
-                "--pkg=gio-2.0",
-                "--pkg=cairo",
-                "--pkg=cairo-gobject",
-                "--output=%s" % gir_path,
-            ] + ext.sources + ext.depends)
+
+            # MSVC: We don't normally have the pkg-config files for
+            # cairo and cairo-gobject, so use --extra-library
+            # instead of --pkg to pass those to the linker, so that
+            # g-ir-scanner won't fail due to linker errors
+            if compiler.compiler_type == "msvc":
+                regress_g_ir_scanner_cmd += [
+                    "--extra-library=cairo",
+                    "--extra-library=cairo-gobject"]
+
+            else:
+                regress_g_ir_scanner_cmd += [
+                    "--pkg=cairo",
+                    "--pkg=cairo-gobject"]
+
+            regress_g_ir_scanner_cmd += ["--output=%s" % gir_path]
+
+            subprocess.check_call(regress_g_ir_scanner_cmd +
+                                  ext.sources + ext.depends)
 
         if self._newer_group([gir_path], typelib_path):
             subprocess.check_call([
@@ -878,76 +926,83 @@ def add_ext_pkg_config_dep(ext, compiler_type, name):
 
 
 def add_ext_compiler_flags(ext, compiler, _cache={}):
-    cache_key = compiler.compiler[0]
-    if cache_key not in _cache:
+    if compiler.compiler_type == "msvc":
+        # MSVC: Just force-include msvc_recommended_pragmas.h so that
+        #       we can look out for compiler warnings that we really
+        #       want to look out for, and filter out those that don't
+        #       really matter to us.
+        ext.extra_compile_args += ['-FImsvc_recommended_pragmas.h']
+    else:
+        cache_key = compiler.compiler[0]
+        if cache_key not in _cache:
 
-        args = [
-            "-Wall",
-            "-Warray-bounds",
-            "-Wcast-align",
-            "-Wdeclaration-after-statement",
-            "-Wduplicated-branches",
-            "-Wextra",
-            "-Wformat=2",
-            "-Wformat-nonliteral",
-            "-Wformat-security",
-            "-Wimplicit-function-declaration",
-            "-Winit-self",
-            "-Wjump-misses-init",
-            "-Wlogical-op",
-            "-Wmissing-declarations",
-            "-Wmissing-format-attribute",
-            "-Wmissing-include-dirs",
-            "-Wmissing-noreturn",
-            "-Wmissing-prototypes",
-            "-Wnested-externs",
-            "-Wnull-dereference",
-            "-Wold-style-definition",
-            "-Wpacked",
-            "-Wpointer-arith",
-            "-Wrestrict",
-            "-Wreturn-type",
-            "-Wshadow",
-            "-Wsign-compare",
-            "-Wstrict-aliasing",
-            "-Wstrict-prototypes",
-            "-Wundef",
-            "-Wunused-but-set-variable",
-            "-Wwrite-strings",
-        ]
-
-        if sys.version_info[:2] != (3, 4):
-            args += [
-                "-Wswitch-default",
+            args = [
+                "-Wall",
+                "-Warray-bounds",
+                "-Wcast-align",
+                "-Wdeclaration-after-statement",
+                "-Wduplicated-branches",
+                "-Wextra",
+                "-Wformat=2",
+                "-Wformat-nonliteral",
+                "-Wformat-security",
+                "-Wimplicit-function-declaration",
+                "-Winit-self",
+                "-Wjump-misses-init",
+                "-Wlogical-op",
+                "-Wmissing-declarations",
+                "-Wmissing-format-attribute",
+                "-Wmissing-include-dirs",
+                "-Wmissing-noreturn",
+                "-Wmissing-prototypes",
+                "-Wnested-externs",
+                "-Wnull-dereference",
+                "-Wold-style-definition",
+                "-Wpacked",
+                "-Wpointer-arith",
+                "-Wrestrict",
+                "-Wreturn-type",
+                "-Wshadow",
+                "-Wsign-compare",
+                "-Wstrict-aliasing",
+                "-Wstrict-prototypes",
+                "-Wundef",
+                "-Wunused-but-set-variable",
+                "-Wwrite-strings",
             ]
 
-        args += [
-            "-Wno-incompatible-pointer-types-discards-qualifiers",
-            "-Wno-missing-field-initializers",
-            "-Wno-unused-parameter",
-            "-Wno-discarded-qualifiers",
-            "-Wno-sign-conversion",
-            "-Wno-cast-function-type",
-            "-Wno-int-conversion",
-        ]
+            if sys.version_info[:2] != (3, 4):
+                args += [
+                    "-Wswitch-default",
+                ]
 
-        # silence clang for unused gcc CFLAGS added by Debian
-        args += [
-            "-Wno-unused-command-line-argument",
-        ]
+            args += [
+                "-Wno-incompatible-pointer-types-discards-qualifiers",
+                "-Wno-missing-field-initializers",
+                "-Wno-unused-parameter",
+                "-Wno-discarded-qualifiers",
+                "-Wno-sign-conversion",
+                "-Wno-cast-function-type",
+                "-Wno-int-conversion",
+            ]
 
-        args += [
-            "-fno-strict-aliasing",
-            "-fvisibility=hidden",
-        ]
+            # silence clang for unused gcc CFLAGS added by Debian
+            args += [
+                "-Wno-unused-command-line-argument",
+            ]
 
-        # force GCC to use colors
-        if hasattr(sys.stdout, "isatty") and sys.stdout.isatty():
-            args.append("-fdiagnostics-color")
+            args += [
+                "-fno-strict-aliasing",
+                "-fvisibility=hidden",
+            ]
 
-        _cache[cache_key] = filter_compiler_arguments(compiler, args)
+            # force GCC to use colors
+            if hasattr(sys.stdout, "isatty") and sys.stdout.isatty():
+                args.append("-fdiagnostics-color")
 
-    ext.extra_compile_args += _cache[cache_key]
+            _cache[cache_key] = filter_compiler_arguments(compiler, args)
+
+        ext.extra_compile_args += _cache[cache_key]
 
 
 du_build_ext = get_command_class("build_ext")
