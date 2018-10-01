@@ -214,7 +214,7 @@ def filter_compiler_arguments(compiler, args):
     """
 
     if compiler.compiler_type == "msvc":
-        # TODO
+        # TODO, not much of need for now.
         return []
 
     extra = []
@@ -878,76 +878,83 @@ def add_ext_pkg_config_dep(ext, compiler_type, name):
 
 
 def add_ext_compiler_flags(ext, compiler, _cache={}):
-    cache_key = compiler.compiler[0]
-    if cache_key not in _cache:
+    if compiler.compiler_type == "msvc":
+        # MSVC: Just force-include msvc_recommended_pragmas.h so that
+        #       we can look out for compiler warnings that we really
+        #       want to look out for, and filter out those that don't
+        #       really matter to us.
+        ext.extra_compile_args += ['-FImsvc_recommended_pragmas.h']
+    else:
+        cache_key = compiler.compiler[0]
+        if cache_key not in _cache:
 
-        args = [
-            "-Wall",
-            "-Warray-bounds",
-            "-Wcast-align",
-            "-Wdeclaration-after-statement",
-            "-Wduplicated-branches",
-            "-Wextra",
-            "-Wformat=2",
-            "-Wformat-nonliteral",
-            "-Wformat-security",
-            "-Wimplicit-function-declaration",
-            "-Winit-self",
-            "-Wjump-misses-init",
-            "-Wlogical-op",
-            "-Wmissing-declarations",
-            "-Wmissing-format-attribute",
-            "-Wmissing-include-dirs",
-            "-Wmissing-noreturn",
-            "-Wmissing-prototypes",
-            "-Wnested-externs",
-            "-Wnull-dereference",
-            "-Wold-style-definition",
-            "-Wpacked",
-            "-Wpointer-arith",
-            "-Wrestrict",
-            "-Wreturn-type",
-            "-Wshadow",
-            "-Wsign-compare",
-            "-Wstrict-aliasing",
-            "-Wstrict-prototypes",
-            "-Wundef",
-            "-Wunused-but-set-variable",
-            "-Wwrite-strings",
-        ]
-
-        if sys.version_info[:2] != (3, 4):
-            args += [
-                "-Wswitch-default",
+            args = [
+                "-Wall",
+                "-Warray-bounds",
+                "-Wcast-align",
+                "-Wdeclaration-after-statement",
+                "-Wduplicated-branches",
+                "-Wextra",
+                "-Wformat=2",
+                "-Wformat-nonliteral",
+                "-Wformat-security",
+                "-Wimplicit-function-declaration",
+                "-Winit-self",
+                "-Wjump-misses-init",
+                "-Wlogical-op",
+                "-Wmissing-declarations",
+                "-Wmissing-format-attribute",
+                "-Wmissing-include-dirs",
+                "-Wmissing-noreturn",
+                "-Wmissing-prototypes",
+                "-Wnested-externs",
+                "-Wnull-dereference",
+                "-Wold-style-definition",
+                "-Wpacked",
+                "-Wpointer-arith",
+                "-Wrestrict",
+                "-Wreturn-type",
+                "-Wshadow",
+                "-Wsign-compare",
+                "-Wstrict-aliasing",
+                "-Wstrict-prototypes",
+                "-Wundef",
+                "-Wunused-but-set-variable",
+                "-Wwrite-strings",
             ]
 
-        args += [
-            "-Wno-incompatible-pointer-types-discards-qualifiers",
-            "-Wno-missing-field-initializers",
-            "-Wno-unused-parameter",
-            "-Wno-discarded-qualifiers",
-            "-Wno-sign-conversion",
-            "-Wno-cast-function-type",
-            "-Wno-int-conversion",
-        ]
+            if sys.version_info[:2] != (3, 4):
+                args += [
+                    "-Wswitch-default",
+                ]
 
-        # silence clang for unused gcc CFLAGS added by Debian
-        args += [
-            "-Wno-unused-command-line-argument",
-        ]
+            args += [
+                "-Wno-incompatible-pointer-types-discards-qualifiers",
+                "-Wno-missing-field-initializers",
+                "-Wno-unused-parameter",
+                "-Wno-discarded-qualifiers",
+                "-Wno-sign-conversion",
+                "-Wno-cast-function-type",
+                "-Wno-int-conversion",
+            ]
 
-        args += [
-            "-fno-strict-aliasing",
-            "-fvisibility=hidden",
-        ]
+            # silence clang for unused gcc CFLAGS added by Debian
+            args += [
+                "-Wno-unused-command-line-argument",
+            ]
 
-        # force GCC to use colors
-        if hasattr(sys.stdout, "isatty") and sys.stdout.isatty():
-            args.append("-fdiagnostics-color")
+            args += [
+                "-fno-strict-aliasing",
+                "-fvisibility=hidden",
+            ]
 
-        _cache[cache_key] = filter_compiler_arguments(compiler, args)
+            # force GCC to use colors
+            if hasattr(sys.stdout, "isatty") and sys.stdout.isatty():
+                args.append("-fdiagnostics-color")
 
-    ext.extra_compile_args += _cache[cache_key]
+            _cache[cache_key] = filter_compiler_arguments(compiler, args)
+
+        ext.extra_compile_args += _cache[cache_key]
 
 
 du_build_ext = get_command_class("build_ext")
