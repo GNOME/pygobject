@@ -24,6 +24,8 @@ import subprocess
 import tarfile
 import sysconfig
 import tempfile
+import posixpath
+
 from email import parser
 
 try:
@@ -444,26 +446,47 @@ class build_tests(Command):
         else:
             compiler.shared_lib_extension = ".so"
 
+        if compiler.compiler_type == "msvc":
+            g_ir_scanner_cmd = [sys.executable, g_ir_scanner]
+        else:
+            g_ir_scanner_cmd = [g_ir_scanner]
+
         def build_ext(ext):
-            if compiler.compiler_type == "msvc":
-                raise Exception("MSVC support not implemented")
 
             libname = compiler.shared_object_filename(ext.name)
             ext_paths = [os.path.join(tests_dir, libname)]
             if os.name == "nt":
-                implibname = libname + ".a"
+                if compiler.compiler_type == "msvc":
+                    # MSVC: Get rid of the 'lib' prefix and the .dll
+                    #       suffix from libname, and append .lib so
+                    #       that we get the right .lib filename to
+                    #       pass to g-ir-scanner with --library
+                    implibname = libname[3:libname.rfind(".dll")] + '.lib'
+                else:
+                    implibname = libname + ".a"
                 ext_paths.append(os.path.join(tests_dir, implibname))
 
             if self._newer_group(ext.sources + ext.depends, *ext_paths):
+                # MSVC: We need to define _GI_EXTERN explcitly so that
+                #       symbols get exported properly
+                if compiler.compiler_type == "msvc":
+                    extra_defines = [('_GI_EXTERN',
+                                      '__declspec(dllexport)extern')]
+                else:
+                    extra_defines = []
                 objects = compiler.compile(
                     ext.sources,
                     output_dir=self.build_temp,
                     include_dirs=ext.include_dirs,
-                    macros=ext.define_macros)
+                    macros=ext.define_macros + extra_defines)
 
                 if os.name == "nt":
-                    postargs = ["-Wl,--out-implib=%s" %
-                                os.path.join(tests_dir, implibname)]
+                    if compiler.compiler_type == "msvc":
+                        postargs = ["-implib:%s" %
+                                    os.path.join(tests_dir, implibname)]
+                    else:
+                        postargs = ["-Wl,--out-implib=%s" %
+                                    os.path.join(tests_dir, implibname)]
                 else:
                     postargs = []
 
@@ -496,29 +519,35 @@ class build_tests(Command):
         add_ext_pkg_config_dep(ext, compiler.compiler_type, "gio-2.0")
         ext_paths = build_ext(ext)
 
-        gir_path = os.path.join(tests_dir, "GIMarshallingTests-1.0.gir")
-        typelib_path = os.path.join(
+        # We want to always use POSIX-style paths for g-ir-compiler
+        # because it expects the input .gir file and .typelib file to use
+        # POSIX-style paths, otherwise it fails
+        gir_path = posixpath.join(
+            tests_dir, "GIMarshallingTests-1.0.gir")
+        typelib_path = posixpath.join(
             tests_dir, "GIMarshallingTests-1.0.typelib")
 
+        gimarshal_g_ir_scanner_cmd = g_ir_scanner_cmd + [
+            "--no-libtool",
+            "--include=Gio-2.0",
+            "--namespace=GIMarshallingTests",
+            "--nsversion=1.0",
+            "--symbol-prefix=gi_marshalling_tests",
+            "--warn-all",
+            "--warn-error",
+            "--library-path=%s" % tests_dir,
+            "--library=gimarshallingtests",
+            "--pkg=glib-2.0",
+            "--pkg=gio-2.0",
+            "--cflags-begin",
+            "-I%s" % gi_tests_dir,
+            "--cflags-end",
+            "--output=%s" % gir_path,
+        ]
+
         if self._newer_group(ext_paths, gir_path):
-            subprocess.check_call([
-                g_ir_scanner,
-                "--no-libtool",
-                "--include=Gio-2.0",
-                "--namespace=GIMarshallingTests",
-                "--nsversion=1.0",
-                "--symbol-prefix=gi_marshalling_tests",
-                "--warn-all",
-                "--warn-error",
-                "--library-path=%s" % tests_dir,
-                "--library=gimarshallingtests",
-                "--pkg=glib-2.0",
-                "--pkg=gio-2.0",
-                "--cflags-begin",
-                "-I%s" % gi_tests_dir,
-                "--cflags-end",
-                "--output=%s" % gir_path,
-            ] + ext.sources + ext.depends)
+            subprocess.check_call(gimarshal_g_ir_scanner_cmd +
+                                  ext.sources + ext.depends)
 
         if self._newer_group([gir_path], typelib_path):
             subprocess.check_call([
@@ -554,8 +583,23 @@ class build_tests(Command):
                 ext, compiler.compiler_type, "cairo-gobject")
         ext_paths = build_ext(ext)
 
-        gir_path = os.path.join(tests_dir, "Regress-1.0.gir")
-        typelib_path = os.path.join(tests_dir, "Regress-1.0.typelib")
+        # We want to always use POSIX-style paths for g-ir-compiler
+        # because it expects the input .gir file and .typelib file to use
+        # POSIX-style paths, otherwise it fails
+        gir_path = posixpath.join(tests_dir, "Regress-1.0.gir")
+        typelib_path = posixpath.join(tests_dir, "Regress-1.0.typelib")
+        regress_g_ir_scanner_cmd = g_ir_scanner_cmd + [
+            "--no-libtool",
+            "--include=cairo-1.0",
+            "--include=Gio-2.0",
+            "--namespace=Regress",
+            "--nsversion=1.0",
+            "--warn-all",
+            "--warn-error",
+            "--library-path=%s" % tests_dir,
+            "--library=regress",
+            "--pkg=glib-2.0",
+            "--pkg=gio-2.0"]
 
         if WITH_CAIRO:
             gir_cairo_args = [
@@ -564,20 +608,27 @@ class build_tests(Command):
             gir_cairo_args = ["-D_GI_DISABLE_CAIRO"]
 
         if self._newer_group(ext_paths, gir_path):
-            subprocess.check_call([
-                g_ir_scanner,
-                "--no-libtool",
-                "--include=Gio-2.0",
-                "--namespace=Regress",
-                "--nsversion=1.0",
-                "--warn-all",
-                "--warn-error",
-                "--library-path=%s" % tests_dir,
-                "--library=regress",
-                "--pkg=glib-2.0",
-                "--pkg=gio-2.0",
-                "--output=%s" % gir_path,
-            ] + gir_cairo_args + ext.sources + ext.depends)
+            if WITH_CAIRO:
+                # MSVC: We don't normally have the pkg-config files for
+                # cairo and cairo-gobject, so use --extra-library
+                # instead of --pkg to pass those to the linker, so that
+                # g-ir-scanner won't fail due to linker errors
+                if compiler.compiler_type == "msvc":
+                    regress_g_ir_scanner_cmd += [
+                        "--extra-library=cairo",
+                        "--extra-library=cairo-gobject"]
+
+                else:
+                    regress_g_ir_scanner_cmd += [
+                        "--pkg=cairo",
+                        "--pkg=cairo-gobject"]
+            else:
+                regress_g_ir_scanner_cmd += ["-D_GI_DISABLE_CAIRO"]
+
+            regress_g_ir_scanner_cmd += ["--output=%s" % gir_path]
+
+            subprocess.check_call(regress_g_ir_scanner_cmd +
+                                  ext.sources + ext.depends)
 
         if self._newer_group([gir_path], typelib_path):
             subprocess.check_call([
