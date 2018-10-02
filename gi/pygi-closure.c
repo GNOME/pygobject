@@ -104,14 +104,14 @@ _pygi_closure_assign_pyobj_to_retval (gpointer retval,
                     *(ffi_arg *) retval = arg->v_uint;
                     break;
                 default:
-                    *(ffi_arg *) retval = arg->v_pointer;
+                    *(ffi_arg *) retval = (ffi_arg) arg->v_pointer;
                     break;
                 }
 
                 break;
             }
         default:
-            *(ffi_arg *) retval = arg->v_pointer;
+            *(ffi_arg *) retval = (ffi_arg) arg->v_pointer;
             break;
       }
 }
