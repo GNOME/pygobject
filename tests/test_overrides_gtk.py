@@ -822,6 +822,30 @@ class TestBuilder(unittest.TestCase):
                             []),
         }
 
+    def test_add_from_string(self):
+        builder = Gtk.Builder()
+        builder.add_from_string(u"")
+        builder.add_from_string("")
+
+        def get_example(string):
+            return u"""\
+<interface>
+  <menu id="appmenu">
+    <section>
+      <item>
+        <attribute name="label">%s</attribute>
+      </item>
+    </section>
+  </menu>
+</interface>""" % string
+
+        builder.add_from_string(get_example(u"ä" * 1000))
+
+        builder = Gtk.Builder()
+        builder.add_objects_from_string(u"", [''])
+        builder.add_objects_from_string("", [''])
+        builder.add_objects_from_string(get_example(u"ä" * 1000), [''])
+
     def test_extract_handler_and_args_object(self):
         class Obj():
             pass
