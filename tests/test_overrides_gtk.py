@@ -222,6 +222,11 @@ class TestGtk(unittest.TestCase):
         mi = ui.get_widget("/menubær1")
         self.assertEqual(type(mi), Gtk.MenuBar)
 
+    @unittest.skipIf(Gtk_version == "4.0", "not in gtk4")
+    def test_uimanager_nullterm(self):
+        ui = Gtk.UIManager()
+        ui.add_ui_from_string("<ui></ui>\x00\x00\x00")
+
     def test_window(self):
         # standard Window
         w = Gtk.Window()
@@ -821,6 +826,34 @@ class TestBuilder(unittest.TestCase):
                             None,
                             []),
         }
+
+    def test_add_from_string(self):
+        builder = Gtk.Builder()
+        builder.add_from_string(u"")
+        builder.add_from_string("")
+        builder.add_from_string(u"\x00")
+        builder.add_from_string("\x00")
+
+        def get_example(string):
+            return u"""\
+<interface>
+  <menu id="appmenu">
+    <section>
+      <item>
+        <attribute name="label">%s</attribute>
+      </item>
+    </section>
+  </menu>
+</interface>""" % string
+
+        builder.add_from_string(get_example(u"ä" * 1000))
+
+        builder = Gtk.Builder()
+        builder.add_objects_from_string(u"", [''])
+        builder.add_objects_from_string("", [''])
+        builder.add_objects_from_string(u"\x00", [''])
+        builder.add_objects_from_string("\x00", [''])
+        builder.add_objects_from_string(get_example(u"ä" * 1000), [''])
 
     def test_extract_handler_and_args_object(self):
         class Obj():
