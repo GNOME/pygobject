@@ -412,7 +412,7 @@ if Gtk._version in ("2.0", "3.0"):
             if not isinstance(buffer, string_types):
                 raise TypeError('buffer must be a string')
 
-            length = len(buffer.encode('UTF-8'))
+            length = _get_utf8_length(buffer)
 
             return Gtk.UIManager.add_ui_from_string(self, buffer, length)
 
@@ -462,6 +462,14 @@ MenuItem = override(MenuItem)
 __all__.append('MenuItem')
 
 
+def _get_utf8_length(string):
+    if not isinstance(string, string_types):
+        raise TypeError('must be a string')
+    if not isinstance(string, bytes):
+        string = string.encode("utf-8")
+    return len(string)
+
+
 class Builder(Gtk.Builder):
     def connect_signals(self, obj_or_map):
         """Connect signals specified by this builder to a name, handler mapping.
@@ -481,7 +489,7 @@ class Builder(Gtk.Builder):
         if not isinstance(buffer, string_types):
             raise TypeError('buffer must be a string')
 
-        length = len(buffer)
+        length = _get_utf8_length(buffer)
 
         return Gtk.Builder.add_from_string(self, buffer, length)
 
@@ -489,7 +497,7 @@ class Builder(Gtk.Builder):
         if not isinstance(buffer, string_types):
             raise TypeError('buffer must be a string')
 
-        length = len(buffer)
+        length = _get_utf8_length(buffer)
 
         return Gtk.Builder.add_objects_from_string(self, buffer, length, object_ids)
 
