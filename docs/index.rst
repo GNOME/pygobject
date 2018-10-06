@@ -72,7 +72,7 @@ Who Is Using PyGObject?
 * `GNOME Music <https://wiki.gnome.org/Apps/Music>`__ - a music player for GNOME
 * `GNOME Tweak Tool <https://wiki.gnome.org/action/show/Apps/GnomeTweakTool>`__ - a tool to customize advanced GNOME 3 options
 * `Gramps <https://gramps-project.org/>`__ - a genealogy program
-* `Lollypop <https://gnumdk.github.io/lollypop-web/>`__ - a modern music player
+* `Lollypop <https://wiki.gnome.org/Apps/Lollypop>`__ - a modern music player
 * `Meld <http://meldmerge.org/>`__ - a visual diff and merge tool
 * `MyPaint <http://mypaint.org/>`__ - a nimble, distraction-free, and easy tool for digital painters
 * `Orca <https://wiki.gnome.org/Projects/Orca>`__ - a flexible and extensible screen reader
