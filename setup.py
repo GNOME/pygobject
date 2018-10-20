@@ -1173,7 +1173,7 @@ def main():
 
     gi_ext = Extension(
         name='gi._gi',
-        sources=sources,
+        sources=sorted(sources),
         include_dirs=[script_dir, gi_dir],
         depends=list_headers(script_dir) + list_headers(gi_dir),
         define_macros=[("PY_SSIZE_T_CLEAN", None)],
