@@ -21,10 +21,10 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
 # USA
 
+import functools
 import warnings
 from collections import namedtuple
 
-import gi.overrides
 import gi.module
 from gi.overrides import override, deprecated_attr
 from gi.repository import GLib
@@ -549,7 +549,7 @@ def _signalmethod(func):
     # Function wrapper for signal functions used as instance methods.
     # This is needed when the signal functions come directly from GI.
     # (they are not already wrapped)
-    @gi.overrides.wraps(func)
+    @functools.wraps(func)
     def meth(*args, **kwargs):
         return func(*args, **kwargs)
     return meth
