@@ -27,7 +27,7 @@ python -m pip install flake8 pytest pytest-faulthandler coverage
 export CFLAGS="-coverage -ftest-coverage -fprofile-arcs -Werror"
 
 # MESON
-/usr/bin/python3 -m pip install --user git+https://github.com/mesonbuild/meson.git
+/usr/bin/python3 -m pip install --user meson
 export PATH="${HOME}/.local/bin:${PATH}"
 export PKG_CONFIG_PATH="$(python -c 'import sys; sys.stdout.write(sys.prefix)')/lib/pkgconfig"
 # pycairo install under PyPy doesn't install a .pc file
