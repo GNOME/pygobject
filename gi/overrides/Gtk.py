@@ -141,15 +141,17 @@ class Widget(Gtk.Widget):
         super(Widget, self).freeze_child_notify()
         return _FreezeNotifyManager(self)
 
-    def drag_dest_set_target_list(self, target_list):
-        if (target_list is not None) and (not isinstance(target_list, Gtk.TargetList)):
-            target_list = Gtk.TargetList.new(_construct_target_list(target_list))
-        super(Widget, self).drag_dest_set_target_list(target_list)
+    if Gtk._version != "4.0":
+        def drag_dest_set_target_list(self, target_list):
+            if (target_list is not None) and (not isinstance(target_list, Gtk.TargetList)):
+                target_list = Gtk.TargetList.new(_construct_target_list(target_list))
+            super(Widget, self).drag_dest_set_target_list(target_list)
 
-    def drag_source_set_target_list(self, target_list):
-        if (target_list is not None) and (not isinstance(target_list, Gtk.TargetList)):
-            target_list = Gtk.TargetList.new(_construct_target_list(target_list))
-        super(Widget, self).drag_source_set_target_list(target_list)
+    if Gtk._version != "4.0":
+        def drag_source_set_target_list(self, target_list):
+            if (target_list is not None) and (not isinstance(target_list, Gtk.TargetList)):
+                target_list = Gtk.TargetList.new(_construct_target_list(target_list))
+            super(Widget, self).drag_source_set_target_list(target_list)
 
     def style_get_property(self, property_name, value=None):
         if value is None:
@@ -184,8 +186,6 @@ class Container(Gtk.Container, Widget):
     # alias for Python 2.x object protocol
     __nonzero__ = __bool__
 
-    get_focus_chain = strip_boolean_result(Gtk.Container.get_focus_chain)
-
     def child_get_property(self, child, property_name, value=None):
         if value is None:
             prop = self.find_child_property(property_name)
@@ -197,15 +197,18 @@ class Container(Gtk.Container, Widget):
         Gtk.Container.child_get_property(self, child, property_name, value)
         return value.get_value()
 
-    def child_get(self, child, *prop_names):
-        """Returns a list of child property values for the given names."""
-        return [self.child_get_property(child, name) for name in prop_names]
+    if Gtk._version in ("2.0", "3.0"):
+        def child_get(self, child, *prop_names):
+            """Returns a list of child property values for the given names."""
+            return [self.child_get_property(child, name) for name in prop_names]
 
-    def child_set(self, child, **kwargs):
-        """Set a child properties on the given child to key/value pairs."""
-        for name, value in kwargs.items():
-            name = name.replace('_', '-')
-            self.child_set_property(child, name, value)
+        def child_set(self, child, **kwargs):
+            """Set a child properties on the given child to key/value pairs."""
+            for name, value in kwargs.items():
+                name = name.replace('_', '-')
+                self.child_set_property(child, name, value)
+
+        get_focus_chain = strip_boolean_result(Gtk.Container.get_focus_chain)
 
 
 Container = override(Container)

@@ -134,7 +134,11 @@ def init_test_environ():
     except ImportError:
         pass
     else:
-        if not Gtk.init_check([])[0]:
+        if Gtk._version == "4.0":
+            res = Gtk.init_check()
+        else:
+            res = Gtk.init_check([])[0]
+        if not res:
             raise RuntimeError("Gtk available, but Gtk.init_check() failed")
 
 
