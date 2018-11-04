@@ -67,9 +67,9 @@ class TestGSettings(unittest.TestCase):
         self.settings.reset('test-enum')
 
     def test_iter(self):
-        assert list(self.settings) == [
+        assert set(list(self.settings)) == set([
             'test-tuple', 'test-array', 'test-boolean', 'test-string',
-            'test-enum', 'test-range']
+            'test-enum', 'test-range'])
 
     def test_get_set(self):
         for key in self.settings:
