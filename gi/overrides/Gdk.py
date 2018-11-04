@@ -161,7 +161,7 @@ if Gdk._version == '2.0':
 
     Drawable = override(Drawable)
     __all__.append('Drawable')
-else:
+elif Gdk._version == '3.0':
     class Window(Gdk.Window):
         def __new__(cls, parent, attributes, attributes_mask):
             # Gdk.Window had to be made abstract,
@@ -181,33 +181,25 @@ if Gdk._version in ("2.0", "3.0"):
     Gdk.EventType._2BUTTON_PRESS = getattr(Gdk.EventType, "2BUTTON_PRESS")
     Gdk.EventType._3BUTTON_PRESS = getattr(Gdk.EventType, "3BUTTON_PRESS")
 
-
-class Event(Gdk.Event):
-    _UNION_MEMBERS = {
-        Gdk.EventType.DELETE: 'any',
-        Gdk.EventType.DESTROY: 'any',
-        Gdk.EventType.EXPOSE: 'expose',
-        Gdk.EventType.MOTION_NOTIFY: 'motion',
-        Gdk.EventType.BUTTON_PRESS: 'button',
-        Gdk.EventType.BUTTON_RELEASE: 'button',
-        Gdk.EventType.KEY_PRESS: 'key',
-        Gdk.EventType.KEY_RELEASE: 'key',
-        Gdk.EventType.ENTER_NOTIFY: 'crossing',
-        Gdk.EventType.LEAVE_NOTIFY: 'crossing',
-        Gdk.EventType.FOCUS_CHANGE: 'focus_change',
-        Gdk.EventType.CONFIGURE: 'configure',
-        Gdk.EventType.MAP: 'any',
-        Gdk.EventType.UNMAP: 'any',
-        Gdk.EventType.PROXIMITY_IN: 'proximity',
-        Gdk.EventType.PROXIMITY_OUT: 'proximity',
-        Gdk.EventType.DRAG_ENTER: 'dnd',
-        Gdk.EventType.DRAG_LEAVE: 'dnd',
-        Gdk.EventType.DRAG_MOTION: 'dnd',
-        Gdk.EventType.DROP_START: 'dnd',
-    }
-
-    if Gdk._version in ("2.0", "3.0"):
-        _UNION_MEMBERS.update({
+    class Event(Gdk.Event):
+        _UNION_MEMBERS = {
+            Gdk.EventType.DELETE: 'any',
+            Gdk.EventType.DESTROY: 'any',
+            Gdk.EventType.MOTION_NOTIFY: 'motion',
+            Gdk.EventType.BUTTON_PRESS: 'button',
+            Gdk.EventType.BUTTON_RELEASE: 'button',
+            Gdk.EventType.KEY_PRESS: 'key',
+            Gdk.EventType.KEY_RELEASE: 'key',
+            Gdk.EventType.ENTER_NOTIFY: 'crossing',
+            Gdk.EventType.LEAVE_NOTIFY: 'crossing',
+            Gdk.EventType.FOCUS_CHANGE: 'focus_change',
+            Gdk.EventType.CONFIGURE: 'configure',
+            Gdk.EventType.PROXIMITY_IN: 'proximity',
+            Gdk.EventType.PROXIMITY_OUT: 'proximity',
+            Gdk.EventType.DRAG_ENTER: 'dnd',
+            Gdk.EventType.DRAG_LEAVE: 'dnd',
+            Gdk.EventType.DRAG_MOTION: 'dnd',
+            Gdk.EventType.DROP_START: 'dnd',
             Gdk.EventType._2BUTTON_PRESS: 'button',
             Gdk.EventType._3BUTTON_PRESS: 'button',
             Gdk.EventType.PROPERTY_NOTIFY: 'property',
@@ -218,116 +210,112 @@ class Event(Gdk.Event):
             Gdk.EventType.DROP_FINISHED: 'dnd',
             Gdk.EventType.CLIENT_EVENT: 'client',
             Gdk.EventType.VISIBILITY_NOTIFY: 'visibility',
-        })
+            Gdk.EventType.EXPOSE: 'expose',
+            Gdk.EventType.MAP: 'any',
+            Gdk.EventType.UNMAP: 'any',
+        }
+
+        if Gdk._version == '2.0':
+            _UNION_MEMBERS[Gdk.EventType.NO_EXPOSE] = 'no_expose'
+
+        if hasattr(Gdk.EventType, 'TOUCH_BEGIN'):
+            _UNION_MEMBERS.update(
+                {
+                    Gdk.EventType.TOUCH_BEGIN: 'touch',
+                    Gdk.EventType.TOUCH_UPDATE: 'touch',
+                    Gdk.EventType.TOUCH_END: 'touch',
+                    Gdk.EventType.TOUCH_CANCEL: 'touch',
+                })
+
+        def __getattr__(self, name):
+            real_event = getattr(self, '_UNION_MEMBERS').get(self.type)
+            if real_event:
+                return getattr(getattr(self, real_event), name)
+            else:
+                raise AttributeError("'%s' object has no attribute '%s'" % (self.__class__.__name__, name))
+
+        def __setattr__(self, name, value):
+            real_event = getattr(self, '_UNION_MEMBERS').get(self.type)
+            if real_event:
+                setattr(getattr(self, real_event), name, value)
+            else:
+                Gdk.Event.__setattr__(self, name, value)
+
+        def __repr__(self):
+            base_repr = Gdk.Event.__repr__(self).strip("><")
+            return "<%s type=%r>" % (base_repr, self.type)
+
+    Event = override(Event)
+    __all__.append('Event')
+
+    # manually bind GdkEvent members to GdkEvent
+
+    modname = globals()['__name__']
+    module = sys.modules[modname]
+
+    # right now we can't get the type_info from the
+    # field info so manually list the class names
+    event_member_classes = ['EventAny',
+                            'EventExpose',
+                            'EventMotion',
+                            'EventButton',
+                            'EventScroll',
+                            'EventKey',
+                            'EventCrossing',
+                            'EventFocus',
+                            'EventConfigure',
+                            'EventProximity',
+                            'EventDND',
+                            'EventSetting',
+                            'EventGrabBroken',
+                            'EventVisibility',
+                            'EventProperty',
+                            'EventSelection',
+                            'EventOwnerChange',
+                            'EventWindowState',
+                            'EventVisibility']
 
     if Gdk._version == '2.0':
-        _UNION_MEMBERS[Gdk.EventType.NO_EXPOSE] = 'no_expose'
+        event_member_classes.append('EventNoExpose')
 
-    if hasattr(Gdk.EventType, 'TOUCH_BEGIN'):
-        _UNION_MEMBERS.update(
-            {
-                Gdk.EventType.TOUCH_BEGIN: 'touch',
-                Gdk.EventType.TOUCH_UPDATE: 'touch',
-                Gdk.EventType.TOUCH_END: 'touch',
-                Gdk.EventType.TOUCH_CANCEL: 'touch',
-            })
-
-    def __getattr__(self, name):
-        real_event = getattr(self, '_UNION_MEMBERS').get(self.type)
-        if real_event:
-            return getattr(getattr(self, real_event), name)
-        else:
-            raise AttributeError("'%s' object has no attribute '%s'" % (self.__class__.__name__, name))
-
-    def __setattr__(self, name, value):
-        real_event = getattr(self, '_UNION_MEMBERS').get(self.type)
-        if real_event:
-            setattr(getattr(self, real_event), name, value)
-        else:
-            Gdk.Event.__setattr__(self, name, value)
-
-    def __repr__(self):
-        base_repr = Gdk.Event.__repr__(self).strip("><")
-        return "<%s type=%r>" % (base_repr, self.type)
+    if hasattr(Gdk, 'EventTouch'):
+        event_member_classes.append('EventTouch')
 
 
-Event = override(Event)
-__all__.append('Event')
-
-# manually bind GdkEvent members to GdkEvent
-
-modname = globals()['__name__']
-module = sys.modules[modname]
-
-# right now we can't get the type_info from the
-# field info so manually list the class names
-event_member_classes = ['EventAny',
-                        'EventExpose',
-                        'EventMotion',
-                        'EventButton',
-                        'EventScroll',
-                        'EventKey',
-                        'EventCrossing',
-                        'EventFocus',
-                        'EventConfigure',
-                        'EventProximity',
-                        'EventDND',
-                        'EventSetting',
-                        'EventGrabBroken']
-
-if Gdk._version in ("2.0", "3.0"):
-    event_member_classes.extend([
-        'EventVisibility',
-        'EventProperty',
-        'EventSelection',
-        'EventOwnerChange',
-        'EventWindowState',
-        'EventVisibility',
-    ])
-
-if Gdk._version == '2.0':
-    event_member_classes.append('EventNoExpose')
-
-if hasattr(Gdk, 'EventTouch'):
-    event_member_classes.append('EventTouch')
+    # whitelist all methods that have a success return we want to mask
+    gsuccess_mask_funcs = ['get_state',
+                           'get_axis',
+                           'get_coords',
+                           'get_root_coords']
 
 
-# whitelist all methods that have a success return we want to mask
-gsuccess_mask_funcs = ['get_state',
-                       'get_axis',
-                       'get_coords',
-                       'get_root_coords']
+    for event_class in event_member_classes:
+        override_class = type(event_class, (getattr(Gdk, event_class),), {})
+        # add the event methods
+        for method_info in Gdk.Event.__info__.get_methods():
+            name = method_info.get_name()
+            event_method = getattr(Gdk.Event, name)
+            # python2 we need to use the __func__ attr to avoid internal
+            # instance checks
+            event_method = getattr(event_method, '__func__', event_method)
 
+            # use the _gsuccess_mask decorator if this method is whitelisted
+            if name in gsuccess_mask_funcs:
+                event_method = strip_boolean_result(event_method)
+            setattr(override_class, name, event_method)
 
-for event_class in event_member_classes:
-    override_class = type(event_class, (getattr(Gdk, event_class),), {})
-    # add the event methods
-    for method_info in Gdk.Event.__info__.get_methods():
-        name = method_info.get_name()
-        event_method = getattr(Gdk.Event, name)
-        # python2 we need to use the __func__ attr to avoid internal
-        # instance checks
-        event_method = getattr(event_method, '__func__', event_method)
+        setattr(module, event_class, override_class)
+        __all__.append(event_class)
 
-        # use the _gsuccess_mask decorator if this method is whitelisted
-        if name in gsuccess_mask_funcs:
-            event_method = strip_boolean_result(event_method)
-        setattr(override_class, name, event_method)
+    # end GdkEvent overrides
 
-    setattr(module, event_class, override_class)
-    __all__.append(event_class)
+    class DragContext(Gdk.DragContext):
+        def finish(self, success, del_, time):
+            Gtk = get_introspection_module('Gtk')
+            Gtk.drag_finish(self, success, del_, time)
 
-# end GdkEvent overrides
-
-
-class DragContext(Gdk.DragContext):
-    def finish(self, success, del_, time):
-        Gtk = get_introspection_module('Gtk')
-        Gtk.drag_finish(self, success, del_, time)
-
-
-DragContext = override(DragContext)
-__all__.append('DragContext')
+    DragContext = override(DragContext)
+    __all__.append('DragContext')
 
 
 class Cursor(Gdk.Cursor):

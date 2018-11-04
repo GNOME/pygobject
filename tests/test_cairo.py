@@ -180,9 +180,16 @@ class TestRegion(unittest.TestCase):
 @unittest.skipUnless(has_cairo, 'built without cairo support')
 @unittest.skipUnless(Gtk, 'Gtk not available')
 class TestPango(unittest.TestCase):
+
     def test_cairo_font_options(self):
-        screen = Gtk.Window().get_screen()
-        font_opts = screen.get_font_options()
+        window = Gtk.Window()
+        if Gtk._version == "4.0":
+            window.set_font_options(cairo.FontOptions())
+            font_opts = window.get_font_options()
+        else:
+            screen = window.get_screen()
+            font_opts = screen.get_font_options()
+        assert font_opts is not None
         self.assertTrue(isinstance(font_opts.get_subpixel_order(), int))
 
 
