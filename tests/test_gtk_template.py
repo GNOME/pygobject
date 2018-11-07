@@ -390,6 +390,9 @@ def test_check_decorated_class():
     with pytest.raises(TypeError, match=".*on Widgets.*"):
         Gtk.Template.from_string("")(object())
 
+
+@pytest.mark.skipif(Gtk._version == "4.0", reason="errors out first with gtk4")
+def test_subclass_fail():
     @Gtk.Template.from_string("")
     class Base(Gtk.Widget):
         __gtype_name__ = new_gtype_name()

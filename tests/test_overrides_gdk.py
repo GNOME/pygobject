@@ -73,6 +73,7 @@ class TestGdk(unittest.TestCase):
         self.assertEqual(tuple(Gdk.RGBA(0.1, 0.2, 0.3, 0.4)),
                          (0.1, 0.2, 0.3, 0.4))
 
+    @unittest.skipIf(Gdk_version == "4.0", "not in gdk4")
     def test_event(self):
         event = Gdk.Event.new(Gdk.EventType.CONFIGURE)
         self.assertEqual(event.type, Gdk.EventType.CONFIGURE)
@@ -82,6 +83,7 @@ class TestGdk(unittest.TestCase):
         event.type = Gdk.EventType.SCROLL
         self.assertRaises(AttributeError, lambda: getattr(event, 'foo_bar'))
 
+    @unittest.skipIf(Gdk_version == "4.0", "not in gdk4")
     def test_event_touch(self):
         event = Gdk.Event.new(Gdk.EventType.TOUCH_BEGIN)
         self.assertEqual(event.type, Gdk.EventType.TOUCH_BEGIN)
@@ -94,6 +96,7 @@ class TestGdk(unittest.TestCase):
         self.assertTrue(event.emulating_pointer)
         self.assertTrue(event.touch.emulating_pointer)
 
+    @unittest.skipIf(Gdk_version == "4.0", "not in gdk4")
     def test_event_setattr(self):
         event = Gdk.Event.new(Gdk.EventType.DRAG_MOTION)
         event.x_root, event.y_root = 0, 5
@@ -106,6 +109,7 @@ class TestGdk(unittest.TestCase):
         self.assertFalse(hasattr(event, "foo_bar"))
         event.foo_bar = 42
 
+    @unittest.skipIf(Gdk_version == "4.0", "not in gdk4")
     def test_event_repr(self):
         event = Gdk.Event.new(Gdk.EventType.CONFIGURE)
         self.assertTrue("CONFIGURE" in repr(event))
