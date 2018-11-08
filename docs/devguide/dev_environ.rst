@@ -72,7 +72,7 @@ your operating system.
 
 .. code:: console
 
-    sudo zypper install -y python3-venv python3-wheel gobject-introspection \
+    sudo zypper install -y python3-venv python3-wheel gobject-introspection-devel \
       python3-cairo-devel openssl zlib git
     sudo zypper install --type pattern devel_basis
 
