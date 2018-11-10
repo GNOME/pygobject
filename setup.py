@@ -891,9 +891,6 @@ def add_ext_pkg_config_dep(ext, compiler_type, name):
 
 
 def add_ext_compiler_flags(ext, compiler, _cache={}):
-    if compiler.compiler_type == "msvc":
-        return
-
     cache_key = compiler.compiler[0]
     if cache_key not in _cache:
 
