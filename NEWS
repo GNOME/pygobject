@@ -1,3 +1,17 @@
+3.30.2 - 2018-11-11
+-------------------
+
+* tests: Fix some test with newer glib.
+* overrides: Fix crash when using non-ascii text with.
+  Gtk.Builder.add_from_string/add_objects_from_string. :issue:`255`
+* Various meson/distutils build fixes for MSVC.
+  :mr:`91` (:user:`Chun-wei Fan <fanc999>`)
+* foreign-cairo: Fix cairo marshalling not using the foreign converters in
+  some cases. :issue:`260`
+* build: setup.py reproducible build fixes.
+  :mr:`94` (:user:`Bernhard M. Wiedemann  <bmwiedemann>`)
+
+
 3.30.1 - 2018-09-14
 -------------------
 
