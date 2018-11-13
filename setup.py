@@ -47,8 +47,10 @@ GI_VERSION_REQUIRED = "1.46.0"
 PYCAIRO_VERSION_REQUIRED = "1.11.1"
 LIBFFI_VERSION_REQUIRED = "3.0"
 
-WITH_CAIRO = True
-"""Set to false if you don't want to build with cairo/pycairo support"""
+WITH_CAIRO = not bool(os.environ.get("PYGOBJECT_WITHOUT_PYCAIRO"))
+"""Set PYGOBJECT_WITHOUT_PYCAIRO if you don't want to build with
+cairo/pycairo support. Note that this option might get removed in the future.
+"""
 
 
 def is_dev_version():
