@@ -1,3 +1,18 @@
+3.31.1 - 2018-11-17
+-------------------
+
+* Changes included in 3.30.2
+* overrides: add Pango.Layout.set_text() override. :issue:`259` :mr:`89`
+* docs: link updates :mr:`93` (:user:`tijder`)
+* overrides: Use functools.wraps instead of custom version.
+  :issue:`271` :mr:`95` (:user:`Kai Willadsen <kaiw>`)
+* tests: Make tests run with current gtk4 master
+* Add (again) a pyproject.toml for specifying the pycairo build dep
+  (requires pip >=18.0)
+* setup.py: Make it possible to build without cairo support through the
+  PYGOBJECT_WITHOUT_PYCAIRO env var. :issue:`250`
+
+
 3.30.2 - 2018-11-11
 -------------------
 
