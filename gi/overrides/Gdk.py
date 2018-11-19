@@ -27,6 +27,8 @@ from ..module import get_introspection_module
 from gi import PyGIDeprecationWarning, require_version
 
 Gdk = get_introspection_module('Gdk')
+GDK2 = Gdk._version == '2.0'
+GDK3 = Gdk._version == '3.0'
 
 __all__ = []
 
@@ -39,7 +41,7 @@ try:
 except (ValueError, ImportError):
     pass
 
-if hasattr(Gdk, 'Color'):
+if GDK2 or GDK3:
     # Gdk.Color was deprecated since 3.14 and dropped in Gtk+-4.0
     class Color(Gdk.Color):
         MAX_VALUE = 65535
@@ -81,7 +83,7 @@ if hasattr(Gdk, 'Color'):
     Color = override(Color)
     __all__.append('Color')
 
-if hasattr(Gdk, 'RGBA'):
+if GDK3:
     # Introduced since Gtk+-3.0
     class RGBA(Gdk.RGBA):
         def __init__(self, red=1.0, green=1.0, blue=1.0, alpha=1.0):
@@ -121,7 +123,7 @@ if hasattr(Gdk, 'RGBA'):
     RGBA = override(RGBA)
     __all__.append('RGBA')
 
-if Gdk._version == '2.0':
+if GDK2:
     class Rectangle(Gdk.Rectangle):
 
         def __init__(self, x, y, width, height):
@@ -136,7 +138,7 @@ if Gdk._version == '2.0':
 
     Rectangle = override(Rectangle)
     __all__.append('Rectangle')
-else:
+elif GDK3:
     # Newer GTK+/gobject-introspection (3.17.x) include GdkRectangle in the
     # typelib. See https://bugzilla.gnome.org/show_bug.cgi?id=748832 and
     # https://bugzilla.gnome.org/show_bug.cgi?id=748833
@@ -154,14 +156,14 @@ else:
         __all__.append('rectangle_intersect')
         __all__.append('rectangle_union')
 
-if Gdk._version == '2.0':
+if GDK2:
     class Drawable(Gdk.Drawable):
         def cairo_create(self):
             return Gdk.cairo_create(self)
 
     Drawable = override(Drawable)
     __all__.append('Drawable')
-elif Gdk._version == '3.0':
+elif GDK3:
     class Window(Gdk.Window):
         def __new__(cls, parent, attributes, attributes_mask):
             # Gdk.Window had to be made abstract,
@@ -177,7 +179,7 @@ elif Gdk._version == '3.0':
     Window = override(Window)
     __all__.append('Window')
 
-if Gdk._version in ("2.0", "3.0"):
+if GDK2 or GDK3:
     Gdk.EventType._2BUTTON_PRESS = getattr(Gdk.EventType, "2BUTTON_PRESS")
     Gdk.EventType._3BUTTON_PRESS = getattr(Gdk.EventType, "3BUTTON_PRESS")
 
@@ -215,7 +217,7 @@ if Gdk._version in ("2.0", "3.0"):
             Gdk.EventType.UNMAP: 'any',
         }
 
-        if Gdk._version == '2.0':
+        if GDK2:
             _UNION_MEMBERS[Gdk.EventType.NO_EXPOSE] = 'no_expose'
 
         if hasattr(Gdk.EventType, 'TOUCH_BEGIN'):
@@ -315,85 +317,76 @@ if Gdk._version in ("2.0", "3.0"):
     DragContext = override(DragContext)
     __all__.append('DragContext')
 
+    class Cursor(Gdk.Cursor):
 
-class Cursor(Gdk.Cursor):
+        def __new__(cls, *args, **kwds):
+            arg_len = len(args)
+            kwd_len = len(kwds)
+            total_len = arg_len + kwd_len
 
-    def __new__(cls, *args, **kwds):
-        arg_len = len(args)
-        kwd_len = len(kwds)
-        total_len = arg_len + kwd_len
+            if total_len == 1:
+                # Since g_object_newv (super.__new__) does not seem valid for
+                # direct use with GdkCursor, we must assume usage of at least
+                # one of the C constructors to be valid.
+                return cls.new(*args, **kwds)
 
-        if total_len == 1:
-            if Gdk._version == "4.0":
+            elif total_len == 2:
+                warnings.warn('Calling "Gdk.Cursor(display, cursor_type)" has been deprecated. '
+                              'Please use Gdk.Cursor.new_for_display(display, cursor_type). '
+                              'See: https://wiki.gnome.org/PyGObject/InitializerDeprecations',
+                              PyGIDeprecationWarning)
+                return cls.new_for_display(*args, **kwds)
+
+            elif total_len == 4:
+                warnings.warn('Calling "Gdk.Cursor(display, pixbuf, x, y)" has been deprecated. '
+                              'Please use Gdk.Cursor.new_from_pixbuf(display, pixbuf, x, y). '
+                              'See: https://wiki.gnome.org/PyGObject/InitializerDeprecations',
+                              PyGIDeprecationWarning)
+                return cls.new_from_pixbuf(*args, **kwds)
+
+            elif total_len == 6:
+                if not GDK2:
+                    # pixmaps don't exist in Gdk 3.0
+                    raise ValueError("Wrong number of parameters")
+
+                warnings.warn('Calling "Gdk.Cursor(source, mask, fg, bg, x, y)" has been deprecated. '
+                              'Please use Gdk.Cursor.new_from_pixmap(source, mask, fg, bg, x, y). '
+                              'See: https://wiki.gnome.org/PyGObject/InitializerDeprecations',
+                              PyGIDeprecationWarning)
+                return cls.new_from_pixmap(*args, **kwds)
+
+            else:
                 raise ValueError("Wrong number of parameters")
-            # Since g_object_newv (super.__new__) does not seem valid for
-            # direct use with GdkCursor, we must assume usage of at least
-            # one of the C constructors to be valid.
-            return cls.new(*args, **kwds)
 
-        elif total_len == 2:
-            warnings.warn('Calling "Gdk.Cursor(display, cursor_type)" has been deprecated. '
-                          'Please use Gdk.Cursor.new_for_display(display, cursor_type). '
-                          'See: https://wiki.gnome.org/PyGObject/InitializerDeprecations',
-                          PyGIDeprecationWarning)
-            return cls.new_for_display(*args, **kwds)
+    Cursor = override(Cursor)
+    __all__.append('Cursor')
 
-        elif total_len == 4:
-            warnings.warn('Calling "Gdk.Cursor(display, pixbuf, x, y)" has been deprecated. '
-                          'Please use Gdk.Cursor.new_from_pixbuf(display, pixbuf, x, y). '
-                          'See: https://wiki.gnome.org/PyGObject/InitializerDeprecations',
-                          PyGIDeprecationWarning)
-            return cls.new_from_pixbuf(*args, **kwds)
-
-        elif total_len == 6:
-            if Gdk._version != '2.0':
-                # pixmaps don't exist in Gdk 3.0
-                raise ValueError("Wrong number of parameters")
-
-            warnings.warn('Calling "Gdk.Cursor(source, mask, fg, bg, x, y)" has been deprecated. '
-                          'Please use Gdk.Cursor.new_from_pixmap(source, mask, fg, bg, x, y). '
-                          'See: https://wiki.gnome.org/PyGObject/InitializerDeprecations',
-                          PyGIDeprecationWarning)
-            return cls.new_from_pixmap(*args, **kwds)
-
-        else:
-            raise ValueError("Wrong number of parameters")
-
-
-Cursor = override(Cursor)
-__all__.append('Cursor')
-
-if hasattr(Gdk, 'color_parse'):
     # Gdk.Color was deprecated since 3.14 and dropped in Gtk+-4.0
     color_parse = strip_boolean_result(Gdk.color_parse)
     __all__.append('color_parse')
 
+    # Note, we cannot override the entire class as Gdk.Atom has no gtype, so just
+    # hack some individual methods
+    def _gdk_atom_str(atom):
+        n = atom.name()
+        if n:
+            return n
+        # fall back to atom index
+        return 'Gdk.Atom<%i>' % hash(atom)
 
-# Note, we cannot override the entire class as Gdk.Atom has no gtype, so just
-# hack some individual methods
-def _gdk_atom_str(atom):
-    n = atom.name()
-    if n:
-        return n
-    # fall back to atom index
-    return 'Gdk.Atom<%i>' % hash(atom)
+    def _gdk_atom_repr(atom):
+        n = atom.name()
+        if n:
+            return 'Gdk.Atom.intern("%s", False)' % n
+        # fall back to atom index
+        return '<Gdk.Atom(%i)>' % hash(atom)
 
-
-def _gdk_atom_repr(atom):
-    n = atom.name()
-    if n:
-        return 'Gdk.Atom.intern("%s", False)' % n
-    # fall back to atom index
-    return '<Gdk.Atom(%i)>' % hash(atom)
-
-
-if Gdk._version in ("2.0", "3.0"):
     Gdk.Atom.__str__ = _gdk_atom_str
     Gdk.Atom.__repr__ = _gdk_atom_repr
 
 
 # constants
-if Gdk._version == '3.0':
+if GDK3:
     SELECTION_PRIMARY = Gdk.atom_intern('PRIMARY', True)
     __all__.append('SELECTION_PRIMARY')
 
@@ -442,6 +435,6 @@ if Gdk._version == '3.0':
     SELECTION_TYPE_STRING = Gdk.atom_intern('STRING', True)
     __all__.append('SELECTION_TYPE_STRING')
 
-if Gdk._version in ('2.0', '3.0'):
+if GDK2 or GDK3:
     import sys
     initialized, argv = Gdk.init_check(sys.argv)
