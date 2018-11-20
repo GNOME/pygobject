@@ -17,7 +17,7 @@ python = pymod.find_installation(get_option('python'))
 
 python_dep = python.dependency()
 
-glib_version_req = '>= 2.38.0'
+glib_version_req = '>= 2.48.0'
 gi_version_req = '>= 1.46.0'
 pycairo_version_req = '>= 1.11.1'
 libffi_version_req = '>= 3.0'
