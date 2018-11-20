@@ -7,8 +7,33 @@ import os
 import unittest
 import warnings
 
+import pytest
+
 from gi.repository import GLib
 from gi import PyGIDeprecationWarning
+
+from .helper import capture_gi_deprecation_warnings
+
+
+def test_child_watch_add_get_args_various():
+    cb = lambda pid, status: None
+    get_args = GLib._child_watch_add_get_args
+    pid = 42
+    with capture_gi_deprecation_warnings():
+        assert get_args(pid, cb, 2) == (0, pid, cb, (2,))
+
+        with pytest.raises(TypeError):
+            get_args(pid, cb, 2, 3, 4)
+
+        assert get_args(0, pid, 2, 3, function=cb) == (0, pid, cb, (2, 3))
+        assert get_args(0, pid, cb, 2, 3) == (0, pid, cb, (2, 3))
+        assert get_args(0, pid, cb, data=99) == (0, pid, cb, (99,))
+
+        with pytest.raises(TypeError):
+            get_args(0, pid, 24)
+
+        with pytest.raises(TypeError):
+            get_args(0, pid, cb, 2, 3, data=99)
 
 
 @unittest.skipIf(os.name == "nt", "not on Windows")

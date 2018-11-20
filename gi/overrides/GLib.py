@@ -825,7 +825,7 @@ def _child_watch_add_get_args(priority_or_pid, pid_or_callback, *args, **kwargs)
     if 'data' in kwargs:
         if user_data:
             raise TypeError('got multiple values for "data" argument')
-        user_data = [kwargs['data']]
+        user_data = (kwargs['data'],)
 
     return priority, pid, callback, user_data
 
@@ -861,14 +861,10 @@ def filename_from_utf8(utf8string, len=-1):
 __all__.append('filename_from_utf8')
 
 
-# backwards compatible API for renamed function
-if not hasattr(GLib, 'unix_signal_add_full'):
-    def add_full_compat(*args):
-        warnings.warn('GLib.unix_signal_add_full() was renamed to GLib.unix_signal_add()',
-                      PyGIDeprecationWarning)
-        return GLib.unix_signal_add(*args)
-
-    GLib.unix_signal_add_full = add_full_compat
+if hasattr("Glib", "unix_signal_add"):
+    unix_signal_add_full = GLib.unix_signal_add
+    __all__.append('unix_signal_add_full')
+    deprecated_attr("GLib", "unix_signal_add_full", "GLib.unix_signal_add")
 
 
 # obsolete constants for backwards compatibility
