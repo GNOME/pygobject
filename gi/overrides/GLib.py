@@ -392,7 +392,7 @@ class Variant(GLib.Variant):
 
     def keys(self):
         if not self.get_type_string().startswith('a{'):
-            return TypeError, 'GVariant type %s is not a dictionary' % self.get_type_string()
+            raise TypeError('GVariant type %s is not a dictionary' % self.get_type_string())
 
         res = []
         for i in range(self.n_children()):

@@ -143,6 +143,9 @@ class TestGVariant(unittest.TestCase):
         with pytest.raises(TypeError):
             variant[0]
 
+        with pytest.raises(TypeError):
+            variant.keys()
+
     def test_create_variant(self):
         variant = GLib.Variant('v', GLib.Variant('i', 42))
         self.assertTrue(isinstance(variant, GLib.Variant))
