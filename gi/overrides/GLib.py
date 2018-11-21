@@ -384,11 +384,8 @@ class Variant(GLib.Variant):
         # Array, dict, tuple
         if self.get_type_string().startswith('a') or self.get_type_string().startswith('('):
             return self.n_children() != 0
-        if self.get_type_string() in ['v']:
-            # unpack works recursively, hence bool also works recursively
-            return bool(self.unpack())
-        # Everything else is True
-        return True
+        # unpack works recursively, hence bool also works recursively
+        return bool(self.unpack())
 
     def keys(self):
         if not self.get_type_string().startswith('a{'):
