@@ -316,9 +316,6 @@ class TestGVariant(unittest.TestCase):
         element = array.get_child_value(2)
         self.assertEqual(element.n_children(), 0)
 
-        variant = GLib.Variant('mai', None)
-        assert bool(variant)
-
     def test_create_complex(self):
         variant = GLib.Variant('(as)', ([],))
         self.assertEqual(variant.get_type_string(), '(as)')
@@ -662,6 +659,11 @@ class TestGVariant(unittest.TestCase):
         # variant types, recursive unpacking
         assert_equals_bool('v', GLib.Variant('i', 0))
         assert_equals_bool('v', GLib.Variant('i', 1))
+
+        # maybe types
+        assert_equals_bool('mi', 42)
+        assert_equals_bool('mi', 0)
+        assert_equals_bool('mi', None)
 
     def test_repr(self):
         # with C constructor
