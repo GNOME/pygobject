@@ -23,7 +23,10 @@
 from __future__ import absolute_import
 
 import unittest
-import collections
+try:
+    from collections import abc
+except ImportError:
+    import collections as abc
 
 import gi._gi as GIRepository
 from gi.module import repository as repo
@@ -113,12 +116,12 @@ class Test(unittest.TestCase):
     def test_object_info(self):
         info = repo.find_by_name('GIMarshallingTests', 'Object')
         self.assertEqual(info.get_parent(), repo.find_by_name('GObject', 'Object'))
-        self.assertTrue(isinstance(info.get_methods(), collections.Iterable))
-        self.assertTrue(isinstance(info.get_fields(), collections.Iterable))
-        self.assertTrue(isinstance(info.get_interfaces(), collections.Iterable))
-        self.assertTrue(isinstance(info.get_constants(), collections.Iterable))
-        self.assertTrue(isinstance(info.get_vfuncs(), collections.Iterable))
-        self.assertTrue(isinstance(info.get_properties(), collections.Iterable))
+        self.assertTrue(isinstance(info.get_methods(), abc.Iterable))
+        self.assertTrue(isinstance(info.get_fields(), abc.Iterable))
+        self.assertTrue(isinstance(info.get_interfaces(), abc.Iterable))
+        self.assertTrue(isinstance(info.get_constants(), abc.Iterable))
+        self.assertTrue(isinstance(info.get_vfuncs(), abc.Iterable))
+        self.assertTrue(isinstance(info.get_properties(), abc.Iterable))
         self.assertFalse(info.get_abstract())
         self.assertEqual(info.get_class_struct(), repo.find_by_name('GIMarshallingTests', 'ObjectClass'))
         self.assertEqual(info.get_type_name(), 'GIMarshallingTestsObject')
@@ -158,12 +161,12 @@ class Test(unittest.TestCase):
 
     def test_interface_info(self):
         info = repo.find_by_name('GIMarshallingTests', 'Interface')
-        self.assertTrue(isinstance(info.get_methods(), collections.Iterable))
-        self.assertTrue(isinstance(info.get_vfuncs(), collections.Iterable))
-        self.assertTrue(isinstance(info.get_constants(), collections.Iterable))
-        self.assertTrue(isinstance(info.get_prerequisites(), collections.Iterable))
-        self.assertTrue(isinstance(info.get_properties(), collections.Iterable))
-        self.assertTrue(isinstance(info.get_signals(), collections.Iterable))
+        self.assertTrue(isinstance(info.get_methods(), abc.Iterable))
+        self.assertTrue(isinstance(info.get_vfuncs(), abc.Iterable))
+        self.assertTrue(isinstance(info.get_constants(), abc.Iterable))
+        self.assertTrue(isinstance(info.get_prerequisites(), abc.Iterable))
+        self.assertTrue(isinstance(info.get_properties(), abc.Iterable))
+        self.assertTrue(isinstance(info.get_signals(), abc.Iterable))
 
         method = info.find_method('test_int8_in')
         vfunc = info.find_vfunc('test_int8_in')
@@ -179,8 +182,8 @@ class Test(unittest.TestCase):
     def test_struct_info(self):
         info = repo.find_by_name('GIMarshallingTests', 'InterfaceIface')
         self.assertTrue(isinstance(info, GIRepository.StructInfo))
-        self.assertTrue(isinstance(info.get_fields(), collections.Iterable))
-        self.assertTrue(isinstance(info.get_methods(), collections.Iterable))
+        self.assertTrue(isinstance(info.get_fields(), abc.Iterable))
+        self.assertTrue(isinstance(info.get_methods(), abc.Iterable))
         self.assertTrue(isinstance(info.get_size(), int))
         self.assertTrue(isinstance(info.get_alignment(), int))
         self.assertTrue(info.is_gtype_struct())
@@ -189,16 +192,16 @@ class Test(unittest.TestCase):
     def test_enum_info(self):
         info = repo.find_by_name('GIMarshallingTests', 'Enum')
         self.assertTrue(isinstance(info, GIRepository.EnumInfo))
-        self.assertTrue(isinstance(info.get_values(), collections.Iterable))
-        self.assertTrue(isinstance(info.get_methods(), collections.Iterable))
+        self.assertTrue(isinstance(info.get_values(), abc.Iterable))
+        self.assertTrue(isinstance(info.get_methods(), abc.Iterable))
         self.assertFalse(info.is_flags())
         self.assertTrue(info.get_storage_type() > 0)  # might be platform dependent
 
     def test_union_info(self):
         info = repo.find_by_name('GIMarshallingTests', 'Union')
         self.assertTrue(isinstance(info, GIRepository.UnionInfo))
-        self.assertTrue(isinstance(info.get_fields(), collections.Iterable))
-        self.assertTrue(isinstance(info.get_methods(), collections.Iterable))
+        self.assertTrue(isinstance(info.get_fields(), abc.Iterable))
+        self.assertTrue(isinstance(info.get_methods(), abc.Iterable))
         self.assertTrue(isinstance(info.get_size(), int))
 
     def test_type_info(self):
@@ -245,7 +248,7 @@ class Test(unittest.TestCase):
     def test_callable_info(self):
         func_info = repo.find_by_name('GIMarshallingTests', 'array_fixed_out_struct')
         self.assertTrue(hasattr(func_info, 'invoke'))
-        self.assertTrue(isinstance(func_info.get_arguments(), collections.Iterable))
+        self.assertTrue(isinstance(func_info.get_arguments(), abc.Iterable))
         self.assertEqual(func_info.get_caller_owns(), GIRepository.Transfer.NOTHING)
         self.assertFalse(func_info.may_return_null())
         self.assertEqual(func_info.get_return_type().get_tag(), GIRepository.TypeTag.VOID)
