@@ -106,7 +106,8 @@ class TestGdk(unittest.TestCase):
         w = Gtk.Window()
         w.realize()
         window = w.get_window()
-        assert window.cairo_create() is not None
+        with capture_glib_deprecation_warnings():
+            assert window.cairo_create() is not None
 
     @unittest.skipIf(GDK4, "not in gdk4")
     def test_drag_context(self):
