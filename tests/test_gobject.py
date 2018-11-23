@@ -15,6 +15,7 @@ from gi.module import get_introspection_module
 from gi import _gi
 
 import testhelper
+from .helper import capture_glib_deprecation_warnings
 
 
 class TestGObjectAPI(unittest.TestCase):
@@ -462,6 +463,14 @@ class TestPropertyBindings(unittest.TestCase):
         self.target.props.int_prop = 2
         self.assertEqual(self.source.int_prop, 1)
         self.assertEqual(self.target.int_prop, 2)
+
+    def test_call_binding(self):
+        binding = self.source.bind_property('int_prop', self.target, 'int_prop',
+                                            GObject.BindingFlags.DEFAULT)
+        with capture_glib_deprecation_warnings() as warn:
+            result = binding()
+        assert len(warn)
+        assert result is binding
 
     def test_bidirectional_binding(self):
         binding = self.source.bind_property('int_prop', self.target, 'int_prop',
