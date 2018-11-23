@@ -260,14 +260,16 @@ class Value(GObjectModule.Value):
                 if isinstance(py_value, text_type):
                     py_value = py_value.encode('UTF-8')
                 else:
-                    raise ValueError("Expected string or unicode but got %s%s" %
-                                     (py_value, type(py_value)))
+                    raise TypeError("Expected string or unicode but got %s%s" %
+                                    (py_value, type(py_value)))
             else:
-                raise ValueError("Expected string but got %s%s" %
-                                 (py_value, type(py_value)))
+                raise TypeError("Expected string but got %s%s" %
+                                (py_value, type(py_value)))
             self.set_string(py_value)
         elif gtype == TYPE_PARAM:
             self.set_param(py_value)
+        elif gtype == TYPE_PYOBJECT:
+            self.set_boxed(py_value)
         elif gtype.is_a(TYPE_ENUM):
             self.set_enum(py_value)
         elif gtype.is_a(TYPE_FLAGS):
@@ -278,16 +280,10 @@ class Value(GObjectModule.Value):
             self.set_pointer(py_value)
         elif gtype.is_a(TYPE_OBJECT):
             self.set_object(py_value)
-        elif gtype == TYPE_UNICHAR:
-            self.set_uint(int(py_value))
-        # elif gtype == TYPE_OVERRIDE:
-        #     pass
         elif gtype == TYPE_GTYPE:
             self.set_gtype(py_value)
         elif gtype == TYPE_VARIANT:
             self.set_variant(py_value)
-        elif gtype == TYPE_PYOBJECT:
-            self.set_boxed(py_value)
         else:
             raise TypeError("Unknown value type %s" % gtype)
 
@@ -318,6 +314,8 @@ class Value(GObjectModule.Value):
             return self.get_double()
         elif gtype == TYPE_STRING:
             return self.get_string()
+        elif gtype == TYPE_PYOBJECT:
+            return self.get_boxed()
         elif gtype == TYPE_PARAM:
             return self.get_param()
         elif gtype.is_a(TYPE_ENUM):
@@ -330,16 +328,14 @@ class Value(GObjectModule.Value):
             return self.get_pointer()
         elif gtype.is_a(TYPE_OBJECT):
             return self.get_object()
-        elif gtype == TYPE_UNICHAR:
-            return self.get_uint()
         elif gtype == TYPE_GTYPE:
             return self.get_gtype()
         elif gtype == TYPE_VARIANT:
             return self.get_variant()
-        elif gtype == TYPE_PYOBJECT:
-            pass
-        else:
+        elif gtype == _gi.TYPE_INVALID:
             return None
+        else:
+            raise TypeError("Unknown value type %s" % gtype)
 
     def __repr__(self):
         return '<Value (%s) %s>' % (self.g_type.name, self.get_value())
@@ -415,8 +411,7 @@ def signal_query(id_or_name, type_=None):
         id_or_name = signal_lookup(id_or_name, type_)
 
     res = GObjectModule.signal_query(id_or_name)
-    if res is None:
-        return None
+    assert res is not None
 
     if res.signal_id == 0:
         return None
