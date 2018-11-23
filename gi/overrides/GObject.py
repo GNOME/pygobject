@@ -159,19 +159,11 @@ for name in ['PARAM_CONSTRUCT', 'PARAM_CONSTRUCT_ONLY', 'PARAM_LAX_VALIDATION',
     __all__.append(name)
 
 # PARAM_READWRITE should come from the gi module but cannot due to:
-# https://bugzilla.gnome.org/show_bug.cgi?id=687615
+# https://gitlab.gnome.org/GNOME/gobject-introspection/issues/75
 PARAM_READWRITE = GObjectModule.ParamFlags.READABLE | \
     GObjectModule.ParamFlags.WRITABLE
+deprecated_attr("GObject", "PARAM_READWRITE", "GObject.ParamFlags.READWRITE")
 __all__.append("PARAM_READWRITE")
-
-# READWRITE is part of ParamFlags since glib 2.42. Only mark PARAM_READWRITE as
-# deprecated in case ParamFlags.READWRITE is available. Also include the glib
-# version in the warning so it's clear that this needs a newer glib, unlike
-# the other ParamFlags related deprecations.
-# https://bugzilla.gnome.org/show_bug.cgi?id=726037
-if hasattr(GObjectModule.ParamFlags, "READWRITE"):
-    deprecated_attr("GObject", "PARAM_READWRITE",
-                    "GObject.ParamFlags.READWRITE (glib 2.42+)")
 
 
 # Deprecated, use: GObject.SignalFlags.* directly
