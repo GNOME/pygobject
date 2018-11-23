@@ -280,8 +280,6 @@ class Value(GObjectModule.Value):
             self.set_object(py_value)
         elif gtype == TYPE_UNICHAR:
             self.set_uint(int(py_value))
-        # elif gtype == TYPE_OVERRIDE:
-        #     pass
         elif gtype == TYPE_GTYPE:
             self.set_gtype(py_value)
         elif gtype == TYPE_VARIANT:
