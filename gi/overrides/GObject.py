@@ -285,7 +285,9 @@ class Value(GObjectModule.Value):
         elif gtype == TYPE_VARIANT:
             self.set_variant(py_value)
         else:
-            raise TypeError("Unknown value type %s" % gtype)
+            # Fall back to _gvalue_set which handles some more cases
+            # like fundamentals for which a converter is registered
+            _gi._gvalue_set(self, py_value)
 
     def get_value(self):
         gtype = self.g_type
@@ -335,7 +337,7 @@ class Value(GObjectModule.Value):
         elif gtype == _gi.TYPE_INVALID:
             return None
         else:
-            raise TypeError("Unknown value type %s" % gtype)
+            return _gi._gvalue_get(self)
 
     def __repr__(self):
         return '<Value (%s) %s>' % (self.g_type.name, self.get_value())
