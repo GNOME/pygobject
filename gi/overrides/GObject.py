@@ -260,11 +260,11 @@ class Value(GObjectModule.Value):
                 if isinstance(py_value, text_type):
                     py_value = py_value.encode('UTF-8')
                 else:
-                    raise ValueError("Expected string or unicode but got %s%s" %
-                                     (py_value, type(py_value)))
+                    raise TypeError("Expected string or unicode but got %s%s" %
+                                    (py_value, type(py_value)))
             else:
-                raise ValueError("Expected string but got %s%s" %
-                                 (py_value, type(py_value)))
+                raise TypeError("Expected string but got %s%s" %
+                                (py_value, type(py_value)))
             self.set_string(py_value)
         elif gtype == TYPE_PARAM:
             self.set_param(py_value)

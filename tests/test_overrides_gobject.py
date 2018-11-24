@@ -206,14 +206,14 @@ def test_value_string():
         v.set_value(u"öäü")
         assert v.get_value().decode("utf-8") == u"öäü"
     else:
-        with pytest.raises(ValueError):
+        with pytest.raises(TypeError):
             v.set_value(b"bar")
 
     v.set_value(u"quux")
     assert v.get_value() == u"quux"
     assert isinstance(v.get_value(), str)
 
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         v.set_value(None)
 
 
