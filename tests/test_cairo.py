@@ -30,6 +30,27 @@ from gi.repository import GObject, Regress
 
 @unittest.skipUnless(has_cairo, 'built without cairo support')
 class Test(unittest.TestCase):
+
+    def test_gvalue_converters(self):
+        surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, 10, 10)
+        context = cairo.Context(surface)
+        objects = {
+            'CairoContext': context,
+            'CairoSurface': surface,
+            'CairoFontFace': context.get_font_face(),
+            'CairoScaledFont': context.get_scaled_font(),
+            'CairoPattern': context.get_source(),
+        }
+        for type_name, cairo_obj in objects.items():
+            gtype = GObject.type_from_name(type_name)
+            v = GObject.Value()
+            assert v.init(gtype) is None
+            assert v.get_value() is None
+            v.set_value(None)
+            assert v.get_value() is None
+            v.set_value(cairo_obj)
+            assert v.get_value() == cairo_obj
+
     def test_cairo_context(self):
         context = Regress.test_cairo_context_full_return()
         self.assertTrue(isinstance(context, cairo.Context))
