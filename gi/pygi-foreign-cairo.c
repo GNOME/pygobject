@@ -118,7 +118,7 @@ cairo_context_from_gvalue (const GValue *value)
     /* PycairoContext_FromContext steals a ref, so we dup it out of the GValue. */
     cairo_t *cr = g_value_dup_boxed (value);
     if (!cr) {
-        return NULL;
+        Py_RETURN_NONE;
     }
 
     return PycairoContext_FromContext (cr, &PycairoContext_Type, NULL);
@@ -203,7 +203,7 @@ cairo_surface_from_gvalue (const GValue *value)
     /* PycairoSurface_FromSurface steals a ref, so we dup it out of the GValue. */
     cairo_surface_t *surface = g_value_dup_boxed (value);
     if (!surface) {
-        return NULL;
+        Py_RETURN_NONE;
     }
 
     return PycairoSurface_FromSurface (surface, NULL);
@@ -308,7 +308,7 @@ cairo_font_face_from_gvalue (const GValue *value)
 {
     cairo_font_face_t *font_face = g_value_dup_boxed (value);
     if (!font_face) {
-        return NULL;
+        Py_RETURN_NONE;
     }
 
     return PycairoFontFace_FromFontFace (font_face);
@@ -398,7 +398,7 @@ cairo_scaled_font_from_gvalue (const GValue *value)
     /* PycairoScaledFont_FromScaledFont steals a ref, so we dup it out of the GValue. */
     cairo_scaled_font_t *scaled_font = g_value_dup_boxed (value);
     if (!scaled_font) {
-        return NULL;
+        Py_RETURN_NONE;
     }
 
     return PycairoScaledFont_FromScaledFont (scaled_font);
@@ -436,7 +436,7 @@ cairo_pattern_from_gvalue (const GValue *value)
     /* PycairoPattern_FromPattern steals a ref, so we dup it out of the GValue. */
     cairo_pattern_t *pattern = g_value_dup_boxed (value);
     if (!pattern) {
-        return NULL;
+        Py_RETURN_NONE;
     }
 
     return PycairoPattern_FromPattern (pattern, NULL);
