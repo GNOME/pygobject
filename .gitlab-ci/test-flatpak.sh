@@ -2,5 +2,5 @@
 
 set -e
 
-python3 -m pip install --user pytest
-python3 setup.py test
+python3 -m pip install --user pytest pytest-faulthandler
+python3 setup.py test -s
