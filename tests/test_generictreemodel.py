@@ -378,7 +378,7 @@ class TestReturnsAfterError(unittest.TestCase):
         self.assertEqual(count, 0)
 
     def test_get_column_type(self):
-        with ExceptHook(NotImplementedError, TypeError):
+        with ExceptHook(NotImplementedError, ValueError):
             col_type = self.model.get_column_type(0)
         self.assertEqual(col_type, GObject.TYPE_INVALID)
 

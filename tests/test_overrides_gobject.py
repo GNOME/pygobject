@@ -66,9 +66,11 @@ def test_value_no_init():
 
 
 def test_value_invalid_type():
-    # FIXME: this complains that the value isn't a GType
-    # GObject.Value(GObject.TYPE_INVALID)
-    pass
+    v = GObject.Value()
+    assert v.g_type == GObject.TYPE_INVALID
+    assert isinstance(GObject.TYPE_INVALID, GObject.GType)
+    with pytest.raises(ValueError, match="Invalid GType"):
+        v.init(GObject.TYPE_INVALID)
 
 
 def test_value_long():
