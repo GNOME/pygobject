@@ -11,10 +11,13 @@ import sys
 import gc
 import warnings
 
+import pytest
+
 from .helper import ignore_gi_deprecation_warnings, capture_glib_warnings
 
 import gi.overrides
 import gi.types
+from gi._compat import cmp
 from gi.repository import GLib, GObject
 
 try:
@@ -102,6 +105,24 @@ def test_freeze_child_notif():
         b.child_set_property(c, "pack-type", Gtk.PackType.START)
 
     assert events.count("pack-type") == 1
+
+
+@unittest.skipUnless(Gtk, 'Gtk not available')
+@unittest.skipIf(Gtk_version == "4.0", "not in gtk4")
+def test_menu_popup():
+    m = Gtk.Menu()
+    with capture_glib_warnings():
+        m.popup(None, None, None, None, 0, 0)
+        m.popdown()
+
+
+@unittest.skipUnless(Gtk, 'Gtk not available')
+@unittest.skipIf(Gtk_version == "4.0", "not in gtk4")
+def test_button_stock():
+    with capture_glib_warnings():
+        button = Gtk.Button(stock=Gtk.STOCK_OK)
+    assert button.props.label == Gtk.STOCK_OK
+    assert button.props.use_stock
 
 
 @unittest.skipUnless(Gtk, 'Gtk not available')
@@ -216,14 +237,60 @@ class TestGtk(unittest.TestCase):
             action.activate()
 
     @unittest.skipIf(Gtk_version == "4.0", "not in gtk4")
+    def test_action_group_error_handling(self):
+        action_group = Gtk.ActionGroup(name='TestActionGroup')
+        with pytest.raises(TypeError):
+            action_group.add_actions(42)
+
+        with pytest.raises(TypeError):
+            action_group.add_toggle_actions(42)
+
+        with pytest.raises(TypeError):
+            action_group.add_radio_actions(42)
+
+    @unittest.skipIf(Gtk_version == "4.0", "not in gtk4")
+    def test_action_group_no_user_data(self):
+        action_group = Gtk.ActionGroup(name='TestActionGroup')
+
+        called = []
+
+        def test_action_callback_no_data(action):
+            called.append(action)
+
+        action_group.add_actions([
+            ('test-action1', None, 'Test Action 1',
+             None, None, test_action_callback_no_data)])
+        action_group.add_actions([('test2-action1',)])
+        action_group.get_action('test-action1').activate()
+
+        action_group.add_toggle_actions([
+            ('test-action2', None, 'Test Action 2',
+             None, None, test_action_callback_no_data)])
+        action_group.add_toggle_actions([('test2-action2',)])
+        action_group.get_action('test-action2').activate()
+
+        def test_action_callback_no_data_radio(action, current):
+            called.append(action)
+
+        action_group.add_radio_actions([
+            ('test-action3', None, 'Test Action 3', None, None, 0),
+            ('test-action4', None, 'Test Action 4', None, None, 1)],
+            1, test_action_callback_no_data_radio)
+        action_group.add_radio_actions([('test2-action3',)])
+        action = action_group.get_action('test-action3')
+        assert action.get_current_value() == 1
+        action.activate()
+
+        assert len(called) == 3
+
+    @unittest.skipIf(Gtk_version == "4.0", "not in gtk4")
     def test_uimanager(self):
         self.assertEqual(Gtk.UIManager, gi.overrides.Gtk.UIManager)
         ui = Gtk.UIManager()
         ui.add_ui_from_string("""<ui>
     <menubar name="menubar1"></menubar>
 </ui>
-"""
-)
+""")
         menubar = ui.get_widget("/menubar1")
         self.assertEqual(type(menubar), Gtk.MenuBar)
 
@@ -234,6 +301,9 @@ class TestGtk(unittest.TestCase):
         groups = ui.get_action_groups()
         self.assertEqual(ag, groups[-2])
         self.assertEqual(ag2, groups[-1])
+
+        with pytest.raises(TypeError):
+            ui.add_ui_from_string(42)
 
     @unittest.skipIf(Gtk_version == "4.0", "not in gtk4")
     def test_uimanager_nonascii(self):
@@ -355,6 +425,15 @@ class TestGtk(unittest.TestCase):
         self.assertEqual('test-button2', button.get_label())
         button = dialog.get_widget_for_response(Gtk.ResponseType.CLOSE)
         self.assertEqual('gtk-close', button.get_label())
+
+        with pytest.raises(ValueError, match="even number"):
+            dialog.add_buttons('test-button2', 2, 'gtk-close')
+
+    @unittest.skipIf(Gtk_version == "4.0", "not in gtk4")
+    def test_dialog_deprecated_attributes(self):
+        dialog = Gtk.Dialog()
+        assert dialog.action_area == dialog.get_action_area()
+        assert dialog.vbox == dialog.get_content_area()
 
     def test_about_dialog(self):
         dialog = Gtk.AboutDialog()
@@ -717,6 +796,11 @@ class TestGtk(unittest.TestCase):
         pixbuf = GdkPixbuf.Pixbuf()
         Gtk.IconSet.new_from_pixbuf(pixbuf)
 
+        with warnings.catch_warnings(record=True) as warn:
+            warnings.simplefilter('always')
+            Gtk.IconSet(pixbuf)
+        assert issubclass(warn[0].category, PyGTKDeprecationWarning)
+
     def test_viewport(self):
         vadjustment = Gtk.Adjustment()
         hadjustment = Gtk.Adjustment()
@@ -853,8 +937,15 @@ class TestBuilder(unittest.TestCase):
                             []),
         }
 
+    class SignalTestObject(GObject.GObject):
+        __gtype_name__ = "GIOverrideSignalTestObject"
+
     def test_add_from_string(self):
         builder = Gtk.Builder()
+
+        with pytest.raises(TypeError):
+            builder.add_from_string(object())
+
         builder.add_from_string(u"")
         builder.add_from_string("")
 
@@ -876,6 +967,9 @@ class TestBuilder(unittest.TestCase):
         builder.add_objects_from_string(u"", [''])
         builder.add_objects_from_string("", [''])
         builder.add_objects_from_string(get_example(u"ä" * 1000), [''])
+
+        with pytest.raises(TypeError):
+            builder.add_objects_from_string(object(), [])
 
     def test_extract_handler_and_args_object(self):
         class Obj():
@@ -908,6 +1002,13 @@ class TestBuilder(unittest.TestCase):
                           Gtk._extract_handler_and_args,
                           obj, 'not_a_handler')
 
+    def test_extract_handler_and_args_type_mismatch(self):
+        with pytest.raises(TypeError):
+            Gtk._extract_handler_and_args({"foo": object()}, "foo")
+
+        with pytest.raises(TypeError):
+            Gtk._extract_handler_and_args({"foo": []}, "foo")
+
     def test_builder_with_handler_and_args(self):
         builder = Gtk.Builder()
         builder.add_from_string("""
@@ -935,6 +1036,31 @@ class TestBuilder(unittest.TestCase):
         self.assertEqual(len(args_collector), 2)
         self.assertSequenceEqual(args_collector[0], (obj, 1, 2))
         self.assertSequenceEqual(args_collector[1], (obj, ))
+
+    def test_builder_with_handler_object(self):
+        builder = Gtk.Builder()
+        builder.add_from_string("""
+            <interface>
+              <object class="GIOverrideSignalTestObject" id="foo"/>
+              <object class="GIOverrideSignalTest" id="object_sig_test">
+                  <signal name="test-signal" handler="on_signal1" object="foo"/>
+                  <signal name="test-signal" handler="on_signal2" after="yes" object="foo" />
+              </object>
+            </interface>
+            """)
+
+        args_collector = []
+
+        def on_signal(*args):
+            args_collector.append(args)
+
+        builder.connect_signals({'on_signal1': (on_signal, 1, 2),
+                                 'on_signal2': on_signal})
+        obj, emitter = builder.get_objects()
+        emitter.emit("test-signal")
+        assert len(args_collector) == 2
+        assert args_collector[0] == (obj, 1, 2)
+        assert args_collector[1] == (obj, )
 
     def test_builder(self):
         self.assertEqual(Gtk.Builder, gi.overrides.Gtk.Builder)
@@ -994,6 +1120,31 @@ class TestBuilder(unittest.TestCase):
 
         self.assertEqual(signal_checker.sentinel, 4)
         self.assertEqual(signal_checker.after_sentinel, 2)
+
+
+@unittest.skipUnless(Gtk, 'Gtk not available')
+class TestTreeModelRow(unittest.TestCase):
+    def test_tree_model_row(self):
+        model = Gtk.TreeStore(int)
+        iter_ = model.append(None, [42])
+        path = model.get_path(iter_)
+        Gtk.TreeModelRow(model, iter_)
+        row = Gtk.TreeModelRow(model, path)
+
+        with pytest.raises(TypeError):
+            row["foo"]
+
+        with pytest.raises(TypeError):
+            Gtk.TreeModelRow(model, 42)
+
+        with pytest.raises(TypeError):
+            Gtk.TreeModelRow(42, path)
+
+        iter_ = model.append(None, [24])
+        row = Gtk.TreeModelRow(model, iter_)
+        assert row.previous[0] == 42
+        assert row.get_previous()[0] == 42
+        assert row.previous.previous is None
 
 
 @ignore_gi_deprecation_warnings
@@ -2056,6 +2207,14 @@ class TestTreeModel(unittest.TestCase):
         filtered[0][1] = 'ONE'
         self.assertEqual(filtered[0][1], 'ONE')
 
+        def foo(store, iter_, data):
+            assert data is None
+            return False
+
+        filtered.set_visible_func(foo)
+        filtered.refilter()
+        assert len(filtered) == 0
+
     def test_list_store_performance(self):
         model = Gtk.ListStore(int, str)
 
@@ -2073,6 +2232,89 @@ class TestTreeModel(unittest.TestCase):
         model = Gtk.ListStore(int)
         filt = model.filter_new()
         self.assertTrue(filt is not None)
+
+    def test_tree_store_set(self):
+        tree_store = Gtk.TreeStore(int, int)
+        iter_ = tree_store.append(None)
+        tree_store.set(iter_)
+        assert tree_store.get_value(iter_, 0) == 0
+        tree_store.set(iter_, 0, 42)
+        assert tree_store.get_value(iter_, 0) == 42
+        assert tree_store.get_value(iter_, 1) == 0
+        tree_store.set(iter_, 0, 42, 1, 24)
+        assert tree_store.get_value(iter_, 1) == 24
+        tree_store.set(iter_, 1, 124)
+        assert tree_store.get_value(iter_, 1) == 124
+
+        with pytest.raises(TypeError):
+            tree_store.set(iter_, 0, 42, "foo", 24)
+        with pytest.raises(TypeError):
+            tree_store.set(iter_, "foo")
+        with pytest.raises(TypeError):
+            tree_store.set(iter_, [1, 2, 3])
+        with pytest.raises(TypeError):
+            tree_store.set(iter_, 0, 42, 24)
+
+    def test_list_store_set(self):
+        list_store = Gtk.ListStore(int, int)
+        iter_ = list_store.append()
+        list_store.set(iter_)
+        assert list_store.get_value(iter_, 0) == 0
+        list_store.set(iter_, 0, 42)
+        assert list_store.get_value(iter_, 0) == 42
+        assert list_store.get_value(iter_, 1) == 0
+        list_store.set(iter_, 0, 42, 1, 24)
+        assert list_store.get_value(iter_, 1) == 24
+        list_store.set(iter_, 1, 124)
+        assert list_store.get_value(iter_, 1) == 124
+
+        with pytest.raises(TypeError):
+            list_store.set(iter_, 0, 42, "foo", 24)
+        with pytest.raises(TypeError):
+            list_store.set(iter_, "foo")
+        with pytest.raises(TypeError):
+            list_store.set(iter_, [1, 2, 3])
+        with pytest.raises(TypeError):
+            list_store.set(iter_, 0, 42, 24)
+
+    def test_set_default_sort_func(self):
+        list_store = Gtk.ListStore(int)
+        list_store.append([2])
+        list_store.append([1])
+
+        def sort_func(store, iter1, iter2, data):
+            assert data is None
+            return cmp(store[iter1][0], store[iter2][0])
+
+        list_store.set_default_sort_func(sort_func)
+        list_store.set_sort_column_id(
+            Gtk.TREE_SORTABLE_DEFAULT_SORT_COLUMN_ID, Gtk.SortType.ASCENDING)
+        assert [v[0] for v in list_store] == [1, 2]
+
+    def test_model_rows_reordered(self):
+        list_store = Gtk.ListStore(int)
+        list_store.append([2])
+        list_store.append([1])
+        list_store.rows_reordered(Gtk.TreePath.new_first(), None, [0, 1])
+        list_store.rows_reordered(0, None, [0, 1])
+
+    def test_model_set_row(self):
+        list_store = Gtk.ListStore(int, int)
+        list_store.append([1, 2])
+        iter_ = list_store.get_iter_first()
+        list_store.set_row(iter_, [3, 4])
+        assert list_store[0][:] == [3, 4]
+        list_store.set_row(iter_, [None, 7])
+        assert list_store[0][:] == [3, 7]
+        list_store.set_row(iter_, [None, GObject.Value(int, 9)])
+        assert list_store[0][:] == [3, 9]
+
+    def test_model_set_row_skip_on_none(self):
+        list_store = Gtk.ListStore(int, int, int, int)
+        list_store.append([1, 2, 3, 4])
+        iter_ = list_store.get_iter_first()
+        list_store.set_row(iter_, [None, 7, None, 9])
+        assert list_store[0][:] == [1, 7, 3, 9]
 
 
 @unittest.skipIf(sys.platform == "darwin", "hangs")
@@ -2184,12 +2426,31 @@ class TestTreeView(unittest.TestCase):
         self.assertEqual(m, store)
         self.assertEqual(store.get_path(s), firstpath)
 
+        sel.unselect_all()
+        (m, s) = sel.get_selected()
+        assert s is None
+
+        sel.select_path(0)
+        m, r = sel.get_selected_rows()
+        assert m == store
+        assert len(r) == 1
+        assert r[0] == store[0].path
+
+    def test_scroll_to_cell(self):
+        store = Gtk.ListStore(int, str)
+        store.append((0, "foo"))
+        view = Gtk.TreeView()
+        view.set_model(store)
+        view.scroll_to_cell(store[0].path)
+        view.scroll_to_cell(0)
+
 
 @unittest.skipUnless(Gtk, 'Gtk not available')
 class TestTextBuffer(unittest.TestCase):
     def test_text_buffer(self):
         self.assertEqual(Gtk.TextBuffer, gi.overrides.Gtk.TextBuffer)
         buffer = Gtk.TextBuffer()
+        assert buffer.get_tag_table() is not None
         tag = buffer.create_tag('title', font='Sans 18')
 
         self.assertEqual(tag.props.name, 'title')
@@ -2260,6 +2521,15 @@ class TestTextBuffer(unittest.TestCase):
 
         self.assertRaises(ValueError, buffer.insert_with_tags_by_name,
                           buffer.get_start_iter(), 'HelloHello', 'unknowntag')
+
+    def test_insert(self):
+        buffer = Gtk.TextBuffer()
+        start = buffer.get_bounds()[0]
+        with pytest.raises(TypeError):
+            buffer.insert(start, 42)
+
+        with pytest.raises(TypeError):
+            buffer.insert_at_cursor(42)
 
     def test_text_iter(self):
         try:
@@ -2334,6 +2604,18 @@ class TestTextBuffer(unittest.TestCase):
 
         self.assertTrue(end.backward_find_char(pred_func))
         self.assertEqual(values, [u"c", u"b", u"a"])
+
+
+@unittest.skipUnless(Gtk, 'Gtk not available')
+class TestPaned(unittest.TestCase):
+
+    def test_pack_defaults(self):
+        p = Gtk.Paned()
+        l1 = Gtk.Label()
+        l2 = Gtk.Label()
+        p.pack1(l1)
+        p.pack2(l2)
+        assert p.get_children() == [l1, l2]
 
 
 @unittest.skipUnless(Gtk, 'Gtk not available')
