@@ -114,12 +114,18 @@ pypy3:
 xenial-i386-py2:
   stage: build_and_test
   image: registry.gitlab.gnome.org/gnome/pygobject/old:v2
+  artifacts:
+    paths:
+      - coverage/
   script:
    - bash -x ./.gitlab-ci/test-docker-old.sh
 
 gtk4:
   stage: build_and_test
   image: registry.gitlab.gnome.org/gnome/pygobject/gtk4:v1
+  artifacts:
+    paths:
+      - coverage/
   script:
    - bash -x ./.gitlab-ci/test-docker-gtk4.sh
 

@@ -466,8 +466,7 @@ __all__.append('MenuItem')
 
 
 def _get_utf8_length(string):
-    if not isinstance(string, string_types):
-        raise TypeError('must be a string')
+    assert isinstance(string, string_types)
     if not isinstance(string, bytes):
         string = string.encode("utf-8")
     return len(string)
@@ -553,8 +552,7 @@ class Dialog(Gtk.Dialog, Container):
                           'Please use the "add_buttons" method for adding buttons. '
                           'See: https://wiki.gnome.org/PyGObject/InitializerDeprecations',
                           PyGTKDeprecationWarning, stacklevel=stacklevel)
-            if 'buttons' in new_kwargs:
-                del new_kwargs['buttons']
+            new_kwargs.pop('buttons', None)
         else:
             add_buttons = None
 
@@ -600,15 +598,15 @@ class Dialog(Gtk.Dialog, Container):
         """
         def _button(b):
             while b:
-                t, r = b[0:2]
+                try:
+                    t, r = b[0:2]
+                except ValueError:
+                    raise ValueError('Must pass an even number of arguments')
                 b = b[2:]
                 yield t, r
 
-        try:
-            for text, response in _button(args):
-                self.add_button(text, response)
-        except (IndexError):
-            raise TypeError('Must pass an even number of arguments')
+        for text, response in _button(args):
+            self.add_button(text, response)
 
 
 Dialog = override(Dialog)
@@ -720,13 +718,6 @@ __all__.append('RecentInfo')
 
 
 class TextBuffer(Gtk.TextBuffer):
-    def _get_or_create_tag_table(self):
-        table = self.get_tag_table()
-        if table is None:
-            table = Gtk.TextTagTable()
-            self.set_tag_table(table)
-
-        return table
 
     def create_tag(self, tag_name=None, **properties):
         """Creates a tag and adds it to the tag table of the TextBuffer.
@@ -753,7 +744,7 @@ class TextBuffer(Gtk.TextBuffer):
         """
 
         tag = Gtk.TextTag(name=tag_name, **properties)
-        self._get_or_create_tag_table().add(tag)
+        self.get_tag_table().add(tag)
         return tag
 
     def create_mark(self, mark_name, where, left_gravity=False):
@@ -830,11 +821,7 @@ class TreeModel(Gtk.TreeModel):
             index = len(self) + key
             if index < 0:
                 raise IndexError("row index is out of bounds: %d" % key)
-            try:
-                aiter = self.get_iter(index)
-            except ValueError:
-                raise IndexError("could not find tree path '%s'" % key)
-            return aiter
+            return self.get_iter(index)
         else:
             try:
                 aiter = self.get_iter(key)
@@ -1086,8 +1073,8 @@ class TreeModelRow(object):
         elif isinstance(iter_or_path, Gtk.TreeIter):
             self.iter = iter_or_path
         else:
-            raise TypeError("expected Gtk.TreeIter or Gtk.TreePath, \
-                %s found" % type(iter_or_path).__name__)
+            raise TypeError("expected Gtk.TreeIter or Gtk.TreePath, "
+                            "%s found" % type(iter_or_path).__name__)
 
     @property
     def path(self):
