@@ -183,12 +183,13 @@ def test_value_variant():
     assert v.get_value() is None
     variant = GLib.Variant('i', 42)
     v.set_value(variant)
-
-    # FIXME: triggers an assert
-    # assert v.get_value() == variant
+    assert v.get_value() == variant
 
     v.set_value(None)
     assert v.get_value() is None
+
+    with pytest.raises(TypeError):
+        v.set_value(object())
 
 
 def test_value_param():
