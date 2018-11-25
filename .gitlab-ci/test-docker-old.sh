@@ -13,5 +13,6 @@ export CCACHE_DIR="${CCACHE_BASEDIR}/_ccache"
 
 # test
 python -m pip install git+https://github.com/pygobject/pycairo.git
-python -m pip install pytest pytest-faulthandler
-xvfb-run -a python setup.py test
+python -m pip install pytest pytest-faulthandler coverage
+python setup.py build_tests
+xvfb-run -a python -m coverage run tests/runtests.py
