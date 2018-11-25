@@ -11,6 +11,8 @@ import sys
 import gc
 import warnings
 
+import pytest
+
 from .helper import ignore_gi_deprecation_warnings, capture_glib_warnings
 
 import gi.overrides
@@ -102,6 +104,14 @@ def test_freeze_child_notif():
         b.child_set_property(c, "pack-type", Gtk.PackType.START)
 
     assert events.count("pack-type") == 1
+
+
+@unittest.skipUnless(Gtk, 'Gtk not available')
+@unittest.skipIf(Gtk_version == "4.0", "not in gtk4")
+def test_menu_popup():
+    m = Gtk.Menu()
+    with capture_glib_warnings():
+        m.popup(None, None, None, None, 0, 0)
 
 
 @unittest.skipUnless(Gtk, 'Gtk not available')
@@ -222,8 +232,7 @@ class TestGtk(unittest.TestCase):
         ui.add_ui_from_string("""<ui>
     <menubar name="menubar1"></menubar>
 </ui>
-"""
-)
+""")
         menubar = ui.get_widget("/menubar1")
         self.assertEqual(type(menubar), Gtk.MenuBar)
 
@@ -355,6 +364,15 @@ class TestGtk(unittest.TestCase):
         self.assertEqual('test-button2', button.get_label())
         button = dialog.get_widget_for_response(Gtk.ResponseType.CLOSE)
         self.assertEqual('gtk-close', button.get_label())
+
+        with pytest.raises(ValueError, match="even number"):
+            dialog.add_buttons('test-button2', 2, 'gtk-close')
+
+    @unittest.skipIf(Gtk_version == "4.0", "not in gtk4")
+    def test_dialog_deprecated_attributes(self):
+        dialog = Gtk.Dialog()
+        assert dialog.action_area == dialog.get_action_area()
+        assert dialog.vbox == dialog.get_content_area()
 
     def test_about_dialog(self):
         dialog = Gtk.AboutDialog()
@@ -717,6 +735,11 @@ class TestGtk(unittest.TestCase):
         pixbuf = GdkPixbuf.Pixbuf()
         Gtk.IconSet.new_from_pixbuf(pixbuf)
 
+        with warnings.catch_warnings(record=True) as warn:
+            warnings.simplefilter('always')
+            Gtk.IconSet(pixbuf)
+        assert issubclass(warn[0].category, PyGTKDeprecationWarning)
+
     def test_viewport(self):
         vadjustment = Gtk.Adjustment()
         hadjustment = Gtk.Adjustment()
@@ -855,6 +878,10 @@ class TestBuilder(unittest.TestCase):
 
     def test_add_from_string(self):
         builder = Gtk.Builder()
+
+        with pytest.raises(TypeError):
+            builder.add_from_string(object())
+
         builder.add_from_string(u"")
         builder.add_from_string("")
 
@@ -876,6 +903,9 @@ class TestBuilder(unittest.TestCase):
         builder.add_objects_from_string(u"", [''])
         builder.add_objects_from_string("", [''])
         builder.add_objects_from_string(get_example(u"ä" * 1000), [''])
+
+        with pytest.raises(TypeError):
+            builder.add_objects_from_string(object(), [])
 
     def test_extract_handler_and_args_object(self):
         class Obj():
@@ -2056,6 +2086,14 @@ class TestTreeModel(unittest.TestCase):
         filtered[0][1] = 'ONE'
         self.assertEqual(filtered[0][1], 'ONE')
 
+        def foo(store, iter_, data):
+            assert data is None
+            return False
+
+        filtered.set_visible_func(foo)
+        filtered.refilter()
+        assert len(filtered) == 0
+
     def test_list_store_performance(self):
         model = Gtk.ListStore(int, str)
 
@@ -2190,6 +2228,7 @@ class TestTextBuffer(unittest.TestCase):
     def test_text_buffer(self):
         self.assertEqual(Gtk.TextBuffer, gi.overrides.Gtk.TextBuffer)
         buffer = Gtk.TextBuffer()
+        assert buffer.get_tag_table() is not None
         tag = buffer.create_tag('title', font='Sans 18')
 
         self.assertEqual(tag.props.name, 'title')
@@ -2260,6 +2299,15 @@ class TestTextBuffer(unittest.TestCase):
 
         self.assertRaises(ValueError, buffer.insert_with_tags_by_name,
                           buffer.get_start_iter(), 'HelloHello', 'unknowntag')
+
+    def test_insert(self):
+        buffer = Gtk.TextBuffer()
+        start = buffer.get_bounds()[0]
+        with pytest.raises(TypeError):
+            buffer.insert(start, 42)
+
+        with pytest.raises(TypeError):
+            buffer.insert_at_cursor(42)
 
     def test_text_iter(self):
         try:
@@ -2334,6 +2382,18 @@ class TestTextBuffer(unittest.TestCase):
 
         self.assertTrue(end.backward_find_char(pred_func))
         self.assertEqual(values, [u"c", u"b", u"a"])
+
+
+@unittest.skipUnless(Gtk, 'Gtk not available')
+class TestPaned(unittest.TestCase):
+
+    def test_pack_defaults(self):
+        p = Gtk.Paned()
+        l1 = Gtk.Label()
+        l2 = Gtk.Label()
+        p.pack1(l1)
+        p.pack2(l2)
+        assert p.get_children() == [l1, l2]
 
 
 @unittest.skipUnless(Gtk, 'Gtk not available')
