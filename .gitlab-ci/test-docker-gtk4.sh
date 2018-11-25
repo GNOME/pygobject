@@ -9,7 +9,7 @@ export CCACHE_DIR="${CCACHE_BASEDIR}/_ccache"
 
 # test
 python -m pip install git+https://github.com/pygobject/pycairo.git
-python -m pip install pytest pytest-faulthandler
+python -m pip install pytest pytest-faulthandler coverage
 g-ir-inspect Gtk --version=4.0 --print-typelibs
 export TEST_GTK_VERSION=4.0
-xvfb-run -a python setup.py test
+xvfb-run -a python -m coverage run tests/runtests.py
