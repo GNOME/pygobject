@@ -345,7 +345,9 @@ class Value(GObjectModule.Value):
         elif gtype == TYPE_GTYPE:
             return self.get_gtype()
         elif gtype == TYPE_VARIANT:
-            return self.get_variant()
+            # get_variant was missing annotations
+            # https://gitlab.gnome.org/GNOME/glib/merge_requests/492
+            return self.dup_variant()
         elif gtype == TYPE_PYOBJECT:
             return self.get_boxed()
         elif gtype == _gi.TYPE_INVALID:
