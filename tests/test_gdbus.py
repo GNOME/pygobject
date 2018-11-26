@@ -248,3 +248,10 @@ class TestGDBusClient(unittest.TestCase):
 
         self.assertTrue(isinstance(data['error'], Exception))
         self.assertTrue('InvalidArgs' in str(data['error']), str(data['error']))
+
+    def test_instantiate_custom_proxy(self):
+        class SomeProxy(Gio.DBusProxy):
+            def __init__(self):
+                Gio.DBusProxy.__init__(self)
+
+        SomeProxy()
