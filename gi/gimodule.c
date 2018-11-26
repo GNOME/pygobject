@@ -1066,7 +1066,7 @@ pygobject__g_instance_init(GTypeInstance   *instance,
     }
 
     /* XXX: used for Gtk.Template */
-    if (PyObject_HasAttrString (wrapper, "__dontuse_ginstance_init__")) {
+    if (PyObject_HasAttrString ((PyObject*) Py_TYPE (wrapper), "__dontuse_ginstance_init__")) {
         result = PyObject_CallMethod (wrapper, "__dontuse_ginstance_init__", NULL);
         if (result == NULL)
             PyErr_Print ();
