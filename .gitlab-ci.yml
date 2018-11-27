@@ -1,4 +1,4 @@
-image: registry.gitlab.gnome.org/gnome/pygobject/main:v8
+image: registry.gitlab.gnome.org/gnome/pygobject/main:v9
 
 stages:
   - build_and_test
@@ -34,7 +34,7 @@ coverage:
     paths:
       - coverage/
   variables:
-    PYENV_VERSION: "3.6.6"
+    PYENV_VERSION: "3.6.7"
   script:
     - bash -x ./.gitlab-ci/coverage-docker.sh
 
@@ -91,12 +91,12 @@ python3.5:
 
 python3.6:
   variables:
-    PYENV_VERSION: "3.6.6"
+    PYENV_VERSION: "3.6.7"
   <<: *defaults
 
 python3.7:
   variables:
-    PYENV_VERSION: "3.7.0-debug"
+    PYENV_VERSION: "3.7.1-debug"
   <<: *defaults
 
 pypy2:
@@ -122,7 +122,7 @@ xenial-i386-py2:
 
 gtk4:
   stage: build_and_test
-  image: registry.gitlab.gnome.org/gnome/pygobject/gtk4:v1
+  image: registry.gitlab.gnome.org/gnome/pygobject/gtk4:v2
   artifacts:
     paths:
       - coverage/

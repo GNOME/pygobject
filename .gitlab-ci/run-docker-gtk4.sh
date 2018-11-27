@@ -2,7 +2,7 @@
 
 set -e
 
-TAG="registry.gitlab.gnome.org/gnome/pygobject/gtk4:v1"
+TAG="registry.gitlab.gnome.org/gnome/pygobject/gtk4:v2"
 
 sudo docker build --tag "${TAG}" --file "Dockerfile.gtk4" .
 sudo docker run --rm --security-opt label=disable \
