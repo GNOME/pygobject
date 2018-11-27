@@ -222,7 +222,9 @@ class TestGdk(unittest.TestCase):
         with capture_glib_deprecation_warnings() as warn:
             c = Gdk.Cursor(display, Gdk.CursorType.WATCH)
         assert len(warn) == 1
-        assert c.props.cursor_type == Gdk.CursorType.WATCH
+        # on macOS the type is switched to PIXMAP behind the scenes
+        assert c.props.cursor_type in (
+            Gdk.CursorType.WATCH, Gdk.CursorType.CURSOR_IS_PIXMAP)
         assert c.props.display == display
 
     @unittest.skipUnless(GDK4, "only gdk4")
