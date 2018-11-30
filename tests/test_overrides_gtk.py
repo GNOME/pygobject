@@ -1596,6 +1596,26 @@ class TestTreeModel(unittest.TestCase):
             ([0], [-1]), ([0, 0], [0]), ([0, 1], [None]), ([0, 2], [None]),
             ([0, 3], [4321]), ([0, 4], [1234])]
 
+    def test_tree_store_insert_before_none(self):
+        store = Gtk.TreeStore(object)
+        root = store.append(None)
+        sub = store.append(root)
+
+        iter_ = store.insert_before(None, None, [1])
+        assert store.get_path(iter_).get_indices() == [1]
+
+        iter_ = store.insert_before(root, None, [1])
+        assert store.get_path(iter_).get_indices() == [0, 1]
+
+        iter_ = store.insert_before(sub, None, [1])
+        assert store.get_path(iter_).get_indices() == [0, 0, 0]
+
+        iter_ = store.insert_before(None, root, [1])
+        assert store.get_path(iter_).get_indices() == [0]
+
+        iter_ = store.insert_before(None, sub, [1])
+        assert store.get_path(iter_).get_indices() == [1, 0]
+
     def test_tree_store_insert_after(self):
         store = Gtk.TreeStore(object)
         signals = []
@@ -1656,6 +1676,26 @@ class TestTreeModel(unittest.TestCase):
         assert rows == [
             ([0], [-1]), ([0, 0], [1234]), ([0, 1], [4321]),
             ([0, 2], [None]), ([0, 3], [None]), ([0, 4], [0])]
+
+    def test_tree_store_insert_after_none(self):
+        store = Gtk.TreeStore(object)
+        root = store.append(None)
+        sub = store.append(root)
+
+        iter_ = store.insert_after(None, None, [1])
+        assert store.get_path(iter_).get_indices() == [0]
+
+        iter_ = store.insert_after(root, None, [1])
+        assert store.get_path(iter_).get_indices() == [1, 0]
+
+        iter_ = store.insert_after(sub, None, [1])
+        assert store.get_path(iter_).get_indices() == [1, 1, 0]
+
+        iter_ = store.insert_after(None, root, [1])
+        assert store.get_path(iter_).get_indices() == [2]
+
+        iter_ = store.insert_after(None, sub, [1])
+        assert store.get_path(iter_).get_indices() == [1, 2]
 
     def test_tree_path(self):
         p1 = Gtk.TreePath()

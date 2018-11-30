@@ -1282,6 +1282,8 @@ class TreeStore(Gtk.TreeStore, TreeModel, TreeSortable):
             if sibling is None:
                 position = -1
             else:
+                if parent is None:
+                    parent = self.iter_parent(sibling)
                 position = self.get_path(sibling).get_indices()[-1]
             return self._do_insert(parent, position, row)
 
@@ -1292,6 +1294,8 @@ class TreeStore(Gtk.TreeStore, TreeModel, TreeSortable):
             if sibling is None:
                 position = 0
             else:
+                if parent is None:
+                    parent = self.iter_parent(sibling)
                 position = self.get_path(sibling).get_indices()[-1] + 1
             return self._do_insert(parent, position, row)
 
