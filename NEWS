@@ -2,7 +2,7 @@
 -------------------
 
 * gtk overrides: Fix rows getting inserted on the wrong level with
-  TreeStore.insert_before/inster_after if parent=None.
+  TreeStore.insert_before/insert_after if parent=None.
   :issue:`281` (3.30 regression, thanks to :user:`Cian Wilson <cianwilson>`
   for the report)
 
