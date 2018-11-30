@@ -41,7 +41,7 @@ from distutils import dir_util, log
 from distutils.spawn import find_executable
 
 
-PYGOBJECT_VERISON = "3.30.4"
+PYGOBJECT_VERSION = "3.30.4"
 GLIB_VERSION_REQUIRED = "2.38.0"
 GI_VERSION_REQUIRED = "1.46.0"
 PYCAIRO_VERSION_REQUIRED = "1.11.1"
@@ -49,7 +49,7 @@ LIBFFI_VERSION_REQUIRED = "3.0"
 
 
 def is_dev_version():
-    version = tuple(map(int, PYGOBJECT_VERISON.split(".")))
+    version = tuple(map(int, PYGOBJECT_VERSION.split(".")))
     return version[1] % 2 != 0
 
 
@@ -79,7 +79,7 @@ def get_version_requirement(pkg_config_name):
 
 
 def get_versions():
-    version = PYGOBJECT_VERISON.split(".")
+    version = PYGOBJECT_VERSION.split(".")
     assert len(version) == 3
 
     versions = {
@@ -275,7 +275,7 @@ class sdist_gnome(Command):
 
     def run(self):
         # Don't use PEP 440 pre-release versions for GNOME releases
-        self.distribution.metadata.version = PYGOBJECT_VERISON
+        self.distribution.metadata.version = PYGOBJECT_VERSION
 
         dist_dir = tempfile.mkdtemp()
         try:
@@ -1130,7 +1130,7 @@ class install_pkgconfig(Command):
             "includedir": "${prefix}/include",
             "datarootdir": "${prefix}/share",
             "datadir": "${datarootdir}",
-            "VERSION": PYGOBJECT_VERISON,
+            "VERSION": PYGOBJECT_VERSION,
         }
         for key, value in config.items():
             content = content.replace("@%s@" % key, value)
