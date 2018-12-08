@@ -114,7 +114,19 @@ def parse_pkg_info(conf_dir):
     return message
 
 
-def pkg_config_get_install_hint(pkg_name):
+def pkg_config_get_install_hint():
+    """Returns an installation hint for installing pkg-config or None"""
+
+    if not sys.platform.startswith("linux"):
+        return
+
+    if find_executable("apt"):
+        return "sudo apt install pkg-config"
+    elif find_executable("dnf"):
+        return "sudo dnf install pkg-config"
+
+
+def pkg_config_get_package_install_hint(pkg_name):
     """Returns an installation hint for a pkg-config name or None"""
 
     if not sys.platform.startswith("linux"):
@@ -148,6 +160,10 @@ class PkgConfigError(Exception):
     pass
 
 
+class PkgConfigMissingError(PkgConfigError):
+    pass
+
+
 class PkgConfigMissingPackageError(PkgConfigError):
     pass
 
@@ -162,7 +178,7 @@ def _run_pkg_config(pkg_name, args, _cache={}):
             result = subprocess.check_output(command)
         except OSError as e:
             if e.errno == errno.ENOENT:
-                raise PkgConfigError(
+                raise PkgConfigMissingError(
                     "%r not found.\nArguments: %r" % (command[0], command))
             raise PkgConfigError(e)
         except subprocess.CalledProcessError as e:
@@ -181,8 +197,15 @@ def _run_pkg_config(pkg_name, args, _cache={}):
 def _run_pkg_config_or_exit(pkg_name, args):
     try:
         return _run_pkg_config(pkg_name, args)
+    except PkgConfigMissingError as e:
+        hint = pkg_config_get_install_hint()
+        if hint:
+            raise SystemExit(
+                "%s\n\nTry installing it with: %r" % (e, hint))
+        else:
+            raise SystemExit(e)
     except PkgConfigMissingPackageError as e:
-        hint = pkg_config_get_install_hint(pkg_name)
+        hint = pkg_config_get_package_install_hint(pkg_name)
         if hint:
             raise SystemExit(
                 "%s\n\nTry installing it with: %r" % (e, hint))
