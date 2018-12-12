@@ -189,6 +189,13 @@ class Test(unittest.TestCase):
         self.assertTrue(info.is_gtype_struct())
         self.assertFalse(info.is_foreign())
 
+        info = repo.find_by_name('GIMarshallingTests', 'SimpleStruct')
+        assert info.find_method("nope") is None
+        assert isinstance(info.find_method("method"), GIRepository.FunctionInfo)
+
+        assert info.find_field("nope") is None
+        assert isinstance(info.find_field("int8"), GIRepository.FieldInfo)
+
     def test_enum_info(self):
         info = repo.find_by_name('GIMarshallingTests', 'Enum')
         self.assertTrue(isinstance(info, GIRepository.EnumInfo))
