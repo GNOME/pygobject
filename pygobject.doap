@@ -19,7 +19,7 @@ PyGObject now dynamically accesses any GObject libraries that uses GObject Intro
   <mailing-list rdf:resource="http://mail.gnome.org/mailman/listinfo/python-hackers-list" />
   <category rdf:resource="http://api.gnome.org/doap-extensions#core" />
   <download-page rdf:resource="http://download.gnome.org/sources/pygobject/" />
-  <bug-database rdf:resource="https://bugzilla.gnome.org/browse.cgi?product=pygobject" />
+  <bug-database rdf:resource="https://gitlab.gnome.org/GNOME/pygobject/issues/" />
   <programming-language>C</programming-language>
   <programming-language>Python</programming-language>
   <maintainer>
