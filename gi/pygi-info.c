@@ -2229,10 +2229,17 @@ _wrap_g_union_info_get_size (PyGIBaseInfo *self)
     return pygi_gsize_to_py (g_union_info_get_size (self->info));
 }
 
+static PyObject *
+_wrap_g_union_info_get_alignment (PyGIBaseInfo *self)
+{
+    return pygi_gsize_to_py (g_union_info_get_alignment (self->info));
+}
+
 static PyMethodDef _PyGIUnionInfo_methods[] = {
     { "get_fields", (PyCFunction) _wrap_g_union_info_get_fields, METH_NOARGS },
     { "get_methods", (PyCFunction) _wrap_g_union_info_get_methods, METH_NOARGS },
     { "get_size", (PyCFunction) _wrap_g_union_info_get_size, METH_NOARGS },
+    { "get_alignment", (PyCFunction) _wrap_g_union_info_get_alignment, METH_NOARGS },
     { NULL, NULL, 0 }
 };
 

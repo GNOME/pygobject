@@ -203,6 +203,7 @@ class Test(unittest.TestCase):
         self.assertTrue(isinstance(info.get_fields(), abc.Iterable))
         self.assertTrue(isinstance(info.get_methods(), abc.Iterable))
         self.assertTrue(isinstance(info.get_size(), int))
+        self.assertTrue(isinstance(info.get_alignment(), int))
 
     def test_type_info(self):
         func_info = repo.find_by_name('GIMarshallingTests', 'array_fixed_out_struct')
