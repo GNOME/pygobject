@@ -1,3 +1,15 @@
+3.31.2 - 2018-12-15
+-------------------
+
+* Changes included in 3.30.4
+* GLib.Variant.keys: correctly raise TypeError for non-dict types
+* GLib.Variant: implement __bool__ for maybe types
+* cairo: Fix GValue converters in case of NULL
+* setup.py: Print an install command hint when pkg-config is missing
+* pygi-info: wrap g_union_info_get_alignment()
+  :mr:`105` (:user:`Tomasz Miąsko <tmiasko>`)
+
+
 3.30.4 - 2018-11-30
 -------------------
 
