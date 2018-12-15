@@ -1708,11 +1708,11 @@ find_vfunc_info (GIBaseInfo *vfunc_info,
                  GIFieldInfo **field_info_ret)
 {
     GType ancestor_g_type = 0;
-    int length, i;
     GIBaseInfo *ancestor_info;
     GIStructInfo *struct_info;
     gpointer implementor_class = NULL;
     gboolean is_interface = FALSE;
+    GIFieldInfo *field_info;
 
     ancestor_info = g_base_info_get_container (vfunc_info);
     is_interface = g_base_info_get_type (ancestor_info) == GI_INFO_TYPE_INTERFACE;
@@ -1743,28 +1743,18 @@ find_vfunc_info (GIBaseInfo *vfunc_info,
 
     *implementor_class_ret = implementor_class;
 
-    length = g_struct_info_get_n_fields (struct_info);
-    for (i = 0; i < length; i++) {
-        GIFieldInfo *field_info;
+    field_info = g_struct_info_find_field (struct_info,
+                                           g_base_info_get_name ( (GIBaseInfo*) vfunc_info));
+    if (field_info != NULL) {
         GITypeInfo *type_info;
-
-        field_info = g_struct_info_get_field (struct_info, i);
-
-        if (strcmp (g_base_info_get_name ( (GIBaseInfo*) field_info),
-                    g_base_info_get_name ( (GIBaseInfo*) vfunc_info)) != 0) {
-            g_base_info_unref (field_info);
-            continue;
-        }
 
         type_info = g_field_info_get_type (field_info);
         if (g_type_info_get_tag (type_info) == GI_TYPE_TAG_INTERFACE) {
-            g_base_info_unref (type_info);
             *field_info_ret = field_info;
-            break;
+        } else {
+            g_base_info_unref (field_info);
         }
-
         g_base_info_unref (type_info);
-        g_base_info_unref (field_info);
     }
 
     g_base_info_unref (struct_info);
