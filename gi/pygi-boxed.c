@@ -43,7 +43,6 @@ boxed_dealloc (PyGIBoxed *self)
 static PyObject *
 boxed_del (PyGIBoxed *self)
 {
-    GType g_type;
     gpointer boxed = pyg_boxed_get_ptr (self);
 
     if ( ( (PyGBoxed *) self)->free_on_dealloc && boxed != NULL) {
@@ -52,8 +51,7 @@ boxed_del (PyGIBoxed *self)
             self->slice_allocated = FALSE;
             self->size = 0;
         } else {
-            g_type = pyg_type_from_object ( (PyObject *) self);
-            g_boxed_free (g_type, boxed);
+            g_boxed_free (((PyGBoxed *)self)->gtype, boxed);
         }
     }
     pyg_boxed_set_ptr (self, NULL);
