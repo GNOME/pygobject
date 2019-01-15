@@ -210,12 +210,8 @@ class Value(GObjectModule.Value):
                 self.set_value(py_value)
 
     def __del__(self):
-        if self._is_valid:
-            if self._free_on_dealloc and self.g_type != TYPE_INVALID:
-                self.unset()
-
-        # We must call base class __del__() after unset.
-        super(Value, self).__del__()
+        if self._free_on_dealloc and self.g_type != TYPE_INVALID:
+            self.unset()
 
     def set_boxed(self, boxed):
         # Workaround the introspection marshalers inability to know
