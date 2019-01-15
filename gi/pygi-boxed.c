@@ -35,13 +35,7 @@ struct _PyGIBoxed {
 };
 
 static void
-boxed_dealloc (PyGIBoxed *self)
-{
-    Py_TYPE (self)->tp_free ((PyObject *)self);
-}
-
-static PyObject *
-boxed_del (PyGIBoxed *self)
+boxed_clear (PyGIBoxed *self)
 {
     gpointer boxed = pyg_boxed_get_ptr (self);
 
@@ -55,8 +49,23 @@ boxed_del (PyGIBoxed *self)
         }
     }
     pyg_boxed_set_ptr (self, NULL);
+}
+
+static PyObject *
+boxed_clear_wrapper (PyGIBoxed *self)
+{
+    boxed_clear (self);
 
     Py_RETURN_NONE;
+}
+
+
+static void
+boxed_dealloc (PyGIBoxed *self)
+{
+    boxed_clear (self);
+
+    Py_TYPE (self)->tp_free ((PyObject *)self);
 }
 
 void *
@@ -197,12 +206,6 @@ boxed_get_free_on_dealloc(PyGIBoxed *self, void *closure)
   return pygi_gboolean_to_py( ((PyGBoxed *)self)->free_on_dealloc );
 }
 
-static PyObject *
-boxed_get_is_valid (PyGIBoxed *self, void *closure)
-{
-  return pygi_gboolean_to_py (pyg_boxed_get_ptr (self) != NULL);
-}
-
 /**
  * pygi_boxed_copy_in_place:
  *
@@ -222,19 +225,18 @@ pygi_boxed_copy_in_place (PyGIBoxed *self)
     if (ptr)
         copy = g_boxed_copy (pygboxed->gtype, ptr);
 
-    boxed_del (self);
+    boxed_clear (self);
     pyg_boxed_set_ptr (pygboxed, copy);
     pygboxed->free_on_dealloc = TRUE;
 }
 
 static PyGetSetDef pygi_boxed_getsets[] = {
     { "_free_on_dealloc", (getter)boxed_get_free_on_dealloc, (setter)0 },
-    { "_is_valid", (getter)boxed_get_is_valid, (setter)0 },
     { NULL, 0, 0 }
 };
 
 static PyMethodDef boxed_methods[] = {
-    { "__del__", (PyCFunction)boxed_del, METH_NOARGS },
+    { "_clear_boxed", (PyCFunction)boxed_clear_wrapper, METH_NOARGS },
     { NULL, NULL, 0 }
 };
 

@@ -524,7 +524,10 @@ class Source(GLib.Source):
     def __del__(self):
         if hasattr(self, '__pygi_custom_source'):
             self.destroy()
-        super(Source, self).__del__()
+            # XXX: We have to unref the underlying source while the Python
+            # wrapper is still valid, so the source can call into the
+            # wrapper methods for the finalized callback.
+            self._clear_boxed()
 
     def set_callback(self, fn, user_data=None):
         if hasattr(self, '__pygi_custom_source'):
