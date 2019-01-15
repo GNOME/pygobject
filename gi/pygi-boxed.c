@@ -38,14 +38,17 @@ static void
 boxed_clear (PyGIBoxed *self)
 {
     gpointer boxed = pyg_boxed_get_ptr (self);
+    GType g_type = ((PyGBoxed *)self)->gtype;
 
     if ( ( (PyGBoxed *) self)->free_on_dealloc && boxed != NULL) {
         if (self->slice_allocated) {
+            if (g_type && g_type_is_a (g_type, G_TYPE_VALUE))
+                g_value_unset (boxed);
             g_slice_free1 (self->size, boxed);
             self->slice_allocated = FALSE;
             self->size = 0;
         } else {
-            g_boxed_free (((PyGBoxed *)self)->gtype, boxed);
+            g_boxed_free (g_type, boxed);
         }
     }
     pyg_boxed_set_ptr (self, NULL);
