@@ -28,6 +28,12 @@
 
 #include <girepository.h>
 
+struct _PyGIBoxed {
+    PyGBoxed base;
+    gboolean slice_allocated;
+    gsize size;
+};
+
 static void
 boxed_dealloc (PyGIBoxed *self)
 {

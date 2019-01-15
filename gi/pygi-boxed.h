@@ -26,11 +26,7 @@
 
 G_BEGIN_DECLS
 
-typedef struct {
-    PyGBoxed base;
-    gboolean slice_allocated;
-    gsize size;
-} PyGIBoxed;
+typedef struct _PyGIBoxed PyGIBoxed;
 
 extern PyTypeObject PyGIBoxed_Type;
 
