@@ -72,6 +72,12 @@ def test_value_invalid_type():
     with pytest.raises(ValueError, match="Invalid GType"):
         v.init(GObject.TYPE_INVALID)
 
+    with pytest.raises(
+            TypeError, match="GObject.Value needs to be initialized first"):
+        v.set_value(None)
+
+    assert v.get_value() is None
+
 
 def test_value_long():
     v = GObject.Value(GObject.TYPE_LONG)
@@ -274,3 +280,23 @@ def test_value_set_boxed_deprecate_non_boxed():
         v.get_boxed()
     with pytest.warns(PyGIDeprecationWarning):
         v.set_boxed(None)
+
+
+def test_value_boolean():
+    v = GObject.Value(GObject.TYPE_BOOLEAN)
+    assert v.get_value() is False
+    assert isinstance(v.get_value(), bool)
+
+    v.set_value(42)
+    assert v.get_value() is True
+    v.set_value(-1)
+    assert v.get_value() is True
+    v.set_value(0)
+    assert v.get_value() is False
+
+    v.set_value([])
+    assert v.get_value() is False
+    v.set_value(["foo"])
+    assert v.get_value() is True
+    with pytest.raises(TypeError):
+        v.set_value(None)
