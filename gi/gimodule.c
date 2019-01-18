@@ -2291,6 +2291,8 @@ static PyMethodDef _gi_functions[] = {
       (PyCFunction)pyg__install_metaclass, METH_O },
     { "_gvalue_get",
       (PyCFunction)pyg__gvalue_get, METH_O },
+    { "_gvalue_get_type",
+      (PyCFunction)pyg__gvalue_get_type, METH_O },
     { "_gvalue_set",
       (PyCFunction)pyg__gvalue_set, METH_VARARGS },
     { NULL, NULL, 0 }

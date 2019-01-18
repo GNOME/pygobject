@@ -887,6 +887,22 @@ pyg__gvalue_get(PyObject *module, PyObject *pygvalue)
 }
 
 PyObject *
+pyg__gvalue_get_type(PyObject *module, PyObject *pygvalue)
+{
+    GValue *value;
+    GType type;
+
+    if (!pyg_boxed_check (pygvalue, G_TYPE_VALUE)) {
+        PyErr_SetString (PyExc_TypeError, "Expected GValue argument.");
+        return NULL;
+    }
+
+    value = pyg_boxed_get (pygvalue, GValue);
+    type = G_VALUE_TYPE (value);
+    return pyg_type_wrapper_new (type);
+}
+
+PyObject *
 pyg__gvalue_set(PyObject *module, PyObject *args)
 {
     PyObject *pygvalue;

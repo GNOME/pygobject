@@ -209,8 +209,14 @@ class Value(GObjectModule.Value):
             if py_value is not None:
                 self.set_value(py_value)
 
+    @property
+    def __g_type(self):
+        # XXX: This is the same as self.g_type, but the field marshalling
+        # code is currently very slow.
+        return _gi._gvalue_get_type(self)
+
     def set_boxed(self, boxed):
-        if not self.g_type.is_a(TYPE_BOXED):
+        if not self.__g_type.is_a(TYPE_BOXED):
             warnings.warn('Calling set_boxed() on a non-boxed type deprecated',
                           PyGIDeprecationWarning, stacklevel=2)
         # Workaround the introspection marshalers inability to know
@@ -219,13 +225,13 @@ class Value(GObjectModule.Value):
         _gi._gvalue_set(self, boxed)
 
     def get_boxed(self):
-        if not self.g_type.is_a(TYPE_BOXED):
+        if not self.__g_type.is_a(TYPE_BOXED):
             warnings.warn('Calling get_boxed() on a non-boxed type deprecated',
                           PyGIDeprecationWarning, stacklevel=2)
         return _gi._gvalue_get(self)
 
     def set_value(self, py_value):
-        gtype = self.g_type
+        gtype = self.__g_type
 
         if gtype == _gi.TYPE_INVALID:
             raise TypeError("GObject.Value needs to be initialized first")
@@ -288,7 +294,7 @@ class Value(GObjectModule.Value):
             _gi._gvalue_set(self, py_value)
 
     def get_value(self):
-        gtype = self.g_type
+        gtype = self.__g_type
 
         if gtype == TYPE_BOOLEAN:
             return self.get_boolean()
@@ -340,7 +346,7 @@ class Value(GObjectModule.Value):
             return _gi._gvalue_get(self)
 
     def __repr__(self):
-        return '<Value (%s) %s>' % (self.g_type.name, self.get_value())
+        return '<Value (%s) %s>' % (self.__g_type.name, self.get_value())
 
 
 Value = override(Value)

@@ -45,6 +45,7 @@ PyObject *pygi_value_to_py_basic_type      (const GValue *value,
 
 PyObject *pyg__gvalue_get(PyObject *module, PyObject *pygvalue);
 PyObject *pyg__gvalue_set(PyObject *module, PyObject *args);
+PyObject *pyg__gvalue_get_type(PyObject *module, PyObject *pygvalue);
 
 G_END_DECLS
 
