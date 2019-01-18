@@ -266,3 +266,11 @@ def test_value_uchar():
 
     with pytest.raises(OverflowError):
         v.set_value(256)
+
+
+def test_value_set_boxed_deprecate_non_boxed():
+    v = GObject.Value(GObject.TYPE_POINTER)
+    with pytest.warns(PyGIDeprecationWarning):
+        v.get_boxed()
+    with pytest.warns(PyGIDeprecationWarning):
+        v.set_boxed(None)

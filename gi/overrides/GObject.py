@@ -210,12 +210,18 @@ class Value(GObjectModule.Value):
                 self.set_value(py_value)
 
     def set_boxed(self, boxed):
+        if not self.g_type.is_a(TYPE_BOXED):
+            warnings.warn('Calling set_boxed() on a non-boxed type deprecated',
+                          PyGIDeprecationWarning, stacklevel=2)
         # Workaround the introspection marshalers inability to know
         # these methods should be marshaling boxed types. This is because
         # the type information is stored on the GValue.
         _gi._gvalue_set(self, boxed)
 
     def get_boxed(self):
+        if not self.g_type.is_a(TYPE_BOXED):
+            warnings.warn('Calling get_boxed() on a non-boxed type deprecated',
+                          PyGIDeprecationWarning, stacklevel=2)
         return _gi._gvalue_get(self)
 
     def set_value(self, py_value):
