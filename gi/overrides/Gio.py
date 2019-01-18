@@ -48,20 +48,79 @@ Application = override(Application)
 __all__.append('Application')
 
 
+def _warn_init(cls, instead=None):
+
+    def new_init(self, *args, **kwargs):
+        super(cls, self).__init__(*args, **kwargs)
+        name = cls.__module__.rsplit(".", 1)[-1] + "." + cls.__name__
+        if instead:
+            warnings.warn(
+                ("%s shouldn't be instantiated directly, "
+                 "use %s instead." % (name, instead)),
+                PyGIWarning, stacklevel=2)
+        else:
+            warnings.warn(
+                "%s shouldn't be instantiated directly." % (name,),
+                PyGIWarning, stacklevel=2)
+
+    return new_init
+
+
+@override
 class VolumeMonitor(Gio.VolumeMonitor):
-
-    def __init__(self, *args, **kwargs):
-        super(VolumeMonitor, self).__init__(*args, **kwargs)
-
-        # https://bugzilla.gnome.org/show_bug.cgi?id=744690
-        warnings.warn(
-            "Gio.VolumeMonitor shouldn't be instantiated directly, "
-            "use Gio.VolumeMonitor.get() instead.",
-            PyGIWarning, stacklevel=2)
+    # https://bugzilla.gnome.org/show_bug.cgi?id=744690
+    __init__ = _warn_init(Gio.VolumeMonitor, "Gio.VolumeMonitor.get()")
 
 
-VolumeMonitor = override(VolumeMonitor)
 __all__.append('VolumeMonitor')
+
+
+@override
+class DBusAnnotationInfo(Gio.DBusAnnotationInfo):
+    __init__ = _warn_init(Gio.DBusAnnotationInfo)
+
+
+__all__.append('DBusAnnotationInfo')
+
+
+@override
+class DBusArgInfo(Gio.DBusArgInfo):
+    __init__ = _warn_init(Gio.DBusArgInfo)
+
+
+__all__.append('DBusArgInfo')
+
+
+@override
+class DBusMethodInfo(Gio.DBusMethodInfo):
+    __init__ = _warn_init(Gio.DBusMethodInfo)
+
+
+__all__.append('DBusMethodInfo')
+
+
+@override
+class DBusSignalInfo(Gio.DBusSignalInfo):
+    __init__ = _warn_init(Gio.DBusSignalInfo)
+
+
+__all__.append('DBusSignalInfo')
+
+
+@override
+class DBusInterfaceInfo(Gio.DBusInterfaceInfo):
+    __init__ = _warn_init(Gio.DBusInterfaceInfo)
+
+
+__all__.append('DBusInterfaceInfo')
+
+
+@override
+class DBusNodeInfo(Gio.DBusNodeInfo):
+    __init__ = _warn_init(Gio.DBusNodeInfo)
+
+
+__all__.append('DBusNodeInfo')
 
 
 class ActionMap(Gio.ActionMap):
