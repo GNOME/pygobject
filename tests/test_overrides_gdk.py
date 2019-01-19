@@ -126,6 +126,16 @@ class TestGdk(unittest.TestCase):
         self.assertRaises(AttributeError, lambda: getattr(event, 'foo_bar'))
 
     @unittest.skipIf(GDK4, "not in gdk4")
+    def test_event_strip_boolean(self):
+        ev = Gdk.EventButton()
+        ev.type = Gdk.EventType.BUTTON_PRESS
+        assert ev.get_coords() == (0.0, 0.0)
+
+        # https://gitlab.gnome.org/GNOME/pygobject/issues/85
+        ev = Gdk.Event.new(Gdk.EventType.BUTTON_PRESS)
+        assert ev.get_coords() == (True, 0.0, 0.0)
+
+    @unittest.skipIf(GDK4, "not in gdk4")
     def test_event_touch(self):
         event = Gdk.Event.new(Gdk.EventType.TOUCH_BEGIN)
         self.assertEqual(event.type, Gdk.EventType.TOUCH_BEGIN)
