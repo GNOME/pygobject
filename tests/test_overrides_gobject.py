@@ -222,8 +222,8 @@ def test_value_string():
     assert v.get_value() == u"quux"
     assert isinstance(v.get_value(), str)
 
-    with pytest.raises(TypeError):
-        v.set_value(None)
+    v.set_value(None)
+    assert v.get_value() is None
 
 
 def test_value_pyobject():

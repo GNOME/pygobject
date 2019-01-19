@@ -258,8 +258,8 @@ class Value(GObjectModule.Value):
         elif gtype == TYPE_DOUBLE:
             self.set_double(py_value)
         elif gtype == TYPE_STRING:
-            if isinstance(py_value, str):
-                py_value = str(py_value)
+            if py_value is None or isinstance(py_value, str):
+                py_value = py_value
             elif PY2:
                 if isinstance(py_value, text_type):
                     py_value = py_value.encode('UTF-8')
