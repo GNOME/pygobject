@@ -233,57 +233,28 @@ class Value(GObjectModule.Value):
     def set_value(self, py_value):
         gtype = self.__g_type
 
-        if gtype == _gi.TYPE_INVALID:
-            raise TypeError("GObject.Value needs to be initialized first")
-        elif gtype == TYPE_BOOLEAN:
-            self.set_boolean(py_value)
-        elif gtype == TYPE_CHAR:
+        if gtype == TYPE_CHAR:
             self.set_char(py_value)
         elif gtype == TYPE_UCHAR:
             self.set_uchar(py_value)
-        elif gtype == TYPE_INT:
-            self.set_int(py_value)
-        elif gtype == TYPE_UINT:
-            self.set_uint(py_value)
-        elif gtype == TYPE_LONG:
-            self.set_long(py_value)
-        elif gtype == TYPE_ULONG:
-            self.set_ulong(py_value)
-        elif gtype == TYPE_INT64:
-            self.set_int64(py_value)
-        elif gtype == TYPE_UINT64:
-            self.set_uint64(py_value)
-        elif gtype == TYPE_FLOAT:
-            self.set_float(py_value)
-        elif gtype == TYPE_DOUBLE:
-            self.set_double(py_value)
         elif gtype == TYPE_STRING:
-            if py_value is None or isinstance(py_value, str):
-                py_value = py_value
-            elif PY2:
-                if isinstance(py_value, text_type):
-                    py_value = py_value.encode('UTF-8')
+            if not isinstance(py_value, str) and py_value is not None:
+                if PY2:
+                    if isinstance(py_value, text_type):
+                        py_value = py_value.encode('UTF-8')
+                    else:
+                        raise TypeError("Expected string or unicode but got %s%s" %
+                                        (py_value, type(py_value)))
                 else:
-                    raise TypeError("Expected string or unicode but got %s%s" %
+                    raise TypeError("Expected string but got %s%s" %
                                     (py_value, type(py_value)))
-            else:
-                raise TypeError("Expected string but got %s%s" %
-                                (py_value, type(py_value)))
-            self.set_string(py_value)
+            _gi._gvalue_set(self, py_value)
         elif gtype == TYPE_PARAM:
             self.set_param(py_value)
-        elif gtype == TYPE_PYOBJECT:
-            self.set_boxed(py_value)
-        elif gtype.is_a(TYPE_ENUM):
-            self.set_enum(py_value)
         elif gtype.is_a(TYPE_FLAGS):
             self.set_flags(py_value)
-        elif gtype.is_a(TYPE_BOXED):
-            self.set_boxed(py_value)
         elif gtype == TYPE_POINTER:
             self.set_pointer(py_value)
-        elif gtype.is_a(TYPE_OBJECT):
-            self.set_object(py_value)
         elif gtype == TYPE_GTYPE:
             self.set_gtype(py_value)
         elif gtype == TYPE_VARIANT:
@@ -291,59 +262,41 @@ class Value(GObjectModule.Value):
         else:
             # Fall back to _gvalue_set which handles some more cases
             # like fundamentals for which a converter is registered
-            _gi._gvalue_set(self, py_value)
+            try:
+                _gi._gvalue_set(self, py_value)
+            except TypeError:
+                if gtype == TYPE_INVALID:
+                    raise TypeError("GObject.Value needs to be initialized first")
+                raise
 
     def get_value(self):
         gtype = self.__g_type
 
-        if gtype == TYPE_BOOLEAN:
-            return self.get_boolean()
-        elif gtype == TYPE_CHAR:
+        if gtype == TYPE_CHAR:
             return self.get_char()
         elif gtype == TYPE_UCHAR:
             return self.get_uchar()
-        elif gtype == TYPE_INT:
-            return self.get_int()
-        elif gtype == TYPE_UINT:
-            return self.get_uint()
-        elif gtype == TYPE_LONG:
-            return self.get_long()
-        elif gtype == TYPE_ULONG:
-            return self.get_ulong()
-        elif gtype == TYPE_INT64:
-            return self.get_int64()
-        elif gtype == TYPE_UINT64:
-            return self.get_uint64()
-        elif gtype == TYPE_FLOAT:
-            return self.get_float()
-        elif gtype == TYPE_DOUBLE:
-            return self.get_double()
-        elif gtype == TYPE_STRING:
-            return self.get_string()
-        elif gtype == TYPE_PYOBJECT:
-            return self.get_boxed()
         elif gtype == TYPE_PARAM:
             return self.get_param()
         elif gtype.is_a(TYPE_ENUM):
             return self.get_enum()
         elif gtype.is_a(TYPE_FLAGS):
             return self.get_flags()
-        elif gtype.is_a(TYPE_BOXED):
-            return self.get_boxed()
         elif gtype == TYPE_POINTER:
             return self.get_pointer()
-        elif gtype.is_a(TYPE_OBJECT):
-            return self.get_object()
         elif gtype == TYPE_GTYPE:
             return self.get_gtype()
         elif gtype == TYPE_VARIANT:
             # get_variant was missing annotations
             # https://gitlab.gnome.org/GNOME/glib/merge_requests/492
             return self.dup_variant()
-        elif gtype == _gi.TYPE_INVALID:
-            return None
         else:
-            return _gi._gvalue_get(self)
+            try:
+                return _gi._gvalue_get(self)
+            except TypeError:
+                if gtype == TYPE_INVALID:
+                    return None
+                raise
 
     def __repr__(self):
         return '<Value (%s) %s>' % (self.__g_type.name, self.get_value())
