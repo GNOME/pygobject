@@ -298,5 +298,6 @@ def test_value_boolean():
     assert v.get_value() is False
     v.set_value(["foo"])
     assert v.get_value() is True
-    with pytest.raises(TypeError):
-        v.set_value(None)
+
+    v.set_value(None)
+    assert v.get_value() is False

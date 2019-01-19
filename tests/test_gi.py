@@ -87,6 +87,11 @@ class TestBoolean(unittest.TestCase):
         GIMarshallingTests.boolean_in_true(1)
         GIMarshallingTests.boolean_in_false(0)
 
+    def test_boolean_in_other_types(self):
+        GIMarshallingTests.boolean_in_true([""])
+        GIMarshallingTests.boolean_in_false([])
+        GIMarshallingTests.boolean_in_false(None)
+
     def test_boolean_out(self):
         self.assertEqual(True, GIMarshallingTests.boolean_out_true())
         self.assertEqual(False, GIMarshallingTests.boolean_out_false())

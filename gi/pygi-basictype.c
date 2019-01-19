@@ -1342,6 +1342,8 @@ arg_basic_type_setup_from_info (PyGIArgCache  *arg_cache,
 
            break;
        case GI_TYPE_TAG_BOOLEAN:
+            arg_cache->allow_none = TRUE;
+            /* fall through */
        case GI_TYPE_TAG_INT8:
        case GI_TYPE_TAG_UINT8:
        case GI_TYPE_TAG_INT16:
