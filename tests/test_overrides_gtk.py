@@ -1056,7 +1056,8 @@ class TestBuilder(unittest.TestCase):
 
         builder.connect_signals({'on_signal1': (on_signal, 1, 2),
                                  'on_signal2': on_signal})
-        obj, emitter = builder.get_objects()
+        obj = builder.get_object("foo")
+        emitter = builder.get_object("object_sig_test")
         emitter.emit("test-signal")
         assert len(args_collector) == 2
         assert args_collector[0] == (obj, 1, 2)
