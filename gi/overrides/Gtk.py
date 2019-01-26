@@ -506,11 +506,18 @@ __all__.append('Builder')
 # NOTE: This must come before any other Window/Dialog subclassing, to ensure
 # that we have a correct inheritance hierarchy.
 
+_window_init = deprecated_init(Gtk.Window.__init__,
+                               arg_names=('type',),
+                               category=PyGTKDeprecationWarning,
+                               stacklevel=3)
 
 class Window(Gtk.Window):
-    __init__ = deprecated_init(Gtk.Window.__init__,
-                               arg_names=('type',),
-                               category=PyGTKDeprecationWarning)
+    def __init__(self, *args, **kwargs):
+        if not initialized:
+            raise RuntimeError(
+                "Gtk couldn't be initialized. "
+                "Use Gtk.init_check() if you want to handle this case.")
+        _window_init(self, *args, **kwargs)
 
 
 Window = override(Window)
@@ -1627,7 +1634,7 @@ if Gtk._version in ("2.0", "3.0"):
     __all__.append('stock_lookup')
 
 if Gtk._version == "4.0":
-    Gtk.init_check()
+    initialized = Gtk.init_check()
 else:
     initialized, argv = Gtk.init_check(sys.argv)
     sys.argv = list(argv)
