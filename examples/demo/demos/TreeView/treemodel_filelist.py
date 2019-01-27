@@ -125,16 +125,16 @@ class FileListModel(gtk.GenericTreeModel):
         except OSError:
             return None
         mode = filestat.st_mode
-        if column is 0:
+        if column == 0:
             if stat.S_ISDIR(mode):
                 return folderpb
             else:
                 return filepb
-        elif column is 1:
+        elif column == 1:
             return rowref
-        elif column is 2:
+        elif column == 2:
             return filestat.st_size
-        elif column is 3:
+        elif column == 3:
             return oct(stat.S_IMODE(mode))
         return time.ctime(filestat.st_mtime)
 
