@@ -170,7 +170,7 @@ pkginfo_conf.set('VERSION', py_version)
 configure_file(input : 'PKG-INFO.in',
   output : 'PyGObject-@0@.egg-info'.format(py_version),
   configuration : pkginfo_conf,
-  install_dir : python.get_install_dir())
+  install_dir : python.get_install_dir(pure : false))
 
 subdir('gi')
 subdir('pygtkcompat')
