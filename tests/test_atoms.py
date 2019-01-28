@@ -97,5 +97,5 @@ class TestGdkAtom(unittest.TestCase):
             dm = display.get_device_manager()
             device = dm.get_client_pointer()
         axes = device.list_axes()
-        axes_names = [atom.name() for atom in axes]
-        self.assertNotEqual(axes_names, [])
+        axes_names = [atom.name() for atom in axes if atom is not None]
+        assert all(isinstance(name, str) for name in axes_names)
