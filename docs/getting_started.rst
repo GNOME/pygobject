@@ -40,7 +40,7 @@ and their dependencies. Follow the instructions for your platform below.
 #) Follow the instructions on the page for setting up the basic environment
 #) Run ``C:\msys64\mingw32.exe`` - a terminal window should pop up
 #) Execute ``pacman -Suy``
-#) Execute ``pacman -S mingw-w64-i686-gtk3 mingw-w64-i686-python2-gobject mingw-w64-i686-python3-gobject``
+#) Execute ``pacman -S mingw-w64-i686-gtk3 mingw-w64-i686-python3-gobject``
 #) To test that GTK+3 is working you can run ``gtk3-demo``
 #) Copy the ``hello.py`` script you created to ``C:\msys64\home\<username>``
 #) In the mingw32 terminal execute ``python3 hello.py`` - a window should appear.
@@ -55,7 +55,7 @@ and their dependencies. Follow the instructions for your platform below.
 -------------------------------------------
 
 1) Open a terminal
-2) Execute ``sudo apt install python-gi python-gi-cairo python3-gi python3-gi-cairo gir1.2-gtk-3.0``
+2) Execute ``sudo apt install python3-gi python3-gi-cairo gir1.2-gtk-3.0``
 3) Change the directory to where your ``hello.py`` script can be found (e.g. ``cd Desktop``)
 4) Run ``python3 hello.py``
 
@@ -69,7 +69,7 @@ and their dependencies. Follow the instructions for your platform below.
 --------------------
 
 1) Open a terminal
-2) Execute ``sudo dnf install pygobject3 python3-gobject gtk3``
+2) Execute ``sudo dnf install python3-gobject gtk3``
 3) Change the directory to where your ``hello.py`` script can be found (e.g. ``cd Desktop``)
 4) Run ``python3 hello.py``
 
@@ -80,7 +80,7 @@ and their dependencies. Follow the instructions for your platform below.
 ----------------------
 
 1) Open a terminal
-2) Execute ``sudo pacman -S python-gobject python2-gobject gtk3``
+2) Execute ``sudo pacman -S python-gobject gtk3``
 3) Change the directory to where your ``hello.py`` script can be found (e.g. ``cd Desktop``)
 4) Run ``python3 hello.py``
 
@@ -91,7 +91,7 @@ and their dependencies. Follow the instructions for your platform below.
 ------------------------
 
 1) Open a terminal
-2) Execute ``sudo zypper install python-gobject python3-gobject gtk3``
+2) Execute ``sudo zypper install python3-gobject gtk3``
 3) Change the directory to where your ``hello.py`` script can be found (e.g. ``cd Desktop``)
 4) Run ``python3 hello.py``
 
@@ -103,7 +103,7 @@ and their dependencies. Follow the instructions for your platform below.
 
 1) Go to https://brew.sh/ and install homebrew
 2) Open a terminal
-3) Execute ``brew install pygobject3 --with-python@2 gtk+3`` to install for both python2 and python3
+3) Execute ``brew install pygobject3 gtk+3``
 4) Change the directory to where your ``hello.py`` script can be found (e.g. ``cd Desktop``)
 5) Run ``python3 hello.py``
 
@@ -123,7 +123,7 @@ dependencies are present yourself as pip will only take care of pycairo.
 
 .. code::
 
-    virtualenv --python=python3 myvenv
+    python3 -m venv myvenv
     source myvenv/bin/activate
     pip install pygobject
     python hello.py
