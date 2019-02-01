@@ -37,7 +37,7 @@ else
     meson _build -Dpython="$(which python)"
 fi
 ninja -C _build
-xvfb-run -a meson test -C _build -v
+xvfb-run -a meson test --timeout-multiplier 4 -C _build -v
 rm -Rf _build
 
 # CODE QUALITY
