@@ -1,3 +1,16 @@
+3.31.3 - 2019-02-02
+-------------------
+
+* Speed up destruction of boxed types :mr:`106` and GObject.Value.set_value() calls.
+  This makes appending to a Gtk.TreeModel nearly twice as fast for example :issue:`46`, :issue:`218`
+* Allow passing None for boolean parameters
+* meson: Install .egg-info directory to arch'd dir. :mr:`109` (:user:`Elliott Sales de Andrade <QuLogic>`)
+* gtk overrides: raise in case Gtk.Window is instantiated after gtk_init failed :issue:`298`
+* gio overrides: Warn when creating various dbus types without a constructor :issue:`15`
+* tests: Fix tests with glib 2.59.x :issue:`287`
+* tests: fix test_atoms failing in some environments :issue:`300`
+
+
 3.31.2 - 2018-12-15
 -------------------
 
