@@ -41,7 +41,7 @@ from distutils import dir_util, log
 from distutils.spawn import find_executable
 
 
-PYGOBJECT_VERSION = "3.31.3"
+PYGOBJECT_VERSION = "3.31.4"
 GLIB_VERSION_REQUIRED = "2.48.0"
 GI_VERSION_REQUIRED = "1.46.0"
 PYCAIRO_VERSION_REQUIRED = "1.11.1"
