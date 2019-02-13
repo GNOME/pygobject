@@ -17,12 +17,12 @@ have to switch everything at once.
 Static Bindings Library Differences
 -----------------------------------
 
-**pygtk** supported GTK+ 2.0 and Python 2 only. PyGObject supports GTK+ >=3.0
-and Python 2/3. If you port away from pygtk you also have to move to GTK+ 3.0
+**pygtk** supported GTK 2.0 and Python 2 only. PyGObject supports GTK >=3.0
+and Python 2/3. If you port away from pygtk you also have to move to GTK 3.0
 at the same time. **pygtkcompat** described below can help you with that
 transition.
 
-**pygst** supports GStreamer 0.10 and Python 2 only. Like with GTK+ you have
+**pygst** supports GStreamer 0.10 and Python 2 only. Like with GTK you have
 to move to PyGObject and GStreamer 1.0 at the same time.
 
 **pygobject 2** supports glib 2.0 and Python 2. The new bindings also support
@@ -50,13 +50,13 @@ you have to make in the beginning, but nothing more.
 4) Continue to the next module...
 
 
-Porting Tips for GTK+
----------------------
+Porting Tips for GTK
+--------------------
 
-While PyGObject theoretically supports GTK+ 2.0 it is not really usable. It
-will be easier to port to GTK+ 3.0 right away.
+While PyGObject theoretically supports GTK 2.0 it is not really usable. It
+will be easier to port to GTK 3.0 right away.
 
-For some general advice regarding the migration from GTK+ 2.0 to 3.0 see the
+For some general advice regarding the migration from GTK 2.0 to 3.0 see the
 `offical migration guide
 <https://developer.gnome.org/gtk3/stable/gtk-migrating-2-to-3.html>`__. If you
 need to know how a C symbol is exposed in Python have a look at the `symbol

@@ -17,7 +17,7 @@ Such an operation might be:
 
 The following examples show
 
-* how Python threads, running in parallel to GTK+, can interact with the UI
+* how Python threads, running in parallel to GTK, can interact with the UI
 * how to use and control asynchronous I/O operations in glib
 
 
@@ -66,7 +66,7 @@ while still showing feedback on the progress in a window.
 
 The example shows a simple window containing a progress bar. After everything
 is set up it constructs a Python thread, passes it a function to execute,
-starts the thread and the GTK+ main loop. After the main loop is started it is
+starts the thread and the GTK main loop. After the main loop is started it is
 possible to see the window and interact with it.
 
 In the background ``example_target()`` gets executed and calls
@@ -74,14 +74,14 @@ In the background ``example_target()`` gets executed and calls
 :func:`time.sleep` represents the blocking operation. :func:`GLib.idle_add`
 takes the ``update_progess()`` function and arguments that will get passed to
 the function and asks the main loop to schedule its execution in the main
-thread. This is needed because GTK+ isn't thread safe; only one thread, the
-main thread, is allowed to call GTK+ code at all times.
+thread. This is needed because GTK isn't thread safe; only one thread, the
+main thread, is allowed to call GTK code at all times.
 
 
 Threads: FAQ
 ------------
 
-* I'm porting code from pygtk (GTK+ 2) to PyGObject (GTK+ 3). Has anything 
+* I'm porting code from pygtk (GTK 2) to PyGObject (GTK 3). Has anything
   changed regarding threads?
 
   Short answer: No.
@@ -96,7 +96,7 @@ Threads: FAQ
 
   * Remove any :func:`Gdk.threads_init()`, :func:`Gdk.threads_enter` and  
     :func:`Gdk.threads_leave` calls. In case they get executed in a thread,
-    move the GTK+ code into its own function and schedule it using
+    move the GTK code into its own function and schedule it using
     :func:`GLib.idle_add`. Be aware that the newly created function will be
     executed some time later, so other stuff can happen in between.
 
@@ -110,12 +110,12 @@ Threads: FAQ
   In GStreamer, for example, some signals can be called from a different
   thread, see the respective signal documentation for when this is the case.
   In case you connect to such a signal you have to make sure to not call any
-  GTK+ code or use :func:`GLib.idle_add` accordingly.
+  GTK code or use :func:`GLib.idle_add` accordingly.
 
-* What if I need to call GTK+ code in signal handlers emitted from a thread?
+* What if I need to call GTK code in signal handlers emitted from a thread?
 
   In case you have a signal that is emitted from another thread and you need
-  to call GTK+ code during and not after signal handling, you can push the
+  to call GTK code during and not after signal handling, you can push the
   operation with an :class:`threading.Event` object to the main loop and wait
   in the signal handler until the operation gets scheduled and the result is
   available. Be aware that if the signal is emitted from the main loop this

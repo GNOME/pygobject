@@ -42,7 +42,7 @@ except (ValueError, ImportError):
     pass
 
 if GDK2 or GDK3:
-    # Gdk.Color was deprecated since 3.14 and dropped in Gtk+-4.0
+    # Gdk.Color was deprecated since 3.14 and dropped in Gtk-4.0
     class Color(Gdk.Color):
         MAX_VALUE = 65535
 
@@ -84,7 +84,7 @@ if GDK2 or GDK3:
     __all__.append('Color')
 
 if GDK3:
-    # Introduced since Gtk+-3.0
+    # Introduced since Gtk-3.0
     class RGBA(Gdk.RGBA):
         def __init__(self, red=1.0, green=1.0, blue=1.0, alpha=1.0):
             Gdk.RGBA.__init__(self)
@@ -139,7 +139,7 @@ if GDK2:
     Rectangle = override(Rectangle)
     __all__.append('Rectangle')
 elif GDK3:
-    # Newer GTK+/gobject-introspection (3.17.x) include GdkRectangle in the
+    # Newer GTK/gobject-introspection (3.17.x) include GdkRectangle in the
     # typelib. See https://bugzilla.gnome.org/show_bug.cgi?id=748832 and
     # https://bugzilla.gnome.org/show_bug.cgi?id=748833
     if not hasattr(Gdk, 'Rectangle'):
@@ -361,7 +361,7 @@ if GDK2 or GDK3:
     Cursor = override(Cursor)
     __all__.append('Cursor')
 
-    # Gdk.Color was deprecated since 3.14 and dropped in Gtk+-4.0
+    # Gdk.Color was deprecated since 3.14 and dropped in Gtk-4.0
     color_parse = strip_boolean_result(Gdk.color_parse)
     __all__.append('color_parse')
 

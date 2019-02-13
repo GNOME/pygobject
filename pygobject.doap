@@ -7,7 +7,7 @@
   <name xml:lang="en">PyGObject</name>
   <shortdesc xml:lang="en">Python bindings for GObject Introspection</shortdesc>
   <description>
-GObject is a object system used by GTK+,  GStreamer and other libraries.
+GObject is a object system used by GTK, GStreamer and other libraries.
 
 PyGObject provides a convenient wrapper for use in Python programs when accessing GObject libraries.
 

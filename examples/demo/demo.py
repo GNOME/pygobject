@@ -130,7 +130,7 @@ class GtkDemoApp(Gtk.Application):
 
     def on_activate(self, app):
         self.window = Gtk.ApplicationWindow.new(self)
-        self.window.set_title('PyGObject GTK+ Code Demos')
+        self.window.set_title('PyGObject GTK Code Demos')
         self.window.set_default_size(600, 400)
         self.setup_default_icon()
 

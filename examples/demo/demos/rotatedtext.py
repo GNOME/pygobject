@@ -32,7 +32,7 @@ import cairo
 import math
 
 
-UTF8_TEXT = u"I ♥ GTK+"
+UTF8_TEXT = u"I ♥ GTK"
 HEART = u"♥"
 BYTES_TEXT = UTF8_TEXT.encode("utf-8")
 BYTES_HEART = HEART.encode("utf-8")

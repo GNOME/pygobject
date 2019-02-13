@@ -29,9 +29,9 @@
     :end-before: ----
 
 If you want to write a Python application for `GNOME
-<https://www.gnome.org/>`__ or a Python GUI application using GTK+, then
+<https://www.gnome.org/>`__ or a Python GUI application using GTK, then
 PyGObject is the way to go. For more information on specific libraries check
-out the "`Python GTK+ 3 Tutorial
+out the "`Python GTK 3 Tutorial
 <https://python-gtk-3-tutorial.readthedocs.io>`__" and the "`Python GI API
 Reference <https://lazka.github.io/pgi-docs>`__".
 

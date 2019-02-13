@@ -6,7 +6,7 @@
 Getting Started
 ===============
 
-To get things started we will try to run a very simple `GTK+
+To get things started we will try to run a very simple `GTK
 <https://www.gtk.org/>`_ based GUI application using the :doc:`PyGObject <index>` provided
 Python bindings. First create a small Python script called ``hello.py`` with
 the following content and save it somewhere:
@@ -22,7 +22,7 @@ the following content and save it somewhere:
     window.connect("destroy", Gtk.main_quit)
     Gtk.main()
 
-Before we can run the example application we need to install PyGObject, GTK+
+Before we can run the example application we need to install PyGObject, GTK
 and their dependencies. Follow the instructions for your platform below.
 
 ======================================================= ==================================================== ==========================================================
@@ -30,9 +30,9 @@ and their dependencies. Follow the instructions for your platform below.
 |windows-logo| :ref:`Windows <windows-getting-started>` |macosx-logo| :ref:`macOS <macosx-getting-started>`  |opensuse-logo| :ref:`openSUSE <opensuse-getting-started>`
 ======================================================= ==================================================== ==========================================================
 
-After running the example application have a look at the "`Python GTK+ 3
+After running the example application have a look at the "`Python GTK 3
 Tutorial <https://python-gtk-3-tutorial.readthedocs.io>`__" for more examples
-on how to create GTK+ apps and the "`PyGObject API Reference
+on how to create GTK apps and the "`PyGObject API Reference
 <https://lazka.github.io/pgi-docs>`__" for API documentation for all supported
 libraries.
 
@@ -46,7 +46,7 @@ libraries.
 #) Run ``C:\msys64\mingw32.exe`` - a terminal window should pop up
 #) Execute ``pacman -Suy``
 #) Execute ``pacman -S mingw-w64-i686-gtk3 mingw-w64-i686-python3-gobject``
-#) To test that GTK+3 is working you can run ``gtk3-demo``
+#) To test that GTK 3 is working you can run ``gtk3-demo``
 #) Copy the ``hello.py`` script you created to ``C:\msys64\home\<username>``
 #) In the mingw32 terminal execute ``python3 hello.py`` - a window should appear.
 

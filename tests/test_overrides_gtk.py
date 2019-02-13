@@ -532,7 +532,7 @@ class TestGtk(unittest.TestCase):
         self.assertTrue(isinstance(button, Gtk.Widget))
 
         if Gtk_version != "4.0":
-            # Using stock items causes hard warning in devel versions of GTK+.
+            # Using stock items causes hard warning in devel versions of GTK.
             with capture_glib_warnings(allow_warnings=True):
                 button = Gtk.Button.new_from_stock(Gtk.STOCK_CLOSE)
 
@@ -771,7 +771,7 @@ class TestGtk(unittest.TestCase):
     def test_toolbutton(self):
         # PyGTK compat
 
-        # Using stock items causes hard warning in devel versions of GTK+.
+        # Using stock items causes hard warning in devel versions of GTK.
         with capture_glib_warnings(allow_warnings=True):
             button = Gtk.ToolButton()
             self.assertEqual(button.props.stock_id, None)

@@ -40,6 +40,6 @@ Build dependencies:
 Test Suite dependencies:
 
     * The runtime dependencies
-    * GTK+ 3 (optional)
+    * GTK 3 (optional)
     * pango (optional)
     * pycairo (optional)

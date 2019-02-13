@@ -124,7 +124,7 @@ Boston, MA 02111-1307, USA.
     transparent = pixbuf.add_alpha(True, 0xff, 0xff, 0xff)
 
     about = Gtk.AboutDialog(parent=window,
-                            program_name='GTK+ Code Demos',
+                            program_name='GTK Code Demos',
                             version='0.1',
                             copyright='(C) 2010 The PyGI Team',
                             license=license,
@@ -133,7 +133,7 @@ Boston, MA 02111-1307, USA.
                             authors=authors,
                             documenters=documentors,
                             logo=transparent,
-                            title='About GTK+ Code Demos')
+                            title='About GTK Code Demos')
 
     about.connect('response', widget_destroy)
     about.show()
@@ -172,7 +172,7 @@ action_entries = (
      about_cb),
     ("Logo", "demo-gtk-logo",                   # name, stock id
      None, None,                                # label, accelerator
-     "GTK+",                                    # tooltip
+     "GTK",                                     # tooltip
      activate_action),
 )
 

@@ -252,7 +252,7 @@ pygi_arg_gobject_to_py_called_from_c (GIArgument *arg,
     PyObject *object;
 
     /* HACK:
-     * The following hack is to work around GTK+ sending signals which
+     * The following hack is to work around GTK sending signals which
      * contain floating widgets in them. This assumes control of how
      * references are added by the PyGObject wrapper and avoids the sink
      * behavior by explicitly passing GI_TRANSFER_EVERYTHING as the transfer
