@@ -30,14 +30,10 @@ export CFLAGS="-coverage -ftest-coverage -fprofile-arcs -Werror"
 /usr/bin/python3 -m pip install --user meson
 export PATH="${HOME}/.local/bin:${PATH}"
 export PKG_CONFIG_PATH="$(python -c 'import sys; sys.stdout.write(sys.prefix)')/lib/pkgconfig"
-# pycairo install under PyPy doesn't install a .pc file
-if [[ "${PYIMPL}" == "PyPy" ]]; then
-    meson _build -Dpython="$(which python)" -Dpycairo=false
-else
-    meson _build -Dpython="$(which python)"
-fi
+
+meson _build -Dpython="$(which python)"
 ninja -C _build
-xvfb-run -a meson test --timeout-multiplier 4 -C _build -v
+xvfb-run -a meson test --suite pygobject --timeout-multiplier 4 -C _build -v
 rm -Rf _build
 
 # CODE QUALITY
