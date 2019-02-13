@@ -30,6 +30,11 @@ and their dependencies. Follow the instructions for your platform below.
 |windows-logo| :ref:`Windows <windows-getting-started>` |macosx-logo| :ref:`macOS <macosx-getting-started>`  |opensuse-logo| :ref:`openSUSE <opensuse-getting-started>`
 ======================================================= ==================================================== ==========================================================
 
+After running the example application have a look at the "`Python GTK+ 3
+Tutorial <https://python-gtk-3-tutorial.readthedocs.io>`__" for more examples
+on how to create GTK+ apps and the "`PyGObject API Reference
+<https://lazka.github.io/pgi-docs>`__" for API documentation for all supported
+libraries.
 
 .. _windows-getting-started:
 
