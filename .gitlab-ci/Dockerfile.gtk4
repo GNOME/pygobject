@@ -1,8 +1,8 @@
-FROM registry.gitlab.gnome.org/gnome/pygobject/main:v9
+FROM registry.gitlab.gnome.org/gnome/pygobject/main:v10
 
 USER root
 
-RUN python3 -m pip install meson
+RUN python3 -m pip install meson==0.49.2
 
 ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get update && apt-get install -y \
@@ -25,4 +25,4 @@ RUN git clone https://gitlab.gnome.org/GNOME/gtk.git \
     && rm -Rf gtk
 
 USER user
-ENV PYENV_VERSION 3.7.1-debug
+ENV PYENV_VERSION 3.7.2-debug
