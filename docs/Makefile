@@ -6,7 +6,7 @@ all: _build
 images/%.svg: images/%.dia
 	dia $< --export=$@ --filter=dia-svg
 
-_build: Makefile *.rst devguide/*.rst guide/*.rst conf.py images/*.png $(DIA_SVGS) ../README.rst ../NEWS
+_build: Makefile *.rst devguide/*.rst guide/*/*.rst guide/*.rst conf.py images/*.png $(DIA_SVGS) ../README.rst ../NEWS
 	sphinx-build -b html . _build
 
 linkcheck:

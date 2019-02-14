@@ -22,6 +22,7 @@ In addition :obj:`GObject.Object` has support for :any:`signals <signals>` and
 
     signals
     properties
+    weakrefs
 
 
 Examples
