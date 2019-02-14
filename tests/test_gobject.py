@@ -6,6 +6,8 @@ import sys
 import gc
 import unittest
 import warnings
+import weakref
+import platform
 
 import pytest
 
@@ -16,6 +18,53 @@ from gi import _gi
 
 import testhelper
 from .helper import capture_glib_deprecation_warnings
+
+
+@pytest.mark.skipif(platform.python_implementation() == "PyPy", reason="crashes")
+def test_gobject_weak_ref():
+
+    called = []
+
+    def callback(*args):
+        called.extend(args)
+
+    # object gets finalized
+    obj = GObject.Object()
+    obj.weak_ref(callback, 1)
+    del obj
+    gc.collect()
+    gc.collect()
+    assert called == [1]
+    del called[:]
+
+    # wrapper gets finalized first
+    obj = GObject.Object()
+    pyref = weakref.ref(obj, lambda x: callback(-2))
+    value = GObject.Value(GObject.Object, obj)
+    ref = obj.weak_ref(callback, 2)
+    del obj
+    gc.collect()
+    assert called == [-2]
+    del pyref
+    value.unset()
+    gc.collect()
+    assert called == [-2, 2]
+    del called[:]
+
+    # weakref gets unregistered first
+    obj = GObject.Object()
+    ref = obj.weak_ref(callback, 3)
+    ref.unref()
+    del obj
+    gc.collect()
+    assert not called
+
+    # weakref gets GCed
+    obj = GObject.Object()
+    obj.weak_ref(callback, 4)
+    gc.collect()
+    del obj
+    assert called == [4]
 
 
 class TestGObjectAPI(unittest.TestCase):
