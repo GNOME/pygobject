@@ -16,8 +16,8 @@ creates a temporary X server without the need for any real display hardware.
 Continuous Integration using Travis CI / CircleCI
 -------------------------------------------------
 
-Travis CI uses a rather old Ubuntu and thus the supported GTK is at 3.10 and
-PyGObject is at 3.12. If that's enough for you then have a look at our Travis
+Travis CI uses a rather old Ubuntu and thus the supported GTK is at 3.18 and
+PyGObject is at 3.20. If that's enough for you then have a look at our Travis
 CI example project:
 
     |github-logo| https://github.com/pygobject/pygobject-travis-ci-examples
