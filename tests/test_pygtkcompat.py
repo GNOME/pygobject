@@ -6,6 +6,8 @@ from __future__ import absolute_import
 import unittest
 import base64
 
+import pytest
+import gi
 import pygtkcompat
 from pygtkcompat.pygtkcompat import _disable_all as disable_all
 
@@ -113,6 +115,106 @@ class TestGTKCompat(unittest.TestCase):
 
     def tearDown(self):
         disable_all()
+
+    def test_window_get_frame_extents(self):
+        import gtk
+        import gtk.gdk
+        w = gtk.Window()
+        w.realize()
+        rect = w.window.get_frame_extents()
+        assert isinstance(rect, gtk.gdk.Rectangle)
+
+    def test_window_get_geometry(self):
+        import gtk
+        w = gtk.Window()
+        w.realize()
+        with capture_gi_deprecation_warnings():
+            geo = w.window.get_geometry()
+        assert isinstance(geo, tuple)
+        assert len(geo) == 5
+
+    def test_action_set_tool_item_type(self):
+        import gtk
+        with pytest.warns(gi.PyGIDeprecationWarning):
+            gtk.Action().set_tool_item_type(gtk.Action)
+
+    def test_treeviewcolumn_pack(self):
+        import gtk
+        col = gtk.TreeViewColumn()
+        col.pack_end(gtk.CellRendererText())
+        col.pack_start(gtk.CellRendererText())
+
+    def test_cell_layout_pack(self):
+        import gtk
+        layout = gtk.EntryCompletion()
+        layout.pack_end(gtk.CellRendererText())
+        layout.pack_start(gtk.CellRendererText())
+
+    def test_cell_layout_cell_data_func(self):
+        import gtk
+
+        def func(*args):
+            pass
+
+        layout = gtk.EntryCompletion()
+        render = gtk.CellRendererText()
+        layout.set_cell_data_func(render, func)
+
+    def test_combo_row_separator_func(self):
+        import gtk
+
+        def func(*args):
+            pass
+
+        combo = gtk.ComboBox()
+        combo.set_row_separator_func(func)
+
+    def test_container_install_child_property(self):
+        import gtk
+
+        box = gtk.Box()
+        with pytest.warns(gi.PyGIDeprecationWarning):
+            box.install_child_property(0, None)
+
+    def test_combo_box_new_text(self):
+        import gtk
+
+        combo = gtk.combo_box_new_text()
+        assert isinstance(combo, gtk.ComboBox)
+        combo.append_text("foo")
+
+    def test_scale(self):
+        import gtk
+
+        adjustment = gtk.Adjustment()
+        assert gtk.HScale()
+        assert gtk.HScale(adjustment).get_adjustment() == adjustment
+        adjustment = gtk.Adjustment()
+        assert gtk.VScale()
+        assert gtk.VScale(adjustment).get_adjustment() == adjustment
+
+    def test_stock_add(self):
+        import gtk
+
+        gtk.stock_add([])
+
+    def test_text_view_scroll_to_mark(self):
+        import gtk
+
+        view = gtk.TextView()
+        buf = view.get_buffer()
+        mark = gtk.TextMark(name="foo")
+        buf.add_mark(mark, buf.get_end_iter())
+        view.scroll_to_mark(mark, 0.0)
+
+    def test_window_set_geometry_hints(self):
+        import gtk
+
+        w = gtk.Window()
+        w.set_geometry_hints(None, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+        w.set_geometry_hints(None, 0, 0, 0, 0, 0, 0, 0, 0, -1, -1)
+        with pytest.raises(TypeError):
+            w.set_geometry_hints(None, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
 
     def test_buttons(self):
         import gtk.gdk
