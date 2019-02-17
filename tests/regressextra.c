@@ -174,6 +174,58 @@ regress_test_cairo_path_full_in_full_return (cairo_path_t *path)
 }
 
 /**
+ * regress_test_cairo_pattern_full_in:
+ * @pattern: (transfer full):
+ */
+void
+regress_test_cairo_pattern_full_in (cairo_pattern_t *pattern)
+{
+    cairo_pattern_destroy (pattern);
+}
+
+/**
+ * regress_test_cairo_pattern_none_in:
+ * @pattern: (transfer none):
+ */
+void
+regress_test_cairo_pattern_none_in (cairo_pattern_t *pattern)
+{
+    cairo_t *cr = regress_test_cairo_context_full_return ();
+    cairo_set_source (cr, pattern);
+    g_assert (cairo_status (cr) == CAIRO_STATUS_SUCCESS);
+    cairo_destroy (cr);
+}
+
+/**
+ * regress_test_cairo_pattern_none_return:
+ *
+ * Returns: (transfer none):
+ */
+cairo_pattern_t*
+regress_test_cairo_pattern_none_return (void)
+{
+    static cairo_pattern_t *pattern;
+
+    if (pattern == NULL) {
+        pattern = cairo_pattern_create_rgb(0.1, 0.2, 0.3);
+    }
+
+    return pattern;
+}
+
+/**
+ * regress_test_cairo_pattern_full_return:
+ *
+ * Returns: (transfer full):
+ */
+cairo_pattern_t *
+regress_test_cairo_pattern_full_return (void)
+{
+    cairo_pattern_t *pattern = cairo_pattern_create_rgb(0.5, 0.6, 0.7);
+    return pattern;
+}
+
+/**
  * regress_test_cairo_region_full_in:
  * @region: (transfer full):
  */

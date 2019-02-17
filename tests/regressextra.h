@@ -34,6 +34,14 @@ void regress_test_cairo_path_none_in (cairo_path_t *path);
 _GI_TEST_EXTERN
 cairo_path_t * regress_test_cairo_path_full_in_full_return (cairo_path_t *path);
 _GI_TEST_EXTERN
+void regress_test_cairo_pattern_full_in (cairo_pattern_t *pattern);
+_GI_TEST_EXTERN
+void regress_test_cairo_pattern_none_in (cairo_pattern_t *pattern);
+_GI_TEST_EXTERN
+cairo_pattern_t* regress_test_cairo_pattern_none_return (void);
+_GI_TEST_EXTERN
+cairo_pattern_t * regress_test_cairo_pattern_full_return (void);
+_GI_TEST_EXTERN
 cairo_font_options_t *regress_test_cairo_font_options_full_return (void);
 _GI_TEST_EXTERN
 cairo_font_options_t *regress_test_cairo_font_options_none_return (void);
