@@ -115,6 +115,27 @@ class Test(unittest.TestCase):
         options = cairo.FontOptions()
         Regress.test_cairo_font_options_none_in(options)
 
+    def test_cairo_pattern_full_in(self):
+        pattern = cairo.SolidPattern(1, 1, 1, 1)
+        Regress.test_cairo_pattern_full_in(pattern)
+
+        with pytest.raises(TypeError):
+            Regress.test_cairo_pattern_full_in(object())
+
+    def test_cairo_pattern_none_in(self):
+        pattern = cairo.SolidPattern(1, 1, 1, 1)
+        Regress.test_cairo_pattern_none_in(pattern)
+
+    def test_cairo_pattern_full_return(self):
+        pattern = Regress.test_cairo_pattern_full_return()
+        self.assertTrue(isinstance(pattern, cairo.Pattern))
+        self.assertTrue(isinstance(pattern, cairo.SolidPattern))
+
+    def test_cairo_pattern_none_return(self):
+        pattern = Regress.test_cairo_pattern_none_return()
+        self.assertTrue(isinstance(pattern, cairo.Pattern))
+        self.assertTrue(isinstance(pattern, cairo.SolidPattern))
+
     def test_cairo_region_full_in(self):
         region = cairo.Region()
         Regress.test_cairo_region_full_in(region)
