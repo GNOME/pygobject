@@ -34,12 +34,14 @@ class Test(unittest.TestCase):
     def test_gvalue_converters(self):
         surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, 10, 10)
         context = cairo.Context(surface)
+        matrix = cairo.Matrix()
         objects = {
             'CairoContext': context,
             'CairoSurface': surface,
             'CairoFontFace': context.get_font_face(),
             'CairoScaledFont': context.get_scaled_font(),
             'CairoPattern': context.get_source(),
+            'CairoMatrix': matrix,
         }
         for type_name, cairo_obj in objects.items():
             gtype = GObject.type_from_name(type_name)
