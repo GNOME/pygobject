@@ -583,6 +583,36 @@ cairo_matrix_release (GIBaseInfo *base_info,
     Py_RETURN_NONE;
 }
 
+static int
+cairo_matrix_to_gvalue (GValue *value, PyObject *obj)
+{
+    cairo_matrix_t *matrix;
+
+    if (!PyObject_TypeCheck (obj, &PycairoMatrix_Type)) {
+        PyErr_SetString (PyExc_TypeError, "Expected cairo.Matrix");
+        return -1;
+    }
+
+    matrix = &(( (PycairoMatrix*) obj)->matrix);
+    if (!matrix) {
+        return -1;
+    }
+
+    g_value_set_boxed (value, matrix);
+    return 0;
+}
+
+static PyObject *
+cairo_matrix_from_gvalue (const GValue *value)
+{
+    cairo_matrix_t *matrix = g_value_get_boxed(value);
+    if (!matrix) {
+        Py_RETURN_NONE;
+    }
+
+    return PycairoMatrix_FromMatrix (matrix);
+}
+
 static PyMethodDef _gi_cairo_functions[] = { {0,} };
 PYGLIB_MODULE_START(_gi_cairo, "_gi_cairo")
 {
@@ -643,6 +673,10 @@ PYGLIB_MODULE_START(_gi_cairo, "_gi_cairo")
                                   cairo_region_to_arg,
                                   cairo_region_from_arg,
                                   cairo_region_release);
+
+    pyg_register_gtype_custom (CAIRO_GOBJECT_TYPE_MATRIX,
+                               cairo_matrix_from_gvalue,
+                               cairo_matrix_to_gvalue);
 
     pyg_register_gtype_custom (CAIRO_GOBJECT_TYPE_CONTEXT,
                                cairo_context_from_gvalue,
