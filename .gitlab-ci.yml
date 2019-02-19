@@ -99,16 +99,22 @@ python3.7:
     PYENV_VERSION: "3.7.2-debug"
   <<: *defaults
 
-pypy2:
+pypy2.7:
   allow_failure: true
   variables:
     PYENV_VERSION: "pypy2.7-7.0.0"
   <<: *defaults
 
-pypy3:
+pypy3.5:
   allow_failure: true
   variables:
     PYENV_VERSION: "pypy3.5-7.0.0"
+  <<: *defaults
+
+pypy3.6:
+  allow_failure: true
+  variables:
+    PYENV_VERSION: "pypy3.6-7.0.0"
   <<: *defaults
 
 xenial-i386-py2:

@@ -41,6 +41,7 @@ RUN curl -L https://raw.githubusercontent.com/pyenv/pyenv-installer/master/bin/p
 
 RUN pyenv install pypy2.7-7.0.0
 RUN pyenv install pypy3.5-7.0.0
+RUN pyenv install pypy3.6-7.0.0
 RUN pyenv install --debug 2.7.15
 RUN pyenv install 3.5.6
 RUN pyenv install 3.6.8
