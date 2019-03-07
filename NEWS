@@ -1,3 +1,11 @@
+3.31.4 - 2019-03-07
+-------------------
+
+* docs: document GObject.Object.weak_ref() :issue:`245`
+* cairo: Add cairo pattern foreign struct support :mr:`111` (:user:`Renato Florentino Garcia <renato_garcia>`)
+* cairo: Add cairo_matrix_t converter to GValue :mr:`112` (:user:`Renato Florentino Garcia <renato_garcia>`)
+
+
 3.31.3 - 2019-02-02
 -------------------
 
