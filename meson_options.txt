@@ -1,2 +1,3 @@
 option('python', type : 'string', value : 'python3')
 option('pycairo', type : 'boolean', value : true, description : 'build with pycairo integration')
+option('tests', type : 'boolean', value : true, description : 'build unit tests')
