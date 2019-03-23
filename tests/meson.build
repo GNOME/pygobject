@@ -58,6 +58,7 @@ gnome.generate_gir(
   symbol_prefix : 'gi_marshalling_tests',
   includes : ['Gio-2.0'],
   build_by_default : true,
+  extra_args: ['--quiet'],
 )
 
 regress_sources += ['regressextra.c']
@@ -89,7 +90,7 @@ gnome.generate_gir(
   includes : ['Gio-2.0', 'cairo-1.0'],
   build_by_default : true,
   dependencies : regress_deps,
-  extra_args: regress_c_args,
+  extra_args: regress_c_args + ['--quiet'],
 )
 
 helper_sources = [
