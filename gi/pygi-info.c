@@ -1824,7 +1824,6 @@ out:
 
 static gint
 _pygi_g_registered_type_info_check_object (GIRegisteredTypeInfo *info,
-                                           gboolean              is_instance,
                                            PyObject             *object)
 {
     gint retval;
@@ -1854,24 +1853,10 @@ _pygi_g_registered_type_info_check_object (GIRegisteredTypeInfo *info,
 
     g_assert (PyType_Check (py_type));
 
-    if (is_instance) {
-        retval = PyObject_IsInstance (object, py_type);
-        if (!retval) {
-            type_name_expected = _pygi_g_base_info_get_fullname (
-                                     (GIBaseInfo *) info);
-        }
-    } else {
-        if (!PyObject_Type (py_type)) {
-            type_name_expected = "type";
-            retval = 0;
-        } else if (!PyType_IsSubtype ( (PyTypeObject *) object,
-                                       (PyTypeObject *) py_type)) {
-            type_name_expected = _pygi_g_base_info_get_fullname (
-                                     (GIBaseInfo *) info);
-            retval = 0;
-        } else {
-            retval = 1;
-        }
+    retval = PyObject_IsInstance (object, py_type);
+    if (!retval) {
+        type_name_expected = _pygi_g_base_info_get_fullname (
+                                 (GIBaseInfo *) info);
     }
 
     Py_DECREF (py_type);
@@ -1920,7 +1905,7 @@ _wrap_g_field_info_get_value (PyGIBaseInfo *self,
     g_assert (container_info != NULL);
 
     /* Check the instance. */
-    if (!_pygi_g_registered_type_info_check_object ( (GIRegisteredTypeInfo *) container_info, TRUE, instance)) {
+    if (!_pygi_g_registered_type_info_check_object ( (GIRegisteredTypeInfo *) container_info, instance)) {
         _PyGI_ERROR_PREFIX ("argument 1: ");
         return NULL;
     }
@@ -2028,7 +2013,7 @@ _wrap_g_field_info_set_value (PyGIBaseInfo *self,
     g_assert (container_info != NULL);
 
     /* Check the instance. */
-    if (!_pygi_g_registered_type_info_check_object ( (GIRegisteredTypeInfo *) container_info, TRUE, instance)) {
+    if (!_pygi_g_registered_type_info_check_object ( (GIRegisteredTypeInfo *) container_info, instance)) {
         _PyGI_ERROR_PREFIX ("argument 1: ");
         return NULL;
     }
