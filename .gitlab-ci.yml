@@ -1,4 +1,4 @@
-image: registry.gitlab.gnome.org/gnome/pygobject/main:v10
+image: registry.gitlab.gnome.org/gnome/pygobject/main:v11
 
 stages:
   - build_and_test
@@ -81,12 +81,12 @@ python3-mingw64:
 
 python2.7:
   variables:
-    PYENV_VERSION: "2.7.15-debug"
+    PYENV_VERSION: "2.7.16-debug"
   <<: *defaults
 
 python3.5:
   variables:
-    PYENV_VERSION: "3.5.6"
+    PYENV_VERSION: "3.5.7"
   <<: *defaults
 
 python3.6:
@@ -96,25 +96,19 @@ python3.6:
 
 python3.7:
   variables:
-    PYENV_VERSION: "3.7.2-debug"
+    PYENV_VERSION: "3.7.3-debug"
   <<: *defaults
 
 pypy2.7:
   allow_failure: true
   variables:
-    PYENV_VERSION: "pypy2.7-7.0.0"
-  <<: *defaults
-
-pypy3.5:
-  allow_failure: true
-  variables:
-    PYENV_VERSION: "pypy3.5-7.0.0"
+    PYENV_VERSION: "pypy2.7-7.1.0"
   <<: *defaults
 
 pypy3.6:
   allow_failure: true
   variables:
-    PYENV_VERSION: "pypy3.6-7.0.0"
+    PYENV_VERSION: "pypy3.6-7.1.0"
   <<: *defaults
 
 xenial-i386-py2:
@@ -128,7 +122,7 @@ xenial-i386-py2:
 
 gtk4:
   stage: build_and_test
-  image: registry.gitlab.gnome.org/gnome/pygobject/gtk4:v3
+  image: registry.gitlab.gnome.org/gnome/pygobject/gtk4:v4
   artifacts:
     paths:
       - coverage/
