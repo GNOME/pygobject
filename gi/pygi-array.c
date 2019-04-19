@@ -766,7 +766,7 @@ _pygi_marshal_cleanup_to_py_array (PyGIInvokeState *state,
             return;
 
         free_array = TRUE;
-        free_array_full = FALSE;
+        free_array_full = arg_cache->transfer != GI_TRANSFER_NOTHING;
     } else if (array_cache->array_type == GI_ARRAY_TYPE_PTR_ARRAY) {
         ptr_array_ = (GPtrArray *) data;
     } else {
