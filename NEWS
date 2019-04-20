@@ -1,3 +1,13 @@
+3.32.1 - 2019-04-20
+-------------------
+
+* tests/gimarshallingtestsextra.c/h: relicense to LGPLv2.1+ :issue:`320`
+* meson: add ``tests`` option for disabling tests :mr:`113` (:user:`Adam Duskett <aduskett>`)
+* meson: tests: pass ``--quiet`` to g-ir-scanner :mr:`114` (:user:`Tim-Philipp Müller <tpm>`)
+* Fix a crash when marshalling a GError to Python fails :mr:`115`
+* Fix leak of transfer-full/container C arrays :mr:`117` (:user:`Tomasz Miąsko <tmiasko>`)
+
+
 3.32.0 - 2019-03-10
 -------------------
 
