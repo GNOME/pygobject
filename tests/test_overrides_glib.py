@@ -121,6 +121,14 @@ def test_iochannel_win32():
         os.remove(fn)
 
 
+def test_datetime_compare():
+    dt100 = GLib.DateTime.new_from_unix_utc(100)
+    dt1000 = GLib.DateTime.new_from_unix_utc(1000)
+    assert GLib.DateTime.compare(dt100, dt1000) == -1
+    assert GLib.DateTime.compare(dt1000, dt100) == 1
+    assert GLib.DateTime.compare(dt100, dt100) == 0
+
+
 class TestGVariant(unittest.TestCase):
     def test_create_simple(self):
         variant = GLib.Variant('i', 42)
