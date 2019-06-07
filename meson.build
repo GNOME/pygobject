@@ -72,7 +72,6 @@ else
     '-Wall',
     '-Warray-bounds',
     '-Wcast-align',
-    '-Wdeclaration-after-statement',
     '-Wduplicated-branches',
     '-Wextra',
     '-Wformat=2',
@@ -103,6 +102,12 @@ else
     '-Wunused-but-set-variable',
     '-Wwrite-strings',
   ]
+
+  if python.language_version().split('.')[0] == '2'
+    main_c_args += [
+        '-Wdeclaration-after-statement',
+    ]
+  endif
 
   main_c_args += [
     '-Wno-incompatible-pointer-types-discards-qualifiers',

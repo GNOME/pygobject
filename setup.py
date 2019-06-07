@@ -937,7 +937,6 @@ def add_ext_compiler_flags(ext, compiler, _cache={}):
                 "-Wall",
                 "-Warray-bounds",
                 "-Wcast-align",
-                "-Wdeclaration-after-statement",
                 "-Wduplicated-branches",
                 "-Wextra",
                 "-Wformat=2",
@@ -968,6 +967,11 @@ def add_ext_compiler_flags(ext, compiler, _cache={}):
                 "-Wunused-but-set-variable",
                 "-Wwrite-strings",
             ]
+
+            if sys.version_info[0] == 2:
+                args += [
+                    "-Wdeclaration-after-statement",
+                ]
 
             args += [
                 "-Wno-incompatible-pointer-types-discards-qualifiers",
