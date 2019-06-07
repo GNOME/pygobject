@@ -98,6 +98,7 @@ else
     '-Wsign-compare',
     '-Wstrict-aliasing',
     '-Wstrict-prototypes',
+    '-Wswitch-default',
     '-Wundef',
     '-Wunused-but-set-variable',
     '-Wwrite-strings',
@@ -117,12 +118,6 @@ else
     '-fno-strict-aliasing',
     '-fvisibility=hidden',
   ]
-
-  if not ['3.3', '3.4'].contains(python.language_version())
-    main_c_args += [
-      '-Wswitch-default',
-    ]
-  endif
 
   main_c_args = cc.get_supported_arguments(main_c_args)
 endif
