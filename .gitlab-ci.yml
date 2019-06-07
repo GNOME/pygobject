@@ -99,6 +99,11 @@ python3.7:
     PYENV_VERSION: "3.7.3-debug"
   <<: *defaults
 
+python3.8:
+  variables:
+    PYENV_VERSION: "3.8-dev-debug"
+  <<: *defaults
+
 pypy2.7:
   allow_failure: true
   variables:
