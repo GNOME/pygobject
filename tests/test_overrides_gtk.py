@@ -6,10 +6,10 @@ from __future__ import absolute_import
 
 import contextlib
 import unittest
-import time
 import sys
 import gc
 import warnings
+import timeit
 
 import pytest
 
@@ -2260,12 +2260,12 @@ class TestTreeModel(unittest.TestCase):
         model = Gtk.ListStore(int, str)
 
         iterations = 2000
-        start = time.clock()
+        start = timeit.default_timer()
         i = iterations
         while i > 0:
             model.append([1, 'hello'])
             i -= 1
-        end = time.clock()
+        end = timeit.default_timer()
         sys.stderr.write('[%.0f µs/append] ' % ((end - start) * 1000000 / iterations))
 
     def test_filter_new_default(self):
