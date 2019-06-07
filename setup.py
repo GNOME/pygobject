@@ -1001,15 +1001,11 @@ def add_ext_compiler_flags(ext, compiler, _cache={}):
                 "-Wsign-compare",
                 "-Wstrict-aliasing",
                 "-Wstrict-prototypes",
+                "-Wswitch-default",
                 "-Wundef",
                 "-Wunused-but-set-variable",
                 "-Wwrite-strings",
             ]
-
-            if sys.version_info[:2] != (3, 4):
-                args += [
-                    "-Wswitch-default",
-                ]
 
             args += [
                 "-Wno-incompatible-pointer-types-discards-qualifiers",
