@@ -1272,6 +1272,8 @@ def main():
             "install_pkgconfig": install_pkgconfig,
         },
         install_requires=install_requires,
+        python_requires=(
+            '>=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, <4'),
         data_files=[
             ('include/pygobject-3.0', ['gi/pygobject.h']),
         ],
