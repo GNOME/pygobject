@@ -1,3 +1,12 @@
+3.30.5 - 2019-06-16
+-------------------
+
+* tests/gimarshallingtestsextra.c/h: relicense to LGPLv2.1+ :issue:`320`
+* Fix a crash when marshalling a GError to Python fails :mr:`115`
+* Fix leak of transfer-full/container C arrays :mr:`117` (:user:`Tomasz Miąsko <tmiasko>`)
+* Python 3.8b1 compatibility fixes
+
+
 3.32.1 - 2019-04-20
 -------------------
 
