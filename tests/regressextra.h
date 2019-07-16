@@ -1,6 +1,8 @@
 #ifndef REGRESS_EXTRA_H
 #define REGRESS_EXTRA_H
 
+#include <glib-object.h>
+
 typedef struct _RegressTestBoxedC RegressTestBoxedC;
 typedef struct _RegressTestBoxedCWrapper RegressTestBoxedCWrapper;
 
@@ -61,5 +63,18 @@ _GI_TEST_EXTERN
 void regress_test_cairo_matrix_out_caller_allocates (cairo_matrix_t *matrix);
 
 #endif
+
+/* RegressTestAction */
+
+typedef struct {
+  GInitiallyUnowned parent;
+} RegressTestAction;
+
+typedef struct {
+  GInitiallyUnownedClass parent_class;
+} RegressTestActionClass;
+
+_GI_TEST_EXTERN
+GType regress_test_action_get_type (void);
 
 #endif /* REGRESS_EXTRA_H */
