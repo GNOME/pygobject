@@ -336,3 +336,43 @@ regress_test_cairo_matrix_out_caller_allocates (cairo_matrix_t *matrix)
 }
 
 #endif
+
+G_DEFINE_TYPE (RegressTestAction, regress_test_action, G_TYPE_INITIALLY_UNOWNED)
+
+enum
+{
+    SIGNAL_0,
+    ACTION_SIGNAL,
+    LAST_SIGNAL
+};
+
+static guint regress_test_action_signals[LAST_SIGNAL] = { 0 };
+
+static RegressTestAction *
+regress_test_action_do_action (RegressTestAction *self)
+{
+    RegressTestAction *ret = g_object_new (regress_test_action_get_type (), NULL);
+
+    return ret;
+}
+
+static void
+regress_test_action_init (RegressTestAction *self)
+{
+}
+
+static void regress_test_action_class_init (RegressTestActionClass *klass)
+{
+    /**
+     * RegressTestAction::action:
+     *
+     * An action signal.
+     *
+     * Returns: (transfer full): another #RegressTestAction
+     */
+    regress_test_action_signals[ACTION_SIGNAL] =
+        g_signal_new_class_handler ("action",
+        G_TYPE_FROM_CLASS (klass), G_SIGNAL_RUN_LAST | G_SIGNAL_ACTION,
+        G_CALLBACK (regress_test_action_do_action), NULL, NULL,
+        NULL, regress_test_action_get_type (), 0);
+}
