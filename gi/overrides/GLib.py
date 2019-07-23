@@ -236,19 +236,21 @@ class Variant(GLib.Variant):
             'g': self.get_string,  # signature
         }
 
+        type_string = self.get_type_string()
+
         # simple values
-        la = LEAF_ACCESSORS.get(self.get_type_string())
+        la = LEAF_ACCESSORS.get(type_string)
         if la:
             return la()
 
         # tuple
-        if self.get_type_string().startswith('('):
+        if type_string.startswith('('):
             res = [self.get_child_value(i).unpack()
                    for i in range(self.n_children())]
             return tuple(res)
 
         # dictionary
-        if self.get_type_string().startswith('a{'):
+        if type_string.startswith('a{'):
             res = {}
             for i in range(self.n_children()):
                 v = self.get_child_value(i)
@@ -256,21 +258,21 @@ class Variant(GLib.Variant):
             return res
 
         # array
-        if self.get_type_string().startswith('a'):
+        if type_string.startswith('a'):
             return [self.get_child_value(i).unpack()
                     for i in range(self.n_children())]
 
         # variant (just unbox transparently)
-        if self.get_type_string().startswith('v'):
+        if type_string.startswith('v'):
             return self.get_variant().unpack()
 
         # maybe
-        if self.get_type_string().startswith('m'):
+        if type_string.startswith('m'):
             if not self.n_children():
                 return None
             return self.get_child_value(0).unpack()
 
-        raise NotImplementedError('unsupported GVariant type ' + self.get_type_string())
+        raise NotImplementedError('unsupported GVariant type ' + type_string)
 
     @classmethod
     def split_signature(klass, signature):
