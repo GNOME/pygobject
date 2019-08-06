@@ -154,12 +154,14 @@ struct _PyGObject_Functions {
     PyObject *(* paramspec_new)(GParamSpec *spec);
     GParamSpec *(*paramspec_get)(PyObject *tuple);
     int (*pyobj_to_unichar_conv)(PyObject *pyobj, void* ptr);
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
     gboolean (*parse_constructor_args)(GType        obj_type,
                                        char       **arg_names,
                                        char       **prop_names,
                                        GParameter  *params,
                                        guint       *nparams,
                                        PyObject   **py_args);
+G_GNUC_END_IGNORE_DEPRECATIONS
     PyObject *(* param_gvalue_as_pyobject) (const GValue* gvalue, 
                                             gboolean copy_boxed,
 					    const GParamSpec* pspec);
