@@ -1,2 +1,10 @@
 [build-system]
-requires = ["setuptools", "wheel", "pycairo"]
+requires = ["mesonpep517", "ninja", "pytest"]
+build-backend = "mesonpep517.buildapi"
+
+[tool.mesonpep517]
+build-backend = "mesonpep517.buildapi"
+
+[tool.mesonpep517.metadata]
+pkg-info-file = "PKG-INFO.in"
+meson-python-option-name = "python"
