@@ -1243,6 +1243,11 @@ class TestIntrospectedSignals(unittest.TestCase):
         # Boxed equality checks pointers by default.
         self.assertNotEqual(struct, held_struct)
 
+    def test_action(self):
+        obj = Regress.TestAction()
+        other_obj = obj.emit('action')
+        self.assertEqual(other_obj.__grefcount__, 1)
+
 
 class TestIntrospectedSignalsIssue158(unittest.TestCase):
     """

@@ -1935,8 +1935,15 @@ pygobject_emit(PyGObject *self, PyObject *args)
     
     g_free(params);
     if ((query.return_type & ~G_SIGNAL_TYPE_STATIC_SCOPE) != G_TYPE_NONE) {
+      gboolean was_floating = FALSE;
+
+      if (G_VALUE_HOLDS_OBJECT (&ret)) {
+        GObject *obj = g_value_get_object (&ret);
+        was_floating = g_object_is_floating (obj);
+      }
 	py_ret = pyg_value_as_pyobject(&ret, TRUE);
-	g_value_unset(&ret);
+      if (!was_floating)
+	      g_value_unset(&ret);
     } else {
 	Py_INCREF(Py_None);
 	py_ret = Py_None;
