@@ -2521,18 +2521,8 @@ PYGLIB_MODULE_START(_gi, "_gi")
     if (PyGIWarning == NULL)
         return PYGLIB_MODULE_ERROR_RETURN;
 
-    /* Use RuntimeWarning as the base class of PyGIDeprecationWarning
-     * for unstable (odd minor version) and use DeprecationWarning for
-     * stable (even minor version). This is so PyGObject deprecations
-     * behave the same as regular Python deprecations in stable releases.
-     */
-#if PYGOBJECT_MINOR_VERSION % 2
-    PyGIDeprecationWarning = PyErr_NewException("gi.PyGIDeprecationWarning",
-                                                PyExc_RuntimeWarning, NULL);
-#else
     PyGIDeprecationWarning = PyErr_NewException("gi.PyGIDeprecationWarning",
                                                 PyExc_DeprecationWarning, NULL);
-#endif
 
     /* Place holder object used to fill in "from Python" argument lists
      * for values not supplied by the caller but support a GI default.
