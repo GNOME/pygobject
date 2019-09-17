@@ -878,3 +878,21 @@ deprecated_attr("GLib", "glib_version",
 pyglib_version = version_info
 __all__.append('pyglib_version')
 deprecated_attr("GLib", "pyglib_version", "gi.version_info")
+
+
+@override
+class DateTime(GLib.DateTime):
+
+    @classmethod
+    def compare(cls, dt1, dt2):
+        difference = GLib.DateTime.difference(dt1, dt2)
+
+        if (difference < 0):
+            return -1
+        elif (difference > 0):
+            return 1
+        else:
+            return 0
+
+
+__all__.append('DateTime')
