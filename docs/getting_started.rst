@@ -91,7 +91,7 @@ Installing the system provided PyGObject:
 
 Installing from PyPI with pip:
   #) Open a terminal and enter your virtual environment
-  #) Execute ``sudo dnf install gcc gobject-introspection-devel cairo-devel pkg-config python3-devel gtk3``
+  #) Execute ``sudo dnf install gcc gobject-introspection-devel cairo-devel pkgconfig python3-devel gtk3``
      to install the build dependencies and GTK
   #) Execute ``pip3 install pycairo`` to build and install Pycairo
   #) Execute ``pip3 install PyGObject`` to build and install PyGObject
