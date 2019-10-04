@@ -41,7 +41,7 @@ export CCACHE_BASEDIR="$(pwd)"
 export CCACHE_DIR="${CCACHE_BASEDIR}/_ccache"
 
 # coverage setup
-export CFLAGS="-coverage -ftest-coverage -fprofile-arcs -Werror"
+export CFLAGS="-coverage -ftest-coverage -fprofile-arcs -Werror -DGLIB_DISABLE_DEPRECATION_WARNINGS"
 PYVER=$($PYTHON -c "import sys; sys.stdout.write(''.join(map(str, sys.version_info[:3])))")
 COV_DIR="$(pwd)/coverage"
 COV_KEY="${MSYSTEM}.${PYVER}"
