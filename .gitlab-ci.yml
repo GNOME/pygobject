@@ -51,20 +51,6 @@ pages:
   only:
     - master
 
-python2-mingw32:
-  variables:
-    PYTHON: "python2"
-    MSYSTEM: "MINGW32"
-    CHERE_INVOKING: "yes"
-  <<: *mingw-defaults
-
-python2-mingw64:
-  variables:
-    PYTHON: "python2"
-    MSYSTEM: "MINGW64"
-    CHERE_INVOKING: "yes"
-  <<: *mingw-defaults
-
 python3-mingw32:
   variables:
     PYTHON: "python3"

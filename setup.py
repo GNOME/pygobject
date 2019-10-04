@@ -1111,6 +1111,9 @@ class build_ext(du_build_ext):
             add_ext_compiler_flags(gi_cairo_ext, compiler)
 
     def run(self):
+        if os.name == "nt" and sys.version_info[0] == 2:
+            raise SystemExit("Python 2 on Windows no longer supported since 3.35. Use Python 3 instead.")
+
         self._write_config_h()
         self._setup_extensions()
         du_build_ext.run(self)
