@@ -460,6 +460,8 @@ pyg_param_spec_from_object (PyObject *tuple)
     return pspec;
 }
 
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+
 /**
  * pyg_parse_constructor_args: helper function for PyGObject constructors
  * @obj_type: GType of the GObject, for parameter introspection
@@ -513,6 +515,8 @@ pyg_parse_constructor_args(GType        obj_type,
     *nparams = param_i;
     return TRUE;
 }
+
+G_GNUC_END_IGNORE_DEPRECATIONS
 
 /* Only for backwards compatibility */
 static int

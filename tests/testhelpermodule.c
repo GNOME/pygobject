@@ -513,6 +513,8 @@ _wrap_test_state_ensure_release(PyObject *self, PyObject *args)
     Py_RETURN_NONE;
 }
 
+#define PYGI_TYPE_VALUE_ARRAY (g_value_array_get_type())
+
 static PyObject *
 _wrap_test_value_array(PyObject *self, PyObject *args)
 {
@@ -523,7 +525,7 @@ _wrap_test_value_array(PyObject *self, PyObject *args)
     return NULL;
 
   G_GNUC_BEGIN_IGNORE_DEPRECATIONS
-  g_value_init(value, G_TYPE_VALUE_ARRAY);
+  g_value_init(value, PYGI_TYPE_VALUE_ARRAY);
   G_GNUC_END_IGNORE_DEPRECATIONS
 
   if (pyg_value_from_pyobject(value, obj)) {
@@ -550,9 +552,9 @@ _wrap_value_array_get_nth_type(PyObject *self, PyObject *args)
   G_GNUC_BEGIN_IGNORE_DEPRECATIONS
 
   if (pyg_boxed_check(obj, G_TYPE_VALUE) &&
-      G_VALUE_HOLDS(pyg_boxed_get(obj, GValue), G_TYPE_VALUE_ARRAY)) {
+      G_VALUE_HOLDS(pyg_boxed_get(obj, GValue), PYGI_TYPE_VALUE_ARRAY)) {
     arr = g_value_get_boxed(pyg_boxed_get(obj, GValue));
-  } else if (pyg_boxed_check(obj, G_TYPE_VALUE_ARRAY)) {
+  } else if (pyg_boxed_check(obj, PYGI_TYPE_VALUE_ARRAY)) {
     arr = pyg_boxed_get(obj, GValueArray);
   } else {
     PyErr_SetString(PyExc_TypeError, "First argument is not GValueArray");
@@ -655,6 +657,7 @@ _wrap_test_floating_and_sunk_get_instance_list (PyObject *self)
     return py_list;
 }
 
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
 
 static PyObject *
 _wrap_test_parse_constructor_args (PyObject *self, PyObject *args)
@@ -675,6 +678,8 @@ _wrap_test_parse_constructor_args (PyObject *self, PyObject *args)
 
     return PYGLIB_PyLong_FromLong (nparams);
 }
+
+G_GNUC_END_IGNORE_DEPRECATIONS
 
 static PyObject *
 _wrap_test_to_unichar_conv (PyObject * self, PyObject *args)

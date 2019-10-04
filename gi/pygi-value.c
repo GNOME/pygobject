@@ -30,6 +30,11 @@
 #include "pygparamspec.h"
 
 
+/* glib 2.62 has started to print warnings for these which can't be disabled selectively, so just copy them here */
+#define PYGI_TYPE_VALUE_ARRAY (g_value_array_get_type())
+#define PYGI_IS_PARAM_SPEC_VALUE_ARRAY(pspec) (G_TYPE_CHECK_INSTANCE_TYPE ((pspec), PYGI_TYPE_VALUE_ARRAY))
+#define PYGI_PARAM_SPEC_VALUE_ARRAY(pspec)    (G_TYPE_CHECK_INSTANCE_CAST ((pspec), g_param_spec_types[18], GParamSpecValueArray))
+
 GIArgument
 _pygi_argument_from_g_value(const GValue *value,
                             GITypeInfo *type_info)
@@ -502,7 +507,7 @@ pyg_value_from_pyobject_with_error(GValue *value, PyObject *obj)
         gboolean holds_value_array;
 
         G_GNUC_BEGIN_IGNORE_DEPRECATIONS
-        holds_value_array = G_VALUE_HOLDS(value, G_TYPE_VALUE_ARRAY);
+        holds_value_array = G_VALUE_HOLDS(value, PYGI_TYPE_VALUE_ARRAY);
         G_GNUC_END_IGNORE_DEPRECATIONS
 
         if (obj == Py_None)
@@ -718,7 +723,7 @@ value_to_py_structured_type (const GValue *value, GType fundamental, gboolean co
         gboolean holds_value_array;
 
         G_GNUC_BEGIN_IGNORE_DEPRECATIONS
-        holds_value_array = G_VALUE_HOLDS(value, G_TYPE_VALUE_ARRAY);
+        holds_value_array = G_VALUE_HOLDS(value, PYGI_TYPE_VALUE_ARRAY);
         G_GNUC_END_IGNORE_DEPRECATIONS
 
         if (G_VALUE_HOLDS(value, PY_TYPE_OBJECT)) {
@@ -826,6 +831,7 @@ pyg_value_as_pyobject (const GValue *value, gboolean copy_boxed)
 }
 
 
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
 int
 pyg_param_gvalue_from_pyobject(GValue* value,
                                PyObject* py_obj,
@@ -841,13 +847,15 @@ pyg_param_gvalue_from_pyobject(GValue* value,
         g_value_set_uint(value, u);
 	return 0;
     }
-    else if (G_IS_PARAM_SPEC_VALUE_ARRAY(pspec))
+    else if (PYGI_IS_PARAM_SPEC_VALUE_ARRAY(pspec))
 	return pyg_value_array_from_pyobject(value, py_obj,
-					     G_PARAM_SPEC_VALUE_ARRAY(pspec));
+					     PYGI_PARAM_SPEC_VALUE_ARRAY(pspec));
     else {
 	return pyg_value_from_pyobject(value, py_obj);
     }
 }
+
+G_GNUC_END_IGNORE_DEPRECATIONS
 
 PyObject*
 pyg_param_gvalue_as_pyobject(const GValue* gvalue,
