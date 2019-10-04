@@ -1162,7 +1162,7 @@ add_property_docs(GType gtype, GString *string)
     GParamSpec **props;
     guint n_props = 0, i;
     gboolean has_prop = FALSE;
-    G_CONST_RETURN gchar *blurb=NULL;
+    const gchar *blurb=NULL;
 
     class = g_type_class_ref(gtype);
     props = g_object_class_list_properties(class, &n_props);
