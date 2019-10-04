@@ -1256,7 +1256,7 @@ pygobject_free(PyObject *op)
     PyObject_GC_Del(op);
 }
 
-gboolean
+static gboolean
 pygobject_prepare_construct_properties(GObjectClass *class, PyObject *kwargs,
                                        guint *n_params, GParameter **params)
 {
