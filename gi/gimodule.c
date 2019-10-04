@@ -1001,19 +1001,53 @@ pygobject_init_wrapper_get(void)
     return (PyObject *) g_private_get(&pygobject_construction_wrapper);
 }
 
+/**
+ * Like g_object_new_with_properties() but also works with older glib versions.
+ */
+GObject *
+pygobject_object_new_with_properties(GType object_type,
+                                     guint n_properties,
+                                     const char *names[],
+                                     const GValue values[])
+{
+    GObject *obj;
+
+#if GLIB_CHECK_VERSION(2, 54, 0)
+    obj = g_object_new_with_properties(object_type, n_properties, names, values);
+#else
+    {
+        GParameter *parameters;
+        uint i;
+
+        parameters = g_new(GParameter, n_properties);
+        for (i = 0; i < n_properties; i++) {
+            parameters[i].name = names[i];
+            parameters[i].value = values[i];
+        }
+        obj = g_object_newv(object_type, n_properties, parameters);
+        g_free(parameters);
+    }
+#endif
+
+    return obj;
+}
+
 int
-pygobject_constructv(PyGObject  *self,
-                     guint       n_parameters,
-                     GParameter *parameters)
+pygobject_constructv (PyGObject   *self,
+                      guint n_properties,
+                      const char *names[],
+                      const GValue values[])
 {
     GObject *obj;
 
     g_assert (self->obj == NULL);
     pygobject_init_wrapper_set((PyObject *) self);
-G_GNUC_BEGIN_IGNORE_DEPRECATIONS
-    obj = g_object_newv(pyg_type_from_object((PyObject *) self),
-                        n_parameters, parameters);
-G_GNUC_END_IGNORE_DEPRECATIONS
+
+    obj = pygobject_object_new_with_properties(pyg_type_from_object((PyObject *) self),
+                                               n_properties,
+                                               names,
+                                               values);
+
     if (g_object_is_floating (obj))
         self->private_flags.flags |= PYGOBJECT_GOBJECT_WAS_FLOATING;
     pygobject_sink (obj);
