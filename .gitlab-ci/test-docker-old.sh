@@ -2,8 +2,8 @@
 
 set -e
 
-python --version
-virtualenv --python=python _venv
+python3 --version
+python3 -m venv _venv
 source _venv/bin/activate
 
 # ccache setup

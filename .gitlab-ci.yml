@@ -104,7 +104,7 @@ pypy3.6:
 
 xenial-i386-py2:
   stage: build_and_test
-  image: registry.gitlab.gnome.org/gnome/pygobject/old:v2
+  image: registry.gitlab.gnome.org/gnome/pygobject/old:v3
   artifacts:
     paths:
       - coverage/

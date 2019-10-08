@@ -17,8 +17,7 @@ RUN apt-get update && apt-get install -y \
     libgtk-3-0 \
     libtool \
     locales \
-    python-dev \
-    python-virtualenv \
+    python3-dev \
     xauth \
     xvfb \
     && rm -rf /var/lib/apt/lists/*
