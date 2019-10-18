@@ -56,7 +56,7 @@ def realized(widget):
         toplevel = widget
     else:
         if Gtk._version == "4.0":
-            toplevel = widget.get_parent_surface()
+            toplevel = widget.get_parent()
         else:
             toplevel = widget.get_parent_window()
 
@@ -79,6 +79,7 @@ def realized(widget):
 
 
 @unittest.skipUnless(Gtk, 'Gtk not available')
+@unittest.skipIf(Gtk_version == "4.0", "not in gtk4")
 def test_freeze_child_notif():
 
     events = []
@@ -90,10 +91,7 @@ def test_freeze_child_notif():
     c = Gtk.Button()
     c.connect("child-notify", on_notify)
     c.freeze_child_notify()
-    if GTK4:
-        b.pack_start(c)
-    else:
-        b.pack_start(c, True, True, 0)
+    b.pack_start(c, True, True, 0)
     b.child_set_property(c, "pack-type", Gtk.PackType.END)
     b.child_set_property(c, "pack-type", Gtk.PackType.START)
     c.thaw_child_notify()
@@ -895,7 +893,10 @@ class TestSignals(unittest.TestCase):
             else:
                 win.size_allocate(rect)
             self.assertTrue(win._alloc_called)
-            self.assertIsInstance(win._alloc_value, Gdk.Rectangle)
+            if GTK4:
+                self.assertIsInstance(win._alloc_value, int)
+            else:
+                self.assertIsInstance(win._alloc_value, Gdk.Rectangle)
             self.assertTrue(win._alloc_error is None, win._alloc_error)
 
     @unittest.expectedFailure  # https://bugzilla.gnome.org/show_bug.cgi?id=735693
@@ -2699,11 +2700,12 @@ class TestContainer(unittest.TestCase):
         result = box.child_get_property(child, 'padding')
         self.assertEqual(result, 42)
 
+    @unittest.skipIf(Gtk_version == "4.0", "not in gtk4")
     def test_child_get_property_error(self):
         box = Gtk.Box()
         child = Gtk.Button()
         if Gtk_version == "4.0":
-            box.pack_start(child)
+            box.add(child)
         else:
             box.pack_start(child, expand=False, fill=True, padding=42)
         with self.assertRaises(ValueError):

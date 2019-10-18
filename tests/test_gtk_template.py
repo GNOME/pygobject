@@ -190,18 +190,17 @@ def test_main_example():
     assert w.goodbye_button.props.label == "Goodbye World"
 
     assert w.callback_hello == []
-    w._hello_button.clicked()
+    w._hello_button.emit("clicked")
     assert w.callback_hello == [(w,)]
     assert w.callback_hello_after == [(w,)]
 
     assert w.callback_goodbye == []
-    w.goodbye_button.clicked()
+    w.goodbye_button.emit("clicked")
     assert w.callback_goodbye == [(w.goodbye_button,)]
     assert w.callback_goodbye_after == [(w.goodbye_button,)]
 
 
 def test_duplicate_handler():
-
     type_name = new_gtype_name()
 
     xml = """\
@@ -209,7 +208,7 @@ def test_duplicate_handler():
   <template class="{0}" parent="GtkBox">
     <child>
       <object class="GtkButton" id="hello_button">
-        <signal name="clicked" handler="hello_button_clicked">
+        <signal name="clicked" handler="hello_button_clicked" />
       </object>
     </child>
   </template>
@@ -300,7 +299,6 @@ def test_missing_handler_callback():
 
 
 def test_handler_swapped_not_supported():
-
     type_name = new_gtype_name()
 
     xml = """\
@@ -332,7 +330,6 @@ def test_handler_swapped_not_supported():
 
 
 def test_handler_class_staticmethod():
-
     type_name = new_gtype_name()
 
     xml = """\
@@ -368,13 +365,13 @@ def test_handler_class_staticmethod():
             signal_args_static.append(args)
 
     foo = Foo()
-    foo.hello_button.clicked()
+    foo.hello_button.emit("clicked")
     assert signal_args_class == [(Foo, foo.hello_button)]
     assert signal_args_static == [(foo.hello_button,)]
 
 
+@pytest.mark.skipif(Gtk._version == "4.0", reason="errors out first with gtk4")
 def test_check_decorated_class():
-
     NonWidget = type("Foo", (object,), {})
     with pytest.raises(TypeError, match=".*on Widgets.*"):
         Gtk.Template.from_string("")(NonWidget)
