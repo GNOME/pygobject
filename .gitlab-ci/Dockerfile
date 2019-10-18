@@ -39,12 +39,12 @@ ENV PYTHON_CONFIGURE_OPTS="--enable-shared"
 
 RUN curl -L https://raw.githubusercontent.com/pyenv/pyenv-installer/master/bin/pyenv-installer | bash
 
-RUN pyenv install pypy2.7-7.1.0
-RUN pyenv install pypy3.6-7.1.0
+RUN pyenv install pypy2.7-7.2.0
+RUN pyenv install pypy3.6-7.2.0
 RUN pyenv install --debug 2.7.16
 RUN pyenv install 3.5.7
-RUN pyenv install 3.6.8
-RUN pyenv install --debug 3.7.3
-RUN pyenv install --debug 3.8-dev
+RUN pyenv install 3.6.9
+RUN pyenv install --debug 3.7.4
+RUN pyenv install --debug 3.8.0
 
 ENV PATH="/usr/lib/ccache:${PATH}"
