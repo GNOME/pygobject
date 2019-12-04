@@ -1087,9 +1087,18 @@ pygobject__g_instance_init(GTypeInstance   *instance,
           /* this looks like a python object created through
            * g_object_new -> we have no python wrapper, so create it
            * now */
-        wrapper = pygobject_new_full(object,
-                                     /*steal=*/ FALSE,
-                                     g_class);
+
+        if (g_object_is_floating (object)) {
+            g_object_ref (object);
+            wrapper = pygobject_new_full(object,
+                                         /*steal=*/ TRUE,
+                                         g_class);
+            g_object_force_floating (object);
+        } else {
+            wrapper = pygobject_new_full(object,
+                                         /*steal=*/ FALSE,
+                                         g_class);
+        }
 
         /* float the wrapper ref here because we are going to orphan it
          * so we don't destroy the wrapper. The next call to pygobject_new_full
