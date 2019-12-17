@@ -2,7 +2,7 @@
 
 set -e
 
-python -m pip install coverage
+python -m pip install "coverage<5"
 
 # Make the Windows paths match our current layout
 python ./.gitlab-ci/fixup-cov-paths.py coverage/.coverage* coverage/*.lcov
