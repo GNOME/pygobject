@@ -5,7 +5,8 @@ set -e
 python -m pip install coverage
 
 # Make the Windows paths match our current layout
-python ./.gitlab-ci/fixup-cov-paths.py coverage/.coverage* coverage/*.lcov
+python ./.gitlab-ci/fixup-lcov-paths.py coverage/*.lcov
+python ./.gitlab-ci/fixup-covpy-paths.py coverage/.coverage*
 
 # Remove external headers (except gi tests)
 for path in coverage/*.lcov; do
