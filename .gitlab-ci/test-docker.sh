@@ -22,7 +22,7 @@ mkdir -p "${CCACHE_DIR}"
 mkdir -p "${COV_DIR}"
 
 python -m pip install git+https://github.com/pygobject/pycairo.git
-python -m pip install flake8 pytest pytest-faulthandler "coverage<5"
+python -m pip install flake8 pytest pytest-faulthandler coverage
 
 export CFLAGS="-coverage -ftest-coverage -fprofile-arcs -Werror"
 
