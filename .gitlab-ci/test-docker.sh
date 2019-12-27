@@ -11,7 +11,8 @@ COV_DIR="${SOURCE_DIR}/coverage"
 export MALLOC_CHECK_=3
 export MALLOC_PERTURB_=$((${RANDOM} % 255 + 1))
 export G_SLICE="debug-blocks"
-export COVERAGE_FILE="${COV_DIR}/.coverage.${CI_JOB_NAME}"
+COV_KEY="${CI_JOB_NAME}"
+export COVERAGE_FILE="${COV_DIR}/.coverage.${COV_KEY}"
 export CCACHE_BASEDIR="$(pwd)"
 export CCACHE_DIR="${CCACHE_BASEDIR}/_ccache"
 
@@ -47,7 +48,7 @@ fi;
 
 # BUILD & TEST AGAIN USING SETUP.PY
 python setup.py build_tests
-xvfb-run -a python -m coverage run tests/runtests.py
+xvfb-run -a python -m coverage run --context "${COV_KEY}" tests/runtests.py
 
 # COLLECT GCOV COVERAGE
 lcov --rc lcov_branch_coverage=1 --directory . --capture --output-file \

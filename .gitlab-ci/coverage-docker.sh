@@ -15,7 +15,7 @@ for path in coverage/*.lcov; do
 done
 
 python -m coverage combine coverage
-python -m coverage html --ignore-errors -d coverage/report-python
+python -m coverage html --show-contexts --ignore-errors -d coverage/report-python
 genhtml --ignore-errors=source --rc lcov_branch_coverage=1 \
     coverage/*.lcov -o coverage/report-c
 
