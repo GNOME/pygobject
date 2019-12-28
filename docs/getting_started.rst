@@ -127,7 +127,7 @@ Installing from PyPI with pip:
 
 Installing the system provided PyGObject:
   #) Open a terminal
-  #) Execute ``sudo zypper install python3-gobject gtk3``
+  #) Execute ``sudo zypper install python3-gobject python3-gobject-Gdk typelib-1_0-Gtk-3_0 libgtk-3-0``
   #) Change the directory to where your ``hello.py`` script can be found
   #) Run ``python3 hello.py``
 
