@@ -12,7 +12,7 @@ mkdir -p "${CCACHE_DIR}"
 
 # test
 python -m pip install git+https://github.com/pygobject/pycairo.git
-python -m pip install pytest pytest-faulthandler "coverage<5"
+python -m pip install pytest pytest-faulthandler coverage
 g-ir-inspect Gtk --version=4.0 --print-typelibs
 export TEST_GTK_VERSION=4.0
 python setup.py build_tests
