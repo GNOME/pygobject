@@ -452,14 +452,14 @@ SizeGroup = override(SizeGroup)
 __all__.append('SizeGroup')
 
 
-class MenuItem(Gtk.MenuItem):
-    __init__ = deprecated_init(Gtk.MenuItem.__init__,
-                               arg_names=('label',),
-                               category=PyGTKDeprecationWarning)
+if Gtk._version in ("2.0", "3.0"):
+    class MenuItem(Gtk.MenuItem):
+        __init__ = deprecated_init(Gtk.MenuItem.__init__,
+                                   arg_names=('label',),
+                                   category=PyGTKDeprecationWarning)
 
-
-MenuItem = override(MenuItem)
-__all__.append('MenuItem')
+    MenuItem = override(MenuItem)
+    __all__.append('MenuItem')
 
 
 def _get_utf8_length(string):
@@ -1607,7 +1607,7 @@ class TreeModelFilter(Gtk.TreeModelFilter):
 TreeModelFilter = override(TreeModelFilter)
 __all__.append('TreeModelFilter')
 
-if Gtk._version != '2.0':
+if Gtk._version == '3.0':
     class Menu(Gtk.Menu):
         def popup(self, parent_menu_shell, parent_menu_item, func, data, button, activate_time):
             self.popup_for_device(None, parent_menu_shell, parent_menu_item, func, data, button, activate_time)
