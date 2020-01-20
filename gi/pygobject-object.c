@@ -1947,7 +1947,9 @@ pygobject_emit(PyGObject *self, PyObject *args)
 
       if (G_VALUE_HOLDS_OBJECT (&ret)) {
         GObject *obj = g_value_get_object (&ret);
-        was_floating = g_object_is_floating (obj);
+        if (obj != NULL && G_IS_OBJECT(obj)) {
+            was_floating = g_object_is_floating (obj);
+        }
       }
 	py_ret = pyg_value_as_pyobject(&ret, TRUE);
       if (!was_floating)

@@ -1247,6 +1247,8 @@ class TestIntrospectedSignals(unittest.TestCase):
         obj = Regress.TestAction()
         other_obj = obj.emit('action')
         self.assertEqual(other_obj.__grefcount__, 1)
+        other_obj2 = obj.emit('action2')
+        self.assertIsNone(other_obj2)
 
 
 class TestIntrospectedSignalsIssue158(unittest.TestCase):

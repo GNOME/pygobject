@@ -343,6 +343,7 @@ enum
 {
     SIGNAL_0,
     ACTION_SIGNAL,
+    ACTION2_SIGNAL,
     LAST_SIGNAL
 };
 
@@ -354,6 +355,12 @@ regress_test_action_do_action (RegressTestAction *self)
     RegressTestAction *ret = g_object_new (regress_test_action_get_type (), NULL);
 
     return ret;
+}
+
+static RegressTestAction *
+regress_test_action_do_action2 (RegressTestAction *self)
+{
+    return NULL;
 }
 
 static void
@@ -374,5 +381,18 @@ static void regress_test_action_class_init (RegressTestActionClass *klass)
         g_signal_new_class_handler ("action",
         G_TYPE_FROM_CLASS (klass), G_SIGNAL_RUN_LAST | G_SIGNAL_ACTION,
         G_CALLBACK (regress_test_action_do_action), NULL, NULL,
+        NULL, regress_test_action_get_type (), 0);
+
+    /**
+     * RegressTestAction::action2:
+     *
+     * Another action signal.
+     *
+     * Returns: (transfer full): another #RegressTestAction
+     */
+    regress_test_action_signals[ACTION2_SIGNAL] =
+        g_signal_new_class_handler ("action2",
+        G_TYPE_FROM_CLASS (klass), G_SIGNAL_RUN_LAST | G_SIGNAL_ACTION,
+        G_CALLBACK (regress_test_action_do_action2), NULL, NULL,
         NULL, regress_test_action_get_type (), 0);
 }
