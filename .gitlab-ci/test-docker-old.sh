@@ -15,7 +15,6 @@ mkdir -p "${COV_DIR}"
 mkdir -p "${CCACHE_DIR}"
 
 # test
-python -m pip install git+https://github.com/pygobject/pycairo.git
-python -m pip install pytest pytest-faulthandler coverage
+python -m pip install pycairo pytest pytest-faulthandler coverage
 python setup.py build_tests
 xvfb-run -a python -m coverage run tests/runtests.py
