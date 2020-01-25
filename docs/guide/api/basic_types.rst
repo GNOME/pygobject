@@ -40,9 +40,6 @@ Platform String Types
 * Unix + Python 2: :obj:`str`
 * Unix + Python 3: :obj:`str`
 
-On Python 3 there is currently no support for :obj:`bytes`, see `bug 746564
-<https://bugzilla.gnome.org/show_bug.cgi?id=746564>`__ for more details.
-
 
 Other Types
 -----------
