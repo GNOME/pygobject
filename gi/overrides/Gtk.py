@@ -834,6 +834,13 @@ class TreeModel(Gtk.TreeModel):
                 raise IndexError("could not find tree path '%s'" % key)
             return aiter
 
+    def sort_new_with_model(self):
+        super_object = super(TreeModel, self)
+        if hasattr(super_object, "sort_new_with_model"):
+            return super_object.sort_new_with_model()
+        else:
+            return TreeModelSort.new_with_model(self)
+
     def _coerce_path(self, path):
         if isinstance(path, Gtk.TreePath):
             return path
@@ -972,6 +979,11 @@ class TreeModelSort(Gtk.TreeModelSort):
     __init__ = deprecated_init(Gtk.TreeModelSort.__init__,
                                arg_names=('model',),
                                category=PyGTKDeprecationWarning)
+
+    if not hasattr(Gtk.TreeModelSort, "new_with_model"):
+        @classmethod
+        def new_with_model(self, child_model):
+            return TreeModel.sort_new_with_model(child_model)
 
 
 TreeModelSort = override(TreeModelSort)
