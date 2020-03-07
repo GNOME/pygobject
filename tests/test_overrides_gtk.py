@@ -1148,6 +1148,21 @@ class TestTreeModelRow(unittest.TestCase):
 @ignore_gi_deprecation_warnings
 @unittest.skipUnless(Gtk, 'Gtk not available')
 class TestTreeModel(unittest.TestCase):
+
+    def test_tree_model_sort_new_with_model_old(self):
+        # https://gitlab.gnome.org/GNOME/gtk/-/merge_requests/1134
+        model = Gtk.TreeStore(int)
+        sort_model = model.sort_new_with_model()
+        assert isinstance(sort_model, Gtk.TreeModelSort)
+        assert sort_model.get_model() == model
+
+    def test_tree_model_sort_new_with_model_new(self):
+        # https://gitlab.gnome.org/GNOME/gtk/-/merge_requests/1134
+        model = Gtk.TreeStore(int)
+        sort_model = Gtk.TreeModelSort.new_with_model(child_model=model)
+        assert isinstance(sort_model, Gtk.TreeModelSort)
+        assert sort_model.get_model() == model
+
     def test_tree_model_sort(self):
         self.assertEqual(Gtk.TreeModelSort, gi.overrides.Gtk.TreeModelSort)
         model = Gtk.TreeStore(int, bool)
