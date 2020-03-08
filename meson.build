@@ -1,5 +1,5 @@
 project('pygobject', 'c',
-  version : '3.35.1',
+  version : '3.36.0',
   meson_version : '>= 0.46.0',
   default_options : [ 'warning_level=1',
                       'buildtype=debugoptimized'])

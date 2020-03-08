@@ -1,3 +1,20 @@
+3.36.0 - 2020-03-08
+-------------------
+
+This will be the last release supporting Python 2.
+
+* pygobject-object: Avoid checking whether NULL is floating :mr:`135` (:user:`Alexandru Băluț <aleb>`)
+* Avoid various new glib deprecation warnings
+* Port to g_object_new_with_properties()
+* Drop Python 2 support on Windows
+* gtk overrides: Drop Menu, MenuItem for Gtk 4 (:user:`Marinus Schraal <mschraal>`)
+* Docs:
+
+  * Update openSUSE instructions (:user:`sharkwouter`)
+  * Add Gaphor to Who is Using PyGObject (:user:`Dan Yeaw <danyeaw>`)
+  * Remove reference to a fixed bug (:user:`Christian Stadelmann <genodeftest>`)
+
+
 3.34.0 - 2019-09-09
 -------------------
 
