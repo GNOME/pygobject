@@ -12,9 +12,9 @@
 <https://developer.gnome.org/glib/stable/>`__, `GIO
 <https://developer.gnome.org/gio/stable/>`__ and many more.
 
-It supports Linux, Windows and macOS and works with **Python 2.7+**, **Python
-3.5+**, **PyPy** and **PyPy3**. PyGObject, including this documentation, is
-licensed under the **LGPLv2.1+**.
+It supports Linux, Windows and macOS and works with **Python 3.5+** and
+**PyPy3**. PyGObject, including this documentation, is licensed under the
+**LGPLv2.1+**.
 
 
 ----

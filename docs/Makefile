@@ -7,10 +7,10 @@ images/%.svg: images/%.dia
 	dia $< --export=$@ --filter=dia-svg
 
 _build: Makefile *.rst devguide/*.rst guide/*/*.rst guide/*.rst conf.py images/*.png $(DIA_SVGS) ../README.rst ../NEWS
-	sphinx-build -b html . _build
+	python3 -m sphinx -b html . _build
 
 linkcheck:
-	sphinx-build -b linkcheck -n . _build
+	python3 -m sphinx -b linkcheck -n . _build
 
 clean:
 	rm -R _build

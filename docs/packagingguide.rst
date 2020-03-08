@@ -23,7 +23,7 @@ Runtime dependencies:
     * glib
     * libgirepository (gobject-introspection)
     * libffi
-    * Python 2 or 3
+    * Python 3
 
     The overrides directory contains various files which includes various
     Python imports mentioning gtk, gdk etc. They are only used when the

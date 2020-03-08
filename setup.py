@@ -28,11 +28,7 @@ import posixpath
 
 from email import parser
 
-try:
-    from setuptools import setup
-except ImportError:
-    from distutils.core import setup
-
+from setuptools import setup
 from distutils.core import Extension, Distribution, Command
 from distutils.errors import DistutilsSetupError, DistutilsOptionError
 from distutils.ccompiler import new_compiler
@@ -63,10 +59,6 @@ def get_command_class(name):
     return Distribution({}).get_command_class(name)
 
 
-def get_pycairo_pkg_config_name():
-    return "py3cairo" if sys.version_info[0] == 3 else "pycairo"
-
-
 def get_version_requirement(pkg_config_name):
     """Given a pkg-config module name gets the minimum version required"""
 
@@ -74,7 +66,7 @@ def get_version_requirement(pkg_config_name):
         "gobject-introspection-1.0": GI_VERSION_REQUIRED,
         "glib-2.0": GLIB_VERSION_REQUIRED,
         "gio-2.0": GLIB_VERSION_REQUIRED,
-        get_pycairo_pkg_config_name(): PYCAIRO_VERSION_REQUIRED,
+        "py3cairo": PYCAIRO_VERSION_REQUIRED,
         "libffi": LIBFFI_VERSION_REQUIRED,
         "cairo": "0",
         "cairo-gobject": "0",
@@ -837,7 +829,7 @@ def get_pycairo_include_dir():
     Raises if pycairo isn't found or it's too old.
     """
 
-    pkg_config_name = get_pycairo_pkg_config_name()
+    pkg_config_name = "py3cairo"
     min_version = get_version_requirement(pkg_config_name)
     min_version_info = tuple(int(p) for p in min_version.split("."))
 
@@ -1111,9 +1103,6 @@ class build_ext(du_build_ext):
             add_ext_compiler_flags(gi_cairo_ext, compiler)
 
     def run(self):
-        if os.name == "nt" and sys.version_info[0] == 2:
-            raise SystemExit("Python 2 on Windows no longer supported since 3.35. Use Python 3 instead.")
-
         self._write_config_h()
         self._setup_extensions()
         du_build_ext.run(self)
@@ -1197,6 +1186,9 @@ class install(du_install):
 
 
 def main():
+    if sys.version_info[0] < 3:
+        raise Exception("Python 2 no longer supported")
+
     script_dir = get_script_dir()
     pkginfo = parse_pkg_info(script_dir)
     gi_dir = os.path.join(script_dir, "gi")
@@ -1235,8 +1227,7 @@ def main():
         )
         ext_modules.append(gi_cairo_ext)
         install_requires.append(
-            "pycairo>=%s" % get_version_requirement(
-                get_pycairo_pkg_config_name()))
+            "pycairo>=%s" % get_version_requirement("py3cairo"))
 
     version = pkginfo["Version"]
     if is_dev_version():
@@ -1275,8 +1266,7 @@ def main():
             "install_pkgconfig": install_pkgconfig,
         },
         install_requires=install_requires,
-        python_requires=(
-            '>=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, <4'),
+        python_requires=pkginfo["Requires-Python"],
         data_files=[
             ('include/pygobject-3.0', ['gi/pygobject.h']),
         ],

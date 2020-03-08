@@ -1,4 +1,4 @@
-Metadata-Version: 1.0
+Metadata-Version: 1.2
 Name: PyGObject
 Version: @VERSION@
 Summary: Python bindings for GObject Introspection
@@ -18,3 +18,4 @@ Classifier: Operating System :: Microsoft :: Windows
 Classifier: Programming Language :: C
 Classifier: Programming Language :: Python
 Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Requires-Python: >=3.5, <4

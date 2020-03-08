@@ -65,11 +65,6 @@ python3-mingw64:
     CHERE_INVOKING: "yes"
   <<: *mingw-defaults
 
-python2.7:
-  variables:
-    PYENV_VERSION: "2.7.17-debug"
-  <<: *defaults
-
 python3.5:
   variables:
     PYENV_VERSION: "3.5.9"
@@ -88,12 +83,6 @@ python3.7:
 python3.8:
   variables:
     PYENV_VERSION: "3.8.1-debug"
-  <<: *defaults
-
-pypy2.7:
-  allow_failure: true
-  variables:
-    PYENV_VERSION: "pypy2.7-7.3.0"
   <<: *defaults
 
 pypy3.6:

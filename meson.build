@@ -15,8 +15,8 @@ platform_version = '@0@.0'.format(pygobject_version_major)
 pymod = import('python')
 python = pymod.find_installation(get_option('python'))
 
-if python.language_version().version_compare('< 3.0') and host_machine.system() == 'windows'
-  error('Python 2 on Windows no longer supported since 3.35. Use Python 3 instead.')
+if python.language_version().version_compare('< 3.5')
+  error('Requires Python >= 3.5')
 endif
 
 python_dep = python.dependency()
@@ -54,14 +54,8 @@ if with_pycairo
     endif
   endif
 
-  if python.language_version().version_compare('>= 3.0')
-    pycairo_name = 'py3cairo'
-  else
-    pycairo_name = 'pycairo'
-  endif
-
   pycairo_dep = dependency(
-    pycairo_name,
+    'py3cairo',
     version: pycairo_version_req,
     fallback: ['pycairo', 'pycairo_dep'],
     default_options: ['python=' + get_option('python')],
