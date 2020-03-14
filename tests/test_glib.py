@@ -18,7 +18,7 @@ from gi._compat import PY3
 
 class TestGLib(unittest.TestCase):
 
-    @pytest.mark.xfail(strict=True)
+    @pytest.mark.xfail()
     def test_pytest_capture_error_in_closure(self):
         # this test is supposed to fail
         ml = GLib.MainLoop()
