@@ -65,8 +65,14 @@ def realized(widget):
         window.add(widget)
 
     widget.realize()
-    while Gtk.events_pending():
-        Gtk.main_iteration()
+    if Gtk._version == "4.0":
+        context = GLib.MainContext()
+        while context.pending():
+            context.iteration(False)
+    else:
+        while Gtk.events_pending():
+            Gtk.main_iteration()
+
     assert widget.get_realized()
     yield widget
 
@@ -74,8 +80,13 @@ def realized(widget):
         window.remove(widget)
         window.destroy()
 
-    while Gtk.events_pending():
-        Gtk.main_iteration()
+    if Gtk._version == "4.0":
+        context = GLib.MainContext()
+        while context.pending():
+            context.iteration(False)
+    else:
+        while Gtk.events_pending():
+            Gtk.main_iteration()
 
 
 @unittest.skipUnless(Gtk, 'Gtk not available')
@@ -806,6 +817,7 @@ class TestGtk(unittest.TestCase):
         self.assertEqual(stock_item.stock_id, 'gtk-ok')
         self.assertEqual(Gtk.stock_lookup('nosuchthing'), None)
 
+    @unittest.skipIf(Gtk_version == "4.0", "not in gtk4")
     def test_gtk_main(self):
         # with no arguments
         GLib.idle_add(Gtk.main_quit)
@@ -2396,8 +2408,13 @@ class TestTreeView(unittest.TestCase):
 
         with realized(tree):
             tree.set_cursor(model[0].path)
-            while Gtk.events_pending():
-                Gtk.main_iteration()
+            if Gtk._version == "4.0":
+                context = GLib.MainContext()
+                while context.pending():
+                    context.iteration(False)
+            else:
+                while Gtk.events_pending():
+                    Gtk.main_iteration()
 
             self.assertEqual(tree.get_column(0).get_title(), 'Head1')
             self.assertEqual(tree.get_column(1).get_title(), 'Head2')

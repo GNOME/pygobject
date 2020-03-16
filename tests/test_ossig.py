@@ -24,8 +24,10 @@ from contextlib import contextmanager
 
 try:
     from gi.repository import Gtk
+    Gtk_version = Gtk._version
 except ImportError:
     Gtk = None
+    Gtk_version = None
 from gi.repository import Gio, GLib
 from gi._ossighelper import wakeup_on_signal, register_sigint_fallback
 
@@ -90,6 +92,7 @@ class TestOverridesWakeupOnAlarm(unittest.TestCase):
             app.run()
 
     @unittest.skipIf(Gtk is None or os.name == "nt", "not on Windows")
+    @unittest.skipIf(Gtk is None or Gtk_version == "4.0", "not in gtk4")
     def test_gtk_main(self):
         signal.signal(signal.SIGALRM, lambda *args: Gtk.main_quit())
         GLib.idle_add(signal.setitimer, signal.ITIMER_REAL, 0.001)

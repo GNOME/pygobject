@@ -1614,22 +1614,20 @@ if Gtk._version == '3.0':
     Menu = override(Menu)
     __all__.append('Menu')
 
-_Gtk_main_quit = Gtk.main_quit
+if Gtk._version in ("2.0", "3.0"):
+    _Gtk_main_quit = Gtk.main_quit
 
+    @override(Gtk.main_quit)
+    def main_quit(*args):
+        _Gtk_main_quit()
 
-@override(Gtk.main_quit)
-def main_quit(*args):
-    _Gtk_main_quit()
+    _Gtk_main = Gtk.main
 
-
-_Gtk_main = Gtk.main
-
-
-@override(Gtk.main)
-def main(*args, **kwargs):
-    with register_sigint_fallback(Gtk.main_quit):
-        with wakeup_on_signal():
-            return _Gtk_main(*args, **kwargs)
+    @override(Gtk.main)
+    def main(*args, **kwargs):
+        with register_sigint_fallback(Gtk.main_quit):
+            with wakeup_on_signal():
+                return _Gtk_main(*args, **kwargs)
 
 
 if Gtk._version in ("2.0", "3.0"):
