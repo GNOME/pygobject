@@ -696,14 +696,14 @@ IconView = override(IconView)
 __all__.append('IconView')
 
 
-class ToolButton(Gtk.ToolButton):
-    __init__ = deprecated_init(Gtk.ToolButton.__init__,
-                               arg_names=('stock_id',),
-                               category=PyGTKDeprecationWarning)
+if Gtk._version in ("2.0", "3.0"):
+    class ToolButton(Gtk.ToolButton):
+        __init__ = deprecated_init(Gtk.ToolButton.__init__,
+                                   arg_names=('stock_id',),
+                                   category=PyGTKDeprecationWarning)
 
-
-ToolButton = override(ToolButton)
-__all__.append('ToolButton')
+    ToolButton = override(ToolButton)
+    __all__.append('ToolButton')
 
 
 class IMContext(Gtk.IMContext):

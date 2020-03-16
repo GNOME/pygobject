@@ -778,12 +778,6 @@ class TestGtk(unittest.TestCase):
         self.assertEqual(button.props.label, 'mylabel')
         self.assertEqual(button.props.icon_widget, icon)
 
-    def test_toolbutton_gtk4(self):
-        icon = Gtk.Image.new()
-        button = Gtk.ToolButton(label='mylabel', icon_widget=icon)
-        self.assertEqual(button.props.label, 'mylabel')
-        self.assertEqual(button.props.icon_widget, icon)
-
     @unittest.skipIf(Gtk_version == "4.0", "not in gtk4")
     def test_iconset(self):
         Gtk.IconSet()
