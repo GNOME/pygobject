@@ -666,6 +666,7 @@ class TestGtk(unittest.TestCase):
         sb = sw.get_vscrollbar()
         self.assertEqual(sw.get_vadjustment(), sb.get_adjustment())
 
+    @unittest.skipIf(Gtk_version == "4.0", "not in gtk4")
     def test_widget_drag_methods(self):
         widget = Gtk.Button()
 
@@ -683,10 +684,8 @@ class TestGtk(unittest.TestCase):
         widget.drag_dest_set_track_motion(True)
         widget.drag_dest_get_target_list()
         widget.drag_dest_set_target_list(None)
-        if GTK4:
-            widget.drag_dest_set_target_list(Gdk.ContentFormats.new([]))
-        else:
-            widget.drag_dest_set_target_list(Gtk.TargetList.new([Gtk.TargetEntry.new('test', 0, 0)]))
+
+        widget.drag_dest_set_target_list(Gtk.TargetList.new([Gtk.TargetEntry.new('test', 0, 0)]))
         widget.drag_dest_unset()
 
         widget.drag_highlight()
@@ -698,22 +697,38 @@ class TestGtk(unittest.TestCase):
         widget.drag_source_add_text_targets()
         widget.drag_source_add_uri_targets()
         widget.drag_source_set_icon_name("_About")
-        if not GTK4:
-            widget.drag_source_set_icon_pixbuf(GdkPixbuf.Pixbuf())
-            widget.drag_source_set_icon_stock(Gtk.STOCK_ABOUT)
+        widget.drag_source_set_icon_pixbuf(GdkPixbuf.Pixbuf())
+        widget.drag_source_set_icon_stock(Gtk.STOCK_ABOUT)
         widget.drag_source_get_target_list()
         widget.drag_source_set_target_list(None)
-        if GTK4:
-            widget.drag_source_set_target_list(Gdk.ContentFormats.new([]))
-        else:
-            widget.drag_source_set_target_list(Gtk.TargetList.new([Gtk.TargetEntry.new('test', 0, 0)]))
+        widget.drag_source_set_target_list(Gtk.TargetList.new([Gtk.TargetEntry.new('test', 0, 0)]))
         widget.drag_source_unset()
 
         # these methods cannot be called because they require a valid drag on
         # a real GdkWindow. So we only check that they exist and are callable.
-        if not GTK4:
-            self.assertTrue(hasattr(widget, 'drag_dest_set_proxy'))
+        self.assertTrue(hasattr(widget, 'drag_dest_set_proxy'))
         self.assertTrue(hasattr(widget, 'drag_get_data'))
+
+    @unittest.skipIf(Gtk_version != "4.0", "gtk4 only")
+    def test_widget_drag_methods_gtk4(self):
+        widget = Gtk.Button()
+        widget.drag_check_threshold(0, 0, 0, 0)
+
+        # drag source
+        drag_source = Gtk.DragSource()
+        content = Gdk.ContentProvider.new_for_value("data")
+        drag_source.set_content(content)
+        drag_source.set_actions(Gdk.DragAction.COPY)
+        image = Gtk.Image.new_from_icon_name("dialog-warning")
+        drag_source.set_icon(image.get_paintable(), 0, 0)
+        widget.add_controller(drag_source)
+
+        # drop target
+        drop_target = Gtk.DropTarget.new(Gdk.ContentFormats.new([]), Gdk.DragAction.COPY)
+        widget.add_controller(drop_target)
+
+        widget.remove_controller(drag_source)
+        widget.remove_controller(drop_target)
 
     @unittest.skipIf(sys.platform == "darwin", "crashes")
     @unittest.skipIf(GTK4, "uses lots of gtk3 only api")
