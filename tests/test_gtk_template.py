@@ -590,3 +590,73 @@ def test_internal_child():
     child = child.get_children()[0]
     assert isinstance(child, Gtk.Label)
     assert child.props.label == "foo"
+
+
+def test_template_hierarchy():
+    testlabel = """
+    <interface>
+      <template class="TestLabel" parent="GtkLabel">
+      </template>
+     </interface>
+    """
+    @Gtk.Template(string=testlabel)
+    class TestLabel(Gtk.Label):
+
+        __gtype_name__ = "TestLabel"
+
+        def __init__(self):
+            super().__init__()
+            self.props.label = "TestLabel"
+
+    testbox = """
+    <interface>
+      <template class="TestBox" parent="GtkBox">
+        <child>
+          <object class="TestLabel" id="_testlabel"/>
+        </child>
+      </template>
+    </interface>
+    """
+    @Gtk.Template(string=testbox)
+    class TestBox(Gtk.Box):
+
+        __gtype_name__ = "TestBox"
+
+        _testlabel = Gtk.Template.Child()
+
+        def __init__(self):
+            super().__init__()
+
+            assert isinstance(self._testlabel, TestLabel)
+
+    window = """
+    <interface>
+      <template class="MyWindow" parent="GtkWindow">
+        <property name="title">"Hellow World"</property>
+        <child>
+          <object class="TestBox" id="_testbox">
+            <child>
+              <object class="TestLabel" id="_testlabel"/>
+            </child>
+          </object>
+        </child>
+      </template>
+    </interface>
+    """
+    @Gtk.Template(string=window)
+    class MyWindow(Gtk.Window):
+
+        __gtype_name__ = "MyWindow"
+
+        _testbox = Gtk.Template.Child()
+        _testlabel = Gtk.Template.Child()
+
+        def __init__(self):
+            super().__init__()
+
+            assert isinstance(self._testbox, TestBox)
+            assert isinstance(self._testlabel, TestLabel)
+            assert len(self._testbox.get_children()) == 2
+
+    win = MyWindow()
+    assert isinstance(win, MyWindow)
