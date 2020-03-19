@@ -1069,6 +1069,7 @@ pygobject__g_instance_init(GTypeInstance   *instance,
     GObject *object = (GObject *) instance;
     PyObject *wrapper, *result;
     PyGILState_STATE state;
+    gboolean needs_init = FALSE;
 
     wrapper = g_object_get_qdata(object, pygobject_wrapper_key);
     if (wrapper == NULL) {
@@ -1095,16 +1096,20 @@ pygobject__g_instance_init(GTypeInstance   *instance,
          * will take the ref */
         pygobject_ref_float ((PyGObject *) wrapper);
 
-        result = PyObject_CallMethod (wrapper, "__init__", NULL);
+        needs_init = TRUE;
+    }
+
+    /* XXX: used for Gtk.Template */
+    if (PyObject_HasAttrString ((PyObject*) Py_TYPE (wrapper), "__dontuse_ginstance_init__")) {
+        result = PyObject_CallMethod (wrapper, "__dontuse_ginstance_init__", NULL);
         if (result == NULL)
             PyErr_Print ();
         else
             Py_DECREF (result);
     }
 
-    /* XXX: used for Gtk.Template */
-    if (PyObject_HasAttrString ((PyObject*) Py_TYPE (wrapper), "__dontuse_ginstance_init__")) {
-        result = PyObject_CallMethod (wrapper, "__dontuse_ginstance_init__", NULL);
+    if (needs_init) {
+        result = PyObject_CallMethod (wrapper, "__init__", NULL);
         if (result == NULL)
             PyErr_Print ();
         else
