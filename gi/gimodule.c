@@ -1931,7 +1931,7 @@ pyg_channel_read(PyObject* self, PyObject *args, PyObject *kwargs)
         PyErr_SetString(PyExc_TypeError, "first argument is not a GLib.IOChannel");
         return NULL;
     }
-	
+
     if (max_count == 0)
         return PyBytes_FromString ("");
 
@@ -1942,15 +1942,15 @@ pyg_channel_read(PyObject* self, PyObject *args, PyObject *kwargs)
 	gsize single_read;
 	char* buf;
 	gsize buf_size;
-	
-	if (max_count == -1) 
+
+	if (max_count == -1)
 	    buf_size = CHUNK_SIZE;
 	else {
 	    buf_size = max_count - total_read;
 	    if (buf_size > CHUNK_SIZE)
 		buf_size = CHUNK_SIZE;
         }
-	
+
 	if ( ret_obj == NULL ) {
 	    ret_obj = PyBytes_FromStringAndSize ((char *)NULL, buf_size);
 	    if (ret_obj == NULL)
@@ -1960,7 +1960,7 @@ pyg_channel_read(PyObject* self, PyObject *args, PyObject *kwargs)
 	    if (_PyBytes_Resize (&ret_obj, buf_size + total_read) == -1)
 		goto failure;
 	}
-       
+
         buf = PyBytes_AsString (ret_obj) + total_read;
 
         Py_BEGIN_ALLOW_THREADS;
@@ -1969,10 +1969,10 @@ pyg_channel_read(PyObject* self, PyObject *args, PyObject *kwargs)
 
         if (pygi_error_check (&error))
 	    goto failure;
-	
+
 	total_read += single_read;
     }
-	
+
     if ( total_read != (gsize)PyBytes_Size (ret_obj) ) {
 	if (_PyBytes_Resize (&ret_obj, total_read) == -1)
 	    goto failure;
