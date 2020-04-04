@@ -6,7 +6,7 @@ import sys
 from pkgutil import get_loader
 
 from gi import PyGIDeprecationWarning
-from gi._gi import CallableInfo
+from gi._gi import CallableInfo, pygobject_new_full
 from gi._constants import \
     TYPE_NONE, \
     TYPE_INVALID
@@ -341,3 +341,13 @@ def strip_boolean_result(method, exc_type=None, exc_str=None, fail_ret=None):
                 raise exc_type(exc_str or 'call failed')
             return fail_ret
     return wrapped
+
+
+def wrap_list_store_sort_func(func):
+
+    def wrap(a, b, *user_data):
+        a = pygobject_new_full(a, False)
+        b = pygobject_new_full(b, False)
+        return func(a, b, *user_data)
+
+    return wrap

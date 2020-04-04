@@ -14,7 +14,7 @@ from .helper import ignore_gi_deprecation_warnings, capture_glib_warnings
 
 import gi.overrides
 import gi.types
-from gi.repository import GLib, GObject
+from gi.repository import Gio, GLib, GObject
 
 try:
     from gi.repository import Gtk, GdkPixbuf, Gdk
@@ -1265,6 +1265,99 @@ class TestTreeModelRow(unittest.TestCase):
         assert row.previous[0] == 42
         assert row.get_previous()[0] == 42
         assert row.previous.previous is None
+
+
+@unittest.skipUnless(Gtk, "Gtk not available")
+class TestCustomSorter():
+    class Person(GObject.GObject):
+
+        name = GObject.Property(type=str, default="")
+
+        def __init__(self, name):
+            super().__init__()
+            self.props.name = name
+
+    user_data = "user_data"
+
+    def names_sort(self, name_a, name_b, user_data):
+        assert user_data is None
+        if name_a.props.name < name_b.props.name:
+            return Gtk.Ordering.SMALLER
+        elif name_a.props.name > name_b.props.name:
+            return Gtk.Ordering.LARGER
+        else:
+            return Gtk.Ordering.EQUAL
+
+    def names_invert_sort(self, name_a, name_b, user_data):
+        assert user_data == self.user_data
+        if name_a.props.name < name_b.props.name:
+            return Gtk.Ordering.LARGER
+        elif name_a.props.name > name_b.props.name:
+            return Gtk.Ordering.SMALLER
+        else:
+            return Gtk.Ordering.EQUAL
+
+    @unittest.skipIf(Gtk_version != "4.0", "gtk4 only")
+    def test_custom_sorter_init(self):
+        custom_sorter_empty = Gtk.CustomSorter()
+        assert isinstance(custom_sorter_empty, Gtk.CustomSorter)
+
+        custom_sorter_empty.set_sort_func(self.names_sort)
+        assert isinstance(custom_sorter_empty, Gtk.CustomSorter)
+
+        custom_sorter_empty.set_sort_func(
+            self.names_invert_sort, self.user_data)
+        assert isinstance(custom_sorter_empty, Gtk.CustomSorter)
+
+        custom_sorter_empty_sort = Gtk.CustomSorter.new(None)
+        assert isinstance(custom_sorter_empty_sort, Gtk.CustomSorter)
+
+        custom_sorter_with_sort = Gtk.CustomSorter.new(self.names_sort, None)
+        assert isinstance(custom_sorter_with_sort, Gtk.CustomSorter)
+
+        custom_sorter_with_sort_ud = Gtk.CustomSorter.new(
+            self.names_invert_sort, self.user_data)
+        assert isinstance(custom_sorter_with_sort_ud, Gtk.CustomSorter)
+
+    @unittest.skipIf(Gtk_version != "4.0", "gtk4 only")
+    def test_custom_sorter_with_model(self):
+        model = Gio.ListStore.new(self.Person)
+        sort_model = Gtk.SortListModel.new(model)
+        assert sort_model.props.sorter is None
+
+        empty_sorter = Gtk.CustomSorter()
+        empty_sorter.set_sort_func(self.names_sort, None)
+        sort_model.set_sorter(empty_sorter)
+        assert sort_model.props.sorter is empty_sorter
+
+        john = self.Person("john")
+        bob = self.Person("bob")
+        model.append(john)
+        model.append(bob)
+        assert sort_model[0] == bob
+        assert sort_model[1] == john
+
+        alice = self.Person("alice")
+        model.append(alice)
+        assert sort_model[0] == alice
+        assert sort_model[2] == john
+
+        new_model = Gio.ListStore.new(self.Person)
+        new_sort_model = Gtk.SortListModel.new(new_model)
+        assert new_sort_model.props.sorter is None
+
+        invert_sorter = Gtk.CustomSorter.new(
+            self.names_invert_sort, self.user_data)
+        new_sort_model.set_sorter(invert_sorter)
+        assert new_sort_model.props.sorter is invert_sorter
+
+        beatles = ["john", "paul", "george", "ringo"]
+        for member in beatles:
+            new_model.append(self.Person(member))
+
+        expected_result = ["ringo", "paul", "john", "george"]
+        for result, member in zip(new_sort_model, expected_result):
+            assert result.props.name == member
 
 
 @ignore_gi_deprecation_warnings

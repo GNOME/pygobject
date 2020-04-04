@@ -26,7 +26,8 @@ from collections import abc
 from gi.repository import GObject
 from .._ossighelper import wakeup_on_signal, register_sigint_fallback
 from .._gtktemplate import Template
-from ..overrides import override, strip_boolean_result, deprecated_init
+from ..overrides import (override, strip_boolean_result, deprecated_init,
+                         wrap_list_store_sort_func)
 from ..module import get_introspection_module
 from gi import PyGIDeprecationWarning
 
@@ -1646,6 +1647,29 @@ class TreeModelFilter(Gtk.TreeModelFilter):
 
 TreeModelFilter = override(TreeModelFilter)
 __all__.append('TreeModelFilter')
+
+if GTK4:
+    class CustomSorter(Gtk.CustomSorter):
+
+        @classmethod
+        def new(cls, sort_func, user_data=None):
+            if sort_func is not None:
+                compare_func = wrap_list_store_sort_func(sort_func)
+            else:
+                compare_func = None
+
+            return Gtk.CustomSorter.new(compare_func, user_data)
+
+        def set_sort_func(self, sort_func, user_data=None):
+            if sort_func is not None:
+                compare_func = wrap_list_store_sort_func(sort_func)
+            else:
+                compare_func = None
+
+            return super(CustomSorter, self).set_sort_func(compare_func, user_data)
+
+    CustomSorter = override(CustomSorter)
+    __all__.append("CustomSorter")
 
 if GTK3:
     class Menu(Gtk.Menu):

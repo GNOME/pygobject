@@ -21,9 +21,8 @@
 import warnings
 
 from .._ossighelper import wakeup_on_signal, register_sigint_fallback
-from ..overrides import override, deprecated_init
+from ..overrides import override, deprecated_init, wrap_list_store_sort_func
 from ..module import get_introspection_module
-from gi._gi import pygobject_new_full
 from gi import PyGIWarning
 
 from gi.repository import GLib
@@ -461,16 +460,6 @@ ListModel = override(ListModel)
 __all__.append('ListModel')
 
 
-def _wrap_list_store_sort_func(func):
-
-    def wrap(a, b, *user_data):
-        a = pygobject_new_full(a, False)
-        b = pygobject_new_full(b, False)
-        return func(a, b, *user_data)
-
-    return wrap
-
-
 if (GLib.MAJOR_VERSION, GLib.MINOR_VERSION, GLib.MICRO_VERSION) < (2, 57, 1):
     # The "additions" functionality in splice() was broken in older glib
     # https://bugzilla.gnome.org/show_bug.cgi?id=795307
@@ -487,11 +476,11 @@ else:
 class ListStore(Gio.ListStore):
 
     def sort(self, compare_func, *user_data):
-        compare_func = _wrap_list_store_sort_func(compare_func)
+        compare_func = wrap_list_store_sort_func(compare_func)
         return super(ListStore, self).sort(compare_func, *user_data)
 
     def insert_sorted(self, item, compare_func, *user_data):
-        compare_func = _wrap_list_store_sort_func(compare_func)
+        compare_func = wrap_list_store_sort_func(compare_func)
         return super(ListStore, self).insert_sorted(
             item, compare_func, *user_data)
 
