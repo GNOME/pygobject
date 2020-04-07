@@ -212,6 +212,7 @@ if GDK2 or GDK3:
             Gdk.EventType.DROP_FINISHED: 'dnd',
             Gdk.EventType.CLIENT_EVENT: 'client',
             Gdk.EventType.VISIBILITY_NOTIFY: 'visibility',
+            Gdk.EventType.SCROLL: 'scroll',
             Gdk.EventType.EXPOSE: 'expose',
             Gdk.EventType.MAP: 'any',
             Gdk.EventType.UNMAP: 'any',
