@@ -18,7 +18,6 @@
 # License along with this library; if not, see <http://www.gnu.org/licenses/>.
 
 from . import _gi
-from ._compat import string_types, long_
 from ._constants import \
     TYPE_NONE, TYPE_INTERFACE, TYPE_CHAR, TYPE_UCHAR, \
     TYPE_BOOLEAN, TYPE_INT, TYPE_UINT, TYPE_LONG, \
@@ -93,8 +92,6 @@ class Property(object):
                 self.value = value
     """
     _type_from_pytype_lookup = {
-        # Put long_ first in case long_ and int are the same so int clobbers long_
-        long_: TYPE_LONG,
         int: TYPE_INT,
         bool: TYPE_BOOLEAN,
         float: TYPE_DOUBLE,
@@ -152,11 +149,11 @@ class Property(object):
         self.default = self._get_default(default)
         self._check_default()
 
-        if not isinstance(nick, string_types):
+        if not isinstance(nick, str):
             raise TypeError("nick must be a string")
         self.nick = nick
 
-        if not isinstance(blurb, string_types):
+        if not isinstance(blurb, str):
             raise TypeError("blurb must be a string")
         self.blurb = blurb
         # Always clobber __doc__ with blurb even if blurb is empty because

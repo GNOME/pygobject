@@ -1,8 +1,5 @@
 # -*- Mode: Python; py-indent-offset: 4 -*-
-# coding=utf-8
 # vim: tabstop=4 shiftwidth=4 expandtab
-
-from __future__ import absolute_import
 
 import unittest
 import traceback
@@ -21,7 +18,6 @@ from gi.repository import Regress as Everything
 from gi.repository import GObject
 from gi.repository import GLib
 from gi.repository import Gio
-from gi._compat import PY3, PY2
 
 try:
     from gi.repository import Gtk
@@ -32,9 +28,7 @@ except:
 from .helper import capture_exceptions
 
 
-const_str = b'const \xe2\x99\xa5 utf8'
-if PY3:
-    const_str = const_str.decode('UTF-8')
+const_str = b'const \xe2\x99\xa5 utf8'.decode('UTF-8')
 noconst_str = 'non' + const_str
 
 
@@ -366,11 +360,7 @@ class TestEverything(unittest.TestCase):
     def test_unichar(self):
         self.assertEqual("c", Everything.test_unichar("c"))
 
-        if PY2:
-            self.assertEqual(b"\xe2\x99\xa5", Everything.test_unichar(u"♥"))
-            self.assertEqual(b"\xe2\x99\xa5", Everything.test_unichar(b"\xe2\x99\xa5"))
-        else:
-            self.assertEqual(u"♥", Everything.test_unichar(u"♥"))
+        self.assertEqual(u"♥", Everything.test_unichar(u"♥"))
         self.assertRaises(TypeError, Everything.test_unichar, "")
         self.assertRaises(TypeError, Everything.test_unichar, "morethanonechar")
 
@@ -444,7 +434,7 @@ class TestEverything(unittest.TestCase):
         self.assertEqual(Everything.test_utf8_inout(const_str), noconst_str)
 
     def test_filename_return(self):
-        if PY3 and os.name != "nt":
+        if os.name != "nt":
             result = [os.fsdecode(b'\xc3\xa5\xc3\xa4\xc3\xb6'), '/etc/fstab']
         else:
             result = ['åäö', '/etc/fstab']
@@ -596,8 +586,7 @@ class TestEverything(unittest.TestCase):
         self.assertEqual(Everything.test_array_int_inout([]), [])
 
     def test_array_gint8_in(self):
-        if PY3:
-            self.assertEqual(Everything.test_array_gint8_in(b'\x01\x03\x05'), 9)
+        self.assertEqual(Everything.test_array_gint8_in(b'\x01\x03\x05'), 9)
         self.assertEqual(Everything.test_array_gint8_in([1, 3, 5, -50]), -41)
 
     def test_array_gint16_in(self):

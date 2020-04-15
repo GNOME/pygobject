@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2017 Christoph Reiter
 #
 # This library is free software; you can redistribute it and/or
@@ -17,7 +16,6 @@
 from __future__ import print_function
 
 import os
-import sys
 import socket
 import signal
 import threading
@@ -63,8 +61,6 @@ def wakeup_on_signal():
     shortly so that any registered Python signal handlers registered through
     signal.signal() can run.
 
-    Works on Windows but needs Python 3.5+.
-
     In case the wrapped function is not called from the main thread it will be
     called as is and it will not wake up the default loop for signals.
     """
@@ -76,16 +72,6 @@ def wakeup_on_signal():
         return
 
     from gi.repository import GLib
-
-    # On Windows only Python 3.5+ supports passing sockets to set_wakeup_fd
-    set_wakeup_fd_supports_socket = (
-        os.name != "nt" or sys.version_info[:2] >= (3, 5))
-    # On Windows only Python 3 has an implementation of socketpair()
-    has_socketpair = hasattr(socket, "socketpair")
-
-    if not has_socketpair or not set_wakeup_fd_supports_socket:
-        yield
-        return
 
     read_socket, write_socket = socket.socketpair()
     with closing(read_socket), closing(write_socket):

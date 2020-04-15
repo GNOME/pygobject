@@ -1,8 +1,5 @@
 # -*- Mode: Python; py-indent-offset: 4 -*-
-# coding: UTF-8
 # vim: tabstop=4 shiftwidth=4 expandtab
-
-from __future__ import absolute_import
 
 import contextlib
 import unittest
@@ -17,7 +14,6 @@ from .helper import ignore_gi_deprecation_warnings, capture_glib_warnings
 
 import gi.overrides
 import gi.types
-from gi._compat import cmp
 from gi.repository import GLib, GObject
 
 try:
@@ -2358,6 +2354,7 @@ class TestTreeModel(unittest.TestCase):
 
         def sort_func(store, iter1, iter2, data):
             assert data is None
+            cmp = lambda a, b: (a > b) - (a < b)
             return cmp(store[iter1][0], store[iter2][0])
 
         list_store.set_default_sort_func(sort_func)

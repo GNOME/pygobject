@@ -1,15 +1,12 @@
 # -*- Mode: Python; py-indent-offset: 4 -*-
 # vim: tabstop=4 shiftwidth=4 expandtab
 
-from __future__ import absolute_import
-
 import sys
 import unittest
 
 import gi.overrides
 import gi.module
 import gi.importer
-from gi._compat import PY2, PY3
 
 from gi.repository import Regress
 
@@ -122,10 +119,7 @@ class TestImporter(unittest.TestCase):
         exception_string = str(context.exception)
 
         self.assertTrue('InvalidGObjectRepositoryModuleName' in exception_string)
-
-        # The message of the custom exception in gi/importer.py is eaten in Python <3.3
-        if sys.version_info >= (3, 3):
-            self.assertTrue('introspection typelib' in exception_string)
+        self.assertTrue('introspection typelib' in exception_string)
 
     def test_require_version_warning(self):
         check = gi.importer._check_require_version
@@ -146,13 +140,8 @@ class TestImporter(unittest.TestCase):
         with self.assertRaises(ValueError):
             gi.require_version('GLib', 2.0)
 
-        # Test that unicode strings work in python 2
-        if PY2:
-            gi.require_version('GLib', u'2.0')
-
-        if PY3:
-            with self.assertRaises(ValueError):
-                gi.require_version('GLib', b'2.0')
+        with self.assertRaises(ValueError):
+            gi.require_version('GLib', b'2.0')
 
     def test_require_versions(self):
         import gi

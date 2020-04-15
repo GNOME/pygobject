@@ -1,7 +1,5 @@
 # -*- Mode: Python -*-
 
-from __future__ import absolute_import
-
 import unittest
 
 from gi.repository import GObject

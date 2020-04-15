@@ -32,7 +32,6 @@ import optparse
 from optparse import OptParseError, OptionError, OptionValueError, \
     BadOptionError, OptionConflictError
 from .module import get_introspection_module
-from ._compat import string_types
 
 from gi import _gi
 from gi._error import GError
@@ -230,7 +229,7 @@ class OptionGroup(optparse.OptionGroup):
     def set_values_to_defaults(self):
         for option in self.option_list:
             default = self.defaults.get(option.dest)
-            if isinstance(default, string_types):
+            if isinstance(default, str):
                 opt_str = option.get_opt_string()
                 self.defaults[option.dest] = option.check_value(
                     opt_str, default)
@@ -310,7 +309,7 @@ class OptionParser(optparse.OptionParser):
         return context
 
     def add_option_group(self, *args, **kwargs):
-        if isinstance(args[0], string_types):
+        if isinstance(args[0], str):
             optparse.OptionParser.add_option_group(self,
                                                    OptionGroup(self, *args, **kwargs))
             return

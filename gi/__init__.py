@@ -18,8 +18,6 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
 # USA
 
-from __future__ import absolute_import
-
 # support overrides in different directories than our gi module
 from pkgutil import extend_path
 __path__ = extend_path(__path__, __name__)
@@ -44,7 +42,6 @@ from ._gi import _API
 from ._gi import Repository
 from ._gi import PyGIDeprecationWarning
 from ._gi import PyGIWarning
-from ._compat import string_types
 
 _API = _API  # pyflakes
 PyGIDeprecationWarning = PyGIDeprecationWarning
@@ -111,7 +108,7 @@ def require_version(namespace, version):
     """
     repository = Repository.get_default()
 
-    if not isinstance(version, string_types):
+    if not isinstance(version, str):
         raise ValueError('Namespace version needs to be a string.')
 
     if namespace in repository.get_loaded_namespaces():

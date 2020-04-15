@@ -44,7 +44,6 @@ headers = [
 install_headers(headers, subdir : 'pygobject-@0@'.format(platform_version))
 
 python_sources = [
-  '_compat.py',
   '_constants.py',
   'docstring.py',
   '_error.py',

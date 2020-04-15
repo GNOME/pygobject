@@ -1,7 +1,5 @@
 # -*- Mode: Python -*-
 
-from __future__ import absolute_import
-
 import gc
 import unittest
 import sys
@@ -12,7 +10,6 @@ import time
 from gi.repository import GObject, GLib, Regress, Gio
 from gi import _signalhelper as signalhelper
 from gi.module import repository as repo
-from gi._compat import PY3, long_
 
 import testhelper
 from .helper import capture_glib_warnings, capture_gi_deprecation_warnings
@@ -523,7 +520,7 @@ class CM(GObject.GObject):
         test2=(GObject.SignalFlags.RUN_LAST, None, (str,)),
         test3=(GObject.SignalFlags.RUN_LAST, int, (GObject.TYPE_DOUBLE,)),
         test4=(GObject.SignalFlags.RUN_FIRST, None,
-               (bool, long_, GObject.TYPE_FLOAT, GObject.TYPE_DOUBLE, int,
+               (bool, int, GObject.TYPE_FLOAT, GObject.TYPE_DOUBLE, int,
                 GObject.TYPE_UINT, GObject.TYPE_ULONG)),
         test_float=(GObject.SignalFlags.RUN_LAST, GObject.TYPE_FLOAT, (GObject.TYPE_FLOAT,)),
         test_double=(GObject.SignalFlags.RUN_LAST, GObject.TYPE_DOUBLE, (GObject.TYPE_DOUBLE,)),
@@ -555,7 +552,7 @@ class _TestCMarshaller:
         self.assertEqual(rv, 20)
 
     def test_test4(self):
-        self.obj.emit("test4", True, long_(10), 3.14, 1.78, 20, long_(30), long_(31))
+        self.obj.emit("test4", True, 10, 3.14, 1.78, 20, 30, 31)
 
     def test_float(self):
         rv = self.obj.emit("test-float", 1.234)
@@ -1015,28 +1012,16 @@ class TestInstallSignals(unittest.TestCase):
         self.assertTrue(hasattr(self.Sub2, 'do_sub2test'))
 
 
-# For this test to work with both python2 and 3 we need to dynamically
-# exec the given code due to the new syntax causing an error in python 2.
-annotated_class_code = """
-class AnnotatedSignalClass(GObject.GObject):
-    @GObject.Signal
-    def sig1(self, a:int, b:float):
-        pass
-
-    @GObject.Signal(flags=GObject.SignalFlags.RUN_LAST)
-    def sig2_with_return(self, a:int, b:float) -> str:
-        return "test"
-"""
-
-
-@unittest.skipUnless(PY3, 'Argument annotations require Python 3')
 class TestPython3Signals(unittest.TestCase):
-    AnnotatedClass = None
 
-    def setUp(self):
-        exec(annotated_class_code, globals(), globals())
-        self.assertTrue('AnnotatedSignalClass' in globals())
-        self.AnnotatedClass = globals()['AnnotatedSignalClass']
+    class AnnotatedClass(GObject.GObject):
+        @GObject.Signal
+        def sig1(self, a: int, b: float):
+            pass
+
+        @GObject.Signal(flags=GObject.SignalFlags.RUN_LAST)
+        def sig2_with_return(self, a: int, b: float) -> str:
+            return "test"
 
     def test_annotations(self):
         self.assertEqual(signalhelper.get_signal_annotations(self.AnnotatedClass.sig1.func),

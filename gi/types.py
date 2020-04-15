@@ -20,9 +20,6 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
 # USA
 
-from __future__ import absolute_import
-
-import warnings
 import re
 
 from ._constants import TYPE_INVALID
@@ -290,19 +287,7 @@ def mro(C):
             # in __mro__ at each point. Therefore at this point we know that
             # we already have our base class MRO's available to us, there is
             # no need for us to (re)calculate them.
-            if hasattr(base, '__mro__'):
-                bases_of_subclasses += [list(base.__mro__)]
-            else:
-                warnings.warn('Mixin class %s is an old style class, please '
-                              'update this to derive from "object".' % base,
-                              RuntimeWarning)
-                # For old-style classes (Python2 only), the MRO is not
-                # easily accessible. As we do need it here, we calculate
-                # it via recursion, according to the C3 algorithm. Using C3
-                # for old style classes deviates from Python's own behaviour,
-                # but visible effects here would be a corner case triggered by
-                # questionable design.
-                bases_of_subclasses += [mro(base)]
+            bases_of_subclasses += [list(base.__mro__)]
         bases_of_subclasses += [list(C.__bases__)]
 
     while bases_of_subclasses:

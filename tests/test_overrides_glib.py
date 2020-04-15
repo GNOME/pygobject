@@ -1,8 +1,6 @@
 # -*- Mode: Python; py-indent-offset: 4 -*-
 # vim: tabstop=4 shiftwidth=4 expandtab
 
-from __future__ import absolute_import
-
 import os
 import gc
 import unittest
@@ -13,7 +11,6 @@ import pytest
 
 import gi
 from gi.repository import GLib
-from gi._compat import long_, integer_types
 
 from .helper import capture_gi_deprecation_warnings
 
@@ -183,7 +180,7 @@ class TestGVariant(unittest.TestCase):
         # nested tuples
         variant = GLib.Variant('((si)(ub))', (('hello', -1), (42, True)))
         self.assertEqual(variant.get_type_string(), '((si)(ub))')
-        self.assertEqual(variant.unpack(), (('hello', -1), (long_(42), True)))
+        self.assertEqual(variant.unpack(), (('hello', -1), (42, True)))
 
     def test_new_tuple_sink(self):
         # https://bugzilla.gnome.org/show_bug.cgi?id=735166
@@ -724,4 +721,4 @@ class TestConstants(unittest.TestCase):
 
     def test_basic_types_limits(self):
         self.assertTrue(isinstance(GLib.MINFLOAT, float))
-        self.assertTrue(isinstance(GLib.MAXLONG, integer_types))
+        self.assertTrue(isinstance(GLib.MAXLONG, int))

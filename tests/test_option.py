@@ -1,15 +1,6 @@
 #!/usr/bin/env python
 
-from __future__ import absolute_import
-
 import unittest
-
-# py3k has StringIO in a different module
-try:
-    from StringIO import StringIO
-    StringIO  # pyflakes
-except ImportError:
-    from io import StringIO
 
 from gi.repository import GLib
 

@@ -217,11 +217,7 @@ def pkg_config_version_check(pkg_name, version):
 
 def pkg_config_parse(opt, pkg_name):
     ret = _run_pkg_config_or_exit(pkg_name, [opt, pkg_name])
-
-    if sys.version_info[0] == 3:
-        output = ret.decode()
-    else:
-        output = ret
+    output = ret.decode()
     opt = opt[-2:]
     return [x.lstrip(opt) for x in output.split()]
 
@@ -874,23 +870,13 @@ def get_pycairo_include_dir():
         location = os.path.dirname(os.path.abspath(cairo.__path__[0]))
         log.info("pycairo: found %r" % location)
 
-        def samefile(src, dst):
-            # Python 2 on Windows doesn't have os.path.samefile, so we have to
-            # provide a fallback
-            if hasattr(os.path, "samefile"):
-                return os.path.samefile(src, dst)
-            os.stat(src)
-            os.stat(dst)
-            return (os.path.normcase(os.path.abspath(src)) ==
-                    os.path.normcase(os.path.abspath(dst)))
-
         def get_sys_path(location, name):
             # Returns the sysconfig path for a distribution, or None
             for scheme in sysconfig.get_scheme_names():
                 for path_type in ["platlib", "purelib"]:
                     path = sysconfig.get_path(path_type, scheme)
                     try:
-                        if samefile(path, location):
+                        if os.path.samefile(path, location):
                             return sysconfig.get_path(name, scheme)
                     except EnvironmentError:
                         pass
@@ -997,11 +983,6 @@ def add_ext_compiler_flags(ext, compiler, _cache={}):
                 "-Wunused-but-set-variable",
                 "-Wwrite-strings",
             ]
-
-            if sys.version_info[0] == 2:
-                args += [
-                    "-Wdeclaration-after-statement",
-                ]
 
             args += [
                 "-Wno-incompatible-pointer-types-discards-qualifiers",

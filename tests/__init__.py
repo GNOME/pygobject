@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 import os
 import sys
 import unittest
@@ -34,12 +32,8 @@ sys.meta_path.insert(0, GIImport())
 
 def init_test_environ():
     # this was renamed in Python 3, provide backwards compatible name
-    if sys.version_info[:2] == (2, 7):
-        unittest.TestCase.assertRaisesRegex = unittest.TestCase.assertRaisesRegexp
-
-    if sys.version_info[0] == 3:
-        unittest.TestCase.assertRegexpMatches = unittest.TestCase.assertRegex
-        unittest.TestCase.assertRaisesRegexp = unittest.TestCase.assertRaisesRegex
+    unittest.TestCase.assertRegexpMatches = unittest.TestCase.assertRegex
+    unittest.TestCase.assertRaisesRegexp = unittest.TestCase.assertRaisesRegex
 
     def dbus_launch_session():
         if os.name == "nt" or sys.platform == "darwin":
@@ -52,8 +46,7 @@ def init_test_environ():
         except (subprocess.CalledProcessError, OSError):
             return (-1, "")
         else:
-            if sys.version_info[0] == 3:
-                out = out.decode("utf-8")
+            out = out.decode("utf-8")
             addr, pid = out.splitlines()
             return int(pid), addr
 

@@ -295,9 +295,6 @@ if GDK2 or GDK3:
         for method_info in Gdk.Event.__info__.get_methods():
             name = method_info.get_name()
             event_method = getattr(Gdk.Event, name)
-            # python2 we need to use the __func__ attr to avoid internal
-            # instance checks
-            event_method = getattr(event_method, '__func__', event_method)
 
             # use the _gsuccess_mask decorator if this method is whitelisted
             if name in gsuccess_mask_funcs:

@@ -29,8 +29,6 @@ import gi.module
 from gi.overrides import override, deprecated_attr
 from gi.repository import GLib
 from gi import PyGIDeprecationWarning
-from gi._compat import PY2, text_type
-
 from gi import _propertyhelper as propertyhelper
 from gi import _signalhelper as signalhelper
 from gi import _gi
@@ -239,15 +237,8 @@ class Value(GObjectModule.Value):
             self.set_uchar(py_value)
         elif gtype == TYPE_STRING:
             if not isinstance(py_value, str) and py_value is not None:
-                if PY2:
-                    if isinstance(py_value, text_type):
-                        py_value = py_value.encode('UTF-8')
-                    else:
-                        raise TypeError("Expected string or unicode but got %s%s" %
-                                        (py_value, type(py_value)))
-                else:
-                    raise TypeError("Expected string but got %s%s" %
-                                    (py_value, type(py_value)))
+                raise TypeError("Expected string but got %s%s" %
+                                (py_value, type(py_value)))
             _gi._gvalue_set(self, py_value)
         elif gtype == TYPE_PARAM:
             self.set_param(py_value)

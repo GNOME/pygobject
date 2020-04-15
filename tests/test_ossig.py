@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2017 Christoph Reiter
 #
 # This library is free software; you can redistribute it and/or

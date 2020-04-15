@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 extensions = [
     'sphinx.ext.todo',
     'sphinx.ext.intersphinx',

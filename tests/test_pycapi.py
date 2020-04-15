@@ -1,6 +1,3 @@
-from __future__ import absolute_import
-
-import sys
 import unittest
 import ctypes
 from ctypes import c_void_p, py_object, c_char_p
@@ -23,16 +20,10 @@ def get_capi():
         ]
 
     api_obj = gi._gobject._PyGObject_API
-    if sys.version_info[0] == 2:
-        func_type = ctypes.PYFUNCTYPE(c_void_p, py_object)
-        PyCObject_AsVoidPtr = func_type(
-            ('PyCObject_AsVoidPtr', ctypes.pythonapi))
-        ptr = PyCObject_AsVoidPtr(api_obj)
-    else:
-        func_type = ctypes.PYFUNCTYPE(c_void_p, py_object, c_char_p)
-        PyCapsule_GetPointer = func_type(
-            ('PyCapsule_GetPointer', ctypes.pythonapi))
-        ptr = PyCapsule_GetPointer(api_obj, b"gobject._PyGObject_API")
+    func_type = ctypes.PYFUNCTYPE(c_void_p, py_object, c_char_p)
+    PyCapsule_GetPointer = func_type(
+        ('PyCapsule_GetPointer', ctypes.pythonapi))
+    ptr = PyCapsule_GetPointer(api_obj, b"gobject._PyGObject_API")
 
     ptr = ctypes.cast(ptr, ctypes.POINTER(CAPI))
     return ptr.contents

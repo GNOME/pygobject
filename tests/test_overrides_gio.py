@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 import random
 import platform
 import warnings
@@ -8,7 +6,6 @@ import pytest
 
 from gi.repository import Gio, GObject
 from gi import PyGIWarning
-from gi._compat import cmp
 
 
 class Item(GObject.Object):
@@ -42,6 +39,7 @@ def test_list_store_sort():
         assert list(args) == user_data
         assert isinstance(a, NamedItem)
         assert isinstance(b, NamedItem)
+        cmp = lambda a, b: (a > b) - (a < b)
         return cmp(a.props.name, b.props.name)
 
     store[:] = items
@@ -61,6 +59,7 @@ def test_list_store_insert_sorted():
         assert list(args) == user_data
         assert isinstance(a, NamedItem)
         assert isinstance(b, NamedItem)
+        cmp = lambda a, b: (a > b) - (a < b)
         return cmp(a.props.name, b.props.name)
 
     for item in items:

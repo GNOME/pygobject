@@ -23,7 +23,6 @@ import warnings
 from .._ossighelper import wakeup_on_signal, register_sigint_fallback
 from ..overrides import override, deprecated_init
 from ..module import get_introspection_module
-from .._compat import xrange
 from gi._gi import pygobject_new_full
 from gi import PyGIWarning
 
@@ -427,7 +426,7 @@ class ListModel(Gio.ListModel):
 
     def __getitem__(self, key):
         if isinstance(key, slice):
-            return [self.get_item(i) for i in xrange(*key.indices(len(self)))]
+            return [self.get_item(i) for i in range(*key.indices(len(self)))]
         elif isinstance(key, int):
             if key < 0:
                 key += len(self)
@@ -454,7 +453,7 @@ class ListModel(Gio.ListModel):
         return self.get_n_items()
 
     def __iter__(self):
-        for i in xrange(len(self)):
+        for i in range(len(self)):
             yield self.get_item(i)
 
 
@@ -504,7 +503,7 @@ class ListStore(Gio.ListStore):
             elif step == -1:
                 _list_store_splice(self, stop + 1, max(start - stop, 0), [])
             else:
-                for i in sorted(xrange(start, stop, step), reverse=True):
+                for i in sorted(range(start, stop, step), reverse=True):
                     self.remove(i)
         elif isinstance(key, int):
             if key < 0:
@@ -531,7 +530,7 @@ class ListStore(Gio.ListStore):
                 _list_store_splice(
                     self, start, max(stop - start, 0), valuelist)
             else:
-                indices = list(xrange(start, stop, step))
+                indices = list(range(start, stop, step))
                 if len(indices) != len(valuelist):
                     raise ValueError
 

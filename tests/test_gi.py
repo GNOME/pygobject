@@ -1,8 +1,5 @@
 # -*- Mode: Python; py-indent-offset: 4 -*-
-# coding=utf-8
 # vim: tabstop=4 shiftwidth=4 expandtab
-
-from __future__ import absolute_import
 
 import sys
 
@@ -22,7 +19,6 @@ from gi import PyGIWarning
 from gi import PyGIDeprecationWarning
 from gi.repository import GObject, GLib, Gio
 from gi.repository import GIMarshallingTests
-from gi._compat import PY2, PY3
 import pytest
 
 from .helper import capture_exceptions, capture_output
@@ -681,21 +677,14 @@ class TestUtf8(unittest.TestCase):
 
     def test_extra_utf8_full_return_invalid(self):
         with pytest.raises(UnicodeDecodeError):
-            value = GIMarshallingTests.extra_utf8_full_return_invalid()
-            if PY2:
-                value.decode("utf-8")
+            GIMarshallingTests.extra_utf8_full_return_invalid()
 
     def test_extra_utf8_full_out_invalid(self):
         with pytest.raises(UnicodeDecodeError):
-            value = GIMarshallingTests.extra_utf8_full_out_invalid()
-            if PY2:
-                value.decode("utf-8")
+            GIMarshallingTests.extra_utf8_full_out_invalid()
 
     def test_utf8_none_in(self):
         GIMarshallingTests.utf8_none_in(CONSTANT_UTF8)
-        if PY2:
-            GIMarshallingTests.utf8_none_in(CONSTANT_UTF8.decode("utf-8"))
-
         self.assertRaises(TypeError, GIMarshallingTests.utf8_none_in, 42)
         self.assertRaises(TypeError, GIMarshallingTests.utf8_none_in, None)
 
@@ -784,22 +773,6 @@ class TestFilename(unittest.TestCase):
             (ValueError, TypeError),
             GIMarshallingTests.filename_copy, u"foo\x00")
 
-    def test_as_is_py2(self):
-        if not PY2:
-            return
-
-        values = [
-            b"foo",
-            b"\xff\xff",
-            b"\xc3\xb6\xc3\xa4\xc3\xbc",
-            b"\xed\xa0\xbd",
-            b"\xf0\x90\x80\x81",
-        ]
-
-        for v in values:
-            self.assertEqual(GIMarshallingTests.filename_copy(v), v)
-            self.assertEqual(GIMarshallingTests.filename_to_glib_repr(v), v)
-
     def test_win32_surrogates(self):
         if os.name != "nt":
             return
@@ -807,15 +780,10 @@ class TestFilename(unittest.TestCase):
         copy = GIMarshallingTests.filename_copy
         glib_repr = GIMarshallingTests.filename_to_glib_repr
 
-        if PY3:
-            self.assertEqual(copy(u"\ud83d"), u"\ud83d")
-            self.assertEqual(copy(u"\x61\uDC00"), u"\x61\uDC00")
-            self.assertEqual(copy(u"\uD800\uDC01"), u"\U00010001")
-            self.assertEqual(copy(u"\uD83D\x20\uDCA9"), u"\uD83D\x20\uDCA9")
-        else:
-            self.assertEqual(copy(u"\ud83d"), u"\ud83d".encode("utf-8"))
-            self.assertEqual(copy(u"\uD800\uDC01").decode("utf-8"),
-                             u"\U00010001")
+        self.assertEqual(copy(u"\ud83d"), u"\ud83d")
+        self.assertEqual(copy(u"\x61\uDC00"), u"\x61\uDC00")
+        self.assertEqual(copy(u"\uD800\uDC01"), u"\U00010001")
+        self.assertEqual(copy(u"\uD83D\x20\uDCA9"), u"\uD83D\x20\uDCA9")
 
         self.assertEqual(glib_repr(u"\ud83d"), b"\xed\xa0\xbd")
         self.assertEqual(glib_repr(u"\uD800\uDC01"), b"\xf0\x90\x80\x81")
@@ -830,7 +798,7 @@ class TestFilename(unittest.TestCase):
         self.assertEqual(glib_repr(u"\uDC00"), b"\xED\xB0\x80")
 
     def test_win32_bytes_py3(self):
-        if not (os.name == "nt" and PY3):
+        if not (os.name == "nt"):
             return
 
         values = [
@@ -855,39 +823,27 @@ class TestFilename(unittest.TestCase):
         copy = GIMarshallingTests.filename_copy
         glib_repr = GIMarshallingTests.filename_to_glib_repr
 
-        if PY3:
-            try:
-                os.fsdecode(b"\xff\xfe")
-            except UnicodeDecodeError:
-                self.assertRaises(UnicodeDecodeError, copy, b"\xff\xfe")
-            else:
-                str_path = copy(b"\xff\xfe")
-                self.assertTrue(isinstance(str_path, str))
-                self.assertEqual(str_path, os.fsdecode(b"\xff\xfe"))
-                self.assertEqual(copy(str_path), str_path)
-                self.assertEqual(glib_repr(b"\xff\xfe"), b"\xff\xfe")
-                self.assertEqual(glib_repr(str_path), b"\xff\xfe")
-
-            # if getfilesystemencoding is ASCII, then we should fail like
-            # os.fsencode
-            try:
-                byte_path = os.fsencode(u"ä")
-            except UnicodeEncodeError:
-                self.assertRaises(UnicodeEncodeError, copy, u"ä")
-            else:
-                self.assertEqual(copy(u"ä"), u"ä")
-                self.assertEqual(glib_repr(u"ä"), byte_path)
+        try:
+            os.fsdecode(b"\xff\xfe")
+        except UnicodeDecodeError:
+            self.assertRaises(UnicodeDecodeError, copy, b"\xff\xfe")
         else:
-            self.assertTrue(isinstance(copy(b"\xff\xfe"), bytes))
-            self.assertEqual(copy(u"foo"), b"foo")
-            self.assertTrue(isinstance(copy(u"foo"), bytes))
-            try:
-                byte_path = u"ä".encode(sys.getfilesystemencoding())
-            except UnicodeEncodeError:
-                self.assertRaises(UnicodeEncodeError, copy, u"ä")
-            else:
-                self.assertEqual(copy(u"ä"), byte_path)
-                self.assertEqual(glib_repr(u"ä"), byte_path)
+            str_path = copy(b"\xff\xfe")
+            self.assertTrue(isinstance(str_path, str))
+            self.assertEqual(str_path, os.fsdecode(b"\xff\xfe"))
+            self.assertEqual(copy(str_path), str_path)
+            self.assertEqual(glib_repr(b"\xff\xfe"), b"\xff\xfe")
+            self.assertEqual(glib_repr(str_path), b"\xff\xfe")
+
+        # if getfilesystemencoding is ASCII, then we should fail like
+        # os.fsencode
+        try:
+            byte_path = os.fsencode(u"ä")
+        except UnicodeEncodeError:
+            self.assertRaises(UnicodeEncodeError, copy, u"ä")
+        else:
+            self.assertEqual(copy(u"ä"), u"ä")
+            self.assertEqual(glib_repr(u"ä"), byte_path)
 
     @unittest.skip("glib can't handle non-unicode paths")
     def test_win32_surrogates_exists(self):
@@ -902,15 +858,15 @@ class TestFilename(unittest.TestCase):
 
     def test_path_exists_various_types(self):
         wd = self.workdir
-        wdb = os.fsencode(wd) if PY3 else wd
+        wdb = os.fsencode(wd)
 
         paths = [(wdb, b"foo-1"), (wd, u"foo-2"), (wd, u"öäü-3")]
-        if PY3:
-            try:
-                paths.append((wd, os.fsdecode(b"\xff\xfe-4")))
-            except UnicodeDecodeError:
-                # depends on the code page
-                pass
+
+        try:
+            paths.append((wd, os.fsdecode(b"\xff\xfe-4")))
+        except UnicodeDecodeError:
+            # depends on the code page
+            pass
 
         if os.name != "nt":
             paths.append((wdb, b"\xff\xfe-5"))
@@ -961,10 +917,7 @@ class TestArray(unittest.TestCase):
     @unittest.skipUnless(
         hasattr(GIMarshallingTests, "array_unichar_out"), "too old gi")
     def test_array_unichar_out(self):
-        if PY2:
-            result = [c.encode("utf-8") for c in list(CONSTANT_UCS4)]
-        else:
-            result = list(CONSTANT_UCS4)
+        result = list(CONSTANT_UCS4)
         assert GIMarshallingTests.array_unichar_out() == result
 
     @unittest.skip("broken")
@@ -1627,10 +1580,7 @@ class TestGValue(unittest.TestCase):
                     GLib.MAXINT + 1, GLib.MININT, GLib.MAXINT)):
             GIMarshallingTests.gvalue_flat_array([GLib.MAXINT + 1, "42", True])
 
-        if PY2:
-            min_, max_ = GLib.MINLONG, GLib.MAXLONG
-        else:
-            min_, max_ = GLib.MININT, GLib.MAXINT
+        min_, max_ = GLib.MININT, GLib.MAXINT
 
         with pytest.raises(
                 OverflowError,
@@ -1651,7 +1601,7 @@ class TestGValue(unittest.TestCase):
         gc.collect()
         assert obj.__grefcount__ == grefcount
 
-    @unittest.skipIf(platform.python_implementation() == "PyPy" and PY3, "fixme")
+    @unittest.skipIf(platform.python_implementation() == "PyPy", "fixme")
     def test_gvalue_gobject_ref_counts(self):
         # Tests a GObject held by a GValue
         obj = GObject.Object()
@@ -2908,10 +2858,7 @@ class TestMRO(unittest.TestCase):
             # style mixin.
             type('GIWithOldStyleMixin', (GIMarshallingTests.Object, Mixin), {})
 
-            if PY2:
-                self.assertTrue(issubclass(warn[0].category, RuntimeWarning))
-            else:
-                self.assertEqual(len(warn), 0)
+            self.assertEqual(len(warn), 0)
 
 
 class TestInterfaceClash(unittest.TestCase):

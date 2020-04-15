@@ -1,12 +1,6 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import absolute_import
-
 import sys
 
 import pytest
-
-from gi._compat import reraise
 
 
 @pytest.hookimpl(hookwrapper=True, tryfirst=True)
@@ -28,4 +22,5 @@ def pytest_runtest_call(item):
     finally:
         sys.excepthook = orig_excepthook
         if exceptions:
-            reraise(*exceptions[0])
+            tp, value, tb = exceptions[0]
+            raise tp(value).with_traceback(tb)

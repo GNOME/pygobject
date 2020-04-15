@@ -20,13 +20,9 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
 # USA
 
-from __future__ import absolute_import
 
 import unittest
-try:
-    from collections import abc
-except ImportError:
-    import collections as abc
+from collections import abc
 
 import gi._gi as GIRepository
 from gi.module import repository as repo

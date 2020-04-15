@@ -20,15 +20,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
 # USA
 
-from __future__ import absolute_import
-
 import importlib
-
-try:
-    maketrans = ''.maketrans
-except AttributeError:
-    # fallback for Python 2
-    from string import maketrans
 
 import gi
 
@@ -155,7 +147,7 @@ class IntrospectionModule(object):
                 # Don't use upper() here to avoid locale specific
                 # identifier conversion (e. g. in Turkish 'i'.upper() == 'i')
                 # see https://bugzilla.gnome.org/show_bug.cgi?id=649165
-                ascii_upper_trans = maketrans(
+                ascii_upper_trans = ''.maketrans(
                     'abcdefgjhijklmnopqrstuvwxyz',
                     'ABCDEFGJHIJKLMNOPQRSTUVWXYZ')
                 for value_info in info.get_values():

@@ -1,13 +1,8 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import absolute_import
-
 import pytest
 
 from gi import PyGIDeprecationWarning
 from gi.repository import GObject, GLib, GIMarshallingTests
 
-from gi._compat import PY2
 from .helper import ignore_gi_deprecation_warnings
 
 
@@ -285,15 +280,8 @@ def test_value_string():
 
         assert getter() is None
 
-        if PY2:
+        with pytest.raises(TypeError):
             setter(b"bar")
-            assert getter() == b"bar"
-
-            setter(u"öäü")
-            assert getter().decode("utf-8") == u"öäü"
-        else:
-            with pytest.raises(TypeError):
-                setter(b"bar")
 
         setter(u"quux")
         assert getter() == u"quux"

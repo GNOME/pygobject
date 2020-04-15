@@ -1,7 +1,3 @@
-# coding=utf-8
-
-from __future__ import absolute_import
-
 import os
 import gc
 import sys
@@ -31,7 +27,6 @@ from gi.repository import GIMarshallingTests
 from gi.repository import Regress
 from gi import _propertyhelper as propertyhelper
 
-from gi._compat import long_, PY3, PY2
 from .helper import capture_glib_warnings
 
 
@@ -182,10 +177,7 @@ class TestPropertyObject(unittest.TestCase):
 
     def test_utf8_lone_surrogate(self):
         obj = PropertyObject()
-        if PY3:
-            with pytest.raises(TypeError):
-                obj.set_property('construct', '\ud83d')
-        else:
+        with pytest.raises(TypeError):
             obj.set_property('construct', '\ud83d')
 
     def test_int_to_str(self):
@@ -207,12 +199,12 @@ class TestPropertyObject(unittest.TestCase):
     def test_uint64(self):
         obj = new(PropertyObject)
         self.assertEqual(obj.props.uint64, 0)
-        obj.props.uint64 = long_(1)
-        self.assertEqual(obj.props.uint64, long_(1))
         obj.props.uint64 = 1
-        self.assertEqual(obj.props.uint64, long_(1))
+        self.assertEqual(obj.props.uint64, 1)
+        obj.props.uint64 = 1
+        self.assertEqual(obj.props.uint64, 1)
 
-        self.assertRaises((TypeError, OverflowError), obj.set_property, "uint64", long_(-1))
+        self.assertRaises((TypeError, OverflowError), obj.set_property, "uint64", -1)
         self.assertRaises((TypeError, OverflowError), obj.set_property, "uint64", -1)
 
     def test_uint64_default_value(self):
@@ -220,7 +212,7 @@ class TestPropertyObject(unittest.TestCase):
             class TimeControl(GObject.GObject):
                 __gproperties__ = {
                     'time': (TYPE_UINT64, 'Time', 'Time',
-                             long_(0), (1 << 64) - 1, long_(0),
+                             0, (1 << 64) - 1, 0,
                              ParamFlags.READABLE)
                     }
         except OverflowError:
@@ -512,9 +504,9 @@ class TestProperty(unittest.TestCase):
     def test_simple(self):
         class C(GObject.GObject):
             str = GObject.Property(type=str)
-            int = GObject.Property(type=int)
             float = GObject.Property(type=float)
-            long = GObject.Property(type=long_)
+            long = GObject.Property(type=int)
+            int = GObject.Property(type=int)
 
         self.assertTrue(hasattr(C.props, 'str'))
         self.assertTrue(hasattr(C.props, 'int'))
@@ -534,9 +526,9 @@ class TestProperty(unittest.TestCase):
         o.float = 3.14
         self.assertEqual(o.float, 3.14)
 
-        self.assertEqual(o.long, long_(0))
-        o.long = long_(100)
-        self.assertEqual(o.long, long_(100))
+        self.assertEqual(o.long, 0)
+        o.long = 100
+        self.assertEqual(o.long, 100)
 
     def test_custom_getter(self):
         class C(GObject.GObject):
@@ -871,8 +863,6 @@ class TestProperty(unittest.TestCase):
     def test_python_to_glib_type_mapping(self):
         tester = GObject.Property()
         self.assertEqual(tester._type_from_python(int), GObject.TYPE_INT)
-        if PY2:
-            self.assertEqual(tester._type_from_python(long_), GObject.TYPE_LONG)
         self.assertEqual(tester._type_from_python(bool), GObject.TYPE_BOOLEAN)
         self.assertEqual(tester._type_from_python(float), GObject.TYPE_DOUBLE)
         self.assertEqual(tester._type_from_python(str), GObject.TYPE_STRING)

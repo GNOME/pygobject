@@ -34,10 +34,10 @@ a well behaved PyGTK application mostly unmodified on top of PyGI.
 
 import sys
 import warnings
+from collections import UserList
 
 import gi
 from gi.repository import GObject
-from gi import _compat
 
 
 _patches = []
@@ -149,10 +149,6 @@ def _disable_all():
             sys.modules[name] = old_value
     del _module_patches[:]
 
-    _compat.reload(sys)
-    if _compat.PY2:
-        sys.setdefaultencoding('ascii')
-
 
 def enable_gtk(version='3.0'):
     if _check_enabled("gtk", version):
@@ -160,11 +156,6 @@ def enable_gtk(version='3.0'):
 
     if version == "4.0":
         raise ValueError("version 4.0 not supported")
-
-    # set the default encoding like PyGTK
-    _compat.reload(sys)
-    if _compat.PY2:
-        sys.setdefaultencoding('utf-8')
 
     # atk
     gi.require_version('Atk', '1.0')
@@ -429,11 +420,11 @@ def enable_gtk(version='3.0'):
     orig_size_request = Gtk.Widget.size_request
 
     def size_request(widget):
-        class SizeRequest(_compat.UserList):
+        class SizeRequest(UserList):
             def __init__(self, req):
                 self.height = req.height
                 self.width = req.width
-                _compat.UserList.__init__(self, [self.width, self.height])
+                UserList.__init__(self, [self.width, self.height])
         return SizeRequest(orig_size_request(widget))
     _patch(Gtk.Widget, "size_request", size_request)
     _patch(Gtk.Widget, "hide_all", Gtk.Widget.hide)

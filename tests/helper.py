@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 import contextlib
 import unittest
 import inspect
@@ -7,11 +5,11 @@ import warnings
 import functools
 import sys
 from collections import namedtuple
+from io import StringIO
 
 import gi
 from gi import PyGIDeprecationWarning
 from gi.repository import GLib
-from gi._compat import StringIO
 
 
 ExceptionInfo = namedtuple("ExceptionInfo", ["type", "value", "traceback"])

@@ -1,7 +1,4 @@
 # -*- Mode: Python -*-
-# encoding: UTF-8
-
-from __future__ import absolute_import
 
 import os
 import sys
@@ -13,7 +10,6 @@ import subprocess
 import pytest
 from gi.repository import GLib
 from gi import PyGIDeprecationWarning
-from gi._compat import PY3
 
 
 class TestGLib(unittest.TestCase):
@@ -83,12 +79,8 @@ class TestGLib(unittest.TestCase):
             if isinstance(f, bytes):
                 return f
             if os.name == "nt":
-                if PY3:
-                    return f.encode("utf-8", "surrogatepass")
-                else:
-                    return f.encode("utf-8")
+                return f.encode("utf-8", "surrogatepass")
             else:
-                assert PY3
                 return os.fsencode(f)
 
         # this is locale dependent, so we cannot completely verify the result
