@@ -1377,7 +1377,12 @@ pygi_type_register_types(PyObject *d)
     PyGTypeWrapper_Type.tp_methods = _PyGTypeWrapper_methods;
     PyGTypeWrapper_Type.tp_getset = _PyGTypeWrapper_getsets;
     PyGTypeWrapper_Type.tp_init = (initproc)pyg_type_wrapper_init;
-    PYGLIB_REGISTER_TYPE(d, PyGTypeWrapper_Type, "GType");
+    PyGTypeWrapper_Type.tp_alloc = PyType_GenericAlloc;
+    PyGTypeWrapper_Type.tp_new = PyType_GenericNew;
+    if (PyType_Ready(&PyGTypeWrapper_Type))
+        return -1;
+
+    PyDict_SetItemString(d, "GType", (PyObject *)&PyGTypeWrapper_Type);
 
     /* This type lazily registered in pyg_object_descr_doc_get */
     PyGObjectDoc_Type.tp_dealloc = (destructor)object_doc_dealloc;

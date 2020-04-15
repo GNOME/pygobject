@@ -272,7 +272,12 @@ pygi_spawn_register_types(PyObject *d)
     PyGPid_Type.tp_init = pyg_pid_tp_init;
     PyGPid_Type.tp_free = (freefunc)pyg_pid_free;
     PyGPid_Type.tp_new = PyLong_Type.tp_new;
-    PYGLIB_REGISTER_TYPE(d, PyGPid_Type, "Pid");
+    PyGPid_Type.tp_alloc = PyType_GenericAlloc;
+
+    if (PyType_Ready(&PyGPid_Type))
+        return -1;
+
+    PyDict_SetItemString(d, "Pid", (PyObject *)&PyGPid_Type);
 
     return 0;
 }

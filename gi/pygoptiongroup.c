@@ -295,7 +295,13 @@ pygi_option_group_register_types(PyObject *d)
     PyGOptionGroup_Type.tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE;
     PyGOptionGroup_Type.tp_methods = pyg_option_group_methods;
     PyGOptionGroup_Type.tp_init = (initproc)pyg_option_group_init;
-    PYGLIB_REGISTER_TYPE(d, PyGOptionGroup_Type, "OptionGroup");
+    PyGOptionGroup_Type.tp_alloc = PyType_GenericAlloc;
+    PyGOptionGroup_Type.tp_new = PyType_GenericNew;
+
+    if (PyType_Ready(&PyGOptionGroup_Type))
+        return -1;
+
+    PyDict_SetItemString(d, "OptionGroup", (PyObject *)&PyGOptionGroup_Type);
 
     return 0;
 }

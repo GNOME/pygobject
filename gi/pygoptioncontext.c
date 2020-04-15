@@ -368,7 +368,12 @@ pygi_option_context_register_types(PyObject *d)
     PyGOptionContext_Type.tp_flags = Py_TPFLAGS_DEFAULT;
     PyGOptionContext_Type.tp_methods = pyg_option_context_methods;
     PyGOptionContext_Type.tp_init = (initproc)pyg_option_context_init;
-    PYGLIB_REGISTER_TYPE(d, PyGOptionContext_Type, "OptionContext");
+    PyGOptionContext_Type.tp_alloc = PyType_GenericAlloc;
+    PyGOptionContext_Type.tp_new = PyType_GenericNew;
+    if (PyType_Ready(&PyGOptionContext_Type))
+        return -1;
+
+    PyDict_SetItemString(d, "OptionContext", (PyObject *)&PyGOptionContext_Type);
 
     return 0;
 }

@@ -19,15 +19,6 @@ PyTypeObject symbol = {                                 \
     sizeof(csymbol)                                     \
 };
 
-#define PYGLIB_REGISTER_TYPE(d, type, name)	            \
-    if (!type.tp_alloc)                                 \
-	    type.tp_alloc = PyType_GenericAlloc;            \
-    if (!type.tp_new)                                   \
-	    type.tp_new = PyType_GenericNew;                \
-    if (PyType_Ready(&type))                            \
-	    return -1;                                         \
-    PyDict_SetItemString(d, name, (PyObject *)&type);
-
 #define _PyGI_ERROR_PREFIX(format, ...) G_STMT_START { \
     PyObject *py_error_prefix; \
     py_error_prefix = PyUnicode_FromFormat(format, ## __VA_ARGS__); \
