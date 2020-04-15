@@ -21,7 +21,6 @@
 #include <Python.h>
 #include <glib.h>
 
-#include "pygi-python-compat.h"
 #include "pygi-struct-marshal.h"
 #include "pygi-struct.h"
 #include "pygi-foreign.h"
@@ -312,7 +311,7 @@ type_error:
         PyErr_Format (PyExc_TypeError, "argument %s: Expected %s, but got %s%s%s",
                       arg_name ? arg_name : "self",
                       type_name,
-                      module ? PYGLIB_PyUnicode_AsString(module) : "",
+                      module ? PyUnicode_AsUTF8(module) : "",
                       module ? "." : "",
                       Py_TYPE (py_arg)->tp_name);
         if (module)

@@ -21,7 +21,6 @@
 #include <Python.h>
 #include <glib.h>
 
-#include "pygi-python-compat.h"
 #include "pygi-enum-marshal.h"
 #include "pygi-type.h"
 #include "pygenum.h"
@@ -132,13 +131,13 @@ _pygi_marshal_from_py_interface_enum (PyGIInvokeState   *state,
 
     is_instance = PyObject_IsInstance (py_arg, iface_cache->py_type);
 
-    py_long = PYGLIB_PyNumber_Long (py_arg);
+    py_long = PyNumber_Long (py_arg);
     if (py_long == NULL) {
         PyErr_Clear();
         goto err;
     }
 
-    c_long = PYGLIB_PyLong_AsLong (py_long);
+    c_long = PyLong_AsLong (py_long);
     Py_DECREF (py_long);
 
     /* Write c_long into arg */
@@ -201,13 +200,13 @@ _pygi_marshal_from_py_interface_flags (PyGIInvokeState   *state,
 
     is_instance = PyObject_IsInstance (py_arg, iface_cache->py_type);
 
-    py_long = PYGLIB_PyNumber_Long (py_arg);
+    py_long = PyNumber_Long (py_arg);
     if (py_long == NULL) {
         PyErr_Clear ();
         goto err;
     }
 
-    c_ulong = PYGLIB_PyLong_AsUnsignedLong (py_long);
+    c_ulong = PyLong_AsUnsignedLongMask (py_long);
     Py_DECREF (py_long);
 
     /* only 0 or argument of type Flag is allowed */

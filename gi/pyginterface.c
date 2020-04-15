@@ -23,7 +23,7 @@
 #include <Python.h>
 #include <glib-object.h>
 
-#include "pygi-python-compat.h"
+#include "pygi-util.h"
 #include "pyginterface.h"
 #include "pygi-type.h"
 

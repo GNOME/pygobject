@@ -40,12 +40,6 @@ _check_for_unexpected_kwargs (PyGICallableCache *cache,
     while (PyDict_Next (py_kwargs, &dict_iter_pos, &dict_key, &dict_value)) {
         PyObject *key;
 
-#if PY_VERSION_HEX < 0x03000000
-        if (PyString_Check (dict_key)) {
-            Py_INCREF (dict_key);
-            key = dict_key;
-        } else
-#endif
         {
             key = PyUnicode_AsUTF8String (dict_key);
             if (key == NULL) {

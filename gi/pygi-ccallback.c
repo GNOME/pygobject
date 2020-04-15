@@ -19,7 +19,7 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "pygi-python-compat.h"
+#include "pygi-util.h"
 #include "pygi-ccallback.h"
 
 #include <girepository.h>

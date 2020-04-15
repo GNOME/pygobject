@@ -22,7 +22,7 @@
 #include "pygi-repository.h"
 #include "pygi-info.h"
 #include "pygi-basictype.h"
-#include "pygi-python-compat.h"
+#include "pygi-util.h"
 
 PyObject *PyGIRepositoryError;
 

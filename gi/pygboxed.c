@@ -58,10 +58,10 @@ gboxed_richcompare(PyObject *self, PyObject *other, int op)
     }
 }
 
-static PYGLIB_Py_hash_t
+static Py_hash_t
 gboxed_hash(PyGBoxed *self)
 {
-    return PYGLIB_Py_hash_t_FromVoidPtr (pyg_boxed_get_ptr (self));
+    return (Py_hash_t)(gintptr)(pyg_boxed_get_ptr (self));
 }
 
 static PyObject *
@@ -74,12 +74,12 @@ gboxed_repr(PyGBoxed *boxed)
     if (module == NULL)
         return NULL;
 
-    if (!PYGLIB_PyUnicode_Check (module)) {
+    if (!PyUnicode_Check (module)) {
         Py_DECREF (module);
         return NULL;
     }
 
-    module_str = PYGLIB_PyUnicode_AsString (module);
+    module_str = PyUnicode_AsUTF8 (module);
     namespace = g_strrstr (module_str, ".");
     if (namespace == NULL) {
         namespace = module_str;
@@ -87,10 +87,10 @@ gboxed_repr(PyGBoxed *boxed)
         namespace += 1;
     }
 
-    repr = PYGLIB_PyUnicode_FromFormat ("<%s.%s object at %p (%s at %p)>",
-                                        namespace, Py_TYPE (self)->tp_name,
-                                        self, g_type_name (boxed->gtype),
-                                        pyg_boxed_get_ptr (boxed));
+    repr = PyUnicode_FromFormat ("<%s.%s object at %p (%s at %p)>",
+                                 namespace, Py_TYPE (self)->tp_name,
+                                 self, g_type_name (boxed->gtype),
+                                 pyg_boxed_get_ptr (boxed));
     Py_DECREF (module);
     return repr;
 }

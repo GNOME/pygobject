@@ -19,7 +19,6 @@
 #include <Python.h>
 #include "pygi-value.h"
 #include "pygi-struct.h"
-#include "pygi-python-compat.h"
 #include "pygi-basictype.h"
 #include "pygobject-object.h"
 #include "pygi-type.h"
@@ -536,12 +535,13 @@ pyg_value_from_pyobject_with_error(GValue *value, PyObject *obj)
         else if (PySequence_Check(obj) &&
                 G_VALUE_HOLDS(value, G_TYPE_ARRAY))
             return pyg_array_from_pyobject(value, obj);
-        else if (PYGLIB_PyUnicode_Check(obj) &&
+        else if (PyUnicode_Check (obj) &&
                 G_VALUE_HOLDS(value, G_TYPE_GSTRING)) {
             GString *string;
             char *buffer;
             Py_ssize_t len;
-            if (PYGLIB_PyUnicode_AsStringAndSize(obj, &buffer, &len))
+            buffer = PyUnicode_AsUTF8AndSize (obj, &len);
+            if (buffer == NULL)
                 return -1;
             string = g_string_new_len(buffer, len);
             g_value_set_boxed(value, string);
@@ -655,9 +655,9 @@ pygi_value_to_py_basic_type (const GValue *value, GType fundamental, gboolean *h
     *handled = TRUE;
     switch (fundamental) {
         case G_TYPE_CHAR:
-            return PYGLIB_PyLong_FromLong (g_value_get_schar (value));
+            return PyLong_FromLong (g_value_get_schar (value));
         case G_TYPE_UCHAR:
-            return PYGLIB_PyLong_FromLong (g_value_get_uchar (value));
+            return PyLong_FromLong (g_value_get_uchar (value));
         case G_TYPE_BOOLEAN:
             return pygi_gboolean_to_py (g_value_get_boolean (value));
         case G_TYPE_INT:
@@ -747,7 +747,7 @@ value_to_py_structured_type (const GValue *value, GType fundamental, gboolean co
             return ret;
         } else if (G_VALUE_HOLDS(value, G_TYPE_GSTRING)) {
             GString *string = (GString *) g_value_get_boxed(value);
-            PyObject *ret = PYGLIB_PyUnicode_FromStringAndSize(string->str, string->len);
+            PyObject *ret = PyUnicode_FromStringAndSize (string->str, string->len);
             return ret;
         }
         bm = pyg_type_lookup(G_VALUE_TYPE(value));
@@ -816,10 +816,10 @@ pyg_value_as_pyobject (const GValue *value, gboolean copy_boxed)
      * See: https://bugzilla.gnome.org/show_bug.cgi?id=733893 */
     if (fundamental == G_TYPE_CHAR) {
         gint8 val = g_value_get_schar(value);
-        return PYGLIB_PyUnicode_FromStringAndSize ((char *)&val, 1);
+        return PyUnicode_FromStringAndSize ((char *)&val, 1);
     } else if (fundamental == G_TYPE_UCHAR) {
         guint8 val = g_value_get_uchar(value);
-        return PYGLIB_PyBytes_FromStringAndSize ((char *)&val, 1);
+        return PyBytes_FromStringAndSize ((char *)&val, 1);
     }
 
     pyobj = pygi_value_to_py_basic_type (value, fundamental, &handled);

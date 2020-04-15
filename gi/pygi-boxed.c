@@ -24,7 +24,7 @@
 #include "pygboxed.h"
 #include "pygi-type.h"
 #include "pygi-basictype.h"
-#include "pygi-python-compat.h"
+#include "pygi-util.h"
 
 #include <girepository.h>
 

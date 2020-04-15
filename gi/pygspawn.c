@@ -22,7 +22,7 @@
 #include <Python.h>
 #include <glib.h>
 
-#include "pygi-python-compat.h"
+#include "pygi-util.h"
 #include "pygi-basictype.h"
 #include "pygspawn.h"
 #include "pygi-error.h"
@@ -32,7 +32,7 @@ struct _PyGChildSetupData {
     PyObject *data;
 };
 
-PYGLIB_DEFINE_TYPE("gi._gi.Pid", PyGPid_Type, PYGLIB_PyLongObject)
+PYGLIB_DEFINE_TYPE("gi._gi.Pid", PyGPid_Type, PyLongObject)
 
 static GPid
 pyg_pid_get_pid (PyObject *self)
@@ -40,7 +40,7 @@ pyg_pid_get_pid (PyObject *self)
 #ifdef G_OS_WIN32
     return (GPid)PyLong_AsVoidPtr (self);
 #else
-    return (GPid)PYGLIB_PyLong_AsLong (self);
+    return (GPid)PyLong_AsLong (self);
 #endif
 }
 
@@ -61,7 +61,7 @@ static void
 pyg_pid_free(PyObject *gpid)
 {
     g_spawn_close_pid(pyg_pid_get_pid (gpid));
-    PYGLIB_PyLong_Type.tp_free((void *) gpid);
+    PyLong_Type.tp_free((void *) gpid);
 }
 
 static int
@@ -158,7 +158,7 @@ pyglib_spawn_async(PyObject *object, PyObject *args, PyObject *kwargs)
     argv = g_new0(char *, len + 1);
     for (i = 0; i < len; ++i) {
         PyObject *tmp = PySequence_ITEM(pyargv, i);
-        if (tmp == NULL || !PYGLIB_PyUnicode_Check(tmp)) {
+        if (tmp == NULL || !PyUnicode_Check (tmp)) {
             PyErr_SetString(PyExc_TypeError,
                             "gi._gi.spawn_async: "
 			    "first argument must be a sequence of strings");
@@ -166,7 +166,7 @@ pyglib_spawn_async(PyObject *object, PyObject *args, PyObject *kwargs)
             Py_XDECREF(tmp);
             return NULL;
         }
-        argv[i] = PYGLIB_PyUnicode_AsString(tmp);
+        argv[i] = PyUnicode_AsUTF8 (tmp);
         Py_DECREF(tmp);
     }
 
@@ -183,7 +183,7 @@ pyglib_spawn_async(PyObject *object, PyObject *args, PyObject *kwargs)
         envp = g_new0(char *, len + 1);
         for (i = 0; i < len; ++i) {
             PyObject *tmp = PySequence_ITEM(pyenvp, i);
-            if (tmp == NULL || !PYGLIB_PyUnicode_Check(tmp)) {
+            if (tmp == NULL || !PyUnicode_Check (tmp)) {
                 PyErr_SetString(PyExc_TypeError,
                                 "gi._gi.spawn_async: "
 				"second argument must be a sequence of strings");
@@ -192,7 +192,7 @@ pyglib_spawn_async(PyObject *object, PyObject *args, PyObject *kwargs)
 		g_free(argv);
                 return NULL;
             }
-            envp[i] = PYGLIB_PyUnicode_AsString(tmp);
+            envp[i] = PyUnicode_AsUTF8 (tmp);
             Py_DECREF(tmp);
         }
     }
@@ -266,12 +266,12 @@ pyglib_spawn_async(PyObject *object, PyObject *args, PyObject *kwargs)
 int
 pygi_spawn_register_types(PyObject *d)
 {
-    PyGPid_Type.tp_base = &PYGLIB_PyLong_Type;
+    PyGPid_Type.tp_base = &PyLong_Type;
     PyGPid_Type.tp_flags = Py_TPFLAGS_DEFAULT;
     PyGPid_Type.tp_methods = pyg_pid_methods;
     PyGPid_Type.tp_init = pyg_pid_tp_init;
     PyGPid_Type.tp_free = (freefunc)pyg_pid_free;
-    PyGPid_Type.tp_new = PYGLIB_PyLong_Type.tp_new;
+    PyGPid_Type.tp_new = PyLong_Type.tp_new;
     PYGLIB_REGISTER_TYPE(d, PyGPid_Type, "Pid");
 
     return 0;

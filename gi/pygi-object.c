@@ -21,7 +21,6 @@
 #include <Python.h>
 #include <glib.h>
 
-#include "pygi-python-compat.h"
 #include "pygi-object.h"
 #include "pygobject-object.h"
 #include "pygparamspec.h"
@@ -52,7 +51,7 @@ _pygi_marshal_from_py_gobject (PyObject *py_arg, /*in*/
     if (!pygobject_check (py_arg, &PyGObject_Type)) {
         PyObject *repr = PyObject_Repr (py_arg);
         PyErr_Format(PyExc_TypeError, "expected GObject but got %s",
-                     PYGLIB_PyUnicode_AsString (repr));
+                     PyUnicode_AsUTF8 (repr));
         Py_DECREF (repr);
         return FALSE;
     }
@@ -117,7 +116,7 @@ pygi_arg_gobject_out_arg_from_py (PyObject *py_arg, /*in*/
             gchar *msg = g_strdup_printf ("Expecting to marshal a borrowed reference for %s, "
                                           "but nothing in Python is holding a reference to this object. "
                                           "See: https://bugzilla.gnome.org/show_bug.cgi?id=687522",
-                                          PYGLIB_PyUnicode_AsString(repr));
+                                          PyUnicode_AsUTF8 (repr));
             Py_DECREF (repr);
             if (PyErr_WarnEx (PyExc_RuntimeWarning, msg, 2)) {
                 g_free (msg);
@@ -161,7 +160,7 @@ _pygi_marshal_from_py_interface_object (PyGIInvokeState             *state,
         PyErr_Format (PyExc_TypeError, "argument %s: Expected %s, but got %s%s%s",
                       arg_cache->arg_name ? arg_cache->arg_name : "self",
                       ( (PyGIInterfaceCache *)arg_cache)->type_name,
-                      module ? PYGLIB_PyUnicode_AsString(module) : "",
+                      module ? PyUnicode_AsUTF8 (module) : "",
                       module ? "." : "",
                       Py_TYPE (py_arg)->tp_name);
         if (module)

@@ -29,7 +29,6 @@
 #include <pygenum.h>
 #include <pygflags.h>
 
-#include "pygi-python-compat.h"
 #include "pygi-argument.h"
 #include "pygi-info.h"
 #include "pygi-value.h"
@@ -360,9 +359,6 @@ _pygi_argument_from_object (PyObject   *object,
 
             /* Note, strings are sequences, but we cannot accept them here */
             if (!PySequence_Check (object) || 
-#if PY_VERSION_HEX < 0x03000000
-                PyString_Check (object) || 
-#endif
                 PyUnicode_Check (object)) {
                 PyErr_SetString (PyExc_TypeError, "expected sequence");
                 break;
@@ -392,9 +388,9 @@ _pygi_argument_from_object (PyObject   *object,
             }
 
             if (g_type_info_get_tag (item_type_info) == GI_TYPE_TAG_UINT8 &&
-                PYGLIB_PyBytes_Check(object)) {
+                PyBytes_Check (object)) {
 
-                memcpy(array->data, PYGLIB_PyBytes_AsString(object), length);
+                memcpy(array->data, PyBytes_AsString (object), length);
                 array->len = length;
                 goto array_success;
             }
@@ -748,7 +744,7 @@ _pygi_argument_to_object (GIArgument  *arg,
 
             if (item_type_tag == GI_TYPE_TAG_UINT8) {
                 /* Return as a byte array */
-                object = PYGLIB_PyBytes_FromStringAndSize (array->data, array->len);
+                object = PyBytes_FromStringAndSize (array->data, array->len);
             } else {
                 object = PyList_New (array->len);
                 if (object == NULL) {

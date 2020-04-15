@@ -151,7 +151,7 @@ pyg_option_context_parse(PyGOptionContext *self,
     for (pos = 0; pos < argv_length; pos++)
     {
         arg = PyList_GetItem(argv, pos);
-        argv_content[pos] = g_strdup(PYGLIB_PyUnicode_AsString(arg));
+        argv_content[pos] = g_strdup(PyUnicode_AsUTF8 (arg));
         if (argv_content[pos] == NULL)
         {
             g_strfreev(argv_content);
@@ -179,7 +179,7 @@ pyg_option_context_parse(PyGOptionContext *self,
     new_argv = PyList_New(g_strv_length(argv_content));
     for (pos = 0; pos < argv_length; pos++)
     {
-        arg = PYGLIB_PyUnicode_FromString(argv_content[pos]);
+        arg = PyUnicode_FromString (argv_content[pos]);
         PyList_SetItem(new_argv, pos, arg);
     }
 

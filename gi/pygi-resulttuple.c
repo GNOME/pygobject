@@ -20,7 +20,7 @@
 #include <Python.h>
 #include <glib.h>
 #include "pygi-resulttuple.h"
-#include "pygi-python-compat.h"
+#include "pygi-util.h"
 
 static char repr_format_key[] = "__repr_format";
 static char tuple_indices_key[] = "__tuple_indices";
@@ -54,12 +54,12 @@ static PyObject*
 resulttuple_repr(PyObject *self) {
     PyObject *format,  *repr, *format_attr;
 
-    format_attr = PYGLIB_PyUnicode_FromString (repr_format_key);
+    format_attr = PyUnicode_FromString (repr_format_key);
     format = PyTuple_Type.tp_getattro (self, format_attr);
     Py_DECREF (format_attr);
     if (format == NULL)
         return NULL;
-    repr = PYGLIB_PyUnicode_Format (format, self);
+    repr = PyUnicode_Format (format, self);
     Py_DECREF (format);
     return repr;
 }
@@ -73,7 +73,7 @@ static PyObject*
 resulttuple_getattro(PyObject *self, PyObject *name) {
     PyObject *mapping, *index, *mapping_attr, *item;
 
-    mapping_attr = PYGLIB_PyUnicode_FromString (tuple_indices_key);
+    mapping_attr = PyUnicode_FromString (tuple_indices_key);
     mapping = PyTuple_Type.tp_getattro (self, mapping_attr);
     Py_DECREF (mapping_attr);
     if (mapping == NULL)
@@ -82,7 +82,7 @@ resulttuple_getattro(PyObject *self, PyObject *name) {
     index = PyDict_GetItem (mapping, name);
 
     if (index != NULL) {
-        item = PyTuple_GET_ITEM (self, PYGLIB_PyLong_AsSsize_t (index));
+        item = PyTuple_GET_ITEM (self, PyLong_AsSsize_t (index));
         Py_INCREF (item);
     } else {
         item = PyTuple_Type.tp_getattro (self, name);
@@ -120,7 +120,7 @@ resulttuple_dir(PyObject *self)
     PyObject *mapping_values = NULL;
     PyObject *result = NULL;
 
-    mapping_attr = PYGLIB_PyUnicode_FromString (tuple_indices_key);
+    mapping_attr = PyUnicode_FromString (tuple_indices_key);
     mapping = PyTuple_Type.tp_getattro (self, mapping_attr);
     Py_DECREF (mapping_attr);
     if (mapping == NULL)
@@ -208,8 +208,8 @@ pygi_resulttuple_new_type(PyObject *tuple_names) {
     format_list = PyList_New (0);
     index_dict = PyDict_New ();
 
-    empty_format = PYGLIB_PyUnicode_FromString ("%r");
-    named_format = PYGLIB_PyUnicode_FromString ("%s=%%r");
+    empty_format = PyUnicode_FromString ("%r");
+    named_format = PyUnicode_FromString ("%s=%%r");
     len = PyList_Size (tuple_names);
     for (i = 0; i < len; i++) {
         PyObject *item, *named_args, *named_build, *index;
@@ -218,11 +218,11 @@ pygi_resulttuple_new_type(PyObject *tuple_names) {
             PyList_Append (format_list, empty_format);
         } else {
             named_args = Py_BuildValue ("(O)", item);
-            named_build = PYGLIB_PyUnicode_Format (named_format, named_args);
+            named_build = PyUnicode_Format (named_format, named_args);
             Py_DECREF (named_args);
             PyList_Append (format_list, named_build);
             Py_DECREF (named_build);
-            index = PYGLIB_PyLong_FromSsize_t (i);
+            index = PyLong_FromSsize_t (i);
             PyDict_SetItem (index_dict, item, index);
             Py_DECREF (index);
         }
@@ -230,12 +230,12 @@ pygi_resulttuple_new_type(PyObject *tuple_names) {
     Py_DECREF (empty_format);
     Py_DECREF (named_format);
 
-    sep = PYGLIB_PyUnicode_FromString (", ");
+    sep = PyUnicode_FromString (", ");
     format_string = PyObject_CallMethod (sep, "join", "O", format_list);
     Py_DECREF (sep);
     Py_DECREF (format_list);
-    paren_format = PYGLIB_PyUnicode_FromString ("(%s)");
-    paren_string = PYGLIB_PyUnicode_Format (paren_format, format_string);
+    paren_format = PyUnicode_FromString ("(%s)");
+    paren_string = PyUnicode_Format (paren_format, format_string);
     Py_DECREF (paren_format);
     Py_DECREF (format_string);
 

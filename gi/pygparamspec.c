@@ -46,10 +46,10 @@ pyg_param_spec_richcompare(PyObject *self, PyObject *other, int op)
     }
 }
 
-static PYGLIB_Py_hash_t
+static Py_hash_t
 pyg_param_spec_hash(PyGParamSpec *self)
 {
-    return PYGLIB_Py_hash_t_FromVoidPtr (pyg_param_spec_get (self));
+    return (Py_hash_t)(gintptr)(pyg_param_spec_get (self));
 }
 
 static PyObject *
@@ -60,7 +60,7 @@ pyg_param_spec_repr(PyGParamSpec *self)
     g_snprintf(buf, sizeof(buf), "<%s '%s'>",
 	       G_PARAM_SPEC_TYPE_NAME (pyg_param_spec_get (self)),
 	       g_param_spec_get_name (pyg_param_spec_get (self)));
-    return PYGLIB_PyUnicode_FromString(buf);
+    return PyUnicode_FromString (buf);
 }
 
 static void
@@ -136,7 +136,7 @@ pyg_param_spec_getattr(PyGParamSpec *self, const gchar *attr)
 
     if (G_IS_PARAM_SPEC_CHAR(pspec)) {
 	if (!strcmp(attr, "default_value")) {
-	    return PYGLIB_PyUnicode_FromFormat(
+	    return PyUnicode_FromFormat(
 		"%c", G_PARAM_SPEC_CHAR(pspec)->default_value);
 	} else if (!strcmp(attr, "minimum")) {
 	    return pygi_gint8_to_py (G_PARAM_SPEC_CHAR(pspec)->minimum);
@@ -145,7 +145,7 @@ pyg_param_spec_getattr(PyGParamSpec *self, const gchar *attr)
 	}
     } else if (G_IS_PARAM_SPEC_UCHAR(pspec)) {
 	if (!strcmp(attr, "default_value")) {
-	    return PYGLIB_PyUnicode_FromFormat(
+	    return PyUnicode_FromFormat(
 		"%c", G_PARAM_SPEC_UCHAR(pspec)->default_value);
 	} else if (!strcmp(attr, "minimum")) {
 	    return pygi_guint8_to_py (G_PARAM_SPEC_UCHAR(pspec)->minimum);
@@ -206,7 +206,7 @@ pyg_param_spec_getattr(PyGParamSpec *self, const gchar *attr)
 	}
     } else if (G_IS_PARAM_SPEC_UNICHAR(pspec)) {
 	if (!strcmp(attr, "default_value")) {
-	    return PYGLIB_PyUnicode_FromFormat(
+	    return PyUnicode_FromFormat(
 		"%c", G_PARAM_SPEC_UNICHAR(pspec)->default_value);
 	}
     } else if (G_IS_PARAM_SPEC_ENUM(pspec)) {

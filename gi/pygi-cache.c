@@ -21,7 +21,6 @@
 #include <Python.h>
 #include <girepository.h>
 
-#include "pygi-python-compat.h"
 #include "pygi-type.h"
 #include "pygi-info.h"
 #include "pygi-cache.h"
@@ -662,7 +661,7 @@ _callable_cache_generate_args_cache_real (PyGICallableCache *callable_cache,
     arg_cache_item = callable_cache->to_py_args;
     while (arg_cache_item) {
         const gchar *arg_name = ((PyGIArgCache *)arg_cache_item->data)->arg_name;
-        PyObject *arg_string = PYGLIB_PyUnicode_FromString (arg_name);
+        PyObject *arg_string = PyUnicode_FromString (arg_name);
         PyList_Append (tuple_names, arg_string);
         Py_DECREF (arg_string);
         arg_cache_item = arg_cache_item->next;

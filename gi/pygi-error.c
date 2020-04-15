@@ -23,7 +23,6 @@
 #include <Python.h>
 #include "pygi-error.h"
 #include "pygi-type.h"
-#include "pygi-python-compat.h"
 #include "pygi-util.h"
 #include "pygi-basictype.h"
 
@@ -355,7 +354,7 @@ pygerror_to_gvalue (GValue *value, PyObject *pyerror)
 int
 pygi_error_register_types (PyObject *module)
 {
-    PyObject *error_module = pygi_import_module ("gi._error");
+    PyObject *error_module = PyImport_ImportModule ("gi._error");
     if (!error_module) {
         return -1;
     }

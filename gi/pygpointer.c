@@ -51,10 +51,10 @@ pyg_pointer_richcompare(PyObject *self, PyObject *other, int op)
     }
 }
 
-static PYGLIB_Py_hash_t
+static Py_hash_t
 pyg_pointer_hash(PyGPointer *self)
 {
-    return PYGLIB_Py_hash_t_FromVoidPtr (pyg_pointer_get_ptr (self));
+    return (Py_hash_t)(gintptr)(pyg_pointer_get_ptr (self));
 }
 
 static PyObject *
@@ -65,7 +65,7 @@ pyg_pointer_repr(PyGPointer *self)
     g_snprintf(buf, sizeof(buf), "<%s at 0x%" G_GUINTPTR_FORMAT ">",
                g_type_name(self->gtype),
                (guintptr)pyg_pointer_get_ptr (self));
-    return PYGLIB_PyUnicode_FromString(buf);
+    return PyUnicode_FromString (buf);
 }
 
 static int

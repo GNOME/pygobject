@@ -18,38 +18,6 @@
 
 #include "pygi-util.h"
 
-/**
- * Like PyErr_Format, but supports the format syntax of
- * PyUnicode_FromFormat also under Python 2.
- * Note: Python 2 doesn't support %lld and %llo there.
- */
-PyObject*
-pygi_pyerr_format (PyObject *exception, const char *format, ...)
-{
-    PyObject *text;
-    va_list argp;
-    va_start(argp, format);
-    text = PyUnicode_FromFormatV (format, argp);
-    va_end(argp);
-
-    if (text != NULL) {
-#if PY_MAJOR_VERSION < 3
-        PyObject *str;
-        str = PyUnicode_AsUTF8String (text);
-        Py_DECREF (text);
-        if (str) {
-            PyErr_SetObject (exception, str);
-            Py_DECREF (str);
-        }
-#else
-        PyErr_SetObject (exception, text);
-        Py_DECREF (text);
-#endif
-    }
-
-    return NULL;
-}
-
 gboolean
 pygi_guint_from_pyssize (Py_ssize_t pyval, guint *result)
 {
@@ -64,23 +32,6 @@ pygi_guint_from_pyssize (Py_ssize_t pyval, guint *result)
     return TRUE;
 }
 
-/* Better alternative to PyImport_ImportModule which tries to import from
- * sys.modules first */
-PyObject *
-pygi_import_module (const char *name)
-{
-#if PY_VERSION_HEX < 0x03000000 && !defined(PYPY_VERSION)
-    /* see PyImport_ImportModuleNoBlock
-     * https://github.com/python/cpython/blob/2.7/Python/import.c#L2166-L2206 */
-    PyObject *result = PyImport_ImportModuleNoBlock(name);
-    if (result)
-        return result;
-
-    PyErr_Clear();
-#endif
-    return PyImport_ImportModule(name);
-}
-
 PyObject *
 pyg_integer_richcompare(PyObject *v, PyObject *w, int op)
 {
@@ -88,12 +39,12 @@ pyg_integer_richcompare(PyObject *v, PyObject *w, int op)
     gboolean t;
 
     switch (op) {
-    case Py_EQ: t = PYGLIB_PyLong_AS_LONG(v) == PYGLIB_PyLong_AS_LONG(w); break;
-    case Py_NE: t = PYGLIB_PyLong_AS_LONG(v) != PYGLIB_PyLong_AS_LONG(w); break;
-    case Py_LE: t = PYGLIB_PyLong_AS_LONG(v) <= PYGLIB_PyLong_AS_LONG(w); break;
-    case Py_GE: t = PYGLIB_PyLong_AS_LONG(v) >= PYGLIB_PyLong_AS_LONG(w); break;
-    case Py_LT: t = PYGLIB_PyLong_AS_LONG(v) <  PYGLIB_PyLong_AS_LONG(w); break;
-    case Py_GT: t = PYGLIB_PyLong_AS_LONG(v) >  PYGLIB_PyLong_AS_LONG(w); break;
+    case Py_EQ: t = PyLong_AS_LONG (v) == PyLong_AS_LONG (w); break;
+    case Py_NE: t = PyLong_AS_LONG (v) != PyLong_AS_LONG (w); break;
+    case Py_LE: t = PyLong_AS_LONG (v) <= PyLong_AS_LONG (w); break;
+    case Py_GE: t = PyLong_AS_LONG (v) >= PyLong_AS_LONG (w); break;
+    case Py_LT: t = PyLong_AS_LONG (v) <  PyLong_AS_LONG (w); break;
+    case Py_GT: t = PyLong_AS_LONG (v) >  PyLong_AS_LONG (w); break;
     default: g_assert_not_reached();
     }
 

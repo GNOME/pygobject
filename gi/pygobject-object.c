@@ -263,7 +263,7 @@ build_parameter_list(GObjectClass *class)
 	name = g_strdup(g_param_spec_get_name(props[i]));
 	/* hyphens cannot belong in identifiers */
 	g_strdelimit(name, "-", '_');
-	prop_str = PYGLIB_PyUnicode_FromString(name);
+	prop_str = PyUnicode_FromString (name);
 	
 	PyList_SetItem(props_list, i, prop_str);
 	g_free(name);
@@ -282,7 +282,7 @@ PyGProps_getattro(PyGProps *self, PyObject *attr)
     GObjectClass *class;
     GParamSpec *pspec;
 
-    attr_name = PYGLIB_PyUnicode_AsString(attr);
+    attr_name = PyUnicode_AsUTF8 (attr);
     if (!attr_name) {
         PyErr_Clear();
         return PyObject_GenericGetAttr((PyObject *)self, attr);
@@ -336,7 +336,7 @@ set_property_from_pspec(GObject *obj,
         PyObject *pvalue_str = PyObject_Repr(pvalue);
 	PyErr_Format(PyExc_TypeError,
 	             "could not convert %s to type '%s' when setting property '%s.%s'",
-	             PYGLIB_PyUnicode_AsString(pvalue_str),
+	             PyUnicode_AsUTF8 (pvalue_str),
 	             g_type_name(G_PARAM_SPEC_VALUE_TYPE(pspec)),
 	             G_OBJECT_TYPE_NAME(obj),
 	             pspec->name);
@@ -368,7 +368,7 @@ PyGProps_setattro(PyGProps *self, PyObject *attr, PyObject *pvalue)
 	return -1;
     }
 
-    attr_name = PYGLIB_PyUnicode_AsString(attr);
+    attr_name = PyUnicode_AsUTF8 (attr);
     if (!attr_name) {
         PyErr_Clear();
         return PyObject_GenericSetAttr((PyObject *)self, attr, pvalue);
@@ -579,7 +579,7 @@ pygobject_register_class(PyObject *dict, const gchar *type_name,
      */
     s = strrchr(type->tp_name, '.');
     if (s != NULL) {
-	mod_name = PYGLIB_PyUnicode_FromStringAndSize(type->tp_name, (int)(s - type->tp_name));
+	mod_name = PyUnicode_FromStringAndSize (type->tp_name, (int)(s - type->tp_name));
 	PyDict_SetItemString(type->tp_dict, "__module__", mod_name);
 	Py_DECREF(mod_name);
     }
@@ -795,7 +795,7 @@ pygobject_new_with_interfaces(GType gtype)
 
     /* Something special to point out that it's not accessible through
      * gi.repository */
-    o = PYGLIB_PyUnicode_FromString ("__gi__");
+    o = PyUnicode_FromString ("__gi__");
     PyDict_SetItemString (dict, "__module__", o);
     Py_DECREF (o);
 
@@ -870,17 +870,11 @@ static void
 pygobject_inherit_slots(PyTypeObject *type, PyObject *bases, gboolean check_for_present)
 {
     static int slot_offsets[] = { offsetof(PyTypeObject, tp_richcompare),
-#if PY_VERSION_HEX < 0x03000000
-                                  offsetof(PyTypeObject, tp_compare),
-#endif
                                   offsetof(PyTypeObject, tp_richcompare),
                                   offsetof(PyTypeObject, tp_hash),
                                   offsetof(PyTypeObject, tp_iter),
                                   offsetof(PyTypeObject, tp_repr),
                                   offsetof(PyTypeObject, tp_str),
-#if PY_VERSION_HEX < 0x03000000
-                                  offsetof(PyTypeObject, tp_print),
-#endif
     };
     gsize i;
 
@@ -1163,10 +1157,10 @@ pygobject_richcompare(PyObject *self, PyObject *other, int op)
                                op);
 }
 
-static PYGLIB_Py_hash_t
+static Py_hash_t
 pygobject_hash(PyGObject *self)
 {
-    return PYGLIB_Py_hash_t_FromVoidPtr (self->obj);
+    return (Py_hash_t)(gintptr)(self->obj);
 }
 
 static PyObject *
@@ -1179,12 +1173,12 @@ pygobject_repr(PyGObject *self)
     if (module == NULL)
         return NULL;
 
-    if (!PYGLIB_PyUnicode_Check (module)) {
+    if (!PyUnicode_Check (module)) {
         Py_DECREF (module);
         return NULL;
     }
 
-    module_str = PYGLIB_PyUnicode_AsString (module);
+    module_str = PyUnicode_AsUTF8 (module);
     namespace = g_strrstr (module_str, ".");
     if (namespace == NULL) {
         namespace = module_str;
@@ -1192,10 +1186,10 @@ pygobject_repr(PyGObject *self)
         namespace += 1;
     }
 
-    repr = PYGLIB_PyUnicode_FromFormat ("<%s.%s object at %p (%s at %p)>",
-                                        namespace, Py_TYPE (self)->tp_name, self,
-                                        self->obj ? G_OBJECT_TYPE_NAME (self->obj) : "uninitialized",
-                                        self->obj);
+    repr = PyUnicode_FromFormat ("<%s.%s object at %p (%s at %p)>",
+                                 namespace, Py_TYPE (self)->tp_name, self,
+                                 self->obj ? G_OBJECT_TYPE_NAME (self->obj) : "uninitialized",
+                                 self->obj);
     Py_DECREF (module);
     return repr;
 }
@@ -1277,7 +1271,7 @@ pygobject_prepare_construct_properties(GObjectClass *class, PyObject *kwargs,
             GParamSpec *pspec;
             GValue *gvalue = &(*values)[*n_properties];
 
-            const gchar *key_str = PYGLIB_PyUnicode_AsString(key);
+            const gchar *key_str = PyUnicode_AsUTF8 (key);
 
             pspec = g_object_class_find_property(class, key_str);
             if (!pspec) {
@@ -1401,13 +1395,13 @@ pygobject_get_properties(PyGObject *self, PyObject *args)
         gchar *property_name;
         PyObject *item;
 
-        if (!PYGLIB_PyUnicode_Check(py_property)) {
+        if (!PyUnicode_Check (py_property)) {
             PyErr_SetString(PyExc_TypeError,
                             "Expected string argument for property.");
             goto fail;
         }
 
-        property_name = PYGLIB_PyUnicode_AsString(py_property);
+        property_name = PyUnicode_AsUTF8 (py_property);
         item = pygi_get_property_value_by_name (self, property_name);
         PyTuple_SetItem (tuple, i, item);
     }
@@ -1474,7 +1468,7 @@ pygobject_set_properties(PyGObject *self, PyObject *args, PyObject *kwargs)
     pos = 0;
 
     while (kwargs && PyDict_Next (kwargs, &pos, &key, &value)) {
-	gchar *key_str = PYGLIB_PyUnicode_AsString(key);
+	gchar *key_str = PyUnicode_AsUTF8 (key);
 	GParamSpec *pspec;
 	int ret = -1;
 
@@ -1658,8 +1652,8 @@ pygobject_bind_property(PyGObject *self, PyObject *args)
 		source_repr = PyObject_Repr((PyObject*)self);
 		target_repr = PyObject_Repr(target);
 		PyErr_Format(PyExc_TypeError, "Cannot create binding from %s.%s to %s.%s",
-			     PYGLIB_PyUnicode_AsString(source_repr), source_name,
-			     PYGLIB_PyUnicode_AsString(target_repr), target_name);
+			     PyUnicode_AsUTF8 (source_repr), source_name,
+			     PyUnicode_AsUTF8 (target_repr), target_name);
 		Py_DECREF(source_repr);
 		Py_DECREF(target_repr);
 		return NULL;
@@ -1681,7 +1675,7 @@ connect_helper(PyGObject *self, gchar *name, PyObject *callback, PyObject *extra
 			     &sigid, &detail, TRUE)) {
 	PyObject *repr = PyObject_Repr((PyObject*)self);
 	PyErr_Format(PyExc_TypeError, "%s: unknown signal name: %s",
-		     PYGLIB_PyUnicode_AsString(repr),
+		     PyUnicode_AsUTF8 (repr),
 		     name);
 	Py_DECREF(repr);
 	return NULL;
@@ -1889,7 +1883,7 @@ pygobject_emit(PyGObject *self, PyObject *args)
 			     &signal_id, &detail, TRUE)) {
 	repr = PyObject_Repr((PyObject*)self);
 	PyErr_Format(PyExc_TypeError, "%s: unknown signal name: %s",
-		     PYGLIB_PyUnicode_AsString(repr),
+		     PyUnicode_AsUTF8 (repr),
 		     name);
 	Py_DECREF(repr);
 	return NULL;
@@ -2102,7 +2096,7 @@ pygobject_disconnect_by_func(PyGObject *self, PyObject *args)
     if (!closure) {
 	repr = PyObject_Repr((PyObject*)pyfunc);
 	PyErr_Format(PyExc_TypeError, "nothing connected to %s",
-		     PYGLIB_PyUnicode_AsString(repr));
+		     PyUnicode_AsUTF8 (repr));
 	Py_DECREF(repr);
 	return NULL;
     }
@@ -2136,7 +2130,7 @@ pygobject_handler_block_by_func(PyGObject *self, PyObject *args)
     if (!closure) {
 	repr = PyObject_Repr((PyObject*)pyfunc);
 	PyErr_Format(PyExc_TypeError, "nothing connected to %s",
-		     PYGLIB_PyUnicode_AsString(repr));
+		     PyUnicode_AsUTF8 (repr));
 	Py_DECREF(repr);
 	return NULL;
     }
@@ -2170,7 +2164,7 @@ pygobject_handler_unblock_by_func(PyGObject *self, PyObject *args)
     if (!closure) {
 	repr = PyObject_Repr((PyObject*)pyfunc);
 	PyErr_Format(PyExc_TypeError, "nothing connected to %s",
-		     PYGLIB_PyUnicode_AsString(repr));
+		     PyUnicode_AsUTF8 (repr));
 	Py_DECREF(repr);
 	return NULL;
     }
@@ -2473,7 +2467,7 @@ pyi_object_register_types(PyObject *d)
     descr = PyObject_New(PyObject, &PyGPropsDescr_Type);
     PyDict_SetItemString(PyGObject_Type.tp_dict, "props", descr);
     PyDict_SetItemString(PyGObject_Type.tp_dict, "__module__",
-                        o=PYGLIB_PyUnicode_FromString("gi._gi"));
+                        o=PyUnicode_FromString ("gi._gi"));
     Py_DECREF(o);
 
     /* GPropsIter */

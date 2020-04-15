@@ -19,7 +19,7 @@
  */
 
 #include <Python.h>
-#include "pygi-python-compat.h"
+
 #include "pygi-type.h"
 #include "pygi-basictype.h"
 #include "pygi-argument.h"
@@ -53,7 +53,7 @@ pygi_gpointer_from_py (PyObject *py_arg, gpointer *result)
             return FALSE;
         *result = temp;
         return TRUE;
-    } else if (PYGLIB_PyLong_Check(py_arg) || PyLong_Check(py_arg)) {
+    } else if (PyLong_Check(py_arg)) {
         temp = PyLong_AsVoidPtr (py_arg);
         if (PyErr_Occurred ())
             return FALSE;
@@ -88,13 +88,13 @@ marshal_from_py_void (PyGIInvokeState   *state,
 PyObject *
 pygi_gsize_to_py (gsize value)
 {
-    return PYGLIB_PyLong_FromSize_t (value);
+    return PyLong_FromSize_t (value);
 }
 
 PyObject *
 pygi_gssize_to_py (gssize value)
 {
-    return PYGLIB_PyLong_FromSsize_t (value);
+    return PyLong_FromSsize_t (value);
 }
 
 static PyObject *
@@ -157,7 +157,7 @@ pygi_gfloat_from_py (PyObject *py_arg, gfloat *result)
 
         min = pygi_gfloat_to_py (-G_MAXFLOAT);
         max = pygi_gfloat_to_py (G_MAXFLOAT);
-        pygi_pyerr_format (
+        PyErr_Format (
             PyExc_OverflowError, "%S not in range %S to %S",
             py_float, min, max);
         Py_DECREF (min);
@@ -197,19 +197,8 @@ pygi_gunichar_from_py (PyObject *py_arg, gunichar *result)
        if (!py_bytes)
            return FALSE;
 
-       string_ = g_strdup(PYGLIB_PyBytes_AsString (py_bytes));
+       string_ = g_strdup(PyBytes_AsString (py_bytes));
        Py_DECREF (py_bytes);
-
-#if PY_VERSION_HEX < 0x03000000
-    } else if (PyString_Check (py_arg)) {
-       PyObject *pyuni = PyUnicode_FromEncodedObject (py_arg, "UTF-8", "strict");
-       if (!pyuni)
-           return FALSE;
-
-       size = PyUnicode_GET_SIZE (pyuni);
-       string_ = g_strdup (PyString_AsString(py_arg));
-       Py_DECREF (pyuni);
-#endif
     } else {
        PyErr_Format (PyExc_TypeError, "Must be string, not %s",
                      Py_TYPE (py_arg)->tp_name);
@@ -236,13 +225,13 @@ pygi_gunichar_to_py (gunichar value)
 
     /* Preserve the bidirectional mapping between 0 and "" */
     if (value == 0) {
-        py_obj = PYGLIB_PyUnicode_FromString ("");
+        py_obj = PyUnicode_FromString ("");
     } else if (g_unichar_validate (value)) {
         gchar utf8[6];
         gint bytes;
 
         bytes = g_unichar_to_utf8 (value, utf8);
-        py_obj = PYGLIB_PyUnicode_FromStringAndSize ((char*)utf8, bytes);
+        py_obj = PyUnicode_FromStringAndSize ((char*)utf8, bytes);
     } else {
         /* TODO: Convert the error to an exception. */
         PyErr_Format (PyExc_TypeError,
@@ -288,14 +277,9 @@ pygi_utf8_from_py (PyObject *py_arg, gchar **result)
         if (!pystr_obj)
             return FALSE;
 
-        string_ = g_strdup (PYGLIB_PyBytes_AsString (pystr_obj));
+        string_ = g_strdup (PyBytes_AsString (pystr_obj));
         Py_DECREF (pystr_obj);
     }
-#if PY_VERSION_HEX < 0x03000000
-    else if (PyString_Check (py_arg)) {
-        string_ = g_strdup (PyString_AsString (py_arg));
-    }
-#endif
     else {
         PyErr_Format (PyExc_TypeError, "Must be string, not %s",
                       Py_TYPE (py_arg)->tp_name);
@@ -317,10 +301,10 @@ filename_from_py_unix (PyObject *py_arg, gchar **result)
         return TRUE;
     }
 
-    if (PYGLIB_PyBytes_Check (py_arg)) {
+    if (PyBytes_Check (py_arg)) {
         char *buffer;
 
-        if (PYGLIB_PyBytes_AsStringAndSize (py_arg, &buffer, NULL) == -1)
+        if (PyBytes_AsStringAndSize (py_arg, &buffer, NULL) == -1)
             return FALSE;
 
         filename = g_strdup (buffer);
@@ -328,17 +312,12 @@ filename_from_py_unix (PyObject *py_arg, gchar **result)
         PyObject *bytes;
         char *buffer;
 
-#if PY_VERSION_HEX < 0x03000000
-        bytes = PyUnicode_AsEncodedString (py_arg, Py_FileSystemDefaultEncoding,
-                                           NULL);
-#else
         bytes = PyUnicode_EncodeFSDefault (py_arg);
-#endif
 
         if (!bytes)
             return FALSE;
 
-        if (PYGLIB_PyBytes_AsStringAndSize (bytes, &buffer, NULL) == -1) {
+        if (PyBytes_AsStringAndSize (bytes, &buffer, NULL) == -1) {
             Py_DECREF (bytes);
             return FALSE;
         }
@@ -366,41 +345,12 @@ filename_from_py_win32 (PyObject *py_arg, gchar **result)
         return TRUE;
     }
 
-#if PY_VERSION_HEX < 0x03000000
-    if (PYGLIB_PyBytes_Check (py_arg)) {
-        char *buffer;
-
-        if (PYGLIB_PyBytes_AsStringAndSize (py_arg, &buffer, NULL) == -1)
-            return FALSE;
-
-        filename = g_strdup (buffer);
-    } else if (PyUnicode_Check (py_arg)) {
-        PyObject *bytes;
-        char *buffer;
-
-        bytes = PyUnicode_AsUTF8String (py_arg);
-        if (!bytes)
-            return FALSE;
-
-        if (PYGLIB_PyBytes_AsStringAndSize (bytes, &buffer, NULL) == -1) {
-            Py_DECREF (bytes);
-            return FALSE;
-        }
-
-        filename = g_strdup (buffer);
-        Py_DECREF (bytes);
-    } else {
-        PyErr_Format (PyExc_TypeError, "Must be unicode, not %s",
-                      Py_TYPE (py_arg)->tp_name);
-        return FALSE;
-    }
-#else
-    if (PYGLIB_PyBytes_Check (py_arg)) {
+    if (PyBytes_Check (py_arg)) {
         PyObject *uni_arg;
         gboolean temp_result;
         char *buffer;
 
-        if (PYGLIB_PyBytes_AsStringAndSize (py_arg, &buffer, NULL) == -1)
+        if (PyBytes_AsStringAndSize (py_arg, &buffer, NULL) == -1)
             return FALSE;
 
         uni_arg = PyUnicode_DecodeFSDefault (buffer);
@@ -432,7 +382,7 @@ filename_from_py_win32 (PyObject *py_arg, gchar **result)
         if (!bytes)
             return FALSE;
 
-        if (PYGLIB_PyBytes_AsStringAndSize (bytes, &buffer, NULL) == -1) {
+        if (PyBytes_AsStringAndSize (bytes, &buffer, NULL) == -1) {
             Py_DECREF (bytes);
             return FALSE;
         }
@@ -444,7 +394,6 @@ filename_from_py_win32 (PyObject *py_arg, gchar **result)
                       Py_TYPE (py_arg)->tp_name);
         return FALSE;
     }
-#endif
 
     *result = filename;
     return TRUE;
@@ -471,19 +420,7 @@ base_number_checks (PyObject *object)
         return NULL;
     }
 
-#if PY_MAJOR_VERSION < 3
-    {
-        PyObject *tmp = PyNumber_Int (object);
-        if (tmp) {
-            number = PyNumber_Long (tmp);
-            Py_DECREF (tmp);
-        } else {
-            number = PyNumber_Long (object);
-        }
-    }
-#else
     number = PyNumber_Long (object);
-#endif
 
     if (number == NULL) {
         PyErr_SetString (PyExc_TypeError, "expected int argument");
@@ -568,7 +505,7 @@ pygi_gint_from_py (PyObject *object, gint *result)
     if (number == NULL)
         return FALSE;
 
-    long_value = PYGLIB_PyLong_AsLong (number);
+    long_value = PyLong_AsLong (number);
     if (PyErr_Occurred ()) {
         if (PyErr_ExceptionMatches (PyExc_OverflowError))
             goto overflow;
@@ -584,7 +521,7 @@ pygi_gint_from_py (PyObject *object, gint *result)
 
 overflow:
     PyErr_Clear ();
-    pygi_pyerr_format (
+    PyErr_Format (
         PyExc_OverflowError, "%S not in range %d to %d",
         number, (int)G_MININT, (int)G_MAXINT);
     Py_DECREF (number);
@@ -594,7 +531,7 @@ overflow:
 PyObject *
 pygi_gint_to_py (gint value)
 {
-    return PYGLIB_PyLong_FromLong (value);
+    return PyLong_FromLong (value);
 }
 
 gboolean
@@ -623,7 +560,7 @@ pygi_guint_from_py (PyObject *object, guint *result)
 
 overflow:
     PyErr_Clear ();
-    pygi_pyerr_format (
+    PyErr_Format (
         PyExc_OverflowError, "%S not in range %ld to %lu",
         number, (long)0, (unsigned long)G_MAXUINT);
     Py_DECREF (number);
@@ -634,10 +571,10 @@ PyObject *
 pygi_guint_to_py (guint value)
 {
 #if (G_MAXUINT <= LONG_MAX)
-    return PYGLIB_PyLong_FromLong ((long) value);
+    return PyLong_FromLong ((long) value);
 #else
     if (value <= LONG_MAX)
-        return PYGLIB_PyLong_FromLong ((long) value);
+        return PyLong_FromLong ((long) value);
     return PyLong_FromUnsignedLong (value);
 #endif
 }
@@ -666,7 +603,7 @@ pygi_glong_from_py (PyObject *object, glong *result)
 
 overflow:
     PyErr_Clear ();
-    pygi_pyerr_format (
+    PyErr_Format (
         PyExc_OverflowError, "%S not in range %ld to %ld",
         number, (long)G_MINLONG, (long)G_MAXLONG);
     Py_DECREF (number);
@@ -676,7 +613,7 @@ overflow:
 PyObject *
 pygi_glong_to_py (glong value)
 {
-    return PYGLIB_PyLong_FromLong (value);
+    return PyLong_FromLong (value);
 }
 
 gboolean
@@ -703,7 +640,7 @@ pygi_gulong_from_py (PyObject *object, gulong *result)
 
 overflow:
     PyErr_Clear ();
-    pygi_pyerr_format (
+    PyErr_Format (
         PyExc_OverflowError, "%S not in range %ld to %lu",
         number, (long)0, (unsigned long)G_MAXULONG);
     Py_DECREF (number);
@@ -714,7 +651,7 @@ PyObject *
 pygi_gulong_to_py (gulong value)
 {
     if (value <= LONG_MAX)
-        return PYGLIB_PyLong_FromLong ((long) value);
+        return PyLong_FromLong ((long) value);
     else
         return PyLong_FromUnsignedLong (value);
 }
@@ -725,13 +662,13 @@ pygi_gint8_from_py (PyObject *object, gint8 *result)
     long long_value;
     PyObject *number;
 
-    if (PYGLIB_PyBytes_Check (object)) {
-        if (PYGLIB_PyBytes_Size (object) != 1) {
+    if (PyBytes_Check (object)) {
+        if (PyBytes_Size (object) != 1) {
             PyErr_Format (PyExc_TypeError, "Must be a single character");
             return FALSE;
         }
 
-        *result = (gint8)(PYGLIB_PyBytes_AsString (object)[0]);
+        *result = (gint8)(PyBytes_AsString (object)[0]);
         return TRUE;
     }
 
@@ -755,7 +692,7 @@ pygi_gint8_from_py (PyObject *object, gint8 *result)
 
 overflow:
     PyErr_Clear ();
-    pygi_pyerr_format (
+    PyErr_Format (
         PyExc_OverflowError, "%S not in range %ld to %ld",
         number, (long)G_MININT8, (long)G_MAXINT8);
     Py_DECREF (number);
@@ -765,7 +702,7 @@ overflow:
 PyObject *
 pygi_gint8_to_py (gint8 value)
 {
-    return PYGLIB_PyLong_FromLong (value);
+    return PyLong_FromLong (value);
 }
 
 gboolean
@@ -774,13 +711,13 @@ pygi_guint8_from_py (PyObject *object, guint8 *result)
     long long_value;
     PyObject *number;
 
-    if (PYGLIB_PyBytes_Check (object)) {
-        if (PYGLIB_PyBytes_Size (object) != 1) {
+    if (PyBytes_Check (object)) {
+        if (PyBytes_Size (object) != 1) {
             PyErr_Format (PyExc_TypeError, "Must be a single character");
             return FALSE;
         }
 
-        *result = (guint8)(PYGLIB_PyBytes_AsString (object)[0]);
+        *result = (guint8)(PyBytes_AsString (object)[0]);
         return TRUE;
     }
 
@@ -804,7 +741,7 @@ pygi_guint8_from_py (PyObject *object, guint8 *result)
 
 overflow:
     PyErr_Clear ();
-    pygi_pyerr_format (
+    PyErr_Format (
         PyExc_OverflowError, "%S not in range %ld to %ld",
         number, (long)0, (long)G_MAXUINT8);
     Py_DECREF (number);
@@ -814,7 +751,7 @@ overflow:
 PyObject *
 pygi_guint8_to_py (guint8 value)
 {
-    return PYGLIB_PyLong_FromLong (value);
+    return PyLong_FromLong (value);
 }
 
 static gboolean
@@ -843,7 +780,7 @@ pygi_gint16_from_py (PyObject *object, gint16 *result)
 
 overflow:
     PyErr_Clear ();
-    pygi_pyerr_format (
+    PyErr_Format (
         PyExc_OverflowError, "%S not in range %ld to %ld",
         number, (long)G_MININT16, (long)G_MAXINT16);
     Py_DECREF (number);
@@ -853,7 +790,7 @@ overflow:
 static PyObject *
 pygi_gint16_to_py (gint16 value)
 {
-    return PYGLIB_PyLong_FromLong (value);
+    return PyLong_FromLong (value);
 }
 
 static gboolean
@@ -882,7 +819,7 @@ pygi_guint16_from_py (PyObject *object, guint16 *result)
 
 overflow:
     PyErr_Clear ();
-    pygi_pyerr_format (
+    PyErr_Format (
         PyExc_OverflowError, "%S not in range %ld to %ld",
         number, (long)0, (long)G_MAXUINT16);
     Py_DECREF (number);
@@ -892,7 +829,7 @@ overflow:
 static PyObject *
 pygi_guint16_to_py (guint16 value)
 {
-    return PYGLIB_PyLong_FromLong (value);
+    return PyLong_FromLong (value);
 }
 
 static gboolean
@@ -921,7 +858,7 @@ pygi_gint32_from_py (PyObject *object, gint32 *result)
 
 overflow:
     PyErr_Clear ();
-    pygi_pyerr_format (
+    PyErr_Format (
         PyExc_OverflowError, "%S not in range %ld to %ld",
         number, (long)G_MININT32, (long)G_MAXINT32);
     Py_DECREF (number);
@@ -931,7 +868,7 @@ overflow:
 static PyObject *
 pygi_gint32_to_py (gint32 value)
 {
-    return PYGLIB_PyLong_FromLong (value);
+    return PyLong_FromLong (value);
 }
 
 static gboolean
@@ -960,7 +897,7 @@ pygi_guint32_from_py (PyObject *object, guint32 *result)
 
 overflow:
     PyErr_Clear ();
-    pygi_pyerr_format (
+    PyErr_Format (
         PyExc_OverflowError, "%S not in range %ld to %lu",
         number, (long)0, (unsigned long)G_MAXUINT32);
     Py_DECREF (number);
@@ -971,10 +908,10 @@ PyObject *
 pygi_guint32_to_py (guint32 value)
 {
 #if (G_MAXUINT <= LONG_MAX)
-    return PYGLIB_PyLong_FromLong (value);
+    return PyLong_FromLong (value);
 #else
     if (value <= LONG_MAX)
-        return PYGLIB_PyLong_FromLong((long) value);
+        return PyLong_FromLong((long) value);
     else
         return PyLong_FromLongLong (value);
 #endif
@@ -1008,7 +945,7 @@ overflow:
     PyErr_Clear ();
     min = pygi_gint64_to_py (G_MININT64);
     max = pygi_gint64_to_py (G_MAXINT64);
-    pygi_pyerr_format (
+    PyErr_Format (
         PyExc_OverflowError, "%S not in range %S to %S",
         number, min, max);
     Py_DECREF (number);
@@ -1021,7 +958,7 @@ PyObject *
 pygi_gint64_to_py (gint64 value)
 {
     if (LONG_MIN <= value && value <= LONG_MAX)
-        return PYGLIB_PyLong_FromLong((long) value);
+        return PyLong_FromLong((long) value);
     else
         return PyLong_FromLongLong (value);
 }
@@ -1053,7 +990,7 @@ pygi_guint64_from_py (PyObject *object, guint64 *result)
 overflow:
     PyErr_Clear ();
     max = pygi_guint64_to_py (G_MAXUINT64);
-    pygi_pyerr_format (
+    PyErr_Format (
         PyExc_OverflowError, "%S not in range %ld to %S",
         number, (long)0, max);
     Py_DECREF (number);
@@ -1065,7 +1002,7 @@ PyObject *
 pygi_guint64_to_py (guint64 value)
 {
     if (value <= LONG_MAX)
-        return PYGLIB_PyLong_FromLong((long) value);
+        return PyLong_FromLong((long) value);
     else
         return PyLong_FromUnsignedLongLong (value);
 }
@@ -1195,7 +1132,7 @@ pygi_utf8_to_py (gchar *value)
         Py_RETURN_NONE;
      }
 
-    return PYGLIB_PyUnicode_FromString (value);
+    return PyUnicode_FromString (value);
 }
 
 PyObject *
@@ -1207,16 +1144,11 @@ pygi_filename_to_py (gchar *value)
         Py_RETURN_NONE;
     }
 
-#if PY_VERSION_HEX < 0x03000000
-    /* On PY2 we return str as is */
-    py_obj = PyString_FromString (value);
-#else
 #ifdef G_OS_WIN32
     py_obj = PyUnicode_DecodeUTF8 (value, strlen(value),
                                    "surrogatepass");
 #else
     py_obj = PyUnicode_DecodeFSDefault (value);
-#endif
 #endif
 
     return py_obj;

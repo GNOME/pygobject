@@ -21,7 +21,6 @@
 #include <Python.h>
 #include <glib.h>
 
-#include "pygi-python-compat.h"
 #include "pygi-array.h"
 #include "pygi-info.h"
 #include "pygi-marshal-cleanup.h"
@@ -251,8 +250,8 @@ _pygi_marshal_from_py_array (PyGIInvokeState   *state,
     }
 
     if (sequence_cache->item_cache->type_tag == GI_TYPE_TAG_UINT8 &&
-        PYGLIB_PyBytes_Check (py_arg)) {
-        gchar *data = PYGLIB_PyBytes_AsString (py_arg);
+        PyBytes_Check (py_arg)) {
+        gchar *data = PyBytes_AsString (py_arg);
 
         /* Avoid making a copy if the data
          * is not transferred to the C function
@@ -583,9 +582,9 @@ _pygi_marshal_to_py_array (PyGIInvokeState   *state,
 
     if (seq_cache->item_cache->type_tag == GI_TYPE_TAG_UINT8) {
         if (arg->v_pointer == NULL) {
-            py_obj = PYGLIB_PyBytes_FromString ("");
+            py_obj = PyBytes_FromString ("");
         } else {
-            py_obj = PYGLIB_PyBytes_FromStringAndSize (array_->data, array_->len);
+            py_obj = PyBytes_FromStringAndSize (array_->data, array_->len);
         }
     } else {
         if (arg->v_pointer == NULL) {

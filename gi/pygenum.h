@@ -20,14 +20,12 @@
 #ifndef __PYGOBJECT_ENUM_H__ 
 #define __PYGOBJECT_ENUM_H__
 
-#include "pygi-python-compat.h"
-
 extern GQuark pygenum_class_key;
 
 #define PyGEnum_Check(x) (PyObject_IsInstance((PyObject *)x, (PyObject *)&PyGEnum_Type) && g_type_is_a(((PyGFlags*)x)->gtype, G_TYPE_ENUM))
 
 typedef struct {
-    PYGLIB_PyLongObject parent;
+    PyLongObject parent;
     int zero_pad; /* must always be 0 */
     GType gtype;
 } PyGEnum;

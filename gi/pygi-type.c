@@ -41,7 +41,7 @@ pygi_type_import_by_name (const char *namespace_,
 
     module_name = g_strconcat ("gi.repository.", namespace_, NULL);
 
-    py_module = pygi_import_module (module_name);
+    py_module = PyImport_ImportModule (module_name);
 
     g_free (module_name);
 
@@ -187,7 +187,7 @@ pyg_type_wrapper_repr(PyGTypeWrapper *self)
 
     g_snprintf(buf, sizeof(buf), "<GType %s (%lu)>",
 	       name?name:"invalid", (unsigned long int) self->type);
-    return PYGLIB_PyUnicode_FromString(buf);
+    return PyUnicode_FromString (buf);
 }
 
 static void
@@ -260,7 +260,7 @@ static PyObject *
 _wrap_g_type_wrapper__get_name(PyGTypeWrapper *self, void *closure)
 {
    const char *name = g_type_name(self->type);
-   return PYGLIB_PyUnicode_FromString(name ? name : "invalid");
+   return PyUnicode_FromString (name ? name : "invalid");
 }
 
 static PyObject *
@@ -501,15 +501,13 @@ pyg_type_from_object_strict(PyObject *obj, gboolean strict)
     if (PyType_Check(obj)) {
 	PyTypeObject *tp = (PyTypeObject *)obj;
 
-	if (tp == &PYGLIB_PyLong_Type)
+	if (tp == &PyLong_Type)
 	    return G_TYPE_INT;
 	else if (tp == &PyBool_Type)
 	    return G_TYPE_BOOLEAN;
-	else if (tp == &PyLong_Type)
-	    return G_TYPE_LONG;
 	else if (tp == &PyFloat_Type)
 	    return G_TYPE_DOUBLE;
-	else if (tp == &PYGLIB_PyUnicode_Type)
+	else if (tp == &PyUnicode_Type)
 	    return G_TYPE_STRING;
 	else if (tp == &PyBaseObject_Type)
 	    return PY_TYPE_OBJECT;
@@ -520,8 +518,8 @@ pyg_type_from_object_strict(PyObject *obj, gboolean strict)
     }
 
     /* handle strings */
-    if (PYGLIB_PyUnicode_Check(obj)) {
-	gchar *name = PYGLIB_PyUnicode_AsString(obj);
+    if (PyUnicode_Check (obj)) {
+	gchar *name = PyUnicode_AsUTF8(obj);
 
 	type = g_type_from_name(name);
 	if (type != 0) {
@@ -594,7 +592,7 @@ pyg_enum_get_value(GType enum_type, PyObject *obj, gint *val)
     if (!obj) {
 	*val = 0;
 	res = 0;
-    } else if (PYGLIB_PyLong_Check(obj)) {
+    } else if (PyLong_Check (obj)) {
 	if (!pygi_gint_from_py (obj, val))
 	    res = -1;
 	else
@@ -617,9 +615,9 @@ pyg_enum_get_value(GType enum_type, PyObject *obj, gint *val)
 		      g_type_name(enum_type),
 		      g_type_name(((PyGEnum *) obj)->gtype));
 	}
-    } else if (PYGLIB_PyUnicode_Check(obj)) {
+    } else if (PyUnicode_Check (obj)) {
 	GEnumValue *info;
-	char *str = PYGLIB_PyUnicode_AsString(obj);
+	char *str = PyUnicode_AsUTF8 (obj);
 
 	if (enum_type != G_TYPE_NONE)
 	    eclass = G_ENUM_CLASS(g_type_class_ref(enum_type));
@@ -671,15 +669,15 @@ pyg_flags_get_value(GType flag_type, PyObject *obj, guint *val)
     if (!obj) {
 	*val = 0;
 	res = 0;
-    } else if (PYGLIB_PyLong_Check(obj)) {
+    } else if (PyLong_Check (obj)) {
 	if (pygi_guint_from_py (obj, val))
 	    res = 0;
     } else if (PyLong_Check(obj)) {
 	if (pygi_guint_from_py (obj, val))
 	    res = 0;
-    } else if (PYGLIB_PyUnicode_Check(obj)) {
+    } else if (PyUnicode_Check (obj)) {
 	GFlagsValue *info;
-	char *str = PYGLIB_PyUnicode_AsString(obj);
+	char *str = PyUnicode_AsUTF8 (obj);
 
 	if (flag_type != G_TYPE_NONE)
 	    fclass = G_FLAGS_CLASS(g_type_class_ref(flag_type));
@@ -715,7 +713,7 @@ pyg_flags_get_value(GType flag_type, PyObject *obj, guint *val)
 
 	for (i = 0; i < len; i++) {
 	    PyObject *item = PyTuple_GetItem(obj, i);
-	    char *str = PYGLIB_PyUnicode_AsString(item);
+	    char *str = PyUnicode_AsUTF8 (item);
 	    GFlagsValue *info = g_flags_get_value_by_name(fclass, str);
 
 	    if (!info)
@@ -1250,7 +1248,7 @@ object_doc_descr_get(PyObject *self, PyObject *obj, PyObject *type)
         g_array_free(parents, TRUE);
     }
 
-    pystring = PYGLIB_PyUnicode_FromStringAndSize(string->str, string->len);
+    pystring = PyUnicode_FromStringAndSize (string->str, string->len);
     g_string_free(string, TRUE);
     return pystring;
 }

@@ -23,7 +23,7 @@
 extern GQuark pygflags_class_key;
 
 typedef struct {
-    PYGLIB_PyLongObject parent;
+    PyLongObject parent;
     int zero_pad; /* must always be 0 */
     GType gtype;
 } PyGFlags;

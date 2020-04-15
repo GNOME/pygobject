@@ -23,13 +23,7 @@
 
 #include <Python.h>
 #include <cairo.h>
-
-#if PY_VERSION_HEX < 0x03000000
-#include <pycairo.h>
-static Pycairo_CAPI_t *Pycairo_CAPI;
-#else
 #include <py3cairo.h>
-#endif
 
 #include <cairo-gobject.h>
 
@@ -38,7 +32,6 @@ static Pycairo_CAPI_t *Pycairo_CAPI;
  * shared library that interacts with PyGI through a PyCapsule API at runtime.
  */
 #include <pygi-foreign-api.h>
-#include "pygi-python-compat.h"
 
 /*
  * cairo_t marshaling
@@ -613,23 +606,43 @@ cairo_matrix_from_gvalue (const GValue *value)
     return PycairoMatrix_FromMatrix (matrix);
 }
 
-static PyMethodDef _gi_cairo_functions[] = { {0,} };
-PYGLIB_MODULE_START(_gi_cairo, "_gi_cairo")
-{
-    PyObject *gobject_mod;
-
-#if PY_VERSION_HEX < 0x03000000
-    Pycairo_IMPORT;
+#ifdef __GNUC__
+#define PYGI_MODINIT_FUNC __attribute__((visibility("default"))) PyMODINIT_FUNC
 #else
-    import_cairo();
+#define PYGI_MODINIT_FUNC PyMODINIT_FUNC
 #endif
 
+static PyMethodDef _gi_cairo_functions[] = { {0,} };
+
+static struct PyModuleDef __gi_cairomodule = {
+    PyModuleDef_HEAD_INIT,
+    "_gi_cairo",
+    NULL,
+    -1,
+    _gi_cairo_functions,
+    NULL,
+    NULL,
+    NULL,
+    NULL
+};
+
+PYGI_MODINIT_FUNC PyInit__gi_cairo (void);
+
+PYGI_MODINIT_FUNC PyInit__gi_cairo (void)
+{
+    PyObject *module;
+    module = PyModule_Create (&__gi_cairomodule);
+
+    PyObject *gobject_mod;
+
+    import_cairo();
+
     if (Pycairo_CAPI == NULL)
-        return PYGLIB_MODULE_ERROR_RETURN;
+        return NULL;
 
     gobject_mod = pygobject_init (3, 13, 2);
     if (gobject_mod == NULL)
-        return PYGLIB_MODULE_ERROR_RETURN;
+        return NULL;
     Py_DECREF (gobject_mod);
 
     pygi_register_foreign_struct ("cairo",
@@ -698,5 +711,5 @@ PYGLIB_MODULE_START(_gi_cairo, "_gi_cairo")
                                cairo_pattern_from_gvalue,
                                cairo_pattern_to_gvalue);
 
+    return module;
 }
-PYGLIB_MODULE_END;

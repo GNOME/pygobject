@@ -20,7 +20,6 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "pygi-python-compat.h"
 #include "pygi-info.h"
 #include "pygi-cache.h"
 #include "pygi-invoke.h"
@@ -40,7 +39,7 @@ _generate_doc_string(PyGIBaseInfo *self)
     static PyObject *_py_generate_doc_string = NULL;
 
     if (_py_generate_doc_string == NULL) {
-        PyObject *mod = pygi_import_module ("gi.docstring");
+        PyObject *mod = PyImport_ImportModule ("gi.docstring");
         if (!mod)
             return NULL;
 
@@ -186,9 +185,9 @@ static PyObject *
 _base_info_repr (PyGIBaseInfo *self)
 {
 
-    return PYGLIB_PyUnicode_FromFormat ("%s(%s)",
-                                        Py_TYPE( (PyObject *) self)->tp_name,
-                                        _safe_base_info_get_name (self->info));
+    return PyUnicode_FromFormat ("%s(%s)",
+                                 Py_TYPE( (PyObject *) self)->tp_name,
+                                 _safe_base_info_get_name (self->info));
 }
 
 static PyObject *
@@ -241,14 +240,7 @@ _pygi_is_python_keyword (const gchar *name)
 {
     /* It may be better to use keyword.iskeyword(); keep in sync with
      * python -c 'import keyword; print(keyword.kwlist)' */
-#if PY_VERSION_HEX < 0x03000000
-    /* Python 2.x */
-    static const gchar* keywords[] = {"and", "as", "assert", "break", "class",
-        "continue", "def", "del", "elif", "else", "except", "exec", "finally",
-        "for", "from", "global", "if", "import", "in", "is", "lambda", "not",
-        "or", "pass", "print", "raise", "return", "try", "while", "with",
-        "yield", NULL};
-#elif PY_VERSION_HEX < 0x04000000
+#if PY_VERSION_HEX < 0x04000000
     /* Python 3.x; note that we explicitly keep "print"; it is not a keyword
      * any more, but we do not want to break API between Python versions */
     static const gchar* keywords[] = {"False", "None", "True", "and", "as",
@@ -376,13 +368,13 @@ _base_info_getattro(PyGIBaseInfo *self, PyObject *name)
 
     static PyObject *docstr;
     if (docstr == NULL) {
-        docstr= PYGLIB_PyUnicode_InternFromString("__doc__");
+        docstr= PyUnicode_InternFromString ("__doc__");
         if (docstr == NULL)
             return NULL;
     }
 
     Py_INCREF (name);
-    PYGLIB_PyUnicode_InternInPlace (&name);
+    PyUnicode_InternInPlace (&name);
 
     if (name == docstr) {
         result = _generate_doc_string (self);
@@ -403,8 +395,8 @@ _base_info_attr_name(PyGIBaseInfo *self, void *closure)
 static PyObject *
 _base_info_attr_module(PyGIBaseInfo *self, void *closure)
 {
-    return PYGLIB_PyUnicode_FromFormat ("gi.repository.%s",
-                                        g_base_info_get_namespace (self->info));
+    return PyUnicode_FromFormat ("gi.repository.%s",
+                                 g_base_info_get_namespace (self->info));
 }
 
 static PyGetSetDef _base_info_getsets[] = {
@@ -600,7 +592,7 @@ _function_info_call (PyGICallableInfo *self, PyObject *args, PyObject *kwargs)
                 py_str_name = tmp;
             }
 
-            str_name = PYGLIB_PyBytes_AsString (py_str_name);
+            str_name = PyBytes_AsString (py_str_name);
             if (strcmp (str_name, _safe_base_info_get_name (container_info))) {
                 PyErr_Format (PyExc_TypeError,
                               "%s constructor cannot be used to create instances of "
