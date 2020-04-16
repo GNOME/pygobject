@@ -656,3 +656,33 @@ def test_template_hierarchy():
 
     win = MyWindow()
     assert isinstance(win, MyWindow)
+
+
+def test_multiple_init_template_calls():
+    xml = """
+    <interface>
+      <template class="MyBox" parent="GtkBox">
+        <child>
+          <object class="GtkLabel" id="_label"/>
+        </child>
+       </template>
+     </interface>
+    """
+    @Gtk.Template(string=xml)
+    class MyBox(Gtk.Box):
+
+        __gtype_name__ = "MyBox"
+
+        _label = Gtk.Template.Child()
+
+        def __init__(self):
+            super().__init__()
+            self._label.props.label = "awesome label"
+
+    my_box = MyBox()
+    assert isinstance(my_box, MyBox)
+    assert len(my_box.get_children()) == 1
+
+    my_box.init_template()
+    assert isinstance(my_box, MyBox)
+    assert len(my_box.get_children()) == 1
