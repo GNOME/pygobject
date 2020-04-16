@@ -29,7 +29,7 @@
 
 GQuark pygflags_class_key;
 
-PYGLIB_DEFINE_TYPE("gobject.GFlags", PyGFlags_Type, PyGFlags);
+PYGI_DEFINE_TYPE("gobject.GFlags", PyGFlags_Type, PyGFlags);
 
 static PyObject *
 pyg_flags_val_new(PyObject* subclass, GType gtype, PyObject *intval)

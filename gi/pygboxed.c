@@ -30,7 +30,7 @@
 
 GQuark pygboxed_type_key;
 
-PYGLIB_DEFINE_TYPE("gobject.GBoxed", PyGBoxed_Type, PyGBoxed);
+PYGI_DEFINE_TYPE("gobject.GBoxed", PyGBoxed_Type, PyGBoxed);
 
 static void
 gboxed_dealloc(PyGBoxed *self)

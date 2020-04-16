@@ -12,7 +12,7 @@ const gchar * pyg_constant_strip_prefix(const gchar *name, const gchar *strip_pr
 
 gboolean pygi_guint_from_pyssize (Py_ssize_t pyval, guint *result);
 
-#define PYGLIB_DEFINE_TYPE(typename, symbol, csymbol)	\
+#define PYGI_DEFINE_TYPE(typename, symbol, csymbol)	\
 PyTypeObject symbol = {                                 \
     PyVarObject_HEAD_INIT(NULL, 0)                      \
     typename,                                           \

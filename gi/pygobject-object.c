@@ -207,7 +207,7 @@ typedef struct {
     guint index;
 } PyGPropsIter;
 
-PYGLIB_DEFINE_TYPE("gi._gi.GPropsIter", PyGPropsIter_Type, PyGPropsIter);
+PYGI_DEFINE_TYPE("gi._gi.GPropsIter", PyGPropsIter_Type, PyGPropsIter);
 
 static void
 pyg_props_iter_dealloc(PyGPropsIter *self)
@@ -352,7 +352,7 @@ set_property_from_pspec(GObject *obj,
     return TRUE;
 }
 
-PYGLIB_DEFINE_TYPE("gi._gi.GProps", PyGProps_Type, PyGProps);
+PYGI_DEFINE_TYPE("gi._gi.GProps", PyGProps_Type, PyGProps);
 
 static int
 PyGProps_setattro(PyGProps *self, PyObject *attr, PyObject *pvalue)
@@ -478,7 +478,7 @@ static PySequenceMethods _PyGProps_as_sequence = {
     0
 };
 
-PYGLIB_DEFINE_TYPE("gi._gi.GPropsDescr", PyGPropsDescr_Type, PyObject);
+PYGI_DEFINE_TYPE("gi._gi.GPropsDescr", PyGPropsDescr_Type, PyObject);
 
 static PyObject *
 pyg_props_descr_descr_get(PyObject *self, PyObject *obj, PyObject *type)
@@ -1107,7 +1107,7 @@ pygobject_watch_closure(PyObject *self, GClosure *closure)
 
 /* -------------- PyGObject behaviour ----------------- */
 
-PYGLIB_DEFINE_TYPE("gi._gi.GObject", PyGObject_Type, PyGObject);
+PYGI_DEFINE_TYPE("gi._gi.GObject", PyGObject_Type, PyGObject);
 
 static void
 pygobject_dealloc(PyGObject *self)
@@ -2258,7 +2258,7 @@ typedef struct {
     gboolean have_floating_ref;
 } PyGObjectWeakRef;
 
-PYGLIB_DEFINE_TYPE("gi._gi.GObjectWeakRef", PyGObjectWeakRef_Type, PyGObjectWeakRef);
+PYGI_DEFINE_TYPE("gi._gi.GObjectWeakRef", PyGObjectWeakRef_Type, PyGObjectWeakRef);
 
 static int
 pygobject_weak_ref_traverse(PyGObjectWeakRef *self, visitproc visit, void *arg)

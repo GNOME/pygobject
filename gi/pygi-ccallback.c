@@ -44,7 +44,7 @@ _ccallback_call(PyGICCallback *self, PyObject *args, PyObject *kwargs)
     return result;
 }
 
-PYGLIB_DEFINE_TYPE("gi.CCallback", PyGICCallback_Type, PyGICCallback);
+PYGI_DEFINE_TYPE("gi.CCallback", PyGICCallback_Type, PyGICCallback);
 
 PyObject *
 _pygi_ccallback_new (GCallback callback,

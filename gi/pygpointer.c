@@ -30,7 +30,7 @@
 
 GQuark pygpointer_class_key;
 
-PYGLIB_DEFINE_TYPE("gobject.GPointer", PyGPointer_Type, PyGPointer);
+PYGI_DEFINE_TYPE("gobject.GPointer", PyGPointer_Type, PyGPointer);
 
 static void
 pyg_pointer_dealloc(PyGPointer *self)

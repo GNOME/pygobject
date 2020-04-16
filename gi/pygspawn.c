@@ -32,7 +32,7 @@ struct _PyGChildSetupData {
     PyObject *data;
 };
 
-PYGLIB_DEFINE_TYPE("gi._gi.Pid", PyGPid_Type, PyLongObject)
+PYGI_DEFINE_TYPE("gi._gi.Pid", PyGPid_Type, PyLongObject)
 
 static GPid
 pyg_pid_get_pid (PyObject *self)

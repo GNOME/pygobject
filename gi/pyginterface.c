@@ -30,7 +30,7 @@
 GQuark pyginterface_type_key;
 GQuark pyginterface_info_key;
 
-PYGLIB_DEFINE_TYPE("gobject.GInterface", PyGInterface_Type, PyObject)
+PYGI_DEFINE_TYPE("gobject.GInterface", PyGInterface_Type, PyObject)
 
 static int
 pyg_interface_init(PyObject *self, PyObject *args, PyObject *kwargs)

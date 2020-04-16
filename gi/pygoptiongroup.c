@@ -24,7 +24,7 @@
 #include "pygi-error.h"
 #include "pygi-util.h"
 
-PYGLIB_DEFINE_TYPE("gi._gi.OptionGroup", PyGOptionGroup_Type, PyGOptionGroup)
+PYGI_DEFINE_TYPE("gi._gi.OptionGroup", PyGOptionGroup_Type, PyGOptionGroup)
 
 /**
  * pyg_option_group_new:

@@ -30,7 +30,7 @@
 
 GQuark pygenum_class_key;
 
-PYGLIB_DEFINE_TYPE("gobject.GEnum", PyGEnum_Type, PyGEnum);
+PYGI_DEFINE_TYPE("gobject.GEnum", PyGEnum_Type, PyGEnum);
 
 static PyObject *
 pyg_enum_val_new(PyObject* subclass, GType gtype, PyObject *intval)

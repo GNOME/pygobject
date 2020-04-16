@@ -165,7 +165,7 @@ boxed_init (PyObject *self,
     return 0;
 }
 
-PYGLIB_DEFINE_TYPE("gi.Boxed", PyGIBoxed_Type, PyGIBoxed);
+PYGI_DEFINE_TYPE("gi.Boxed", PyGIBoxed_Type, PyGIBoxed);
 
 PyObject *
 pygi_boxed_new (PyTypeObject *type,

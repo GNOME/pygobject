@@ -25,7 +25,7 @@
 #include "pygi-util.h"
 #include "pygi-basictype.h"
 
-PYGLIB_DEFINE_TYPE("gi._gi.OptionContext", PyGOptionContext_Type, PyGOptionContext)
+PYGI_DEFINE_TYPE("gi._gi.OptionContext", PyGOptionContext_Type, PyGOptionContext)
 
 /**
  * pyg_option_group_transfer_group:

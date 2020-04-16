@@ -31,7 +31,7 @@
 #include "pygi-util.h"
 #include "pygi-basictype.h"
 
-PYGLIB_DEFINE_TYPE("gobject.GParamSpec", PyGParamSpec_Type, PyGParamSpec);
+PYGI_DEFINE_TYPE("gobject.GParamSpec", PyGParamSpec_Type, PyGParamSpec);
 
 static PyObject*
 pyg_param_spec_richcompare(PyObject *self, PyObject *other, int op)

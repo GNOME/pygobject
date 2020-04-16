@@ -5,7 +5,7 @@
 #include "test-unknown.h"
 #include "test-floating.h"
 
-#define PYGLIB_DEFINE_TYPE(typename, symbol, csymbol)	\
+#define PYGI_DEFINE_TYPE(typename, symbol, csymbol)	\
 PyTypeObject symbol = {                                 \
     PyVarObject_HEAD_INIT(NULL, 0)                      \
     typename,                                           \
@@ -116,7 +116,7 @@ static const PyMethodDef _PyTestInterface_methods[] = {
 };
 
 /* TestInterface */
-PYGLIB_DEFINE_TYPE("test.Interface", PyTestInterface_Type, PyObject);
+PYGI_DEFINE_TYPE("test.Interface", PyTestInterface_Type, PyObject);
 
 static PyObject *
 _wrap_TestInterface__do_iface_method(PyObject *cls, PyObject *args, PyObject *kwargs)
@@ -141,7 +141,7 @@ _wrap_TestInterface__do_iface_method(PyObject *cls, PyObject *args, PyObject *kw
   return Py_None;
 }
 
-PYGLIB_DEFINE_TYPE("testhelper.Unknown", PyTestUnknown_Type, PyGObject);
+PYGI_DEFINE_TYPE("testhelper.Unknown", PyTestUnknown_Type, PyGObject);
 
 static void
 _wrap_TestInterface__proxy_do_iface_method(TestInterface *self)
@@ -227,10 +227,10 @@ static const GInterfaceInfo __TestInterface__iinfo = {
 };
 
 /* TestFloating */
-PYGLIB_DEFINE_TYPE("testhelper.Floating", PyTestFloating_Type, PyGObject);
+PYGI_DEFINE_TYPE("testhelper.Floating", PyTestFloating_Type, PyGObject);
 
 /* TestOwnedByLibrary */
-PYGLIB_DEFINE_TYPE("testhelper.OwnedByLibrary", PyTestOwnedByLibrary_Type, PyGObject);
+PYGI_DEFINE_TYPE("testhelper.OwnedByLibrary", PyTestOwnedByLibrary_Type, PyGObject);
 
 static PyObject *
 _wrap_test_owned_by_library_release (PyGObject *self)
@@ -245,7 +245,7 @@ static const PyMethodDef _PyTestOwnedByLibrary_methods[] = {
 };
 
 /* TestFloatingAndSunk */
-PYGLIB_DEFINE_TYPE("testhelper.FloatingAndSunk", PyTestFloatingAndSunk_Type, PyGObject);
+PYGI_DEFINE_TYPE("testhelper.FloatingAndSunk", PyTestFloatingAndSunk_Type, PyGObject);
 
 static PyObject *
 _wrap_test_floating_and_sunk_release (PyGObject *self)
