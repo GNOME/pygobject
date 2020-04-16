@@ -381,6 +381,8 @@ static PyGetSetDef pyg_enum_getsets[] = {
 int
 pygi_enum_register_types(PyObject *d)
 {
+    PyObject *pygtype;
+
     pygenum_class_key        = g_quark_from_static_string("PyGEnum::class");
 
     PyGEnum_Type.tp_base = &PyLong_Type;
@@ -392,7 +394,15 @@ pygi_enum_register_types(PyObject *d)
     PyGEnum_Type.tp_richcompare = (richcmpfunc)pyg_enum_richcompare;
     PyGEnum_Type.tp_methods = pyg_enum_methods;
     PyGEnum_Type.tp_getset = pyg_enum_getsets;
-    PYGOBJECT_REGISTER_GTYPE(d, PyGEnum_Type, "GEnum", G_TYPE_ENUM);
+    PyGEnum_Type.tp_alloc = PyType_GenericAlloc;
+    if (PyType_Ready(&PyGEnum_Type))
+        return -1;
+
+    pygtype = pyg_type_wrapper_new (G_TYPE_ENUM);
+    PyDict_SetItemString (PyGEnum_Type.tp_dict, "__gtype__", pygtype);
+    Py_DECREF (pygtype);
+
+    PyDict_SetItemString(d, "GEnum", (PyObject *)&PyGEnum_Type);
 
     return 0;
 }

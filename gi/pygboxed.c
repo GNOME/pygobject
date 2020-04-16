@@ -244,6 +244,8 @@ pygi_gboxed_new (GType boxed_type, gpointer boxed, gboolean copy_boxed,
 int
 pygi_gboxed_register_types(PyObject *d)
 {
+    PyObject *pygtype;
+
     pygboxed_type_key        = g_quark_from_static_string("PyGBoxed::class");
 
     PyGBoxed_Type.tp_dealloc = (destructor)gboxed_dealloc;
@@ -254,8 +256,16 @@ pygi_gboxed_register_types(PyObject *d)
     PyGBoxed_Type.tp_init = (initproc)gboxed_init;
     PyGBoxed_Type.tp_free = (freefunc)gboxed_free;
     PyGBoxed_Type.tp_hash = (hashfunc)gboxed_hash;
-    
-    PYGOBJECT_REGISTER_GTYPE(d, PyGBoxed_Type, "GBoxed", G_TYPE_BOXED);
+    PyGBoxed_Type.tp_alloc = PyType_GenericAlloc;
+    PyGBoxed_Type.tp_new = PyType_GenericNew;
+    if (PyType_Ready(&PyGBoxed_Type))
+        return -1;
+
+    pygtype = pyg_type_wrapper_new (G_TYPE_POINTER);
+    PyDict_SetItemString (PyGBoxed_Type.tp_dict, "__gtype__", pygtype);
+    Py_DECREF (pygtype);
+
+    PyDict_SetItemString(d, "GBoxed", (PyObject *)&PyGBoxed_Type);
 
     return 0;
 }

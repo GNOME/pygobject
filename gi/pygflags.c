@@ -498,6 +498,8 @@ static PyNumberMethods pyg_flags_as_number = {
 int
 pygi_flags_register_types(PyObject *d)
 {
+    PyObject *pygtype;
+
     pygflags_class_key = g_quark_from_static_string("PyGFlags::class");
 
     PyGFlags_Type.tp_base = &PyLong_Type;
@@ -509,7 +511,15 @@ pygi_flags_register_types(PyObject *d)
     PyGFlags_Type.tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE;
     PyGFlags_Type.tp_richcompare = (richcmpfunc)pyg_flags_richcompare;
     PyGFlags_Type.tp_getset = pyg_flags_getsets;
-    PYGOBJECT_REGISTER_GTYPE(d, PyGFlags_Type, "GFlags", G_TYPE_FLAGS);
+    PyGFlags_Type.tp_alloc = PyType_GenericAlloc;
+    if (PyType_Ready(&PyGFlags_Type))
+        return -1;
+
+    pygtype = pyg_type_wrapper_new (G_TYPE_FLAGS);
+    PyDict_SetItemString (PyGFlags_Type.tp_dict, "__gtype__", pygtype);
+    Py_DECREF (pygtype);
+
+    PyDict_SetItemString(d, "GFlags", (PyObject *)&PyGFlags_Type);
 
     return 0;
 }
