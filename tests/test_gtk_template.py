@@ -605,7 +605,7 @@ def test_template_hierarchy():
         __gtype_name__ = "TestLabel"
 
         def __init__(self):
-            super().__init__()
+            super(TestLabel, self).__init__()
             self.props.label = "TestLabel"
 
     testbox = """
@@ -625,7 +625,7 @@ def test_template_hierarchy():
         _testlabel = Gtk.Template.Child()
 
         def __init__(self):
-            super().__init__()
+            super(TestBox, self).__init__()
 
             assert isinstance(self._testlabel, TestLabel)
 
@@ -652,7 +652,7 @@ def test_template_hierarchy():
         _testlabel = Gtk.Template.Child()
 
         def __init__(self):
-            super().__init__()
+            super(MyWindow, self).__init__()
 
             assert isinstance(self._testbox, TestBox)
             assert isinstance(self._testlabel, TestLabel)
@@ -680,7 +680,7 @@ def test_multiple_init_template_calls():
         _label = Gtk.Template.Child()
 
         def __init__(self):
-            super().__init__()
+            super(MyBox, self).__init__()
             self._label.props.label = "awesome label"
 
     my_box = MyBox()
