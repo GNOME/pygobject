@@ -2793,3 +2793,11 @@ class TestContainer(unittest.TestCase):
         self.assertEqual(expand, False)
         self.assertEqual(fill, False)
         self.assertEqual(padding, 21)
+
+
+def test_button_focus_on_click():
+    b = Gtk.Button()
+    b.set_focus_on_click(True)
+    assert b.get_focus_on_click()
+    b.set_focus_on_click(False)
+    assert not b.get_focus_on_click()

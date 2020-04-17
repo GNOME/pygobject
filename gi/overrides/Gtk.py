@@ -1460,15 +1460,17 @@ class Button(Gtk.Button, Container):
         else:
             self._init(*args, **kwargs)
 
-    def set_focus_on_click(self, focus_on_click):
-        # Gtk.Button.set_focus_on_click is deprecated since version 3.20
-        # Use Gtk.Widget.set_focus_on_click instead
-        Gtk.Widget.set_focus_on_click(self, focus_on_click)
+    if hasattr(Gtk.Widget, "set_focus_on_click"):
+        def set_focus_on_click(self, *args, **kwargs):
+            # Gtk.Widget.set_focus_on_click should be used instead but it's
+            # no obvious how because of the shadowed method, so override here
+            return Gtk.Widget.set_focus_on_click(self, *args, **kwargs)
 
-    def get_focus_on_click(self):
-        # Gtk.Button.get_focus_on_click is deprecated since version 3.20
-        # Use Gtk.Widget.get_focus_on_click instead
-        Gtk.Widget.get_focus_on_click(self)
+    if hasattr(Gtk.Widget, "get_focus_on_click"):
+        def get_focus_on_click(self, *args, **kwargs):
+            # Gtk.Widget.get_focus_on_click should be used instead but it's
+            # no obvious how because of the shadowed method, so override here
+            return Gtk.Widget.get_focus_on_click(self, *args, **kwargs)
 
 
 Button = override(Button)
