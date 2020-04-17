@@ -124,6 +124,11 @@ class TestGdk(unittest.TestCase):
         self.assertRaises(AttributeError, lambda: getattr(event, 'foo_bar'))
 
     @unittest.skipIf(GDK4, "not in gdk4")
+    def test_scroll_event(self):
+        event = Gdk.Event.new(Gdk.EventType.SCROLL)
+        assert event.direction == Gdk.ScrollDirection.UP
+
+    @unittest.skipIf(GDK4, "not in gdk4")
     def test_event_strip_boolean(self):
         ev = Gdk.EventButton()
         ev.type = Gdk.EventType.BUTTON_PRESS
