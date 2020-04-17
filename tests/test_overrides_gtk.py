@@ -313,7 +313,8 @@ class TestGtk(unittest.TestCase):
         mi = ui.get_widget("/menubær1")
         self.assertEqual(type(mi), Gtk.MenuBar)
 
-    def test_window(self):
+    @unittest.skipIf(Gtk_version == "4.0", "not in gtk4")
+    def test_window_gtk3(self):
         # standard Window
         w = Gtk.Window()
         self.assertEqual(w.get_property('type'), Gtk.WindowType.TOPLEVEL)
@@ -344,6 +345,33 @@ class TestGtk(unittest.TestCase):
                          Gtk.WindowType.TOPLEVEL)
         self.assertEqual(builder.get_object('testpop').get_property('type'),
                          Gtk.WindowType.POPUP)
+
+    @unittest.skipUnless(Gtk_version == "4.0", "no GtkWindowType in gtk4")
+    def test_window_gtk4(self):
+        w = Gtk.Window()
+
+        # check that setting default size works
+        w.set_default_size(300, 300)
+        self.assertEqual(w.get_default_size(), (300, 300))
+
+        class TestWindow(Gtk.Window):
+            __gtype_name__ = "TestWindow"
+
+        # works from builder
+        builder = Gtk.Builder()
+        builder.add_from_string('''
+<interface>
+  <object class="GtkWindow" id="win">
+    <property name="css-name">amazing</property>
+  </object>
+  <object class="TestWindow" id="testwin">
+    <property name="css-name">amazing-test</property>
+  </object>
+</interface>''')
+        self.assertEqual(builder.get_object("win").get_property("css-name"),
+                         "amazing")
+        self.assertEqual(builder.get_object("testwin").get_property("css-name"),
+                         "amazing-test")
 
     def test_dialog_classes(self):
         self.assertEqual(Gtk.Dialog, gi.overrides.Gtk.Dialog)
