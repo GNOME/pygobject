@@ -182,9 +182,39 @@ pygi_arg_gclosure_from_py_marshal (PyObject   *py_arg,
             g_closure_ref (closure);
         }
     } else {
-        closure = pyg_closure_new (py_arg, NULL, NULL);
-        g_closure_ref (closure);
-        g_closure_sink (closure);
+        PyObject *functools;
+        PyObject *partial = NULL;
+
+        functools = PyImport_ImportModule ("functools");
+        if (functools) {
+            partial = PyObject_GetAttrString (functools, "partial");
+            Py_DECREF (functools);
+        }
+
+        if (partial && PyObject_IsInstance (py_arg, partial) > 0) {
+            PyObject *partial_func;
+            PyObject *partial_keywords;
+            PyObject *swap_data;
+
+            partial_func = PyObject_GetAttrString (py_arg, "func");
+            partial_keywords = PyObject_GetAttrString (py_arg, "keywords");
+            swap_data = PyDict_GetItemString (partial_keywords, "swap_data");
+
+            closure = pyg_closure_new (partial_func, NULL, swap_data);
+
+            Py_DECREF (partial_func);
+            Py_DECREF (partial_keywords);
+            g_closure_ref (closure);
+            g_closure_sink (closure);
+        } else {
+            closure = pyg_closure_new (py_arg, NULL, NULL);
+            g_closure_ref (closure);
+            g_closure_sink (closure);
+        }
+
+        if (partial) {
+            Py_DECREF (partial);
+        }
     }
 
     if (closure == NULL) {
