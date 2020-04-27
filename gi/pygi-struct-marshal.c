@@ -193,16 +193,19 @@ pygi_arg_gclosure_from_py_marshal (PyObject   *py_arg,
 
         if (partial && PyObject_IsInstance (py_arg, partial) > 0) {
             PyObject *partial_func;
+            PyObject *partial_args;
             PyObject *partial_keywords;
             PyObject *swap_data;
 
             partial_func = PyObject_GetAttrString (py_arg, "func");
+            partial_args = PyObject_GetAttrString (py_arg, "args");
             partial_keywords = PyObject_GetAttrString (py_arg, "keywords");
             swap_data = PyDict_GetItemString (partial_keywords, "swap_data");
 
-            closure = pyg_closure_new (partial_func, NULL, swap_data);
+            closure = pyg_closure_new (partial_func, partial_args, swap_data);
 
             Py_DECREF (partial_func);
+            Py_DECREF (partial_args);
             Py_DECREF (partial_keywords);
             g_closure_ref (closure);
             g_closure_sink (closure);

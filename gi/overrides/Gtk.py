@@ -21,11 +21,10 @@
 
 import sys
 import warnings
-from collections import abc
 
 from gi.repository import GObject
 from .._ossighelper import wakeup_on_signal, register_sigint_fallback
-from .._gtktemplate import Template
+from .._gtktemplate import Template, _extract_handler_and_args
 from ..overrides import (override, strip_boolean_result, deprecated_init,
                          wrap_list_store_sort_func)
 from ..module import get_introspection_module
@@ -42,6 +41,10 @@ __all__ = []
 
 Template = Template
 __all__.append('Template')
+
+# Exposed for unit-testing.
+_extract_handler_and_args = _extract_handler_and_args
+__all__.append('_extract_handler_and_args')
 
 if GTK2:
     warn_msg = "You have imported the Gtk 2.0 module.  Because Gtk 2.0 \
@@ -76,33 +79,6 @@ def _construct_target_list(targets):
 
 
 __all__.append('_construct_target_list')
-
-
-def _extract_handler_and_args(obj_or_map, handler_name):
-    handler = None
-    if isinstance(obj_or_map, abc.Mapping):
-        handler = obj_or_map.get(handler_name, None)
-    else:
-        handler = getattr(obj_or_map, handler_name, None)
-
-    if handler is None:
-        raise AttributeError('Handler %s not found' % handler_name)
-
-    args = ()
-    if isinstance(handler, abc.Sequence):
-        if len(handler) == 0:
-            raise TypeError("Handler %s tuple can not be empty" % handler)
-        args = handler[1:]
-        handler = handler[0]
-
-    elif not callable(handler):
-        raise TypeError('Handler %s is not a method, function or tuple' % handler)
-
-    return handler, args
-
-
-# Exposed for unit-testing.
-__all__.append('_extract_handler_and_args')
 
 
 def _builder_connect_callback(builder, gobj, signal_name, handler_name, connect_obj, flags, obj_or_map):
@@ -480,19 +456,29 @@ def _get_utf8_length(string):
 
 
 class Builder(Gtk.Builder):
-    def connect_signals(self, obj_or_map):
-        """Connect signals specified by this builder to a name, handler mapping.
+    if GTK4:
+        from .._gtktemplate import define_builder_scope
+        BuilderScope = define_builder_scope()
 
-        Connect signal, name, and handler sets specified in the builder with
-        the given mapping "obj_or_map". The handler/value aspect of the mapping
-        can also contain a tuple in the form of (handler [,arg1 [,argN]])
-        allowing for extra arguments to be passed to the handler. For example:
+        def __init__(self, scope_object_or_map=None):
+            super(Builder, self).__init__()
+            if scope_object_or_map:
+                self.set_scope(Builder.BuilderScope(scope_object_or_map))
 
-        .. code-block:: python
+    else:
+        def connect_signals(self, obj_or_map):
+            """Connect signals specified by this builder to a name, handler mapping.
 
-            builder.connect_signals({'on_clicked': (on_clicked, arg1, arg2)})
-        """
-        self.connect_signals_full(_builder_connect_callback, obj_or_map)
+            Connect signal, name, and handler sets specified in the builder with
+            the given mapping "obj_or_map". The handler/value aspect of the mapping
+            can also contain a tuple in the form of (handler [,arg1 [,argN]])
+            allowing for extra arguments to be passed to the handler. For example:
+
+            .. code-block:: python
+
+                builder.connect_signals({'on_clicked': (on_clicked, arg1, arg2)})
+            """
+            self.connect_signals_full(_builder_connect_callback, obj_or_map)
 
     def add_from_string(self, buffer):
         if not isinstance(buffer, str):
