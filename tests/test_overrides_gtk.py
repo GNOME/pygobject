@@ -1161,8 +1161,8 @@ class TestBuilder(unittest.TestCase):
             <interface>
               <object class="GIOverrideSignalTestObject" id="foo"/>
               <object class="GIOverrideSignalTest" id="object_sig_test">
-                  <signal name="test-signal" handler="on_signal1" object="foo"/>
-                  <signal name="test-signal" handler="on_signal2" after="yes" object="foo" />
+                  <signal name="test-signal" handler="on_signal1" object="foo" swapped="no"/>
+                  <signal name="test-signal" handler="on_signal2" after="yes" object="foo" swapped="no"/>
               </object>
             </interface>
             """)
