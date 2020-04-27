@@ -537,7 +537,7 @@ def test_internal_child():
       <template class="{0}" parent="GtkBox">
         <child>
           <object class="GtkBox" id="somechild">
-            <property name="margin">42</property>
+            <property name="margin-top">42</property>
           </object>
         </child>
       </template>
@@ -551,7 +551,7 @@ def test_internal_child():
         somechild = Gtk.Template.Child(internal=True)
 
     thing = MainThing()
-    assert thing.somechild.props.margin == 42
+    assert thing.somechild.props.margin_top == 42
 
     other_type_name = new_gtype_name()
 
@@ -562,7 +562,7 @@ def test_internal_child():
           <object class="{1}">
             <child internal-child="somechild">
               <object class="GtkBox">
-                <property name="margin">24</property>
+                <property name="margin-top">24</property>
                 <child>
                   <object class="GtkLabel">
                     <property name="label">foo</property>
@@ -585,7 +585,7 @@ def test_internal_child():
     assert isinstance(child, MainThing)
     child = child.get_children()[0]
     assert isinstance(child, Gtk.Box)
-    assert child.props.margin == 24
+    assert child.props.margin_top == 24
     child = child.get_children()[0]
     assert isinstance(child, Gtk.Label)
     assert child.props.label == "foo"
