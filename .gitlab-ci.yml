@@ -20,7 +20,7 @@ cache:
 .mingw-defaults: &mingw-defaults
   stage: build_and_test
   tags:
-    - win32
+    - win32-ps
   artifacts:
     paths:
       - coverage/
