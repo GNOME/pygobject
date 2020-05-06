@@ -1,3 +1,14 @@
+3.36.1 - 2020-05-06
+-------------------
+
+* tests: Fix failing tests with pytest 5.4.0+
+* Gtk: Add override to make sure both TreeModelSort.new_with_model and
+  TreeModel.sort_new_with_model exist independend of the gtk version
+* Gtk.Template: Fix initialisation order errors with Widgets getting created from C
+  (potentially through other templates) :issue:`257` :issue:`386` :issue:`341` :mr:`140` (:user:`Jean Felder <jfelder>`)
+* Gtk.Template: Fix errors when calling init_template() multiple times :mr:`140` (:user:`Jean Felder <jfelder>`)
+
+
 3.36.0 - 2020-03-08
 -------------------
 
