@@ -595,6 +595,7 @@ def test_template_hierarchy():
       </template>
      </interface>
     """
+
     @Gtk.Template(string=testlabel)
     class TestLabel(Gtk.Label):
 
@@ -613,6 +614,7 @@ def test_template_hierarchy():
       </template>
     </interface>
     """
+
     @Gtk.Template(string=testbox)
     class TestBox(Gtk.Box):
 
@@ -639,6 +641,7 @@ def test_template_hierarchy():
       </template>
     </interface>
     """
+
     @Gtk.Template(string=window)
     class MyWindow(Gtk.Window):
 
@@ -668,6 +671,7 @@ def test_multiple_init_template_calls():
        </template>
      </interface>
     """
+
     @Gtk.Template(string=xml)
     class MyBox(Gtk.Box):
 

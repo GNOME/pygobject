@@ -802,8 +802,8 @@ class TestGValue(unittest.TestCase):
 
 def test_list_properties():
 
-    def find_param(l, name):
-        for param in l:
+    def find_param(props, name):
+        for param in props:
             if param.name == name:
                 return param
         return
@@ -820,8 +820,8 @@ def test_list_properties():
     props = list_props(Gio.SimpleAction)
     assert find_param(props, "enabled")
 
-    def names(l):
-        return [p.name for p in l]
+    def names(props):
+        return [p.name for p in props]
 
     assert (set(names(list_props(Gio.Action))) <=
             set(names(list_props(Gio.SimpleAction))))

@@ -92,8 +92,8 @@ class PrintingApp:
         file_path = print_data['filename']
         if not os.path.isfile(file_path):
             file_path = os.path.join('demos', file_path)
-            if not os.path.isfile:
-                raise Exception("file not found: " % (file_path, ))
+            if not os.path.isfile(file_path):
+                raise Exception("file not found: %s" % (file_path, ))
 
         # in reality you should most likely not read the entire
         # file into a buffer
