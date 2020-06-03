@@ -43,7 +43,7 @@ with_pycairo = get_option('pycairo')
 
 cc = meson.get_compiler('c')
 
-if with_pycairo
+if not with_pycairo.disabled()
   cairo_dep = dependency('cairo', required: cc.get_id() != 'msvc')
   cairo_gobject_dep = dependency('cairo-gobject', required: cc.get_id() != 'msvc')
 
@@ -59,7 +59,10 @@ if with_pycairo
     version: pycairo_version_req,
     fallback: ['pycairo', 'pycairo_dep'],
     default_options: ['python=' + get_option('python')],
+    required: with_pycairo,
   )
+else
+  pycairo_dep = dependency('', required: false)
 endif
 
 main_c_args = []
