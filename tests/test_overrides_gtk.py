@@ -58,7 +58,10 @@ def realized(widget):
 
     if toplevel is None:
         window = Gtk.Window()
-        window.add(widget)
+        if Gtk._version == "4.0":
+            window.set_child(widget)
+        else:
+            window.add(widget)
 
     widget.realize()
     if Gtk._version == "4.0":
@@ -73,7 +76,11 @@ def realized(widget):
     yield widget
 
     if toplevel is None:
-        window.remove(widget)
+        if Gtk._version == "4.0":
+            window.set_child(None)
+        else:
+            window.remove(widget)
+
         window.destroy()
 
     if Gtk._version == "4.0":
@@ -161,6 +168,7 @@ def test_wrapper_toggle_refs():
 @unittest.skipUnless(Gtk, 'Gtk not available')
 @ignore_gi_deprecation_warnings
 class TestGtk(unittest.TestCase):
+    @unittest.skipIf(Gtk_version == "4.0", "not in gtk4")
     def test_container(self):
         box = Gtk.Box()
         self.assertTrue(isinstance(box, Gtk.Box))
@@ -557,7 +565,8 @@ class TestGtk(unittest.TestCase):
         # test Gtk.Button
         button = Gtk.Button()
         self.assertTrue(isinstance(button, Gtk.Button))
-        self.assertTrue(isinstance(button, Gtk.Container))
+        if Gtk._version != "4.0":
+            self.assertTrue(isinstance(button, Gtk.Container))
         self.assertTrue(isinstance(button, Gtk.Widget))
 
         if Gtk_version != "4.0":
@@ -579,7 +588,8 @@ class TestGtk(unittest.TestCase):
         # test Gtk.LinkButton
         button = Gtk.LinkButton(uri='http://www.Gtk.org', label='Gtk')
         self.assertTrue(isinstance(button, Gtk.Button))
-        self.assertTrue(isinstance(button, Gtk.Container))
+        if Gtk._version != "4.0":
+            self.assertTrue(isinstance(button, Gtk.Container))
         self.assertTrue(isinstance(button, Gtk.Widget))
         self.assertEqual('http://www.Gtk.org', button.get_uri())
         self.assertEqual('Gtk', button.get_label())
@@ -662,7 +672,8 @@ class TestGtk(unittest.TestCase):
     def test_table(self):
         table = Gtk.Table()
         self.assertTrue(isinstance(table, Gtk.Table))
-        self.assertTrue(isinstance(table, Gtk.Container))
+        if Gtk._version != "4.0":
+            self.assertTrue(isinstance(table, Gtk.Container))
         self.assertTrue(isinstance(table, Gtk.Widget))
         self.assertEqual(table.get_size(), (1, 1))
         self.assertEqual(table.get_homogeneous(), False)
@@ -683,7 +694,8 @@ class TestGtk(unittest.TestCase):
     def test_scrolledwindow(self):
         sw = Gtk.ScrolledWindow()
         self.assertTrue(isinstance(sw, Gtk.ScrolledWindow))
-        self.assertTrue(isinstance(sw, Gtk.Container))
+        if Gtk._version != "4.0":
+            self.assertTrue(isinstance(sw, Gtk.Container))
         self.assertTrue(isinstance(sw, Gtk.Widget))
         sb = sw.get_hscrollbar()
         self.assertEqual(sw.get_hadjustment(), sb.get_adjustment())

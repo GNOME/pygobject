@@ -165,24 +165,23 @@ Widget = override(Widget)
 __all__.append('Widget')
 
 
-class Container(Gtk.Container, Widget):
+if Gtk._version in ("2.0", "3.0"):
+    class Container(Gtk.Container, Widget):
 
-    def __len__(self):
-        return len(self.get_children())
+        def __len__(self):
+            return len(self.get_children())
 
-    def __contains__(self, child):
-        return child in self.get_children()
+        def __contains__(self, child):
+            return child in self.get_children()
 
-    def __iter__(self):
-        return iter(self.get_children())
+        def __iter__(self):
+            return iter(self.get_children())
 
-    def __bool__(self):
-        return True
+        def __bool__(self):
+            return True
 
-    # alias for Python 2.x object protocol
-    __nonzero__ = __bool__
-
-    if Gtk._version in ("2.0", "3.0"):
+        # alias for Python 2.x object protocol
+        __nonzero__ = __bool__
 
         def child_get_property(self, child, property_name, value=None):
             if value is None:
@@ -207,9 +206,11 @@ class Container(Gtk.Container, Widget):
 
         get_focus_chain = strip_boolean_result(Gtk.Container.get_focus_chain)
 
-
-Container = override(Container)
-__all__.append('Container')
+    Container = override(Container)
+    __all__.append('Container')
+else:
+    class Container(object):
+        pass
 
 
 class Editable(Gtk.Editable):
