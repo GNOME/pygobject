@@ -21,6 +21,7 @@
 # USA
 
 import importlib
+from threading import Lock
 
 import gi
 
@@ -117,6 +118,8 @@ class IntrospectionModule(object):
         if self._version is None:
             self._version = repository.get_version(self._namespace)
 
+        self._lock = Lock()
+
     def __getattr__(self, name):
         info = repository.find_by_name(self._namespace, name)
         if not info:
@@ -125,39 +128,41 @@ class IntrospectionModule(object):
 
         if isinstance(info, EnumInfo):
             g_type = info.get_g_type()
-            wrapper = g_type.pytype
 
-            if wrapper is None:
-                if info.is_flags():
-                    if g_type.is_a(TYPE_FLAGS):
-                        wrapper = flags_add(g_type)
+            with self._lock:
+                wrapper = g_type.pytype
+
+                if wrapper is None:
+                    if info.is_flags():
+                        if g_type.is_a(TYPE_FLAGS):
+                            wrapper = flags_add(g_type)
+                        else:
+                            assert g_type == TYPE_NONE
+                            wrapper = flags_register_new_gtype_and_add(info)
                     else:
-                        assert g_type == TYPE_NONE
-                        wrapper = flags_register_new_gtype_and_add(info)
-                else:
-                    if g_type.is_a(TYPE_ENUM):
-                        wrapper = enum_add(g_type)
-                    else:
-                        assert g_type == TYPE_NONE
-                        wrapper = enum_register_new_gtype_and_add(info)
+                        if g_type.is_a(TYPE_ENUM):
+                            wrapper = enum_add(g_type)
+                        else:
+                            assert g_type == TYPE_NONE
+                            wrapper = enum_register_new_gtype_and_add(info)
 
-                wrapper.__info__ = info
-                wrapper.__module__ = 'gi.repository.' + info.get_namespace()
+                    wrapper.__info__ = info
+                    wrapper.__module__ = 'gi.repository.' + info.get_namespace()
 
-                # Don't use upper() here to avoid locale specific
-                # identifier conversion (e. g. in Turkish 'i'.upper() == 'i')
-                # see https://bugzilla.gnome.org/show_bug.cgi?id=649165
-                ascii_upper_trans = ''.maketrans(
-                    'abcdefgjhijklmnopqrstuvwxyz',
-                    'ABCDEFGJHIJKLMNOPQRSTUVWXYZ')
-                for value_info in info.get_values():
-                    value_name = value_info.get_name_unescaped().translate(ascii_upper_trans)
-                    setattr(wrapper, value_name, wrapper(value_info.get_value()))
-                for method_info in info.get_methods():
-                    setattr(wrapper, method_info.__name__, method_info)
+                    # Don't use upper() here to avoid locale specific
+                    # identifier conversion (e. g. in Turkish 'i'.upper() == 'i')
+                    # see https://bugzilla.gnome.org/show_bug.cgi?id=649165
+                    ascii_upper_trans = ''.maketrans(
+                        'abcdefgjhijklmnopqrstuvwxyz',
+                        'ABCDEFGJHIJKLMNOPQRSTUVWXYZ')
+                    for value_info in info.get_values():
+                        value_name = value_info.get_name_unescaped().translate(ascii_upper_trans)
+                        setattr(wrapper, value_name, wrapper(value_info.get_value()))
+                    for method_info in info.get_methods():
+                        setattr(wrapper, method_info.__name__, method_info)
 
-            if g_type != TYPE_NONE:
-                g_type.pytype = wrapper
+                if g_type != TYPE_NONE:
+                    g_type.pytype = wrapper
 
         elif isinstance(info, RegisteredTypeInfo):
             g_type = info.get_g_type()
@@ -188,27 +193,28 @@ class IntrospectionModule(object):
             else:
                 raise NotImplementedError(info)
 
-            # Check if there is already a Python wrapper that is not a parent class
-            # of the wrapper being created. If it is a parent, it is ok to clobber
-            # g_type.pytype with a new child class wrapper of the existing parent.
-            # Note that the return here never occurs under normal circumstances due
-            # to caching on the __dict__ itself.
-            if g_type != TYPE_NONE:
-                type_ = g_type.pytype
-                if type_ is not None and type_ not in bases:
-                    self.__dict__[name] = type_
-                    return type_
+            with self._lock:
+                # Check if there is already a Python wrapper that is not a parent class
+                # of the wrapper being created. If it is a parent, it is ok to clobber
+                # g_type.pytype with a new child class wrapper of the existing parent.
+                # Note that the return here never occurs under normal circumstances due
+                # to caching on the __dict__ itself.
+                if g_type != TYPE_NONE:
+                    type_ = g_type.pytype
+                    if type_ is not None and type_ not in bases:
+                        self.__dict__[name] = type_
+                        return type_
 
-            dict_ = {
-                '__info__': info,
-                '__module__': 'gi.repository.' + self._namespace,
-                '__gtype__': g_type
-            }
-            wrapper = metaclass(name, bases, dict_)
+                dict_ = {
+                    '__info__': info,
+                    '__module__': 'gi.repository.' + self._namespace,
+                    '__gtype__': g_type
+                }
+                wrapper = metaclass(name, bases, dict_)
 
-            # Register the new Python wrapper.
-            if g_type != TYPE_NONE:
-                g_type.pytype = wrapper
+                # Register the new Python wrapper.
+                if g_type != TYPE_NONE:
+                    g_type.pytype = wrapper
 
         elif isinstance(info, FunctionInfo):
             wrapper = info
