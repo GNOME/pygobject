@@ -168,7 +168,7 @@ Widget = override(Widget)
 __all__.append('Widget')
 
 
-if Gtk._version in ("2.0", "3.0"):
+if GTK2 or GTK3:
     class Container(Gtk.Container, Widget):
 
         def __len__(self):
@@ -422,12 +422,20 @@ if GTK2 or GTK3:
     __all__.append('UIManager')
 
 
-class ComboBox(Gtk.ComboBox, Container):
-    get_active_iter = strip_boolean_result(Gtk.ComboBox.get_active_iter)
+if GTK4:
+    class ComboBox(Gtk.ComboBox):
+        get_active_iter = strip_boolean_result(Gtk.ComboBox.get_active_iter)
 
 
-ComboBox = override(ComboBox)
-__all__.append('ComboBox')
+    ComboBox = override(ComboBox)
+    __all__.append('ComboBox')
+else:
+    class ComboBox(Gtk.ComboBox, Container):
+        get_active_iter = strip_boolean_result(Gtk.ComboBox.get_active_iter)
+
+
+    ComboBox = override(ComboBox)
+    __all__.append('ComboBox')
 
 
 class Box(Gtk.Box):
@@ -1340,51 +1348,94 @@ TreeStore = override(TreeStore)
 __all__.append('TreeStore')
 
 
-class TreeView(Gtk.TreeView, Container):
-    __init__ = deprecated_init(Gtk.TreeView.__init__,
-                               arg_names=('model',),
-                               category=PyGTKDeprecationWarning)
+if GTK4:
+    class TreeView(Gtk.TreeView):
+        get_path_at_pos = strip_boolean_result(Gtk.TreeView.get_path_at_pos)
+        get_visible_range = strip_boolean_result(Gtk.TreeView.get_visible_range)
+        get_dest_row_at_pos = strip_boolean_result(Gtk.TreeView.get_dest_row_at_pos)
 
-    get_path_at_pos = strip_boolean_result(Gtk.TreeView.get_path_at_pos)
-    get_visible_range = strip_boolean_result(Gtk.TreeView.get_visible_range)
-    get_dest_row_at_pos = strip_boolean_result(Gtk.TreeView.get_dest_row_at_pos)
+        def enable_model_drag_source(self, start_button_mask, targets, actions):
+            target_entries = _construct_target_list(targets)
+            super(TreeView, self).enable_model_drag_source(start_button_mask,
+                                                           target_entries,
+                                                           actions)
 
-    def enable_model_drag_source(self, start_button_mask, targets, actions):
-        target_entries = _construct_target_list(targets)
-        super(TreeView, self).enable_model_drag_source(start_button_mask,
-                                                       target_entries,
-                                                       actions)
+        def enable_model_drag_dest(self, targets, actions):
+            target_entries = _construct_target_list(targets)
+            super(TreeView, self).enable_model_drag_dest(target_entries,
+                                                         actions)
 
-    def enable_model_drag_dest(self, targets, actions):
-        target_entries = _construct_target_list(targets)
-        super(TreeView, self).enable_model_drag_dest(target_entries,
-                                                     actions)
+        def scroll_to_cell(self, path, column=None, use_align=False, row_align=0.0, col_align=0.0):
+            if not isinstance(path, Gtk.TreePath):
+                path = TreePath(path)
+            super(TreeView, self).scroll_to_cell(path, column, use_align, row_align, col_align)
 
-    def scroll_to_cell(self, path, column=None, use_align=False, row_align=0.0, col_align=0.0):
-        if not isinstance(path, Gtk.TreePath):
-            path = TreePath(path)
-        super(TreeView, self).scroll_to_cell(path, column, use_align, row_align, col_align)
+        def set_cursor(self, path, column=None, start_editing=False):
+            if not isinstance(path, Gtk.TreePath):
+                path = TreePath(path)
+            super(TreeView, self).set_cursor(path, column, start_editing)
 
-    def set_cursor(self, path, column=None, start_editing=False):
-        if not isinstance(path, Gtk.TreePath):
-            path = TreePath(path)
-        super(TreeView, self).set_cursor(path, column, start_editing)
+        def get_cell_area(self, path, column=None):
+            if not isinstance(path, Gtk.TreePath):
+                path = TreePath(path)
+            return super(TreeView, self).get_cell_area(path, column)
 
-    def get_cell_area(self, path, column=None):
-        if not isinstance(path, Gtk.TreePath):
-            path = TreePath(path)
-        return super(TreeView, self).get_cell_area(path, column)
-
-    def insert_column_with_attributes(self, position, title, cell, **kwargs):
-        column = TreeViewColumn()
-        column.set_title(title)
-        column.pack_start(cell, False)
-        self.insert_column(column, position)
-        column.set_attributes(cell, **kwargs)
+        def insert_column_with_attributes(self, position, title, cell, **kwargs):
+            column = TreeViewColumn()
+            column.set_title(title)
+            column.pack_start(cell, False)
+            self.insert_column(column, position)
+            column.set_attributes(cell, **kwargs)
 
 
-TreeView = override(TreeView)
-__all__.append('TreeView')
+    TreeView = override(TreeView)
+    __all__.append('TreeView')
+else:
+    class TreeView(Gtk.TreeView, Container):
+        __init__ = deprecated_init(Gtk.TreeView.__init__,
+                                   arg_names=('model',),
+                                   category=PyGTKDeprecationWarning)
+
+        get_path_at_pos = strip_boolean_result(Gtk.TreeView.get_path_at_pos)
+        get_visible_range = strip_boolean_result(Gtk.TreeView.get_visible_range)
+        get_dest_row_at_pos = strip_boolean_result(Gtk.TreeView.get_dest_row_at_pos)
+
+        def enable_model_drag_source(self, start_button_mask, targets, actions):
+            target_entries = _construct_target_list(targets)
+            super(TreeView, self).enable_model_drag_source(start_button_mask,
+                                                           target_entries,
+                                                           actions)
+
+        def enable_model_drag_dest(self, targets, actions):
+            target_entries = _construct_target_list(targets)
+            super(TreeView, self).enable_model_drag_dest(target_entries,
+                                                         actions)
+
+        def scroll_to_cell(self, path, column=None, use_align=False, row_align=0.0, col_align=0.0):
+            if not isinstance(path, Gtk.TreePath):
+                path = TreePath(path)
+            super(TreeView, self).scroll_to_cell(path, column, use_align, row_align, col_align)
+
+        def set_cursor(self, path, column=None, start_editing=False):
+            if not isinstance(path, Gtk.TreePath):
+                path = TreePath(path)
+            super(TreeView, self).set_cursor(path, column, start_editing)
+
+        def get_cell_area(self, path, column=None):
+            if not isinstance(path, Gtk.TreePath):
+                path = TreePath(path)
+            return super(TreeView, self).get_cell_area(path, column)
+
+        def insert_column_with_attributes(self, position, title, cell, **kwargs):
+            column = TreeViewColumn()
+            column.set_title(title)
+            column.pack_start(cell, False)
+            self.insert_column(column, position)
+            column.set_attributes(cell, **kwargs)
+
+
+    TreeView = override(TreeView)
+    __all__.append('TreeView')
 
 
 class TreeViewColumn(Gtk.TreeViewColumn):
