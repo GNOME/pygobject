@@ -32,6 +32,9 @@ from gi import PyGIDeprecationWarning
 
 
 Gtk = get_introspection_module('Gtk')
+GTK2 = Gtk._version == '2.0'
+GTK3 = Gtk._version == '3.0'
+GTK4 = Gtk._version == '4.0'
 
 __all__ = []
 
@@ -39,7 +42,7 @@ __all__ = []
 Template = Template
 __all__.append('Template')
 
-if Gtk._version == '2.0':
+if GTK2:
     warn_msg = "You have imported the Gtk 2.0 module.  Because Gtk 2.0 \
 was not designed for use with introspection some of the \
 interfaces and API will fail.  As such this is not supported \
@@ -225,7 +228,7 @@ Editable = override(Editable)
 __all__.append("Editable")
 
 
-if Gtk._version in ("2.0", "3.0"):
+if GTK2 or GTK3:
     class Action(Gtk.Action):
         __init__ = deprecated_init(Gtk.Action.__init__,
                                    arg_names=('name', 'label', 'tooltip', 'stock_id'),
@@ -448,7 +451,7 @@ SizeGroup = override(SizeGroup)
 __all__.append('SizeGroup')
 
 
-if Gtk._version in ("2.0", "3.0"):
+if GTK2 or GTK3:
     class MenuItem(Gtk.MenuItem):
         __init__ = deprecated_init(Gtk.MenuItem.__init__,
                                    arg_names=('label',),
@@ -1523,7 +1526,7 @@ Adjustment = override(Adjustment)
 __all__.append('Adjustment')
 
 
-if Gtk._version in ("2.0", "3.0"):
+if GTK2 or GTK3:
     class Table(Gtk.Table, Container):
         __init__ = deprecated_init(Gtk.Table.__init__,
                                    arg_names=('n_rows', 'n_columns', 'homogeneous'),
@@ -1577,7 +1580,7 @@ Paned = override(Paned)
 __all__.append('Paned')
 
 
-if Gtk._version in ("2.0", "3.0"):
+if GTK2 or GTK3:
     class Arrow(Gtk.Arrow):
         __init__ = deprecated_init(Gtk.Arrow.__init__,
                                    arg_names=('arrow_type', 'shadow_type'),
@@ -1627,14 +1630,14 @@ class TreeModelFilter(Gtk.TreeModelFilter):
 TreeModelFilter = override(TreeModelFilter)
 __all__.append('TreeModelFilter')
 
-if Gtk._version == '3.0':
+if GTK3:
     class Menu(Gtk.Menu):
         def popup(self, parent_menu_shell, parent_menu_item, func, data, button, activate_time):
             self.popup_for_device(None, parent_menu_shell, parent_menu_item, func, data, button, activate_time)
     Menu = override(Menu)
     __all__.append('Menu')
 
-if Gtk._version in ("2.0", "3.0"):
+if GTK2 or GTK3:
     _Gtk_main_quit = Gtk.main_quit
 
     @override(Gtk.main_quit)
@@ -1650,11 +1653,11 @@ if Gtk._version in ("2.0", "3.0"):
                 return _Gtk_main(*args, **kwargs)
 
 
-if Gtk._version in ("2.0", "3.0"):
+if GTK2 or GTK3:
     stock_lookup = strip_boolean_result(Gtk.stock_lookup)
     __all__.append('stock_lookup')
 
-if Gtk._version == "4.0":
+if GTK4:
     initialized = Gtk.init_check()
 else:
     initialized, argv = Gtk.init_check(sys.argv)
