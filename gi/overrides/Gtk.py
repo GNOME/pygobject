@@ -1522,46 +1522,47 @@ TreeSelection = override(TreeSelection)
 __all__.append('TreeSelection')
 
 
-class Button(Gtk.Button, Container):
-    _init = deprecated_init(Gtk.Button.__init__,
-                            arg_names=('label', 'stock', 'use_stock', 'use_underline'),
-                            ignore=('stock',),
-                            category=PyGTKDeprecationWarning,
-                            stacklevel=3)
+if GTK2 or GTK3:
+    class Button(Gtk.Button, Container):
+        _init = deprecated_init(Gtk.Button.__init__,
+                                arg_names=('label', 'stock', 'use_stock', 'use_underline'),
+                                ignore=('stock',),
+                                category=PyGTKDeprecationWarning,
+                                stacklevel=3)
 
-    def __init__(self, *args, **kwargs):
-        # Doubly deprecated initializer, the stock keyword is non-standard.
-        # Simply give a warning that stock items are deprecated even though
-        # we want to deprecate the non-standard keyword as well here from
-        # the overrides.
-        if 'stock' in kwargs and kwargs['stock']:
-            warnings.warn('Stock items are deprecated. '
-                          'Please use: Gtk.Button.new_with_mnemonic(label)',
-                          PyGTKDeprecationWarning, stacklevel=2)
-            new_kwargs = kwargs.copy()
-            new_kwargs['label'] = new_kwargs['stock']
-            new_kwargs['use_stock'] = True
-            new_kwargs['use_underline'] = True
-            del new_kwargs['stock']
-            Gtk.Button.__init__(self, **new_kwargs)
-        else:
-            self._init(*args, **kwargs)
+        def __init__(self, *args, **kwargs):
+            # Doubly deprecated initializer, the stock keyword is non-standard.
+            # Simply give a warning that stock items are deprecated even though
+            # we want to deprecate the non-standard keyword as well here from
+            # the overrides.
+            if 'stock' in kwargs and kwargs['stock']:
+                warnings.warn('Stock items are deprecated. '
+                              'Please use: Gtk.Button.new_with_mnemonic(label)',
+                              PyGTKDeprecationWarning, stacklevel=2)
+                new_kwargs = kwargs.copy()
+                new_kwargs['label'] = new_kwargs['stock']
+                new_kwargs['use_stock'] = True
+                new_kwargs['use_underline'] = True
+                del new_kwargs['stock']
+                Gtk.Button.__init__(self, **new_kwargs)
+            else:
+                self._init(*args, **kwargs)
 
-    if hasattr(Gtk.Widget, "set_focus_on_click"):
-        def set_focus_on_click(self, *args, **kwargs):
-            # Gtk.Widget.set_focus_on_click should be used instead but it's
-            # no obvious how because of the shadowed method, so override here
-            return Gtk.Widget.set_focus_on_click(self, *args, **kwargs)
+        if hasattr(Gtk.Widget, "set_focus_on_click"):
+            def set_focus_on_click(self, *args, **kwargs):
+                # Gtk.Widget.set_focus_on_click should be used instead but it's
+                # no obvious how because of the shadowed method, so override here
+                return Gtk.Widget.set_focus_on_click(self, *args, **kwargs)
 
-    if hasattr(Gtk.Widget, "get_focus_on_click"):
-        def get_focus_on_click(self, *args, **kwargs):
-            # Gtk.Widget.get_focus_on_click should be used instead but it's
-            # no obvious how because of the shadowed method, so override here
-            return Gtk.Widget.get_focus_on_click(self, *args, **kwargs)
+        if hasattr(Gtk.Widget, "get_focus_on_click"):
+            def get_focus_on_click(self, *args, **kwargs):
+                # Gtk.Widget.get_focus_on_click should be used instead but it's
+                # no obvious how because of the shadowed method, so override here
+                return Gtk.Widget.get_focus_on_click(self, *args, **kwargs)
 
 
-Button = override(Button)
-__all__.append('Button')
+    Button = override(Button)
+    __all__.append('Button')
 
 
 class LinkButton(Gtk.LinkButton):
