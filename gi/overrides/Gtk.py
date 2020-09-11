@@ -534,95 +534,127 @@ Window = override(Window)
 __all__.append('Window')
 
 
-class Dialog(Gtk.Dialog, Container):
-    _old_arg_names = ('title', 'parent', 'flags', 'buttons', '_buttons_property')
-    _init = deprecated_init(Gtk.Dialog.__init__,
-                            arg_names=('title', 'transient_for', 'flags',
-                                       'add_buttons', 'buttons'),
-                            ignore=('flags', 'add_buttons'),
-                            deprecated_aliases={'transient_for': 'parent',
-                                                'buttons': '_buttons_property'},
-                            category=PyGTKDeprecationWarning)
+if GTK4:
+    class Dialog(Gtk.Dialog):
+        def add_buttons(self, *args):
+            """
+            The add_buttons() method adds several buttons to the Gtk.Dialog using
+            the button data passed as arguments to the method. This method is the
+            same as calling the Gtk.Dialog.add_button() repeatedly. The button data
+            pairs - button text (or stock ID) and a response ID integer are passed
+            individually. For example:
 
-    def __init__(self, *args, **kwargs):
+            .. code-block:: python
 
-        new_kwargs = kwargs.copy()
-        old_kwargs = dict(zip(self._old_arg_names, args))
-        old_kwargs.update(kwargs)
+                dialog.add_buttons(Gtk.STOCK_OPEN, 42, "Close", Gtk.ResponseType.CLOSE)
 
-        # Increment the warning stacklevel for sub-classes which implement their own __init__.
-        stacklevel = 2
-        if self.__class__ != Dialog and self.__class__.__init__ != Dialog.__init__:
-            stacklevel += 1
+            will add "Open" and "Close" buttons to dialog.
+            """
+            def _button(b):
+                while b:
+                    try:
+                        t, r = b[0:2]
+                    except ValueError:
+                        raise ValueError('Must pass an even number of arguments')
+                    b = b[2:]
+                    yield t, r
 
-        # buttons was overloaded by PyGtk but is needed for Gtk.MessageDialog
-        # as a pass through, so type check the argument and give a deprecation
-        # when it is not of type Gtk.ButtonsType
-        add_buttons = old_kwargs.get('buttons', None)
-        if add_buttons is not None and not isinstance(add_buttons, Gtk.ButtonsType):
-            warnings.warn('The "buttons" argument must be a Gtk.ButtonsType enum value. '
-                          'Please use the "add_buttons" method for adding buttons. '
-                          'See: https://wiki.gnome.org/PyGObject/InitializerDeprecations',
-                          PyGTKDeprecationWarning, stacklevel=stacklevel)
-            new_kwargs.pop('buttons', None)
-        else:
-            add_buttons = None
-
-        flags = old_kwargs.get('flags', 0)
-        if flags:
-            warnings.warn('The "flags" argument for dialog construction is deprecated. '
-                          'Please use initializer keywords: modal=True and/or destroy_with_parent=True. '
-                          'See: https://wiki.gnome.org/PyGObject/InitializerDeprecations',
-                          PyGTKDeprecationWarning, stacklevel=stacklevel)
-
-            if flags & Gtk.DialogFlags.MODAL:
-                new_kwargs['modal'] = True
-
-            if flags & Gtk.DialogFlags.DESTROY_WITH_PARENT:
-                new_kwargs['destroy_with_parent'] = True
-
-        self._init(*args, **new_kwargs)
-
-        if add_buttons:
-            self.add_buttons(*add_buttons)
-
-    def run(self, *args, **kwargs):
-        with register_sigint_fallback(self.destroy):
-            with wakeup_on_signal():
-                return Gtk.Dialog.run(self, *args, **kwargs)
-
-    action_area = property(lambda dialog: dialog.get_action_area())
-    vbox = property(lambda dialog: dialog.get_content_area())
-
-    def add_buttons(self, *args):
-        """
-        The add_buttons() method adds several buttons to the Gtk.Dialog using
-        the button data passed as arguments to the method. This method is the
-        same as calling the Gtk.Dialog.add_button() repeatedly. The button data
-        pairs - button text (or stock ID) and a response ID integer are passed
-        individually. For example:
-
-        .. code-block:: python
-
-            dialog.add_buttons(Gtk.STOCK_OPEN, 42, "Close", Gtk.ResponseType.CLOSE)
-
-        will add "Open" and "Close" buttons to dialog.
-        """
-        def _button(b):
-            while b:
-                try:
-                    t, r = b[0:2]
-                except ValueError:
-                    raise ValueError('Must pass an even number of arguments')
-                b = b[2:]
-                yield t, r
-
-        for text, response in _button(args):
-            self.add_button(text, response)
+            for text, response in _button(args):
+                self.add_button(text, response)
 
 
-Dialog = override(Dialog)
-__all__.append('Dialog')
+    Dialog = override(Dialog)
+    __all__.append('Dialog')
+else:
+    class Dialog(Gtk.Dialog, Container):
+        _old_arg_names = ('title', 'parent', 'flags', 'buttons', '_buttons_property')
+        _init = deprecated_init(Gtk.Dialog.__init__,
+                                arg_names=('title', 'transient_for', 'flags',
+                                           'add_buttons', 'buttons'),
+                                ignore=('flags', 'add_buttons'),
+                                deprecated_aliases={'transient_for': 'parent',
+                                                    'buttons': '_buttons_property'},
+                                category=PyGTKDeprecationWarning)
+
+        def __init__(self, *args, **kwargs):
+
+            new_kwargs = kwargs.copy()
+            old_kwargs = dict(zip(self._old_arg_names, args))
+            old_kwargs.update(kwargs)
+
+            # Increment the warning stacklevel for sub-classes which implement their own __init__.
+            stacklevel = 2
+            if self.__class__ != Dialog and self.__class__.__init__ != Dialog.__init__:
+                stacklevel += 1
+
+            # buttons was overloaded by PyGtk but is needed for Gtk.MessageDialog
+            # as a pass through, so type check the argument and give a deprecation
+            # when it is not of type Gtk.ButtonsType
+            add_buttons = old_kwargs.get('buttons', None)
+            if add_buttons is not None and not isinstance(add_buttons, Gtk.ButtonsType):
+                warnings.warn('The "buttons" argument must be a Gtk.ButtonsType enum value. '
+                              'Please use the "add_buttons" method for adding buttons. '
+                              'See: https://wiki.gnome.org/PyGObject/InitializerDeprecations',
+                              PyGTKDeprecationWarning, stacklevel=stacklevel)
+                new_kwargs.pop('buttons', None)
+            else:
+                add_buttons = None
+
+            flags = old_kwargs.get('flags', 0)
+            if flags:
+                warnings.warn('The "flags" argument for dialog construction is deprecated. '
+                              'Please use initializer keywords: modal=True and/or destroy_with_parent=True. '
+                              'See: https://wiki.gnome.org/PyGObject/InitializerDeprecations',
+                              PyGTKDeprecationWarning, stacklevel=stacklevel)
+
+                if flags & Gtk.DialogFlags.MODAL:
+                    new_kwargs['modal'] = True
+
+                if flags & Gtk.DialogFlags.DESTROY_WITH_PARENT:
+                    new_kwargs['destroy_with_parent'] = True
+
+            self._init(*args, **new_kwargs)
+
+            if add_buttons:
+                self.add_buttons(*add_buttons)
+
+        def run(self, *args, **kwargs):
+            with register_sigint_fallback(self.destroy):
+                with wakeup_on_signal():
+                    return Gtk.Dialog.run(self, *args, **kwargs)
+
+        action_area = property(lambda dialog: dialog.get_action_area())
+        vbox = property(lambda dialog: dialog.get_content_area())
+
+        def add_buttons(self, *args):
+            """
+            The add_buttons() method adds several buttons to the Gtk.Dialog using
+            the button data passed as arguments to the method. This method is the
+            same as calling the Gtk.Dialog.add_button() repeatedly. The button data
+            pairs - button text (or stock ID) and a response ID integer are passed
+            individually. For example:
+
+            .. code-block:: python
+
+                dialog.add_buttons(Gtk.STOCK_OPEN, 42, "Close", Gtk.ResponseType.CLOSE)
+
+            will add "Open" and "Close" buttons to dialog.
+            """
+            def _button(b):
+                while b:
+                    try:
+                        t, r = b[0:2]
+                    except ValueError:
+                        raise ValueError('Must pass an even number of arguments')
+                    b = b[2:]
+                    yield t, r
+
+            for text, response in _button(args):
+                self.add_button(text, response)
+
+
+    Dialog = override(Dialog)
+    __all__.append('Dialog')
 
 
 class MessageDialog(Gtk.MessageDialog, Dialog):
