@@ -1,19 +1,23 @@
-3.xx.x - ????-??-??
+3.38.0 - 2020-09-12
 -------------------
 
-Python 2 is no longer supported.
+* Python 2 is no longer supported.
 
-Note for distros/packagers:
-    In case you want to keep Python 2 support you'll likely split any existing
-    package into a Python 2 and 3 version. Since these aren't parallel installable
-    here are some recommendations on how to make it work:
+  Note for distros/packagers:
+      In case you want to keep Python 2 support you'll likely split any existing
+      package into a Python 2 and 3 version. Since these aren't parallel installable
+      here are some recommendations on how to make it work:
 
-    * Build the devel package from the Python 3 source package
-    * Drop the headers/.pc files from the Python 2 build/package
-    * Make sure no Python 2 using package depends on the devel package
-      (@Arch: gnumeric can be build without Python support for example)
+      * Build the devel package from the Python 3 source package
+      * Drop the headers/.pc files from the Python 2 build/package
+      * Make sure no Python 2 using package depends on the devel package
+        (@Arch: gnumeric can be build without Python support for example)
 
-    See :issue:`392` for details
+      See :issue:`392` for details
+
+* meson: Make the `pycairo` option a feature :mr:`146` :mr:`147`
+* gdk overrides: Fix wrapping of scroll events :mr:`141`
+* Add overrides for Gtk.Button set/get_focus_on_click :mr:`132`
 
 
 3.36.1 - 2020-05-06
