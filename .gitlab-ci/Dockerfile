@@ -1,4 +1,6 @@
-FROM ubuntu:cosmic
+FROM ubuntu:focal
+
+ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -y \
     build-essential \
@@ -39,12 +41,9 @@ ENV PYTHON_CONFIGURE_OPTS="--enable-shared"
 
 RUN curl -L https://raw.githubusercontent.com/pyenv/pyenv-installer/master/bin/pyenv-installer | bash
 
-RUN pyenv install pypy2.7-7.3.0
-RUN pyenv install pypy3.6-7.3.0
-RUN pyenv install --debug 2.7.17
-RUN pyenv install 3.5.9
-RUN pyenv install 3.6.10
-RUN pyenv install --debug 3.7.6
-RUN pyenv install --debug 3.8.1
+RUN pyenv install pypy3.6-7.3.1
+RUN pyenv install 3.6.12
+RUN pyenv install --debug 3.7.9
+RUN pyenv install --debug 3.8.5
 
 ENV PATH="/usr/lib/ccache:${PATH}"

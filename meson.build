@@ -15,16 +15,16 @@ platform_version = '@0@.0'.format(pygobject_version_major)
 pymod = import('python')
 python = pymod.find_installation(get_option('python'))
 
-if python.language_version().version_compare('< 3.5')
-  error('Requires Python >= 3.5')
+if python.language_version().version_compare('< 3.6')
+  error('Requires Python >= 3.6')
 endif
 
 python_dep = python.dependency()
 
-glib_version_req = '>= 2.48.0'
-gi_version_req = '>= 1.46.0'
-pycairo_version_req = '>= 1.11.1'
-libffi_version_req = '>= 3.0'
+glib_version_req = '>= 2.56.0'
+gi_version_req = '>= 1.56.0'
+pycairo_version_req = '>= 1.16.0'
+libffi_version_req = '>= 3.2'
 
 gi_dep = dependency('gobject-introspection-1.0', version : gi_version_req,
   fallback: ['gobject-introspection', 'girepo_dep'])
@@ -36,7 +36,7 @@ gio_dep = dependency('gio-2.0', version : glib_version_req,
   fallback: ['glib', 'libgio_dep'])
 gmodule_dep = dependency('gmodule-2.0', version : glib_version_req,
   fallback: ['glib', 'libgmodule_dep'])
-ffi_dep = dependency('libffi', version : '>= 3.0',
+ffi_dep = dependency('libffi', version : libffi_version_req,
   fallback : ['libffi', 'ffi_dep'])
 
 with_pycairo = get_option('pycairo')
