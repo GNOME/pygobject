@@ -45,5 +45,6 @@ RUN pyenv install pypy3.6-7.3.1
 RUN pyenv install 3.6.12
 RUN pyenv install --debug 3.7.9
 RUN pyenv install --debug 3.8.5
+RUN pyenv install --debug 3.9.0
 
 ENV PATH="/usr/lib/ccache:${PATH}"
