@@ -359,6 +359,7 @@ class TestEverything(unittest.TestCase):
 
     def test_unichar(self):
         self.assertEqual("c", Everything.test_unichar("c"))
+        self.assertEqual(chr(sys.maxunicode), Everything.test_unichar(chr(sys.maxunicode)))
 
         self.assertEqual(u"♥", Everything.test_unichar(u"♥"))
         self.assertRaises(TypeError, Everything.test_unichar, "")

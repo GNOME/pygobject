@@ -192,7 +192,7 @@ pygi_gunichar_from_py (PyObject *py_arg, gunichar *result)
     if (PyUnicode_Check (py_arg)) {
        PyObject *py_bytes;
 
-       size = PyUnicode_GET_SIZE (py_arg);
+       size = PyUnicode_GET_LENGTH (py_arg);
        py_bytes = PyUnicode_AsUTF8String (py_arg);
        if (!py_bytes)
            return FALSE;
