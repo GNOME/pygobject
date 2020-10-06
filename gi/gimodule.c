@@ -2522,12 +2522,16 @@ PYGI_MODINIT_FUNC PyInit__gi(void) {
     module = PyModule_Create(&__gimodule);
     PyObject *module_dict = PyModule_GetDict (module);
 
+#if PY_VERSION_HEX < 0x03090000
+    /* Deprecated since 3.9 */
+
     /* Always enable Python threads since we cannot predict which GI repositories
      * might accept Python callbacks run within non-Python threads or might trigger
      * toggle ref notifications.
      * See: https://bugzilla.gnome.org/show_bug.cgi?id=709223
      */
     PyEval_InitThreads ();
+#endif
 
     PyModule_AddStringConstant(module, "__package__", "gi._gi");
 
