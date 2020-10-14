@@ -77,6 +77,7 @@ Who Is Using PyGObject?
 * `Lollypop <https://wiki.gnome.org/Apps/Lollypop>`__ - a modern music player
 * `Meld <http://meldmerge.org/>`__ - a visual diff and merge tool
 * `MyPaint <http://mypaint.org/>`__ - a nimble, distraction-free, and easy tool for digital painters
+* `Nicotine+ <https://nicotine-plus.org/>`__ - a graphical client for the Soulseek file sharing network
 * `Orca <https://wiki.gnome.org/Projects/Orca>`__ - a flexible and extensible screen reader
 * `Pithos <https://pithos.github.io/>`__ - a Pandora Radio client
 * `Pitivi <http://www.pitivi.org/>`__ - a free and open source video editor
