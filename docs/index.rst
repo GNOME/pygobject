@@ -82,6 +82,7 @@ Who Is Using PyGObject?
 * `Pithos <https://pithos.github.io/>`__ - a Pandora Radio client
 * `Pitivi <http://www.pitivi.org/>`__ - a free and open source video editor
 * `Quod Libet <https://quodlibet.readthedocs.io/>`__ - a music library manager / player
+* `Terminator <https://gnome-terminator.org/>` -- The Robot Future of Terminals
 * `Transmageddon <http://www.linuxrising.org/>`__ - a video transcoder
 
 
