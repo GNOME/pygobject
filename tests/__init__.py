@@ -5,29 +5,6 @@ import signal
 import subprocess
 import atexit
 import warnings
-import imp
-
-
-class GIImport:
-    def find_module(self, fullname, path=None):
-        if fullname in ('gi._gi', 'gi._gi_cairo'):
-            return self
-        return None
-
-    def load_module(self, name):
-        if name in sys.modules:
-            return sys.modules[name]
-        fp, pathname, description = imp.find_module(name.split('.')[-1])
-        try:
-            module = imp.load_module(name, fp, pathname, description)
-        finally:
-            if fp:
-                fp.close()
-        sys.modules[name] = module
-        return module
-
-
-sys.meta_path.insert(0, GIImport())
 
 
 def init_test_environ():
