@@ -70,7 +70,6 @@ def init_test_environ():
     from gi.repository import GIRepository
     repo = GIRepository.Repository.get_default()
     repo.prepend_library_path(os.path.join(tests_builddir))
-    repo.prepend_library_path(os.path.join(tests_builddir, ".libs"))
     repo.prepend_search_path(tests_builddir)
 
     def try_require_version(namespace, version):
