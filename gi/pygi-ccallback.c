@@ -91,7 +91,7 @@ _ccallback_dealloc (PyGICCallback *self)
 int
 pygi_ccallback_register_types (PyObject *m)
 {
-    Py_TYPE(&PyGICCallback_Type) = &PyType_Type;
+    Py_SET_TYPE(&PyGICCallback_Type, &PyType_Type);
     PyGICCallback_Type.tp_flags = (Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE);
     PyGICCallback_Type.tp_dealloc = (destructor) _ccallback_dealloc;
     PyGICCallback_Type.tp_call = (ternaryfunc) _ccallback_call;

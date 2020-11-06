@@ -12,6 +12,10 @@ const gchar * pyg_constant_strip_prefix(const gchar *name, const gchar *strip_pr
 
 gboolean pygi_guint_from_pyssize (Py_ssize_t pyval, guint *result);
 
+#if PY_VERSION_HEX < 0x030900A4
+#  define Py_SET_TYPE(obj, type) ((Py_TYPE(obj) = (type)), (void)0)
+#endif
+
 #define PYGI_DEFINE_TYPE(typename, symbol, csymbol)	\
 PyTypeObject symbol = {                                 \
     PyVarObject_HEAD_INIT(NULL, 0)                      \

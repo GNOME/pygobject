@@ -154,7 +154,7 @@ pygi_register_gboxed (PyObject *dict, const gchar *class_name,
 
     if (!type->tp_dealloc)  type->tp_dealloc  = (destructor)gboxed_dealloc;
 
-    Py_TYPE(type) = &PyType_Type;
+    Py_SET_TYPE(type, &PyType_Type);
     g_assert (Py_TYPE (&PyGBoxed_Type) != NULL);
     type->tp_base = &PyGBoxed_Type;
 

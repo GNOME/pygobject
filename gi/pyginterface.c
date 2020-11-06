@@ -69,7 +69,7 @@ pyg_register_interface(PyObject *dict, const gchar *class_name,
 {
     PyObject *o;
 
-    Py_TYPE(type) = &PyType_Type;
+    Py_SET_TYPE(type, &PyType_Type);
     g_assert (Py_TYPE (&PyGInterface_Type) != NULL);
     type->tp_base = &PyGInterface_Type;
 

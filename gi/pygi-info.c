@@ -2269,7 +2269,7 @@ int
 pygi_info_register_types (PyObject *m)
 {
 #define _PyGI_REGISTER_TYPE(m, type, cname, base) \
-    Py_TYPE(&type) = &PyType_Type; \
+    Py_SET_TYPE(&type, &PyType_Type); \
     type.tp_flags = (Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE); \
     type.tp_weaklistoffset = offsetof(PyGIBaseInfo, inst_weakreflist); \
     type.tp_methods = _PyGI##cname##_methods; \
@@ -2282,7 +2282,7 @@ pygi_info_register_types (PyObject *m)
         return -1; \
     };
 
-    Py_TYPE(&PyGIBaseInfo_Type) = &PyType_Type;
+    Py_SET_TYPE(&PyGIBaseInfo_Type, &PyType_Type);
 
     PyGIBaseInfo_Type.tp_dealloc = (destructor) _base_info_dealloc;
     PyGIBaseInfo_Type.tp_repr = (reprfunc) _base_info_repr;

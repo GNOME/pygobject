@@ -560,7 +560,7 @@ pygobject_register_class(PyObject *dict, const gchar *type_name,
     } else
         bases = runtime_bases;
 
-    Py_TYPE(type) = PyGObject_MetaType;
+    Py_SET_TYPE(type, PyGObject_MetaType);
     type->tp_bases = bases;
     if (G_LIKELY(bases)) {
         type->tp_base = (PyTypeObject *)PyTuple_GetItem(bases, 0);

@@ -375,7 +375,7 @@ static PyMethodDef _PyGIRepository_methods[] = {
 int
 pygi_repository_register_types (PyObject *m)
 {
-    Py_TYPE(&PyGIRepository_Type) = &PyType_Type;
+    Py_SET_TYPE(&PyGIRepository_Type, &PyType_Type);
 
     PyGIRepository_Type.tp_flags = Py_TPFLAGS_DEFAULT;
     PyGIRepository_Type.tp_methods = _PyGIRepository_methods;

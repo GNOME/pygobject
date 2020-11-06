@@ -289,7 +289,7 @@ pygi_resulttuple_new(PyTypeObject *subclass, Py_ssize_t len) {
             for (i=0; i < len; i++) {
                 PyTuple_SET_ITEM (self, i, NULL);
             }
-            Py_TYPE (self) = subclass;
+            Py_SET_TYPE (self, subclass);
             Py_INCREF (subclass);
             _Py_NewReference (self);
             PyObject_GC_Track (self);

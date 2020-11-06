@@ -233,7 +233,7 @@ struct_repr(PyGIStruct *self)
 int
 pygi_struct_register_types (PyObject *m)
 {
-    Py_TYPE(&PyGIStruct_Type) = &PyType_Type;
+    Py_SET_TYPE(&PyGIStruct_Type, &PyType_Type);
     g_assert (Py_TYPE (&PyGPointer_Type) != NULL);
     PyGIStruct_Type.tp_base = &PyGPointer_Type;
     PyGIStruct_Type.tp_new = (newfunc) struct_new;

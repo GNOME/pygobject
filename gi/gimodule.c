@@ -2253,7 +2253,7 @@ pyg__install_metaclass(PyObject *dummy, PyTypeObject *metaclass)
     PyGObject_MetaType = metaclass;
     Py_INCREF(metaclass);
 
-    Py_TYPE(&PyGObject_Type) = metaclass;
+    Py_SET_TYPE(&PyGObject_Type, metaclass);
 
     Py_INCREF(Py_None);
     return Py_None;

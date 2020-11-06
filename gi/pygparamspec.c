@@ -406,7 +406,7 @@ pyg_param_spec_new(GParamSpec *pspec)
 int
 pygi_paramspec_register_types(PyObject *d)
 {
-    Py_TYPE(&PyGParamSpec_Type) = &PyType_Type;
+    Py_SET_TYPE(&PyGParamSpec_Type, &PyType_Type);
     PyGParamSpec_Type.tp_dealloc = (destructor)pyg_param_spec_dealloc;
     PyGParamSpec_Type.tp_getattr = (getattrfunc)pyg_param_spec_getattr;
     PyGParamSpec_Type.tp_richcompare = pyg_param_spec_richcompare;
