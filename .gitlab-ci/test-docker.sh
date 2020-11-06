@@ -47,8 +47,12 @@ fi;
 
 # BUILD & TEST AGAIN USING SETUP.PY
 python setup.py build_tests
+
+lcov --config-file .gitlab-ci/lcovrc --directory . --capture --initial --output-file \
+    "${COV_DIR}/${CI_JOB_NAME}-baseline.lcov"
+
 xvfb-run -a python -m coverage run --context "${COV_KEY}" tests/runtests.py
 
 # COLLECT GCOV COVERAGE
-lcov --rc lcov_branch_coverage=1 --directory . --capture --output-file \
+lcov --config-file .gitlab-ci/lcovrc --directory . --capture --output-file \
     "${COV_DIR}/${CI_JOB_NAME}.lcov"

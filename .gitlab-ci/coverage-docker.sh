@@ -10,13 +10,16 @@ python ./.gitlab-ci/fixup-covpy-paths.py coverage/.coverage*
 
 # Remove external headers (except gi tests)
 for path in coverage/*.lcov; do
-    lcov --rc lcov_branch_coverage=1 -r "${path}" '/usr/include/*' -o "${path}"
-    lcov --rc lcov_branch_coverage=1 -r "${path}" '/home/*' -o "${path}"
+    lcov --config-file .gitlab-ci/lcovrc -r "${path}" '/usr/include/*' -o "${path}"
+    lcov --config-file .gitlab-ci/lcovrc -r "${path}" '/home/*' -o "${path}"
+    lcov --config-file .gitlab-ci/lcovrc -r "${path}" '*/msys64/*' -o "${path}"
+    lcov --config-file .gitlab-ci/lcovrc -r "${path}" '*subprojects/*' -o "${path}"
+    lcov --config-file .gitlab-ci/lcovrc -r "${path}" '*tmp-introspect*' -o "${path}"
 done
 
 python -m coverage combine coverage
 python -m coverage html --show-contexts --ignore-errors -d coverage/report-python
-genhtml --ignore-errors=source --rc lcov_branch_coverage=1 \
+genhtml --ignore-errors=source --config-file .gitlab-ci/lcovrc \
     coverage/*.lcov -o coverage/report-c
 
 cd coverage

@@ -17,6 +17,7 @@ pacman --noconfirm -Suy
 
 pacman --noconfirm -S --needed \
     base-devel \
+    lcov \
     mingw-w64-$MSYS2_ARCH-toolchain \
     mingw-w64-$MSYS2_ARCH-ccache \
     mingw-w64-$MSYS2_ARCH-$PYTHON-cairo \
@@ -28,8 +29,7 @@ pacman --noconfirm -S --needed \
     mingw-w64-$MSYS2_ARCH-libffi \
     mingw-w64-$MSYS2_ARCH-glib2 \
     mingw-w64-$MSYS2_ARCH-gtk3 \
-    git \
-    perl
+    git
 
 # ccache setup
 export PATH="$MSYSTEM/lib/ccache/bin:$PATH"
@@ -49,13 +49,16 @@ export COVERAGE_FILE="${COV_DIR}/.coverage.${COV_KEY}"
 export PYTHONDEVMODE=1
 
 $PYTHON setup.py build_tests
+
+lcov \
+    --config-file .gitlab-ci/lcovrc \
+    --directory "$(pwd)" \
+    --capture --initial --output-file \
+    "${COV_DIR}/${COV_KEY}-baseline.lcov"
+
 MSYSTEM= $PYTHON -m coverage run --context "${COV_KEY}" tests/runtests.py
 
-# FIXME: lcov doesn't support gcc9
-#~ curl -O -J -L "https://github.com/linux-test-project/lcov/archive/master.tar.gz"
-#~ tar -xvzf lcov-master.tar.gz
-
-#~ ./lcov-master/bin/lcov \
-    #~ --rc lcov_branch_coverage=1 --no-external \
-    #~ --directory . --capture --output-file \
-    #~ "${COV_DIR}/${COV_KEY}.lcov"
+lcov \
+    --config-file .gitlab-ci/lcovrc \
+    --directory "$(pwd)" --capture --output-file \
+    "${COV_DIR}/${COV_KEY}.lcov"
