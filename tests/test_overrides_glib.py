@@ -691,30 +691,30 @@ class TestGVariant(unittest.TestCase):
 
     def test_parse_error_exceptions(self):
         source_str = 'abc'
-        self.assertRaisesRegexp(TypeError, 'Must be GLib.Error, not int',
-                                GLib.Variant.parse_error_print_context,
-                                42, source_str)
+        self.assertRaisesRegex(TypeError, 'Must be GLib.Error, not int',
+                               GLib.Variant.parse_error_print_context,
+                               42, source_str)
 
         gerror = GLib.Error(message=42)  # not a string
-        self.assertRaisesRegexp(TypeError, ".*Must be string, not int.*",
-                                GLib.Variant.parse_error_print_context,
-                                gerror, source_str)
+        self.assertRaisesRegex(TypeError, ".*Must be string, not int.*",
+                               GLib.Variant.parse_error_print_context,
+                               gerror, source_str)
 
         gerror = GLib.Error(domain=42)  # not a string
-        self.assertRaisesRegexp(TypeError, ".*Must be string, not int.*",
-                                GLib.Variant.parse_error_print_context,
-                                gerror, source_str)
+        self.assertRaisesRegex(TypeError, ".*Must be string, not int.*",
+                               GLib.Variant.parse_error_print_context,
+                               gerror, source_str)
 
         gerror = GLib.Error(code='not an int')
-        self.assertRaisesRegexp(TypeError, ".*Must be number, not str.*",
-                                GLib.Variant.parse_error_print_context,
-                                gerror, source_str)
+        self.assertRaisesRegex(TypeError, ".*Must be number, not str.*",
+                               GLib.Variant.parse_error_print_context,
+                               gerror, source_str)
 
         gerror = GLib.Error(code=GLib.MAXUINT)
-        self.assertRaisesRegexp(OverflowError,
-                                ".*not in range.*",
-                                GLib.Variant.parse_error_print_context,
-                                gerror, source_str)
+        self.assertRaisesRegex(OverflowError,
+                               ".*not in range.*",
+                               GLib.Variant.parse_error_print_context,
+                               gerror, source_str)
 
 
 class TestConstants(unittest.TestCase):

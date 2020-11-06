@@ -227,8 +227,8 @@ class TestGdk(unittest.TestCase):
 
             self.assertEqual(len(warn), 1)
             self.assertTrue(issubclass(warn[0].category, PyGIDeprecationWarning))
-            self.assertRegexpMatches(str(warn[0].message),
-                                     '.*new_from_pixbuf.*')
+            self.assertRegex(str(warn[0].message),
+                             '.*new_from_pixbuf.*')
 
         self.assertRaises(ValueError, Gdk.Cursor, 1, 2, 3)
 

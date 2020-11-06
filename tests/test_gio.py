@@ -50,8 +50,8 @@ class TestGio(unittest.TestCase):
             Gio.VolumeMonitor()
             self.assertEqual(len(warn), 1)
             self.assertTrue(issubclass(warn[0].category, PyGIWarning))
-            self.assertRegexpMatches(str(warn[0].message),
-                                     '.*Gio\\.VolumeMonitor\\.get\\(\\).*')
+            self.assertRegex(str(warn[0].message),
+                             '.*Gio\\.VolumeMonitor\\.get\\(\\).*')
 
 
 class TestGSettings(unittest.TestCase):

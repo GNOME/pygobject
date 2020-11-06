@@ -1,6 +1,5 @@
 import os
 import sys
-import unittest
 import signal
 import subprocess
 import atexit
@@ -8,9 +7,6 @@ import warnings
 
 
 def init_test_environ():
-    # this was renamed in Python 3, provide backwards compatible name
-    unittest.TestCase.assertRegexpMatches = unittest.TestCase.assertRegex
-    unittest.TestCase.assertRaisesRegexp = unittest.TestCase.assertRaisesRegex
 
     def dbus_launch_session():
         if os.name == "nt" or sys.platform == "darwin":

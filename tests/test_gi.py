@@ -2248,22 +2248,22 @@ class TestStructure(unittest.TestCase):
         self.assertRaises(TypeError, GIMarshallingTests.Union.method)
 
     def test_repr(self):
-        self.assertRegexpMatches(
+        self.assertRegex(
             repr(GIMarshallingTests.PointerStruct()),
             r"<GIMarshallingTests.PointerStruct object at 0x[^\s]+ "
             r"\(void at 0x[^\s]+\)>")
 
-        self.assertRegexpMatches(
+        self.assertRegex(
             repr(GIMarshallingTests.SimpleStruct()),
             r"<GIMarshallingTests.SimpleStruct object at 0x[^\s]+ "
             r"\(void at 0x[^\s]+\)>")
 
-        self.assertRegexpMatches(
+        self.assertRegex(
             repr(GIMarshallingTests.Union()),
             r"<GIMarshallingTests.Union object at 0x[^\s]+ "
             r"\(GIMarshallingTestsUnion at 0x[^\s]+\)>")
 
-        self.assertRegexpMatches(
+        self.assertRegex(
             repr(GIMarshallingTests.BoxedStruct()),
             r"<GIMarshallingTests.BoxedStruct object at 0x[^\s]+ "
             r"\(GIMarshallingTestsBoxedStruct at 0x[^\s]+\)>")
@@ -2399,13 +2399,13 @@ class TestGObject(unittest.TestCase):
         self.assertEqual(new_object.__grefcount__, 1)
 
     def test_repr(self):
-        self.assertRegexpMatches(
+        self.assertRegex(
             repr(GIMarshallingTests.Object(int=42)),
             r"<GIMarshallingTests.Object object at 0x[^\s]+ "
             r"\(GIMarshallingTestsObject at 0x[^\s]+\)>")
 
     def test_nongir_repr(self):
-        self.assertRegexpMatches(
+        self.assertRegex(
             repr(Gio.File.new_for_path("")),
             r"<__gi__.GLocalFile object at 0x[^\s]+ "
             r"\(GLocalFile at 0x[^\s]+\)>")
@@ -3208,7 +3208,7 @@ class TestDeprecation(unittest.TestCase):
             self.assertEqual(len(warn), 3)
             self.assertTrue(
                 issubclass(warn[0].category, PyGIDeprecationWarning))
-            self.assertRegexpMatches(
+            self.assertRegex(
                 str(warn[0].message),
                 ".*GLib.IO_STATUS_ERROR.*GLib.IOStatus.ERROR.*")
 
@@ -3244,8 +3244,8 @@ class TestDeprecation(unittest.TestCase):
             fn(self, 1, 2, 3)
             self.assertEqual(len(warn), 1)
             self.assertTrue(issubclass(warn[0].category, PyGIDeprecationWarning))
-            self.assertRegexpMatches(str(warn[0].message),
-                                     '.*keyword.*a, b, c.*')
+            self.assertRegex(str(warn[0].message),
+                             '.*keyword.*a, b, c.*')
 
     def test_deprecated_init_no_keywords_out_of_order(self):
         def init(self, **kwargs):
@@ -3257,8 +3257,8 @@ class TestDeprecation(unittest.TestCase):
             fn(self, 2, 1, 3)
             self.assertEqual(len(warn), 1)
             self.assertTrue(issubclass(warn[0].category, PyGIDeprecationWarning))
-            self.assertRegexpMatches(str(warn[0].message),
-                                     '.*keyword.*b, a, c.*')
+            self.assertRegex(str(warn[0].message),
+                             '.*keyword.*b, a, c.*')
 
     def test_deprecated_init_ignored_keyword(self):
         def init(self, **kwargs):
@@ -3272,8 +3272,8 @@ class TestDeprecation(unittest.TestCase):
             fn(self, 1, 2, 3)
             self.assertEqual(len(warn), 1)
             self.assertTrue(issubclass(warn[0].category, PyGIDeprecationWarning))
-            self.assertRegexpMatches(str(warn[0].message),
-                                     '.*keyword.*a, b, c.*')
+            self.assertRegex(str(warn[0].message),
+                             '.*keyword.*a, b, c.*')
 
     def test_deprecated_init_with_aliases(self):
         def init(self, **kwargs):
@@ -3288,8 +3288,8 @@ class TestDeprecation(unittest.TestCase):
             fn(self, a=1, bb=2, cc=3)
             self.assertEqual(len(warn), 1)
             self.assertTrue(issubclass(warn[0].category, PyGIDeprecationWarning))
-            self.assertRegexpMatches(str(warn[0].message),
-                                     '.*keyword.*"bb, cc".*deprecated.*"b, c" respectively')
+            self.assertRegex(str(warn[0].message),
+                             '.*keyword.*"bb, cc".*deprecated.*"b, c" respectively')
 
     def test_deprecated_init_with_defaults(self):
         def init(self, **kwargs):
@@ -3303,6 +3303,6 @@ class TestDeprecation(unittest.TestCase):
             fn(self, a=1)
             self.assertEqual(len(warn), 1)
             self.assertTrue(issubclass(warn[0].category, PyGIDeprecationWarning))
-            self.assertRegexpMatches(str(warn[0].message),
-                                     '.*relying on deprecated non-standard defaults.*'
-                                     'explicitly use: b=2, c=3')
+            self.assertRegex(str(warn[0].message),
+                             '.*relying on deprecated non-standard defaults.*'
+                             'explicitly use: b=2, c=3')

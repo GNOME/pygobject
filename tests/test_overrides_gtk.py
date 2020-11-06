@@ -403,8 +403,8 @@ class TestGtk(unittest.TestCase):
             self.assertTrue(dialog.get_modal())
             self.assertEqual(len(warn), 1)
             self.assertTrue(issubclass(warn[0].category, PyGTKDeprecationWarning))
-            self.assertRegexpMatches(str(warn[0].message),
-                                     '.*flags.*modal.*')
+            self.assertRegex(str(warn[0].message),
+                             '.*flags.*modal.*')
 
         with warnings.catch_warnings(record=True) as warn:
             warnings.simplefilter('always')
@@ -412,8 +412,8 @@ class TestGtk(unittest.TestCase):
             self.assertTrue(dialog.get_destroy_with_parent())
             self.assertEqual(len(warn), 1)
             self.assertTrue(issubclass(warn[0].category, PyGTKDeprecationWarning))
-            self.assertRegexpMatches(str(warn[0].message),
-                                     '.*flags.*destroy_with_parent.*')
+            self.assertRegex(str(warn[0].message),
+                             '.*flags.*destroy_with_parent.*')
 
     def test_dialog_deprecation_stacklevels(self):
         # Test warning levels are setup to give the correct filename for
@@ -425,7 +425,7 @@ class TestGtk(unittest.TestCase):
             warnings.simplefilter('always')
             Gtk.Dialog(flags=Gtk.DialogFlags.MODAL)
             self.assertEqual(len(warn), 1)
-            self.assertRegexpMatches(warn[0].filename, '.*test_overrides_gtk.*')
+            self.assertRegex(warn[0].filename, '.*test_overrides_gtk.*')
 
         # Validate overridden base with overridden sub-class.
         self.assertEqual(Gtk.MessageDialog, gi.overrides.Gtk.MessageDialog)
@@ -433,7 +433,7 @@ class TestGtk(unittest.TestCase):
             warnings.simplefilter('always')
             Gtk.MessageDialog(flags=Gtk.DialogFlags.MODAL)
             self.assertEqual(len(warn), 1)
-            self.assertRegexpMatches(warn[0].filename, '.*test_overrides_gtk.*')
+            self.assertRegex(warn[0].filename, '.*test_overrides_gtk.*')
 
         # Validate overridden base with non-overridden sub-class.
         self.assertEqual(Gtk.AboutDialog, gi.repository.Gtk.AboutDialog)
@@ -441,7 +441,7 @@ class TestGtk(unittest.TestCase):
             warnings.simplefilter('always')
             Gtk.AboutDialog(flags=Gtk.DialogFlags.MODAL)
             self.assertEqual(len(warn), 1)
-            self.assertRegexpMatches(warn[0].filename, '.*test_overrides_gtk.*')
+            self.assertRegex(warn[0].filename, '.*test_overrides_gtk.*')
 
     def test_dialog_add_buttons(self):
         # The overloaded "buttons" keyword gives a warning when attempting
@@ -452,8 +452,8 @@ class TestGtk(unittest.TestCase):
                                 buttons=('test-button1', 1))
             self.assertEqual(len(warn), 1)
             self.assertTrue(issubclass(warn[0].category, PyGTKDeprecationWarning))
-            self.assertRegexpMatches(str(warn[0].message),
-                                     '.*ButtonsType.*add_buttons.*')
+            self.assertRegex(str(warn[0].message),
+                             '.*ButtonsType.*add_buttons.*')
 
         dialog.add_buttons('test-button2', 2, 'gtk-close', Gtk.ResponseType.CLOSE)
         button = dialog.get_widget_for_response(1)
