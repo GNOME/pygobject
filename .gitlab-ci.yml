@@ -25,6 +25,7 @@ cache:
     paths:
       - coverage/
   script:
+    - $env:CHERE_INVOKING = 'yes'
     - C:\msys64\usr\bin\pacman --noconfirm -Syyuu
     - C:\msys64\usr\bin\bash -lc "bash -x ./.gitlab-ci/test-msys2.sh"
 
@@ -51,18 +52,14 @@ pages:
   only:
     - master
 
-python3-mingw32:
+mingw32:
   variables:
-    PYTHON: "python3"
     MSYSTEM: "MINGW32"
-    CHERE_INVOKING: "yes"
   <<: *mingw-defaults
 
-python3-mingw64:
+mingw64:
   variables:
-    PYTHON: "python3"
     MSYSTEM: "MINGW64"
-    CHERE_INVOKING: "yes"
   <<: *mingw-defaults
 
 python3.6:
