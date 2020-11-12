@@ -56,6 +56,11 @@ typedef struct _PyGIInvokeState
 
     gboolean failed;
 
+    /* An awaitable to return for an async function that was called with
+     * default arguments.
+     */
+    PyObject *py_async;
+
     gpointer user_data;
 
     /* Function pointer to call with ffi. */
