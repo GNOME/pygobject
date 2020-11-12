@@ -409,10 +409,28 @@ _invoke_marshal_in_args (PyGIInvokeState *state, PyGIFunctionCache *function_cac
         return FALSE;
     }
 
+    if (function_cache->async_finish && function_cache->async_callback &&
+        function_cache->async_callback->py_arg_index < state->n_py_in_args &&
+        PyTuple_GET_ITEM (state->py_in_args, function_cache->async_callback->py_arg_index) == _PyGIDefaultArgPlaceholder) {
+
+         /* We are dealing with an async call that returns an awaitable */
+         PyObject *cancellable = NULL;
+
+         /* Try to resolve any passed GCancellable. */
+         if (function_cache->async_cancellable && function_cache->async_cancellable->py_arg_index < state->n_py_in_args)
+             cancellable = PyTuple_GET_ITEM (state->py_in_args, function_cache->async_cancellable->py_arg_index);
+
+         if (cancellable == _PyGIDefaultArgPlaceholder)
+             cancellable = NULL;
+
+        state->py_async = pygi_async_new (function_cache->async_finish, cancellable);
+    }
+
     for (i = 0; (gsize)i < _pygi_callable_cache_args_len (cache); i++) {
         GIArgument *c_arg = &state->args[i].arg_value;
         PyGIArgCache *arg_cache = g_ptr_array_index (cache->args_cache, i);
         PyObject *py_arg = NULL;
+        gboolean marshal = TRUE;
 
         switch (arg_cache->direction) {
             case PYGI_DIRECTION_FROM_PYTHON:
@@ -512,9 +530,25 @@ _invoke_marshal_in_args (PyGIInvokeState *state, PyGIFunctionCache *function_cac
         }
 
         if (py_arg == _PyGIDefaultArgPlaceholder) {
-            *c_arg = arg_cache->default_value;
-        } else if (arg_cache->from_py_marshaller != NULL &&
-                   arg_cache->meta_type != PYGI_META_ARG_TYPE_CHILD) {
+            /* If this is the cancellable, then we may override it later if we
+             * detect an async call.
+             */
+            marshal = FALSE;
+
+            if (state->py_async && arg_cache->async_context == PYGI_ASYNC_CONTEXT_CANCELLABLE) {
+                marshal = TRUE;
+                py_arg = ((PyGIAsync*) state->py_async)->cancellable;
+            } else if (state->py_async && arg_cache->async_context == PYGI_ASYNC_CONTEXT_CALLBACK) {
+                marshal = TRUE;
+            } else {
+                *c_arg = arg_cache->default_value;
+            }
+        }
+
+        if (marshal &&
+            arg_cache->from_py_marshaller != NULL &&
+            arg_cache->meta_type != PYGI_META_ARG_TYPE_CHILD) {
+
             gboolean success;
             gpointer cleanup_data = NULL;
 
@@ -585,6 +619,17 @@ _invoke_marshal_out_args (PyGIInvokeState *state, PyGIFunctionCache *function_ca
                                     FALSE);
             }
         }
+    }
+
+    /* Return the async future if we have one. */
+    if (state->py_async) {
+        /* We must have no return value */
+        g_assert (n_out_args == 0);
+        g_assert (cache->return_cache->is_skipped || cache->return_cache->type_tag == GI_TYPE_TAG_VOID);
+
+        Py_DECREF(py_return);
+        Py_INCREF(state->py_async);
+        return state->py_async;
     }
 
     if (n_out_args == 0) {
