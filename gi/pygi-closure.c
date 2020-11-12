@@ -23,6 +23,7 @@
 #include "pygi-invoke.h"
 #include "pygi-ccallback.h"
 #include "pygi-info.h"
+#include "pygi-async.h"
 
 extern PyObject *_PyGIDefaultArgPlaceholder;
 
@@ -719,6 +720,23 @@ _pygi_marshal_from_py_interface_callback (PyGIInvokeState   *state,
     PyObject *py_user_data = NULL;
 
     callback_cache = (PyGICallbackCache *)arg_cache;
+
+    if (py_arg == _PyGIDefaultArgPlaceholder) {
+        /* We need to have an async to "marshal" instead in this case. */
+        if (!state->py_async)
+            return FALSE;
+
+        if (callback_cache->user_data_index <= 0)
+            return FALSE;
+
+        user_data_cache = _pygi_callable_cache_get_arg (callable_cache, (guint)callback_cache->user_data_index);
+
+        Py_INCREF (state->py_async);
+        arg->v_pointer = pygi_async_finish_cb;
+        state->args[user_data_cache->c_arg_index].arg_value.v_pointer = state->py_async;
+
+        return TRUE;
+    }
 
     if (callback_cache->user_data_index > 0) {
         user_data_cache = _pygi_callable_cache_get_arg (callable_cache, (guint)callback_cache->user_data_index);
