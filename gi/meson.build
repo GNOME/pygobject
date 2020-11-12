@@ -17,6 +17,7 @@ sources = [
   'pygi-source.c',
   'pygi-argument.c',
   'pygi-resulttuple.c',
+  'pygi-async.c',
   'pygi-type.c',
   'pygi-boxed.c',
   'pygi-closure.c',
