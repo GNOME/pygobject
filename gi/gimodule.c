@@ -34,6 +34,7 @@
 #include "pygi-error.h"
 #include "pygi-foreign.h"
 #include "pygi-resulttuple.h"
+#include "pygi-async.h"
 #include "pygi-source.h"
 #include "pygi-ccallback.h"
 #include "pygi-closure.h"
@@ -2560,6 +2561,8 @@ _gi_exec (PyObject *module)
     if ((ret = pygi_ccallback_register_types (module)) < 0)
         return ret;
     if ((ret = pygi_resulttuple_register_types (module)) < 0)
+        return ret;
+    if ((ret = pygi_async_register_types (module) < 0))
         return ret;
 
     if ((ret = pygi_spawn_register_types (module_dict)) < 0)
