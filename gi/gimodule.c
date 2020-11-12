@@ -34,6 +34,7 @@
 #include "pygi-error.h"
 #include "pygi-foreign.h"
 #include "pygi-resulttuple.h"
+#include "pygi-async.h"
 #include "pygi-source.h"
 #include "pygi-ccallback.h"
 #include "pygi-closure.h"
@@ -2565,6 +2566,8 @@ PYGI_MODINIT_FUNC PyInit__gi(void) {
     if (pygi_ccallback_register_types (module) < 0)
         return NULL;
     if (pygi_resulttuple_register_types (module) < 0)
+        return NULL;
+    if (pygi_async_register_types (module) < 0)
         return NULL;
 
     if (pygi_spawn_register_types (module_dict) < 0)
