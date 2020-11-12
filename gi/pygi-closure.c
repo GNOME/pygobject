@@ -937,6 +937,9 @@ pygi_arg_callback_setup_from_info (PyGICallbackCache  *arg_cache,
         arg_cache->closure_cache = pygi_closure_cache_new (arg_cache->interface_info);
         cache->from_py_marshaller = _pygi_marshal_from_py_interface_callback;
         cache->from_py_cleanup = _pygi_marshal_cleanup_from_py_interface_callback;
+
+        if (arg_cache->scope == GI_SCOPE_TYPE_ASYNC)
+            arg_cache->arg_cache.async_context = PYGI_ASYNC_CONTEXT_CALLBACK;
     }
 
     if (direction & PYGI_DIRECTION_TO_PYTHON) {
