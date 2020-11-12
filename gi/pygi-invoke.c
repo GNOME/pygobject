@@ -24,6 +24,7 @@
 #include "pygi-marshal-cleanup.h"
 #include "pygi-error.h"
 #include "pygi-resulttuple.h"
+#include "pygi-async.h"
 #include "pygi-foreign.h"
 #include "pygi-boxed.h"
 
@@ -317,6 +318,7 @@ _invoke_state_clear (PyGIInvokeState *state, PyGIFunctionCache *function_cache)
 {
     _pygi_invoke_arg_state_free (state);
     Py_XDECREF (state->py_in_args);
+    Py_XDECREF (state->py_async);
 }
 
 static gboolean
