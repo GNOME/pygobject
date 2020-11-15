@@ -426,13 +426,11 @@ if GTK4:
     class ComboBox(Gtk.ComboBox):
         get_active_iter = strip_boolean_result(Gtk.ComboBox.get_active_iter)
 
-
     ComboBox = override(ComboBox)
     __all__.append('ComboBox')
 else:
     class ComboBox(Gtk.ComboBox, Container):
         get_active_iter = strip_boolean_result(Gtk.ComboBox.get_active_iter)
-
 
     ComboBox = override(ComboBox)
     __all__.append('ComboBox')
@@ -562,7 +560,6 @@ if GTK4:
             for text, response in _button(args):
                 self.add_button(text, response)
 
-
     Dialog = override(Dialog)
     __all__.append('Dialog')
 else:
@@ -651,7 +648,6 @@ else:
 
             for text, response in _button(args):
                 self.add_button(text, response)
-
 
     Dialog = override(Dialog)
     __all__.append('Dialog')
@@ -1419,7 +1415,6 @@ if GTK4:
             self.insert_column(column, position)
             column.set_attributes(cell, **kwargs)
 
-
     TreeView = override(TreeView)
     __all__.append('TreeView')
 else:
@@ -1464,7 +1459,6 @@ else:
             column.pack_start(cell, False)
             self.insert_column(column, position)
             column.set_attributes(cell, **kwargs)
-
 
     TreeView = override(TreeView)
     __all__.append('TreeView')
@@ -1559,7 +1553,6 @@ if GTK2 or GTK3:
                 # Gtk.Widget.get_focus_on_click should be used instead but it's
                 # no obvious how because of the shadowed method, so override here
                 return Gtk.Widget.get_focus_on_click(self, *args, **kwargs)
-
 
     Button = override(Button)
     __all__.append('Button')
