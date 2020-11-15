@@ -1645,16 +1645,16 @@ if GTK2 or GTK3:
     __all__.append('VScrollbar')
 
 
-class Paned(Gtk.Paned):
-    def pack1(self, child, resize=False, shrink=True):
-        super(Paned, self).pack1(child, resize, shrink)
+if GTK2 or GTK3:
+    class Paned(Gtk.Paned):
+        def pack1(self, child, resize=False, shrink=True):
+            super(Paned, self).pack1(child, resize, shrink)
 
-    def pack2(self, child, resize=True, shrink=True):
-        super(Paned, self).pack2(child, resize, shrink)
+        def pack2(self, child, resize=True, shrink=True):
+            super(Paned, self).pack2(child, resize, shrink)
 
-
-Paned = override(Paned)
-__all__.append('Paned')
+    Paned = override(Paned)
+    __all__.append('Paned')
 
 
 if GTK2 or GTK3:

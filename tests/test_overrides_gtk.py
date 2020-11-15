@@ -2723,6 +2723,7 @@ class TestTextBuffer(unittest.TestCase):
 
 
 @unittest.skipUnless(Gtk, 'Gtk not available')
+@unittest.skipIf(Gtk_version == "4.0", "not in gtk4")
 class TestPaned(unittest.TestCase):
 
     def test_pack_defaults(self):
