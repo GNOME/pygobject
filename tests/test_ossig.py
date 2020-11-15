@@ -100,6 +100,7 @@ class TestOverridesWakeupOnAlarm(unittest.TestCase):
             Gtk.main()
 
     @unittest.skipIf(Gtk is None or os.name == "nt", "not on Windows")
+    @unittest.skipIf(Gtk is None or Gtk_version == "4.0", "not in gtk4")
     def test_gtk_dialog_run(self):
         w = Gtk.Window()
         d = Gtk.Dialog(transient_for=w)

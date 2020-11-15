@@ -513,10 +513,13 @@ __all__.append('Builder')
 # NOTE: This must come before any other Window/Dialog subclassing, to ensure
 # that we have a correct inheritance hierarchy.
 
-_window_init = deprecated_init(Gtk.Window.__init__,
-                               arg_names=('type',),
-                               category=PyGTKDeprecationWarning,
-                               stacklevel=3)
+if GTK4:
+    _window_init = Gtk.Window.__init__
+else:
+    _window_init = deprecated_init(Gtk.Window.__init__,
+                                   arg_names=('type',),
+                                   category=PyGTKDeprecationWarning,
+                                   stacklevel=3)
 
 
 class Window(Gtk.Window):
