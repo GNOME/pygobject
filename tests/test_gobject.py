@@ -833,7 +833,8 @@ def test_list_properties():
 
     assert list_props("GFileIcon") == list_props(Gio.FileIcon)
     assert list_props(Gio.FileIcon.__gtype__) == list_props(Gio.FileIcon)
-    assert list_props(Gio.FileIcon()) == list_props(Gio.FileIcon)
+    assert list_props(Gio.FileIcon(
+        file=Gio.File.new_for_path('.'))) == list_props(Gio.FileIcon)
 
     for obj in [Gio.ActionEntry, Gio.DBusError, 0, object()]:
         with pytest.raises(TypeError):
