@@ -7,8 +7,11 @@ GLib = pytest.importorskip("gi.repository.GLib")
 GObject = pytest.importorskip("gi.repository.GObject")
 Gio = pytest.importorskip("gi.repository.Gio")
 
-
 from .helper import capture_exceptions
+
+
+# https://gitlab.gnome.org/GNOME/pygobject/-/merge_requests/145
+pytestmark = pytest.mark.skipif(Gtk._version == "4.0", reason="FIXME!!")
 
 
 def new_gtype_name(_count=[0]):
