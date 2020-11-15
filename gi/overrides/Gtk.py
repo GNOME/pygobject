@@ -135,18 +135,18 @@ class Widget(Gtk.Widget):
 
     translate_coordinates = strip_boolean_result(Gtk.Widget.translate_coordinates)
 
-    if Gtk._version != "4.0":
+    if GTK2 or GTK3:
         def freeze_child_notify(self):
             super(Widget, self).freeze_child_notify()
             return _FreezeNotifyManager(self)
 
-    if Gtk._version != "4.0":
+    if GTK2 or GTK3:
         def drag_dest_set_target_list(self, target_list):
             if (target_list is not None) and (not isinstance(target_list, Gtk.TargetList)):
                 target_list = Gtk.TargetList.new(_construct_target_list(target_list))
             super(Widget, self).drag_dest_set_target_list(target_list)
 
-    if Gtk._version != "4.0":
+    if GTK2 or GTK3:
         def drag_source_set_target_list(self, target_list):
             if (target_list is not None) and (not isinstance(target_list, Gtk.TargetList)):
                 target_list = Gtk.TargetList.new(_construct_target_list(target_list))
@@ -382,7 +382,7 @@ if GTK2 or GTK3:
             def _process_action(group_source, name, stock_id=None, label=None, accelerator=None, tooltip=None, entry_value=0):
                 action = RadioAction(name=name, label=label, tooltip=tooltip, stock_id=stock_id, value=entry_value)
 
-                if Gtk._version == '3.0':
+                if GTK3:
                     action.join_group(group_source)
 
                 if value == entry_value:
@@ -678,7 +678,7 @@ MessageDialog = override(MessageDialog)
 __all__.append('MessageDialog')
 
 
-if Gtk._version in ("2.0", "3.0"):
+if GTK2 or GTK3:
     class ColorSelectionDialog(Gtk.ColorSelectionDialog):
         __init__ = deprecated_init(Gtk.ColorSelectionDialog.__init__,
                                    arg_names=('title',),
@@ -698,7 +698,7 @@ FileChooserDialog = override(FileChooserDialog)
 __all__.append('FileChooserDialog')
 
 
-if Gtk._version in ("2.0", "3.0"):
+if GTK2 or GTK3:
     class FontSelectionDialog(Gtk.FontSelectionDialog):
         __init__ = deprecated_init(Gtk.FontSelectionDialog.__init__,
                                    arg_names=('title',),
@@ -708,7 +708,7 @@ if Gtk._version in ("2.0", "3.0"):
     __all__.append('FontSelectionDialog')
 
 
-if Gtk._version in ("2.0", "3.0"):
+if GTK2 or GTK3:
     class RecentChooserDialog(Gtk.RecentChooserDialog):
         # Note, the "manager" keyword must work across the entire 3.x series because
         # "recent_manager" is not backwards compatible with PyGObject versions prior to 3.10.
@@ -735,7 +735,7 @@ IconView = override(IconView)
 __all__.append('IconView')
 
 
-if Gtk._version in ("2.0", "3.0"):
+if GTK2 or GTK3:
     class ToolButton(Gtk.ToolButton):
         __init__ = deprecated_init(Gtk.ToolButton.__init__,
                                    arg_names=('stock_id',),
@@ -1634,7 +1634,7 @@ ScrolledWindow = override(ScrolledWindow)
 __all__.append('ScrolledWindow')
 
 
-if Gtk._version in ("2.0", "3.0"):
+if GTK2 or GTK3:
     class HScrollbar(Gtk.HScrollbar):
         __init__ = deprecated_init(Gtk.HScrollbar.__init__,
                                    arg_names=('adjustment',),

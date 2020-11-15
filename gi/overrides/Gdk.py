@@ -278,7 +278,7 @@ if GDK2 or GDK3:
                             'EventWindowState',
                             'EventVisibility']
 
-    if Gdk._version == '2.0':
+    if GDK2:
         event_member_classes.append('EventNoExpose')
 
     if hasattr(Gdk, 'EventTouch'):
