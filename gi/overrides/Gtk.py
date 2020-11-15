@@ -158,7 +158,7 @@ class Widget(Gtk.Widget):
                 prop = self.find_style_property(property_name)
                 if prop is None:
                     raise ValueError('Class "%s" does not contain style property "%s"' %
-                                    (self, property_name))
+                                     (self, property_name))
                 value = GObject.Value(prop.value_type)
 
             Gtk.Widget.style_get_property(self, property_name, value)
@@ -213,8 +213,7 @@ if GTK2 or GTK3:
     Container = override(Container)
     __all__.append('Container')
 else:
-    class Container(object):
-        pass
+    Container = object
 
 
 class Editable(Gtk.Editable):
@@ -423,39 +422,33 @@ if GTK2 or GTK3:
     __all__.append('UIManager')
 
 
-if GTK4:
-    class ComboBox(Gtk.ComboBox):
-        get_active_iter = strip_boolean_result(Gtk.ComboBox.get_active_iter)
-
-    ComboBox = override(ComboBox)
-    __all__.append('ComboBox')
-else:
-    class ComboBox(Gtk.ComboBox, Container):
-        get_active_iter = strip_boolean_result(Gtk.ComboBox.get_active_iter)
-
-    ComboBox = override(ComboBox)
-    __all__.append('ComboBox')
+class ComboBox(Gtk.ComboBox, Container):
+    get_active_iter = strip_boolean_result(Gtk.ComboBox.get_active_iter)
 
 
-class Box(Gtk.Box):
-    __init__ = deprecated_init(Gtk.Box.__init__,
-                               arg_names=('homogeneous', 'spacing'),
-                               category=PyGTKDeprecationWarning)
+ComboBox = override(ComboBox)
+__all__.append('ComboBox')
 
 
-Box = override(Box)
-__all__.append('Box')
+if GTK2 or GTK3:
+    class Box(Gtk.Box):
+        __init__ = deprecated_init(Gtk.Box.__init__,
+                                   arg_names=('homogeneous', 'spacing'),
+                                   category=PyGTKDeprecationWarning)
+
+    Box = override(Box)
+    __all__.append('Box')
 
 
-class SizeGroup(Gtk.SizeGroup):
-    __init__ = deprecated_init(Gtk.SizeGroup.__init__,
-                               arg_names=('mode',),
-                               deprecated_defaults={'mode': Gtk.SizeGroupMode.VERTICAL},
-                               category=PyGTKDeprecationWarning)
+if GTK2 or GTK3:
+    class SizeGroup(Gtk.SizeGroup):
+        __init__ = deprecated_init(Gtk.SizeGroup.__init__,
+                                   arg_names=('mode',),
+                                   deprecated_defaults={'mode': Gtk.SizeGroupMode.VERTICAL},
+                                   category=PyGTKDeprecationWarning)
 
-
-SizeGroup = override(SizeGroup)
-__all__.append('SizeGroup')
+    SizeGroup = override(SizeGroup)
+    __all__.append('SizeGroup')
 
 
 if GTK2 or GTK3:
@@ -536,38 +529,8 @@ Window = override(Window)
 __all__.append('Window')
 
 
-if GTK4:
-    class Dialog(Gtk.Dialog):
-        def add_buttons(self, *args):
-            """
-            The add_buttons() method adds several buttons to the Gtk.Dialog using
-            the button data passed as arguments to the method. This method is the
-            same as calling the Gtk.Dialog.add_button() repeatedly. The button data
-            pairs - button text (or stock ID) and a response ID integer are passed
-            individually. For example:
-
-            .. code-block:: python
-
-                dialog.add_buttons(Gtk.STOCK_OPEN, 42, "Close", Gtk.ResponseType.CLOSE)
-
-            will add "Open" and "Close" buttons to dialog.
-            """
-            def _button(b):
-                while b:
-                    try:
-                        t, r = b[0:2]
-                    except ValueError:
-                        raise ValueError('Must pass an even number of arguments')
-                    b = b[2:]
-                    yield t, r
-
-            for text, response in _button(args):
-                self.add_button(text, response)
-
-    Dialog = override(Dialog)
-    __all__.append('Dialog')
-else:
-    class Dialog(Gtk.Dialog, Container):
+class Dialog(Gtk.Dialog, Container):
+    if GTK2 or GTK3:
         _old_arg_names = ('title', 'parent', 'flags', 'buttons', '_buttons_property')
         _init = deprecated_init(Gtk.Dialog.__init__,
                                 arg_names=('title', 'transient_for', 'flags',
@@ -627,55 +590,56 @@ else:
         action_area = property(lambda dialog: dialog.get_action_area())
         vbox = property(lambda dialog: dialog.get_content_area())
 
-        def add_buttons(self, *args):
-            """
-            The add_buttons() method adds several buttons to the Gtk.Dialog using
-            the button data passed as arguments to the method. This method is the
-            same as calling the Gtk.Dialog.add_button() repeatedly. The button data
-            pairs - button text (or stock ID) and a response ID integer are passed
-            individually. For example:
+    def add_buttons(self, *args):
+        """
+        The add_buttons() method adds several buttons to the Gtk.Dialog using
+        the button data passed as arguments to the method. This method is the
+        same as calling the Gtk.Dialog.add_button() repeatedly. The button data
+        pairs - button text (or stock ID) and a response ID integer are passed
+        individually. For example:
 
-            .. code-block:: python
+        .. code-block:: python
 
-                dialog.add_buttons(Gtk.STOCK_OPEN, 42, "Close", Gtk.ResponseType.CLOSE)
+            dialog.add_buttons(Gtk.STOCK_OPEN, 42, "Close", Gtk.ResponseType.CLOSE)
 
-            will add "Open" and "Close" buttons to dialog.
-            """
-            def _button(b):
-                while b:
-                    try:
-                        t, r = b[0:2]
-                    except ValueError:
-                        raise ValueError('Must pass an even number of arguments')
-                    b = b[2:]
-                    yield t, r
+        will add "Open" and "Close" buttons to dialog.
+        """
+        def _button(b):
+            while b:
+                try:
+                    t, r = b[0:2]
+                except ValueError:
+                    raise ValueError('Must pass an even number of arguments')
+                b = b[2:]
+                yield t, r
 
-            for text, response in _button(args):
-                self.add_button(text, response)
-
-    Dialog = override(Dialog)
-    __all__.append('Dialog')
+        for text, response in _button(args):
+            self.add_button(text, response)
 
 
-class MessageDialog(Gtk.MessageDialog, Dialog):
-    __init__ = deprecated_init(Gtk.MessageDialog.__init__,
-                               arg_names=('parent', 'flags', 'message_type',
-                                          'buttons', 'message_format'),
-                               deprecated_aliases={'text': 'message_format',
-                                                   'message_type': 'type'},
-                               category=PyGTKDeprecationWarning)
-
-    def format_secondary_text(self, message_format):
-        self.set_property('secondary-use-markup', False)
-        self.set_property('secondary-text', message_format)
-
-    def format_secondary_markup(self, message_format):
-        self.set_property('secondary-use-markup', True)
-        self.set_property('secondary-text', message_format)
+Dialog = override(Dialog)
+__all__.append('Dialog')
 
 
-MessageDialog = override(MessageDialog)
-__all__.append('MessageDialog')
+if GTK2 or GTK3:
+    class MessageDialog(Gtk.MessageDialog, Dialog):
+        __init__ = deprecated_init(Gtk.MessageDialog.__init__,
+                                   arg_names=('parent', 'flags', 'message_type',
+                                              'buttons', 'message_format'),
+                                   deprecated_aliases={'text': 'message_format',
+                                                       'message_type': 'type'},
+                                   category=PyGTKDeprecationWarning)
+
+        def format_secondary_text(self, message_format):
+            self.set_property('secondary-use-markup', False)
+            self.set_property('secondary-text', message_format)
+
+        def format_secondary_markup(self, message_format):
+            self.set_property('secondary-use-markup', True)
+            self.set_property('secondary-text', message_format)
+
+    MessageDialog = override(MessageDialog)
+    __all__.append('MessageDialog')
 
 
 if GTK2 or GTK3:
@@ -687,15 +651,13 @@ if GTK2 or GTK3:
     ColorSelectionDialog = override(ColorSelectionDialog)
     __all__.append('ColorSelectionDialog')
 
+    class FileChooserDialog(Gtk.FileChooserDialog):
+        __init__ = deprecated_init(Gtk.FileChooserDialog.__init__,
+                                   arg_names=('title', 'parent', 'action', 'buttons'),
+                                   category=PyGTKDeprecationWarning)
 
-class FileChooserDialog(Gtk.FileChooserDialog):
-    __init__ = deprecated_init(Gtk.FileChooserDialog.__init__,
-                               arg_names=('title', 'parent', 'action', 'buttons'),
-                               category=PyGTKDeprecationWarning)
-
-
-FileChooserDialog = override(FileChooserDialog)
-__all__.append('FileChooserDialog')
+    FileChooserDialog = override(FileChooserDialog)
+    __all__.append('FileChooserDialog')
 
 
 if GTK2 or GTK3:
@@ -722,9 +684,10 @@ if GTK2 or GTK3:
 
 
 class IconView(Gtk.IconView):
-    __init__ = deprecated_init(Gtk.IconView.__init__,
-                               arg_names=('model',),
-                               category=PyGTKDeprecationWarning)
+    if GTK2 or GTK3:
+        __init__ = deprecated_init(Gtk.IconView.__init__,
+                                   arg_names=('model',),
+                                   category=PyGTKDeprecationWarning)
 
     get_item_at_pos = strip_boolean_result(Gtk.IconView.get_item_at_pos)
     get_visible_range = strip_boolean_result(Gtk.IconView.get_visible_range)
@@ -855,8 +818,9 @@ class TreeModel(Gtk.TreeModel):
     def __bool__(self):
         return True
 
-    # alias for Python 2.x object protocol
-    __nonzero__ = __bool__
+    if GTK2 or GTK3:
+        # alias for Python 2.x object protocol
+        __nonzero__ = __bool__
 
     def _getiter(self, key):
         if isinstance(key, Gtk.TreeIter):
@@ -1014,19 +978,19 @@ TreeSortable = override(TreeSortable)
 __all__.append('TreeSortable')
 
 
-class TreeModelSort(Gtk.TreeModelSort):
-    __init__ = deprecated_init(Gtk.TreeModelSort.__init__,
-                               arg_names=('model',),
-                               category=PyGTKDeprecationWarning)
+if GTK2 or GTK3:
+    class TreeModelSort(Gtk.TreeModelSort):
+        __init__ = deprecated_init(Gtk.TreeModelSort.__init__,
+                                   arg_names=('model',),
+                                   category=PyGTKDeprecationWarning)
 
-    if not hasattr(Gtk.TreeModelSort, "new_with_model"):
-        @classmethod
-        def new_with_model(self, child_model):
-            return TreeModel.sort_new_with_model(child_model)
+        if not hasattr(Gtk.TreeModelSort, "new_with_model"):
+            @classmethod
+            def new_with_model(self, child_model):
+                return TreeModel.sort_new_with_model(child_model)
 
-
-TreeModelSort = override(TreeModelSort)
-__all__.append('TreeModelSort')
+    TreeModelSort = override(TreeModelSort)
+    __all__.append('TreeModelSort')
 
 
 class ListStore(Gtk.ListStore, TreeModel, TreeSortable):
@@ -1233,8 +1197,9 @@ class TreeModelRowIter(object):
         self.iter = self.model.iter_next(self.iter)
         return row
 
-    # alias for Python 2.x object protocol
-    next = __next__
+    if GTK2 or GTK3:
+        # alias for Python 2.x object protocol
+        next = __next__
 
     def __iter__(self):
         return self
@@ -1380,92 +1345,52 @@ TreeStore = override(TreeStore)
 __all__.append('TreeStore')
 
 
-if GTK4:
-    class TreeView(Gtk.TreeView):
-        get_path_at_pos = strip_boolean_result(Gtk.TreeView.get_path_at_pos)
-        get_visible_range = strip_boolean_result(Gtk.TreeView.get_visible_range)
-        get_dest_row_at_pos = strip_boolean_result(Gtk.TreeView.get_dest_row_at_pos)
-
-        def enable_model_drag_source(self, start_button_mask, targets, actions):
-            target_entries = _construct_target_list(targets)
-            super(TreeView, self).enable_model_drag_source(start_button_mask,
-                                                           target_entries,
-                                                           actions)
-
-        def enable_model_drag_dest(self, targets, actions):
-            target_entries = _construct_target_list(targets)
-            super(TreeView, self).enable_model_drag_dest(target_entries,
-                                                         actions)
-
-        def scroll_to_cell(self, path, column=None, use_align=False, row_align=0.0, col_align=0.0):
-            if not isinstance(path, Gtk.TreePath):
-                path = TreePath(path)
-            super(TreeView, self).scroll_to_cell(path, column, use_align, row_align, col_align)
-
-        def set_cursor(self, path, column=None, start_editing=False):
-            if not isinstance(path, Gtk.TreePath):
-                path = TreePath(path)
-            super(TreeView, self).set_cursor(path, column, start_editing)
-
-        def get_cell_area(self, path, column=None):
-            if not isinstance(path, Gtk.TreePath):
-                path = TreePath(path)
-            return super(TreeView, self).get_cell_area(path, column)
-
-        def insert_column_with_attributes(self, position, title, cell, **kwargs):
-            column = TreeViewColumn()
-            column.set_title(title)
-            column.pack_start(cell, False)
-            self.insert_column(column, position)
-            column.set_attributes(cell, **kwargs)
-
-    TreeView = override(TreeView)
-    __all__.append('TreeView')
-else:
-    class TreeView(Gtk.TreeView, Container):
+class TreeView(Gtk.TreeView, Container):
+    if GTK2 or GTK3:
         __init__ = deprecated_init(Gtk.TreeView.__init__,
                                    arg_names=('model',),
                                    category=PyGTKDeprecationWarning)
 
-        get_path_at_pos = strip_boolean_result(Gtk.TreeView.get_path_at_pos)
-        get_visible_range = strip_boolean_result(Gtk.TreeView.get_visible_range)
-        get_dest_row_at_pos = strip_boolean_result(Gtk.TreeView.get_dest_row_at_pos)
+    get_path_at_pos = strip_boolean_result(Gtk.TreeView.get_path_at_pos)
+    get_visible_range = strip_boolean_result(Gtk.TreeView.get_visible_range)
+    get_dest_row_at_pos = strip_boolean_result(Gtk.TreeView.get_dest_row_at_pos)
 
-        def enable_model_drag_source(self, start_button_mask, targets, actions):
-            target_entries = _construct_target_list(targets)
-            super(TreeView, self).enable_model_drag_source(start_button_mask,
-                                                           target_entries,
-                                                           actions)
+    def enable_model_drag_source(self, start_button_mask, targets, actions):
+        target_entries = _construct_target_list(targets)
+        super(TreeView, self).enable_model_drag_source(start_button_mask,
+                                                       target_entries,
+                                                       actions)
 
-        def enable_model_drag_dest(self, targets, actions):
-            target_entries = _construct_target_list(targets)
-            super(TreeView, self).enable_model_drag_dest(target_entries,
-                                                         actions)
+    def enable_model_drag_dest(self, targets, actions):
+        target_entries = _construct_target_list(targets)
+        super(TreeView, self).enable_model_drag_dest(target_entries,
+                                                     actions)
 
-        def scroll_to_cell(self, path, column=None, use_align=False, row_align=0.0, col_align=0.0):
-            if not isinstance(path, Gtk.TreePath):
-                path = TreePath(path)
-            super(TreeView, self).scroll_to_cell(path, column, use_align, row_align, col_align)
+    def scroll_to_cell(self, path, column=None, use_align=False, row_align=0.0, col_align=0.0):
+        if not isinstance(path, Gtk.TreePath):
+            path = TreePath(path)
+        super(TreeView, self).scroll_to_cell(path, column, use_align, row_align, col_align)
 
-        def set_cursor(self, path, column=None, start_editing=False):
-            if not isinstance(path, Gtk.TreePath):
-                path = TreePath(path)
-            super(TreeView, self).set_cursor(path, column, start_editing)
+    def set_cursor(self, path, column=None, start_editing=False):
+        if not isinstance(path, Gtk.TreePath):
+            path = TreePath(path)
+        super(TreeView, self).set_cursor(path, column, start_editing)
 
-        def get_cell_area(self, path, column=None):
-            if not isinstance(path, Gtk.TreePath):
-                path = TreePath(path)
-            return super(TreeView, self).get_cell_area(path, column)
+    def get_cell_area(self, path, column=None):
+        if not isinstance(path, Gtk.TreePath):
+            path = TreePath(path)
+        return super(TreeView, self).get_cell_area(path, column)
 
-        def insert_column_with_attributes(self, position, title, cell, **kwargs):
-            column = TreeViewColumn()
-            column.set_title(title)
-            column.pack_start(cell, False)
-            self.insert_column(column, position)
-            column.set_attributes(cell, **kwargs)
+    def insert_column_with_attributes(self, position, title, cell, **kwargs):
+        column = TreeViewColumn()
+        column.set_title(title)
+        column.pack_start(cell, False)
+        self.insert_column(column, position)
+        column.set_attributes(cell, **kwargs)
 
-    TreeView = override(TreeView)
-    __all__.append('TreeView')
+
+TreeView = override(TreeView)
+__all__.append('TreeView')
 
 
 class TreeViewColumn(Gtk.TreeViewColumn):
@@ -1561,46 +1486,51 @@ if GTK2 or GTK3:
     Button = override(Button)
     __all__.append('Button')
 
+    class LinkButton(Gtk.LinkButton):
+        __init__ = deprecated_init(Gtk.LinkButton.__init__,
+                                   arg_names=('uri', 'label'),
+                                   category=PyGTKDeprecationWarning)
 
-class LinkButton(Gtk.LinkButton):
-    __init__ = deprecated_init(Gtk.LinkButton.__init__,
-                               arg_names=('uri', 'label'),
-                               category=PyGTKDeprecationWarning)
+    LinkButton = override(LinkButton)
+    __all__.append('LinkButton')
 
+    class Label(Gtk.Label):
+        __init__ = deprecated_init(Gtk.Label.__init__,
+                                   arg_names=('label',),
+                                   category=PyGTKDeprecationWarning)
 
-LinkButton = override(LinkButton)
-__all__.append('LinkButton')
-
-
-class Label(Gtk.Label):
-    __init__ = deprecated_init(Gtk.Label.__init__,
-                               arg_names=('label',),
-                               category=PyGTKDeprecationWarning)
-
-
-Label = override(Label)
-__all__.append('Label')
+    Label = override(Label)
+    __all__.append('Label')
 
 
 class Adjustment(Gtk.Adjustment):
-    _init = deprecated_init(Gtk.Adjustment.__init__,
-                            arg_names=('value', 'lower', 'upper',
-                                       'step_increment', 'page_increment', 'page_size'),
-                            deprecated_aliases={'page_increment': 'page_incr',
-                                                'step_increment': 'step_incr'},
-                            category=PyGTKDeprecationWarning,
-                            stacklevel=3)
+    if GTK2 or GTK3:
+        _init = deprecated_init(Gtk.Adjustment.__init__,
+                                arg_names=('value', 'lower', 'upper',
+                                           'step_increment', 'page_increment', 'page_size'),
+                                deprecated_aliases={'page_increment': 'page_incr',
+                                                    'step_increment': 'step_incr'},
+                                category=PyGTKDeprecationWarning,
+                                stacklevel=3)
 
     def __init__(self, *args, **kwargs):
-        self._init(*args, **kwargs)
+        if GTK2 or GTK3:
+            self._init(*args, **kwargs)
+            # The value property is set between lower and (upper - page_size).
+            # Just in case lower, upper or page_size was still 0 when value
+            # was set, we set it again here.
+            if 'value' in kwargs:
+                self.set_value(kwargs['value'])
+            elif len(args) >= 1:
+                self.set_value(args[0])
+        else:
+            Gtk.Adjustment.__init__(self, *args, **kwargs)
 
-        # The value property is set between lower and (upper - page_size).
-        # Just in case lower, upper or page_size was still 0 when value
-        # was set, we set it again here.
-        if 'value' in kwargs:
-            self.set_value(kwargs['value'])
-        elif len(args) >= 1:
-            self.set_value(args[0])
+            # The value property is set between lower and (upper - page_size).
+            # Just in case lower, upper or page_size was still 0 when value
+            # was set, we set it again here.
+            if 'value' in kwargs:
+                self.set_value(kwargs['value'])
 
 
 Adjustment = override(Adjustment)
@@ -1620,15 +1550,13 @@ if GTK2 or GTK3:
     Table = override(Table)
     __all__.append('Table')
 
+    class ScrolledWindow(Gtk.ScrolledWindow):
+        __init__ = deprecated_init(Gtk.ScrolledWindow.__init__,
+                                   arg_names=('hadjustment', 'vadjustment'),
+                                   category=PyGTKDeprecationWarning)
 
-class ScrolledWindow(Gtk.ScrolledWindow):
-    __init__ = deprecated_init(Gtk.ScrolledWindow.__init__,
-                               arg_names=('hadjustment', 'vadjustment'),
-                               category=PyGTKDeprecationWarning)
-
-
-ScrolledWindow = override(ScrolledWindow)
-__all__.append('ScrolledWindow')
+    ScrolledWindow = override(ScrolledWindow)
+    __all__.append('ScrolledWindow')
 
 
 if GTK2 or GTK3:
@@ -1687,15 +1615,13 @@ if GTK2 or GTK3:
     IconSet = override(IconSet)
     __all__.append('IconSet')
 
+    class Viewport(Gtk.Viewport):
+        __init__ = deprecated_init(Gtk.Viewport.__init__,
+                                   arg_names=('hadjustment', 'vadjustment'),
+                                   category=PyGTKDeprecationWarning)
 
-class Viewport(Gtk.Viewport):
-    __init__ = deprecated_init(Gtk.Viewport.__init__,
-                               arg_names=('hadjustment', 'vadjustment'),
-                               category=PyGTKDeprecationWarning)
-
-
-Viewport = override(Viewport)
-__all__.append('Viewport')
+    Viewport = override(Viewport)
+    __all__.append('Viewport')
 
 
 class TreeModelFilter(Gtk.TreeModelFilter):

@@ -390,8 +390,8 @@ class TestGtk(unittest.TestCase):
 
     def test_dialog_classes(self):
         self.assertEqual(Gtk.Dialog, gi.overrides.Gtk.Dialog)
-        self.assertEqual(Gtk.FileChooserDialog, gi.overrides.Gtk.FileChooserDialog)
         if not GTK4:
+            self.assertEqual(Gtk.FileChooserDialog, gi.overrides.Gtk.FileChooserDialog)
             self.assertEqual(Gtk.RecentChooserDialog, gi.overrides.Gtk.RecentChooserDialog)
             self.assertEqual(Gtk.ColorSelectionDialog, gi.overrides.Gtk.ColorSelectionDialog)
             self.assertEqual(Gtk.FontSelectionDialog, gi.overrides.Gtk.FontSelectionDialog)
@@ -509,13 +509,14 @@ class TestGtk(unittest.TestCase):
         text = dialog.get_property('text')
         self.assertEqual('dude!', text)
 
-        dialog.format_secondary_text('2nd text')
-        self.assertEqual(dialog.get_property('secondary-text'), '2nd text')
-        self.assertFalse(dialog.get_property('secondary-use-markup'))
+        if not GTK4:
+            dialog.format_secondary_text('2nd text')
+            self.assertEqual(dialog.get_property('secondary-text'), '2nd text')
+            self.assertFalse(dialog.get_property('secondary-use-markup'))
 
-        dialog.format_secondary_markup('2nd markup')
-        self.assertEqual(dialog.get_property('secondary-text'), '2nd markup')
-        self.assertTrue(dialog.get_property('secondary-use-markup'))
+            dialog.format_secondary_markup('2nd markup')
+            self.assertEqual(dialog.get_property('secondary-text'), '2nd markup')
+            self.assertTrue(dialog.get_property('secondary-use-markup'))
 
     @unittest.skipIf(Gtk_version == "4.0", "not in gtk4")
     def test_color_selection_dialog(self):
@@ -678,11 +679,12 @@ class TestGtk(unittest.TestCase):
         adjustment = Gtk.Adjustment()
         self.adjustment_check(adjustment)
 
-        adjustment = Gtk.Adjustment(1, -1, 3, 0, 0, 0)
-        self.adjustment_check(adjustment, value=1, lower=-1, upper=3)
+        if not GTK4:
+            adjustment = Gtk.Adjustment(1, -1, 3, 0, 0, 0)
+            self.adjustment_check(adjustment, value=1, lower=-1, upper=3)
 
-        adjustment = Gtk.Adjustment(1, -1, 3, 0, 0, 0, value=2)
-        self.adjustment_check(adjustment, value=2, lower=-1, upper=3)
+            adjustment = Gtk.Adjustment(1, -1, 3, 0, 0, 0, value=2)
+            self.adjustment_check(adjustment, value=2, lower=-1, upper=3)
 
     @unittest.skipIf(Gtk_version == "4.0", "not in gtk4")
     def test_table(self):
@@ -1238,6 +1240,7 @@ class TestTreeModelRow(unittest.TestCase):
 @unittest.skipUnless(Gtk, 'Gtk not available')
 class TestTreeModel(unittest.TestCase):
 
+    @unittest.skipIf(Gtk_version == "4.0", "not in gtk4")
     def test_tree_model_sort_new_with_model_old(self):
         # https://gitlab.gnome.org/GNOME/gtk/-/merge_requests/1134
         model = Gtk.TreeStore(int)
@@ -1253,7 +1256,8 @@ class TestTreeModel(unittest.TestCase):
         assert sort_model.get_model() == model
 
     def test_tree_model_sort(self):
-        self.assertEqual(Gtk.TreeModelSort, gi.overrides.Gtk.TreeModelSort)
+        if not GTK4:
+            self.assertEqual(Gtk.TreeModelSort, gi.overrides.Gtk.TreeModelSort)
         model = Gtk.TreeStore(int, bool)
         model_sort = Gtk.TreeModelSort(model=model)
         self.assertEqual(model_sort.get_model(), model)
