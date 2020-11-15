@@ -58,6 +58,10 @@ def init_test_environ():
     # Avoid accessibility dbus warnings
     os.environ['NO_AT_BRIDGE'] = '1'
 
+    # A workaround for https://gitlab.gnome.org/GNOME/glib/-/issues/2251
+    # The gtk4 a11y stack calls get_dbus_object_path() on the default app
+    os.environ['GTK_A11Y'] = 'none'
+
     # Force the default theme so broken themes don't affect the tests
     os.environ['GTK_THEME'] = 'Adwaita'
 
