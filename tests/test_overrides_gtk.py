@@ -902,8 +902,8 @@ class TestGtk(unittest.TestCase):
 
 
 @unittest.skipUnless(Gtk, 'Gtk not available')
-@unittest.skipIf(Gtk_version == "4.0", "not in gtk4")
 class TestWidget(unittest.TestCase):
+    @unittest.skipIf(Gtk_version == "4.0", "not in gtk4")
     def test_style_get_property_gvalue(self):
         button = Gtk.Button()
         value = GObject.Value(int, -42)
@@ -912,6 +912,7 @@ class TestWidget(unittest.TestCase):
         # set it.
         self.assertNotEqual(value.get_int(), -42)
 
+    @unittest.skipIf(Gtk_version == "4.0", "not in gtk4")
     def test_style_get_property_return_with_explicit_gvalue(self):
         button = Gtk.Button()
         value = GObject.Value(int, -42)
@@ -919,16 +920,27 @@ class TestWidget(unittest.TestCase):
         self.assertIsInstance(result, int)
         self.assertNotEqual(result, -42)
 
+    @unittest.skipIf(Gtk_version == "4.0", "not in gtk4")
     def test_style_get_property_return_with_implicit_gvalue(self):
         button = Gtk.Button()
         result = button.style_get_property('focus-padding')
         self.assertIsInstance(result, int)
         self.assertNotEqual(result, -42)
 
+    @unittest.skipIf(Gtk_version == "4.0", "not in gtk4")
     def test_style_get_property_error(self):
         button = Gtk.Button()
         with self.assertRaises(ValueError):
             button.style_get_property('not-a-valid-style-property')
+
+    @unittest.skipIf(Gtk_version != "4.0", "only in gtk4")
+    def test_translate_coordinates(self):
+        box = Gtk.Box()
+        child = Gtk.Button()
+        box.append(child)
+        with realized(box):
+            assert box.translate_coordinates(child, 42, 24) == (42.0, 24.0)
+            assert box.translate_coordinates(Gtk.Button(), 0, 0) is None
 
 
 @unittest.skipIf(sys.platform == "darwin", "hangs")
