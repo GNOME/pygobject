@@ -9,6 +9,7 @@ Gio = pytest.importorskip("gi.repository.Gio")
 
 from .helper import capture_exceptions
 
+GTK4 = (Gtk._version == "4.0")
 
 # https://gitlab.gnome.org/GNOME/pygobject/-/merge_requests/145
 pytestmark = pytest.mark.skipif(Gtk._version == "4.0", reason="FIXME!!")
@@ -581,12 +582,26 @@ def test_internal_child():
         __gtype_name__ = other_type_name
 
     other = OtherThing()
-    child = other.get_children()[0]
+    if not GTK4:
+        child = other.get_children()[0]
+    else:
+        child = other.get_first_child()
+
     assert isinstance(child, MainThing)
-    child = child.get_children()[0]
+
+    if not GTK4:
+        child = child.get_children()[0]
+    else:
+        child = child.get_first_child()
+
     assert isinstance(child, Gtk.Box)
     assert child.props.margin_top == 24
-    child = child.get_children()[0]
+
+    if not GTK4:
+        child = child.get_children()[0]
+    else:
+        child = child.get_first_child()
+
     assert isinstance(child, Gtk.Label)
     assert child.props.label == "foo"
 
@@ -658,7 +673,12 @@ def test_template_hierarchy():
 
             assert isinstance(self._testbox, TestBox)
             assert isinstance(self._testlabel, TestLabel)
-            assert len(self._testbox.get_children()) == 2
+            if not GTK4:
+                children = self._testbox.get_children()
+            else:
+                children = list(self._testbox)
+
+            assert len(children) == 2
 
     win = MyWindow()
     assert isinstance(win, MyWindow)
@@ -688,8 +708,17 @@ def test_multiple_init_template_calls():
 
     my_box = MyBox()
     assert isinstance(my_box, MyBox)
-    assert len(my_box.get_children()) == 1
+    if not GTK4:
+        children = my_box.get_children()
+    else:
+        children = list(my_box)
 
+    assert len(children) == 1
     my_box.init_template()
     assert isinstance(my_box, MyBox)
-    assert len(my_box.get_children()) == 1
+    if not GTK4:
+        children = my_box.get_children()
+    else:
+        children = list(my_box)
+
+    assert len(children) == 1
