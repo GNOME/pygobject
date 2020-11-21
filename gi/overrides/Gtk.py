@@ -135,6 +135,16 @@ class Widget(Gtk.Widget):
 
     translate_coordinates = strip_boolean_result(Gtk.Widget.translate_coordinates)
 
+    if GTK4:
+        def __contains__(self, child):
+            return child in list(self)
+
+        def __iter__(self):
+            child = self.get_first_child()
+            while child:
+                yield child
+                child = child.get_next_sibling()
+
     if GTK2 or GTK3:
         def freeze_child_notify(self):
             super(Widget, self).freeze_child_notify()

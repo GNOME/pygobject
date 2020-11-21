@@ -902,6 +902,37 @@ class TestGtk(unittest.TestCase):
         pixbuf = button.render_icon(Gtk.STOCK_OK, Gtk.IconSize.BUTTON)
         self.assertTrue(pixbuf is not None)
 
+    @unittest.skipUnless(
+        Gtk_version == "4.0", "GtkWidget prior to gtk4 is not iterable")
+    def test_widget_iterable(self):
+        widget = Gtk.Box()
+
+        children = [child for child in widget]
+        self.assertEqual(len(children), 0)
+
+        nr_children = 7
+        for i in range(nr_children):
+            widget.append(Gtk.Label())
+
+        children = [child for child in widget]
+        self.assertEqual(len(children), nr_children)
+
+        first_child = children[0]
+        last_child = children[-1]
+        self.assertEqual(first_child, widget.get_first_child())
+        self.assertEqual(last_child, widget.get_last_child())
+
+        self.assertTrue(first_child in widget)
+        self.assertTrue(last_child in widget)
+
+        widget.remove(first_child)
+        self.assertTrue(first_child not in widget)
+        self.assertTrue(last_child in widget)
+
+        widget.remove(last_child)
+        self.assertTrue(first_child not in widget)
+        self.assertTrue(last_child not in widget)
+
 
 @unittest.skipUnless(Gtk, 'Gtk not available')
 class TestWidget(unittest.TestCase):
