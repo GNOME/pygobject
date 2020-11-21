@@ -11,9 +11,6 @@ from .helper import capture_exceptions
 
 GTK4 = (Gtk._version == "4.0")
 
-# https://gitlab.gnome.org/GNOME/pygobject/-/merge_requests/145
-pytestmark = pytest.mark.skipif(Gtk._version == "4.0", reason="FIXME!!")
-
 
 def new_gtype_name(_count=[0]):
     _count[0] += 1
