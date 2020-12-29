@@ -613,8 +613,8 @@ pygi_gulong_to_py (gulong value)
         return PyLong_FromUnsignedLong (value);
 }
 
-gboolean
-pygi_gint8_from_py (PyObject *object, gint8 *result)
+static gboolean
+pygi_gint8_from_py_converted (PyObject *object, gint8 *result)
 {
     long long_value;
     PyObject *number;
@@ -653,14 +653,37 @@ overflow:
     return FALSE;
 }
 
+gboolean
+pygi_gint8_from_py (PyObject *object, gint8 *result)
+{
+    /* If we pass unicode, convert it to a bytes representation
+     * and then continue. */
+    if (PyUnicode_Check (object)) {
+        PyObject *bytes_object = PyUnicode_AsUTF8String (object);
+
+        if (!bytes_object) {
+            PyErr_Format (PyExc_TypeError,
+                          "Could not convert unicode string to bytes");
+            return FALSE;
+        }
+
+        gboolean ret = pygi_gint8_from_py_converted (bytes_object, result);
+        Py_DECREF (bytes_object);
+
+        return ret;
+    }
+
+    return pygi_gint8_from_py_converted (object, result);
+}
+
 PyObject *
 pygi_gint8_to_py (gint8 value)
 {
     return PyLong_FromLong (value);
 }
 
-gboolean
-pygi_guint8_from_py (PyObject *object, guint8 *result)
+static gboolean
+pygi_guint8_from_py_converted (PyObject *object, guint8 *result)
 {
     long long_value;
     PyObject *number;
@@ -697,6 +720,29 @@ overflow:
                   (long)0, (long)G_MAXUINT8);
     Py_DECREF (number);
     return FALSE;
+}
+
+gboolean
+pygi_guint8_from_py (PyObject *object, guint8 *result)
+{
+    /* If we pass unicode, convert it to a bytes representation
+     * and then continue */
+    if (PyUnicode_Check (object)) {
+        PyObject *bytes_object = PyUnicode_AsUTF8String (object);
+
+        if (!bytes_object) {
+            PyErr_Format (PyExc_TypeError,
+                          "Could not convert unicode string to bytes");
+            return FALSE;
+        }
+
+        gboolean ret = pygi_guint8_from_py_converted (bytes_object, result);
+        Py_DECREF (bytes_object);
+
+        return ret;
+    }
+
+    return pygi_guint8_from_py_converted (object, result);
 }
 
 PyObject *

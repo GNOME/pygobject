@@ -291,8 +291,8 @@ class TestGVariant(unittest.TestCase):
         variant = GLib.Variant("ay", iter([1, 2, 3]))
         assert variant.unpack() == [1, 2, 3]
 
-        with self.assertRaises(TypeError):
-            GLib.Variant("ay", "aaa")
+        variant = GLib.Variant("ay", "aaa")
+        assert variant.unpack() == [97, 97, 97]
 
         with self.assertRaises(TypeError):
             GLib.Variant("ay", object())
