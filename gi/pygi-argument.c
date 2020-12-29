@@ -325,7 +325,7 @@ _pygi_argument_to_array (GIArgument *arg,
     return g_array;
 }
 
-typedef void (*ArrayInsertFunc) (gpointer array, guint index, gpointer item,
+typedef void (*ArrayInsertFunc) (gpointer array, guint index, GIArgument item,
                                  guint item_size);
 
 static gint
@@ -355,17 +355,17 @@ _pygi_fill_array_from_object (gpointer array, GITypeInfo *item_type_info,
             return -1;
         }
 
-        (*insert_func) (array, i, &item, item_size);
+        (*insert_func) (array, i, item, item_size);
     }
 
     return 0;
 }
 
 static inline void
-_pygi_insert_garray_element (gpointer array, guint index, gpointer item,
+_pygi_insert_garray_element (gpointer array, guint index, GIArgument item,
                              guint item_size)
 {
-    g_array_insert_vals ((GArray *)array, index, item, 1);
+    g_array_insert_vals ((GArray *)array, index, &item, 1);
 }
 
 static gint
@@ -415,10 +415,10 @@ out:
 }
 
 static inline void
-_pygi_insert_c_array_element (gpointer array, guint index, gpointer item,
+_pygi_insert_c_array_element (gpointer array, guint index, GIArgument item,
                               guint item_size)
 {
-    memcpy (((gchar *)array) + (index * item_size), item, item_size);
+    memcpy (((gchar *)array) + (index * item_size), &item, item_size);
 }
 
 static gint
@@ -470,10 +470,10 @@ out:
 }
 
 static inline void
-_pygi_insert_g_ptr_array_element (gpointer array, guint index, gpointer item,
+_pygi_insert_g_ptr_array_element (gpointer array, guint index, GIArgument item,
                                   guint item_size)
 {
-    g_ptr_array_insert ((GPtrArray *)array, index, item);
+    g_ptr_array_insert ((GPtrArray *)array, index, item.v_pointer);
 }
 
 static gint
@@ -525,10 +525,10 @@ out:
 }
 
 static inline void
-_pygi_insert_g_byte_array_element (gpointer array, guint index, gpointer item,
-                                   guint item_size)
+_pygi_insert_g_byte_array_element (gpointer array, guint index,
+                                   GIArgument item, guint item_size)
 {
-    guint8 *item_c = item;
+    guint8 *item_c = (guint8 *)&item.v_uint8;
     GByteArray *byte_array = array;
 
     byte_array->data[index] = *item_c;
