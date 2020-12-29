@@ -996,7 +996,7 @@ pygobject_prepare_construct_properties (GObjectClass *class, PyObject *kwargs,
                 return FALSE;
             }
             g_value_init (gvalue, G_PARAM_SPEC_VALUE_TYPE (pspec));
-            if (pyg_param_gvalue_from_pyobject (gvalue, value, pspec) < 0) {
+            if (pygi_set_gvalue_for_pspec (pspec, gvalue, value) < 0) {
                 PyErr_Format (
                     PyExc_TypeError,
                     "could not convert value for property `%s' from %s to %s",
