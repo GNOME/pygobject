@@ -337,25 +337,12 @@ pygi_set_property_gvalue_from_property_info (GIPropertyInfo *property_info,
         else
             g_value_set_pointer (value, arg.v_pointer);
         break;
-    case GI_TYPE_TAG_ARRAY: {
-        /* This is assumes GI_TYPE_TAG_ARRAY is always a GStrv
-         * https://bugzilla.gnome.org/show_bug.cgi?id=688232
-         */
-        GArray *arg_items = (GArray *)arg.v_pointer;
-        gchar **strings;
-        guint i;
-
-        if (arg_items == NULL) goto out;
-
-        strings = g_new0 (char *, arg_items->len + 1);
-        for (i = 0; i < arg_items->len; ++i) {
-            strings[i] = g_array_index (arg_items, GIArgument, i).v_string;
-        }
-        strings[arg_items->len] = NULL;
-        g_value_take_boxed (value, strings);
-        g_array_free (arg_items, TRUE);
+    case GI_TYPE_TAG_ARRAY:
+        if (G_VALUE_HOLDS_BOXED (value))
+            g_value_set_boxed (value, arg.v_pointer);
+        else
+            g_value_set_pointer (value, arg.v_pointer);
         break;
-    }
     default:
         PyErr_Format (
             PyExc_NotImplementedError,
