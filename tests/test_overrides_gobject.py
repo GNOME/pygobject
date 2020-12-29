@@ -312,8 +312,8 @@ def test_value_char():
     v.set_value(b"\x00")
     assert v.get_value() == 0
 
-    with pytest.raises(TypeError):
-        v.set_value("a")
+    v.set_value("a")
+    assert v.get_value() == 97
 
     with pytest.raises(OverflowError):
         v.set_value(128)
@@ -329,8 +329,8 @@ def test_value_uchar():
     v.set_value(b"\x00")
     assert v.get_value() == 0
 
-    with pytest.raises(TypeError):
-        v.set_value("a")
+    v.set_value("a")
+    assert v.get_value() == 97
 
     with pytest.raises(OverflowError):
         v.set_value(256)
