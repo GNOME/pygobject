@@ -346,8 +346,12 @@ _pygi_argument_to_array (GIArgument *arg,
         break;
     case GI_ARRAY_TYPE_PTR_ARRAY: {
         GPtrArray *ptr_array = (GPtrArray *)arg->v_pointer;
-        g_array = g_array_sized_new (FALSE, FALSE, sizeof (gpointer),
-                                     ptr_array->len);
+        /* Similar pattern to GI_ARRAY_TYPE_C - we create a new
+         * array but free the segment and replace it with
+         * what was in the ptr_array */
+        g_array = g_array_new (FALSE, FALSE, sizeof (gpointer));
+        g_free (g_array->data);
+
         g_array->data = (char *)ptr_array->pdata;
         g_array->len = ptr_array->len;
         *out_free_array = TRUE;
