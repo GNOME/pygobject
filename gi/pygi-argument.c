@@ -1336,7 +1336,7 @@ _pygi_argument_release (GIArgument *arg, GITypeInfo *type_info,
         }
         break;
     case GI_TYPE_TAG_ARRAY: {
-        guint n_elements = 0;
+        size_t n_elements = 0;
         gchar *array = NULL;
 
 
@@ -1360,13 +1360,7 @@ _pygi_argument_release (GIArgument *arg, GITypeInfo *type_info,
                                 ? GI_TRANSFER_NOTHING
                                 : GI_TRANSFER_EVERYTHING;
 
-            /* Free the items,
-             *
-             * Note in the case of a C array, items will not be freed
-             * because we cannot know how long the array is.
-             *
-             * XXX: That leaks, which isn't good.
-             */
+            /* Free the items */
             _pygi_array_release_elements (
                 array, n_elements, _pygi_gi_type_info_size (item_type_info),
                 item_type_info, item_transfer, direction);
