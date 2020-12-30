@@ -1250,19 +1250,35 @@ _pygi_array_release_elements (gchar *array, size_t n_items, guint item_size,
 
 static gchar *
 _pygi_get_underlying_array (GIArgument *arg, GITypeInfo *type_info,
-                            guint *n_elements)
+                            size_t *n_elements)
 {
     GIArrayType array_type = gi_type_info_get_array_type (type_info);
 
     g_assert (n_elements != NULL);
 
     switch (array_type) {
-    case GI_ARRAY_TYPE_C:
-        /* XXX: We lose information on the array size
-             *      when storing as a C array, so set
-             *      n_elements to zero */
-        *n_elements = 0;
+    case GI_ARRAY_TYPE_C: {
+        size_t length;
+        GITypeInfo *item_type_info =
+            gi_type_info_get_param_type (type_info, 0);
+        size_t item_size = _pygi_gi_type_info_size (item_type_info);
+
+        gi_base_info_unref ((GIBaseInfo *)item_type_info);
+
+        if (_pygi_determine_c_array_length (arg, type_info, item_size, NULL,
+                                            NULL, NULL, &length)
+            < 0) {
+            g_critical (
+                "Unable to determine array length of %p, this will leak",
+                arg->v_pointer);
+
+            *n_elements = 0;
+            return (gchar *)arg->v_pointer;
+        }
+
+        *n_elements = length;
         return (gchar *)arg->v_pointer;
+    }
     case GI_ARRAY_TYPE_ARRAY:
         *n_elements = ((GArray *)arg->v_pointer)->len;
         return (gchar *)((GArray *)arg->v_pointer)->data;
