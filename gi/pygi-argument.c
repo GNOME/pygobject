@@ -205,6 +205,66 @@ _pygi_argument_array_length_marshal (gsize length_arg_index, void *user_data1,
     return array_len;
 }
 
+static size_t
+_pygi_measure_c_zero_terminated_array_length (gpointer array,
+                                              size_t   item_size)
+{
+    gchar *array_ptr = array;
+    size_t length = 0;
+    char test_block[item_size];
+
+    memset (test_block, 0, sizeof (test_block));
+
+    /* Compare with a block of memory the same size of item_size
+     * and check that it is all zeros */
+    while (memcmp (test_block, (array_ptr + (length * item_size)), item_size))
+        ++length;
+
+    return length;
+}
+
+static gint
+_pygi_determine_c_array_length (gpointer                  array,
+                                GITypeInfo               *type_info,
+                                size_t                    item_size,
+                                PyGIArgArrayLengthPolicy  array_length_policy,
+                                void                     *user_data1,
+                                void                     *user_data2,
+                                size_t                   *return_length)
+{
+    gboolean is_zero_terminated = g_type_info_is_zero_terminated (type_info);
+    gint   length = 0;
+
+    if (is_zero_terminated) {
+        /* Array can be arbitrarily long. Best to store the size in a size_t */
+        *return_length = _pygi_measure_c_zero_terminated_array_length (array,
+                                                                       item_size);
+        return 0;
+    } else {
+        length = g_type_info_get_array_fixed_size (type_info);
+        if (length < 0) {
+            gint length_arg_pos;
+
+            if (G_UNLIKELY (array_length_policy == NULL)) {
+                return -1;
+            }
+
+            length_arg_pos = g_type_info_get_array_length (type_info);
+            g_assert (length_arg_pos >= 0);
+
+            length = array_length_policy (length_arg_pos, user_data1, user_data2);
+            if (length < 0) {
+                return -1;
+            }
+        }
+    }
+
+    /* Getting the length through GI or PyGIArgArrayLengthPolicy
+     * will be at most the size of a gint */
+    *return_length = length;
+    return 0;
+}
+
 /**
  * _pygi_argument_to_array
  * @arg: The argument to convert
