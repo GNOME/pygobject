@@ -329,17 +329,17 @@ pygi_set_property_gvalue_from_property_info (GIPropertyInfo *property_info,
         g_value_set_string (value, arg.v_string);
         break;
     case GI_TYPE_TAG_GHASH:
-        g_value_set_boxed (value, arg.v_pointer);
+        g_value_take_boxed (value, arg.v_pointer);
         break;
     case GI_TYPE_TAG_GLIST:
         if (G_VALUE_HOLDS_BOXED (value))
-            g_value_set_boxed (value, arg.v_pointer);
+            g_value_take_boxed (value, arg.v_pointer);
         else
             g_value_set_pointer (value, arg.v_pointer);
         break;
     case GI_TYPE_TAG_ARRAY:
         if (G_VALUE_HOLDS_BOXED (value))
-            g_value_set_boxed (value, arg.v_pointer);
+            g_value_take_boxed (value, arg.v_pointer);
         else
             g_value_set_pointer (value, arg.v_pointer);
         break;
