@@ -73,34 +73,7 @@ _pygi_marshal_cleanup_from_py_ghash (PyGIInvokeState *state,
     if (data == NULL) return;
 
     if (was_processed) {
-        GHashTable *hash_;
-        PyGIHashCache *hash_cache = (PyGIHashCache *)arg_cache;
-
-        hash_ = (GHashTable *)data;
-
-        // TOOD: This can go away as soon as we add destructors to the hash table init.
-        /* clean up keys and values first */
-        if (hash_cache->key_cache->from_py_cleanup != NULL
-            || hash_cache->value_cache->from_py_cleanup != NULL) {
-            GHashTableIter hiter;
-            gpointer key;
-            gpointer value;
-
-            PyGIMarshalFromPyCleanupFunc key_cleanup_func =
-                hash_cache->key_cache->from_py_cleanup;
-            PyGIMarshalFromPyCleanupFunc value_cleanup_func =
-                hash_cache->value_cache->from_py_cleanup;
-
-            g_hash_table_iter_init (&hiter, hash_);
-            while (g_hash_table_iter_next (&hiter, &key, &value)) {
-                if (key != NULL && key_cleanup_func != NULL)
-                    key_cleanup_func (state, hash_cache->key_cache, NULL, key,
-                                      TRUE);
-                if (value != NULL && value_cleanup_func != NULL)
-                    value_cleanup_func (state, hash_cache->value_cache, NULL,
-                                        value, TRUE);
-            }
-        }
+        GHashTable *hash_ = (GHashTable *)data;
 
         g_hash_table_unref (hash_);
     }

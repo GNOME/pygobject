@@ -210,6 +210,154 @@ _pygi_arg_to_hash_pointer (const GIArgument arg, GITypeInfo *type_info)
     }
 }
 
+static void
+_free_value_slice (GValue *value)
+{
+    g_value_unset (value);
+    g_free (value);
+}
+
+static void
+_free_error_slice (GError **error)
+{
+    g_clear_error (error);
+    g_free (error);
+}
+
+static GDestroyNotify
+_pygi_type_info_get_free_func (GITypeInfo *type_info, GITransfer transfer,
+                               gboolean is_none)
+{
+    GITypeTag type_tag = gi_type_info_get_tag (type_info);
+
+    if (is_none) return NULL;
+
+    switch (type_tag) {
+    case GI_TYPE_TAG_VOID:
+    case GI_TYPE_TAG_BOOLEAN:
+    case GI_TYPE_TAG_INT8:
+    case GI_TYPE_TAG_UINT8:
+    case GI_TYPE_TAG_INT16:
+    case GI_TYPE_TAG_UINT16:
+    case GI_TYPE_TAG_INT32:
+    case GI_TYPE_TAG_UINT32:
+    case GI_TYPE_TAG_INT64:
+    case GI_TYPE_TAG_UINT64:
+    case GI_TYPE_TAG_FLOAT:
+    case GI_TYPE_TAG_DOUBLE:
+    case GI_TYPE_TAG_GTYPE:
+    case GI_TYPE_TAG_UNICHAR:
+        break;
+    case GI_TYPE_TAG_FILENAME:
+    case GI_TYPE_TAG_UTF8:
+        /* With allow-none support the string could be NULL */
+        return g_free;
+    case GI_TYPE_TAG_ARRAY:
+        switch (gi_type_info_get_array_type (type_info)) {
+        case GI_ARRAY_TYPE_C:
+            g_warning ("Cannot make a free_func for a C array");
+            break;
+        case GI_ARRAY_TYPE_ARRAY:
+            return (GDestroyNotify)g_array_unref;
+        case GI_ARRAY_TYPE_PTR_ARRAY:
+            return (GDestroyNotify)g_ptr_array_unref;
+        case GI_ARRAY_TYPE_BYTE_ARRAY:
+            return (GDestroyNotify)g_byte_array_unref;
+        default:
+            g_assert_not_reached ();
+        }
+        break;
+    case GI_TYPE_TAG_INTERFACE: {
+        GIBaseInfo *info;
+        GDestroyNotify free_func = NULL;
+
+        info = gi_type_info_get_interface (type_info);
+
+        if (GI_IS_CALLBACK_INFO (info)) {
+            /* TODO */
+        } else if (GI_IS_STRUCT_INFO (info) || GI_IS_UNION_INFO (info)) {
+            GType type = gi_registered_type_info_get_g_type (
+                (GIRegisteredTypeInfo *)info);
+
+            if (g_type_is_a (type, G_TYPE_VALUE)) {
+                free_func = (GDestroyNotify)_free_value_slice;
+            } else if (g_type_is_a (type, G_TYPE_CLOSURE)) {
+                free_func = (GDestroyNotify)g_closure_unref;
+            } else if (GI_IS_STRUCT_INFO (info)) {
+                if (gi_struct_info_is_foreign ((GIStructInfo *)info)) {
+                    g_warning ("Cannot make a free func for a foreign struct");
+                }
+            } else if (g_type_is_a (type, G_TYPE_BOXED)) {
+                g_warning ("Cannot make a free func for a boxed type");
+            } else if (g_type_is_a (type, G_TYPE_POINTER)
+                       || type == G_TYPE_NONE) {
+                if (gi_type_info_is_pointer (type_info)) {
+                    g_warning ("Cannot make a free func for a pointer type");
+                }
+            }
+        } else if (GI_IS_ENUM_INFO (info) || GI_IS_FLAGS_INFO (info)) {
+            /* no-op */
+        } else if (GI_IS_INTERFACE_INFO (info) || GI_IS_OBJECT_INFO (info)) {
+            free_func = g_object_unref;
+        } else {
+            g_assert_not_reached ();
+        }
+
+        gi_base_info_unref (info);
+        return free_func;
+    }
+    case GI_TYPE_TAG_GLIST:
+    case GI_TYPE_TAG_GSLIST: {
+        GITypeInfo *item_type_info =
+            gi_type_info_get_param_type (type_info, 0);
+        GITransfer item_transfer = transfer == GI_TRANSFER_EVERYTHING
+                                       ? GI_TRANSFER_EVERYTHING
+                                       : GI_TRANSFER_NOTHING;
+        GDestroyNotify item_free = _pygi_type_info_get_free_func (
+            item_type_info, item_transfer, FALSE);
+
+        gi_base_info_unref ((GIBaseInfo *)item_type_info);
+
+        if (item_free != NULL) {
+            g_warning ("Cannot make free_func to free items in GList");
+        }
+
+        return type_tag == GI_TYPE_TAG_GSLIST ? (GDestroyNotify)g_slist_free
+                                              : (GDestroyNotify)g_list_free;
+    }
+    case GI_TYPE_TAG_GHASH: {
+        GITypeInfo *key_type_info = gi_type_info_get_param_type (type_info, 0);
+        GITypeInfo *value_type_info =
+            gi_type_info_get_param_type (type_info, 1);
+        GITransfer item_transfer = transfer == GI_TRANSFER_EVERYTHING
+                                       ? GI_TRANSFER_EVERYTHING
+                                       : GI_TRANSFER_NOTHING;
+        GDestroyNotify key_free_func = _pygi_type_info_get_free_func (
+            key_type_info, item_transfer, FALSE);
+        GDestroyNotify value_free_func = _pygi_type_info_get_free_func (
+            value_type_info, item_transfer, FALSE);
+
+        gi_base_info_unref ((GIBaseInfo *)key_type_info);
+        gi_base_info_unref ((GIBaseInfo *)value_type_info);
+
+        if (key_free_func != NULL) {
+            g_warning ("Cannot make free_func to free keys in GHashTable");
+        }
+
+        if (value_free_func != NULL) {
+            g_warning ("Cannot make free_func to free values in GHashTable");
+        }
+
+        return (GDestroyNotify)g_hash_table_unref;
+    }
+    case GI_TYPE_TAG_ERROR:
+        return (GDestroyNotify)_free_error_slice;
+    default:
+        g_assert_not_reached ();
+    }
+    return NULL;
+}
+
 /**
  * pygi_argument_to_array
  * @arg: The argument to convert
@@ -622,15 +770,17 @@ pygi_argument_hash_table_from_py (PyObject *object, GITypeInfo *type_info,
         equal_func = NULL;
     }
 
-    // TODO: set hash table destroy notifier
-    hash_table = g_hash_table_new (hash_func, equal_func);
+    item_transfer = transfer == GI_TRANSFER_CONTAINER ? GI_TRANSFER_NOTHING
+                                                      : transfer;
+
+    hash_table = g_hash_table_new_full (
+        hash_func, equal_func,
+        _pygi_type_info_get_free_func (key_type_info, item_transfer, FALSE),
+        _pygi_type_info_get_free_func (value_type_info, item_transfer, FALSE));
     if (hash_table == NULL) {
         PyErr_NoMemory ();
         goto hash_table_release;
     }
-
-    item_transfer = transfer == GI_TRANSFER_CONTAINER ? GI_TRANSFER_NOTHING
-                                                      : transfer;
 
     for (i = 0; i < length; i++) {
         PyObject *py_key;
@@ -1172,7 +1322,7 @@ _pygi_argument_release (GIArgument *arg, GITypeInfo *type_info,
                      && transfer == GI_TRANSFER_NOTHING)
                     || (direction == GI_DIRECTION_OUT
                         && transfer != GI_TRANSFER_NOTHING)) {
-                    g_slice_free (GValue, value);
+                    g_free (value);
                 }
             } else if (g_type_is_a (type, G_TYPE_CLOSURE)) {
                 if (direction == GI_DIRECTION_IN
@@ -1267,51 +1417,12 @@ _pygi_argument_release (GIArgument *arg, GITypeInfo *type_info,
 
         hash_table = arg->v_pointer;
 
-        // TODO: simplify to g_hash_table_unref.
-
-        if (direction == GI_DIRECTION_IN
-            && transfer != GI_TRANSFER_EVERYTHING) {
-            /* We created the table without a destroy function, so keys and
-                 * values need to be released. */
-            GITypeInfo *key_type_info;
-            GITypeInfo *value_type_info;
-            GITransfer item_transfer;
-            GHashTableIter hash_table_iter;
-            gpointer key;
-            gpointer value;
-
-            key_type_info = gi_type_info_get_param_type (type_info, 0);
-            g_assert (key_type_info != NULL);
-
-            value_type_info = gi_type_info_get_param_type (type_info, 1);
-            g_assert (value_type_info != NULL);
-
-            if (direction == GI_DIRECTION_IN) {
-                item_transfer = GI_TRANSFER_NOTHING;
-            } else {
-                item_transfer = GI_TRANSFER_EVERYTHING;
-            }
-
-            g_hash_table_iter_init (&hash_table_iter, hash_table);
-            while (g_hash_table_iter_next (&hash_table_iter, &key, &value)) {
-                _pygi_argument_release ((GIArgument *)&key, key_type_info,
-                                        item_transfer, direction);
-                _pygi_argument_release ((GIArgument *)&value, value_type_info,
-                                        item_transfer, direction);
-            }
-
-            gi_base_info_unref ((GIBaseInfo *)key_type_info);
-            gi_base_info_unref ((GIBaseInfo *)value_type_info);
-        } else if (direction == GI_DIRECTION_OUT
-                   && transfer == GI_TRANSFER_CONTAINER) {
+        if (direction == GI_DIRECTION_OUT
+            && transfer == GI_TRANSFER_CONTAINER) {
             /* Be careful to avoid keys and values being freed if the
-                 * callee gave a destroy function. */
+             * callee gave a destroy function. */
             g_hash_table_steal_all (hash_table);
-        }
-
-        if ((direction == GI_DIRECTION_IN && transfer == GI_TRANSFER_NOTHING)
-            || (direction == GI_DIRECTION_OUT
-                && transfer != GI_TRANSFER_NOTHING)) {
+        } else {
             g_hash_table_unref (hash_table);
         }
 
@@ -1330,7 +1441,7 @@ _pygi_argument_release (GIArgument *arg, GITypeInfo *type_info,
             g_error_free (error);
         }
 
-        g_slice_free (GError *, arg->v_pointer);
+        g_free (arg->v_pointer);
         break;
     }
     default:
