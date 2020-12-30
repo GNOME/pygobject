@@ -206,56 +206,62 @@ _pygi_argument_array_length_marshal (gsize length_arg_index, void *user_data1,
 }
 
 static size_t
-_pygi_measure_c_zero_terminated_array_length (gpointer array,
-                                              size_t   item_size)
+_pygi_measure_c_zero_terminated_array_length (GIArgument *arg,
+                                              size_t item_size)
 {
-    gchar *array_ptr = array;
     size_t length = 0;
-    char test_block[item_size];
 
-    memset (test_block, 0, sizeof (test_block));
-
-    /* Compare with a block of memory the same size of item_size
-     * and check that it is all zeros */
-    while (memcmp (test_block, (array_ptr + (length * item_size)), item_size))
-        ++length;
+    if (item_size == sizeof (gpointer))
+        length = g_strv_length ((gchar **)arg->v_pointer);
+    else if (item_size == 1)
+        length = strlen ((gchar *)arg->v_pointer);
+    else if (item_size == sizeof (int))
+        for (length = 0; *(((int *)arg->v_pointer) + length); length++);
+    else if (item_size == sizeof (short))
+        for (length = 0; *(((short *)arg->v_pointer) + length); length++);
+    else
+        g_assert_not_reached ();
 
     return length;
 }
 
 static gint
-_pygi_determine_c_array_length (gpointer                  array,
-                                GITypeInfo               *type_info,
-                                size_t                    item_size,
-                                PyGIArgArrayLengthPolicy  array_length_policy,
-                                void                     *user_data1,
-                                void                     *user_data2,
-                                size_t                   *return_length)
+_pygi_determine_c_array_length (GIArgument *arg, GITypeInfo *type_info,
+                                size_t item_size,
+                                PyGIArgArrayLengthPolicy array_length_policy,
+                                void *user_data1, void *user_data2,
+                                size_t *return_length)
 {
-    gboolean is_zero_terminated = g_type_info_is_zero_terminated (type_info);
-    gint   length = 0;
+    gboolean is_zero_terminated = gi_type_info_is_zero_terminated (type_info);
+    size_t length = 0;
 
     if (is_zero_terminated) {
         /* Array can be arbitrarily long. Best to store the size in a size_t */
-        *return_length = _pygi_measure_c_zero_terminated_array_length (array,
-                                                                       item_size);
+        *return_length =
+            _pygi_measure_c_zero_terminated_array_length (arg, item_size);
         return 0;
     } else {
-        length = g_type_info_get_array_fixed_size (type_info);
-        if (length < 0) {
-            gint length_arg_pos;
+        gboolean has_length;
+        has_length = gi_type_info_get_array_fixed_size (type_info, &length);
+        if (!has_length) {
+            guint length_arg_pos;
+            gboolean has_array_length;
+            gssize length_by_policy;
 
             if (G_UNLIKELY (array_length_policy == NULL)) {
                 return -1;
             }
 
-            length_arg_pos = g_type_info_get_array_length (type_info);
-            g_assert (length_arg_pos >= 0);
+            has_array_length = gi_type_info_get_array_length_index (
+                type_info, &length_arg_pos);
+            g_assert (has_array_length);
 
-            length = array_length_policy (length_arg_pos, user_data1, user_data2);
+            length_by_policy =
+                array_length_policy (length_arg_pos, user_data1, user_data2);
             if (length < 0) {
                 return -1;
             }
+            length = (size_t)length_by_policy;
         }
     }
 
@@ -295,7 +301,6 @@ _pygi_argument_to_array (GIArgument *arg,
     gboolean is_zero_terminated;
     gsize item_size;
     size_t length;
-    gssize length_policy;
     GArray *g_array;
 
     g_return_val_if_fail (
@@ -314,44 +319,16 @@ _pygi_argument_to_array (GIArgument *arg,
 
         gi_base_info_unref ((GIBaseInfo *)item_type_info);
 
-        if (is_zero_terminated) {
-            if (item_size == sizeof (gpointer))
-                length = g_strv_length ((gchar **)arg->v_pointer);
-            else if (item_size == 1)
-                length = strlen ((gchar *)arg->v_pointer);
-            else if (item_size == sizeof (int))
-                for (length = 0; *(((int *)arg->v_pointer) + length);
-                     length++);
-            else if (item_size == sizeof (short))
-                for (length = 0; *(((short *)arg->v_pointer) + length);
-                     length++);
-            else
-                g_assert_not_reached ();
-        } else {
-            if (!gi_type_info_get_array_fixed_size (type_info, &length)) {
-                unsigned int length_arg_pos;
-                gboolean has_array_length;
-
-                if (G_UNLIKELY (array_length_policy == NULL)) {
-                    g_critical ("Unable to determine array length for %p",
-                                arg->v_pointer);
-                    g_array = g_array_new (is_zero_terminated, FALSE,
-                                           (guint)item_size);
-                    *out_free_array = TRUE;
-                    return g_array;
-                }
-
-                has_array_length = gi_type_info_get_array_length_index (
-                    type_info, &length_arg_pos);
-                g_assert (has_array_length);
-
-                length_policy = array_length_policy (length_arg_pos,
-                                                     user_data1, user_data2);
-                if (length_policy < 0) {
-                    return NULL;
-                }
-                length = (size_t)length_policy;
-            }
+        if (_pygi_determine_c_array_length (arg, type_info, item_size,
+                                            array_length_policy, user_data1,
+                                            user_data2, &length)
+            < 0) {
+            g_critical ("Unable to determine array length for %p",
+                        arg->v_pointer);
+            g_array =
+                g_array_new (is_zero_terminated, FALSE, (guint)item_size);
+            *out_free_array = TRUE;
+            return g_array;
         }
 
         g_array = g_array_new (is_zero_terminated, FALSE, (guint)item_size);
