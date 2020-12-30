@@ -1679,49 +1679,12 @@ _pygi_argument_release (GIArgument *arg, GITypeInfo *type_info,
 
         hash_table = arg->v_pointer;
 
-        if (direction == GI_DIRECTION_IN
-            && transfer != GI_TRANSFER_EVERYTHING) {
-            /* We created the table without a destroy function, so keys and
-                 * values need to be released. */
-            GITypeInfo *key_type_info;
-            GITypeInfo *value_type_info;
-            GITransfer item_transfer;
-            GHashTableIter hash_table_iter;
-            gpointer key;
-            gpointer value;
-
-            key_type_info = gi_type_info_get_param_type (type_info, 0);
-            g_assert (key_type_info != NULL);
-
-            value_type_info = gi_type_info_get_param_type (type_info, 1);
-            g_assert (value_type_info != NULL);
-
-            if (direction == GI_DIRECTION_IN) {
-                item_transfer = GI_TRANSFER_NOTHING;
-            } else {
-                item_transfer = GI_TRANSFER_EVERYTHING;
-            }
-
-            g_hash_table_iter_init (&hash_table_iter, hash_table);
-            while (g_hash_table_iter_next (&hash_table_iter, &key, &value)) {
-                _pygi_argument_release ((GIArgument *)&key, key_type_info,
-                                        item_transfer, direction);
-                _pygi_argument_release ((GIArgument *)&value, value_type_info,
-                                        item_transfer, direction);
-            }
-
-            gi_base_info_unref ((GIBaseInfo *)key_type_info);
-            gi_base_info_unref ((GIBaseInfo *)value_type_info);
-        } else if (direction == GI_DIRECTION_OUT
-                   && transfer == GI_TRANSFER_CONTAINER) {
+        if (direction == GI_DIRECTION_OUT
+            && transfer == GI_TRANSFER_CONTAINER) {
             /* Be careful to avoid keys and values being freed if the
                  * callee gave a destroy function. */
             g_hash_table_steal_all (hash_table);
-        }
-
-        if ((direction == GI_DIRECTION_IN && transfer == GI_TRANSFER_NOTHING)
-            || (direction == GI_DIRECTION_OUT
-                && transfer != GI_TRANSFER_NOTHING)) {
+        } else {
             g_hash_table_unref (hash_table);
         }
 
