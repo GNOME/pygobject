@@ -9,6 +9,7 @@ User Guide
 
     api/index
     cairo_integration
+    gtk_template
     threading
     debug_profile
     deploy
