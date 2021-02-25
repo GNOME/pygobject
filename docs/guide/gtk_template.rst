@@ -88,3 +88,36 @@ to the name of the built-in widget:
         </child>
       </template>
     </interface>
+
+
+Subclasses that declare ``__gtype_name__`` can be used as objects in the XML:
+
+.. code-block:: python
+
+    xml = """\
+    <interface>
+      <template class="example3" parent="GtkBox">
+        <child>
+          <object class="ExampleButton" id="hello_button">
+            <property name="label">Hello World</property>
+            <signal name="clicked" handler="hello_button_clicked" swapped="no" />
+          </object>
+        </child>
+      </template>
+    </interface>
+    """
+
+
+    class HelloButton(Gtk.Button):
+        __gtype_name__ = "ExampleButton"
+
+
+    @Gtk.Template(string=xml)
+    class Foo(Gtk.Box):
+        __gtype_name__ = "example3"
+
+        hello_button = Gtk.Template.Child()
+
+        @Gtk.Template.Callback()
+        def hello_button_clicked(self, *args):
+            pass
