@@ -1,3 +1,15 @@
+3.40.0 - 2021-03-19
+-------------------
+
+* GTK 4 compatibility fixes :mr:`148` :mr:`159` :mr:`144` :mr:`145`
+* Python 3.9 and 3.10 compatibility fixes :mr:`152` :mr:`156`
+* New minimal dependency requirements due to dropping support for Ubuntu 16.04 :mr:`151`
+  * Python 3.6+
+  * glib 2.56+
+  * gobject-introspection 1.56+
+  * pycairo 1.16+
+
+
 3.38.0 - 2020-09-12
 -------------------
 
