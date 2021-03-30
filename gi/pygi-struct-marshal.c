@@ -191,7 +191,7 @@ pygi_arg_gclosure_from_py_marshal (PyObject   *py_arg,
             Py_DECREF (functools);
         }
 
-        if (partial && PyObject_IsInstance (py_arg, partial) > 0) {
+        if (partial && PyObject_IsInstance (py_arg, partial) > 0 && PyObject_HasAttrString (py_arg, "__gtk_template__")) {
             PyObject *partial_func;
             PyObject *partial_args;
             PyObject *partial_keywords;

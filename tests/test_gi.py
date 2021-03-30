@@ -1692,6 +1692,22 @@ class TestGClosure(unittest.TestCase):
     def test_in(self):
         GIMarshallingTests.gclosure_in(lambda: 42)
 
+    def test_in_partial(self):
+        from functools import partial
+
+        called_args = []
+        called_kwargs = {}
+
+        def callback(*args, **kwargs):
+            called_args.extend(args)
+            called_kwargs.update(kwargs)
+            return 42
+
+        func = partial(callback, 1, 2, 3, foo=42)
+        GIMarshallingTests.gclosure_in(func)
+        assert called_args == [1, 2, 3]
+        assert called_kwargs["foo"] == 42
+
     def test_pass(self):
         # test passing a closure between two C calls
         closure = GIMarshallingTests.gclosure_return()
