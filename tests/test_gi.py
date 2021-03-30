@@ -2406,7 +2406,7 @@ class TestGObject(unittest.TestCase):
 
     def test_nongir_repr(self):
         self.assertRegex(
-            repr(Gio.File.new_for_path("")),
+            repr(Gio.File.new_for_path("/")),
             r"<__gi__.GLocalFile object at 0x[^\s]+ "
             r"\(GLocalFile at 0x[^\s]+\)>")
 
