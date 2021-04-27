@@ -520,7 +520,6 @@ class Object(GObjectModule.Object):
     interface_install_property = _unsupported_method
     interface_list_properties = _unsupported_method
     notify_by_pspec = _unsupported_method
-    run_dispose = _unsupported_method
     watch_closure = _unsupported_method
 
     # Make all reference management methods private but still accessible.

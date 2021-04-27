@@ -67,6 +67,25 @@ def test_gobject_weak_ref():
 
 class TestGObjectAPI(unittest.TestCase):
 
+    def test_run_dispose(self):
+        class TestObject(GObject.GObject):
+            int_prop = GObject.Property(default=0, type=int)
+
+        obj = TestObject()
+        called = []
+
+        def on_notify(*args):
+            called.append(args)
+
+        obj.connect('notify::int-prop', on_notify)
+        obj.notify("int-prop")
+        obj.notify("int-prop")
+        # after this everything should be disconnected
+        obj.run_dispose()
+        obj.notify("int-prop")
+        obj.notify("int-prop")
+        assert len(called) == 2
+
     def test_call_method_uninitialized_instance(self):
         obj = GObject.Object.__new__(GObject.Object)
         with self.assertRaisesRegex(RuntimeError, '.*is not initialized'):
