@@ -85,3 +85,4 @@ Makefile.in
 *.pyd
 *.dll.a
 .coverage
+poetry.lock

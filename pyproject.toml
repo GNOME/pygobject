@@ -1,2 +1,19 @@
+[tool.poetry]
+name = "PyGObject"
+version = "3.41.0"
+description = "Python bindings for GObject Introspection"
+authors = ["Christoph Reiter"]
+
+[tool.poetry.dependencies]
+python = "^3.6"
+pycairo = "^1.16"
+
+[tool.poetry.dev-dependencies]
+pytest = "^6.0.0"
+flake8 = "^3.9.1"
+Sphinx = "^3.5.4"
+sphinx-rtd-theme = "^0.5.2"
+coverage = "^5.5"
+
 [build-system]
 requires = ["setuptools", "wheel", "pycairo"]
