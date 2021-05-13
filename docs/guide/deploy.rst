@@ -44,9 +44,11 @@ Example Deployments
 * `MyPaint <http://mypaint.org/>`__ provides a Windows installer based on
   MSYS2 and Inno Setup. It uses SCons for building/installing the application.
 
-* ...?
+* `Passphraser <https://github.com/zevlee/passphraser>`__ uses the Hello World
+  GTK template build system (see below).
 
 Other options
 -------------
 
 * `PyInstaller <http://www.pyinstaller.org/>`_ is a program that freezes (packages) Python programs into stand-alone executables, under Windows, Linux, Mac OS X, and more. PyInstaller's packager has built-in support for automatically including PyGObject dependencies with your application without requiring additional configuration.
+* `Hello World GTK <https://github.com/zevlee/hello-world-gtk>`_ is a template build system for distributing Python-based GTK applications on Windows, macOS, and Linux. First, an application directory is assembled using PyInstaller. Then, a different program is used to package the resulting directory. For Windows, NSIS3 is used. For macOS, the built-in hdiutil is used. For Linux, AppImageKit is used.
