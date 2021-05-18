@@ -107,15 +107,20 @@ class DynamicImporter(object):
     def __init__(self, path):
         self.path = path
 
-    def find_module(self, fullname, path=None):
+    def _find_module_check(self, fullname):
         if not fullname.startswith(self.path):
-            return
+            return False
 
         path, namespace = fullname.rsplit('.', 1)
-        if path != self.path:
-            return
+        return path == self.path
 
-        return self
+    def find_spec(self, fullname, path=None, target=None):
+        if self._find_module_check(fullname):
+            return importlib.util.spec_from_loader(fullname, self)
+
+    def find_module(self, fullname, path=None):
+        if self._find_module_check(fullname):
+            return self
 
     def load_module(self, fullname):
         if fullname in sys.modules:
