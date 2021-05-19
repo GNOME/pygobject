@@ -1359,16 +1359,18 @@ class TreeView(Gtk.TreeView, Container):
     get_visible_range = strip_boolean_result(Gtk.TreeView.get_visible_range)
     get_dest_row_at_pos = strip_boolean_result(Gtk.TreeView.get_dest_row_at_pos)
 
-    def enable_model_drag_source(self, start_button_mask, targets, actions):
-        target_entries = _construct_target_list(targets)
-        super(TreeView, self).enable_model_drag_source(start_button_mask,
-                                                       target_entries,
-                                                       actions)
+    if GTK2 or GTK3:
+        def enable_model_drag_source(self, start_button_mask, targets, actions):
+            target_entries = _construct_target_list(targets)
+            super(TreeView, self).enable_model_drag_source(start_button_mask,
+                                                           target_entries,
+                                                           actions)
 
-    def enable_model_drag_dest(self, targets, actions):
-        target_entries = _construct_target_list(targets)
-        super(TreeView, self).enable_model_drag_dest(target_entries,
-                                                     actions)
+    if GTK2 or GTK3:
+        def enable_model_drag_dest(self, targets, actions):
+            target_entries = _construct_target_list(targets)
+            super(TreeView, self).enable_model_drag_dest(target_entries,
+                                                         actions)
 
     def scroll_to_cell(self, path, column=None, use_align=False, row_align=0.0, col_align=0.0):
         if not isinstance(path, Gtk.TreePath):

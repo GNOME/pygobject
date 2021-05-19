@@ -786,7 +786,7 @@ class TestGtk(unittest.TestCase):
 
     @unittest.skipIf(sys.platform == "darwin", "crashes")
     @unittest.skipIf(GTK4, "uses lots of gtk3 only api")
-    def test_drag_target_list_gtk3(self):
+    def test_tree_view_drag_target_list_gtk3(self):
         mixed_target_list = [Gtk.TargetEntry.new('test0', 0, 0),
                              ('test1', 1, 1),
                              Gtk.TargetEntry.new('test2', 2, 2),
@@ -817,6 +817,19 @@ class TestGtk(unittest.TestCase):
 
         treeview.enable_model_drag_dest(mixed_target_list,
                                         Gdk.DragAction.DEFAULT | Gdk.DragAction.MOVE)
+
+    @unittest.skipUnless(GTK4, "gtk4 only")
+    def test_tree_view_drag_content_formats_gtk4(self):
+        content_formats = Gdk.ContentFormats.new(
+            ["application/json", "GTK_TREE_MODEL_ROW"]
+        )
+        treeview = Gtk.TreeView()
+        treeview.enable_model_drag_source(Gdk.ModifierType.BUTTON1_MASK,
+                                          content_formats,
+                                          Gdk.DragAction.MOVE)
+
+        treeview.enable_model_drag_dest(content_formats,
+                                        Gdk.DragAction.MOVE)
 
     @unittest.skipIf(Gtk_version == "4.0", "not in gtk4")
     def test_scrollbar(self):
