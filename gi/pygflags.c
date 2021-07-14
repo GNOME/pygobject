@@ -108,10 +108,13 @@ pyg_flags_repr(PyGFlags *self)
     tmp = generate_repr(self->gtype, (guint)PyLong_AsUnsignedLongMask ((PyObject*)self));
 
     module = PyObject_GetAttrString ((PyObject *)self, "__module__");
-    if (module == NULL)
+    if (module == NULL) {
+        g_free (tmp);
         return NULL;
+    }
 
     if (!PyUnicode_Check (module)) {
+        g_free (tmp);
         Py_DECREF (module);
         return NULL;
     }

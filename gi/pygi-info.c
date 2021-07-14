@@ -1862,6 +1862,7 @@ _pygi_g_registered_type_info_check_object (GIRegisteredTypeInfo *info,
 
         object_type = (PyTypeObject *) PyObject_Type (object);
         if (object_type == NULL) {
+            g_free (type_name_expected);
             return -1;
         }
 
