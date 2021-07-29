@@ -620,8 +620,10 @@ end:
             async_free_list = g_slist_prepend (async_free_list, closure);
             break;
         default:
-            g_error ("Invalid scope reached inside %s.  Possibly a bad annotation?",
-                     g_base_info_get_name (closure->info));
+            /* Handle new scopes added by gobject-introspection */
+            g_critical ("Unknown scope reached inside %s. Please file an issue "
+                        "at https://gitlab.gnome.org/GNOME/pygobject/issues/new",
+                        g_base_info_get_name (closure->info));
     }
 
     _invoke_state_clear (&state);
