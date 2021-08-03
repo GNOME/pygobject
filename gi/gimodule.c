@@ -1066,10 +1066,14 @@ static void
 pygobject__g_instance_init(GTypeInstance   *instance,
                            gpointer         g_class)
 {
-    GObject *object = (GObject *) instance;
+    GObject *object;
     PyObject *wrapper, *result;
     PyGILState_STATE state;
     gboolean needs_init = FALSE;
+
+    g_return_if_fail(G_IS_OBJECT(instance));
+
+    object = (GObject *) instance;
 
     wrapper = g_object_get_qdata(object, pygobject_wrapper_key);
     if (wrapper == NULL) {
