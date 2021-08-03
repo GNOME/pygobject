@@ -235,10 +235,14 @@ pygi_arg_gobject_to_py (GIArgument *arg, GITransfer transfer) {
         if (transfer == GI_TRANSFER_EVERYTHING)
             g_param_spec_unref (arg->v_pointer);
 
-    } else {
+    } else if (G_IS_OBJECT(arg->v_pointer)) {
          pyobj = pygobject_new_full (arg->v_pointer,
                                      /*steal=*/ transfer == GI_TRANSFER_EVERYTHING,
                                      /*type=*/  NULL);
+    } else {
+        g_warning("No means to translate argument or return value for '%s'", g_type_name_from_instance(arg->v_pointer));
+        pyobj = Py_None;
+        Py_INCREF (pyobj);
     }
 
     return pyobj;
