@@ -47,13 +47,13 @@ typedef struct _PyGICClosure
 void _pygi_closure_handle (ffi_cif *cif, void *result, void
                            **args, void *userdata);
 
-void _pygi_invoke_closure_free (gpointer user_data);
+void _pygi_invoke_closure_free (PyGICClosure* invoke_closure);
 
 PyGICClosure* _pygi_make_native_closure (GICallableInfo* info,
                                          PyGIClosureCache *cache,
                                          GIScopeType scope,
                                          PyObject *function,
-                                         gpointer user_data);
+                                         PyObject *user_data);
 
 PyGIArgCache *pygi_arg_callback_new_from_info  (GITypeInfo        *type_info,
                                                 GIArgInfo         *arg_info,   /* may be null */

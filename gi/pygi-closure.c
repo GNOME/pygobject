@@ -630,10 +630,8 @@ end:
     PyGILState_Release (py_state);
 }
 
-void _pygi_invoke_closure_free (gpointer data)
+void _pygi_invoke_closure_free (PyGICClosure* invoke_closure)
 {
-    PyGICClosure* invoke_closure = (PyGICClosure *) data;
-
     g_callable_info_free_closure (invoke_closure->info,
                                   invoke_closure->closure);
 
@@ -653,7 +651,7 @@ _pygi_make_native_closure (GICallableInfo* info,
                            PyGIClosureCache *cache,
                            GIScopeType scope,
                            PyObject *py_function,
-                           gpointer py_user_data)
+                           PyObject *py_user_data)
 {
     PyGICClosure *closure;
     ffi_closure *fficlosure;
