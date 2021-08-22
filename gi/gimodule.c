@@ -1312,7 +1312,7 @@ pyg_type_register(PyTypeObject *class, const char *type_name)
 
     /* store pointer to the class with the GType */
     Py_INCREF(class);
-    g_type_set_qdata(instance_type, g_quark_from_string("PyGObject::class"),
+    g_type_set_qdata(instance_type, pygobject_class_key,
 		     class);
 
     /* Mark this GType as a custom python type */
