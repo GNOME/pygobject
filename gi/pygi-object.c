@@ -240,9 +240,10 @@ pygi_arg_gobject_to_py (GIArgument *arg, GITransfer transfer) {
                                      /*steal=*/ transfer == GI_TRANSFER_EVERYTHING,
                                      /*type=*/  NULL);
     } else {
-        g_critical("No means to translate argument or return value for '%s'", g_type_name_from_instance(arg->v_pointer));
-        pyobj = Py_None;
-        Py_INCREF (pyobj);
+        PyErr_Format(PyExc_TypeError,
+                     "No means to translate argument or return value for '%s'",
+                     g_type_name_from_instance(arg->v_pointer));
+        return NULL;
     }
 
     return pyobj;
@@ -265,6 +266,7 @@ pygi_arg_gobject_to_py_called_from_c (GIArgument *arg,
      */
     if (arg->v_pointer != NULL &&
             transfer == GI_TRANSFER_NOTHING &&
+            // Should check for G_IS_OBJECT instead
             !G_IS_PARAM_SPEC (arg->v_pointer) &&
             g_object_is_floating (arg->v_pointer)) {
 
