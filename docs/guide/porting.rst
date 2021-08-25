@@ -53,8 +53,8 @@ you have to make in the beginning, but nothing more.
 Porting Tips for GTK
 --------------------
 
-While PyGObject theoretically supports GTK 2.0 it is not really usable. It
-will be easier to port to GTK 3.0 right away.
+PyGObject does not support GTK 2.0. In order to use PyGObject, you'll need
+to port your code to GTK 3.0 right away.
 
 For some general advice regarding the migration from GTK 2.0 to 3.0 see the
 `offical migration guide
