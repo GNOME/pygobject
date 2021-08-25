@@ -70,13 +70,16 @@ Using the pygtkcompat Compatibility Layer
 
 .. note
 
-   The pygtkcompat module is deprecated. If your code is dependent on pygtkcompat,
-   you have two options:
+   The pygtkcompat module is deprecated since PyGObject 3.46.
+   If your code is dependent on pygtkcompat, you have two options:
 
    1. Update your code to use the GTK interface directly
    2. Copy the bits you need into your own application
 
-PyGObject ships a compatibility layer for pygtk which partially emulates the
+    As of PyGObject 3.48, the compatibility layer will be disfunctional,
+    and it will be completely removed in 3.50.
+
+PyGObject versions prior to 3.48 ship a compatibility layer for pygtk which partially emulates the
 old interfaces:
 
 ::

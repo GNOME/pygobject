@@ -80,7 +80,6 @@ bindable API becomes a reality (:bzbug:`707280`).
     *Reason*: Read or watch Ned Batchelders "`Pragmatic Unicode
     <https://nedbatchelder.com/text/unipain.html>`__"
 
-* For PyGTK compatibility APIs, add them to PyGTKCompat not overrides.
 * Prefer adapter patterns over of inheritance and overrides.
 
   *Reason*: An adapter allows more flexibility and less dependency on
