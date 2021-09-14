@@ -266,8 +266,7 @@ pygi_arg_gobject_to_py_called_from_c (GIArgument *arg,
      */
     if (arg->v_pointer != NULL &&
             transfer == GI_TRANSFER_NOTHING &&
-            // Should check for G_IS_OBJECT instead
-            !G_IS_PARAM_SPEC (arg->v_pointer) &&
+            G_IS_OBJECT (arg->v_pointer) &&
             g_object_is_floating (arg->v_pointer)) {
 
         g_object_ref (arg->v_pointer);
