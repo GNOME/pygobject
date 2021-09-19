@@ -1,4 +1,4 @@
-image: registry.gitlab.gnome.org/gnome/pygobject/main:v16
+image: registry.gitlab.gnome.org/gnome/pygobject/main:v17
 
 stages:
   - build_and_test
@@ -62,11 +62,6 @@ mingw64:
     MSYSTEM: "MINGW64"
   <<: *mingw-defaults
 
-python3.6:
-  variables:
-    PYENV_VERSION: "3.6.14"
-  <<: *defaults
-
 python3.7:
   variables:
     PYENV_VERSION: "3.7.11-debug"
@@ -95,7 +90,7 @@ pypy3.7:
 
 old-i386-py3:
   stage: build_and_test
-  image: registry.gitlab.gnome.org/gnome/pygobject/old:v4
+  image: registry.gitlab.gnome.org/gnome/pygobject/old:v5
   artifacts:
     paths:
       - coverage/
