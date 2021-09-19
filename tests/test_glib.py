@@ -282,8 +282,10 @@ https://my.org/q?x=1&y=2
             self.assertGreaterEqual(micro, 0)
 
     def test_timezone_constructor(self):
-        timezone = GLib.TimeZone("+05:21")
-        self.assertEqual(timezone.get_offset(0), ((5 * 60) + 21) * 60)
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', DeprecationWarning)
+            timezone = GLib.TimeZone("+05:21")
+            self.assertEqual(timezone.get_offset(0), ((5 * 60) + 21) * 60)
 
     def test_source_attach_implicit_context(self):
         context = GLib.MainContext.default()
