@@ -995,10 +995,17 @@ class ListStore(Gtk.ListStore, TreeModel, TreeSortable):
         Gtk.ListStore.__init__(self)
         self.set_column_types(column_types)
 
+    # insert_with_valuesv got renamed to insert_with_values with 4.1.0
+    # https://gitlab.gnome.org/GNOME/gtk/-/commit/a1216599ff6b39bca3e9
+    if not hasattr(Gtk.ListStore, "insert_with_valuesv"):
+        insert_with_valuesv = Gtk.ListStore.insert_with_values
+    elif not hasattr(Gtk.ListStore, "insert_with_values"):
+        insert_with_values = Gtk.ListStore.insert_with_valuesv
+
     def _do_insert(self, position, row):
         if row is not None:
             row, columns = self._convert_row(row)
-            treeiter = self.insert_with_valuesv(position, columns, row)
+            treeiter = self.insert_with_values(position, columns, row)
         else:
             treeiter = Gtk.ListStore.insert(self, position)
 
