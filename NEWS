@@ -1,3 +1,14 @@
+3.42.0 - 2021-09-19
+-------------------
+
+* meson: Bump minimum meson_version to 0.47.0
+* Expose GObject.Object.run_dispose() :issue:`470`
+* docs: document Gtk.Template. :issue:`396`
+* dev: Add poetry support
+* meson: use main branch for glib subproject
+* Fix some small memory leaks :mr:`178`
+
+
 3.40.1 - 2021-03-30
 -------------------
 
