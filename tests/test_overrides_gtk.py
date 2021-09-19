@@ -1377,6 +1377,20 @@ class TestCustomSorter():
             assert result.props.name == member
 
 
+@unittest.skipUnless(Gtk, 'Gtk not available')
+class TestListStore(unittest.TestCase):
+
+    def test_insert_with_values(self):
+        model = Gtk.ListStore(int)
+        assert hasattr(model, 'insert_with_values')
+        iter_ = model.insert_with_values(0, (0,), [42])
+        assert isinstance(iter_, Gtk.TreeIter)
+        assert hasattr(model, 'insert_with_valuesv')
+        iter_ = model.insert_with_valuesv(0, (0,), [43])
+        assert isinstance(iter_, Gtk.TreeIter)
+        assert len(model) == 2
+
+
 @ignore_gi_deprecation_warnings
 @unittest.skipUnless(Gtk, 'Gtk not available')
 class TestTreeModel(unittest.TestCase):
