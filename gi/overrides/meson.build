@@ -8,6 +8,7 @@ python_sources = [
   'GIMarshallingTests.py',
   'Pango.py',
   'keysyms.py',
+  'Soup.py',
   '__init__.py']
 
 python.install_sources(python_sources,
