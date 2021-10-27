@@ -2300,6 +2300,18 @@ _wrap_pyig_pyos_getsig (PyObject *self, PyObject *args)
 }
 
 static PyObject *
+_wrap_pyig_pyos_setsig (PyObject *self, PyObject *args)
+{
+    int sig_num;
+    PyObject *sig_handler;
+
+    if (!PyArg_ParseTuple (args, "iO!:pyos_setsig", &sig_num, &PyLong_Type, &sig_handler))
+        return NULL;
+
+    return PyLong_FromVoidPtr ((void *)(PyOS_setsig (sig_num, (PyOS_sighandler_t) PyLong_AsVoidPtr (sig_handler))));
+}
+
+static PyObject *
 _wrap_pygobject_new_full (PyObject *self, PyObject *args)
 {
     PyObject *ptr_value, *long_value;
@@ -2337,6 +2349,7 @@ static PyMethodDef _gi_functions[] = {
     { "variant_type_from_string", (PyCFunction) _wrap_pyg_variant_type_from_string, METH_VARARGS },
     { "source_new", (PyCFunction) pygi_source_new, METH_NOARGS },
     { "pyos_getsig", (PyCFunction) _wrap_pyig_pyos_getsig, METH_VARARGS },
+    { "pyos_setsig", (PyCFunction) _wrap_pyig_pyos_setsig, METH_VARARGS },
     { "source_set_callback", (PyCFunction) pygi_source_set_callback, METH_VARARGS },
     { "io_channel_read", (PyCFunction) pyg_channel_read, METH_VARARGS },
     { "require_foreign", (PyCFunction) pygi_require_foreign, METH_VARARGS | METH_KEYWORDS },
