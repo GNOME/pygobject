@@ -127,6 +127,7 @@ def wakeup_on_signal():
 
 
 PyOS_getsig = _gi.pyos_getsig
+PyOS_setsig = _gi.pyos_setsig
 
 # We save the signal pointer so we can detect if glib has changed the
 # signal handler behind Python's back (GLib.unix_signal_add)
