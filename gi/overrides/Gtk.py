@@ -64,21 +64,21 @@ class PyGTKDeprecationWarning(PyGIDeprecationWarning):
 __all__.append('PyGTKDeprecationWarning')
 
 
-def _construct_target_list(targets):
-    """Create a list of TargetEntry items from a list of tuples in the form (target, flags, info)
+if GTK2 or GTK3:
+    def _construct_target_list(targets):
+        """Create a list of TargetEntry items from a list of tuples in the form (target, flags, info)
 
-    The list can also contain existing TargetEntry items in which case the existing entry
-    is re-used in the return list.
-    """
-    target_entries = []
-    for entry in targets:
-        if not isinstance(entry, Gtk.TargetEntry):
-            entry = Gtk.TargetEntry.new(*entry)
-        target_entries.append(entry)
-    return target_entries
+        The list can also contain existing TargetEntry items in which case the existing entry
+        is re-used in the return list.
+        """
+        target_entries = []
+        for entry in targets:
+            if not isinstance(entry, Gtk.TargetEntry):
+                entry = Gtk.TargetEntry.new(*entry)
+            target_entries.append(entry)
+        return target_entries
 
-
-__all__.append('_construct_target_list')
+    __all__.append('_construct_target_list')
 
 
 def _builder_connect_callback(builder, gobj, signal_name, handler_name, connect_obj, flags, obj_or_map):
