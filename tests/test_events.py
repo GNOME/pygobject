@@ -24,7 +24,7 @@ import gi
 import gi.events
 import asyncio
 import threading
-from gi.repository import GLib
+from gi.repository import GLib, Gtk
 
 
 # None of this currently works on Windows
@@ -100,6 +100,88 @@ if sys.platform != 'win32':
                 self.assertEqual(called, True)
 
             loop.run_until_complete(run())
+            loop.close()
+
+        def test_outside_context_iteration(self):
+            """Iterating the main context from the outside, does not cause the
+            EventLoop to dispatch."""
+            policy = self.create_policy()
+            loop = policy.new_event_loop()
+
+            called = False
+
+            def cb():
+                nonlocal called
+                called = True
+
+            loop.call_soon(cb)
+            while loop._context.iteration(False):
+                pass
+            loop.close()
+            self.assertEqual(called, False)
+
+        def test_inside_context_iteration(self):
+            """Iterating the main context from the inside, does not cause the
+            EventLoop to dispatch."""
+            policy = self.create_policy()
+            loop = policy.get_event_loop()
+
+            done = asyncio.Future(loop=loop)
+
+            called = False
+
+            def cb():
+                nonlocal called
+                called = True
+
+            def ctx_iterate():
+                nonlocal called
+
+                loop.call_soon(cb)
+                while loop._context.iteration(False):
+                    pass
+                self.assertEqual(called, False)
+
+                # If we by-pass the override, then the callback is called
+                while super(GLib.MainContext, loop._context).iteration(False):
+                    pass
+                self.assertEqual(called, True)
+
+                # It'll also be called (again) before run_until_complete finishes
+                called = False
+                loop.call_soon(cb)
+
+                done.set_result(True)
+
+                return GLib.SOURCE_REMOVE
+
+            GLib.idle_add(ctx_iterate)
+            loop.run_until_complete(done)
+            loop.close()
+            self.assertEqual(called, True)
+
+        def test_recursive_stop(self):
+            """Calling stop() on the EventLoop will quit it, even if iteration
+            is done recursively."""
+            policy = self.create_policy()
+            asyncio.set_event_loop_policy(policy)
+            self.addCleanup(asyncio.set_event_loop_policy, None)
+            loop = policy.get_event_loop()
+
+            def main_gtk():
+                GLib.idle_add(loop.stop)
+                Gtk.main()
+
+            GLib.idle_add(main_gtk)
+            Gtk.main()
+
+            def main_glib():
+                GLib.idle_add(loop.stop)
+                GLib.MainLoop().run()
+
+            GLib.idle_add(main_glib)
+            GLib.MainLoop().run()
+
             loop.close()
 
         def test_thread_event_loop(self):
