@@ -20,7 +20,7 @@
 
 import warnings
 
-from .._ossighelper import wakeup_on_signal, register_sigint_fallback
+from .._ossighelper import register_sigint_fallback, get_event_loop
 from ..overrides import override, deprecated_init, wrap_list_store_sort_func
 from ..module import get_introspection_module
 from gi import PyGIWarning
@@ -38,7 +38,7 @@ class Application(Gio.Application):
 
     def run(self, *args, **kwargs):
         with register_sigint_fallback(self.quit):
-            with wakeup_on_signal():
+            with get_event_loop(GLib.MainContext.default()).running(self.quit):
                 return Gio.Application.run(self, *args, **kwargs)
 
 
