@@ -302,6 +302,10 @@ class GLibEventLoopPolicy(asyncio.AbstractEventLoopPolicy):
             raise RuntimeError('There is no main context set for thread %r.'
                                % threading.current_thread().name)
 
+        return self.get_event_loop_for_context(ctx)
+
+    def get_event_loop_for_context(self, ctx):
+        """Get the event loop for a specific context."""
         # Note: We cannot attach it to ctx, as getting the default will always
         #       return a new python wrapper. But, we can use hash() as that returns
         #       the pointer to the C structure.
