@@ -20,8 +20,6 @@ except:
     from unittest import TestCase
 
 import sys
-import gi
-import gi.events
 import asyncio
 import threading
 from gi.repository import GLib, Gtk
@@ -29,6 +27,8 @@ from gi.repository import GLib, Gtk
 
 # None of this currently works on Windows
 if sys.platform != 'win32':
+    import gi
+    import gi.events
 
     class GLibEventLoopTests(UnixEventLoopTestsMixin, TestCase):
 
