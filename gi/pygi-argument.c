@@ -269,7 +269,16 @@ _pygi_argument_to_array (GIArgument  *arg,
             g_base_info_unref ( (GIBaseInfo *) item_type_info);
 
             if (is_zero_terminated) {
-                length = g_strv_length (arg->v_pointer);
+                if (item_size == sizeof(gpointer))
+                    length = g_strv_length ((gchar **)arg->v_pointer);
+                else if (item_size == 1)
+                    length = strlen ((gchar*)arg->v_pointer);
+                else if (item_size == sizeof(int))
+                    for (length = 0; *(((int*)arg->v_pointer) + length); length++);
+                else if (item_size == sizeof(short))
+                    for (length = 0; *(((short*)arg->v_pointer) + length); length++);
+                else
+                    g_assert_not_reached ();
             } else {
                 length = g_type_info_get_array_fixed_size (type_info);
                 if (length < 0) {

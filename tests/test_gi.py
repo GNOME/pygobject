@@ -920,7 +920,6 @@ class TestArray(unittest.TestCase):
         result = list(CONSTANT_UCS4)
         assert GIMarshallingTests.array_unichar_out() == result
 
-    @unittest.skip("broken")
     def test_array_zero_terminated_return_unichar(self):
         assert GIMarshallingTests.array_zero_terminated_return_unichar() == \
             list(CONSTANT_UCS4)
