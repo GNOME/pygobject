@@ -545,10 +545,16 @@ _pygi_marshal_to_py_array (PyGIInvokeState   *state,
         } else if (array_cache->is_zero_terminated) {
             if (arg->v_pointer == NULL) {
                 len = 0;
-            } else if (seq_cache->item_cache->type_tag == GI_TYPE_TAG_UINT8) {
+            } else if (array_cache->item_size == 1) {
                 len = strlen (arg->v_pointer);
-            } else {
+            } else if (array_cache->item_size == sizeof(gpointer)) {
                 len = g_strv_length ((gchar **)arg->v_pointer);
+            } else if (array_cache->item_size == sizeof(int)) {
+                for (len = 0; *(((int*)arg->v_pointer) + len); len++);
+            } else if (array_cache->item_size == sizeof(short)) {
+                for (len = 0; *(((short*)arg->v_pointer) + len); len++);
+            } else {
+                g_assert_not_reached ();
             }
         } else {
             GIArgument *len_arg = &state->args[array_cache->len_arg_index].arg_value;
@@ -717,7 +723,16 @@ _wrap_c_array (PyGIInvokeState   *state,
     if (array_cache->fixed_size >= 0) {
         len = array_cache->fixed_size;
     } else if (array_cache->is_zero_terminated) {
-        len = g_strv_length ((gchar **)data);
+        if (array_cache->item_size == sizeof(gpointer))
+            len = g_strv_length ((gchar **)data);
+        else if (array_cache->item_size == 1)
+            len = strlen ((gchar*)data);
+        else if (array_cache->item_size == sizeof(int))
+            for (len = 0; *(((int*)data) + len); len++);
+        else if (array_cache->item_size == sizeof(short))
+            for (len = 0; *(((short*)data) + len); len++);
+        else
+            g_assert_not_reached ();
     } else if (array_cache->len_arg_index >= 0) {
         GIArgument *len_arg = &state->args[array_cache->len_arg_index].arg_value;
         len = len_arg->v_long;
