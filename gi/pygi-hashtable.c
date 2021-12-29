@@ -141,8 +141,6 @@ err:
         /* FIXME: cleanup hash keys and values */
         Py_XDECREF (py_key);
         Py_XDECREF (py_value);
-        Py_DECREF (py_keys);
-        Py_DECREF (py_values);
         g_hash_table_unref (hash_);
         _PyGI_ERROR_PREFIX ("Item %i: ", i);
         return FALSE;
