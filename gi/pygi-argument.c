@@ -490,9 +490,21 @@ array_success:
                     break;
                 }
                 case GI_INFO_TYPE_ENUM:
+                {
+                    GType g_type;
+
+                    g_type = g_registered_type_info_get_g_type ( (GIRegisteredTypeInfo *) info);
+                    if (pyg_enum_get_value(g_type, object, &arg.v_int) < 0)
+                        break;
+
+                    break;
+                }
                 case GI_INFO_TYPE_FLAGS:
                 {
-                    if (!pygi_gint_from_py (object, &arg.v_int))
+                    GType g_type;
+
+                    g_type = g_registered_type_info_get_g_type ( (GIRegisteredTypeInfo *) info);
+                    if (pyg_flags_get_value(g_type, object, &arg.v_uint) < 0)
                         break;
 
                     break;
