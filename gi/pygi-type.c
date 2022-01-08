@@ -603,18 +603,6 @@ pyg_enum_get_value(GType enum_type, PyObject *obj, gint *val)
 		      g_type_name(enum_type),
 		      g_type_name(((PyGEnum *) obj)->gtype));
 	}
-    /* Dumb code duplication, but probably not worth it to have yet another macro. */
-    } else if (PyLong_Check(obj)) {
-	if (!pygi_gint_from_py (obj, val))
-	    res = -1;
-	else
-	    res = 0;
-
-	if (PyObject_TypeCheck(obj, &PyGEnum_Type) && ((PyGEnum *) obj)->gtype != enum_type) {
-	    g_warning("expected enumeration type %s, but got %s instead",
-		      g_type_name(enum_type),
-		      g_type_name(((PyGEnum *) obj)->gtype));
-	}
     } else if (PyUnicode_Check (obj)) {
 	GEnumValue *info;
 	char *str = PyUnicode_AsUTF8 (obj);
@@ -670,9 +658,6 @@ pyg_flags_get_value(GType flag_type, PyObject *obj, guint *val)
 	*val = 0;
 	res = 0;
     } else if (PyLong_Check (obj)) {
-	if (pygi_guint_from_py (obj, val))
-	    res = 0;
-    } else if (PyLong_Check(obj)) {
 	if (pygi_guint_from_py (obj, val))
 	    res = 0;
     } else if (PyUnicode_Check (obj)) {
