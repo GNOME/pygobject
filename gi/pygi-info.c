@@ -560,6 +560,33 @@ _callable_info_call (PyGICallableInfo *self, PyObject *args, PyObject *kwargs)
     }
 }
 
+static PyObject *
+_callable_info_repr (PyGICallableInfo *self)
+{
+    PyObject *bound_repr_o = NULL;
+    const char *bound_repr = "None";
+    PyObject *res = NULL;
+
+    if (self->py_bound_arg) {
+        bound_repr_o = PyObject_Repr(self->py_bound_arg);
+        if (bound_repr_o == NULL)
+            goto out;
+
+        bound_repr = PyUnicode_AsUTF8(bound_repr_o);
+        if (bound_repr == NULL)
+            goto out;
+    }
+
+    res = PyUnicode_FromFormat ("%s(%s, bound=%s)",
+                                Py_TYPE( (PyObject *) self)->tp_name,
+                                _safe_base_info_get_name (self->base.info),
+                                bound_repr);
+
+out:
+    Py_XDECREF(bound_repr_o);
+
+    return res;
+}
 
 /* _function_info_call:
  *
@@ -2303,6 +2330,7 @@ pygi_info_register_types (PyObject *m)
     }
 
     PyGICallableInfo_Type.tp_call = (ternaryfunc) _callable_info_call;
+    PyGICallableInfo_Type.tp_repr = (reprfunc) _callable_info_repr;
     PyGICallableInfo_Type.tp_dealloc = (destructor) _callable_info_dealloc;
     _PyGI_REGISTER_TYPE (m, PyGICallableInfo_Type, CallableInfo,
                          PyGIBaseInfo_Type);
