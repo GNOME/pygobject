@@ -17,6 +17,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
 # USA
 
+import os
 from collections import abc
 from functools import partial
 
@@ -296,7 +297,7 @@ class Template(object):
             return cls
         else:
             assert self.filename is not None
-            file_ = Gio.File.new_for_path(self.filename)
+            file_ = Gio.File.new_for_path(os.fspath(self.filename))
             bytes_ = GLib.Bytes.new(file_.load_contents()[1])
             cls.set_template(bytes_)
             register_template(cls)
