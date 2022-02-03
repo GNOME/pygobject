@@ -29,6 +29,7 @@ from gi import PyGIDeprecationWarning, require_version
 Gdk = get_introspection_module('Gdk')
 GDK2 = Gdk._version == '2.0'
 GDK3 = Gdk._version == '3.0'
+GDK4 = Gdk._version == '4.0'
 
 __all__ = []
 
@@ -83,7 +84,7 @@ if GDK2 or GDK3:
     Color = override(Color)
     __all__.append('Color')
 
-if GDK3:
+if GDK3 or GDK4:
     # Introduced since Gtk-3.0
     class RGBA(Gdk.RGBA):
         def __init__(self, red=1.0, green=1.0, blue=1.0, alpha=1.0):
