@@ -1082,7 +1082,8 @@ pygobject__g_instance_init(GTypeInstance   *instance,
     }
 
     /* XXX: used for Gtk.Template */
-    if (PyObject_HasAttrString ((PyObject*) Py_TYPE (wrapper), "__dontuse_ginstance_init__")) {
+    int is_final_subclass = G_OBJECT_TYPE (object) == G_OBJECT_CLASS_TYPE (g_class);
+    if (is_final_subclass && PyObject_HasAttrString ((PyObject*) Py_TYPE (wrapper), "__dontuse_ginstance_init__")) {
         result = PyObject_CallMethod (wrapper, "__dontuse_ginstance_init__", NULL);
         if (result == NULL)
             PyErr_Print ();

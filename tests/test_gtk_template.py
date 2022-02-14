@@ -719,3 +719,40 @@ def test_multiple_init_template_calls():
         children = list(my_box)
 
     assert len(children) == 1
+
+
+def test_python_class_hierarchy():
+    xml="""
+    <interface>
+      <template class="ChildBox" parent="ParentBox">
+        <child>
+          <object class="GtkLabel" id="_label"/>
+        </child>
+      </template>
+    </interface>
+    """
+
+    class ParentBox(Gtk.Box):
+        __gtype_name__ = 'ParentBox'
+
+        def __init__(self):
+            super().__init__()
+
+    @Gtk.Template(string=xml)
+    class ChildBox(ParentBox):
+        __gtype_name__ = 'ChildBox'
+
+        _label = Gtk.Template.Child()
+
+        def __init__(self):
+            super().__init__()
+
+    childBox = ChildBox()
+    assert isinstance(childBox, ChildBox)
+    if not GTK4:
+        children = childBox.get_children()
+    else:
+        children = list(childBox)
+
+    assert len(children) == 1
+
