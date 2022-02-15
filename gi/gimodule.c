@@ -874,6 +874,38 @@ pyg_object_set_property (GObject *object, guint property_id,
 }
 
 static void
+pyg_object_dispose (GObject *object)
+{
+    PyObject *object_wrapper, *retval;
+    GObjectClass *parent_class;
+    PyGILState_STATE state = PyGILState_Ensure();
+
+    object_wrapper = g_object_get_qdata(object, pygobject_wrapper_key);
+    Py_XINCREF (object_wrapper);
+
+    if (object_wrapper != NULL && PyObject_HasAttrString (object_wrapper, "do_dispose")) {
+        retval = PyObject_CallMethod(object_wrapper, "do_dispose", NULL);
+        if (retval)
+            Py_DECREF(retval);
+        else
+            PyErr_Print();
+    }
+    Py_XDECREF(object_wrapper);
+
+    PyGILState_Release(state);
+
+    /* Find the first non-pygobject dispose method. */
+    parent_class = g_type_class_peek (g_type_parent (G_TYPE_FROM_INSTANCE (object)));
+    while (parent_class && parent_class->dispose == pyg_object_dispose) {
+        parent_class = g_type_class_peek (g_type_parent (G_TYPE_FROM_CLASS (parent_class)));
+    }
+
+    if (parent_class && parent_class->dispose) {
+        parent_class->dispose(object);
+    }
+}
+
+static void
 pyg_object_class_init(GObjectClass *class, PyObject *py_class)
 {
     PyObject *gproperties, *gsignals, *overridden_signals;
@@ -881,6 +913,7 @@ pyg_object_class_init(GObjectClass *class, PyObject *py_class)
 
     class->set_property = pyg_object_set_property;
     class->get_property = pyg_object_get_property;
+    class->dispose = pyg_object_dispose;
 
     /* install signals */
     /* we look this up in the instance dictionary, so we don't

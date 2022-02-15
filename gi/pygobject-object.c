@@ -2059,6 +2059,12 @@ pygobject_weak_ref(PyGObject *self, PyObject *args)
 
 
 static PyObject *
+pygobject_do_dispose(PyObject *self)
+{
+    Py_RETURN_NONE;
+}
+
+static PyObject *
 pygobject_copy(PyGObject *self)
 {
     PyErr_SetString(PyExc_TypeError,
@@ -2194,6 +2200,7 @@ static PyMethodDef pygobject_methods[] = {
     { "emit", (PyCFunction)pygobject_emit, METH_VARARGS },
     { "chain", (PyCFunction)pygobject_chain_from_overridden,METH_VARARGS },
     { "weak_ref", (PyCFunction)pygobject_weak_ref, METH_VARARGS },
+    { "do_dispose", (PyCFunction)pygobject_do_dispose, METH_NOARGS },
     { "__copy__", (PyCFunction)pygobject_copy, METH_NOARGS },
     { "__deepcopy__", (PyCFunction)pygobject_deepcopy, METH_VARARGS },
     { NULL, NULL, 0 },
