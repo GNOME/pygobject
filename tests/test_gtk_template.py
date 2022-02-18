@@ -722,7 +722,7 @@ def test_multiple_init_template_calls():
 
 
 def test_python_class_hierarchy():
-    xml="""
+    xml = """
     <interface>
       <template class="ChildBox" parent="ParentBox">
         <child>
@@ -755,4 +755,3 @@ def test_python_class_hierarchy():
         children = list(childBox)
 
     assert len(children) == 1
-
