@@ -2531,8 +2531,9 @@ PYGI_MODINIT_FUNC PyInit__gi(void) {
     module = PyModule_Create(&__gimodule);
     PyObject *module_dict = PyModule_GetDict (module);
 
-#if PY_VERSION_HEX < 0x03090000
+#if PY_VERSION_HEX < 0x03090000 || defined(PYPY_VERSION)
     /* Deprecated since 3.9 */
+    /* Except in PyPy it's still not a no-op: https://foss.heptapod.net/pypy/pypy/-/issues/3691 */
 
     /* Always enable Python threads since we cannot predict which GI repositories
      * might accept Python callbacks run within non-Python threads or might trigger
