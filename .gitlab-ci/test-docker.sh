@@ -52,6 +52,7 @@ lcov --config-file .gitlab-ci/lcovrc --directory . --capture --initial --output-
     "${COV_DIR}/${CI_JOB_NAME}-baseline.lcov"
 
 xvfb-run -a python -m coverage run --context "${COV_KEY}" tests/runtests.py
+python -m coverage lcov -o "${COV_DIR}/${COV_KEY}.py.lcov"
 
 # COLLECT GCOV COVERAGE
 lcov --config-file .gitlab-ci/lcovrc --directory . --capture --output-file \

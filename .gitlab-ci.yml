@@ -38,6 +38,7 @@ coverage:
     PYENV_VERSION: "3.7.13-debug"
   script:
     - bash -x ./.gitlab-ci/coverage-docker.sh
+  coverage: '/^\s+lines\.+:\s+([\d.]+\%)\s+/'
 
 pages:
   stage: deploy

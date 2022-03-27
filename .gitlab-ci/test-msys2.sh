@@ -47,6 +47,7 @@ lcov \
     "${COV_DIR}/${COV_KEY}-baseline.lcov"
 
 MSYSTEM= python -m coverage run --context "${COV_KEY}" tests/runtests.py
+MSYSTEM= python -m coverage lcov -o "${COV_DIR}/${COV_KEY}.py.lcov"
 
 lcov \
     --config-file .gitlab-ci/lcovrc \
