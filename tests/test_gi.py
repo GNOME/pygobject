@@ -637,7 +637,7 @@ class TestGType(unittest.TestCase):
 
         errors = (AttributeError,)
         if platform.python_implementation() == "PyPy":
-            # https://bitbucket.org/pypy/pypy/issues/2788
+            # https://foss.heptapod.net/pypy/pypy/-/issues/2788
             errors = (AttributeError, TypeError)
 
         self.assertRaises(errors, check_readonly, GObject.TYPE_NONE)
