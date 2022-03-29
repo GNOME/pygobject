@@ -1751,6 +1751,7 @@ _wrap_pyg_register_interface_info (PyObject *self, PyObject *args)
     info->interface_init = (GInterfaceInitFunc) initialize_interface;
 
     pyg_register_interface_info (g_type, info);
+    g_free (info);
 
     Py_RETURN_NONE;
 }
