@@ -85,15 +85,21 @@ pyg_register_interface(PyObject *dict, const gchar *class_name,
     }
 
     g_type_set_qdata(gtype, pyginterface_type_key, type);
-    
+
     PyDict_SetItemString(dict, (char *)class_name, (PyObject *)type);
-    
+
 }
 
 void
 pyg_register_interface_info(GType gtype, const GInterfaceInfo *info)
 {
-    g_type_set_qdata(gtype, pyginterface_info_key, (gpointer) info);
+    GInterfaceInfo *prev_info = pyg_lookup_interface_info (gtype);
+
+    if (prev_info) {
+        g_free (prev_info);
+    }
+
+    g_type_set_qdata(gtype, pyginterface_info_key, g_memdup2 (info, sizeof(GInterfaceInfo)));
 }
 
 const GInterfaceInfo *

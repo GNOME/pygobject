@@ -1018,6 +1018,11 @@ class build_ext(du_build_ext):
 /* Configuration header created by setup.py - do not edit */
 #ifndef _CONFIG_H
 #define _CONFIG_H 1
+#include <glib.h>
+
+#if !GLIB_CHECK_VERSION(2, 67, 4)
+#define g_memdup2(ptr,sz) (G_LIKELY(((guint64)(sz)) < G_MAXUINT)) ? g_memdup(ptr,sz) : (g_abort(),NULL)
+#endif
 
 #define PYGOBJECT_MAJOR_VERSION %(PYGOBJECT_MAJOR_VERSION)s
 #define PYGOBJECT_MINOR_VERSION %(PYGOBJECT_MINOR_VERSION)s
