@@ -22,7 +22,6 @@ import sys
 import errno
 import subprocess
 import tarfile
-import sysconfig
 import tempfile
 import posixpath
 
@@ -827,7 +826,9 @@ def get_pycairo_include_dir():
 
     pkg_config_name = "py3cairo"
     min_version = get_version_requirement(pkg_config_name)
-    min_version_info = tuple(int(p) for p in min_version.split("."))
+
+    def parse_version(string):
+        return tuple(int(p) for p in string.split("."))
 
     def check_path(include_dir):
         log.info("pycairo: trying include directory: %r" % include_dir)
@@ -843,61 +844,44 @@ def get_pycairo_include_dir():
             if check_path(p):
                 return p
 
-    def find_new_api():
-        log.info("pycairo: new API")
-        import cairo
+    def find_python():
+        """This tries to find the pycairo module without importing it"""
 
-        if cairo.version_info < min_version_info:
-            raise DistutilsSetupError(
-                "pycairo >= %s required, %s found." % (
-                    min_version, ".".join(map(str, cairo.version_info))))
+        from importlib.util import find_spec
 
-        if hasattr(cairo, "get_include"):
-            return [cairo.get_include()]
-        log.info("pycairo: no get_include()")
-        return []
+        # Find the module path
+        spec = find_spec("cairo")
+        if spec is None:
+            log.info("pycairo: cairo module not found via importlib")
+            return []
+        package_path = os.path.dirname(spec.origin)
 
-    def find_old_api():
-        log.info("pycairo: old API")
+        # With Python 3.8 we can also check the package version
+        try:
+            from importlib.metadata import distribution, PackageNotFoundError
+        except ImportError:
+            # Python <3.8
+            pass
+        else:
+            try:
+                d = distribution("pycairo")
+            except PackageNotFoundError:
+                log.info("pycairo: pycairo distribution not found via importlib")
+            else:
+                if parse_version(d.version) < parse_version(min_version):
+                    raise DistutilsSetupError(
+                        "pycairo >= %s required, %s found (%s)." % (
+                            min_version, d.version, package_path))
 
-        import cairo
-
-        if cairo.version_info < min_version_info:
-            raise DistutilsSetupError(
-                "pycairo >= %s required, %s found." % (
-                    min_version, ".".join(map(str, cairo.version_info))))
-
-        location = os.path.dirname(os.path.abspath(cairo.__path__[0]))
-        log.info("pycairo: found %r" % location)
-
-        def get_sys_path(location, name):
-            # Returns the sysconfig path for a distribution, or None
-            for scheme in sysconfig.get_scheme_names():
-                for path_type in ["platlib", "purelib"]:
-                    path = sysconfig.get_path(path_type, scheme)
-                    try:
-                        if os.path.samefile(path, location):
-                            return sysconfig.get_path(name, scheme)
-                    except EnvironmentError:
-                        pass
-
-        data_path = get_sys_path(location, "data") or sys.prefix
-        return [os.path.join(data_path, "include", "pycairo")]
+        return [os.path.join(package_path, 'include')]
 
     def find_pkg_config():
         log.info("pycairo: pkg-config")
         pkg_config_version_check(pkg_config_name, min_version)
         return pkg_config_parse("--cflags-only-I", pkg_config_name)
 
-    # First the new get_include() API added in >1.15.6
-    include_dir = find_path(find_new_api())
-    if include_dir is not None:
-        return include_dir
-
-    # Then try to find it in the data prefix based on the module path.
-    # This works with many virtualenv/userdir setups, but not all apparently,
-    # see https://gitlab.gnome.org/GNOME/pygobject/issues/150
-    include_dir = find_path(find_old_api())
+    # First look in the current Python installation/venv
+    include_dir = find_path(find_python())
     if include_dir is not None:
         return include_dir
 
