@@ -1,3 +1,13 @@
+3.42.1 - 2022-04-17
+-------------------
+
+* Do not error out for unknown scopes :mr:`179`
+* gtk overrides: restore Gtk.ListStore.insert_with_valuesv with newer gtk4 :issue:`467`
+* gtk overrides: Do not override Treeview.enable_model_drag_xx for GTK4 :mr:`175`
+* Implement DynamicImporter.find_spec() to silence a deprecation warning with Python 3.10 :issue:`473`
+* Some test/CI fixes
+
+
 3.42.0 - 2021-09-19
 -------------------
 
