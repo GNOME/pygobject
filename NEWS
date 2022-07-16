@@ -1,3 +1,17 @@
+3.42.2 - 2022-07-16
+-------------------
+
+* Error out instead of crashing when marshaling unsupported fundamental types in some cases :mr:`180`
+* Add a workaround for a PyPy 3.9+ bug when threads are used :mr:`200`
+* Fix crashes when marshaling zero terminated arrays for certain item types :mr:`191`
+* Fix a crash/refcounting error in case marshaling a hash table fails :mr:`191`
+* Make the test suite pass again with PyPy :mr:`191`
+* tests: support running tests with (MSVC) CPython 3.8+ on Windows :mr:`206`
+* interface: Fix leak when overriding GInterfaceInfo :mr:`204`
+* setup.py: look up pycairo headers without importing the module
+  (helps with building on Windows and MSVC CPython 3.8+) :mr:`205`
+
+
 3.42.1 - 2022-04-17
 -------------------
 
