@@ -82,6 +82,11 @@ python3.9:
     PYENV_VERSION: "3.9.0-debug"
   <<: *defaults
 
+python3.10:
+  variables:
+    PYENV_VERSION: "3.10.5-debug"
+  <<: *defaults
+
 pypy3.6:
   allow_failure: true
   variables:
