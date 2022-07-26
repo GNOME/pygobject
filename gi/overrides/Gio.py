@@ -414,8 +414,11 @@ class DBusProxy(Gio.DBusProxy):
           result_handler=mymethod_done, user_data='data')
     '''
     def __getattr__(self, name):
-        return _DBusProxyMethodCall(self, name)
-
+        if name.starts_with("do_"):
+            return self[name]
+        else:
+            return _DBusProxyMethodCall(self, name)
+    
 
 DBusProxy = override(DBusProxy)
 __all__.append('DBusProxy')
