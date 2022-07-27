@@ -101,7 +101,7 @@ old-i386-py3:
 gnome-master:
   allow_failure: true
   stage: build_and_test
-  image: registry.gitlab.gnome.org/gnome/gnome-runtime-images/gnome:master
+  image: quay.io/gnome_infrastructure/gnome-runtime-images:gnome-master
   tags:
     - flatpak
   script:
@@ -110,7 +110,7 @@ gnome-master:
 gnome-master-gtk4:
   allow_failure: true
   stage: build_and_test
-  image: registry.gitlab.gnome.org/gnome/gnome-runtime-images/gnome:master
+  image: quay.io/gnome_infrastructure/gnome-runtime-images:gnome-master
   tags:
     - flatpak
   script:
