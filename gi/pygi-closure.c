@@ -24,6 +24,10 @@
 #include "pygi-ccallback.h"
 #include "pygi-info.h"
 
+#ifndef GI_CHECK_VERSION
+#define GI_CHECK_VERSION(x,y,z) 0
+#endif
+
 extern PyObject *_PyGIDefaultArgPlaceholder;
 
 typedef struct _PyGICallbackCache
@@ -634,8 +638,13 @@ void _pygi_invoke_closure_free (gpointer data)
 {
     PyGICClosure* invoke_closure = (PyGICClosure *) data;
 
+#if GI_CHECK_VERSION(1, 72, 0)
+    g_callable_info_destroy_closure (invoke_closure->info,
+                                     invoke_closure->closure);
+#else
     g_callable_info_free_closure (invoke_closure->info,
                                   invoke_closure->closure);
+#endif
 
     if (invoke_closure->info)
         g_base_info_unref ( (GIBaseInfo*) invoke_closure->info);
@@ -673,8 +682,13 @@ _pygi_make_native_closure (GICallableInfo* info,
     Py_XINCREF (closure->user_data);
 
     fficlosure =
+#if GI_CHECK_VERSION(1, 72, 0)
+        g_callable_info_create_closure (info, &closure->cif, _pygi_closure_handle,
+                                        closure);
+#else
         g_callable_info_prepare_closure (info, &closure->cif, _pygi_closure_handle,
                                          closure);
+#endif
     closure->closure = fficlosure;
 
     /* Give the closure the information it needs to determine when
