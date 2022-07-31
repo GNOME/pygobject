@@ -209,7 +209,7 @@ class ComboboxApp:
         path = tree_model.get_path(treeiter)
         indices = path.get_indices()
 
-        sensitive = not(indices[0] == 1)
+        sensitive = not (indices[0] == 1)
 
         cell.set_property('sensitive', sensitive)
 
