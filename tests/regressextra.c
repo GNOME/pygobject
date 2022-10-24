@@ -69,6 +69,24 @@ regress_test_array_fixed_boxed_none_out (RegressTestBoxedC ***objs)
 }
 
 /**
+ * regress_test_gvalue_out_boxed:
+ * @value: (out) (transfer full): the output gvalue
+ * @init: (in): the initialisation value
+**/
+void
+regress_test_gvalue_out_boxed (GValue *value, int init)
+{
+  RegressTestBoxed rtb;
+  GValue v = G_VALUE_INIT;
+
+  memset(&rtb, 0, sizeof (rtb));
+  rtb.some_int8 = init;
+  g_value_init (&v, REGRESS_TEST_TYPE_BOXED);
+  g_value_set_boxed (&v, &rtb);
+  *value = v;
+}
+
+/**
  * regress_test_glist_boxed_none_return
  * Return value: (element-type RegressTestBoxedC) (transfer none):
 **/

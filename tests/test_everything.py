@@ -11,6 +11,7 @@ import re
 import platform
 import gc
 import timeit
+import random
 
 import pytest
 
@@ -1377,6 +1378,12 @@ class TestBoxed(unittest.TestCase):
         assert len(arr) == 2
         assert arr[0].refcount == 2
         assert arr[1].refcount == 2
+
+    def test_gvalue_out_boxed(self):
+        # As corruption is random data, check several times.
+        for i in range(10):
+            int8 = random.randint(GLib.MININT8, GLib.MAXINT8)
+            assert Everything.test_gvalue_out_boxed(int8).some_int8 == int8
 
     def test_glist_boxed_none_return(self):
         assert len(Everything.test_glist_boxed_none_return(0)) == 0
