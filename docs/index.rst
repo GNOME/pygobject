@@ -30,21 +30,34 @@
 
 If you want to write a Python application for `GNOME
 <https://www.gnome.org/>`__ or a Python GUI application using GTK, then
-PyGObject is the way to go. For more information on specific libraries check
-out the "`Python GTK 3 Tutorial
-<https://python-gtk-3-tutorial.readthedocs.io>`__" and the "`Python GI API
+PyGObject is the way to go. To get started, check out the "`GNOME Developer Documentation
+<https://developer.gnome.org/documentation/tutorials/beginners.html>`__". For more
+information on specific libraries, check out the "`Python GI API
 Reference <https://lazka.github.io/pgi-docs>`__".
 
 .. code:: python
 
-    import gi
-    gi.require_version("Gtk", "3.0")
-    from gi.repository import Gtk
+    import sys
 
-    window = Gtk.Window(title="Hello World")
-    window.show()
-    window.connect("destroy", Gtk.main_quit)
-    Gtk.main()
+    import gi
+
+    gi.require_version("Gtk", "4.0")
+    from gi.repository import GLib, Gtk
+
+
+    class MyApplication(Gtk.Application):
+        def __init__(self):
+            super().__init__(application_id="com.example.MyGtkApplication")
+            GLib.set_application_name("My Gtk Application")
+
+        def do_activate(self):
+            window = Gtk.ApplicationWindow(application=self, title="Hello World")
+            window.present()
+
+
+    app = MyApplication()
+    exit_status = app.run(sys.argv)
+    sys.exit(exit_status)
 
 
 How does it work?
@@ -55,12 +68,12 @@ How does it work?
     :height: 222px
     :align: center
 
-PyGObject uses `glib <https://developer.gnome.org/glib/stable/>`__, `gobject
-<https://developer.gnome.org/gobject/stable/>`__, `girepository
-<https://developer.gnome.org/gi/stable/>`__, `libffi
+PyGObject uses `glib <https://docs.gtk.org/glib/>`__, `gobject
+<https://docs.gtk.org/gobject/>`__, `girepository
+<https://gnome.pages.gitlab.gnome.org/gobject-introspection/girepository/GIRepository.html>`__, `libffi
 <https://sourceware.org/libffi/>`__ and other libraries to access the C
-library (libgtk-3.so) in combination with the additional metadata from the
-accompanying typelib file (Gtk-3.0.typelib) and dynamically provides a Python
+library (libgtk-4.so) in combination with the additional metadata from the
+accompanying typelib file (Gtk-4.0.typelib) and dynamically provides a Python
 interface based on that information.
 
 

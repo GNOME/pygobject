@@ -4,7 +4,7 @@ Packaging Guide
 Some notes on how to package PyGObject
 
 Source packages can be found at
-https://ftp.gnome.org/pub/GNOME/sources/pygobject
+https://download.gnome.org/sources/pygobject
 
 Existing Packages:
 
@@ -40,6 +40,6 @@ Build dependencies:
 Test Suite dependencies:
 
     * The runtime dependencies
-    * GTK 3 (optional)
+    * GTK 4 (optional)
     * pango (optional)
     * pycairo (optional)

@@ -31,37 +31,38 @@ while still showing feedback on the progress in a window.
 
     import threading
     import time
+    import gi
 
+    gi.require_version('Gtk', '4.0')
     from gi.repository import GLib, Gtk, GObject
 
 
-    def app_main():
-        win = Gtk.Window(default_height=50, default_width=300)
-        win.connect("destroy", Gtk.main_quit)
+    class Application(Gtk.Application):
 
-        progress = Gtk.ProgressBar(show_text=True)
-        win.add(progress)
+        def do_activate(self):
+            window = Gtk.ApplicationWindow(application=self)
+            self.progress = Gtk.ProgressBar(show_text=True)
 
-        def update_progess(i):
-            progress.pulse()
-            progress.set_text(str(i))
+            window.set_child(self.progress)
+            window.present()
+
+            thread = threading.Thread(target=self.example_target)
+            thread.daemon = True
+            thread.start()
+
+        def update_progess(self, i):
+            self.progress.pulse()
+            self.progress.set_text(str(i))
             return False
 
-        def example_target():
+        def example_target(self):
             for i in range(50):
-                GLib.idle_add(update_progess, i)
+                GLib.idle_add(self.update_progess, i)
                 time.sleep(0.2)
 
-        win.show_all()
 
-        thread = threading.Thread(target=example_target)
-        thread.daemon = True
-        thread.start()
-
-
-    if __name__ == "__main__":
-        app_main()
-        Gtk.main()
+    app = Application()
+    app.run()
 
 
 The example shows a simple window containing a progress bar. After everything
@@ -167,15 +168,17 @@ operation.
 .. code:: python
 
     import time
+    import gi
 
+    gi.require_version('Gtk', '4.0')
     from gi.repository import Gio, GLib, Gtk
 
 
-    class DownloadWindow(Gtk.Window):
+    class DownloadWindow(Gtk.ApplicationWindow):
 
-        def __init__(self):
-            super(DownloadWindow, self).__init__(
-                default_width=500, default_height=400, title="Async I/O Example")
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs, default_width=500, default_height=400,
+                             title="Async I/O Example")
 
             self.cancellable = Gio.Cancellable()
 
@@ -186,22 +189,22 @@ operation.
             self.start_button = Gtk.Button(label="Load")
             self.start_button.connect("clicked", self.on_start_clicked)
 
-            textview = Gtk.TextView()
+            textview = Gtk.TextView(vexpand=True)
             self.textbuffer = textview.get_buffer()
             scrolled = Gtk.ScrolledWindow()
-            scrolled.add(textview)
+            scrolled.set_child(textview)
 
             box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6,
-                          border_width=12)
-            box.pack_start(self.start_button, False, True, 0)
-            box.pack_start(self.cancel_button, False, True, 0)
-            box.pack_start(scrolled, True, True, 0)
+                          margin_start=12, margin_end=12, margin_top=12, margin_bottom=12)
+            box.append(self.start_button)
+            box.append(self.cancel_button)
+            box.append(scrolled)
 
-            self.add(box)
+            self.set_child(box)
 
         def append_text(self, text):
             iter_ = self.textbuffer.get_end_iter()
-            self.textbuffer.insert(iter_, "[%s] %s\n" % (str(time.time()), text))
+            self.textbuffer.insert(iter_, f"[{time.time()}] {text}\n")
 
         def on_start_clicked(self, button):
             button.set_sensitive(False)
@@ -221,22 +224,25 @@ operation.
             try:
                 succes, content, etag = source_object.load_contents_finish(result)
             except GLib.GError as e:
-                self.append_text("Error: " + e.message)
+                self.append_text(f"Error: {e.message}")
             else:
                 content_text = content[:100].decode("utf-8")
-                self.append_text("Got content: " + content_text + "...")
+                self.append_text(f"Got content: {content_text}...")
             finally:
                 self.cancellable.reset()
                 self.cancel_button.set_sensitive(False)
                 self.start_button.set_sensitive(True)
 
 
-    if __name__ == "__main__":
-        win = DownloadWindow()
-        win.show_all()
-        win.connect("destroy", Gtk.main_quit)
+    class Application(Gtk.Application):
 
-        Gtk.main()
+        def do_activate(self):
+            window = DownloadWindow(application=self)
+            window.present()
+
+
+    app = Application()
+    app.run()
 
 
 The example uses the asynchronous version of :meth:`Gio.File.load_contents` to
@@ -249,7 +255,7 @@ the content of the web page we wanted.
 
 .. code:: python
 
-    file = Gio.File.new_for_uri("http://python-gtk-3-tutorial.readthedocs.org/")
+    file = Gio.File.new_for_uri("https://developer.gnome.org/documentation/tutorials/beginners.html")
     try:
         status, contents, etag_out = file.load_contents(None)
     except GLib.GError:

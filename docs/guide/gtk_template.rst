@@ -69,27 +69,6 @@ Python attribute names that are different to the XML values:
             pass
 
 
-To add widgets to the built-in child of a parent, describe the built-in widget
-in the XML with its ``child`` element having an ``internal-child`` attribute set
-to the name of the built-in widget:
-
-.. code-block:: XML
-
-    <interface>
-      <template class="example2" parent="GtkDialog">
-        <child internal-child="vbox">
-          <object class="GtkBox">
-            <child>
-              <object class="GtkButton" id="hello_button">
-                <property name="label">Hello World</property>
-              </object>
-            </child>
-          </object>
-        </child>
-      </template>
-    </interface>
-
-
 Subclasses that declare ``__gtype_name__`` can be used as objects in the XML:
 
 .. code-block:: python
