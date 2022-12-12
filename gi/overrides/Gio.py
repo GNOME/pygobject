@@ -21,7 +21,7 @@
 import warnings
 
 from .._ossighelper import wakeup_on_signal, register_sigint_fallback
-from ..overrides import override, deprecated_init, wrap_list_store_sort_func
+from ..overrides import override, deprecated_init, wrap_list_store_equal_func, wrap_list_store_sort_func
 from ..module import get_introspection_module
 from gi import PyGIWarning
 
@@ -544,6 +544,13 @@ class ListStore(Gio.ListStore):
             _list_store_splice(self, key, 1, [value])
         else:
             raise TypeError
+
+    def find_with_equal_func(self, item, equal_func, *user_data):
+        # find_with_equal_func() is not suited for language bindings,
+        # see: https://gitlab.gnome.org/GNOME/glib/-/issues/2447.
+        # Use find_with_equal_func_full() instead.
+        equal_func = wrap_list_store_equal_func(equal_func)
+        return self.find_with_equal_func_full(item, equal_func, *user_data)
 
 
 ListStore = override(ListStore)
