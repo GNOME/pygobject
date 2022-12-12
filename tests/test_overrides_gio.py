@@ -387,3 +387,38 @@ def test_file_fspath_with_no_path():
     else:
         assert path == file.__fspath__()
         assert path == os.getcwd()
+
+
+def test_list_store_find_with_equal_func():
+
+    def test(*user_data):
+        class TestObject(GObject.Object):
+            def __init__(self, val):
+                super().__init__()
+                self.val = val
+
+        NUM = 5
+        data = [TestObject(i) for i in range(NUM)]
+        list_store = Gio.ListStore()
+        for d in data:
+            list_store.append(d)
+
+        def equal_func(a, b, *data):
+            assert data == user_data
+            return a.val == b.val
+
+        for i in range(NUM):
+            res, position = (list_store.find_with_equal_func(
+                data[i], equal_func, *user_data
+            ))
+            assert res
+            assert position == i
+
+        not_in_list_store = TestObject(NUM + 1)
+        res, position = (list_store.find_with_equal_func(
+            not_in_list_store, equal_func, *user_data
+        ))
+        assert not res
+
+    test()
+    test((100, "data"))

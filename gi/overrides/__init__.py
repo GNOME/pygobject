@@ -345,3 +345,12 @@ def wrap_list_store_sort_func(func):
         return func(a, b, *user_data)
 
     return wrap
+
+def wrap_list_store_equal_func(func):
+
+    def wrap(a, b, *user_data):
+        a = pygobject_new_full(a, False)
+        b = pygobject_new_full(b, False)
+        return func(a, b, *user_data)
+
+    return wrap
