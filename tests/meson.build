@@ -21,7 +21,7 @@ if get_option('default_library') != 'static'
 endif
 
 if gi_dep.type_name() == 'pkgconfig'
-  gi_datadir = gi_dep.get_pkgconfig_variable('gidatadir')
+  gi_datadir = gi_dep.get_variable(pkgconfig : 'gidatadir')
   regress_sources = [join_paths(gi_datadir, 'tests', 'regress.c')]
   regress_headers = [join_paths(gi_datadir, 'tests', 'regress.h')]
   regress_incdir = include_directories(join_paths(gi_datadir, 'tests'))
@@ -110,7 +110,7 @@ schemas = gnome.compile_schemas(build_by_default: true)
 envdata = environment()
 envdata.append('GI_TYPELIB_PATH', meson.current_build_dir())
 if gi_dep.type_name() == 'internal'
-  envdata.append('GI_TYPELIB_PATH', join_paths(meson.build_root(), 'subprojects', 'gobject-introspection', 'gir'))
+  envdata.append('GI_TYPELIB_PATH', join_paths(meson.project_build_root(), 'subprojects', 'gobject-introspection', 'gir'))
 endif
 
 if host_machine.system() == 'linux'
@@ -122,7 +122,7 @@ endif
 
 python_paths = [join_paths(meson.current_build_dir(), '..')]
 if pycairo_dep.found() and pycairo_dep.type_name() == 'internal'
-  python_paths += [join_paths(meson.build_root(), 'subprojects', 'pycairo')]
+  python_paths += [join_paths(meson.project_build_root(), 'subprojects', 'pycairo')]
 endif
 envdata.append('PYTHONPATH', python_paths)
 envdata.append('TESTS_BUILDDIR', meson.current_build_dir())
