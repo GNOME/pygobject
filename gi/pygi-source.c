@@ -158,6 +158,9 @@ source_finalize(GSource *source)
 
     state = PyGILState_Ensure();
 
+    if (!pysource->obj || Py_REFCNT(pysource->obj) == 0)
+        goto out;
+
     func = PyObject_GetAttrString(pysource->obj, "finalize");
     if (func) {
 	t = PyObject_CallObject(func, NULL);
@@ -172,6 +175,7 @@ source_finalize(GSource *source)
         PyErr_Clear ();
     }
 
+out:
     PyGILState_Release(state);
 }
 
@@ -296,7 +300,7 @@ pygi_source_new (PyObject *self, PyObject *args)
 
     source = (PyGRealSource*) g_source_new (&pyg_source_funcs, sizeof (PyGRealSource));
     /* g_source_new uses malloc, not slices */
-    boxed = pygi_boxed_new ( (PyTypeObject *) py_type, source, TRUE, 0);
+    boxed = pygi_boxed_new ( (PyTypeObject *) py_type, source, TRUE, 0, (gpointer*)&source->obj);
     Py_DECREF (py_type);
     if (!boxed) {
         g_source_unref ((GSource *)source);

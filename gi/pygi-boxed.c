@@ -32,6 +32,7 @@ struct _PyGIBoxed {
     PyGBoxed base;
     gboolean slice_allocated;
     gsize size;
+    gpointer *weak_ref;
 };
 
 static void
@@ -52,6 +53,11 @@ boxed_clear (PyGIBoxed *self)
         }
     }
     pyg_boxed_set_ptr (self, NULL);
+
+    if (self->weak_ref) {
+        *self->weak_ref = NULL;
+        self->weak_ref = NULL;
+    }
 }
 
 static PyObject *
@@ -132,7 +138,7 @@ boxed_new (PyTypeObject *type,
         goto out;
     }
 
-    self = (PyGIBoxed *) pygi_boxed_new (type, boxed, TRUE, size);
+    self = (PyGIBoxed *) pygi_boxed_new (type, boxed, TRUE, size, NULL);
     if (self == NULL) {
         g_slice_free1 (size, boxed);
         goto out;
@@ -171,7 +177,8 @@ PyObject *
 pygi_boxed_new (PyTypeObject *type,
                 gpointer      boxed,
                 gboolean      free_on_dealloc,
-                gsize         allocated_slice)
+                gsize         allocated_slice,
+                gpointer     *weak_ref)
 {
     PyGIBoxed *self;
 
@@ -199,6 +206,7 @@ pygi_boxed_new (PyTypeObject *type,
         self->size = 0;
         self->slice_allocated = FALSE;
     }
+    self->weak_ref = weak_ref;
 
     return (PyObject *) self;
 }

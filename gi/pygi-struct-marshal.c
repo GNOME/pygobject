@@ -423,7 +423,8 @@ pygi_arg_struct_to_py_marshaller (GIArgument *arg,
                                      arg->v_pointer,
                                      transfer == GI_TRANSFER_EVERYTHING || is_allocated,
                                      is_allocated ?
-                                            g_struct_info_get_size(interface_info) : 0);
+                                            g_struct_info_get_size(interface_info) : 0,
+                                     NULL);
         }
     } else if (g_type_is_a (g_type, G_TYPE_POINTER)) {
         if (py_type == NULL ||
