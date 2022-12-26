@@ -264,6 +264,43 @@ class TestSource(unittest.TestCase):
         assert not self.dispatched
         assert context.find_source_by_id(id_) is None
 
+    def test_python_unref_during_dispatch(self):
+        # Tests a Python derived Source which is free'd in the context of
+        # Python, while being dispatched
+        # i.e. finalize is never called as the python object is destroyed
+        self.dispatched = False
+        self.finalized = False
+
+        class S(GLib.Source):
+            def __init__(s, func=None):
+                s.func = func
+
+            def prepare(s):
+                return (True, 1)
+
+            def check(s):
+                pass
+
+            def dispatch(s, callback, args):
+                self.dispatched = True
+                self.source = None
+                return False
+
+            def finalize(s):
+                self.finalized = True
+
+        context = GLib.MainContext.new()
+        self.source = S()
+        id_ = self.source.attach(context)
+
+        while context.iteration(may_block=False):
+            pass
+
+        assert self.source is None
+        assert context.find_source_by_id(id_) is None
+        assert self.finalized
+        assert self.dispatched
+
     def test_extra_init_args(self):
         class SourceWithInitArgs(GLib.Source):
             def __init__(self, arg, kwarg=None):

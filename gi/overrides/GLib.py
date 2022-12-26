@@ -525,11 +525,15 @@ class Source(GLib.Source):
 
     def __del__(self):
         if hasattr(self, '__pygi_custom_source'):
+            # We destroy and finalize the box from here, as GLib might hold
+            # a reference (e.g. while the source is pending), delaying the
+            # finalize call until a later point.
             self.destroy()
-            # XXX: We have to unref the underlying source while the Python
-            # wrapper is still valid, so the source can call into the
-            # wrapper methods for the finalized callback.
+            self.finalize()
             self._clear_boxed()
+
+    def finalize(self):
+        pass
 
     def set_callback(self, fn, user_data=None):
         if hasattr(self, '__pygi_custom_source'):

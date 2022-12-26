@@ -149,38 +149,12 @@ source_dispatch(GSource *source, GSourceFunc callback, gpointer user_data)
     return ret;
 }
 
-static void
-source_finalize(GSource *source)
-{
-    PyGRealSource *pysource = (PyGRealSource *)source;
-    PyObject *func, *t;
-    PyGILState_STATE state;
-
-    state = PyGILState_Ensure();
-
-    func = PyObject_GetAttrString(pysource->obj, "finalize");
-    if (func) {
-	t = PyObject_CallObject(func, NULL);
-	Py_DECREF(func);
-
-	if (t == NULL) {
-	    PyErr_Print();
-	} else {
-	    Py_DECREF(t);
-	}
-    } else {
-        PyErr_Clear ();
-    }
-
-    PyGILState_Release(state);
-}
-
 static GSourceFuncs pyg_source_funcs =
 {
     source_prepare,
     source_check,
     source_dispatch,
-    source_finalize
+    NULL
 };
 
 /**
