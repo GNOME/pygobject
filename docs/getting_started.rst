@@ -34,7 +34,7 @@ After running the example application have a look at the "`Python GTK 3
 Tutorial <https://python-gtk-3-tutorial.readthedocs.io>`__" for more examples
 on how to create GTK apps and the "`PyGObject API Reference
 <https://lazka.github.io/pgi-docs>`__" for API documentation for all supported
-libraries.
+libraries. There are also typing stubs available here `PyGObject-stubs <https://pypi.org/project/PyGObject-stubs/>`_.
 
 .. _windows-getting-started:
 
