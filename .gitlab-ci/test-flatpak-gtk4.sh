@@ -7,6 +7,7 @@ COV_KEY="gtk4"
 export COVERAGE_FILE="${COV_DIR}/.coverage.${COV_KEY}"
 mkdir -p "${COV_DIR}"
 
+export G_DEBUG=""
 export TEST_GTK_VERSION=4.0
 python3 -m venv _venv
 . _venv/bin/activate
