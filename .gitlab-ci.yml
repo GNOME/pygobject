@@ -110,7 +110,9 @@ gnome-master:
   tags:
     - flatpak
   script:
-    - xvfb-run -a flatpak run --filesystem=host --share=network --socket=x11 --command=bash org.gnome.Sdk//master -x .gitlab-ci/test-flatpak.sh
+    # https://gitlab.gnome.org/GNOME/gnome-runtime-images/-/issues/7
+    - export DBUS_SYSTEM_BUS_ADDRESS="$(dbus-daemon --session --print-address --fork)"
+    - xvfb-run -a flatpak run --user --filesystem=host --share=network --socket=x11 --command=bash org.gnome.Sdk//master -x .gitlab-ci/test-flatpak.sh
 
 gnome-master-gtk4:
   allow_failure: true
@@ -119,7 +121,9 @@ gnome-master-gtk4:
   tags:
     - flatpak
   script:
-    - xvfb-run -a flatpak run --filesystem=host --share=network --socket=x11 --command=bash org.gnome.Sdk//master -x .gitlab-ci/test-flatpak-gtk4.sh
+    # https://gitlab.gnome.org/GNOME/gnome-runtime-images/-/issues/7
+    - export DBUS_SYSTEM_BUS_ADDRESS="$(dbus-daemon --session --print-address --fork)"
+    - xvfb-run -a flatpak run --user --filesystem=host --share=network --socket=x11 --command=bash org.gnome.Sdk//master -x .gitlab-ci/test-flatpak-gtk4.sh
   artifacts:
     paths:
       - coverage/
