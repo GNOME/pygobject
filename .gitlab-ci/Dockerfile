@@ -20,6 +20,7 @@ RUN apt-get update && apt-get install -y \
     libreadline-dev \
     libsqlite3-dev \
     libssl-dev \
+    liblzma-dev \
     ninja-build \
     python3-pip \
     xauth \
@@ -41,10 +42,11 @@ ENV PYTHON_CONFIGURE_OPTS="--enable-shared"
 
 RUN curl -L https://raw.githubusercontent.com/pyenv/pyenv-installer/master/bin/pyenv-installer | bash
 
-RUN pyenv install pypy3.8-7.3.8
-RUN pyenv install --debug 3.7.13
-RUN pyenv install --debug 3.8.13
-RUN pyenv install --debug 3.9.12
-RUN pyenv install --debug 3.10.4
+RUN pyenv install pypy3.8-7.3.11
+RUN pyenv install --debug 3.7.16
+RUN pyenv install --debug 3.8.16
+RUN pyenv install --debug 3.9.16
+RUN pyenv install --debug 3.10.9
+RUN pyenv install --debug 3.11.1
 
 ENV PATH="/usr/lib/ccache:${PATH}"

@@ -1,4 +1,4 @@
-image: registry.gitlab.gnome.org/gnome/pygobject/main:v18
+image: registry.gitlab.gnome.org/gnome/pygobject/main:v19
 
 stages:
   - build_and_test
@@ -35,7 +35,7 @@ coverage:
     paths:
       - coverage/
   variables:
-    PYENV_VERSION: "3.7.13-debug"
+    PYENV_VERSION: "3.8.16-debug"
   script:
     - bash -x ./.gitlab-ci/coverage-docker.sh
   coverage: '/^\s+lines\.+:\s+([\d.]+\%)\s+/'
@@ -65,28 +65,33 @@ mingw64:
 
 python3.7:
   variables:
-    PYENV_VERSION: "3.7.13-debug"
+    PYENV_VERSION: "3.7.16-debug"
   <<: *defaults
 
 python3.8:
   variables:
-    PYENV_VERSION: "3.8.13-debug"
+    PYENV_VERSION: "3.8.16-debug"
   <<: *defaults
 
 python3.9:
   variables:
-    PYENV_VERSION: "3.9.12-debug"
+    PYENV_VERSION: "3.9.16-debug"
   <<: *defaults
 
 python3.10:
   variables:
-    PYENV_VERSION: "3.10.4-debug"
+    PYENV_VERSION: "3.10.9-debug"
+  <<: *defaults
+
+python3.11:
+  variables:
+    PYENV_VERSION: "3.11.1-debug"
   <<: *defaults
 
 pypy3.8:
   allow_failure: true
   variables:
-    PYENV_VERSION: "pypy3.8-7.3.8"
+    PYENV_VERSION: "pypy3.8-7.3.11"
   <<: *defaults
 
 old-i386-py3:
