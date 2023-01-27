@@ -309,7 +309,7 @@ static void resulttuple_dealloc(PyObject *self) {
     Py_ssize_t i, len;
 
     PyObject_GC_UnTrack (self);
-    Py_TRASHCAN_SAFE_BEGIN (self)
+    CPy_TRASHCAN_BEGIN (self, resulttuple_dealloc)
 
     /* Free the tuple items and, if there is space, save the tuple object
      * pointer to the front of the free list for its size. Otherwise free it.
@@ -331,7 +331,7 @@ static void resulttuple_dealloc(PyObject *self) {
     Py_TYPE (self)->tp_free (self);
 
 done:
-    Py_TRASHCAN_SAFE_END (self)
+    CPy_TRASHCAN_END (self)
 }
 #endif
 

@@ -16,6 +16,14 @@ gboolean pygi_guint_from_pyssize (Py_ssize_t pyval, guint *result);
 #  define Py_SET_TYPE(obj, type) ((Py_TYPE(obj) = (type)), (void)0)
 #endif
 
+#if PY_VERSION_HEX >= 0x03080000
+#  define CPy_TRASHCAN_BEGIN(op, dealloc) Py_TRASHCAN_BEGIN(op, dealloc)
+#  define CPy_TRASHCAN_END(op) Py_TRASHCAN_END
+#else
+#  define CPy_TRASHCAN_BEGIN(op, dealloc) Py_TRASHCAN_SAFE_BEGIN(op)
+#  define CPy_TRASHCAN_END(op) Py_TRASHCAN_SAFE_END(op)
+#endif
+
 #define PYGI_DEFINE_TYPE(typename, symbol, csymbol)	\
 PyTypeObject symbol = {                                 \
     PyVarObject_HEAD_INIT(NULL, 0)                      \
