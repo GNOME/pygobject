@@ -1,3 +1,21 @@
+3.43.1 - 2023-01-28
+-------------------
+
+* Note: PyGObject is in need of more maintainers, please read
+  https://www.bassi.io/articles/2022/12/02/on-pygobject/
+* Note: This is an unstable release.
+
+* Drop support for Python 3.6 :mr:`184`
+* meson: bump minimum version to 0.53.0 and update subprojects :mr:`227`
+* gimodule: fix floating state of python objects created with g_object_new :mr:`129`
+* Gtk.Template: Accept PathLike objects as a filename :mr:`195`
+* info: Show which type/object callables are bound to :mr:`194`
+* IntrospectionModule: handle two threads loading type at same time :mr:`149`
+* Port to Py_TRASHCAN_BEGIN :mr:`226`
+* Other cleanups/improvements: :mr:`181` :mr:`173`
+* This release also includes all changes from 3.42.1 and 3.42.2
+
+
 3.42.2 - 2022-07-16
 -------------------
 
