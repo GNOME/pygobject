@@ -1643,6 +1643,26 @@ class TreeModelFilter(Gtk.TreeModelFilter):
 TreeModelFilter = override(TreeModelFilter)
 __all__.append('TreeModelFilter')
 
+
+class CssProvider(Gtk.CssProvider):
+    def load_from_data(self, text, length=-1):
+        if Gtk.get_major_version() >= 4 and Gtk.get_minor_version() > 8:
+            if isinstance(text, bytes):
+                text = text.decode("utf-8")
+            if not isinstance(text, str):
+                raise TypeError('text must be a string')
+            super(CssProvider, self).load_from_data(text, length)
+        else:
+            if isinstance(text, str):
+                text = text.encode("utf-8")
+            if not isinstance(text, bytes):
+                raise TypeError('text must be bytes')
+            super(CssProvider, self).load_from_data(text)
+
+
+CssProvider = override(CssProvider)
+__all__.append("CssProvider")
+
 if GTK4:
     class CustomSorter(Gtk.CustomSorter):
 

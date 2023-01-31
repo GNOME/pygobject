@@ -3027,3 +3027,15 @@ def test_button_focus_on_click():
     assert b.get_focus_on_click()
     b.set_focus_on_click(False)
     assert not b.get_focus_on_click()
+
+
+@pytest.mark.parametrize(
+    "data",
+    [
+        "* { background: white; }",
+        "* { background: white; }".encode()
+    ]
+)
+def test_css_provider_load_from_data(data):
+    provider = Gtk.CssProvider.new()
+    provider.load_from_data(data)
