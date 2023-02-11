@@ -274,6 +274,7 @@ pyg_array_from_pyobject(GValue *value,
         if (! item) {
             PyErr_Clear();
             g_array_free(array, FALSE);
+            g_free(array->data);
             return -1;
         }
 
@@ -284,6 +285,7 @@ pyg_array_from_pyobject(GValue *value,
             if (! type) {
                 PyErr_Clear();
                 g_array_free(array, FALSE);
+                g_free(array->data);
                 Py_DECREF(item);
                 return -1;
             }
@@ -295,6 +297,7 @@ pyg_array_from_pyobject(GValue *value,
 
         if (status == -1) {
             g_array_free(array, FALSE);
+            g_free(array->data);
             g_value_unset(&item_value);
             return -1;
         }
