@@ -84,9 +84,9 @@ your operating system.
 
 .. code:: console
 
-    pacman -S --needed --noconfirm base-devel mingw-w64-i686-toolchain git \
-       mingw-w64-i686-python3 mingw-w64-i686-python3-cairo \
-       mingw-w64-i686-gobject-introspection mingw-w64-i686-libffi
+    pacman -S --needed --noconfirm base-devel mingw-w64-x86_64-toolchain git \
+       mingw-w64-x86_64-python3 mingw-w64-x86_64-python3-cairo \
+       mingw-w64-x86_64-gobject-introspection mingw-w64-x86_64-libffi
 
 .. _macosx-dep:
 
