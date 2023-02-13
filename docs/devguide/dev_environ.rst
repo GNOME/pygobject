@@ -12,9 +12,9 @@ instructions on ":ref:`gettingstarted`" first, as they are a pre-requirement.
 
 .. _pipenv-setup:
 
-************
-Pipenv Setup
-************
+*****************
+Environment Setup
+*****************
 
 .. _install-dependencies:
 
@@ -115,12 +115,10 @@ Install `pyenv`_
 
 .. code:: console
 
-    git clone https://github.com/pyenv/pyenv.git ~/.pyenv
-    echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bashrc
-    echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bashrc
-    echo -e 'if command -v pyenv 1>/dev/null 2>&1; then\n  eval "$(pyenv init -)"\nfi' >> ~/.bashrc
-    source ~/.bashrc
-    pyenv install 3.6.4
+    curl https://pyenv.run | bash
+    exec $SHELL
+    pyenv install 3.11
+    pyenv global 3.11
 
 
 .. _windows-pyenv:
@@ -144,57 +142,50 @@ TODO: currently no way to install `pyenv`_ in Windows. So we'll use a normal
 
 .. code:: console
 
+    brew update
     brew install pyenv
-    pyenv install 3.6.4
+    pyenv install 3.11
+    pyenv global 3.11
 
 
-.. _install-pipsi:
+.. _install-poetry:
 
-Install `pipsi`_
+Install `Poetry`_
 ================
 
-`pipsi`_ is a wrapper around virtualenv and pip which installs
-scripts provided by python packages into separate virtualenvs to shield them
-from your system and each other. We'll use this to install pipenv.
+`Poetry`_ is a tool for dependency management and packaging in Python, we'll install it
+with `pipx`_ which installs Python CLI tools in to separate virtualenvs.
 
-============================================= =========================================
-|linux-logo| :ref:`Linux <linux-pipsi>`       |macosx-logo| :ref:`macOS <macosx-pipsi>`
-|windows-logo| :ref:`Windows <windows-pipsi>`
-============================================= =========================================
+============================================== ==========================================
+|linux-logo| :ref:`Linux <linux-poetry>`       |macosx-logo| :ref:`macOS <macosx-poetry>`
+|windows-logo| :ref:`Windows <windows-poetry>`
+============================================== ==========================================
 
-.. _linux-pipsi:
+.. _linux-poetry:
 
 |linux-logo| Linux
 ------------------
 
 .. code:: console
 
-    curl https://raw.githubusercontent.com/mitsuhiko/pipsi/master/get-pipsi.py | python3 - --src=git+https://github.com/mitsuhiko/pipsi.git\#egg=pipsi
-    echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
-    source ~/.bashrc
-    pipsi install pew
-    pipsi install pipenv
+    python3 -m pip install --user pipx
+    python3 -m pipx ensurepath
+    pipx install poetry
 
 
-.. _windows-pipsi:
+.. _windows-poetry:
 
 |windows-logo| Windows
 ----------------------
 
 .. code:: console
 
-    curl https://raw.githubusercontent.com/mitsuhiko/pipsi/master/get-pipsi.py | python3 - --src=git+https://github.com/mitsuhiko/pipsi.git\#egg=pipsi
-
-Add C:/\Users/\.local/\bin to your path via Control Panel->All Control Panel
-Items->System->Advanced System Setttings->Environment Variables
-
-.. code:: console
-
-    pipsi install pew
-    pipsi install pipenv
+    python.exe -m pip install --user pipx
+    python.exe -m pipx ensurepath
+    pipx install poetry
 
 
-.. _macosx-pipsi:
+.. _macosx-poetry:
 
 |macosx-logo| macOS
 -------------------
@@ -203,39 +194,13 @@ With homebrew:
 
 .. code:: console
 
-    brew install pipenv
-
-With pipsi:
-
-.. code:: console
-
-    curl https://raw.githubusercontent.com/mitsuhiko/pipsi/master/get-pipsi.py | python3 - --src=git+https://github.com/mitsuhiko/pipsi.git\#egg=pipsi
-    echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
-    source ~/.bashrc
-    pipsi install pew
-    pipsi install pipenv
+    brew install pipx
+    pipx ensurepath
+    pipx install poetry
 
 
 .. _projects-pygobject-dependencies:
 
-************************************
-Projects with PyGObject Dependencies
-************************************
-
-If you are going to work on a project that has PyGObject as a dependency, then
-do the following additional steps:
-
-.. code:: console
-
-    git clone <url/projectname.git>
-    cd projectname
-    pipenv --python 3
-    pipenv install pycairo
-    pipenv install pygobject
-    pipenv shell
-
-
-.. _work-on-pygobject:
 
 *****************
 Work on PyGObject
@@ -254,14 +219,11 @@ additional steps:
 
     git clone https://gitlab.gnome.org/GNOME/pygobject.git
     cd pygobject
-    pipenv --python 3
-    pipenv install pytest
-    pipenv install flake8
-    pipenv install pycairo
-    pipenv shell
+    poetry install
+    poetry shell
 
 
 .. _pyenv: https://github.com/pyenv/pyenv
-.. _pipsi: https://github.com/mitsuhiko/pipsi
-.. _pipenv: https://github.com/pypa/pipenv
+.. _pipx: https://pypa.github.io/pipx/
+.. _Poetry: https://python-poetry.org
 .. _virtualenv: https://www.virtualenv.org
