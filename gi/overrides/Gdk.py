@@ -53,6 +53,8 @@ if GDK2 or GDK3:
             self.blue = blue
 
         def __eq__(self, other):
+            if not isinstance(other, Gdk.Color):
+                return False
             return self.equal(other)
 
         def __repr__(self):
@@ -94,6 +96,8 @@ if GDK3:
             self.alpha = alpha
 
         def __eq__(self, other):
+            if not isinstance(other, Gdk.RGBA):
+                return False
             return self.equal(other)
 
         def __repr__(self):
