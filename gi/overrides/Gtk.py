@@ -1646,7 +1646,7 @@ __all__.append('TreeModelFilter')
 
 class CssProvider(Gtk.CssProvider):
     def load_from_data(self, text, length=-1):
-        if Gtk.get_major_version() >= 4 and Gtk.get_minor_version() > 8:
+        if (Gtk.get_major_version(), Gtk.get_minor_version()) >= (4, 9):
             if isinstance(text, bytes):
                 text = text.decode("utf-8")
             if not isinstance(text, str):
