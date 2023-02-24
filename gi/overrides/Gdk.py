@@ -57,6 +57,11 @@ if GDK2 or GDK3:
                 return False
             return self.equal(other)
 
+        # This is required (even when __eq__ is defined) in order
+        # for != operator to work as expected
+        def __ne__(self, other):
+            return not self == other
+
         def __repr__(self):
             return 'Gdk.Color(red=%d, green=%d, blue=%d)' % (self.red, self.green, self.blue)
 
@@ -99,6 +104,11 @@ if GDK3:
             if not isinstance(other, Gdk.RGBA):
                 return False
             return self.equal(other)
+
+        # This is required (even when __eq__ is defined) in order
+        # for != operator to work as expected
+        def __ne__(self, other):
+            return not self == other
 
         def __repr__(self):
             return 'Gdk.RGBA(red=%f, green=%f, blue=%f, alpha=%f)' % (self.red, self.green, self.blue, self.alpha)
