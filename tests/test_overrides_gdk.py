@@ -49,6 +49,10 @@ class TestGdk(unittest.TestCase):
         with capture_glib_deprecation_warnings():
             self.assertEqual(color, Gdk.Color(100, 200, 300))
         self.assertNotEqual(color, Gdk.Color(1, 2, 3))
+        self.assertNotEqual(color, None)
+        # assertNotEqual only tests __ne__. Following line explicitly
+        # tests __eq__ with objects of other types
+        self.assertFalse(color == object())
 
     @unittest.skipIf(GDK4, "not in gdk4")
     def test_color_floats(self):
@@ -89,6 +93,10 @@ class TestGdk(unittest.TestCase):
         self.assertEqual(rgba.alpha, 0.4)
         rgba.green = 0.9
         self.assertEqual(rgba.green, 0.9)
+        self.assertNotEqual(rgba, None)
+        # assertNotEqual only tests __ne__. Following line explicitly
+        # tests __eq__ with objects of other types
+        self.assertFalse(rgba == object())
 
         # Iterator/tuple convsersion
         self.assertEqual(tuple(Gdk.RGBA(0.1, 0.2, 0.3, 0.4)),
