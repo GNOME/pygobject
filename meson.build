@@ -183,3 +183,12 @@ with_tests = get_option('tests')
 if with_tests
 subdir('tests')
 endif
+
+if meson.version().version_compare('>=0.58.0')
+  devenv = environment()
+  devenv.prepend('PYTHONPATH', [
+      meson.current_source_dir(),
+      meson.current_build_dir(),
+  ])
+  meson.add_devenv(devenv)
+endif
