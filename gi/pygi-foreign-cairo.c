@@ -278,6 +278,53 @@ cairo_path_release (GIBaseInfo *base_info,
  * cairo_font_face_t marshaling
  */
 
+static PyObject *
+cairo_font_face_to_arg (PyObject        *value,
+                        GIInterfaceInfo *interface_info,
+                        GITransfer       transfer,
+                        GIArgument      *arg)
+{
+    cairo_font_face_t *font_face;
+
+    if (!PyObject_TypeCheck (value, &PycairoFontFace_Type)) {
+        PyErr_SetString (PyExc_TypeError, "Expected cairo.FontFace");
+        return NULL;
+    }
+
+    font_face = ( (PycairoFontFace*) value)->font_face;
+    if (!font_face) {
+        PyErr_SetString (PyExc_ValueError, "FontFace instance wrapping a NULL font_face");
+        return NULL;
+    }
+
+    if (transfer != GI_TRANSFER_NOTHING)
+        font_face = cairo_font_face_reference (font_face);
+
+    arg->v_pointer = font_face;
+    Py_RETURN_NONE;
+}
+
+static PyObject *
+cairo_font_face_from_arg (GIInterfaceInfo *interface_info,
+                          GITransfer       transfer,
+                          gpointer         data)
+{
+    cairo_font_face_t *font_face = (cairo_font_face_t*) data;
+
+    if (transfer == GI_TRANSFER_NOTHING)
+        cairo_font_face_reference (font_face);
+
+    return PycairoFontFace_FromFontFace (font_face);
+}
+
+static PyObject *
+cairo_font_face_release (GIBaseInfo *base_info,
+                         gpointer    struct_)
+{
+    cairo_font_face_destroy ( (cairo_font_face_t*) struct_);
+    Py_RETURN_NONE;
+}
+
 static int
 cairo_font_face_to_gvalue (GValue *value, PyObject *obj)
 {
@@ -364,6 +411,53 @@ cairo_font_options_release (GIBaseInfo *base_info,
 /*
  * scaled_font_t marshaling
  */
+
+static PyObject *
+cairo_scaled_font_to_arg (PyObject        *value,
+                          GIInterfaceInfo *interface_info,
+                          GITransfer       transfer,
+                          GIArgument      *arg)
+{
+    cairo_scaled_font_t *scaled_font;
+
+    if (!PyObject_TypeCheck (value, &PycairoScaledFont_Type)) {
+        PyErr_SetString (PyExc_TypeError, "Expected cairo.ScaledFont");
+        return NULL;
+    }
+
+    scaled_font = ( (PycairoScaledFont*) value)->scaled_font;
+    if (!scaled_font) {
+        PyErr_SetString (PyExc_ValueError, "ScaledFont instance wrapping a NULL scaled_font");
+        return NULL;
+    }
+
+    if (transfer != GI_TRANSFER_NOTHING)
+        scaled_font = cairo_scaled_font_reference (scaled_font);
+
+    arg->v_pointer = scaled_font;
+    Py_RETURN_NONE;
+}
+
+static PyObject *
+cairo_scaled_font_from_arg (GIInterfaceInfo *interface_info,
+                            GITransfer       transfer,
+                            gpointer         data)
+{
+    cairo_scaled_font_t *scaled_font = (cairo_scaled_font_t*) data;
+
+    if (transfer == GI_TRANSFER_NOTHING)
+        cairo_scaled_font_reference (scaled_font);
+
+    return PycairoScaledFont_FromScaledFont (scaled_font);
+}
+
+static PyObject *
+cairo_scaled_font_release (GIBaseInfo *base_info,
+                       gpointer    struct_)
+{
+    cairo_scaled_font_destroy ( (cairo_scaled_font_t*) struct_);
+    Py_RETURN_NONE;
+}
 
 static int
 cairo_scaled_font_to_gvalue (GValue *value, PyObject *obj)
@@ -680,6 +774,12 @@ _gi_cairo_exec (PyObject *module)
                                   cairo_path_release);
 
     pygi_register_foreign_struct ("cairo",
+                                  "FontFace",
+                                  cairo_font_face_to_arg,
+                                  cairo_font_face_from_arg,
+                                  cairo_font_face_release);
+
+    pygi_register_foreign_struct ("cairo",
                                   "FontOptions",
                                   cairo_font_options_to_arg,
                                   cairo_font_options_from_arg,
@@ -696,6 +796,12 @@ _gi_cairo_exec (PyObject *module)
                                   cairo_region_to_arg,
                                   cairo_region_from_arg,
                                   cairo_region_release);
+
+    pygi_register_foreign_struct ("cairo",
+                                  "ScaledFont",
+                                  cairo_scaled_font_to_arg,
+                                  cairo_scaled_font_from_arg,
+                                  cairo_scaled_font_release);
 
     pyg_register_gtype_custom (CAIRO_GOBJECT_TYPE_MATRIX,
                                cairo_matrix_from_gvalue,
