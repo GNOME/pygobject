@@ -44,6 +44,22 @@ from ._constants import (
     TYPE_VARIANT,
 )
 
+
+from typing import Optional
+
+try:
+    # Only available in Python 3.8 or later.
+    from typing import get_origin
+except ImportError:
+    from typing import _GenericAlias
+
+    def get_origin(type_: object) -> Optional[type]:
+        """Get the unsubscripted version of a type."""
+        if isinstance(type_, _GenericAlias):
+            return type_.__origin__
+        return None
+
+
 G_MAXFLOAT = _gi.G_MAXFLOAT
 G_MAXDOUBLE = _gi.G_MAXDOUBLE
 G_MININT = _gi.G_MININT
@@ -274,6 +290,12 @@ class Property:
     def _type_from_python(self, type_):
         if type_ in self._type_from_pytype_lookup:
             return self._type_from_pytype_lookup[type_]
+
+        # Support instances of generic types such as Gio.ListStore[Gio.File]
+        origin = get_origin(type_)
+        if origin is not None:
+            type_ = origin
+
         if isinstance(type_, type) and issubclass(
             type_, (_gi.GObject, _gi.GEnum, _gi.GFlags, _gi.GBoxed, _gi.GInterface)
         ):
