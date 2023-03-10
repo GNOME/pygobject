@@ -826,6 +826,9 @@ class TestProperty(unittest.TestCase):
 
         PropertyObjectSubclass(obj=ObjectSubclass())
 
+    def test_generic_instance_property(self):
+        GObject.Property(type=Gio.ListStore[Gio.File])
+
     def test_property_subclass(self):
         # test for #470718
         class A(GObject.GObject):
