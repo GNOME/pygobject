@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "PyGObject"
-version = "3.44.0"
+version = "3.44.1"
 description = "Python bindings for GObject Introspection"
 authors = ["Christoph Reiter"]
 
