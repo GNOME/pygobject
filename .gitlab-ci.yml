@@ -1,4 +1,4 @@
-image: registry.gitlab.gnome.org/gnome/pygobject/main:v19
+image: registry.gitlab.gnome.org/gnome/pygobject/main:v20
 
 stages:
   - build_and_test
@@ -35,7 +35,7 @@ coverage:
     paths:
       - coverage/
   variables:
-    PYENV_VERSION: "3.8.16-debug"
+    PYENV_VERSION: "3.9.16-debug"
   script:
     - bash -x ./.gitlab-ci/coverage-docker.sh
   coverage: '/^\s+lines\.+:\s+([\d.]+\%)\s+/'
@@ -63,11 +63,6 @@ mingw64:
     MSYSTEM: "MINGW64"
   <<: *mingw-defaults
 
-python3.7:
-  variables:
-    PYENV_VERSION: "3.7.16-debug"
-  <<: *defaults
-
 python3.8:
   variables:
     PYENV_VERSION: "3.8.16-debug"
@@ -80,12 +75,12 @@ python3.9:
 
 python3.10:
   variables:
-    PYENV_VERSION: "3.10.9-debug"
+    PYENV_VERSION: "3.10.10-debug"
   <<: *defaults
 
 python3.11:
   variables:
-    PYENV_VERSION: "3.11.1-debug"
+    PYENV_VERSION: "3.11.2-debug"
   <<: *defaults
 
 pypy3.8:
@@ -96,7 +91,7 @@ pypy3.8:
 
 old-i386-py3:
   stage: build_and_test
-  image: registry.gitlab.gnome.org/gnome/pygobject/old:v5
+  image: registry.gitlab.gnome.org/gnome/pygobject/old:v6
   artifacts:
     paths:
       - coverage/

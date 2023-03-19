@@ -1,4 +1,4 @@
-FROM ubuntu:focal
+FROM ubuntu:jammy
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -43,10 +43,9 @@ ENV PYTHON_CONFIGURE_OPTS="--enable-shared"
 RUN curl -L https://raw.githubusercontent.com/pyenv/pyenv-installer/master/bin/pyenv-installer | bash
 
 RUN pyenv install pypy3.8-7.3.11
-RUN pyenv install --debug 3.7.16
 RUN pyenv install --debug 3.8.16
 RUN pyenv install --debug 3.9.16
-RUN pyenv install --debug 3.10.9
-RUN pyenv install --debug 3.11.1
+RUN pyenv install --debug 3.10.10
+RUN pyenv install --debug 3.11.2
 
 ENV PATH="/usr/lib/ccache:${PATH}"

@@ -26,6 +26,9 @@ python -m pip install pycairo flake8 pytest pytest-faulthandler coverage
 
 export CFLAGS="-coverage -ftest-coverage -fprofile-arcs -Werror"
 
+# FIXME: g_callable_info_free_closure etc
+CFLAGS+=" -Wno-error=deprecated-declarations"
+
 # MESON
 /usr/bin/python3 -m pip install --user meson
 export PATH="${HOME}/.local/bin:${PATH}"
