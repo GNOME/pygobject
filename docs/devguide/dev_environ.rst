@@ -93,7 +93,14 @@ your operating system.
 |macosx-logo| macOS
 -------------------
 
-No extra dependencies needed.
+With homebrew:
+
+.. code:: console
+
+    brew update
+    brew install pyenv pipx
+    brew install pipx
+    pipx ensurepath
 
 
 .. _install-pyenv:
@@ -127,8 +134,6 @@ Install `pyenv`_
 
 .. code:: console
 
-    brew update
-    brew install pyenv
     pyenv install 3.11
     pyenv global 3.11
 
@@ -179,8 +184,6 @@ With homebrew:
 
 .. code:: console
 
-    brew install pipx
-    pipx ensurepath
     pipx install poetry
 
 
