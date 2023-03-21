@@ -48,7 +48,7 @@ your operating system.
 
 .. code:: console
 
-    sudo dnf install -y python3-venv python3-wheel
+    sudo dnf install -y python3-wheel
     sudo dnf install -y gcc zlib-devel bzip2 bzip2-devel readline-devel \
       sqlite sqlite-devel openssl-devel tk-devel git python3-cairo-devel \
       cairo-gobject-devel gobject-introspection-devel
@@ -61,7 +61,7 @@ your operating system.
 
 .. code:: console
 
-    sudo pacman -S --noconfirm python-virtualenv python-wheel
+    sudo pacman -S --noconfirm python-wheel
     sudo pacman -S --noconfirm base-devel openssl zlib git gobject-introspection
 
 
@@ -72,7 +72,7 @@ your operating system.
 
 .. code:: console
 
-    sudo zypper install -y python3-venv python3-wheel gobject-introspection-devel \
+    sudo zypper install -y python3-wheel gobject-introspection-devel \
       python3-cairo-devel openssl zlib git
     sudo zypper install --type pattern devel_basis
 
@@ -105,7 +105,6 @@ Install `pyenv`_
 
 ============================================= =========================================
 |linux-logo| :ref:`Linux <linux-pyenv>`       |macosx-logo| :ref:`macOS <macosx-pyenv>`
-|windows-logo| :ref:`Windows <windows-pyenv>`
 ============================================= =========================================
 
 .. _linux-pyenv:
@@ -119,20 +118,6 @@ Install `pyenv`_
     exec $SHELL
     pyenv install 3.11
     pyenv global 3.11
-
-
-.. _windows-pyenv:
-
-|windows-logo| Windows
-----------------------
-
-TODO: currently no way to install `pyenv`_ in Windows. So we'll use a normal
-`virtualenv`_ instead.
-
-.. code:: console
-
-    virtualenv --python 3 myvenv
-    source myvenv/bin/activate
 
 
 .. _macosx-pyenv:
@@ -226,4 +211,3 @@ additional steps:
 .. _pyenv: https://github.com/pyenv/pyenv
 .. _pipx: https://pypa.github.io/pipx/
 .. _Poetry: https://python-poetry.org
-.. _virtualenv: https://www.virtualenv.org
