@@ -688,7 +688,7 @@ class TestProperty(unittest.TestCase):
 
         # we test known-bad values here which cause Gtk-WARNING logs.
         # Explicitly allow these for this test.
-        with capture_glib_warnings(allow_warnings=True):
+        with capture_glib_warnings(allow_warnings=True, allow_criticals=True):
             o = C()
             self.assertEqual(o.prop_int, 1)
 
