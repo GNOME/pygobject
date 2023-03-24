@@ -365,7 +365,7 @@ class TestClosures(unittest.TestCase):
             self.count += 1
 
     def _callback_invalid_stop_emission_name(self, obj, prop):
-        with capture_glib_warnings(allow_warnings=True) as warn:
+        with capture_glib_warnings(allow_warnings=True, allow_criticals=True) as warn:
             obj.stop_emission_by_name('notasignal::baddetail')
             self.emission_error = True
             self.assertTrue(warn)
