@@ -54,6 +54,11 @@
 #include "gimodule.h"
 #include "pygi-basictype.h"
 
+/* GI_CHECK_VERSION was introduced in gobject-introspection 1.60 */
+#ifndef GI_CHECK_VERSION
+# define GI_CHECK_VERSION(x,y,z) 0
+#endif
+
 PyObject *PyGIWarning;
 PyObject *PyGIDeprecationWarning;
 PyObject *_PyGIDefaultArgPlaceholder;
@@ -1859,7 +1864,11 @@ _wrap_pyg_hook_up_vfunc_implementation (PyObject *self, PyObject *args)
         closure = _pygi_make_native_closure ( (GICallableInfo*) callback_info, cache,
                                               GI_SCOPE_TYPE_NOTIFIED, py_function, NULL);
 
+#if GI_CHECK_VERSION (1, 72, 0)
+        *method_ptr = g_callable_info_get_closure_native_address (callback_info, closure->closure);
+#else
         *method_ptr = closure->closure;
+#endif
 
         g_base_info_unref (interface_info);
         g_base_info_unref (type_info);
