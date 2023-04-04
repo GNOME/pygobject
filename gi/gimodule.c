@@ -54,11 +54,6 @@
 #include "gimodule.h"
 #include "pygi-basictype.h"
 
-/* GI_CHECK_VERSION was introduced in gobject-introspection 1.60 */
-#ifndef GI_CHECK_VERSION
-# define GI_CHECK_VERSION(x,y,z) 0
-#endif
-
 PyObject *PyGIWarning;
 PyObject *PyGIDeprecationWarning;
 PyObject *_PyGIDefaultArgPlaceholder;

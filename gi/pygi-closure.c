@@ -24,11 +24,6 @@
 #include "pygi-ccallback.h"
 #include "pygi-info.h"
 
-/* GI_CHECK_VERSION was introduced in gobject-introspection 1.60 */
-#ifndef GI_CHECK_VERSION
-# define GI_CHECK_VERSION(x,y,z) 0
-#endif
-
 extern PyObject *_PyGIDefaultArgPlaceholder;
 
 typedef struct _PyGICallbackCache
