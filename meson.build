@@ -63,6 +63,7 @@ if not with_pycairo.disabled()
   )
 else
   cairo_dep = dependency('', required: false)
+  pycairo_dep = dependency('', required: false)
 endif
 
 main_c_args = []
