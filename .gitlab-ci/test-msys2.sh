@@ -32,9 +32,6 @@ COV_KEY="${CI_JOB_NAME}"
 mkdir -p "${COV_DIR}"
 export COVERAGE_FILE="${COV_DIR}/.coverage.${COV_KEY}"
 
-# FIXME: g_callable_info_free_closure etc
-CFLAGS+=" -Wno-error=deprecated-declarations"
-
 # https://docs.python.org/3/using/cmdline.html#envvar-PYTHONDEVMODE
 export PYTHONDEVMODE=1
 
