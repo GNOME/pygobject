@@ -658,6 +658,16 @@ class Binding(GObjectModule.Binding):
 Binding = override(Binding)
 __all__.append('Binding')
 
+# SignalGroup was introduced in GLib 2.72
+if hasattr(GObjectModule, "SignalGroup"):
+    class SignalGroup(GObjectModule.SignalGroup):
+        def connect(self, detailed_signal, callback, *args, after=False):
+            clos = functools.partial(callback, *args)
+            self.connect_closure(detailed_signal, clos, after)
+
+    SignalGroup = override(SignalGroup)
+    __all__.append('SignalGroup')
+
 
 Property = propertyhelper.Property
 Signal = signalhelper.Signal
