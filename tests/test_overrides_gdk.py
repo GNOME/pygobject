@@ -12,7 +12,7 @@ import gi.overrides
 from gi import PyGIDeprecationWarning
 
 try:
-    from gi.repository import Gdk, GdkPixbuf, Gtk
+    from gi.repository import Gio, Gdk, GdkPixbuf, Gtk
     GDK4 = Gdk._version == "4.0"
 except ImportError:
     Gdk = None
@@ -305,3 +305,11 @@ class TestGdk(unittest.TestCase):
         atom = Gdk.atom_intern("", True)
         assert re.match(r"<Gdk.Atom\(\d+\)>", repr(atom))
         assert re.match(r"Gdk.Atom<\d+>", str(atom))
+
+    @unittest.skipUnless(GDK4, "only in gdk4")
+    def test_file_list(self):
+        f = Gio.File.new_for_path("/tmp")
+        filelist = Gdk.FileList([f])
+        self.assertTrue(isinstance(filelist, Gdk.FileList))
+        self.assertEqual(len(filelist), 1)
+        self.assertEqual(filelist[0], f)
