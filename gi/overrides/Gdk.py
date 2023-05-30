@@ -29,6 +29,7 @@ from gi import PyGIDeprecationWarning, require_version
 Gdk = get_introspection_module('Gdk')
 GDK2 = Gdk._version == '2.0'
 GDK3 = Gdk._version == '3.0'
+GDK4 = Gdk._version == '4.0'
 
 __all__ = []
 
@@ -395,6 +396,35 @@ if GDK2 or GDK3:
 
     Gdk.Atom.__str__ = _gdk_atom_str
     Gdk.Atom.__repr__ = _gdk_atom_repr
+
+
+if GDK4:
+    from gi.repository import Gio
+
+    class FileList(Gdk.FileList):
+        def __new__(cls, files):
+            files_list = []
+            if isinstance(files, (tuple, list)):
+                for f in files:
+                    if isinstance(f, Gio.File):
+                        files_list.append(f)
+                    else:
+                        raise TypeError('Constructor requires a list or tuple of Gio.File instances')
+            else:
+                raise TypeError('Constructor requires a list or tuple of Gio.File instances')
+            return Gdk.FileList.new_from_list(files)
+
+        def __iter__(self):
+            return iter(self.get_files())
+
+        def __len__(self):
+            return len(self.get_files())
+
+        def __getitem__(self, index):
+            return self.get_files()[index]
+
+    FileList = override(FileList)
+    __all__.append('FileList')
 
 
 # constants
