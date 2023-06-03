@@ -141,7 +141,7 @@ Install `pyenv`_
 .. _install-poetry:
 
 Install `Poetry`_
-================
+=================
 
 `Poetry`_ is a tool for dependency management and packaging in Python, we'll install it
 with `pipx`_ which installs Python CLI tools in to separate virtualenvs.
