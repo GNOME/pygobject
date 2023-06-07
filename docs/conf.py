@@ -48,12 +48,12 @@ html_theme_options = {
 }
 
 extlinks = {
-    'bzbug': ('https://bugzilla.gnome.org/show_bug.cgi?id=%s', 'bz#'),
-    'issue': ('https://gitlab.gnome.org/GNOME/pygobject/issues/%s', '#'),
-    'commit': ('https://gitlab.gnome.org/GNOME/pygobject/commit/%s', ''),
+    'bzbug': ('https://bugzilla.gnome.org/show_bug.cgi?id=%s', 'bz#%s'),
+    'issue': ('https://gitlab.gnome.org/GNOME/pygobject/issues/%s', '#%s'),
+    'commit': ('https://gitlab.gnome.org/GNOME/pygobject/commit/%s', '%s'),
     'mr': (
-        'https://gitlab.gnome.org/GNOME/pygobject/merge_requests/%s', '!'),
-    'user': ('https://gitlab.gnome.org/%s', ''),
+        'https://gitlab.gnome.org/GNOME/pygobject/merge_requests/%s', '!%s'),
+    'user': ('https://gitlab.gnome.org/%s', '%s'),
 }
 
 suppress_warnings = ["image.nonlocal_uri"]
