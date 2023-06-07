@@ -22,7 +22,7 @@ export PYTHONDEVMODE=1
 mkdir -p "${CCACHE_DIR}"
 mkdir -p "${COV_DIR}"
 
-python -m pip install pycairo flake8 pytest pytest-faulthandler coverage
+python -m pip install pycairo flake8 pytest pytest-faulthandler coverage setuptools
 
 export CFLAGS="-coverage -ftest-coverage -fprofile-arcs -Werror"
 
