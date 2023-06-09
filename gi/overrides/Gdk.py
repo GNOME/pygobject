@@ -402,17 +402,19 @@ if GDK4:
     from gi.repository import Gio
 
     class FileList(Gdk.FileList):
-        def __new__(cls, files):
-            files_list = []
-            if isinstance(files, (tuple, list)):
-                for f in files:
-                    if isinstance(f, Gio.File):
-                        files_list.append(f)
-                    else:
-                        raise TypeError('Constructor requires a list or tuple of Gio.File instances')
-            else:
-                raise TypeError('Constructor requires a list or tuple of Gio.File instances')
-            return Gdk.FileList.new_from_list(files)
+
+        if hasattr(Gdk.FileList, "new_from_list"):
+            def __new__(cls, files):
+                files_list = []
+                if isinstance(files, (tuple, list)):
+                    for f in files:
+                        if isinstance(f, Gio.File):
+                            files_list.append(f)
+                        else:
+                            raise TypeError('Constructor requires a list or tuple of Gio.File instances')
+                else:
+                    raise TypeError('Constructor requires a list or tuple of Gio.File instances')
+                return Gdk.FileList.new_from_list(files)
 
         def __iter__(self):
             return iter(self.get_files())

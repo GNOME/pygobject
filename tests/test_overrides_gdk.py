@@ -18,6 +18,15 @@ except ImportError:
     Gdk = None
     GDK4 = False
 
+
+def gtkver():
+    if Gtk is None:
+        return (0, 0, 0)
+    return (Gtk.get_major_version(),
+            Gtk.get_minor_version(),
+            Gtk.get_micro_version())
+
+
 try:
     gi.require_foreign('cairo')
     has_cairo = True
@@ -307,6 +316,7 @@ class TestGdk(unittest.TestCase):
         assert re.match(r"Gdk.Atom<\d+>", str(atom))
 
     @unittest.skipUnless(GDK4, "only in gdk4")
+    @unittest.skipUnless(gtkver() >= (4, 8, 0), "constructor available since 4.8")
     def test_file_list(self):
         f = Gio.File.new_for_path("/tmp")
         filelist = Gdk.FileList([f])
