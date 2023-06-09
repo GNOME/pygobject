@@ -25,6 +25,7 @@ RUN apt-get update && apt-get install -y \
     liblzma-dev \
     ninja-build \
     python3-pip \
+    sudo \
     xauth \
     xvfb \
     && rm -rf /var/lib/apt/lists/*
@@ -32,6 +33,7 @@ RUN apt-get update && apt-get install -y \
 ARG HOST_USER_ID=5555
 ENV HOST_USER_ID ${HOST_USER_ID}
 RUN useradd -u $HOST_USER_ID -ms /bin/bash user
+RUN echo 'user ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
 USER user
 WORKDIR /home/user
