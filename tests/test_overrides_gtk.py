@@ -62,6 +62,7 @@ def realized(widget):
             window.set_child(widget)
         else:
             window.add(widget)
+        window.show()
 
     widget.realize()
     if Gtk._version == "4.0":
