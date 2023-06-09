@@ -40,13 +40,19 @@ ENV PYENV_ROOT /home/user/.pyenv
 ENV PATH="${PYENV_ROOT}/shims:${PYENV_ROOT}/bin:${PATH}"
 ENV PYTHON_CONFIGURE_OPTS="--enable-shared"
 
+# https://github.com/pyenv/pyenv/releases
+ENV PYENV_GIT_TAG v2.3.19
 RUN curl -L https://raw.githubusercontent.com/pyenv/pyenv-installer/master/bin/pyenv-installer | bash
 
-RUN pyenv install pypy3.8-7.3.11
-RUN pyenv install --debug 3.8.16
-RUN pyenv install --debug 3.9.16
-RUN pyenv install --debug 3.10.10
-RUN pyenv install --debug 3.11.2
+RUN pyenv install pypy3.8
+RUN pyenv install --debug 3.8
+RUN pyenv install --debug 3.9
+RUN pyenv install --debug 3.10
+RUN pyenv install --debug 3.11
 RUN pyenv install --debug 3.12.0b2
 
 ENV PATH="/usr/lib/ccache:${PATH}"
+
+COPY --chown=user:user set_env.sh /home/user/set_env.sh
+RUN chmod +x /home/user/set_env.sh
+ENTRYPOINT ["/home/user/set_env.sh"]
