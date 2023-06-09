@@ -66,32 +66,44 @@ mingw64:
 python3.8:
   variables:
     PYTHON_VERSION: "3.8"
+    TEST_GTK_VERSION: "3.0"
   <<: *defaults
 
 python3.9:
   variables:
     PYTHON_VERSION: "3.9"
+    TEST_GTK_VERSION: "3.0"
   <<: *defaults
 
 python3.10:
   variables:
     PYTHON_VERSION: "3.10"
+    TEST_GTK_VERSION: "3.0"
   <<: *defaults
 
 python3.11:
   variables:
     PYTHON_VERSION: "3.11"
+    TEST_GTK_VERSION: "3.0"
+  <<: *defaults
+
+python3.11-gtk4:
+  variables:
+    PYTHON_VERSION: "3.11"
+    TEST_GTK_VERSION: "4.0"
   <<: *defaults
 
 python3.12:
   variables:
     PYTHON_VERSION: "3.12"
+    TEST_GTK_VERSION: "3.0"
   <<: *defaults
 
 pypy3.8:
   allow_failure: true
   variables:
     PYTHON_VERSION: "pypy3.8"
+    TEST_GTK_VERSION: "3.0"
   <<: *defaults
 
 old-i386-py3:

@@ -8,6 +8,7 @@ RUN apt-get update && apt-get install -y \
     curl \
     dbus \
     gir1.2-gtk-3.0 \
+    gir1.2-gtk-4.0 \
     git \
     gobject-introspection \
     lcov \
@@ -17,6 +18,7 @@ RUN apt-get update && apt-get install -y \
     libgirepository1.0-dev \
     libglib2.0-dev \
     libgtk-3-0 \
+    libgtk-4-1 \
     libreadline-dev \
     libsqlite3-dev \
     libssl-dev \
