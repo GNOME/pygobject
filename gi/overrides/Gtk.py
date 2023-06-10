@@ -1649,14 +1649,10 @@ class CssProvider(Gtk.CssProvider):
         if (Gtk.get_major_version(), Gtk.get_minor_version()) >= (4, 9):
             if isinstance(text, bytes):
                 text = text.decode("utf-8")
-            if not isinstance(text, str):
-                raise TypeError('text must be a string')
             super(CssProvider, self).load_from_data(text, length)
         else:
             if isinstance(text, str):
                 text = text.encode("utf-8")
-            if not isinstance(text, bytes):
-                raise TypeError('text must be bytes')
             super(CssProvider, self).load_from_data(text)
 
 
