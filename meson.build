@@ -54,13 +54,39 @@ if not with_pycairo.disabled()
     endif
   endif
 
-  pycairo_dep = dependency(
-    'py3cairo',
-    version: pycairo_version_req,
-    fallback: ['pycairo', 'pycairo_dep'],
-    default_options: ['python=' + get_option('python')],
-    required: with_pycairo,
+  # Find pycairo with target Python (TODO: extract version as well, see setup.py)
+  r = run_command(
+    python,
+    '-c',
+    '''
+import os, sys
+from importlib.util import find_spec
+spec = find_spec("cairo")
+if spec is None:
+  sys.stderr.write("cairo module spec not found")
+  sys.exit(1)
+sys.stdout.write(os.path.join(os.path.dirname(spec.origin), "include"))
+''',
+    check: false,
   )
+
+  if r.returncode() == 0
+    message('Found pycairo with target Python: ' + r.stdout())
+    pycairo_inc_dir = include_directories(r.stdout())
+    pycairo_dep = declare_dependency(
+      include_directories: pycairo_inc_dir,
+    )
+  else
+    message('pycairo not found via target Python, falling back to pkg-config (@0@)'.format(r.stderr()))
+    # Find pycairo with pkg-config
+    pycairo_dep = dependency(
+      'py3cairo',
+      version: pycairo_version_req,
+      fallback: ['pycairo', 'pycairo_dep'],
+      default_options: ['python=' + get_option('python')],
+      required: with_pycairo,
+    )
+  endif
 else
   cairo_dep = dependency('', required: false)
   pycairo_dep = dependency('', required: false)
