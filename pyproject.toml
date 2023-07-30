@@ -1,20 +1,36 @@
-[tool.poetry]
+[project]
 name = "PyGObject"
 version = "3.47.0"
 description = "Python bindings for GObject Introspection"
-authors = ["Christoph Reiter"]
+license = { text = "GNU Lesser General Public License v2.1 (LGPLv2.1)" }
+authors = [
+    { name="James Henstridge", email="james@daa.com.au" }
+]
+maintainers = [
+    { name="Simon Feltman", email="sfeltman@src.gnome.org" },
+    { name="Christoph Reiter" },
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: GNU Lesser General Public License v2 or later (LGPLv2+)",
+    "Operating System :: POSIX",
+    "Operating System :: Microsoft :: Windows",
+    "Programming Language :: C",
+    "Programming Language :: Python",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+requires-python = ">=3.8, <4"
 
-[tool.poetry.dependencies]
-python = "^3.8"
-pycairo = "^1.16"
+[project.urls]
+Homepage = "https://pygobject.readthedocs.io"
+Repository = "https://gitlab.gnome.org/GNOME/pygobject.git"
+Changelog = "https://gitlab.gnome.org/GNOME/pygobject/-/blob/master/NEWS"
 
-[tool.poetry.dev-dependencies]
-pytest = "^7.0.0"
-flake8 = "^3.9.1"
-Sphinx = "^3.5.4|^4.2.0"
-sphinx-rtd-theme = "^0.5.2|^1.0.0"
-coverage = "^6.3.2"
-setuptools = "^67.8.0"
+
+[tool.meson-python.args]
+setup = ["-Dpkgconf=false"]
 
 [build-system]
-requires = ["setuptools", "wheel", "pycairo"]
+build-backend = "mesonpy"
+requires = ["meson-python", "pycairo>=1.16"]
