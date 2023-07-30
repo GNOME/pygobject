@@ -35,7 +35,7 @@ export COVERAGE_FILE="${COV_DIR}/.coverage.${COV_KEY}"
 # https://docs.python.org/3/using/cmdline.html#envvar-PYTHONDEVMODE
 export PYTHONDEVMODE=1
 
-python setup.py build_tests
+python -m pip install .
 
 lcov \
     --config-file .gitlab-ci/lcovrc \

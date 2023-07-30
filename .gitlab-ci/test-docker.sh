@@ -45,8 +45,8 @@ if [[ "${PYVER}" == "2.7" ]] && [[ "${PYIMPL}" == "CPython" ]]; then
     python -m sphinx -W -a -E -b html -n docs docs/_build
 fi;
 
-# BUILD & TEST AGAIN USING SETUP.PY
-python setup.py build_tests
+# BUILD
+python -m pip install .
 
 lcov --config-file .gitlab-ci/lcovrc --directory . --capture --initial --output-file \
     "${COV_DIR}/${CI_JOB_NAME}-baseline.lcov"
