@@ -1,6 +1,6 @@
 project('pygobject', 'c',
   version : '3.47.0',
-  meson_version : '>= 0.56.0',
+  meson_version : '>= 0.64.0',
   default_options : [ 'warning_level=1',
                       'buildtype=debugoptimized'])
 
@@ -207,11 +207,9 @@ if with_tests
 subdir('tests')
 endif
 
-if meson.version().version_compare('>=0.58.0')
-  devenv = environment()
-  devenv.prepend('PYTHONPATH', [
-      meson.current_source_dir(),
-      meson.current_build_dir(),
-  ])
-  meson.add_devenv(devenv)
-endif
+devenv = environment()
+devenv.prepend('PYTHONPATH', [
+    meson.current_source_dir(),
+    meson.current_build_dir(),
+])
+meson.add_devenv(devenv)
