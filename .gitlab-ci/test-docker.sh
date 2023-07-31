@@ -22,32 +22,26 @@ export PYTHONDEVMODE=1
 mkdir -p "${CCACHE_DIR}"
 mkdir -p "${COV_DIR}"
 
-python -m pip install --user pycairo flake8 pytest pytest-faulthandler coverage meson
+# NB. setuptools is needed, since distutils has been removed from Python 3.12
+python -m pip install pycairo flake8 pytest pytest-faulthandler coverage setuptools
+
+# MESON
+/usr/bin/python3 -m pip install --user meson
 export PATH="${HOME}/.local/bin:${PATH}"
+export PKG_CONFIG_PATH="$(python -c 'import sys; sys.stdout.write(sys.prefix)')/lib/pkgconfig"
 
 # CODE QUALITY
 python -m flake8
 
-# MESON
-export CFLAGS="-coverage -ftest-coverage -fprofile-arcs -Werror"
+# BUILD & TEST
+CFLAGS="-coverage -ftest-coverage -fprofile-arcs -Werror" meson setup _build -Dpython="$(which python)" -Dcoverage=true
 
-export PKG_CONFIG_PATH="$(python -c 'import sys; sys.stdout.write(sys.prefix)')/lib/pkgconfig"
-
-meson _build -Dpython="$(which python)" -Dcoverage=true
-ninja -C _build
-xvfb-run -a meson test --suite pygobject --timeout-multiplier 4 -C _build -v
-
-# DOCUMENTATION CHECKS
-if [[ "${PYVER}" == "2.7" ]] && [[ "${PYIMPL}" == "CPython" ]]; then
-    python -m pip install sphinx sphinx_rtd_theme
-    python -m sphinx -W -a -E -b html -n docs docs/_build
-fi;
-
-# COLLECT GCOV COVERAGE
 lcov --config-file .gitlab-ci/lcovrc --directory . --capture --initial --output-file \
     "${COV_DIR}/${CI_JOB_NAME}-baseline.lcov"
 
+xvfb-run -a meson test --suite pygobject --timeout-multiplier 4 -C _build -v
 python -m coverage lcov -o "${COV_DIR}/${COV_KEY}.py.lcov"
 
+# COLLECT GCOV COVERAGE
 lcov --config-file .gitlab-ci/lcovrc --directory . --capture --output-file \
     "${COV_DIR}/${CI_JOB_NAME}.lcov"

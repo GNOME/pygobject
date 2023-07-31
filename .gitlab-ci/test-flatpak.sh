@@ -10,10 +10,11 @@ if [[ "$1" == "inflatpak" ]]; then
     export COVERAGE_FILE="${COV_DIR}/.coverage.${COV_KEY}"
     mkdir -p "${COV_DIR}"
 
-    python3 -m venv _venv
-    . _venv/bin/activate
-    python3 -m pip install pytest pytest-faulthandler coverage .
-    python3 -m coverage run --context "${COV_KEY}" tests/runtests.py
+    python3 -m venv ~/_venv
+    . ~/_venv/bin/activate
+    python3 -m pip install pytest pytest-faulthandler coverage
+    meson setup _build -Dcoverage=true
+    meson test --suite pygobject --timeout-multiplier 4 -C _build -v
     python3 -m coverage lcov -o "${COV_DIR}/${COV_KEY}.py.lcov"
     chmod -R 777 "${COV_DIR}"
 else

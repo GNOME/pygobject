@@ -3,8 +3,8 @@
 set -e
 
 python3 --version
-python3 -m venv _venv
-source _venv/bin/activate
+python3 -m venv ~/_venv
+source ~/_venv/bin/activate
 
 # ccache setup
 export CCACHE_BASEDIR="$(pwd)"
@@ -17,7 +17,8 @@ mkdir -p "${CCACHE_DIR}"
 
 # test
 python -m pip install --upgrade pip
-python -m pip install pycairo pytest pytest-faulthandler coverage
-python setup.py build_tests
-xvfb-run -a python -m coverage run --context "${COV_KEY}" tests/runtests.py
+python -m pip install pycairo pytest pytest-faulthandler coverage meson ninja
+
+meson setup _build -Dcoverage=true
+xvfb-run -a meson test --suite pygobject --timeout-multiplier 4 -C _build -v
 python -m coverage lcov -o "${COV_DIR}/${COV_KEY}.py.lcov"
