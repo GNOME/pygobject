@@ -128,6 +128,7 @@ envdata.append('PYTHONPATH', python_paths)
 envdata.append('TESTS_BUILDDIR', meson.current_build_dir())
 
 if get_option('coverage')
+  # NB. Coverage file can be changed via the COVERAGE_FILE environment variable
   test_args = [
     '-m', 'coverage', 'run',
     '--context', python.get_variable('SOABI', python.language_version()),

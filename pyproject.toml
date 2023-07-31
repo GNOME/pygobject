@@ -21,16 +21,30 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 requires-python = ">=3.8, <4"
+dependencies = [
+    "pycairo>=1.16"
+]
 
 [project.urls]
 Homepage = "https://pygobject.readthedocs.io"
 Repository = "https://gitlab.gnome.org/GNOME/pygobject.git"
 Changelog = "https://gitlab.gnome.org/GNOME/pygobject/-/blob/master/NEWS"
 
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-faulthandler",
+    "coverage",
+    "flake8",
+]
+docs = [
+    "sphinx>=4.0,<5.0",
+    "sphinx-rtd-theme>=0.5,<2.0",
+]
 
 [tool.meson-python.args]
 setup = ["-Dpkgconf=false"]
 
 [build-system]
 build-backend = "mesonpy"
-requires = ["meson-python", "pycairo>=1.16"]
+requires = ["meson-python>=0.12.1", "wheel", "pycairo>=1.16"]
