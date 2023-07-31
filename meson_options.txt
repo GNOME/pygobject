@@ -1,4 +1,5 @@
 option('python', type : 'string', value : 'python3')
 option('pycairo', type : 'feature', value : 'auto', description : 'build with pycairo integration')
 option('tests', type : 'boolean', value : true, description : 'build unit tests')
+option('coverage', type : 'boolean', value : false, description : 'run unit tests with coverage')
 option('pkgconf', type : 'boolean', value : true, description : 'install pkgconf file')

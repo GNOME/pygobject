@@ -127,7 +127,18 @@ endif
 envdata.append('PYTHONPATH', python_paths)
 envdata.append('TESTS_BUILDDIR', meson.current_build_dir())
 
-test('pygobject-test-suite', python,
-  args : [join_paths(meson.current_source_dir(), 'runtests.py')],
+if get_option('coverage')
+  test_args = [
+    '-m', 'coverage', 'run',
+    '--context', python.get_variable('SOABI', python.language_version()),
+  ]
+else
+  test_args = []
+endif
+test_args += join_paths(meson.current_source_dir(), 'runtests.py')
+
+test('pygobject-test-suite',
+  python,
+  args : test_args,
   env : envdata,
   timeout : 90)
