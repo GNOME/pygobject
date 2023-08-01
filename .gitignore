@@ -19,7 +19,8 @@
 .idea
 .cache
 .pytest_cache
-config.h
+/config.h
+/tmp/*
 /build/
 /dist/
 /pygobject.egg-info/
