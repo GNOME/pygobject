@@ -59,14 +59,19 @@ if not with_pycairo.disabled()
     python,
     '-c',
     '''
-import os, sys
+import pathlib, sys
 from importlib.util import find_spec
 spec = find_spec("cairo")
 if spec is None:
   sys.stderr.write("cairo module spec not found")
   sys.exit(1)
-sys.stdout.write(os.path.join(os.path.dirname(spec.origin), "include"))
-''',
+src_path = pathlib.Path("@0@")
+inc_path = pathlib.Path(spec.origin).parent / "include"
+try:
+  sys.stdout.write(str(inc_path.relative_to(src_path)))
+except ValueError:
+  sys.stdout.write(str(inc_path))
+'''.format(meson.current_source_dir()),
     check: false,
   )
 
