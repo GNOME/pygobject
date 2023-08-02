@@ -127,19 +127,9 @@ endif
 envdata.append('PYTHONPATH', python_paths)
 envdata.append('TESTS_BUILDDIR', meson.current_build_dir())
 
-if get_option('coverage')
-  # NB. Coverage file can be changed via the COVERAGE_FILE environment variable
-  test_args = [
-    '-m', 'coverage', 'run',
-    '--context', python.get_variable('SOABI', python.language_version()),
-  ]
-else
-  test_args = []
-endif
-test_args += join_paths(meson.current_source_dir(), 'runtests.py')
-
 test('pygobject-test-suite',
   python,
-  args : test_args,
-  env : envdata,
-  timeout : 90)
+  args: [join_paths(meson.current_source_dir(), 'runtests.py')],
+  workdir: meson.project_source_root(),
+  env: envdata,
+  timeout: 90)

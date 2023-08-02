@@ -14,9 +14,9 @@ pacman --noconfirm -S --needed \
     "${MINGW_PACKAGE_PREFIX}"-ninja \
     "${MINGW_PACKAGE_PREFIX}"-python \
     "${MINGW_PACKAGE_PREFIX}"-python-cairo \
-    "${MINGW_PACKAGE_PREFIX}"-python-coverage \
     "${MINGW_PACKAGE_PREFIX}"-python-pip \
     "${MINGW_PACKAGE_PREFIX}"-python-pytest \
+    "${MINGW_PACKAGE_PREFIX}"-python-pytest-cov \
     "${MINGW_PACKAGE_PREFIX}"-toolchain \
     git \
     lcov
@@ -37,14 +37,14 @@ export COVERAGE_FILE="${COV_DIR}/.coverage.${COV_KEY}"
 export PYTHONDEVMODE=1
 
 
-MSYSTEM= CFLAGS="-coverage -ftest-coverage -fprofile-arcs -Werror" meson setup _build -Dcoverage=true
+MSYSTEM= CFLAGS="-coverage -ftest-coverage -fprofile-arcs -Werror" meson setup _build
 
 lcov \
     --config-file .gitlab-ci/lcovrc \
     --directory "$(pwd)" --capture --initial --output-file \
     "${COV_DIR}/${COV_KEY}-baseline.lcov"
 
-MSYSTEM= meson test --suite pygobject --timeout-multiplier 4 -C _build -v
+MSYSTEM= PYTEST_ADDOPTS="--cov" meson test --suite pygobject --timeout-multiplier 4 -C _build -v
 MSYSTEM= python -m coverage lcov -o "${COV_DIR}/${COV_KEY}.py.lcov"
 
 lcov \

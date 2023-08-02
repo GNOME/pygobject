@@ -23,7 +23,7 @@ mkdir -p "${CCACHE_DIR}"
 mkdir -p "${COV_DIR}"
 
 # NB. setuptools is needed, since distutils has been removed from Python 3.12
-python -m pip install pycairo flake8 pytest pytest-faulthandler coverage setuptools
+python -m pip install pycairo flake8 pytest pytest-cov pytest-faulthandler setuptools
 
 # MESON
 /usr/bin/python3 -m pip install --user meson
@@ -34,12 +34,12 @@ export PKG_CONFIG_PATH="$(python -c 'import sys; sys.stdout.write(sys.prefix)')/
 python -m flake8
 
 # BUILD & TEST
-CFLAGS="-coverage -ftest-coverage -fprofile-arcs -Werror" meson setup _build -Dpython="$(which python)" -Dcoverage=true
+CFLAGS="-coverage -ftest-coverage -fprofile-arcs -Werror" meson setup _build -Dpython="$(which python)"
 
 lcov --config-file .gitlab-ci/lcovrc --directory . --capture --initial --output-file \
     "${COV_DIR}/${CI_JOB_NAME}-baseline.lcov"
 
-xvfb-run -a meson test --suite pygobject --timeout-multiplier 4 -C _build -v
+PYTEST_ADDOPTS="--cov" xvfb-run -a meson test --suite pygobject --timeout-multiplier 4 -C _build -v
 python -m coverage lcov -o "${COV_DIR}/${COV_KEY}.py.lcov"
 
 # COLLECT GCOV COVERAGE
