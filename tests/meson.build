@@ -108,14 +108,10 @@ helperext = python.extension_module('testhelper', helper_sources,
 schemas = gnome.compile_schemas(build_by_default: true)
 
 envdata = environment()
-envdata.append('GI_TYPELIB_PATH', meson.current_build_dir())
 if gi_dep.type_name() == 'internal'
   envdata.append('GI_TYPELIB_PATH', join_paths(meson.project_build_root(), 'subprojects', 'gobject-introspection', 'gir'))
 endif
 
-if host_machine.system() == 'linux'
-    envdata.prepend('LD_LIBRARY_PATH', meson.current_build_dir())
-endif
 if host_machine.system() == 'windows'
     envdata.prepend('PATH', join_paths(get_option('prefix'), get_option('bindir')))
 endif
@@ -125,7 +121,6 @@ if pycairo_dep.found() and pycairo_dep.type_name() == 'internal'
   python_paths += [join_paths(meson.project_build_root(), 'subprojects', 'pycairo')]
 endif
 envdata.append('PYTHONPATH', python_paths)
-envdata.append('TESTS_BUILDDIR', meson.current_build_dir())
 
 test('pygobject-test-suite',
   python,

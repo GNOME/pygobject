@@ -71,17 +71,6 @@ def init_test_environ():
     else:
         os.environ["DBUS_SESSION_BUS_ADDRESS"] = "."
 
-    tests_builddir = os.path.abspath(os.environ.get('TESTS_BUILDDIR', os.path.dirname(__file__)))
-    builddir = os.path.dirname(tests_builddir)
-    tests_srcdir = os.path.abspath(os.path.dirname(__file__))
-    srcdir = os.path.dirname(tests_srcdir)
-
-    sys.path.insert(0, os.path.join(builddir, 'gi'))
-    sys.path.insert(0, tests_srcdir)
-    sys.path.insert(0, srcdir)
-    sys.path.insert(0, tests_builddir)
-    sys.path.insert(0, builddir)
-
     # force untranslated messages, as we check for them in some tests
     os.environ['LC_MESSAGES'] = 'C'
     os.environ['G_DEBUG'] = 'fatal-warnings fatal-criticals'
@@ -90,6 +79,22 @@ def init_test_environ():
         # On Windows glib will create an error dialog which will block tests
         # so it's never a good idea there to make things fatal.
         os.environ['G_DEBUG'] = ''
+
+    # First add test directory, since we have a gi package there
+    tests_srcdir = os.path.abspath(os.path.dirname(__file__))
+    srcdir = os.path.dirname(tests_srcdir)
+
+    sys.path.insert(0, tests_srcdir)
+    sys.path.insert(0, srcdir)
+
+    import gi
+
+    gi_builddir = os.path.dirname(gi._gi.__file__)
+    builddir = os.path.dirname(gi_builddir)
+    tests_builddir = os.path.join(builddir, "tests")
+
+    sys.path.insert(0, tests_builddir)
+    sys.path.insert(0, builddir)
 
     # make Gio able to find our gschemas.compiled in tests/. This needs to be set
     # before importing Gio. Support a separate build tree, so look in build dir
@@ -108,7 +113,6 @@ def init_test_environ():
     # Force the default theme so broken themes don't affect the tests
     os.environ['GTK_THEME'] = 'Adwaita'
 
-    import gi
     gi.require_version("GIRepository", "2.0")
     from gi.repository import GIRepository
     repo = GIRepository.Repository.get_default()
