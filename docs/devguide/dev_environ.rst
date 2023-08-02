@@ -82,6 +82,8 @@ your operating system.
 |windows-logo| Windows
 ----------------------
 
+Do develop on Windows you need to have `MSys2 <https://msys2.org>`_ installed.
+
 .. code:: console
 
     pacman -S --needed --noconfirm base-devel mingw-w64-x86_64-toolchain git \
@@ -98,15 +100,13 @@ With homebrew:
 .. code:: console
 
     brew update
-    brew install pyenv pipx
-    brew install pipx
-    pipx ensurepath
+    brew install python3 gobject-introspection
 
 
 .. _install-pyenv:
 
-Install `pyenv`_
-================
+Install `pyenv`_ (Optional)
+===========================
 
 `pyenv`_ lets you easily switch between multiple versions of Python.
 
@@ -134,57 +134,9 @@ Install `pyenv`_
 
 .. code:: console
 
+    brew install pyenv
     pyenv install 3.11
     pyenv global 3.11
-
-
-.. _install-poetry:
-
-Install `Poetry`_
-=================
-
-`Poetry`_ is a tool for dependency management and packaging in Python, we'll install it
-with `pipx`_ which installs Python CLI tools in to separate virtualenvs.
-
-============================================== ==========================================
-|linux-logo| :ref:`Linux <linux-poetry>`       |macosx-logo| :ref:`macOS <macosx-poetry>`
-|windows-logo| :ref:`Windows <windows-poetry>`
-============================================== ==========================================
-
-.. _linux-poetry:
-
-|linux-logo| Linux
-------------------
-
-.. code:: console
-
-    python3 -m pip install --user pipx
-    python3 -m pipx ensurepath
-    pipx install poetry
-
-
-.. _windows-poetry:
-
-|windows-logo| Windows
-----------------------
-
-.. code:: console
-
-    python.exe -m pip install --user pipx
-    python.exe -m pipx ensurepath
-    pipx install poetry
-
-
-.. _macosx-poetry:
-
-|macosx-logo| macOS
--------------------
-
-With homebrew:
-
-.. code:: console
-
-    pipx install poetry
 
 
 .. _projects-pygobject-dependencies:
@@ -200,17 +152,59 @@ Platform Independent Steps
 ==========================
 
 
-If you are going to work on developing PyGObject itself, then do the following
-additional steps:
+First, check out the source code:
 
 .. code:: console
 
     git clone https://gitlab.gnome.org/GNOME/pygobject.git
     cd pygobject
-    poetry install
-    poetry shell
 
 
-.. _pyenv: https://github.com/pyenv/pyenv
-.. _pipx: https://pypa.github.io/pipx/
-.. _Poetry: https://python-poetry.org
+It's always a good idea to work from within a Python virtual environment.
+PyGObject is built with `Meson <https://mesonbuild.com/>`_.
+In order to support 
+`editable installs <https://meson-python.readthedocs.io/en/latest/how-to-guides/editable-installs.html>`_,
+Meson-python, Meson, and Ninja should be installed in the virtual environment.
+
+.. code:: console
+
+    python3 -m venv .venv
+    source .venv/bin/activate
+    pip install meson-python meson ninja pycairo
+
+.. note::
+
+   For Python 3.12 and newer, also install ``setuptools``, since distutils is no longer provided in the standard library.
+
+Install PyGObject in your local environment with the ``--no-build-isolation`` to allow for dynamic rebuilds
+
+.. code:: console
+
+   pip install --no-build-isolation -e '.[dev]'
+
+Open a Python console:
+
+.. code:: python
+
+   from gi.repository import GObject
+
+Run the unittests:
+
+.. code:: console
+
+   pytest
+
+It's also not possible to run the tests from meson:
+
+.. code:: console
+
+   meson setup _build  # Needed only once
+   meson test -C _build
+
+
+Create a release tarball and wheel:
+
+.. code:: console
+
+    pip install build
+    python -m build
