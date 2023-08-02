@@ -45,6 +45,15 @@ docs = [
 [tool.meson-python.args]
 setup = ["-Dpkgconf=false"]
 
+[tool.pytest.ini_options]
+testpaths = [
+    "tests",
+]
+python_files = "test_*.py"
+addopts = [
+    "--import-mode=importlib",
+]
+
 [build-system]
 build-backend = "mesonpy"
 requires = ["meson-python>=0.12.1", "wheel", "pycairo>=1.16"]
