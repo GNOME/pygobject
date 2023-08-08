@@ -182,6 +182,13 @@ Install PyGObject in your local environment with the ``--no-build-isolation`` to
 
    pip install --no-build-isolation -e '.[dev]'
 
+By default the C libraries are built in "release" mode (no debug symbols).
+To compile the C libraries with debug symbols, run
+
+.. code:: console
+
+   pip install --no-build-isolation --config-settings=setup-args="-Dbuildtype=debug" -e '.[dev]'
+   
 Open a Python console:
 
 .. code:: python
