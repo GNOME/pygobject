@@ -23,11 +23,11 @@
 #include "pygi-info.h"
 #include "pygi-cache.h"
 #include "pygi-invoke.h"
-#include "pygi-type.h"
 #include "pygi-argument.h"
 #include "pygi-util.h"
 #include "pygi-basictype.h"
 #include "pygi-type.h"
+#include "pygi-fundamental.h"
 
 /* _generate_doc_string
  *
@@ -1938,7 +1938,10 @@ _wrap_g_field_info_get_value (PyGIBaseInfo *self,
             pointer = pyg_boxed_get (instance, void);
             break;
         case GI_INFO_TYPE_OBJECT:
-            pointer = pygobject_get (instance);
+            if (pygi_check_fundamental (container_info_type, container_info))
+                pointer = pyg_pointer_get (instance, void);
+            else
+                pointer = pygobject_get (instance);
             break;
         default:
             /* Other types don't have fields. */
@@ -2052,7 +2055,10 @@ _wrap_g_field_info_set_value (PyGIBaseInfo *self,
             pointer = pyg_boxed_get (instance, void);
             break;
         case GI_INFO_TYPE_OBJECT:
-            pointer = pygobject_get (instance);
+            if (pygi_check_fundamental (container_info_type, container_info))
+                pointer = pyg_pointer_get (instance, void);
+            else
+                pointer = pygobject_get (instance);
             break;
         default:
             /* Other types don't have fields. */
