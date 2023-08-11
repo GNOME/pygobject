@@ -32,6 +32,7 @@ sources = [
   'pygi-array.c',
   'pygi-error.c',
   'pygi-object.c',
+  'pygi-fundamental.c',
   'pygi-value.c',
   'pygi-enum-marshal.c',
   'pygi-struct-marshal.c',

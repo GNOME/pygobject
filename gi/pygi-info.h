@@ -69,6 +69,7 @@ extern PyTypeObject PyGIUnresolvedInfo_Type;
 extern PyTypeObject PyGIVFuncInfo_Type;
 extern PyTypeObject PyGIUnionInfo_Type;
 extern PyTypeObject PyGIBoxedInfo_Type;
+extern PyTypeObject PyGIFundamental_Type;
 extern PyTypeObject PyGIErrorDomainInfo_Type;
 extern PyTypeObject PyGISignalInfo_Type;
 extern PyTypeObject PyGIPropertyInfo_Type;

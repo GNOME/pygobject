@@ -39,6 +39,7 @@
 #include "pygi-closure.h"
 #include "pygi-type.h"
 #include "pygi-boxed.h"
+#include "pygi-fundamental.h"
 #include "pygi-info.h"
 #include "pygi-struct.h"
 #include "pygobject-object.h"
@@ -2569,6 +2570,8 @@ PYGI_MODINIT_FUNC PyInit__gi(void) {
     if (pygi_struct_register_types (module) < 0)
         return NULL;
     if (pygi_gboxed_register_types (module_dict) < 0)
+        return NULL;
+    if (pygi_fundamental_register_types (module) < 0)
         return NULL;
     if (pygi_boxed_register_types (module) < 0)
         return NULL;
