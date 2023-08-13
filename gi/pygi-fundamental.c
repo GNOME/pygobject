@@ -99,8 +99,8 @@ fundamental_init (PyObject *self,
 PYGI_DEFINE_TYPE("gi.Fundamental", PyGIFundamental_Type, PyGIFundamental);
 
 PyObject *
-pygi_fundamental_new (PyTypeObject *type,
-                       gpointer      pointer)
+pygi_fundamental_new (PyTypeObject *type, // GTypeInstance?
+                      gpointer      pointer)
 {
     PyGIFundamental *self;
     GIObjectInfo *info;
