@@ -133,12 +133,25 @@ pygi_fundamental_new (PyTypeObject *type,
     self->ref_func = g_object_info_get_ref_function_pointer (info);
     self->unref_func = g_object_info_get_unref_function_pointer (info);
 
-    if (self->ref_func)
-        self->ref_func (pointer);
+    pygi_fundamental_ref (self);
 
     g_base_info_unref (info);
 
     return (PyObject *) self;
+}
+
+void
+pygi_fundamental_ref (PyGIFundamental *self)
+{
+    if (self->ref_func && ((PyGPointer *) self)->pointer)
+        self->ref_func (((PyGPointer *) self)->pointer);
+}
+
+void
+pygi_fundamental_unref (PyGIFundamental *self)
+{
+    if (self->unref_func && ((PyGPointer *) self)->pointer)
+        self->unref_func (((PyGPointer *) self)->pointer);
 }
 
 int

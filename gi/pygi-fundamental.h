@@ -42,9 +42,11 @@ typedef struct {
 } PyGIFundamental;
 
 
-PyObject *
-pygi_fundamental_new (PyTypeObject *type,
-                       gpointer      pointer);
+PyObject* pygi_fundamental_new   (PyTypeObject *type,
+                                  gpointer      pointer);
+
+void      pygi_fundamental_ref   (PyGIFundamental *self);
+void      pygi_fundamental_unref (PyGIFundamental *self);
 
 int pygi_fundamental_register_types (PyObject *m);
 
