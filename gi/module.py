@@ -38,6 +38,7 @@ from ._gi import \
     CallbackInfo, \
     Struct, \
     Boxed, \
+    Fundamental, \
     CCallback, \
     enum_add, \
     enum_register_new_gtype_and_add, \
@@ -74,6 +75,9 @@ def get_parent_for_object(object_info):
         gtype = object_info.get_g_type()
         if gtype and gtype.pytype:
             return gtype.pytype
+
+        if object_info.get_fundamental():
+            return Fundamental
 
         # Otherwise use builtins.object as the base
         return object

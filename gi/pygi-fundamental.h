@@ -33,6 +33,7 @@
 
 G_BEGIN_DECLS
 
+extern PyTypeObject PyGIFundamental_Type;
 
 typedef struct {
     PyGPointer base;
