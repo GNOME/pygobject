@@ -30,6 +30,12 @@
 #include "pygi-info.h"
 #include "pygi-util.h"
 #include "pygi-fundamental.h"
+#include "pygobject-object.h" // for pygobject_lookup_class
+
+
+static PyObject *
+_pygi_fundamental_new_internal (PyTypeObject *type,
+                                gpointer      pointer);
 
 
 static void
@@ -73,14 +79,14 @@ fundamental_new (PyTypeObject *type,
         PyErr_Format (PyExc_TypeError, "cannot instantiate abstract type %s", g_type_name (g_type));
         return NULL;
     }
-    
+
     pointer = g_type_create_instance (g_type);
     if (pointer == NULL) {
         PyErr_NoMemory();
         goto out;
     }
 
-    self = pygi_fundamental_new (type, pointer);
+    self = _pygi_fundamental_new_internal (type, pointer);
     if (self == NULL) {
         g_free (pointer);
     }
@@ -103,9 +109,26 @@ fundamental_init (PyObject *self,
 
 PYGI_DEFINE_TYPE("gi.Fundamental", PyGIFundamental_Type, PyGIFundamental);
 
+
 PyObject *
-pygi_fundamental_new (PyTypeObject *type, // GTypeInstance?
-                      gpointer      pointer)
+pygi_fundamental_new (gpointer pointer)
+{
+    GType gtype;
+    PyTypeObject *type;
+
+    if (!pointer) {
+        Py_RETURN_NONE;
+    }
+
+    gtype = G_TYPE_FROM_INSTANCE (pointer);
+    type = pygobject_lookup_class (gtype);
+
+    return _pygi_fundamental_new_internal (type, pointer);
+}
+
+static PyObject *
+_pygi_fundamental_new_internal (PyTypeObject *type,
+                                gpointer      pointer)
 {
     PyGIFundamental *self;
     GIObjectInfo *info;

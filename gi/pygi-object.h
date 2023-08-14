@@ -32,9 +32,7 @@ pygi_arg_gobject_out_arg_from_py     (PyObject          *py_arg,     /* in */
 
 PyObject *
 pygi_arg_object_to_py_called_from_c  (GIArgument        *arg,
-                                      GITransfer         transfer,
-                                      PyObject          *py_type);
-
+                                      GITransfer         transfer);
 
 PyGIArgCache *
 pygi_arg_gobject_new_from_info       (GITypeInfo        *type_info,

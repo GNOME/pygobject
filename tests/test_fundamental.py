@@ -1,6 +1,13 @@
 import pytest
 from gi.repository import GObject, Regress
 
+try:
+    from gi.repository import Gtk
+    GTK4 = (Gtk._version == "4.0")
+except ImportError:
+    Gtk = None
+    GTK4 = False
+
 
 def test_constructor_no_data():
     obj = Regress.TestFundamentalSubObject()
@@ -77,7 +84,6 @@ def test_abstract_fundamental_type():
         Regress.TestFundamentalObject()
 
 
-@pytest.mark.xfail()
 def test_fundamental_argument_out():
     obj = Regress.TestFundamentalSubObject.new("data")
     other = Regress.test_fundamental_argument_out(obj)
@@ -92,3 +98,11 @@ def test_multiple_objects():
     obj2 = Regress.TestFundamentalSubObject()
 
     assert obj1 != obj2
+
+
+@pytest.mark.skipif(not GTK4, reason="requires GTK 4")
+def test_gtk_expression():
+    obj = object()
+    con = Gtk.ConstantExpression.new_for_value(obj)
+
+    assert con.get_value() is obj
