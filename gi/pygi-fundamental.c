@@ -69,6 +69,11 @@ fundamental_new (PyTypeObject *type,
     }
 
     g_type = pyg_type_from_object ( (PyObject *) type);
+    if (G_TYPE_IS_ABSTRACT (g_type)) {
+        PyErr_Format (PyExc_TypeError, "cannot instantiate abstract type %s", g_type_name (g_type));
+        return NULL;
+    }
+    
     pointer = g_type_create_instance (g_type);
     if (pointer == NULL) {
         PyErr_NoMemory();

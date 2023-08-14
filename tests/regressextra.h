@@ -29,6 +29,10 @@ _GI_TEST_EXTERN
 gboolean regress_test_array_of_fundamental_objects_in (RegressTestFundamentalObject **list, gsize len);
 _GI_TEST_EXTERN
 RegressTestFundamentalObject** regress_test_array_of_fundamental_objects_out (gsize *len);
+_GI_TEST_EXTERN
+gboolean regress_test_fundamental_argument_in (RegressTestFundamentalObject *obj);
+_GI_TEST_EXTERN
+RegressTestFundamentalObject* regress_test_fundamental_argument_out (RegressTestFundamentalObject *obj);
 
 #ifndef _GI_DISABLE_CAIRO
 

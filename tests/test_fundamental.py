@@ -45,7 +45,7 @@ def test_create_fundamental_hidden_class_instance():
     assert isinstance(obj, Regress.TestFundamentalObject)
 
 
-@pytest.mark.xfail(reason="Cannot find fundamental type (pygi-value.c:791)")
+@pytest.mark.xfail(reason="Requires value get/set function for fundamental type")
 def test_value_set_fundamental_object():
     val = GObject.Value(Regress.TestFundamentalSubObject.__gtype__)
     obj = Regress.TestFundamentalSubObject()
@@ -64,3 +64,31 @@ def test_array_of_fundamental_objects_out():
 
     assert len(objs) == 2
     assert all(isinstance(o, Regress.TestFundamentalObject) for o in objs)
+
+
+def test_fundamental_argument_in():
+    obj = Regress.TestFundamentalSubObject()
+
+    assert Regress.test_fundamental_argument_in(obj)
+
+
+def test_abstract_fundamental_type():
+    with pytest.raises(TypeError):
+        Regress.TestFundamentalObject()
+
+
+@pytest.mark.xfail()
+def test_fundamental_argument_out():
+    obj = Regress.TestFundamentalSubObject.new("data")
+    other = Regress.test_fundamental_argument_out(obj)
+
+    assert type(obj) is type(other)
+    assert obj is not other
+    assert obj.data == other.data
+
+
+def test_multiple_objects():
+    obj1 = Regress.TestFundamentalSubObject()
+    obj2 = Regress.TestFundamentalSubObject()
+
+    assert obj1 != obj2

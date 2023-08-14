@@ -157,6 +157,27 @@ regress_test_array_of_fundamental_objects_out (gsize *len)
     return objs;
 }
 
+/**
+ * regress_test_fundamental_argument_in
+ * @obj: (transfer full): A #RegressTestFundamentalObject
+ **/
+gboolean
+regress_test_fundamental_argument_in (RegressTestFundamentalObject *obj)
+{
+    return REGRESS_TEST_IS_FUNDAMENTAL_OBJECT (obj);
+}
+
+/**
+ * regress_test_fundamental_argument_out
+ * @obj: (transfer none): A #RegressTestFundamentalObject
+ * Returns: (transfer none): Same #RegressTestFundamentalObject
+ **/
+RegressTestFundamentalObject*
+regress_test_fundamental_argument_out (RegressTestFundamentalObject *obj)
+{
+    return obj;
+}
+
 #ifndef _GI_DISABLE_CAIRO
 
 /**
