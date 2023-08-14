@@ -82,7 +82,7 @@ your operating system.
 |windows-logo| Windows
 ----------------------
 
-Do develop on Windows you need to have `MSys2 <https://msys2.org>`_ installed.
+To develop on Windows you need to have `MSYS2 <https://msys2.org>`_ installed.
 
 .. code:: console
 
