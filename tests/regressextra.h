@@ -25,6 +25,11 @@ GList *regress_test_glist_boxed_none_return (guint count);
 _GI_TEST_EXTERN
 GList *regress_test_glist_boxed_full_return (guint count);
 
+_GI_TEST_EXTERN
+gboolean regress_test_array_of_fundamental_objects_in (RegressTestFundamentalObject **list, gsize len);
+_GI_TEST_EXTERN
+RegressTestFundamentalObject** regress_test_array_of_fundamental_objects_out (gsize *len);
+
 #ifndef _GI_DISABLE_CAIRO
 
 _GI_TEST_EXTERN

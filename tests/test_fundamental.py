@@ -1,7 +1,8 @@
-from gi.repository import Regress
+import pytest
+from gi.repository import GObject, Regress
 
 
-def test_refcount_no_data():
+def test_constructor_no_data():
     obj = Regress.TestFundamentalSubObject()
 
     assert isinstance(obj, Regress.TestFundamentalSubObject)
@@ -10,17 +11,56 @@ def test_refcount_no_data():
     assert obj.data is None
 
 
-def test_refcount_with_data():
+def test_constructor_with_data():
+    with pytest.raises(TypeError):
+        Regress.TestFundamentalSubObject(data='foo')
+
+
+def test_create_fundamental_new_with_data():
     obj = Regress.TestFundamentalSubObject.new('foo')
+
     assert isinstance(obj, Regress.TestFundamentalSubObject)
     assert isinstance(obj, Regress.TestFundamentalObject)
     assert obj.refcount == 1
     assert obj.data == 'foo'
 
 
-# Add more test cases:
-#  - setting properties (obj.data = ...), to test the change in pygi_set_property_value_real(), using compatible and incompatible types
-#  - getting values of different data types, including None and objects
-#  - Calling methods on the Fundamental, testing none and full transfer modes for an argument and return value
-#  - constructor and method calls with keyword arguments
-#  - Passing a Fundamental object in an array to a method; array handling keeps causing crashes and malfunctions, so I think it's important to make sure that this keeps working.
+def test_change_field():
+    obj = Regress.TestFundamentalObjectNoGetSetFunc.new('foo')
+
+    obj.data = 'bar'
+
+    assert obj.get_data() == 'bar'
+
+
+def test_call_method():
+    obj = Regress.TestFundamentalObjectNoGetSetFunc.new('foo')
+
+    assert obj.get_data() == 'foo'
+
+
+def test_create_fundamental_hidden_class_instance():
+    obj = Regress.test_create_fundamental_hidden_class_instance()
+
+    assert isinstance(obj, Regress.TestFundamentalObject)
+
+
+@pytest.mark.xfail(reason="Cannot find fundamental type (pygi-value.c:791)")
+def test_value_set_fundamental_object():
+    val = GObject.Value(Regress.TestFundamentalSubObject.__gtype__)
+    obj = Regress.TestFundamentalSubObject()
+
+    Regress.test_value_set_fundamental_object(val, obj)
+
+    assert val.get_value() == obj
+
+
+def test_array_of_fundamental_objects_in():
+    assert Regress.test_array_of_fundamental_objects_in([Regress.TestFundamentalSubObject()])
+
+
+def test_array_of_fundamental_objects_out():
+    objs = Regress.test_array_of_fundamental_objects_out()
+
+    assert len(objs) == 2
+    assert all(isinstance(o, Regress.TestFundamentalObject) for o in objs)
