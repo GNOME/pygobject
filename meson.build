@@ -179,12 +179,12 @@ pkgconf.set('VERSION', pygobject_version)
 
 with_pkgconf = get_option('pkgconf')
 if with_pkgconf
-pkg_install_dir = '@0@/pkgconfig'.format(get_option('libdir'))
+  pkg_install_dir = '@0@/pkgconfig'.format(get_option('libdir'))
 
-configure_file(input : 'pygobject-@0@.pc.in'.format(platform_version),
-  output : 'pygobject-@0@.pc'.format(platform_version),
-  configuration : pkgconf,
-  install_dir : pkg_install_dir)
+  configure_file(input : 'pygobject-@0@.pc.in'.format(platform_version),
+    output : 'pygobject-@0@.pc'.format(platform_version),
+    configuration : pkgconf,
+    install_dir : pkg_install_dir)
 endif
 
 pygobject_dep = declare_dependency(
