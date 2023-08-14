@@ -46,8 +46,8 @@ fundamental_dealloc (PyGIFundamental *self)
 
 static PyObject *
 fundamental_new (PyTypeObject *type,
-                  PyObject     *args,
-                  PyObject     *kwargs)
+                 PyObject     *args,
+                 PyObject     *kwargs)
 {
     static char *kwlist[] = { NULL };
 
@@ -89,8 +89,8 @@ out:
 
 static int
 fundamental_init (PyObject *self,
-                   PyObject *args,
-                   PyObject *kwargs)
+                  PyObject *args,
+                  PyObject *kwargs)
 {
     /* Don't call PyGPointer's init, which raises an exception. */
     return 0;

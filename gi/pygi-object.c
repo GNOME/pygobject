@@ -232,7 +232,7 @@ _pygi_marshal_cleanup_from_py_interface_object (PyGIInvokeState *state,
  */
 
 static PyObject *
-pygi_arg_gobject_to_py (GIArgument *arg,
+pygi_arg_object_to_py (GIArgument *arg,
                         GITransfer  transfer,
                         PyObject   *py_type)
 {
@@ -266,7 +266,7 @@ pygi_arg_gobject_to_py (GIArgument *arg,
 }
 
 PyObject *
-pygi_arg_gobject_to_py_called_from_c (GIArgument *arg,
+pygi_arg_object_to_py_called_from_c (GIArgument *arg,
                                       GITransfer  transfer,
                                       PyObject   *py_type)
 {
@@ -287,10 +287,10 @@ pygi_arg_gobject_to_py_called_from_c (GIArgument *arg,
             g_object_is_floating (arg->v_pointer)) {
 
         g_object_ref (arg->v_pointer);
-        object = pygi_arg_gobject_to_py (arg, GI_TRANSFER_EVERYTHING, NULL);
+        object = pygi_arg_object_to_py (arg, GI_TRANSFER_EVERYTHING, NULL);
         g_object_force_floating (arg->v_pointer);
     } else {
-        object = pygi_arg_gobject_to_py (arg, transfer, py_type);
+        object = pygi_arg_object_to_py (arg, transfer, py_type);
     }
 
     return object;
@@ -303,7 +303,7 @@ _pygi_marshal_to_py_called_from_c_interface_object_cache_adapter (PyGIInvokeStat
                                                                   GIArgument        *arg,
                                                                   gpointer          *cleanup_data)
 {
-    return pygi_arg_gobject_to_py_called_from_c (arg,
+    return pygi_arg_object_to_py_called_from_c (arg,
                                                  arg_cache->transfer,
                                                  ((PyGIInterfaceCache *) arg_cache)->py_type);
 }
@@ -315,7 +315,7 @@ _pygi_marshal_to_py_called_from_py_interface_object_cache_adapter (PyGIInvokeSta
                                                                    GIArgument        *arg,
                                                                    gpointer          *cleanup_data)
 {
-    return pygi_arg_gobject_to_py (arg,
+    return pygi_arg_object_to_py (arg,
                                    arg_cache->transfer,
                                    ((PyGIInterfaceCache *) arg_cache)->py_type);
 }
