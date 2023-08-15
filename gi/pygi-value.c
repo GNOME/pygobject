@@ -131,7 +131,7 @@ _pygi_argument_from_g_value(const GValue *value,
                 case GI_INFO_TYPE_OBJECT:
                     if (G_VALUE_HOLDS_PARAM (value))
                       arg.v_pointer = g_value_get_param (value);
-                    else
+                    else if (G_VALUE_HOLDS_OBJECT (value))
                       arg.v_pointer = g_value_get_object (value);
                     break;
                 case GI_INFO_TYPE_BOXED:
