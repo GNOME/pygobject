@@ -100,6 +100,26 @@ def test_multiple_objects():
     assert obj1 != obj2
 
 
+class MyCustomFundamentalObject(Regress.TestFundamentalObject):
+
+    def __init__(self):
+        print("MyCustomFundamentalObject.__init__")
+        super().__init__()
+
+    def do_finalize(self):
+        print("MyCustomFundamentalObject.do_finalize")
+
+
+def test_custom_fundamental_type_vfunc_override(capsys):
+    obj = MyCustomFundamentalObject()
+    del obj
+
+    out = capsys.readouterr().out
+
+    assert "MyCustomFundamentalObject.__init__" in out
+    assert "MyCustomFundamentalObject.do_finalize" in out
+
+
 @pytest.mark.skipif(not GTK4, reason="requires GTK 4")
 def test_gtk_expression():
     obj = object()

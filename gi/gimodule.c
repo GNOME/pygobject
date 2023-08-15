@@ -1275,15 +1275,20 @@ pyg_type_register(PyTypeObject *class, const char *type_name)
 	(GBaseInitFunc) NULL,
 	(GBaseFinalizeFunc) NULL,
 
-	(GClassInitFunc) pyg_object_class_init,
+	(GClassInitFunc) NULL,
 	(GClassFinalizeFunc) NULL,
 	NULL, /* class_data */
 
 	0,    /* instance_size */
 	0,    /* n_preallocs */
-	(GInstanceInitFunc) pygobject__g_instance_init
+	(GInstanceInitFunc) NULL
     };
     gchar *new_type_name;
+
+    if (PyType_IsSubtype(class, &PyGObject_Type)) {
+        type_info.class_init = (GClassInitFunc) pyg_object_class_init;
+        type_info.instance_init = pygobject__g_instance_init;
+    }
 
     /* find the GType of the parent */
     parent_type = pyg_type_from_object((PyObject *)class);
@@ -1383,15 +1388,17 @@ _wrap_pyg_type_register(PyObject *self, PyObject *args)
     if (!PyArg_ParseTuple(args, "O!|z:gobject.type_register",
 			  &PyType_Type, &class, &type_name))
 	return NULL;
-    if (!PyType_IsSubtype(class, &PyGObject_Type)) {
+
+    GType base_gtype = pyg_type_from_object((PyObject *) class->tp_base);
+
+    if (base_gtype == G_TYPE_INVALID) {
 	PyErr_SetString(PyExc_TypeError,
-			"argument must be a GObject subclass");
+			"argument must be a Fundamental or GObject subclass");
 	return NULL;
     }
 
       /* Check if type already registered */
-    if (pyg_type_from_object((PyObject *) class) ==
-        pyg_type_from_object((PyObject *) class->tp_base))
+    if (pyg_type_from_object((PyObject *) class) == base_gtype)
     {
         if (pyg_type_register(class, type_name))
             return NULL;
