@@ -316,18 +316,16 @@ _pygi_marshal_cleanup_to_py_interface_object (PyGIInvokeState *state,
                                               gpointer         data,
                                               gboolean         was_processed)
 {
-    /* If we error out and the object is not marshalled into a PyGObject
-       we must take care of removing the ref */
     if (was_processed && state->failed && data != NULL && arg_cache->transfer == GI_TRANSFER_EVERYTHING) {
-        if (arg_cache->is_fundamental) {
+        if (G_IS_OBJECT (data)) {
+            g_object_unref (G_OBJECT(data));
+        } else {
             PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)arg_cache;
             GIObjectInfoUnrefFunction unref_func;
 
             unref_func = g_object_info_get_unref_function_pointer ( (GIObjectInfo *)iface_cache->interface_info);
             if (unref_func)
                 unref_func (data);
-        } else {
-            g_object_unref (G_OBJECT(data));
         }
     }
 

@@ -113,7 +113,6 @@ struct _PyGIArgCache
     gboolean is_pointer;
     gboolean is_caller_allocates;
     gboolean is_skipped;
-    gboolean is_fundamental;
     gboolean allow_none;
     gboolean has_default;
 

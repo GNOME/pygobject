@@ -199,9 +199,6 @@ pygi_arg_interface_new_from_info (GITypeInfo         *type_info,
         return NULL;
     }
 
-    if (g_base_info_get_type ( (GIBaseInfo *)iface_info) == GI_INFO_TYPE_OBJECT)
-        ((PyGIArgCache *) ic)->is_fundamental = g_object_info_get_fundamental ( (GIObjectInfo *) iface_info);
-
     return (PyGIArgCache *)ic;
 }
 
