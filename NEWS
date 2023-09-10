@@ -1,3 +1,30 @@
+3.46.0 - 2023-09-10
+-------------------
+
+* build: Drop Python 3.7 support :mr:`238`
+* build: Require glib 2.64 and gobject-introspection 1.64 :mr:`243`
+* Add support for Python 3.12 (minor test fixes) :mr:`247`
+* Drop GTK 2 support (after being effectively unsupported for 12 years) :mr:`182`
+* meson: Require meson 0.56.0 :mr:`220`
+* meson: Set PYTHONPATH in devenv :mr:`235`
+* meson: define pycairo_dep in case pycairo=disabled :mr:`242`
+* meson: Use pycairo from target python before pkg-config :mr:`223`
+* Complete the PEP-451 implementation in gi.importer :mr:`229`
+* Replace usage of deprecated FFI closure API :mr:`241`
+* Fix invalid marshalling in some cases for boxed values, for example with
+  Gtk.StyleContext.get_property() :mr:`213`
+* Consistent setting of enum and flag property :mr:`192`
+* Fix docstring for methods that return an array and have a length (out) argument :mr:`249`
+* overrides: Fix incompatibility for CssProvider.load_from_data() (GTK 4.10) :mr:`231`
+* overrides: Allow Gdk.{Color,RGBA} instances to be compared with other objects :mr:`233`
+* overrides: Add overrides for Gdk.FileList in Gdk-4.0 :mr:`245`
+* docs: Fix underline too short warning :mr:`246`
+* docs: Fix build failure due to extlinks with Sphinx 6 :mr:`244`
+* docs: List additional projects using PyGObject :mr:`230`
+* docs: Update Development Environment Docs :mr:`232`
+* docs: Update docs and code examples to GTK 4 :mr:`215`
+
+
 3.44.1 - 2023-03-24
 -------------------
 
