@@ -2,10 +2,9 @@ import os
 import unittest
 
 try:
-    from gi.repository import Gtk, Atk, Gdk
+    from gi.repository import Gtk, Gdk
 except ImportError:
     Gdk = None
-    Atk = None
     Gtk = None
 
 from .helper import capture_glib_deprecation_warnings
