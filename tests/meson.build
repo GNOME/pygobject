@@ -124,7 +124,7 @@ envdata.append('PYTHONPATH', python_paths)
 
 test('pygobject-test-suite',
   python,
-  args: [join_paths(meson.current_source_dir(), 'runtests.py')],
+  args: ['-m', 'pytest'],
   workdir: meson.project_source_root(),
   env: envdata,
   timeout: 90)
