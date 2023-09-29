@@ -1,3 +1,16 @@
+3.44.2 - 2023-09-29
+-------------------
+
+* Add support for Python 3.12 (minor test fixes) :mr:`247`
+* meson: define pycairo_dep in case pycairo=disabled :mr:`242`
+* Complete the PEP-451 implementation in gi.importer :mr:`229`
+* Replace usage of deprecated FFI closure API :mr:`241`
+* Fix invalid marshalling in some cases for boxed values, for example with
+  Gtk.StyleContext.get_property() :mr:`213`
+* overrides: Allow Gdk.{Color,RGBA} instances to be compared with other objects :mr:`233`
+* docs: Fix build failure due to extlinks with Sphinx 6 :mr:`244`
+
+
 3.46.0 - 2023-09-10
 -------------------
 
