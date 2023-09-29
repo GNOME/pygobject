@@ -100,7 +100,8 @@ With homebrew:
 .. code:: console
 
     brew update
-    brew install python3 gobject-introspection
+    brew install python3 gobject-introspection libffi
+    export PKG_CONFIG_PATH=/opt/homebrew/opt/libffi/lib/pkgconfig  # use /usr/local/ for older Homebrew installs
 
 
 .. _install-pyenv:
