@@ -32,7 +32,7 @@ def test_create_fundamental_new_with_data():
     assert obj.data == 'foo'
 
 
-@pytest.mark.skipif(not hasattr(Regress, "TestFundamentalObjectNoGetSetFunc"), reason="Old versions to not ave this function")
+@pytest.mark.skipif(not hasattr(Regress, "TestFundamentalObjectNoGetSetFunc"), reason="Old versions do not have this type")
 def test_change_field():
     obj = Regress.TestFundamentalObjectNoGetSetFunc.new('foo')
 
@@ -41,7 +41,7 @@ def test_change_field():
     assert obj.get_data() == 'bar'
 
 
-@pytest.mark.skipif(not hasattr(Regress, "TestFundamentalObjectNoGetSetFunc"), reason="Old versions to not ave this function")
+@pytest.mark.skipif(not hasattr(Regress, "TestFundamentalObjectNoGetSetFunc"), reason="Old versions do not have this type")
 def test_call_method():
     obj = Regress.TestFundamentalObjectNoGetSetFunc.new('foo')
 
