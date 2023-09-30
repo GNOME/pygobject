@@ -90,7 +90,8 @@ fundamental_new (PyTypeObject *type,
     if (self == NULL) {
         g_free (pointer);
     }
-    ((PyGIFundamental *)self)->unref_func (pointer);
+    /* Release the reference acquired by _pygi_fundamental_new_internal() */
+    pygi_fundamental_unref ((PyGIFundamental *) self);
 
 out:
     g_base_info_unref (info);
