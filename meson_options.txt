@@ -1,4 +1,4 @@
 option('python', type : 'string', value : 'python3')
 option('pycairo', type : 'feature', value : 'auto', description : 'build with pycairo integration')
 option('tests', type : 'boolean', value : true, description : 'build unit tests')
-option('pkgconf', type : 'boolean', value : true, description : 'install pkgconf file')
+option('wheel', type : 'boolean', value : false, description : 'build for a Python wheel')

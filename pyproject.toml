@@ -43,7 +43,7 @@ docs = [
 ]
 
 [tool.meson-python.args]
-setup = ["-Dpkgconf=false"]
+setup = ["-Dwheel=true"]
 
 [tool.pytest.ini_options]
 testpaths = [

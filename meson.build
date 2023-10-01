@@ -177,14 +177,27 @@ pkgconf.set('datarootdir', join_paths('${prefix}', get_option('datadir')))
 pkgconf.set('datadir', '${datarootdir}')
 pkgconf.set('VERSION', pygobject_version)
 
-with_pkgconf = get_option('pkgconf')
-if with_pkgconf
+for_wheel = get_option('wheel')
+if not for_wheel
   pkg_install_dir = '@0@/pkgconfig'.format(get_option('libdir'))
 
   configure_file(input : 'pygobject-@0@.pc.in'.format(platform_version),
     output : 'pygobject-@0@.pc'.format(platform_version),
     configuration : pkgconf,
     install_dir : pkg_install_dir)
+
+  if pygobject_version_minor.is_odd()
+    py_version = '@0@.dev0'.format(pygobject_version)
+  else
+    py_version = pygobject_version
+  endif
+
+  pkginfo_conf = configuration_data()
+  pkginfo_conf.set('VERSION', py_version)
+  configure_file(input : 'PKG-INFO.in',
+  output : 'PyGObject-@0@.egg-info'.format(py_version),
+  configuration : pkginfo_conf,
+  install_dir : python.get_install_dir(pure : false))
 endif
 
 pygobject_dep = declare_dependency(
@@ -193,11 +206,6 @@ pygobject_dep = declare_dependency(
   version: meson.project_version(),
 )
 
-if pygobject_version_minor.is_odd()
-  py_version = '@0@.dev0'.format(pygobject_version)
-else
-  py_version = pygobject_version
-endif
 
 subdir('gi')
 subdir('pygtkcompat')
