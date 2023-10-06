@@ -17,7 +17,7 @@ mkdir -p "${CCACHE_DIR}"
 
 # test
 python -m pip install --upgrade pip
-python -m pip install pycairo pytest pytest-cov pytest-faulthandler meson ninja
+python -m pip install pycairo pytest pytest-cov meson ninja
 
 meson setup _build
 PYTEST_ADDOPTS="--cov" xvfb-run -a meson test --suite pygobject --timeout-multiplier 4 -C _build -v

@@ -23,7 +23,7 @@ mkdir -p "${CCACHE_DIR}"
 mkdir -p "${COV_DIR}"
 
 # NB. setuptools is needed, since distutils has been removed from Python 3.12
-python -m pip install pycairo flake8 pytest pytest-cov pytest-faulthandler setuptools
+python -m pip install pycairo flake8 pytest pytest-cov setuptools
 
 # MESON
 /usr/bin/python3 -m pip install --user meson

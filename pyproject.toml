@@ -34,7 +34,6 @@ Changelog = "https://gitlab.gnome.org/GNOME/pygobject/-/blob/master/NEWS"
 dev = [
     "pytest",
     "pytest-cov",
-    "pytest-faulthandler",
     "flake8",
 ]
 docs = [

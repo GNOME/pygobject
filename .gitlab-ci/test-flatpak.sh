@@ -12,7 +12,7 @@ if [[ "$1" == "inflatpak" ]]; then
 
     python3 -m venv _venv
     . _venv/bin/activate
-    python3 -m pip install pytest pytest-cov pytest-faulthandler
+    python3 -m pip install pytest pytest-cov
     meson setup _build
     PYTEST_ADDOPTS="--cov" meson test --suite pygobject --timeout-multiplier 4 -C _build -v
     python3 -m coverage lcov -o "${COV_DIR}/${COV_KEY}.py.lcov"
