@@ -142,3 +142,13 @@ gnome-master-gtk4:
     TEST_GTK_VERSION: "4.0"
   script:
     - bash -x ./.gitlab-ci/test-flatpak.sh
+
+minimal-meson:
+  stage: build_and_test
+  image: quay.io/fedora/fedora:39 
+  before_script:
+    - dnf install --assumeyes gcc meson git flex bison diffutils python3-devel python3-pytest
+  script:
+    - meson setup _build
+    - meson compile -C _build
+    - PYTEST_ADDOPTS="-k 'not test_cairo'" meson test -C _build --verbose
