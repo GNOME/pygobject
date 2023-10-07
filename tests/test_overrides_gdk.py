@@ -16,6 +16,7 @@ try:
     GDK4 = Gdk._version == "4.0"
 except ImportError:
     Gdk = None
+    Gtk = None
     GDK4 = False
 
 

@@ -36,7 +36,7 @@ def gtkver():
             Gtk.get_micro_version())
 
 
-GTK4 = (Gtk._version == "4.0")
+GTK4 = (Gtk and Gtk._version == "4.0")
 
 
 @contextlib.contextmanager
@@ -3021,6 +3021,7 @@ class TestContainer(unittest.TestCase):
         self.assertEqual(padding, 21)
 
 
+@pytest.mark.skipif(not Gtk, reason="Test requires GTK")
 def test_button_focus_on_click():
     b = Gtk.Button()
     b.set_focus_on_click(True)
@@ -3029,6 +3030,7 @@ def test_button_focus_on_click():
     assert not b.get_focus_on_click()
 
 
+@pytest.mark.skipif(not Gtk, reason="Test requires GTK")
 @pytest.mark.parametrize(
     "data",
     [
