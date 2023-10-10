@@ -155,3 +155,10 @@ class TestMarshalling(unittest.TestCase):
         error1 = GLib.Error.new_literal(1, "error", 1)
 
         GIMarshallingTests.compare_two_gerrors_in_gvalue(error, error1)
+
+
+def test_nullable_error():
+    error = GLib.Error.new_literal(1, "error", 1)
+
+    assert GIMarshallingTests.nullable_gerror(error) == 1
+    assert GIMarshallingTests.nullable_gerror(None) == 0

@@ -38,6 +38,24 @@ gi_marshalling_tests_compare_two_gerrors_in_gvalue (GValue *v, GValue *v1)
 }
 
 /**
+ * gi_marshalling_tests_nullable_gerror:
+ * @error:     (in) (nullable) (transfer full):
+ *             an optional #GError.
+ *
+ * So we've got an API which takes a `GError *` as `(in)` argument,
+ * and we want this to be optional, so we added `(nullable)`.
+ *
+ * Returns: 1 or 0, depending if the error was set.
+ */
+gboolean
+gi_marshalling_tests_nullable_gerror(GError *error)
+{
+    return error ? 1 : 0;
+}
+
+
+
+/**
  * gi_marshalling_tests_ghashtable_enum_none_in:
  * @hash_table: (element-type gint GIMarshallingTestsExtraEnum) (transfer none):
  */
