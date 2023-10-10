@@ -234,7 +234,11 @@ _pygi_marshal_from_py_gerror (PyGIInvokeState   *state,
                               gpointer          *cleanup_data)
 {
     GError *error = NULL;
-    if (pygi_error_marshal_from_py (py_arg, &error)) {
+    if (py_arg == Py_None) {
+        arg->v_pointer = NULL;
+        *cleanup_data = NULL;
+        return TRUE;
+    } else if (pygi_error_marshal_from_py (py_arg, &error)) {
         arg->v_pointer = error;
         *cleanup_data = error;
         return TRUE;
