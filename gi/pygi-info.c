@@ -1945,6 +1945,12 @@ _wrap_g_field_info_get_value (PyGIBaseInfo *self,
             g_assert_not_reached();
     }
 
+    if (pointer == NULL) {
+        PyErr_Format(PyExc_RuntimeError, "object at %p of type %s is not initialized",
+                instance, Py_TYPE(instance)->tp_name);
+        return NULL;
+    }
+
     /* Get the field's value. */
     field_type_info = g_field_info_get_type ( (GIFieldInfo *) self->info);
 
@@ -2051,6 +2057,12 @@ _wrap_g_field_info_set_value (PyGIBaseInfo *self,
         default:
             /* Other types don't have fields. */
             g_assert_not_reached();
+    }
+
+    if (pointer == NULL) {
+        PyErr_Format(PyExc_RuntimeError, "object at %p of type %s is not initialized",
+                instance, Py_TYPE(instance)->tp_name);
+        return NULL;
     }
 
     field_type_info = g_field_info_get_type ( (GIFieldInfo *) self->info);

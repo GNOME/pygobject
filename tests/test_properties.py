@@ -1360,3 +1360,19 @@ class TestCGetPropertyMethod(CPropertiesTestBase, unittest.TestCase):
 
     def set_prop(self, obj, name, value):
         obj.set_property(name, value)
+
+
+def test_gobject_inheritance_with_incomplete_initialization():
+    class Test:
+        def __init__(self):
+            # super().__init__() should have been called here
+            pass
+
+    class Bomb(Test, GObject.Object):
+        def __init__(self):
+            super().__init__()
+
+    bomb = Bomb()
+
+    with pytest.raises(RuntimeError, match="is not initialized"):
+        bomb.qdata
