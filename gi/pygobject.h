@@ -75,19 +75,6 @@ typedef struct {
 typedef void (*PyGFatalExceptionFunc) (void);
 typedef void (*PyGThreadBlockFunc) (void);
 
-typedef struct {
-    PyObject_HEAD
-    GParamSpec *pspec;
-} PyGParamSpec;
-
-#define pyg_param_spec_get(v)    (((PyGParamSpec *)v)->pspec)
-#define pyg_param_spec_set(v,p)  (((PyGParamSpec *)v)->pspec = (GParamSpec*)p)
-#define pyg_param_spec_check(v)  (PyObject_TypeCheck(v, &PyGParamSpec_Type))
-
-/* Deprecated in favor of lower case with underscore macros above. */
-#define PyGParamSpec_Get    pyg_param_spec_get
-#define PyGParamSpec_Check  pyg_param_spec_check
-
 typedef int (*PyGClassInitFunc) (gpointer gclass, PyTypeObject *pyclass);
 typedef PyTypeObject * (*PyGTypeRegistrationFunction) (const gchar *name,
 						       gpointer data);
@@ -260,8 +247,6 @@ struct _PyGObject_Functions *_PyGObject_API;
 #define pyg_flags_add_constants     (_PyGObject_API->flags_add_constants)
 #define pyg_constant_strip_prefix   (_PyGObject_API->constant_strip_prefix)
 #define pyg_error_check             (_PyGObject_API->error_check)
-#define PyGParamSpec_Type           (*_PyGObject_API->paramspec_type)
-#define pyg_param_spec_new          (_PyGObject_API->paramspec_new)
 #define pyg_param_spec_from_object  (_PyGObject_API->paramspec_get)
 #define pyg_pyobj_to_unichar_conv   (_PyGObject_API->pyobj_to_unichar_conv)
 #define pyg_parse_constructor_args  (_PyGObject_API->parse_constructor_args)

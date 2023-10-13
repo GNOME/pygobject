@@ -26,7 +26,6 @@
 #include "pygpointer.h"
 #include "pygboxed.h"
 #include "pygflags.h"
-#include "pygparamspec.h"
 
 
 /* glib 2.62 has started to print warnings for these which can't be disabled selectively, so just copy them here */

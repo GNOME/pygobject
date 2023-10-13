@@ -46,7 +46,6 @@
 #include "pygoptioncontext.h"
 #include "pygoptiongroup.h"
 #include "pygspawn.h"
-#include "pygparamspec.h"
 #include "pygpointer.h"
 #include "pygobject-internal.h"
 #include "pygi-value.h"
@@ -2409,8 +2408,6 @@ struct _PyGObject_Functions pygobject_api_functions = {
   (PyGThreadBlockFunc)0, /* block_threads */
   (PyGThreadBlockFunc)0, /* unblock_threads */
 
-  &PyGParamSpec_Type,
-  pyg_param_spec_new,
   pyg_param_spec_from_object,
 
   pyg_pyobj_to_unichar_conv,
@@ -2605,8 +2602,6 @@ PYGI_MODINIT_FUNC PyInit__gi(void) {
     if (pyi_object_register_types (module_dict) < 0)
         return NULL;
     if (pygi_interface_register_types (module_dict) < 0)
-        return NULL;
-    if (pygi_paramspec_register_types (module_dict) < 0)
         return NULL;
     if (pygi_enum_register_types (module_dict) < 0)
         return NULL;

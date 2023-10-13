@@ -24,7 +24,6 @@
 #include "pygi-object.h"
 #include "pygi-fundamental.h"
 #include "pygobject-object.h"
-#include "pygparamspec.h"
 
 /*
  * GObject from Python
