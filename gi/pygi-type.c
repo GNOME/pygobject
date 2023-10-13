@@ -22,7 +22,6 @@
 #include "pygboxed.h"
 #include "pygenum.h"
 #include "pygflags.h"
-#include "pygparamspec.h"
 #include "pygi-util.h"
 #include "pygpointer.h"
 #include "pyginterface.h"

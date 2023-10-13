@@ -24,7 +24,6 @@
 #include "pygi-object.h"
 #include "pygi-fundamental.h"
 #include "pygobject-object.h"
-#include "pygparamspec.h"
 
 /*
  * GObject from Python
@@ -240,12 +239,6 @@ pygi_arg_object_to_py (GIArgument *arg,
     if (arg->v_pointer == NULL) {
         pyobj = Py_None;
         Py_INCREF (pyobj);
-
-    } else if (G_IS_PARAM_SPEC(arg->v_pointer)) {
-        pyobj = pyg_param_spec_new (arg->v_pointer);
-        if (transfer == GI_TRANSFER_EVERYTHING)
-            g_param_spec_unref (arg->v_pointer);
-
     } else if (G_IS_OBJECT(arg->v_pointer)) {
          pyobj = pygobject_new_full (arg->v_pointer,
                                      /*steal=*/ transfer == GI_TRANSFER_EVERYTHING,

@@ -22,7 +22,6 @@
 
 #include "pygobject-object.h"
 #include "pyginterface.h"
-#include "pygparamspec.h"
 #include "pygi-type.h"
 #include "pygboxed.h"
 #include "gimodule.h"
@@ -33,6 +32,7 @@
 #include "pygi-property.h"
 #include "pygi-signal-closure.h"
 #include "pygi-basictype.h"
+#include "pygi-fundamental.h"
 
 extern PyObject *PyGIDeprecationWarning;
 
@@ -220,7 +220,7 @@ static PyObject*
 pygobject_props_iter_next(PyGPropsIter *iter)
 {
     if (iter->index < iter->n_props)
-        return pyg_param_spec_new(iter->props[iter->index++]);
+        return pygi_fundamental_new(iter->props[iter->index++]);
     else {
         PyErr_SetNone(PyExc_StopIteration);
         return NULL;
@@ -305,7 +305,7 @@ PyGProps_getattro(PyGProps *self, PyObject *attr)
 
     if (!self->pygobject) {
         /* If we're doing it without an instance, return a GParamSpec */
-        return pyg_param_spec_new(pspec);
+        return pygi_fundamental_new(pspec);
     }
 
     return pygi_get_property_value (self->pygobject, pspec);

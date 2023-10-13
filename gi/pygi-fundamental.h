@@ -49,7 +49,7 @@ PyObject* pygi_fundamental_new   (gpointer      instance);
 void      pygi_fundamental_ref   (PyGIFundamental *self);
 void      pygi_fundamental_unref (PyGIFundamental *self);
 
-GTypeInstance* pygi_fundamental_get   (PyObject *self);
+GTypeInstance* pygi_fundamental_get (PyObject *self);
 
 int pygi_fundamental_register_types (PyObject *m);
 

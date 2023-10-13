@@ -46,7 +46,6 @@
 #include "pygoptioncontext.h"
 #include "pygoptiongroup.h"
 #include "pygspawn.h"
-#include "pygparamspec.h"
 #include "pygpointer.h"
 #include "pygobject-internal.h"
 #include "pygi-value.h"
@@ -922,7 +921,7 @@ pyg_object_set_property (GObject *object, guint property_id,
 	return;
     }
 
-    py_pspec = pyg_param_spec_new(pspec);
+    py_pspec = pygi_fundamental_new(pspec);
     py_value = pyg_value_as_pyobject (value, TRUE);
 
     retval = PyObject_CallMethod(object_wrapper, "do_set_property",
@@ -2263,7 +2262,7 @@ pyg_object_class_list_properties (PyObject *self, PyObject *args)
 	return NULL;
     }
     for (i = 0; i < nprops; i++) {
-	PyTuple_SetItem(list, i, pyg_param_spec_new(specs[i]));
+	PyTuple_SetItem(list, i, pygi_fundamental_new(specs[i]));
     }
     g_free(specs);
     if (class)
@@ -2411,8 +2410,6 @@ struct _PyGObject_Functions pygobject_api_functions = {
   (PyGThreadBlockFunc)0, /* block_threads */
   (PyGThreadBlockFunc)0, /* unblock_threads */
 
-  &PyGParamSpec_Type,
-  pyg_param_spec_new,
   pyg_param_spec_from_object,
 
   pyg_pyobj_to_unichar_conv,
@@ -2617,8 +2614,6 @@ _gi_exec (PyObject *module)
     if ((ret = pyi_object_register_types (module_dict)) < 0)
         return ret;
     if ((ret = pygi_interface_register_types (module_dict)) < 0)
-        return ret;
-    if ((ret = pygi_paramspec_register_types (module_dict)) < 0)
         return ret;
     if ((ret = pygi_enum_register_types (module_dict)) < 0)
         return ret;

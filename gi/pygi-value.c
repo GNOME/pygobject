@@ -20,6 +20,7 @@
 #include "pygi-value.h"
 #include "pygi-struct.h"
 #include "pygi-basictype.h"
+#include "pygi-fundamental.h"
 #include "pygobject-object.h"
 #include "pygi-type.h"
 #include "pygi-fundamental.h"
@@ -27,7 +28,6 @@
 #include "pygpointer.h"
 #include "pygboxed.h"
 #include "pygflags.h"
-#include "pygparamspec.h"
 
 
 /* glib 2.62 has started to print warnings for these which can't be disabled selectively, so just copy them here */
@@ -562,12 +562,8 @@ pyg_value_from_pyobject_with_error(GValue *value, PyObject *obj)
         break;
     }
     case G_TYPE_PARAM:
-        /* we need to support both the wrapped _gi.GParamSpec and the GI
-         * GObject.ParamSpec */
-        if (G_IS_PARAM_SPEC (pygobject_get (obj)))
-            g_value_set_param(value, G_PARAM_SPEC (pygobject_get (obj)));
-        else if (pyg_param_spec_check (obj))
-            g_value_set_param(value, PyCapsule_GetPointer (obj, NULL));
+        if (PyObject_TypeCheck(obj, &PyGIFundamental_Type))
+            g_value_set_param(value, G_PARAM_SPEC (pygi_fundamental_get (obj)));
         else {
             PyErr_SetString(PyExc_TypeError, "Expected ParamSpec");
             return -1;
@@ -793,7 +789,7 @@ value_to_py_structured_type (const GValue *value, GType fundamental, gboolean co
         }
     }
     case G_TYPE_PARAM:
-        return pyg_param_spec_new(g_value_get_param(value));
+        return pygi_fundamental_new(g_value_get_param(value));
     case G_TYPE_OBJECT:
         return pygobject_new(g_value_get_object(value));
     case G_TYPE_VARIANT:

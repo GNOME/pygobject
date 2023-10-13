@@ -25,8 +25,8 @@
 #include "pygi-value.h"
 #include "pygi-argument.h"
 #include "pygi-fundamental.h"
-#include "pygparamspec.h"
 #include "pygi-type.h"
+#include "pygi-fundamental.h"
 
 #include <girepository.h>
 
@@ -106,7 +106,7 @@ pygi_call_do_get_property (PyObject *instance, GParamSpec *pspec)
     PyObject *py_pspec;
     PyObject *retval;
 
-    py_pspec = pyg_param_spec_new (pspec);
+    py_pspec = pygi_fundamental_new (pspec);
     retval = PyObject_CallMethod (instance, "do_get_property", "O", py_pspec);
     Py_DECREF (py_pspec);
     return retval;
