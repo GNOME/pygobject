@@ -180,13 +180,11 @@ GFlags = _gi.GFlags
 GInterface = _gi.GInterface
 GObject = _gi.GObject
 GObjectWeakRef = _gi.GObjectWeakRef
-GParamSpec = _gi.GParamSpec
 GPointer = _gi.GPointer
 GType = _gi.GType
 Warning = _gi.Warning
 __all__ += ['GBoxed', 'GEnum', 'GFlags', 'GInterface', 'GObject',
-            'GObjectWeakRef', 'GParamSpec', 'GPointer', 'GType',
-            'Warning']
+            'GObjectWeakRef', 'GPointer', 'GType', 'Warning']
 
 
 features = {'generic-c-marshaller': True}

@@ -101,13 +101,15 @@ _pygi_lookup_property_from_g_type (GType g_type, const gchar *attr_name)
 PyObject *
 pygi_call_do_get_property (PyObject *instance, GParamSpec *pspec)
 {
-    PyObject *py_pspec;
-    PyObject *retval;
+//     PyObject *py_pspec;
+//     PyObject *retval;
 
-    py_pspec = pyg_param_spec_new (pspec);
-    retval = PyObject_CallMethod (instance, "do_get_property", "O", py_pspec);
-    Py_DECREF (py_pspec);
-    return retval;
+//     py_pspec = pyg_param_spec_new (pspec);
+//     retval = PyObject_CallMethod (instance, "do_get_property", "O", py_pspec);
+//     Py_DECREF (py_pspec);
+//     return retval;
+    Py_INCREF(Py_None);
+    return Py_None;
 }
 
 PyObject *

@@ -137,8 +137,6 @@ struct _PyGObject_Functions {
     PyGThreadBlockFunc block_threads;
     PyGThreadBlockFunc unblock_threads;
 
-    PyTypeObject *paramspec_type;
-    PyObject *(* paramspec_new)(GParamSpec *spec);
     GParamSpec *(*paramspec_get)(PyObject *tuple);
     int (*pyobj_to_unichar_conv)(PyObject *pyobj, void* ptr);
 G_GNUC_BEGIN_IGNORE_DEPRECATIONS

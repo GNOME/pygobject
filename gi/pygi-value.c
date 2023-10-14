@@ -557,18 +557,18 @@ pyg_value_from_pyobject_with_error(GValue *value, PyObject *obj)
         }
         break;
     }
-    case G_TYPE_PARAM:
-        /* we need to support both the wrapped _gi.GParamSpec and the GI
-         * GObject.ParamSpec */
-        if (G_IS_PARAM_SPEC (pygobject_get (obj)))
-            g_value_set_param(value, G_PARAM_SPEC (pygobject_get (obj)));
-        else if (pyg_param_spec_check (obj))
-            g_value_set_param(value, PyCapsule_GetPointer (obj, NULL));
-        else {
-            PyErr_SetString(PyExc_TypeError, "Expected ParamSpec");
-            return -1;
-        }
-        break;
+//     case G_TYPE_PARAM:
+//         /* we need to support both the wrapped _gi.GParamSpec and the GI
+//          * GObject.ParamSpec */
+//         if (G_IS_PARAM_SPEC (pygobject_get (obj)))
+//             g_value_set_param(value, G_PARAM_SPEC (pygobject_get (obj)));
+//         else if (pyg_param_spec_check (obj))
+//             g_value_set_param(value, PyCapsule_GetPointer (obj, NULL));
+//         else {
+//             PyErr_SetString(PyExc_TypeError, "Expected ParamSpec");
+//             return -1;
+//         }
+//         break;
     case G_TYPE_OBJECT:
         if (obj == Py_None) {
             g_value_set_object(value, NULL);
@@ -761,8 +761,8 @@ value_to_py_structured_type (const GValue *value, GType fundamental, gboolean co
                         g_value_get_boxed(value),FALSE,FALSE);
         }
     }
-    case G_TYPE_PARAM:
-        return pyg_param_spec_new(g_value_get_param(value));
+//     case G_TYPE_PARAM:
+//         return pyg_param_spec_new(g_value_get_param(value));
     case G_TYPE_OBJECT:
         return pygobject_new(g_value_get_object(value));
     case G_TYPE_VARIANT:

@@ -218,12 +218,12 @@ pyg_props_iter_dealloc(PyGPropsIter *self)
 static PyObject*
 pygobject_props_iter_next(PyGPropsIter *iter)
 {
-    if (iter->index < iter->n_props)
-        return pyg_param_spec_new(iter->props[iter->index++]);
-    else {
-        PyErr_SetNone(PyExc_StopIteration);
-        return NULL;
-    }
+//     if (iter->index < iter->n_props)
+//         return pyg_param_spec_new(iter->props[iter->index++]);
+//     else {
+    PyErr_SetNone(PyExc_StopIteration);
+    return NULL;
+//     }
 }
 
 typedef struct {
@@ -303,8 +303,10 @@ PyGProps_getattro(PyGProps *self, PyObject *attr)
     }
 
     if (!self->pygobject) {
-        /* If we're doing it without an instance, return a GParamSpec */
-        return pyg_param_spec_new(pspec);
+        // /* If we're doing it without an instance, return a GParamSpec */
+        // return pyg_param_spec_new(pspec);
+        Py_INCREF(Py_None);
+        return Py_None;
     }
 
     return pygi_get_property_value (self->pygobject, pspec);
