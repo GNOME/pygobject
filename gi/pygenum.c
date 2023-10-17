@@ -170,7 +170,7 @@ pyg_enum_new(PyTypeObject *type, PyObject *args, PyObject *kwargs)
 
     g_type_class_unref(eclass);
 
-    intvalue = PyLong_FromLong(value);
+    intvalue = PyLong_FromLong((int)value);
     ret = PyDict_GetItem(values, intvalue);
     Py_DECREF(intvalue);
     Py_DECREF(values);
