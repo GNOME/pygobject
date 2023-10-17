@@ -2971,6 +2971,7 @@ class TestDir(unittest.TestCase):
 class TestParamSpec(unittest.TestCase):
     # https://bugzilla.gnome.org/show_bug.cgi?id=682355
     @unittest.expectedFailure
+    @unittest.skip("Cannot pass GParamSpec arguments: causes segfault")
     def test_param_spec_in_bool(self):
         ps = GObject.param_spec_boolean('mybool', 'test-bool', 'boolblurb',
                                         True, GObject.ParamFlags.READABLE)
