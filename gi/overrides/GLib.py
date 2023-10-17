@@ -36,12 +36,6 @@ GLib = get_introspection_module("GLib")
 
 __all__ = []
 
-from gi import _option as option
-
-option
-__all__.append("option")
-
-
 # Types and functions still needed from static bindings
 from gi import _gi
 from gi._error import GError

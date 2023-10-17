@@ -39,11 +39,6 @@ GObjectModule = gi.module.get_introspection_module("GObject")
 __all__ = []
 
 
-from gi import _option as option
-
-option = option
-
-
 # API aliases for backwards compatibility
 for name in [
     "markup_escape_text",

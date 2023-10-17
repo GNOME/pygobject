@@ -54,7 +54,6 @@ python_sources = [
   'importer.py',
   '__init__.py',
   'module.py',
-  '_option.py',
   '_ossighelper.py',
   '_propertyhelper.py',
   'pygtkcompat.py',
