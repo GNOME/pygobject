@@ -901,38 +901,38 @@ static void
 pyg_object_set_property (GObject *object, guint property_id,
 			 const GValue *value, GParamSpec *pspec)
 {
-//     PyObject *object_wrapper, *retval;
-//     PyObject *py_pspec, *py_value;
+    PyObject *object_wrapper, *retval;
+    PyObject *py_pspec, *py_value;
     PyGILState_STATE state;
 
     state = PyGILState_Ensure();
 
-//     object_wrapper = g_object_get_qdata(object, pygobject_wrapper_key);
+    object_wrapper = g_object_get_qdata(object, pygobject_wrapper_key);
 
-//     if (object_wrapper)
-//       Py_INCREF (object_wrapper);
-//     else
-//       object_wrapper = pygobject_new(object);
+    if (object_wrapper)
+      Py_INCREF (object_wrapper);
+    else
+      object_wrapper = pygobject_new(object);
 
-//     if (object_wrapper == NULL) {
-// 	PyGILState_Release(state);
-// 	return;
-//     }
+    if (object_wrapper == NULL) {
+	PyGILState_Release(state);
+	return;
+    }
 
-//     py_pspec = pyg_param_spec_new(pspec);
-//     py_value = pyg_value_as_pyobject (value, TRUE);
+    py_pspec = pygi_fundamental_new(pspec);
+    py_value = pyg_value_as_pyobject (value, TRUE);
 
-//     retval = PyObject_CallMethod(object_wrapper, "do_set_property",
-// 				 "OO", py_pspec, py_value);
-//     if (retval) {
-// 	Py_DECREF(retval);
-//     } else {
-// 	PyErr_Print();
-//     }
+    retval = PyObject_CallMethod(object_wrapper, "do_set_property",
+				 "OO", py_pspec, py_value);
+    if (retval) {
+	Py_DECREF(retval);
+    } else {
+	PyErr_Print();
+    }
 
-//     Py_DECREF(object_wrapper);
-//     Py_DECREF(py_pspec);
-//     Py_DECREF(py_value);
+    Py_DECREF(object_wrapper);
+    Py_DECREF(py_pspec);
+    Py_DECREF(py_value);
 
     PyGILState_Release(state);
 }
@@ -2223,7 +2223,7 @@ pyg_object_class_list_properties (PyObject *self, PyObject *args)
     GObjectClass *class = NULL;
     gpointer iface = NULL;
     guint nprops;
-//     guint i;
+    guint i;
 
     if (!PyArg_ParseTuple(args, "O:gobject.list_properties",
 			  &py_itype))
@@ -2259,9 +2259,9 @@ pyg_object_class_list_properties (PyObject *self, PyObject *args)
 	g_type_class_unref(class);
 	return NULL;
     }
-//     for (i = 0; i < nprops; i++) {
-// 	PyTuple_SetItem(list, i, pyg_param_spec_new(specs[i]));
-//     }
+    for (i = 0; i < nprops; i++) {
+	PyTuple_SetItem(list, i, pygi_fundamental_new(specs[i]));
+    }
     g_free(specs);
     if (class)
         g_type_class_unref(class);

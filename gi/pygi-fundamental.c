@@ -41,8 +41,10 @@ _pygi_fundamental_new_internal (PyTypeObject *type,
 static void
 fundamental_dealloc (PyGIFundamental *self)
 {
-    if (self->unref_func)
-        self->unref_func (((PyGPointer *) self)->pointer);
+    g_message ("fundamental dealloc %p",  ((PyGPointer *) self)->pointer);
+
+    pygi_fundamental_unref (self);
+    ((PyGPointer *) self)->pointer = NULL;
 
     PyObject_GC_UnTrack ( (PyObject *) self);
     PyObject_ClearWeakRefs ( (PyObject *) self);
@@ -167,6 +169,17 @@ _pygi_fundamental_new_internal (PyTypeObject *type,
     g_base_info_unref (info);
 
     return (PyObject *) self;
+}
+
+gpointer
+pygi_fundamental_get (PyObject *self)
+{
+    if (PyObject_TypeCheck(self, &PyGIFundamental_Type))
+        return ((PyGPointer *) self)->pointer;
+    else {
+        PyErr_SetString(PyExc_TypeError, "Expected GObject Fundamental type");
+        return NULL;
+    }
 }
 
 void

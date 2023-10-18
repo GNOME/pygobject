@@ -44,6 +44,8 @@ typedef struct {
 
 PyObject* pygi_fundamental_new   (gpointer      pointer);
 
+gpointer  pygi_fundamental_get   (PyObject        *self);
+
 void      pygi_fundamental_ref   (PyGIFundamental *self);
 void      pygi_fundamental_unref (PyGIFundamental *self);
 
