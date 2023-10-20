@@ -1,3 +1,5 @@
+import gc
+
 import pytest
 from gi.repository import GObject, Regress
 
@@ -52,6 +54,19 @@ def test_create_fundamental_hidden_class_instance():
     obj = Regress.test_create_fundamental_hidden_class_instance()
 
     assert isinstance(obj, Regress.TestFundamentalObject)
+
+
+def test_create_fundamental_refcount():
+    obj = Regress.TestFundamentalSubObject.new('foo')
+
+    assert obj.refcount == 1
+
+
+def test_delete_fundamental_refcount():
+    obj = Regress.TestFundamentalSubObject.new('foo')
+    del obj
+
+    gc.collect()
 
 
 @pytest.mark.xfail(reason="Requires value get/set function for fundamental type")

@@ -33,7 +33,7 @@
 #include "pygobject-object.h" // for pygobject_lookup_class
 
 
-static PyObject *
+static PyGIFundamental *
 _pygi_fundamental_new_internal (PyTypeObject *type,
                                 gpointer      pointer);
 
@@ -41,8 +41,8 @@ _pygi_fundamental_new_internal (PyTypeObject *type,
 static void
 fundamental_dealloc (PyGIFundamental *self)
 {
-    if (self->unref_func)
-        self->unref_func (((PyGPointer *) self)->pointer);
+    pygi_fundamental_unref (self);
+    ((PyGPointer *) self)->pointer = NULL;
 
     PyObject_GC_UnTrack ( (PyObject *) self);
     PyObject_ClearWeakRefs ( (PyObject *) self);
@@ -59,7 +59,7 @@ fundamental_new (PyTypeObject *type,
 
     GIBaseInfo *info;
     gpointer pointer;
-    PyObject *self = NULL;
+    PyGIFundamental *self = NULL;
     GType g_type;
 
     if (!PyArg_ParseTupleAndKeywords (args, kwargs, "", kwlist)) {
@@ -89,9 +89,9 @@ fundamental_new (PyTypeObject *type,
     self = _pygi_fundamental_new_internal (type, pointer);
     if (self == NULL) {
         g_free (pointer);
+        PyErr_Format (PyExc_TypeError, "cannot instantiate Fundamental Python wrapper type %s", g_type_name (g_type));
+        goto out;
     }
-    /* Release the reference acquired by _pygi_fundamental_new_internal() */
-    pygi_fundamental_unref ((PyGIFundamental *) self);
 
 out:
     g_base_info_unref (info);
@@ -116,6 +116,7 @@ pygi_fundamental_new (gpointer pointer)
 {
     GType gtype;
     PyTypeObject *type;
+    PyGIFundamental *self;
 
     if (!pointer) {
         Py_RETURN_NONE;
@@ -124,19 +125,17 @@ pygi_fundamental_new (gpointer pointer)
     gtype = G_TYPE_FROM_INSTANCE (pointer);
     type = pygobject_lookup_class (gtype);
 
-    return _pygi_fundamental_new_internal (type, pointer);
+    self = _pygi_fundamental_new_internal (type, pointer);
+    pygi_fundamental_ref (self);
+    return (PyObject *) self;
 }
 
-static PyObject *
+static PyGIFundamental *
 _pygi_fundamental_new_internal (PyTypeObject *type,
                                 gpointer      pointer)
 {
     PyGIFundamental *self;
     GIObjectInfo *info;
-
-    if (!pointer) {
-        Py_RETURN_NONE;
-    }
 
     if (!PyType_IsSubtype (type, &PyGIFundamental_Type)) {
         PyErr_SetString (PyExc_TypeError, "must be a subtype of gi.Fundamental");
@@ -162,11 +161,9 @@ _pygi_fundamental_new_internal (PyTypeObject *type,
     self->ref_func = g_object_info_get_ref_function_pointer (info);
     self->unref_func = g_object_info_get_unref_function_pointer (info);
 
-    pygi_fundamental_ref (self);
-
     g_base_info_unref (info);
 
-    return (PyObject *) self;
+    return self;
 }
 
 void
