@@ -1939,7 +1939,7 @@ _wrap_g_field_info_get_value (PyGIBaseInfo *self,
             break;
         case GI_INFO_TYPE_OBJECT:
             if (pygi_check_fundamental (container_info_type, container_info))
-                pointer = pyg_pointer_get (instance, void);
+                pointer = pygi_fundamental_get (instance);
             else
                 pointer = pygobject_get (instance);
             break;
@@ -2056,7 +2056,7 @@ _wrap_g_field_info_set_value (PyGIBaseInfo *self,
             break;
         case GI_INFO_TYPE_OBJECT:
             if (pygi_check_fundamental (container_info_type, container_info))
-                pointer = pyg_pointer_get (instance, void);
+                pointer = pygi_fundamental_get (instance);
             else
                 pointer = pygobject_get (instance);
             break;

@@ -36,16 +36,20 @@ G_BEGIN_DECLS
 extern PyTypeObject PyGIFundamental_Type;
 
 typedef struct {
-    PyGPointer base;
+    PyObject_HEAD
+    gpointer instance;
+    GType gtype;
     GIObjectInfoRefFunction ref_func;
     GIObjectInfoUnrefFunction unref_func;
 } PyGIFundamental;
 
 
-PyObject* pygi_fundamental_new   (gpointer      pointer);
+PyObject* pygi_fundamental_new   (gpointer      instance);
 
 void      pygi_fundamental_ref   (PyGIFundamental *self);
 void      pygi_fundamental_unref (PyGIFundamental *self);
+
+gpointer  pygi_fundamental_get   (PyObject *self);
 
 int pygi_fundamental_register_types (PyObject *m);
 

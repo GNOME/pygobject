@@ -50,7 +50,7 @@ _pygi_marshal_from_py_object (PyObject *py_arg, /*in*/
     }
 
     if (PyObject_TypeCheck(py_arg, &PyGIFundamental_Type)) {
-        arg->v_pointer = pyg_pointer_get (py_arg, void);
+        arg->v_pointer = pygi_fundamental_get (py_arg);
         if (transfer == GI_TRANSFER_EVERYTHING) {
             pygi_fundamental_ref ((PyGIFundamental *) py_arg);
         }
