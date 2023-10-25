@@ -22,6 +22,7 @@
 #include "pygi-basictype.h"
 #include "pygobject-object.h"
 #include "pygi-type.h"
+#include "pygi-fundamental.h"
 #include "pygenum.h"
 #include "pygpointer.h"
 #include "pygboxed.h"
@@ -600,8 +601,36 @@ pyg_value_from_pyobject_with_error(GValue *value, PyObject *obj)
         if ((bm = pyg_type_lookup(G_VALUE_TYPE(value))) != NULL) {
             return bm->tovalue(value, obj);
         } else {
-            PyErr_SetString(PyExc_TypeError, "Unknown value type");
-            return -1;
+            GIRepository *repository;
+            GIBaseInfo *info;
+            GIObjectInfoSetValueFunction set_value_func = NULL;
+
+            if (!PyObject_TypeCheck(obj, &PyGIFundamental_Type)) {
+                PyErr_SetString(PyExc_TypeError, "Fundamental type is required");
+                return -1;
+            }
+            if (!G_TYPE_CHECK_INSTANCE_TYPE(pygi_fundamental_get(obj),
+                    value_type)) {
+                PyErr_SetString(PyExc_TypeError, "Invalid fundamental type for assignment");
+                return -1;
+            }
+
+            repository = g_irepository_get_default();
+            info = g_irepository_find_by_gtype (repository, value_type);
+
+            if (info && GI_IS_OBJECT_INFO (info)) {
+                set_value_func = g_object_info_get_set_value_function_pointer ((GIObjectInfo *) info);
+                if (set_value_func) {
+                    set_value_func (value, pygi_fundamental_get (obj));
+                } else {
+                    PyErr_SetString(PyExc_TypeError, "No set-value function for fundamental type");
+                }
+            } else {
+                PyErr_SetString(PyExc_TypeError, "Unknown value type");
+            }
+
+            if (info)
+                g_base_info_unref (info);
         }
         break;
     }
@@ -775,11 +804,33 @@ value_to_py_structured_type (const GValue *value, GType fundamental, gboolean co
         }
         return pygi_struct_new_from_g_type (G_TYPE_VARIANT, g_variant_ref(v), FALSE);
     }
+    case G_TYPE_INVALID:
+        PyErr_SetString (PyExc_TypeError, "Invalid type");
+        return NULL;
     default:
     {
         PyGTypeMarshal *bm;
+        GIRepository *repository;
+        GIBaseInfo *info;
+        GIObjectInfoGetValueFunction get_value_func = NULL;
+
         if ((bm = pyg_type_lookup(G_VALUE_TYPE(value))))
             return bm->fromvalue(value);
+
+        repository = g_irepository_get_default();
+        info = g_irepository_find_by_gtype (repository, fundamental);
+
+        if (info == NULL)
+            break;
+
+        if (GI_IS_OBJECT_INFO (info))
+            get_value_func = g_object_info_get_get_value_function_pointer ((GIObjectInfo *) info);
+
+        g_base_info_unref (info);
+
+        if (get_value_func)
+            return pygi_fundamental_new (get_value_func (value));
+
         break;
     }
     }

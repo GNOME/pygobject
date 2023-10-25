@@ -69,14 +69,27 @@ def test_delete_fundamental_refcount():
     gc.collect()
 
 
-@pytest.mark.xfail(reason="Requires value get/set function for fundamental type")
 def test_value_set_fundamental_object():
     val = GObject.Value(Regress.TestFundamentalSubObject.__gtype__)
     obj = Regress.TestFundamentalSubObject()
 
-    Regress.test_value_set_fundamental_object(val, obj)
+    val.set_value(obj)
 
     assert val.get_value() == obj
+
+
+def test_value_set_wrong_value():
+    val = GObject.Value(Regress.TestFundamentalSubObject.__gtype__)
+
+    with pytest.raises(TypeError, match="Fundamental type is required"):
+        val.set_value(1)
+
+
+def test_value_set_wrong_fundamental():
+    val = GObject.Value(Regress.TestFundamentalSubObject.__gtype__)
+
+    with pytest.raises(TypeError, match="Invalid fundamental type for assignment"):
+        val.set_value(MyCustomFundamentalObject())
 
 
 def test_array_of_fundamental_objects_in():
@@ -117,16 +130,6 @@ def test_multiple_objects():
     assert obj1 != obj2
 
 
-class MyCustomFundamentalObject(Regress.TestFundamentalObject):
-
-    def __init__(self):
-        print("MyCustomFundamentalObject.__init__")
-        super().__init__()
-
-    def do_finalize(self):
-        print("MyCustomFundamentalObject.do_finalize")
-
-
 def test_custom_fundamental_type_vfunc_override(capsys):
     obj = MyCustomFundamentalObject()
     del obj
@@ -147,10 +150,20 @@ def test_gtk_expression():
 
 @pytest.mark.skipif(not GTK4, reason="requires GTK 4")
 @pytest.mark.xfail()
-def test_gtk_string_filter():
+def test_gtk_string_filter_fundamental_property():
     expr = Gtk.ConstantExpression.new_for_value("one")
     filter = Gtk.StringFilter.new(expr)
 
     assert filter.get_expression() == expr
     # Expression cannot be read from GValue currently
     assert filter.props.expression == expr
+
+
+class MyCustomFundamentalObject(Regress.TestFundamentalObject):
+
+    def __init__(self):
+        print("MyCustomFundamentalObject.__init__")
+        super().__init__()
+
+    def do_finalize(self):
+        print("MyCustomFundamentalObject.do_finalize")
