@@ -24,6 +24,7 @@
 #include "pygi-property.h"
 #include "pygi-value.h"
 #include "pygi-argument.h"
+#include "pygi-fundamental.h"
 #include "pygparamspec.h"
 #include "pygi-type.h"
 
@@ -260,7 +261,14 @@ pygi_set_property_value (PyGObject *instance,
                     break;
                 case GI_INFO_TYPE_INTERFACE:
                 case GI_INFO_TYPE_OBJECT:
-                    g_value_set_object (&value, arg.v_pointer);
+                    if (arg.v_pointer == NULL || G_IS_OBJECT (arg.v_pointer))
+                        g_value_set_object (&value, arg.v_pointer);
+                    else if (!pygi_fundamental_set_value (&value, arg.v_pointer)) {
+                        PyErr_Format (PyExc_NotImplementedError,
+                                      "Setting properties of type '%s' is not implemented",
+                                      g_type_name (type));
+                        goto out;
+                    }
                     break;
                 case GI_INFO_TYPE_BOXED:
                 case GI_INFO_TYPE_STRUCT:

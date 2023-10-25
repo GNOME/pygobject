@@ -49,12 +49,16 @@ PyObject* pygi_fundamental_new   (gpointer      instance);
 void      pygi_fundamental_ref   (PyGIFundamental *self);
 void      pygi_fundamental_unref (PyGIFundamental *self);
 
-gpointer  pygi_fundamental_get   (PyObject *self);
+GTypeInstance* pygi_fundamental_get   (PyObject *self);
 
 int pygi_fundamental_register_types (PyObject *m);
 
 #define pygi_check_fundamental(info_type,info) \
   ((info_type) == GI_INFO_TYPE_OBJECT && \
    g_object_info_get_fundamental ((GIObjectInfo *)(info)))
+
+GTypeInstance* pygi_fundamental_from_value (const GValue *value);
+
+gboolean  pygi_fundamental_set_value (GValue *value, GTypeInstance *instance);
 
 #endif /* __PYGI_FUNDAMENTAL_H__ */

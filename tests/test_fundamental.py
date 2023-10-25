@@ -149,13 +149,12 @@ def test_gtk_expression():
 
 
 @pytest.mark.skipif(not GTK4, reason="requires GTK 4")
-@pytest.mark.xfail()
 def test_gtk_string_filter_fundamental_property():
     expr = Gtk.ConstantExpression.new_for_value("one")
     filter = Gtk.StringFilter.new(expr)
+    filter.props.expression = expr
 
     assert filter.get_expression() == expr
-    # Expression cannot be read from GValue currently
     assert filter.props.expression == expr
 
 

@@ -201,13 +201,13 @@ pygi_fundamental_unref (PyGIFundamental *self)
         self->unref_func (self->instance);
 }
 
-gpointer
+GTypeInstance*
 pygi_fundamental_get (PyObject *self)
 {
     if (PyObject_TypeCheck(self, &PyGIFundamental_Type))
         return ((PyGIFundamental *) self)->instance;
     else {
-        PyErr_SetString(PyExc_TypeError, "Expected GObject Fundamental type");
+        PyErr_SetString (PyExc_TypeError, "Expected GObject Fundamental type");
         return NULL;
     }
 }
@@ -232,4 +232,55 @@ pygi_fundamental_register_types (PyObject *m)
         return -1;
 
     return 0;
+}
+
+
+GTypeInstance*
+pygi_fundamental_from_value (const GValue *value)
+{
+    GIRepository *repository = g_irepository_get_default();
+    GIBaseInfo *info = g_irepository_find_by_gtype (repository, G_VALUE_TYPE(value));
+    GTypeInstance *instance = NULL;
+
+    if (info == NULL)
+        return NULL;
+
+    if (GI_IS_OBJECT_INFO (info)) {
+        GIObjectInfoGetValueFunction get_value_func = g_object_info_get_get_value_function_pointer ((GIObjectInfo *) info);
+        if (get_value_func) {
+            instance = get_value_func (value);
+        }
+    }
+
+    g_base_info_unref (info);
+
+    return instance;
+}
+
+gboolean
+pygi_fundamental_set_value (GValue *value, GTypeInstance *instance)
+{
+    GIRepository *repository;
+    GIBaseInfo *info;
+    gboolean result = FALSE;
+
+    if (instance == NULL) 
+        return result;
+
+    repository = g_irepository_get_default();
+    info = g_irepository_find_by_gtype (repository, G_TYPE_FROM_INSTANCE (instance));
+
+    if (info == NULL)
+        return result;
+
+    if (GI_IS_OBJECT_INFO (info)) {
+        GIObjectInfoSetValueFunction set_value_func = g_object_info_get_set_value_function_pointer ((GIObjectInfo *) info);
+        if (set_value_func) {
+            set_value_func (value, instance);
+            result = TRUE;
+        }
+    }
+
+    g_base_info_unref (info);
+    return result;
 }
