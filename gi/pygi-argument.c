@@ -252,13 +252,13 @@ _pygi_argument_to_array (GIArgument  *arg,
     gsize item_size;
     gssize length;
     GArray *g_array;
-    
+
     g_return_val_if_fail (g_type_info_get_tag (type_info) == GI_TYPE_TAG_ARRAY, NULL);
 
     if (arg->v_pointer == NULL) {
         return NULL;
     }
-    
+
     switch (g_type_info_get_array_type (type_info)) {
         case GI_ARRAY_TYPE_C:
             is_zero_terminated = g_type_info_is_zero_terminated (type_info);
@@ -747,16 +747,16 @@ _pygi_argument_to_object (GIArgument  *arg,
 
             if (arg->v_pointer == NULL)
                 return PyList_New (0);
-            
+
             item_type_info = g_type_info_get_param_type (type_info, 0);
             g_assert (item_type_info != NULL);
 
             item_type_tag = g_type_info_get_tag (item_type_info);
             item_transfer = transfer == GI_TRANSFER_CONTAINER ? GI_TRANSFER_NOTHING : transfer;
-            
+
             array = arg->v_pointer;
             item_size = g_array_get_element_size (array);
-            
+
             if (G_UNLIKELY (item_size > sizeof(GIArgument))) {
                 g_critical ("Stack overflow protection. "
                             "Can't copy array element into GIArgument.");
@@ -777,7 +777,7 @@ _pygi_argument_to_object (GIArgument  *arg,
                 for (i = 0; i < array->len; i++) {
                     GIArgument item = { 0 };
                     PyObject *py_item;
-                    
+
                     memcpy (&item, array->data + i * item_size, item_size);
 
                     py_item = _pygi_argument_to_object (&item, item_type_info, item_transfer);
@@ -872,7 +872,6 @@ _pygi_argument_to_object (GIArgument  *arg,
                 case GI_INFO_TYPE_INTERFACE:
                 case GI_INFO_TYPE_OBJECT:
                     object = pygi_arg_object_to_py_called_from_c (arg, transfer);
-
                     break;
                 default:
                     g_assert_not_reached();

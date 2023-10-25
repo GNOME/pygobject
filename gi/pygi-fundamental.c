@@ -211,6 +211,7 @@ pygi_fundamental_get (PyObject *self)
         return NULL;
     }
 }
+
 int
 pygi_fundamental_register_types (PyObject *m)
 {

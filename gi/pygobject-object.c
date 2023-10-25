@@ -361,7 +361,7 @@ PyGProps_setattro(PyGProps *self, PyObject *attr, PyObject *pvalue)
     char *attr_name, *property_name;
     GObject *obj;
     int ret = -1;
-    
+
     if (pvalue == NULL) {
 	PyErr_SetString(PyExc_TypeError, "properties cannot be "
 			"deleted");
