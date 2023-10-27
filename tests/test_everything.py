@@ -459,6 +459,7 @@ class TestEverything(unittest.TestCase):
         self.assertEqual(Everything.test_enum_param(Everything.TestEnum.VALUE3), 'value3')
         self.assertRaises(TypeError, Everything.test_enum_param, 'hello')
 
+    @pytest.mark.xfail("32bit" in platform.architecture() or platform.system() == "Windows", reason="Big enum value doesn't convert to 32 bit (signed) long")
     def test_enum_unsigned(self):
         self.assertEqual(Everything.test_unsigned_enum_param(Everything.TestEnumUnsigned.VALUE1), 'value1')
         self.assertEqual(Everything.test_unsigned_enum_param(Everything.TestEnumUnsigned.VALUE2), 'value2')
