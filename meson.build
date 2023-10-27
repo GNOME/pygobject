@@ -65,7 +65,7 @@ spec = find_spec("cairo")
 if spec is None:
   sys.stderr.write("cairo module spec not found")
   sys.exit(1)
-src_path = pathlib.Path("@0@")
+src_path = pathlib.Path(r"@0@")
 inc_path = pathlib.Path(spec.origin).parent / "include"
 try:
   sys.stdout.write(str(inc_path.relative_to(src_path)))
