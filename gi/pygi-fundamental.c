@@ -191,6 +191,13 @@ _pygi_fundamental_new_internal (PyTypeObject *type,
     self->ref_func = g_object_info_get_ref_function_pointer (info);
     self->unref_func = g_object_info_get_unref_function_pointer (info);
 
+    /* A special case for GParamSpec. It has a floating reference when created.
+     * We make sure we have a proper reference, so we can ref/unref normally.
+     */
+    if (G_TYPE_IS_PARAM (self->gtype)) {
+        g_param_spec_ref_sink (self->instance);
+    }
+
     g_base_info_unref (info);
 
     return self;
