@@ -561,14 +561,6 @@ pyg_value_from_pyobject_with_error(GValue *value, PyObject *obj)
         }
         break;
     }
-    case G_TYPE_PARAM:
-        if (PyObject_TypeCheck(obj, &PyGIFundamental_Type))
-            g_value_set_param(value, G_PARAM_SPEC (pygi_fundamental_get (obj)));
-        else {
-            PyErr_SetString(PyExc_TypeError, "Expected ParamSpec");
-            return -1;
-        }
-        break;
     case G_TYPE_OBJECT:
         if (obj == Py_None) {
             g_value_set_object(value, NULL);
@@ -788,8 +780,6 @@ value_to_py_structured_type (const GValue *value, GType fundamental, gboolean co
                         g_value_get_boxed(value),FALSE,FALSE);
         }
     }
-    case G_TYPE_PARAM:
-        return pygi_fundamental_new(g_value_get_param(value));
     case G_TYPE_OBJECT:
         return pygobject_new(g_value_get_object(value));
     case G_TYPE_VARIANT:
