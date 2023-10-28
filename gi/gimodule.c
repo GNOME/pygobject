@@ -407,60 +407,6 @@ create_property (const gchar  *prop_name,
     return pspec;
 }
 
-static GParamSpec *
-pyg_param_spec_from_object (PyObject *tuple)
-{
-    Py_ssize_t val_length;
-    const gchar *prop_name;
-    GType prop_type;
-    const gchar *nick, *blurb;
-    PyObject *slice, *item, *py_prop_type;
-    GParamSpec *pspec;
-    gint intvalue;
-
-    val_length = PyTuple_Size(tuple);
-    if (val_length < 4) {
-	PyErr_SetString(PyExc_TypeError,
-			"paramspec tuples must be at least 4 elements long");
-	return NULL;
-    }
-
-    slice = PySequence_GetSlice(tuple, 0, 4);
-    if (!slice) {
-	return NULL;
-    }
-
-    if (!PyArg_ParseTuple(slice, "sOzz", &prop_name, &py_prop_type, &nick, &blurb)) {
-	Py_DECREF(slice);
-	return NULL;
-    }
-
-    Py_DECREF(slice);
-
-    prop_type = pyg_type_from_object(py_prop_type);
-    if (!prop_type) {
-	return NULL;
-    }
-
-    item = PyTuple_GetItem(tuple, val_length-1);
-    if (!PyLong_Check (item)) {
-	PyErr_SetString(PyExc_TypeError,
-			"last element in tuple must be an int");
-	return NULL;
-    }
-
-    if (!pygi_gint_from_py (item, &intvalue))
-	return NULL;
-
-    /* slice is the extra items in the tuple */
-    slice = PySequence_GetSlice(tuple, 4, val_length-1);
-    pspec = create_property(prop_name, prop_type,
-			    nick, blurb, slice,
-			    intvalue);
-
-    return pspec;
-}
-
 G_GNUC_BEGIN_IGNORE_DEPRECATIONS
 
 /**
@@ -2409,8 +2355,6 @@ struct _PyGObject_Functions pygobject_api_functions = {
   _pyg_set_thread_block_funcs,
   (PyGThreadBlockFunc)0, /* block_threads */
   (PyGThreadBlockFunc)0, /* unblock_threads */
-
-  pyg_param_spec_from_object,
 
   pyg_pyobj_to_unichar_conv,
   pyg_parse_constructor_args,
