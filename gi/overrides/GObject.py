@@ -665,3 +665,28 @@ SignalOverride = signalhelper.SignalOverride
 property = Property
 deprecated_attr("GObject", "property", "GObject.Property")
 __all__ += ['Property', 'Signal', 'SignalOverride', 'property']
+
+
+@override
+class ParamSpec(GObjectModule.ParamSpec):
+
+    @property
+    def nick(self):
+        return self._nick
+
+    @nick.setter
+    def nick(self, nick):
+        self._nick = nick
+
+    @property
+    def blurb(self):
+        return self._blurb
+
+    @blurb.setter
+    def blurb(self, blurb):
+        self._blurb = blurb
+
+
+GParamSpec = ParamSpec
+deprecated_attr("GObject", "GParamSpec", "GObject.ParamSpec")
+__all__ += ["ParamSpec", "GParamSpec"]
