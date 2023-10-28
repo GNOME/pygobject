@@ -24,6 +24,8 @@ if gi_dep.type_name() == 'pkgconfig'
   gi_datadir = gi_dep.get_variable(pkgconfig : 'gidatadir')
   regress_sources = [join_paths(gi_datadir, 'tests', 'regress.c')]
   regress_headers = [join_paths(gi_datadir, 'tests', 'regress.h')]
+  regress_sources += [join_paths(gi_datadir, 'tests', 'annotation.c')]
+  regress_headers += [join_paths(gi_datadir, 'tests', 'annotation.h')]
   regress_incdir = include_directories(join_paths(gi_datadir, 'tests'))
   marshalling_sources = [join_paths(gi_datadir, 'tests', 'gimarshallingtests.c')]
   marshalling_headers = [join_paths(gi_datadir, 'tests', 'gimarshallingtests.h')]

@@ -1376,3 +1376,17 @@ def test_gobject_inheritance_with_incomplete_initialization():
 
     with pytest.raises(RuntimeError, match="is not initialized"):
         bomb.qdata
+
+
+@unittest.skipUnless(hasattr(Regress, "AnnotationObject"), "no Regress.AnnotationObject")
+def test_get_function_property():
+    obj = Regress.AnnotationObject()
+
+    assert obj.props.function_property
+
+
+@unittest.skipUnless(hasattr(Regress, "AnnotationObject"), "no Regress.AnnotationObject")
+def test_set_function_property():
+    obj = Regress.AnnotationObject()
+
+    obj.props.function_property = lambda *x: x
