@@ -31,7 +31,7 @@ class TestCoercion(unittest.TestCase):
         prop = GObject.ObjectClass.find_property(GIMarshallingTests.PropertiesObject,
                                                  'some-int')
 
-        self.assertIsInstance(prop, GObject.GParamSpec)
+        self.assertIsInstance(prop, GObject.ParamSpec)
         self.assertEqual(prop.name, 'some-int')
         self.assertEqual(prop.value_type, GObject.TYPE_INT)
         self.assertEqual(prop.owner_type,
@@ -41,7 +41,7 @@ class TestCoercion(unittest.TestCase):
         gtype = GIMarshallingTests.PropertiesObject.__gtype__
         prop = GObject.ObjectClass.find_property(gtype, 'some-int')
 
-        self.assertIsInstance(prop, GObject.GParamSpec)
+        self.assertIsInstance(prop, GObject.ParamSpec)
         self.assertEqual(prop.name, 'some-int')
         self.assertEqual(prop.value_type, GObject.TYPE_INT)
         self.assertEqual(prop.owner_type, gtype)
@@ -50,7 +50,7 @@ class TestCoercion(unittest.TestCase):
         obj = GIMarshallingTests.PropertiesObject()
         prop = GObject.ObjectClass.find_property(obj, 'some-int')
 
-        self.assertIsInstance(prop, GObject.GParamSpec)
+        self.assertIsInstance(prop, GObject.ParamSpec)
         self.assertEqual(prop.name, 'some-int')
         self.assertEqual(prop.value_type, GObject.TYPE_INT)
         self.assertEqual(prop.owner_type, obj.__gtype__)
