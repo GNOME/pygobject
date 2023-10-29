@@ -453,8 +453,7 @@ array_success:
 
             switch (info_type) {
                 case GI_INFO_TYPE_CALLBACK:
-                    /* This should be handled in invoke() */
-                    g_assert_not_reached();
+                    PyErr_SetString (PyExc_TypeError, "Cannot translate Python object to callback type");
                     break;
                 case GI_INFO_TYPE_BOXED:
                 case GI_INFO_TYPE_STRUCT:
@@ -804,9 +803,8 @@ _pygi_argument_to_object (GIArgument  *arg,
 
             switch (info_type) {
                 case GI_INFO_TYPE_CALLBACK:
-                {
-                    g_assert_not_reached();
-                }
+                    PyErr_SetString (PyExc_TypeError, "Cannot translate callback type to Python object");
+                    break;
                 case GI_INFO_TYPE_BOXED:
                 case GI_INFO_TYPE_STRUCT:
                 case GI_INFO_TYPE_UNION:

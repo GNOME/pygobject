@@ -176,6 +176,10 @@ pygi_get_property_value (PyGObject *instance, GParamSpec *pspec)
 
         g_base_info_unref (type_info);
         g_base_info_unref (property_info);
+
+        if (PyErr_Occurred()) {
+            return NULL;
+        }
     }
 
     /* Fallback to GValue marshalling. */
