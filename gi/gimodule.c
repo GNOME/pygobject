@@ -59,6 +59,8 @@ PyObject *PyGIWarning;
 PyObject *PyGIDeprecationWarning;
 PyObject *_PyGIDefaultArgPlaceholder;
 
+static int _gi_exec (PyObject *module);
+
 /* Returns a new flag/enum type or %NULL */
 static PyObject *
 flags_enum_from_gtype (GType g_type,
@@ -2522,13 +2524,18 @@ pygi_register_version_tuples(PyObject *d)
     return 0;
 }
 
+static PyModuleDef_Slot _gi_slots[] = {
+    {Py_mod_exec, _gi_exec},
+    {0, NULL}
+};
+
 static struct PyModuleDef __gimodule = {
     PyModuleDef_HEAD_INIT,
     "_gi",
     NULL,
-    -1,
+    0,
     _gi_functions,
-    NULL,
+    _gi_slots,
     NULL,
     NULL,
     NULL
@@ -2543,10 +2550,15 @@ static struct PyModuleDef __gimodule = {
 PYGI_MODINIT_FUNC PyInit__gi(void);
 
 PYGI_MODINIT_FUNC PyInit__gi(void) {
-    PyObject *module;
+    return PyModuleDef_Init(&__gimodule);
+}
+
+static int
+_gi_exec (PyObject *module)
+{
     PyObject *api;
-    module = PyModule_Create(&__gimodule);
     PyObject *module_dict = PyModule_GetDict (module);
+    int ret;
 
 #if PY_VERSION_HEX < 0x03090000 || defined(PYPY_VERSION)
     /* Deprecated since 3.9 */
@@ -2562,60 +2574,60 @@ PYGI_MODINIT_FUNC PyInit__gi(void) {
 
     PyModule_AddStringConstant(module, "__package__", "gi._gi");
 
-    if (pygi_foreign_init () < 0)
-        return NULL;
-    if (pygi_error_register_types (module) < 0)
-        return NULL;
-    if (pygi_repository_register_types (module) < 0)
-        return NULL;
-    if (pygi_info_register_types (module) < 0)
-        return NULL;
-    if (pygi_type_register_types (module_dict) < 0)
-        return NULL;
-    if (pygi_pointer_register_types (module_dict) < 0)
-        return NULL;
-    if (pygi_struct_register_types (module) < 0)
-        return NULL;
-    if (pygi_gboxed_register_types (module_dict) < 0)
-        return NULL;
-    if (pygi_fundamental_register_types (module) < 0)
-        return NULL;
-    if (pygi_boxed_register_types (module) < 0)
-        return NULL;
-    if (pygi_ccallback_register_types (module) < 0)
-        return NULL;
-    if (pygi_resulttuple_register_types (module) < 0)
-        return NULL;
+    if ((ret = pygi_foreign_init ()) < 0)
+        return ret;
+    if ((ret = pygi_error_register_types (module)) < 0)
+        return ret;
+    if ((ret = pygi_repository_register_types (module)) < 0)
+        return ret;
+    if ((ret = pygi_info_register_types (module)) < 0)
+        return ret;
+    if ((ret = pygi_type_register_types (module_dict)) < 0)
+        return ret;
+    if ((ret = pygi_pointer_register_types (module_dict)) < 0)
+        return ret;
+    if ((ret = pygi_struct_register_types (module)) < 0)
+        return ret;
+    if ((ret = pygi_gboxed_register_types (module_dict)) < 0)
+        return ret;
+    if ((ret = pygi_fundamental_register_types (module)) < 0)
+        return ret;
+    if ((ret = pygi_boxed_register_types (module)) < 0)
+        return ret;
+    if ((ret = pygi_ccallback_register_types (module)) < 0)
+        return ret;
+    if ((ret = pygi_resulttuple_register_types (module)) < 0)
+        return ret;
 
-    if (pygi_spawn_register_types (module_dict) < 0)
-        return NULL;
-    if (pygi_option_context_register_types (module_dict) < 0)
-        return NULL;
-    if (pygi_option_group_register_types (module_dict) < 0)
-        return NULL;
+    if ((ret = pygi_spawn_register_types (module_dict)) < 0)
+        return ret;
+    if ((ret = pygi_option_context_register_types (module_dict)) < 0)
+        return ret;
+    if ((ret = pygi_option_group_register_types (module_dict)) < 0)
+        return ret;
 
-    if (pygi_register_api (module_dict) < 0)
-        return NULL;
-    if (pygi_register_constants (module) < 0)
-        return NULL;
-    if (pygi_register_version_tuples (module_dict) < 0)
-        return NULL;
-    if (pygi_register_warnings (module_dict) < 0)
-        return NULL;
-    if (pyi_object_register_types (module_dict) < 0)
-        return NULL;
-    if (pygi_interface_register_types (module_dict) < 0)
-        return NULL;
-    if (pygi_paramspec_register_types (module_dict) < 0)
-        return NULL;
-    if (pygi_enum_register_types (module_dict) < 0)
-        return NULL;
-    if (pygi_flags_register_types (module_dict) < 0)
-        return NULL;
+    if ((ret = pygi_register_api (module_dict)) < 0)
+        return ret;
+    if ((ret = pygi_register_constants (module)) < 0)
+        return ret;
+    if ((ret = pygi_register_version_tuples (module_dict)) < 0)
+        return ret;
+    if ((ret = pygi_register_warnings (module_dict)) < 0)
+        return ret;
+    if ((ret = pyi_object_register_types (module_dict)) < 0)
+        return ret;
+    if ((ret = pygi_interface_register_types (module_dict)) < 0)
+        return ret;
+    if ((ret = pygi_paramspec_register_types (module_dict)) < 0)
+        return ret;
+    if ((ret = pygi_enum_register_types (module_dict)) < 0)
+        return ret;
+    if ((ret = pygi_flags_register_types (module_dict)) < 0)
+        return ret;
 
     PyGIWarning = PyErr_NewException ("gi.PyGIWarning", PyExc_Warning, NULL);
     if (PyGIWarning == NULL)
-        return NULL;
+        return -1;
 
     PyGIDeprecationWarning = PyErr_NewException("gi.PyGIDeprecationWarning",
                                                 PyExc_DeprecationWarning, NULL);
@@ -2633,9 +2645,9 @@ PYGI_MODINIT_FUNC PyInit__gi(void) {
 
     api = PyCapsule_New ( (void *) &CAPI, "gi._API", NULL);
     if (api == NULL) {
-        return NULL;
+        return -1;
     }
     PyModule_AddObject (module, "_API", api);
 
-    return module;
+    return 0;
 }
