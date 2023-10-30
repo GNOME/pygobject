@@ -134,9 +134,8 @@ _pygi_argument_from_g_value(const GValue *value,
                       arg.v_pointer = g_value_get_param (value);
                     else if (G_VALUE_HOLDS_OBJECT (value))
                       arg.v_pointer = g_value_get_object (value);
-                    else {
-                        arg.v_pointer = pygi_fundamental_from_value (value);
-                    }
+                    else
+                      arg.v_pointer = pygi_fundamental_from_value (value);
                     break;
                 case GI_INFO_TYPE_BOXED:
                 case GI_INFO_TYPE_STRUCT:
@@ -608,13 +607,12 @@ pyg_value_from_pyobject_with_error(GValue *value, PyObject *obj)
             GIBaseInfo *info;
             GIObjectInfoSetValueFunction set_value_func = NULL;
 
-            if (!PyObject_TypeCheck(obj, &PyGIFundamental_Type)) {
-                PyErr_SetString(PyExc_TypeError, "Fundamental type is required");
+            if (!PyObject_TypeCheck (obj, &PyGIFundamental_Type)) {
+                PyErr_SetString (PyExc_TypeError, "Fundamental type is required");
                 return -1;
             }
-            if (!G_TYPE_CHECK_INSTANCE_TYPE(pygi_fundamental_get(obj),
-                    value_type)) {
-                PyErr_SetString(PyExc_TypeError, "Invalid fundamental type for assignment");
+            if (!G_TYPE_CHECK_INSTANCE_TYPE (pygi_fundamental_get (obj), value_type)) {
+                PyErr_SetString (PyExc_TypeError, "Invalid fundamental type for assignment");
                 return -1;
             }
 
@@ -626,10 +624,10 @@ pyg_value_from_pyobject_with_error(GValue *value, PyObject *obj)
                 if (set_value_func) {
                     set_value_func (value, pygi_fundamental_get (obj));
                 } else {
-                    PyErr_SetString(PyExc_TypeError, "No set-value function for fundamental type");
+                    PyErr_SetString (PyExc_TypeError, "No set-value function for fundamental type");
                 }
             } else {
-                PyErr_SetString(PyExc_TypeError, "Unknown value type");
+                PyErr_SetString (PyExc_TypeError, "Unknown value type");
             }
 
             if (info)
@@ -820,7 +818,7 @@ value_to_py_structured_type (const GValue *value, GType fundamental, gboolean co
         if ((bm = pyg_type_lookup(G_VALUE_TYPE(value))))
             return bm->fromvalue(value);
 
-        repository = g_irepository_get_default();
+        repository = g_irepository_get_default ();
         info = g_irepository_find_by_gtype (repository, fundamental);
 
         if (info == NULL)

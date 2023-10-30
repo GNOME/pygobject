@@ -100,32 +100,34 @@ out:
 }
 
 static PyObject*
-fundamental_richcompare(PyObject *self, PyObject *other, int op)
+fundamental_richcompare (PyObject *self,
+                         PyObject *other,
+                         int op)
 {
-    if (Py_TYPE(self) == Py_TYPE(other))
+    if (Py_TYPE (self) == Py_TYPE (other)) {
         return pyg_ptr_richcompare (((PyGIFundamental*) self)->instance,
                                     ((PyGIFundamental*) other)->instance,
                                     op);
-    else {
-        Py_INCREF(Py_NotImplemented);
+    } else {
+        Py_INCREF (Py_NotImplemented);
         return Py_NotImplemented;
     }
 }
 
 static Py_hash_t
-fundamental_hash(PyGIFundamental *self)
+fundamental_hash (PyGIFundamental *self)
 {
     return (Py_hash_t)(gintptr)(self->instance);
 }
 
 static PyObject *
-fundamental_repr(PyGIFundamental *self)
+fundamental_repr (PyGIFundamental *self)
 {
     gchar buf[128];
 
-    g_snprintf(buf, sizeof(buf), "<%s at 0x%" G_GUINTPTR_FORMAT ">",
-               g_type_name(self->gtype),
-               (guintptr) self->instance);
+    g_snprintf (buf, sizeof(buf), "<%s at 0x%" G_GUINTPTR_FORMAT ">",
+                g_type_name (self->gtype),
+                (guintptr) self->instance);
     return PyUnicode_FromString (buf);
 }
 
@@ -204,9 +206,9 @@ pygi_fundamental_unref (PyGIFundamental *self)
 GTypeInstance*
 pygi_fundamental_get (PyObject *self)
 {
-    if (PyObject_TypeCheck(self, &PyGIFundamental_Type))
+    if (PyObject_TypeCheck (self, &PyGIFundamental_Type)) {
         return ((PyGIFundamental *) self)->instance;
-    else {
+    } else {
         PyErr_SetString (PyExc_TypeError, "Expected GObject Fundamental type");
         return NULL;
     }
@@ -238,8 +240,8 @@ pygi_fundamental_register_types (PyObject *m)
 GTypeInstance*
 pygi_fundamental_from_value (const GValue *value)
 {
-    GIRepository *repository = g_irepository_get_default();
-    GIBaseInfo *info = g_irepository_find_by_gtype (repository, G_VALUE_TYPE(value));
+    GIRepository *repository = g_irepository_get_default ();
+    GIBaseInfo *info = g_irepository_find_by_gtype (repository, G_VALUE_TYPE (value));
     GTypeInstance *instance = NULL;
 
     if (info == NULL)
@@ -267,7 +269,7 @@ pygi_fundamental_set_value (GValue *value, GTypeInstance *instance)
     if (instance == NULL) 
         return result;
 
-    repository = g_irepository_get_default();
+    repository = g_irepository_get_default ();
     info = g_irepository_find_by_gtype (repository, G_TYPE_FROM_INSTANCE (instance));
 
     if (info == NULL)

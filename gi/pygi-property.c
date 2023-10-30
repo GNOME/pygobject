@@ -261,9 +261,9 @@ pygi_set_property_value (PyGObject *instance,
                     break;
                 case GI_INFO_TYPE_INTERFACE:
                 case GI_INFO_TYPE_OBJECT:
-                    if (arg.v_pointer == NULL || G_IS_OBJECT (arg.v_pointer))
+                    if (arg.v_pointer == NULL || G_IS_OBJECT (arg.v_pointer)) {
                         g_value_set_object (&value, arg.v_pointer);
-                    else if (!pygi_fundamental_set_value (&value, arg.v_pointer)) {
+                    } else if (!pygi_fundamental_set_value (&value, arg.v_pointer)) {
                         PyErr_Format (PyExc_NotImplementedError,
                                       "Setting properties of type '%s' is not implemented",
                                       g_type_name (type));
