@@ -17,7 +17,6 @@
 
 import pytest
 
-from gi import PyGIDeprecationWarning
 GdkPixbuf = pytest.importorskip("gi.repository.GdkPixbuf")
 
 

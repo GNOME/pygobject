@@ -15,9 +15,6 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
 # USA
 
-import warnings
-
-from gi import PyGIDeprecationWarning
 from gi.repository import GLib
 
 from ..overrides import override
@@ -34,15 +31,7 @@ class Pixbuf(GdkPixbuf.Pixbuf):
     @classmethod
     def new_from_data(
             cls, data, colorspace, has_alpha, bits_per_sample,
-            width, height, rowstride,
-            destroy_fn=None, *destroy_fn_data):
-
-        if destroy_fn is not None:
-            w = PyGIDeprecationWarning("destroy_fn argument deprecated")
-            warnings.warn(w)
-        if destroy_fn_data:
-            w = PyGIDeprecationWarning("destroy_fn_data argument deprecated")
-            warnings.warn(w)
+            width, height, rowstride):
 
         data = GLib.Bytes.new(data)
         return cls.new_from_bytes(
