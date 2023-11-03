@@ -29,11 +29,12 @@ GOptionGroup in glib.
 
 import sys
 import optparse
+import warnings
 from optparse import OptParseError, OptionError, OptionValueError, \
     BadOptionError, OptionConflictError
 from .module import get_introspection_module
 
-from gi import _gi
+from gi import _gi, PyGIDeprecationWarning
 from gi._error import GError
 GLib = get_introspection_module('GLib')
 
@@ -92,6 +93,10 @@ class Option(optparse.Option):
     REMAINING = '--' + GLib.OPTION_REMAINING
 
     def __init__(self, *args, **kwargs):
+        warnings.warn(
+            "gi.repository.GLib.option.Option is depecated, use gi.repository.GLib.OptionEntry instead",
+            PyGIDeprecationWarning
+        )
         optparse.Option.__init__(self, *args, **kwargs)
         if not self._long_opts:
             raise ValueError("%s at least one long option name.")
@@ -169,6 +174,10 @@ class OptionGroup(optparse.OptionGroup):
     def __init__(self, name, description, help_description="",
                  option_list=None, defaults=None,
                  translation_domain=None):
+        warnings.warn(
+            "gi.repository.GLib.option.OptionGroup is depecated, use gi.repository.GLib.OptionContext instead",
+            PyGIDeprecationWarning
+        )
         optparse.OptionContainer.__init__(self, Option, 'error', description)
         self.name = name
         self.parser = None
@@ -260,6 +269,10 @@ class OptionParser(optparse.OptionParser):
     """
 
     def __init__(self, *args, **kwargs):
+        warnings.warn(
+            "gi.repository.GLib.option.OptionParser is depecated, use gi.repository.GLib.OptionContext instead",
+            PyGIDeprecationWarning
+        )
         if 'option_class' not in kwargs:
             kwargs['option_class'] = Option
         self.help_enabled = kwargs.pop('help_enabled', True)
