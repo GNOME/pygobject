@@ -114,42 +114,6 @@ class TestGObjectAPI(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, 'This method is currently unsupported.*'):
             obj.force_floating()
 
-    def test_compat_api(self):
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter('always')
-            # GObject formerly exposed a lot of GLib's functions
-            self.assertEqual(GObject.markup_escape_text('foo'), 'foo')
-
-            ml = GObject.MainLoop()
-            self.assertFalse(ml.is_running())
-
-            context = GObject.main_context_default()
-            self.assertTrue(context.pending() in [False, True])
-
-            context = GObject.MainContext()
-            self.assertFalse(context.pending())
-
-            self.assertTrue(issubclass(w[0].category, PyGIDeprecationWarning))
-            self.assertTrue('GLib.markup_escape_text' in str(w[0]), str(w[0]))
-
-            self.assertLess(GObject.PRIORITY_HIGH, GObject.PRIORITY_DEFAULT)
-
-    def test_min_max_int(self):
-        with warnings.catch_warnings():
-            warnings.simplefilter('ignore', PyGIDeprecationWarning)
-
-            self.assertEqual(GObject.G_MAXINT16, 2 ** 15 - 1)
-            self.assertEqual(GObject.G_MININT16, -2 ** 15)
-            self.assertEqual(GObject.G_MAXUINT16, 2 ** 16 - 1)
-
-            self.assertEqual(GObject.G_MAXINT32, 2 ** 31 - 1)
-            self.assertEqual(GObject.G_MININT32, -2 ** 31)
-            self.assertEqual(GObject.G_MAXUINT32, 2 ** 32 - 1)
-
-            self.assertEqual(GObject.G_MAXINT64, 2 ** 63 - 1)
-            self.assertEqual(GObject.G_MININT64, -2 ** 63)
-            self.assertEqual(GObject.G_MAXUINT64, 2 ** 64 - 1)
-
 
 class TestReferenceCounting(unittest.TestCase):
     def test_regular_object(self):
@@ -529,14 +493,6 @@ class TestPropertyBindings(unittest.TestCase):
         self.target.props.int_prop = 2
         self.assertEqual(self.source.int_prop, 1)
         self.assertEqual(self.target.int_prop, 2)
-
-    def test_call_binding(self):
-        binding = self.source.bind_property('int_prop', self.target, 'int_prop',
-                                            GObject.BindingFlags.DEFAULT)
-        with capture_glib_deprecation_warnings() as warn:
-            result = binding()
-        assert len(warn)
-        assert result is binding
 
     def test_bidirectional_binding(self):
         binding = self.source.bind_property('int_prop', self.target, 'int_prop',

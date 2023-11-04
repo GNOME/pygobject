@@ -3232,14 +3232,6 @@ class TestDeprecation(unittest.TestCase):
     def test_deprecated_attribute_warning_coverage(self):
         with warnings.catch_warnings(record=True) as warn:
             warnings.simplefilter('always')
-            GObject.markup_escape_text
-            GObject.PRIORITY_DEFAULT
-            GObject.GError
-            GObject.PARAM_CONSTRUCT
-            GObject.SIGNAL_ACTION
-            GObject.property
-            GObject.IO_STATUS_ERROR
-            GObject.G_MAXUINT64
             GLib.IO_STATUS_ERROR
             GLib.SPAWN_SEARCH_PATH
             GLib.OPTION_FLAG_HIDDEN
@@ -3249,7 +3241,7 @@ class TestDeprecation(unittest.TestCase):
             GLib.OPTION_ERROR_BAD_VALUE
             GLib.glib_version
             GLib.pyglib_version
-            self.assertEqual(len(warn), 17)
+            self.assertEqual(len(warn), 9)
 
     def test_deprecated_init_no_keywords(self):
         def init(self, **kwargs):

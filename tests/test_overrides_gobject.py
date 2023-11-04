@@ -6,25 +6,6 @@ from gi.repository import GObject, GLib, GIMarshallingTests
 from .helper import ignore_gi_deprecation_warnings
 
 
-def test_stop_emission_deprec():
-    class TestObject(GObject.GObject):
-        int_prop = GObject.Property(default=0, type=int)
-
-    obj = TestObject()
-
-    def notify_callback(obj, *args):
-        with pytest.warns(PyGIDeprecationWarning):
-            obj.stop_emission("notify::int-prop")
-
-        with pytest.warns(PyGIDeprecationWarning):
-            obj.emit_stop_by_name("notify::int-prop")
-
-        obj.stop_emission_by_name("notify::int-prop")
-
-    obj.connect("notify::int-prop", notify_callback)
-    obj.notify("int-prop")
-
-
 def test_signal_parse_name():
     obj = GObject.GObject()
     assert GObject.signal_parse_name("notify", obj, True) == (1, 0)
@@ -339,14 +320,6 @@ def test_value_uchar():
 
     with pytest.raises(OverflowError):
         v.set_value(256)
-
-
-def test_value_set_boxed_deprecate_non_boxed():
-    v = GObject.Value(GObject.TYPE_POINTER)
-    with pytest.warns(PyGIDeprecationWarning):
-        v.get_boxed()
-    with pytest.warns(PyGIDeprecationWarning):
-        v.set_boxed(None)
 
 
 def test_value_boolean():
