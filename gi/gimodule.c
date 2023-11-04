@@ -407,6 +407,22 @@ create_property (const gchar  *prop_name,
     return pspec;
 }
 
+static PyObject *
+pyg_param_spec_new (GParamSpec *pspec)
+{
+    PyErr_SetString (PyExc_NotImplementedError,
+                     "Creating ParamSpecs through pyg_param_spec_new is no longer supported");
+    return NULL;
+}
+
+static GParamSpec *
+pyg_param_spec_from_object (PyObject *tuple)
+{
+    PyErr_SetString (PyExc_NotImplementedError,
+                     "Creating ParamSpecs through pyg_param_spec_from_object is no longer supported");
+    return NULL;
+}
+
 G_GNUC_BEGIN_IGNORE_DEPRECATIONS
 
 /**
@@ -2317,6 +2333,8 @@ static struct PyGI_API CAPI = {
   pygi_register_foreign_struct,
 };
 
+const gpointer PyGParamSpec_Type_Stub = NULL;
+
 struct _PyGObject_Functions pygobject_api_functions = {
   pygobject_register_class,
   pygobject_register_wrapper,
@@ -2355,6 +2373,10 @@ struct _PyGObject_Functions pygobject_api_functions = {
   _pyg_set_thread_block_funcs,
   (PyGThreadBlockFunc)0, /* block_threads */
   (PyGThreadBlockFunc)0, /* unblock_threads */
+
+  (PyTypeObject *) &PyGParamSpec_Type_Stub,
+  pyg_param_spec_new,
+  pyg_param_spec_from_object,
 
   pyg_pyobj_to_unichar_conv,
   pyg_parse_constructor_args,

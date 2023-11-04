@@ -137,6 +137,9 @@ struct _PyGObject_Functions {
     PyGThreadBlockFunc block_threads;
     PyGThreadBlockFunc unblock_threads;
 
+    PyTypeObject *paramspec_type;
+    PyObject *(* paramspec_new)(GParamSpec *spec);
+    GParamSpec *(*paramspec_get)(PyObject *tuple);
     int (*pyobj_to_unichar_conv)(PyObject *pyobj, void* ptr);
 G_GNUC_BEGIN_IGNORE_DEPRECATIONS
     gboolean (*parse_constructor_args)(GType        obj_type,
@@ -244,6 +247,9 @@ struct _PyGObject_Functions *_PyGObject_API;
 #define pyg_flags_add_constants     (_PyGObject_API->flags_add_constants)
 #define pyg_constant_strip_prefix   (_PyGObject_API->constant_strip_prefix)
 #define pyg_error_check             (_PyGObject_API->error_check)
+#define PyGParamSpec_Type           (*_PyGObject_API->paramspec_type)
+#define pyg_param_spec_new          (_PyGObject_API->paramspec_new)
+#define pyg_param_spec_from_object  (_PyGObject_API->paramspec_get)
 #define pyg_pyobj_to_unichar_conv   (_PyGObject_API->pyobj_to_unichar_conv)
 #define pyg_parse_constructor_args  (_PyGObject_API->parse_constructor_args)
 #define pyg_param_gvalue_as_pyobject   (_PyGObject_API->value_as_pyobject)
