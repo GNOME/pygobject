@@ -2,7 +2,7 @@
 
 set -e
 
-TAG="registry.gitlab.gnome.org/gnome/pygobject/main:v21"
+TAG="registry.gitlab.gnome.org/gnome/pygobject/main:v22"
 
 sudo docker build --build-arg HOST_USER_ID="$UID" --tag "${TAG}" \
     --file "Dockerfile" .
