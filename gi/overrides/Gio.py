@@ -21,7 +21,7 @@
 import warnings
 
 from .._ossighelper import wakeup_on_signal, register_sigint_fallback
-from ..overrides import override, deprecated_init, wrap_list_store_sort_func
+from ..overrides import override, wrap_list_store_sort_func
 from ..module import get_introspection_module
 from gi import PyGIWarning
 
@@ -231,9 +231,6 @@ __all__.append('MenuItem')
 
 class Settings(Gio.Settings):
     '''Provide dictionary-like access to GLib.Settings.'''
-
-    __init__ = deprecated_init(Gio.Settings.__init__,
-                               arg_names=('schema', 'path', 'backend'))
 
     def __contains__(self, key):
         return key in self.list_keys()
