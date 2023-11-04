@@ -7,7 +7,6 @@ python_sources = [
   'Gio.py',
   'GIMarshallingTests.py',
   'Pango.py',
-  'keysyms.py',
   '__init__.py']
 
 python.install_sources(python_sources,
