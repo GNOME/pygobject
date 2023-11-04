@@ -5,7 +5,6 @@ import contextlib
 import unittest
 import sys
 import gc
-import warnings
 import timeit
 
 import pytest
@@ -18,12 +17,10 @@ from gi.repository import Gio, GLib, GObject
 
 try:
     from gi.repository import Gtk, GdkPixbuf, Gdk
-    PyGTKDeprecationWarning = Gtk.PyGTKDeprecationWarning
     Gtk_version = Gtk._version
 except ImportError:
     Gtk = None
     Gtk_version = None
-    PyGTKDeprecationWarning = None
     GdkPixbuf = None
     Gdk = None
 
@@ -130,15 +127,6 @@ def test_menu_popup():
 
 
 @unittest.skipUnless(Gtk, 'Gtk not available')
-@unittest.skipIf(Gtk_version == "4.0", "not in gtk4")
-def test_button_stock():
-    with capture_glib_warnings():
-        button = Gtk.Button(stock=Gtk.STOCK_OK)
-    assert button.props.label == Gtk.STOCK_OK
-    assert button.props.use_stock
-
-
-@unittest.skipUnless(Gtk, 'Gtk not available')
 def test_wrapper_toggle_refs():
     if not GTK4:
         BASE = Gtk.Button
@@ -196,14 +184,12 @@ class TestGtk(unittest.TestCase):
 
     @unittest.skipIf(Gtk_version == "4.0", "not in gtk4")
     def test_actions(self):
-        self.assertEqual(Gtk.Action, gi.overrides.Gtk.Action)
         action = Gtk.Action(name="test", label="Test", tooltip="Test Action", stock_id=Gtk.STOCK_COPY)
         self.assertEqual(action.get_name(), "test")
         self.assertEqual(action.get_label(), "Test")
         self.assertEqual(action.get_tooltip(), "Test Action")
         self.assertEqual(action.get_stock_id(), Gtk.STOCK_COPY)
 
-        self.assertEqual(Gtk.RadioAction, gi.overrides.Gtk.RadioAction)
         action = Gtk.RadioAction(name="test", label="Test", tooltip="Test Action", stock_id=Gtk.STOCK_COPY, value=1)
         self.assertEqual(action.get_name(), "test")
         self.assertEqual(action.get_label(), "Test")
@@ -391,11 +377,6 @@ class TestGtk(unittest.TestCase):
 
     def test_dialog_classes(self):
         self.assertEqual(Gtk.Dialog, gi.overrides.Gtk.Dialog)
-        if not GTK4:
-            self.assertEqual(Gtk.FileChooserDialog, gi.overrides.Gtk.FileChooserDialog)
-            self.assertEqual(Gtk.RecentChooserDialog, gi.overrides.Gtk.RecentChooserDialog)
-            self.assertEqual(Gtk.ColorSelectionDialog, gi.overrides.Gtk.ColorSelectionDialog)
-            self.assertEqual(Gtk.FontSelectionDialog, gi.overrides.Gtk.FontSelectionDialog)
 
     def test_dialog_base(self):
         dialog = Gtk.Dialog(title='Foo', modal=True)
@@ -406,69 +387,17 @@ class TestGtk(unittest.TestCase):
 
     @unittest.skipIf(GTK4, "flags not in gtk4")
     def test_dialog_deprecations(self):
-        with warnings.catch_warnings(record=True) as warn:
-            warnings.simplefilter('always')
-            dialog = Gtk.Dialog(title='Foo', flags=Gtk.DialogFlags.MODAL)
-            self.assertTrue(dialog.get_modal())
-            self.assertEqual(len(warn), 1)
-            self.assertTrue(issubclass(warn[0].category, PyGTKDeprecationWarning))
-            self.assertRegex(str(warn[0].message),
-                             '.*flags.*modal.*')
-
-        with warnings.catch_warnings(record=True) as warn:
-            warnings.simplefilter('always')
-            dialog = Gtk.Dialog(title='Foo', flags=Gtk.DialogFlags.DESTROY_WITH_PARENT)
-            self.assertTrue(dialog.get_destroy_with_parent())
-            self.assertEqual(len(warn), 1)
-            self.assertTrue(issubclass(warn[0].category, PyGTKDeprecationWarning))
-            self.assertRegex(str(warn[0].message),
-                             '.*flags.*destroy_with_parent.*')
-
-    @unittest.skipIf(GTK4, "flags not in gtk4")
-    def test_dialog_deprecation_stacklevels(self):
-        # Test warning levels are setup to give the correct filename for
-        # deprecations in different classes in the inheritance hierarchy.
-
-        # Base class
-        self.assertEqual(Gtk.Dialog, gi.overrides.Gtk.Dialog)
-        with warnings.catch_warnings(record=True) as warn:
-            warnings.simplefilter('always')
-            Gtk.Dialog(flags=Gtk.DialogFlags.MODAL)
-            self.assertEqual(len(warn), 1)
-            self.assertRegex(warn[0].filename, '.*test_overrides_gtk.*')
-
-        # Validate overridden base with overridden sub-class.
-        self.assertEqual(Gtk.MessageDialog, gi.overrides.Gtk.MessageDialog)
-        with warnings.catch_warnings(record=True) as warn:
-            warnings.simplefilter('always')
-            Gtk.MessageDialog(flags=Gtk.DialogFlags.MODAL)
-            self.assertEqual(len(warn), 1)
-            self.assertRegex(warn[0].filename, '.*test_overrides_gtk.*')
-
-        # Validate overridden base with non-overridden sub-class.
-        self.assertEqual(Gtk.AboutDialog, gi.repository.Gtk.AboutDialog)
-        with warnings.catch_warnings(record=True) as warn:
-            warnings.simplefilter('always')
-            Gtk.AboutDialog(flags=Gtk.DialogFlags.MODAL)
-            self.assertEqual(len(warn), 1)
-            self.assertRegex(warn[0].filename, '.*test_overrides_gtk.*')
+        dialog = Gtk.Dialog(title='Foo')
+        self.assertFalse(dialog.get_modal())
+        self.assertFalse(dialog.get_destroy_with_parent())
 
     def test_dialog_add_buttons(self):
         if not GTK4:
-            # The overloaded "buttons" keyword gives a warning when attempting
-            # to use it for adding buttons as was available in PyGTK.
-            with warnings.catch_warnings(record=True) as warn:
-                warnings.simplefilter('always')
-                dialog = Gtk.Dialog(title='Foo', modal=True,
-                                    buttons=('test-button1', 1))
-                self.assertEqual(len(warn), 1)
-                self.assertTrue(issubclass(warn[0].category, PyGTKDeprecationWarning))
-                self.assertRegex(str(warn[0].message),
-                                 '.*ButtonsType.*add_buttons.*')
+            dialog = Gtk.Dialog(title='Foo', modal=True)
         else:
             dialog = Gtk.Dialog()
-            dialog.add_buttons('test-button1', 1)
 
+        dialog.add_buttons('test-button1', 1)
         dialog.add_buttons('test-button2', 2, 'gtk-close', Gtk.ResponseType.CLOSE)
         button = dialog.get_widget_for_response(1)
         self.assertEqual('test-button1', button.get_label())
@@ -680,13 +609,6 @@ class TestGtk(unittest.TestCase):
         adjustment = Gtk.Adjustment()
         self.adjustment_check(adjustment)
 
-        if not GTK4:
-            adjustment = Gtk.Adjustment(1, -1, 3, 0, 0, 0)
-            self.adjustment_check(adjustment, value=1, lower=-1, upper=3)
-
-            adjustment = Gtk.Adjustment(1, -1, 3, 0, 0, 0, value=2)
-            self.adjustment_check(adjustment, value=2, lower=-1, upper=3)
-
     @unittest.skipIf(Gtk_version == "4.0", "not in gtk4")
     def test_table(self):
         table = Gtk.Table()
@@ -877,11 +799,6 @@ class TestGtk(unittest.TestCase):
         Gtk.IconSet()
         pixbuf = GdkPixbuf.Pixbuf()
         Gtk.IconSet.new_from_pixbuf(pixbuf)
-
-        with warnings.catch_warnings(record=True) as warn:
-            warnings.simplefilter('always')
-            Gtk.IconSet(pixbuf)
-        assert issubclass(warn[0].category, PyGTKDeprecationWarning)
 
     def test_viewport(self):
         vadjustment = Gtk.Adjustment()
