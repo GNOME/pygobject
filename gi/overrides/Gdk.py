@@ -20,11 +20,10 @@
 # USA
 
 import sys
-import warnings
 
 from ..overrides import override, strip_boolean_result
 from ..module import get_introspection_module
-from gi import PyGIDeprecationWarning, require_version
+from gi import require_version
 
 Gdk = get_introspection_module('Gdk')
 GDK2 = Gdk._version == '2.0'
@@ -329,50 +328,6 @@ if GDK2 or GDK3:
 
     DragContext = override(DragContext)
     __all__.append('DragContext')
-
-    class Cursor(Gdk.Cursor):
-
-        def __new__(cls, *args, **kwds):
-            arg_len = len(args)
-            kwd_len = len(kwds)
-            total_len = arg_len + kwd_len
-
-            if total_len == 1:
-                # Since g_object_newv (super.__new__) does not seem valid for
-                # direct use with GdkCursor, we must assume usage of at least
-                # one of the C constructors to be valid.
-                return cls.new(*args, **kwds)
-
-            elif total_len == 2:
-                warnings.warn('Calling "Gdk.Cursor(display, cursor_type)" has been deprecated. '
-                              'Please use Gdk.Cursor.new_for_display(display, cursor_type). '
-                              'See: https://wiki.gnome.org/PyGObject/InitializerDeprecations',
-                              PyGIDeprecationWarning)
-                return cls.new_for_display(*args, **kwds)
-
-            elif total_len == 4:
-                warnings.warn('Calling "Gdk.Cursor(display, pixbuf, x, y)" has been deprecated. '
-                              'Please use Gdk.Cursor.new_from_pixbuf(display, pixbuf, x, y). '
-                              'See: https://wiki.gnome.org/PyGObject/InitializerDeprecations',
-                              PyGIDeprecationWarning)
-                return cls.new_from_pixbuf(*args, **kwds)
-
-            elif total_len == 6:
-                if not GDK2:
-                    # pixmaps don't exist in Gdk 3.0
-                    raise ValueError("Wrong number of parameters")
-
-                warnings.warn('Calling "Gdk.Cursor(source, mask, fg, bg, x, y)" has been deprecated. '
-                              'Please use Gdk.Cursor.new_from_pixmap(source, mask, fg, bg, x, y). '
-                              'See: https://wiki.gnome.org/PyGObject/InitializerDeprecations',
-                              PyGIDeprecationWarning)
-                return cls.new_from_pixmap(*args, **kwds)
-
-            else:
-                raise ValueError("Wrong number of parameters")
-
-    Cursor = override(Cursor)
-    __all__.append('Cursor')
 
     # Gdk.Color was deprecated since 3.14 and dropped in Gtk-4.0
     color_parse = strip_boolean_result(Gdk.color_parse)

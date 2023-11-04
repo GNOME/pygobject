@@ -9,10 +9,9 @@ import pytest
 
 import gi
 import gi.overrides
-from gi import PyGIDeprecationWarning
 
 try:
-    from gi.repository import Gio, Gdk, GdkPixbuf, Gtk
+    from gi.repository import Gio, Gdk, Gtk
     GDK4 = Gdk._version == "4.0"
 except ImportError:
     Gdk = None
@@ -217,46 +216,6 @@ class TestGdk(unittest.TestCase):
                                  0,
                                  Gdk.ModifierType.CONTROL_MASK,
                                  Gdk.EventType.BUTTON_PRESS)
-
-    @unittest.skipIf(GDK4, "not in gdk4")
-    def test_cursor(self):
-        self.assertEqual(Gdk.Cursor, gi.overrides.Gdk.Cursor)
-        with capture_glib_deprecation_warnings():
-            c = Gdk.Cursor(Gdk.CursorType.WATCH)
-        self.assertNotEqual(c, None)
-        with capture_glib_deprecation_warnings():
-            c = Gdk.Cursor(cursor_type=Gdk.CursorType.WATCH)
-        self.assertNotEqual(c, None)
-
-        display_manager = Gdk.DisplayManager.get()
-        display = display_manager.get_default_display()
-
-        test_pixbuf = GdkPixbuf.Pixbuf.new(GdkPixbuf.Colorspace.RGB,
-                                           False,
-                                           8,
-                                           5,
-                                           10)
-
-        with capture_glib_deprecation_warnings() as warn:
-            c = Gdk.Cursor(display,
-                           test_pixbuf,
-                           y=0, x=0)
-            self.assertNotEqual(c, None)
-
-            self.assertEqual(len(warn), 1)
-            self.assertTrue(issubclass(warn[0].category, PyGIDeprecationWarning))
-            self.assertRegex(str(warn[0].message),
-                             '.*new_from_pixbuf.*')
-
-        self.assertRaises(ValueError, Gdk.Cursor, 1, 2, 3)
-
-        with capture_glib_deprecation_warnings() as warn:
-            c = Gdk.Cursor(display, Gdk.CursorType.WATCH)
-        assert len(warn) == 1
-        # on macOS the type is switched to PIXMAP behind the scenes
-        assert c.props.cursor_type in (
-            Gdk.CursorType.WATCH, Gdk.CursorType.CURSOR_IS_PIXMAP)
-        assert c.props.display == display
 
     @unittest.skipUnless(GDK4, "only gdk4")
     def test_cursor_gdk4(self):
