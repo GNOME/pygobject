@@ -15,4 +15,5 @@ User Guide
     deploy
     testing
     porting
+    sysdeps
     faq
