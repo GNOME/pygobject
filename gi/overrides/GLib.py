@@ -19,7 +19,6 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
 # USA
 
-import warnings
 import sys
 import socket
 
@@ -28,7 +27,7 @@ from ..module import get_introspection_module
 from .._gi import (variant_type_from_string, source_new,
                    source_set_callback, io_channel_read)
 from ..overrides import override, deprecated, deprecated_attr
-from gi import PyGIDeprecationWarning, version_info
+from gi import version_info
 
 GLib = get_introspection_module('GLib')
 
@@ -48,12 +47,6 @@ OptionContext = _gi.OptionContext
 OptionGroup = _gi.OptionGroup
 Pid = _gi.Pid
 spawn_async = _gi.spawn_async
-
-
-def threads_init():
-    warnings.warn('Since version 3.11, calling threads_init is no longer needed. '
-                  'See: https://wiki.gnome.org/PyGObject/Threading',
-                  PyGIDeprecationWarning, stacklevel=2)
 
 
 def gerror_matches(self, domain, code):
@@ -80,7 +73,7 @@ Error.new_literal = staticmethod(gerror_new_literal)
 
 
 __all__ += ['GError', 'Error', 'OptionContext', 'OptionGroup', 'Pid',
-            'spawn_async', 'threads_init']
+            'spawn_async']
 
 
 class _VariantCreator(object):
@@ -639,30 +632,7 @@ __all__.append('timeout_add_seconds')
 # - calling with a Python file object as first argument (we keep this one as
 #   it's really convenient and does not change the number of arguments)
 # - calling without a priority as second argument
-def _io_add_watch_get_args(channel, priority_, condition, *cb_and_user_data, **kwargs):
-    if not isinstance(priority_, int) or isinstance(priority_, GLib.IOCondition):
-        warnings.warn('Calling io_add_watch without priority as second argument is deprecated',
-                      PyGIDeprecationWarning)
-        # shift the arguments around
-        user_data = cb_and_user_data
-        callback = condition
-        condition = priority_
-        if not callable(callback):
-            raise TypeError('third argument must be callable')
-
-        # backwards compatibility: Call with priority kwarg
-        if 'priority' in kwargs:
-            warnings.warn('Calling io_add_watch with priority keyword argument is deprecated, put it as second positional argument',
-                          PyGIDeprecationWarning)
-            priority_ = kwargs['priority']
-        else:
-            priority_ = GLib.PRIORITY_DEFAULT
-    else:
-        if len(cb_and_user_data) < 1 or not callable(cb_and_user_data[0]):
-            raise TypeError('expecting callback as fourth argument')
-        callback = cb_and_user_data[0]
-        user_data = cb_and_user_data[1:]
-
+def _io_add_watch_get_args(channel, priority, condition, callback, *user_data):
     # backwards compatibility: Allow calling with fd
     if isinstance(channel, int):
         func_fdtransform = lambda _, cond, *data: callback(channel, cond, *data)
@@ -679,15 +649,17 @@ def _io_add_watch_get_args(channel, priority_, condition, *cb_and_user_data, **k
         func_fdtransform = callback
         real_channel = channel
 
-    return real_channel, priority_, condition, func_fdtransform, user_data
+    return real_channel, priority, condition, func_fdtransform, user_data
 
 
 __all__.append('_io_add_watch_get_args')
 
 
-def io_add_watch(*args, **kwargs):
+def io_add_watch(channel, priority, condition, func, *user_data):
     """io_add_watch(channel, priority, condition, func, *user_data) -> event_source_id"""
-    channel, priority, condition, func, user_data = _io_add_watch_get_args(*args, **kwargs)
+    channel, priority, condition, func, user_data = _io_add_watch_get_args(
+        channel, priority, condition, func, *user_data
+    )
     return GLib.io_add_watch(channel, priority, condition, func, *user_data)
 
 
@@ -801,32 +773,16 @@ __all__.append('PollFD')
 def _child_watch_add_get_args(priority_or_pid, pid_or_callback, *args, **kwargs):
     user_data = []
 
-    if callable(pid_or_callback):
-        warnings.warn('Calling child_watch_add without priority as first argument is deprecated',
-                      PyGIDeprecationWarning)
-        pid = priority_or_pid
-        callback = pid_or_callback
-        if len(args) == 0:
-            priority = kwargs.get('priority', GLib.PRIORITY_DEFAULT)
-        elif len(args) == 1:
-            user_data = args
-            priority = kwargs.get('priority', GLib.PRIORITY_DEFAULT)
-        elif len(args) == 2:
-            user_data = [args[0]]
-            priority = args[1]
-        else:
-            raise TypeError('expected at most 4 positional arguments')
+    priority = priority_or_pid
+    pid = pid_or_callback
+    if 'function' in kwargs:
+        callback = kwargs['function']
+        user_data = args
+    elif len(args) > 0 and callable(args[0]):
+        callback = args[0]
+        user_data = args[1:]
     else:
-        priority = priority_or_pid
-        pid = pid_or_callback
-        if 'function' in kwargs:
-            callback = kwargs['function']
-            user_data = args
-        elif len(args) > 0 and callable(args[0]):
-            callback = args[0]
-            user_data = args[1:]
-        else:
-            raise TypeError('expected callback as third argument')
+        raise TypeError('expected callback as third argument')
 
     if 'data' in kwargs:
         if user_data:

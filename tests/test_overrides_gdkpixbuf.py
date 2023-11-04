@@ -33,14 +33,3 @@ def test_new_from_data():
     del pixels
     new_pixels = new_pixbuf.get_pixels()
     assert len(new_pixels) == width * height * 4
-
-
-def test_new_from_data_deprecated_args():
-    GdkPixbuf.Pixbuf.new_from_data(b"1234", 0, True, 8, 1, 1, 4)
-    GdkPixbuf.Pixbuf.new_from_data(b"1234", 0, True, 8, 1, 1, 4, None)
-    with pytest.warns(PyGIDeprecationWarning, match=".*destroy_fn.*"):
-        GdkPixbuf.Pixbuf.new_from_data(
-            b"1234", 0, True, 8, 1, 1, 4, object(), object(), object())
-    with pytest.warns(PyGIDeprecationWarning, match=".*destroy_fn_data.*"):
-        GdkPixbuf.Pixbuf.new_from_data(
-            b"1234", 0, True, 8, 1, 1, 4, object(), object(), object())

@@ -208,7 +208,7 @@ second line
         os.close(r)
 
     @unittest.skipIf(os.name == "nt", "NONBLOCK not implemented on Windows")
-    def test_deprecated_method_add_watch_no_data(self):
+    def test_watch_no_data(self):
         (r, w) = os.pipe()
 
         ch = GLib.IOChannel(filedes=r)
@@ -225,11 +225,7 @@ second line
                 ml.quit()
             return True
 
-        # io_add_watch() method is deprecated, use GLib.io_add_watch
-        with warnings.catch_warnings(record=True) as warn:
-            warnings.simplefilter('always')
-            ch.add_watch(GLib.IOCondition.IN, cb, priority=GLib.PRIORITY_HIGH)
-            self.assertTrue(issubclass(warn[0].category, PyGIDeprecationWarning))
+        GLib.io_add_watch(ch, GLib.PRIORITY_HIGH, GLib.IOCondition.IN, cb)
 
         def write():
             os.write(w, b'a')
@@ -262,11 +258,7 @@ second line
             return True
 
         ml = GLib.MainLoop()
-        # io_add_watch() method is deprecated, use GLib.io_add_watch
-        with warnings.catch_warnings(record=True) as warn:
-            warnings.simplefilter('always')
-            id = ch.add_watch(GLib.IOCondition.IN, cb, 'hello', priority=GLib.PRIORITY_HIGH)
-            self.assertTrue(issubclass(warn[0].category, PyGIDeprecationWarning))
+        id = GLib.io_add_watch(ch, GLib.PRIORITY_HIGH, GLib.IOCondition.IN, cb, 'hello')
 
         self.assertEqual(ml.get_context().find_source_by_id(id).priority,
                          GLib.PRIORITY_HIGH)
@@ -406,11 +398,7 @@ second line
                 ml.quit()
             return True
 
-        with warnings.catch_warnings(record=True) as warn:
-            warnings.simplefilter('always')
-            id = GLib.io_add_watch(ch, GLib.IOCondition.IN, cb, priority=GLib.PRIORITY_HIGH)
-            self.assertTrue(issubclass(warn[0].category, PyGIDeprecationWarning))
-
+        id = GLib.io_add_watch(ch, GLib.PRIORITY_HIGH, GLib.IOCondition.IN, cb)
         ml = GLib.MainLoop()
         self.assertEqual(ml.get_context().find_source_by_id(id).priority,
                          GLib.PRIORITY_HIGH)
@@ -444,12 +432,7 @@ second line
                 ml.quit()
             return True
 
-        with warnings.catch_warnings(record=True) as warn:
-            warnings.simplefilter('always')
-            id = GLib.io_add_watch(ch, GLib.IOCondition.IN, cb, 'hello',
-                                   priority=GLib.PRIORITY_HIGH)
-            self.assertTrue(issubclass(warn[0].category, PyGIDeprecationWarning))
-
+        id = GLib.io_add_watch(ch, GLib.PRIORITY_HIGH, GLib.IOCondition.IN, cb, 'hello')
         ml = GLib.MainLoop()
         self.assertEqual(ml.get_context().find_source_by_id(id).priority,
                          GLib.PRIORITY_HIGH)

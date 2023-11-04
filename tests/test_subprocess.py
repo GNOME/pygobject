@@ -18,7 +18,7 @@ def test_child_watch_add_get_args_various():
     get_args = GLib._child_watch_add_get_args
     pid = 42
     with capture_gi_deprecation_warnings():
-        assert get_args(pid, cb, 2) == (0, pid, cb, (2,))
+        assert get_args(GLib.PRIORITY_DEFAULT, pid, cb, 2) == (0, pid, cb, (2,))
 
         with pytest.raises(TypeError):
             get_args(pid, cb, 2, 3, 4)
@@ -40,10 +40,7 @@ class TestProcess(unittest.TestCase):
     def test_deprecated_child_watch_no_data(self):
         cb = lambda pid, status: None
         pid = object()
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter('always')
-            res = GLib._child_watch_add_get_args(pid, cb)
-            self.assertTrue(issubclass(w[0].category, PyGIDeprecationWarning))
+        res = GLib._child_watch_add_get_args(GLib.PRIORITY_DEFAULT, pid, cb)
 
         self.assertEqual(len(res), 4)
         self.assertEqual(res[0], GLib.PRIORITY_DEFAULT)
@@ -54,10 +51,7 @@ class TestProcess(unittest.TestCase):
     def test_deprecated_child_watch_data_priority(self):
         cb = lambda pid, status: None
         pid = object()
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter('always')
-            res = GLib._child_watch_add_get_args(pid, cb, 12345, GLib.PRIORITY_HIGH)
-            self.assertTrue(issubclass(w[0].category, PyGIDeprecationWarning))
+        res = GLib._child_watch_add_get_args(GLib.PRIORITY_HIGH, pid, cb, 12345)
 
         self.assertEqual(len(res), 4)
         self.assertEqual(res[0], GLib.PRIORITY_HIGH)
@@ -68,10 +62,7 @@ class TestProcess(unittest.TestCase):
     def test_deprecated_child_watch_data_priority_kwargs(self):
         cb = lambda pid, status: None
         pid = object()
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter('always')
-            res = GLib._child_watch_add_get_args(pid, cb, priority=GLib.PRIORITY_HIGH, data=12345)
-            self.assertTrue(issubclass(w[0].category, PyGIDeprecationWarning))
+        res = GLib._child_watch_add_get_args(GLib.PRIORITY_HIGH, pid, cb, data=12345)
 
         self.assertEqual(len(res), 4)
         self.assertEqual(res[0], GLib.PRIORITY_HIGH)

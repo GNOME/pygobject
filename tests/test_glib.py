@@ -161,12 +161,7 @@ https://my.org/q?x=1&y=2
                 ml.quit()
             return True
 
-        # io_add_watch() takes an IOChannel, calling with an fd is deprecated
-        with warnings.catch_warnings(record=True) as warn:
-            warnings.simplefilter('always')
-            GLib.io_add_watch(r, GLib.IOCondition.IN, cb,
-                              priority=GLib.PRIORITY_HIGH)
-            self.assertTrue(issubclass(warn[0].category, PyGIDeprecationWarning))
+        GLib.io_add_watch(r, GLib.PRIORITY_HIGH, GLib.IOCondition.IN, cb)
 
         def write():
             os.write(w, b'a')
@@ -191,12 +186,7 @@ https://my.org/q?x=1&y=2
                 ml.quit()
             return True
 
-        # io_add_watch() takes an IOChannel, calling with an fd is deprecated
-        with warnings.catch_warnings(record=True) as warn:
-            warnings.simplefilter('always')
-            GLib.io_add_watch(r, GLib.IOCondition.IN, cb, 'moo',
-                              priority=GLib.PRIORITY_HIGH)
-            self.assertTrue(issubclass(warn[0].category, PyGIDeprecationWarning))
+        GLib.io_add_watch(r, GLib.PRIORITY_HIGH, GLib.IOCondition.IN, cb, 'moo')
 
         def write():
             os.write(w, b'a')
@@ -220,12 +210,7 @@ https://my.org/q?x=1&y=2
             ml.quit()
             return True
 
-        # io_add_watch() takes an IOChannel, calling with an fd is deprecated
-        with warnings.catch_warnings(record=True) as warn:
-            warnings.simplefilter('always')
-            GLib.io_add_watch(r, GLib.IOCondition.IN, cb, 'moo', 'foo')
-            self.assertTrue(issubclass(warn[0].category, PyGIDeprecationWarning))
-
+        GLib.io_add_watch(r, GLib.PRIORITY_DEFAULT, GLib.IOCondition.IN, cb, 'moo', 'foo')
         ml = GLib.MainLoop()
         GLib.idle_add(lambda: os.write(w, b'a') and False)
         GLib.timeout_add(2000, ml.quit)
@@ -248,12 +233,7 @@ https://my.org/q?x=1&y=2
                 ml.quit()
             return True
 
-        # io_add_watch() takes an IOChannel, calling with a Python file is deprecated
-        with warnings.catch_warnings(record=True) as warn:
-            warnings.simplefilter('always')
-            GLib.io_add_watch(cmd.stdout, GLib.IOCondition.IN, cb)
-            self.assertTrue(issubclass(warn[0].category, PyGIDeprecationWarning))
-
+        GLib.io_add_watch(cmd.stdout, GLib.PRIORITY_DEFAULT, GLib.IOCondition.IN, cb)
         ml = GLib.MainLoop()
         GLib.timeout_add(2000, ml.quit)
         ml.run()

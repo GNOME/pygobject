@@ -193,10 +193,9 @@ features = {'generic-c-marshaller': True}
 list_properties = _gi.list_properties
 new = _gi.new
 pygobject_version = _gi.pygobject_version
-threads_init = GLib.threads_init
 type_register = _gi.type_register
 __all__ += ['features', 'list_properties', 'new',
-            'pygobject_version', 'threads_init', 'type_register']
+            'pygobject_version', 'type_register']
 
 
 class Value(GObjectModule.Value):

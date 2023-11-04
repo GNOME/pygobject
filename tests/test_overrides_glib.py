@@ -30,7 +30,7 @@ def test_io_add_watch_get_args():
 
     # old way
     with capture_gi_deprecation_warnings():
-        assert get_args(chan, GLib.IOCondition.IN, func) == (
+        assert get_args(chan, GLib.PRIORITY_DEFAULT, GLib.IOCondition.IN, func) == (
             chan, 0, GLib.IOCondition.IN, func, tuple())
 
         with pytest.raises(TypeError):
@@ -59,12 +59,6 @@ def test_io_add_watch_get_args_win32_socket():
     chan = get_args(s, prio, GLib.IOCondition.IN, func)[0]
     assert isinstance(chan, GLib.IOChannel)
     chan.shutdown(False)
-
-
-def test_threads_init():
-    with capture_gi_deprecation_warnings() as w:
-        GLib.threads_init()
-    assert len(w)
 
 
 def test_gerror_matches():
