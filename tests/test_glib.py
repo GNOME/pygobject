@@ -9,7 +9,6 @@ import subprocess
 
 import pytest
 from gi.repository import GLib
-from gi import PyGIDeprecationWarning
 
 
 class TestGLib(unittest.TestCase):
@@ -54,12 +53,6 @@ class TestGLib(unittest.TestCase):
         self.assertTrue(os.path.sep in d, d)
         d = GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_DESKTOP)
         self.assertTrue(os.path.sep in d, d)
-        with warnings.catch_warnings():
-            warnings.simplefilter('ignore', PyGIDeprecationWarning)
-
-            # also works with backwards compatible enum names
-            self.assertEqual(GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_MUSIC),
-                             GLib.get_user_special_dir(GLib.USER_DIRECTORY_MUSIC))
 
         for d in GLib.get_system_config_dirs():
             self.assertTrue(os.path.sep in d, d)
@@ -102,15 +95,6 @@ https://my.org/q?x=1&y=2
         self.assertEqual(res, ['http://example.com',
                                'https://my.org/q?x=1&y=2',
                                'http://gnome.org/new'])
-
-    def test_current_time(self):
-        with warnings.catch_warnings(record=True) as warn:
-            warnings.simplefilter('always')
-            tm = GLib.get_current_time()
-            self.assertTrue(issubclass(warn[0].category, PyGIDeprecationWarning))
-
-        self.assertTrue(isinstance(tm, float))
-        self.assertGreater(tm, 1350000000.0)
 
     @unittest.skipIf(sys.platform == "darwin", "fails on OSX")
     def test_main_loop(self):
@@ -242,24 +226,6 @@ https://my.org/q?x=1&y=2
 
         self.assertEqual(call_data, [(cmd.stdout, GLib.IOCondition.IN, b'hello\n'),
                                      (cmd.stdout, GLib.IOCondition.IN, b'world\n')])
-
-    def test_glib_version(self):
-        with warnings.catch_warnings():
-            warnings.simplefilter('ignore', PyGIDeprecationWarning)
-
-            (major, minor, micro) = GLib.glib_version
-            self.assertGreaterEqual(major, 2)
-            self.assertGreaterEqual(minor, 0)
-            self.assertGreaterEqual(micro, 0)
-
-    def test_pyglib_version(self):
-        with warnings.catch_warnings():
-            warnings.simplefilter('ignore', PyGIDeprecationWarning)
-
-            (major, minor, micro) = GLib.pyglib_version
-            self.assertGreaterEqual(major, 3)
-            self.assertGreaterEqual(minor, 0)
-            self.assertGreaterEqual(micro, 0)
 
     def test_timezone_constructor(self):
         with warnings.catch_warnings():

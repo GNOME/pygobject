@@ -1,6 +1,5 @@
 import pytest
 
-from gi import PyGIDeprecationWarning
 from gi.repository import GObject, GLib, GIMarshallingTests
 
 from .helper import ignore_gi_deprecation_warnings

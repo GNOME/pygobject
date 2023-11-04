@@ -89,12 +89,6 @@ def test_iochannel_write():
         chan.shutdown(True)
 
 
-@pytest.mark.skipif(os.name == "nt", reason="unix only")
-def test_has_unix_signal_add():
-    with capture_gi_deprecation_warnings():
-        GLib.unix_signal_add == GLib.unix_signal_add_full
-
-
 @pytest.mark.skipif(os.name != "nt", reason="windows only")
 def test_iochannel_win32():
     fd, fn = tempfile.mkstemp()

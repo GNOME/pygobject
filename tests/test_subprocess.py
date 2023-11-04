@@ -3,13 +3,10 @@
 import sys
 import os
 import unittest
-import warnings
 
 import pytest
 
 from gi.repository import GLib
-from gi import PyGIDeprecationWarning
-
 from .helper import capture_gi_deprecation_warnings
 
 
@@ -164,10 +161,3 @@ class TestProcess(unittest.TestCase):
         os.close(stdout)
         pid.close()
         self.assertEqual(out, b'moo!\n')
-
-    def test_backwards_compat_flags(self):
-        with warnings.catch_warnings():
-            warnings.simplefilter('ignore', PyGIDeprecationWarning)
-
-            self.assertEqual(GLib.SpawnFlags.DO_NOT_REAP_CHILD,
-                             GLib.SPAWN_DO_NOT_REAP_CHILD)

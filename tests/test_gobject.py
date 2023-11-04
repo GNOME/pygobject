@@ -10,12 +10,10 @@ import platform
 import pytest
 
 from gi.repository import GObject, GLib, Gio
-from gi import PyGIDeprecationWarning
 from gi.module import get_introspection_module
 from gi import _gi
 
 import testhelper
-from .helper import capture_glib_deprecation_warnings
 
 
 @pytest.mark.skipif(platform.python_implementation() == "PyPy", reason="crashes")

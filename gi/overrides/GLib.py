@@ -26,8 +26,7 @@ from .._ossighelper import wakeup_on_signal, register_sigint_fallback
 from ..module import get_introspection_module
 from .._gi import (variant_type_from_string, source_new,
                    source_set_callback, io_channel_read)
-from ..overrides import override, deprecated, deprecated_attr
-from gi import version_info
+from ..overrides import override
 
 GLib = get_introspection_module('GLib')
 
@@ -413,57 +412,9 @@ def markup_escape_text(text, length=-1):
 __all__.append('markup_escape_text')
 
 
-# backwards compatible names from old static bindings
-for n in ['DESKTOP', 'DOCUMENTS', 'DOWNLOAD', 'MUSIC', 'PICTURES',
-          'PUBLIC_SHARE', 'TEMPLATES', 'VIDEOS']:
-    attr = 'USER_DIRECTORY_' + n
-    deprecated_attr("GLib", attr, "GLib.UserDirectory.DIRECTORY_" + n)
-    globals()[attr] = getattr(GLib.UserDirectory, 'DIRECTORY_' + n)
-    __all__.append(attr)
-
 for n in ['ERR', 'HUP', 'IN', 'NVAL', 'OUT', 'PRI']:
     globals()['IO_' + n] = getattr(GLib.IOCondition, n)
     __all__.append('IO_' + n)
-
-for n in ['APPEND', 'GET_MASK', 'IS_READABLE', 'IS_SEEKABLE',
-          'MASK', 'NONBLOCK', 'SET_MASK']:
-    attr = 'IO_FLAG_' + n
-    deprecated_attr("GLib", attr, "GLib.IOFlags." + n)
-    globals()[attr] = getattr(GLib.IOFlags, n)
-    __all__.append(attr)
-
-# spelling for the win
-IO_FLAG_IS_WRITEABLE = GLib.IOFlags.IS_WRITABLE
-deprecated_attr("GLib", "IO_FLAG_IS_WRITEABLE", "GLib.IOFlags.IS_WRITABLE")
-__all__.append('IO_FLAG_IS_WRITEABLE')
-
-for n in ['AGAIN', 'EOF', 'ERROR', 'NORMAL']:
-    attr = 'IO_STATUS_' + n
-    globals()[attr] = getattr(GLib.IOStatus, n)
-    deprecated_attr("GLib", attr, "GLib.IOStatus." + n)
-    __all__.append(attr)
-
-for n in ['CHILD_INHERITS_STDIN', 'DO_NOT_REAP_CHILD', 'FILE_AND_ARGV_ZERO',
-          'LEAVE_DESCRIPTORS_OPEN', 'SEARCH_PATH', 'STDERR_TO_DEV_NULL',
-          'STDOUT_TO_DEV_NULL']:
-    attr = 'SPAWN_' + n
-    globals()[attr] = getattr(GLib.SpawnFlags, n)
-    deprecated_attr("GLib", attr, "GLib.SpawnFlags." + n)
-    __all__.append(attr)
-
-for n in ['HIDDEN', 'IN_MAIN', 'REVERSE', 'NO_ARG', 'FILENAME', 'OPTIONAL_ARG',
-          'NOALIAS']:
-    attr = 'OPTION_FLAG_' + n
-    globals()[attr] = getattr(GLib.OptionFlags, n)
-    deprecated_attr("GLib", attr, "GLib.OptionFlags." + n)
-    __all__.append(attr)
-
-for n in ['UNKNOWN_OPTION', 'BAD_VALUE', 'FAILED']:
-    attr = 'OPTION_ERROR_' + n
-    deprecated_attr("GLib", attr, "GLib.OptionError." + n)
-    globals()[attr] = getattr(GLib.OptionError, n)
-    __all__.append(attr)
-
 
 # these are not currently exported in GLib gir, presumably because they are
 # platform dependent; so get them from our static bindings
@@ -536,12 +487,6 @@ class Source(GLib.Source):
         else:
             # otherwise, for Idle and Timeout, use the standard method
             super(Source, self).set_callback(fn, user_data)
-
-    def get_current_time(self):
-        return GLib.get_real_time() * 0.000001
-
-    get_current_time = deprecated(get_current_time,
-                                  'GLib.Source.get_time() or GLib.get_real_time()')
 
     # as get/set_priority are introspected, we can't use the static
     # property(get_priority, ..) here
@@ -726,12 +671,6 @@ class IOChannel(GLib.IOChannel):
             raise ValueError("invalid 'whence' value")
         return self.seek_position(offset, w)
 
-    def add_watch(self, condition, callback, *user_data, **kwargs):
-        priority = kwargs.get('priority', GLib.PRIORITY_DEFAULT)
-        return io_add_watch(self, priority, condition, callback, *user_data)
-
-    add_watch = deprecated(add_watch, 'GLib.io_add_watch()')
-
     def __iter__(self):
         return self
 
@@ -805,15 +744,6 @@ def child_watch_add(*args, **kwargs):
 __all__.append('child_watch_add')
 
 
-def get_current_time():
-    return GLib.get_real_time() * 0.000001
-
-
-get_current_time = deprecated(get_current_time, 'GLib.get_real_time()')
-
-__all__.append('get_current_time')
-
-
 # backwards compatible API with default argument, and ignoring bytes_read
 # output argument
 def filename_from_utf8(utf8string, len=-1):
@@ -821,20 +751,3 @@ def filename_from_utf8(utf8string, len=-1):
 
 
 __all__.append('filename_from_utf8')
-
-
-if hasattr(GLib, "unix_signal_add"):
-    unix_signal_add_full = GLib.unix_signal_add
-    __all__.append('unix_signal_add_full')
-    deprecated_attr("GLib", "unix_signal_add_full", "GLib.unix_signal_add")
-
-
-# obsolete constants for backwards compatibility
-glib_version = (GLib.MAJOR_VERSION, GLib.MINOR_VERSION, GLib.MICRO_VERSION)
-__all__.append('glib_version')
-deprecated_attr("GLib", "glib_version",
-                "(GLib.MAJOR_VERSION, GLib.MINOR_VERSION, GLib.MICRO_VERSION)")
-
-pyglib_version = version_info
-__all__.append('pyglib_version')
-deprecated_attr("GLib", "pyglib_version", "gi.version_info")

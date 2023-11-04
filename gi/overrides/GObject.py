@@ -22,7 +22,6 @@
 # USA
 
 import functools
-import warnings
 from collections import namedtuple
 
 import gi.module

@@ -3,10 +3,8 @@
 import sys
 import gc
 import unittest
-import warnings
 
 from gi.repository import GLib
-from gi import PyGIDeprecationWarning
 
 from .helper import capture_glib_warnings
 
@@ -166,19 +164,6 @@ class TestSource(unittest.TestCase):
 
         s = GLib.Source()
         self.assertEqual(s.priority, GLib.PRIORITY_DEFAULT)
-
-    def test_get_current_time(self):
-        # Note, deprecated API
-        s = GLib.Idle()
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter('always')
-            time = s.get_current_time()
-            self.assertTrue(issubclass(w[0].category, PyGIDeprecationWarning))
-
-        self.assertTrue(isinstance(time, float))
-        # plausibility check, and check magnitude of result
-        self.assertGreater(time, 1300000000.0)
-        self.assertLess(time, 2000000000.0)
 
     def test_add_remove_poll(self):
         # FIXME: very shallow test, only verifies the API signature
