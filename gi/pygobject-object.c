@@ -34,8 +34,6 @@
 #include "pygi-signal-closure.h"
 #include "pygi-basictype.h"
 
-extern PyObject *PyGIDeprecationWarning;
-
 static void pygobject_dealloc(PyGObject *self);
 static int  pygobject_traverse(PyGObject *self, visitproc visit, void *arg);
 static PyObject * pyg_type_get_bases(GType gtype);
@@ -1682,12 +1680,8 @@ connect_helper(PyGObject *self, gchar *name, PyObject *callback, PyObject *extra
     }
 
     if (object && !PyObject_TypeCheck (object, &PyGObject_Type)) {
-        if (PyErr_WarnEx (PyGIDeprecationWarning,
-                          "Using non GObject arguments for connect_object() is deprecated, use: "
-                          "connect_data(signal, callback, data, connect_flags=GObject.ConnectFlags.SWAPPED)",
-                          1)) {
-            return NULL;
-        }
+        PyErr_SetString (PyExc_ValueError, "connect_object() requires a GObject");
+        return NULL;
     }
 
     g_signal_query (sigid, &query_info);
