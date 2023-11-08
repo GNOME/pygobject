@@ -66,6 +66,14 @@ mapping listing <https://lazka.github.io/pgi-docs/#Gtk-3.0/mapping.html>`__.
 Using the pygtkcompat Compatibility Layer
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+.. note
+
+   The pygtkcompat module is deprecated. If your code is dependent on pygtkcompat,
+   you have two options:
+
+   1. Update your code to use the GTK interface directly
+   2. Copy the bits you need into your own application
+
 PyGObject ships a compatibility layer for pygtk which partially emulates the
 old interfaces:
 
