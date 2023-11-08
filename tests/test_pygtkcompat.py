@@ -3,6 +3,7 @@
 
 import unittest
 import base64
+import warnings
 
 import pytest
 import gi
@@ -23,7 +24,8 @@ else:
 class TestGlibCompat(unittest.TestCase):
 
     def setUp(self):
-        pygtkcompat.enable()
+        with warnings.catch_warnings(record=True):
+            pygtkcompat.enable()
 
     def tearDown(self):
         disable_all()
@@ -41,8 +43,9 @@ class TestMultipleEnable(unittest.TestCase):
         disable_all()
 
     def test_main(self):
-        pygtkcompat.enable()
-        pygtkcompat.enable()
+        with warnings.catch_warnings(record=True):
+            pygtkcompat.enable()
+            pygtkcompat.enable()
 
     def test_gtk(self):
         pygtkcompat.enable_gtk("3.0")
