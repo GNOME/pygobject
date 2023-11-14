@@ -618,6 +618,10 @@ class TestEverything(unittest.TestCase):
     def test_array_fixed_size_int_return(self):
         self.assertEqual(Everything.test_array_fixed_size_int_return(), [0, 1, 2, 3, 4])
 
+    def test_array_of_non_utf8_strings(self):
+        with pytest.raises(UnicodeDecodeError):
+            Everything.test_array_of_non_utf8_strings()
+
     def test_garray_container_return(self):
         # GPtrArray transfer container
         result = Everything.test_garray_container_return()

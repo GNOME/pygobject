@@ -51,6 +51,19 @@ regress_test_boxed_c_wrapper_get (RegressTestBoxedCWrapper *self)
 }
 
 /**
+ * regress_test_array_of_non_utf8_strings
+ * Returns: (transfer full) (allow-none) (array zero-terminated=1): Array of strings
+ */
+gchar**
+regress_test_array_of_non_utf8_strings (void)
+{
+    char **ret = g_new (char *, 2);
+    ret[0] = g_strdup ("Andr\351 Lur\347at");
+    ret[1] = NULL;
+    return ret;
+}
+
+/**
  * regress_test_array_fixed_boxed_none_out
  * @objs: (out) (array fixed-size=2) (transfer none): An array of #RegressTestBoxedC
 **/

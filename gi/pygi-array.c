@@ -670,9 +670,6 @@ _pygi_marshal_to_py_array (PyGIInvokeState   *state,
                 if (py_item == NULL) {
                     Py_CLEAR (py_obj);
 
-                    if (array_cache->array_type == GI_ARRAY_TYPE_C)
-                        g_array_unref (array_);
-
                     g_ptr_array_unref (item_cleanups);
 
                     goto err;

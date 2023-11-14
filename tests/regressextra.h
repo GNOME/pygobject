@@ -17,6 +17,8 @@ _GI_TEST_EXTERN
 RegressTestBoxedC *regress_test_boxed_c_wrapper_get (RegressTestBoxedCWrapper *self);
 
 _GI_TEST_EXTERN
+gchar** regress_test_array_of_non_utf8_strings (void);
+_GI_TEST_EXTERN
 void regress_test_array_fixed_boxed_none_out (RegressTestBoxedC ***objs);
 _GI_TEST_EXTERN
 void regress_test_gvalue_out_boxed (GValue *value, int init);
