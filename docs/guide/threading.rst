@@ -50,14 +50,14 @@ while still showing feedback on the progress in a window.
             thread.daemon = True
             thread.start()
 
-        def update_progess(self, i):
+        def update_progress(self, i):
             self.progress.pulse()
             self.progress.set_text(str(i))
             return False
 
         def example_target(self):
             for i in range(50):
-                GLib.idle_add(self.update_progess, i)
+                GLib.idle_add(self.update_progress, i)
                 time.sleep(0.2)
 
 
@@ -73,7 +73,7 @@ possible to see the window and interact with it.
 In the background ``example_target()`` gets executed and calls
 :func:`GLib.idle_add` and :func:`time.sleep` in a loop. In this example
 :func:`time.sleep` represents the blocking operation. :func:`GLib.idle_add`
-takes the ``update_progess()`` function and arguments that will get passed to
+takes the ``update_progress()`` function and arguments that will get passed to
 the function and asks the main loop to schedule its execution in the main
 thread. This is needed because GTK isn't thread safe; only one thread, the
 main thread, is allowed to call GTK code at all times.
