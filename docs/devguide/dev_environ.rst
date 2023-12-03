@@ -86,9 +86,9 @@ To develop on Windows you need to have `MSYS2 <https://msys2.org>`_ installed.
 
 .. code:: console
 
-    pacman -S --needed --noconfirm base-devel mingw-w64-x86_64-toolchain git \
-       mingw-w64-x86_64-python3 mingw-w64-x86_64-python3-cairo \
-       mingw-w64-x86_64-gobject-introspection mingw-w64-x86_64-libffi
+    pacman -S --needed --noconfirm base-devel mingw-w64-ucrt-x86_64-toolchain git \
+       mingw-w64-ucrt-x86_64-python mingw-w64-ucrt-x86_64-pycairo \
+       mingw-w64-ucrt-x86_64-gobject-introspection mingw-w64-ucrt-x86_64-libffi
 
 .. _macosx-dep:
 
