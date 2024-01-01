@@ -6,6 +6,6 @@ versions with even minor version are stable releases (e.g. 3.28.x). This list
 is sorted by release date.
 
 For more details see the GIT log:
-https://gitlab.gnome.org/GNOME/pygobject/commits/master
+https://gitlab.gnome.org/GNOME/pygobject/commits/main
 
 .. include:: ../NEWS

@@ -33,7 +33,7 @@ html_context = {
     "display_gitlab": True,
     "gitlab_user": "GNOME",
     "gitlab_repo": "pygobject",
-    "gitlab_version": "master",
+    "gitlab_version": "main",
     "conf_py_path": "/docs/",
     "gitlab_host": "gitlab.gnome.org",
 }

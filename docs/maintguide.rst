@@ -18,16 +18,16 @@ Making a Release
 #. Install tarball:
    ``ssh user@master.gnome.org 'ftpadmin install pygobject-3.X.Y.tar.xz'``
 #. In case the release happens on a stable branch copy the NEWS changes to
-   the master branch
+   the main branch
 
 
 Branching
 ---------
 
 Each cycle after the feature freeze, we create a stable branch so development
-can continue in the master branch unaffected by the freezes.
+can continue in the main branch unaffected by the freezes.
 
 #. Create the branch locally with: ``git checkout -b pygobject-3-2``
 #. Push new branch: ``git push origin pygobject-3-2``
-#. In master, update pyproject.toml to what will be the next version number
+#. In main, update pyproject.toml to what will be the next version number
    (3.3.0)

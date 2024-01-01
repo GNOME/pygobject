@@ -28,7 +28,7 @@ dynamic = ["version"]
 [project.urls]
 Homepage = "https://pygobject.gnome.org"
 Repository = "https://gitlab.gnome.org/GNOME/pygobject.git"
-Changelog = "https://gitlab.gnome.org/GNOME/pygobject/-/blob/master/NEWS"
+Changelog = "https://gitlab.gnome.org/GNOME/pygobject/-/blob/main/NEWS"
 
 [project.optional-dependencies]
 dev = [

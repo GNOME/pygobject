@@ -54,7 +54,7 @@ pages:
       - public
     expire_in: 30 days
   only:
-    - master
+    - main
 
 sdist:
   stage: build_and_test
