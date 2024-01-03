@@ -31,7 +31,15 @@ Repository = "https://gitlab.gnome.org/GNOME/pygobject.git"
 Changelog = "https://gitlab.gnome.org/GNOME/pygobject/-/blob/main/NEWS"
 
 [project.optional-dependencies]
-dev = [
+
+[tool.pdm.dev-dependencies]
+build = [
+    "meson-python",
+    "meson",
+    "ninja",
+    "pycairo",
+]
+test = [
     "pytest",
     "pytest-cov",
     "flake8",
@@ -40,6 +48,11 @@ docs = [
     "sphinx>=4.0,<5.0",
     "sphinx-rtd-theme>=0.5,<2.0",
 ]
+
+
+[tool.pdm.options]
+install = ["--no-isolation"]
+build = ["--no-wheel"]
 
 [tool.meson-python.args]
 setup = ["-Dtests=false", "-Dwheel=true", "--wrap-mode=nofallback"]

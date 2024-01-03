@@ -29,3 +29,5 @@
 *.pyd
 *.dll.a
 .coverage
+pdm.lock
+.pdm-python
