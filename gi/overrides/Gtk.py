@@ -1633,20 +1633,20 @@ TreeModelFilter = override(TreeModelFilter)
 __all__.append('TreeModelFilter')
 
 
-class CssProvider(Gtk.CssProvider):
-    def load_from_data(self, text, length=-1):
-        if (Gtk.get_major_version(), Gtk.get_minor_version()) >= (4, 9):
-            if isinstance(text, bytes):
-                text = text.decode("utf-8")
-            super(CssProvider, self).load_from_data(text, length)
-        else:
-            if isinstance(text, str):
-                text = text.encode("utf-8")
-            super(CssProvider, self).load_from_data(text)
+if GTK3 or GTK4:
+    class CssProvider(Gtk.CssProvider):
+        def load_from_data(self, text, length=-1):
+            if (Gtk.get_major_version(), Gtk.get_minor_version()) >= (4, 9):
+                if isinstance(text, bytes):
+                    text = text.decode("utf-8")
+                super(CssProvider, self).load_from_data(text, length)
+            else:
+                if isinstance(text, str):
+                    text = text.encode("utf-8")
+                super(CssProvider, self).load_from_data(text)
 
-
-CssProvider = override(CssProvider)
-__all__.append("CssProvider")
+    CssProvider = override(CssProvider)
+    __all__.append("CssProvider")
 
 if GTK4:
     class CustomSorter(Gtk.CustomSorter):
