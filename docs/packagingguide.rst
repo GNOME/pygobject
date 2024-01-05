@@ -14,9 +14,9 @@ Existing Packages:
 
 Building::
 
-    python3 setup.py build
-    python3 setup.py test # if you want to run the test suite
-    python3 setup.py install --prefix="${PREFIX}" --root="${PKGDIR}"
+    python3 -m build
+    pytest # if you want to run the test suite
+    meson install
 
 Runtime dependencies:
 
