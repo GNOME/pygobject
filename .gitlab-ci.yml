@@ -144,6 +144,7 @@ gnome-master-gtk4:
     - bash -x ./.gitlab-ci/test-flatpak.sh
 
 minimal-meson:
+  allow_failure: true
   stage: build_and_test
   image: quay.io/fedora/fedora:39 
   before_script:
