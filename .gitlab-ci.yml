@@ -44,7 +44,10 @@ pages:
   stage: deploy
   dependencies:
     - coverage
+  before_script:
+    - python -m pip install -r docs/requirements.txt
   script:
+    - python -m sphinx -T -E -W --keep-going -b html -d _build/doctrees -D language=en docs/ public
     - mv coverage/ public/
   artifacts:
     paths:

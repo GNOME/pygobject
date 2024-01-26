@@ -216,3 +216,5 @@ Create a release tarball and wheel:
 
     pip install build
     python -m build
+
+.. _pyenv: https://github.com/pyenv/pyenv
