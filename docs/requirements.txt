@@ -1,2 +1,2 @@
 sphinx>=7.0,<8.0
-sphinx-rtd-theme>=2.0,<3.0
+furo>=2022,<2025

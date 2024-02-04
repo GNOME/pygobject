@@ -19,7 +19,7 @@ master_doc = 'index'
 exclude_patterns = ['_build', 'README.rst']
 
 pygments_style = 'tango'
-html_theme = 'sphinx_rtd_theme'
+html_theme = 'furo'
 html_show_copyright = False
 html_favicon = "images/favicon.ico"
 project = "PyGObject"
@@ -42,10 +42,6 @@ html_static_path = [
     "extra.css",
     "images/pygobject-small.svg",
 ]
-
-html_theme_options = {
-    "display_version": False,
-}
 
 extlinks = {
     'bzbug': ('https://bugzilla.gnome.org/show_bug.cgi?id=%s', 'bz#%s'),
