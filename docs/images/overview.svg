@@ -1,72 +1,270 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/2001/PR-SVG-20010719/DTD/svg10.dtd">
-<svg width="27cm" height="10cm" viewBox="220 135 524 199" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-  <defs/>
-  <g id="Background">
-    <rect style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 2; stroke-linejoin: round; stroke: #646464" x="456.332" y="136.698" width="134.923" height="196.302" rx="8" ry="8"/>
-    <g>
-      <rect style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 2; stroke-linejoin: round; stroke: #5a9fd4" x="221.09" y="214.954" width="80" height="36" rx="10" ry="10"/>
-      <text font-size="12.8" style="fill: #646464; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:Lato;font-style:normal;font-weight:500" x="261.09" y="237.604">
-        <tspan x="261.09" y="237.604">Python</tspan>
-      </text>
+<svg
+   width="27cm"
+   height="10cm"
+   viewBox="220 135 524 199"
+   version="1.1"
+   id="svg13"
+   sodipodi:docname="overview.svg"
+   inkscape:version="1.3.2 (091e20ef0f, 2023-11-25)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview13"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="cm"
+     inkscape:zoom="1.7021528"
+     inkscape:cx="510.23622"
+     inkscape:cy="188.87846"
+     inkscape:window-width="2256"
+     inkscape:window-height="1435"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="Background" />
+  <defs
+     id="defs1" />
+  <g
+     id="Background">
+    <rect
+       style="stroke-opacity:1;stroke-width:2;stroke-linejoin:round;stroke:#646464;fill:none"
+       x="456.332"
+       y="136.698"
+       width="134.923"
+       height="196.302"
+       rx="8"
+       ry="8"
+       id="rect1"
+       inkscape:label="rect1" />
+    <g
+       id="g2">
+      <rect
+         style="fill: none; stroke-opacity: 1; stroke-width: 2; stroke-linejoin: round; stroke: #5a9fd4"
+         x="221.09"
+         y="214.954"
+         width="80"
+         height="36"
+         rx="10"
+         ry="10"
+         id="rect2" />
+      <text
+         font-size="12.8"
+         style="fill: #646464; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:Lato;font-style:normal;font-weight:500"
+         x="261.09"
+         y="237.604"
+         id="text2"><tspan
+           x="261.09"
+           y="237.604"
+           id="tspan2">Python</tspan></text>
     </g>
-    <g>
-      <rect style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 2; stroke-linejoin: round; stroke: #5a9fd4" x="338" y="216.562" width="81.6" height="36" rx="10" ry="10"/>
-      <text font-size="12.8" style="fill: #646464; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:Lato;font-style:normal;font-weight:500" x="378.8" y="239.212">
-        <tspan x="378.8" y="239.212">PyGObject</tspan>
-      </text>
+    <g
+       id="g3">
+      <rect
+         style="fill: none; stroke-opacity: 1; stroke-width: 2; stroke-linejoin: round; stroke: #5a9fd4"
+         x="338"
+         y="216.562"
+         width="81.6"
+         height="36"
+         rx="10"
+         ry="10"
+         id="rect3" />
+      <text
+         font-size="12.8"
+         style="fill: #646464; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:Lato;font-style:normal;font-weight:500"
+         x="378.8"
+         y="239.212"
+         id="text3"><tspan
+           x="378.8"
+           y="239.212"
+           id="tspan3">PyGObject</tspan></text>
     </g>
-    <g>
-      <rect style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 2; stroke-linejoin: round; stroke: #5a9fd4" x="473.126" y="147.249" width="100.6" height="36" rx="10" ry="10"/>
-      <text font-size="12.8" style="fill: #646464; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:Lato;font-style:normal;font-weight:500" x="523.426" y="169.899">
-        <tspan x="523.426" y="169.899">libgirepository</tspan>
-      </text>
+    <g
+       id="g4">
+      <rect
+         style="fill: none; stroke-opacity: 1; stroke-width: 2; stroke-linejoin: round; stroke: #5a9fd4"
+         x="473.126"
+         y="147.249"
+         width="100.6"
+         height="36"
+         rx="10"
+         ry="10"
+         id="rect4" />
+      <text
+         font-size="12.8"
+         style="fill: #646464; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:Lato;font-style:normal;font-weight:500"
+         x="523.426"
+         y="169.899"
+         id="text4"><tspan
+           x="523.426"
+           y="169.899"
+           id="tspan4">GIRepository</tspan></text>
     </g>
-    <g>
-      <rect style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 2; stroke-linejoin: round; stroke: #5a9fd4" x="483.752" y="192.25" width="80" height="36" rx="10" ry="10"/>
-      <text font-size="12.8" style="fill: #646464; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:Lato;font-style:normal;font-weight:500" x="523.752" y="214.9">
-        <tspan x="523.752" y="214.9">libglib</tspan>
-      </text>
+    <g
+       id="g5">
+      <rect
+         style="fill: none; stroke-opacity: 1; stroke-width: 2; stroke-linejoin: round; stroke: #5a9fd4"
+         x="483.752"
+         y="192.25"
+         width="80"
+         height="36"
+         rx="10"
+         ry="10"
+         id="rect5" />
+      <text
+         font-size="12.8"
+         style="fill: #646464; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:Lato;font-style:normal;font-weight:500"
+         x="523.752"
+         y="214.9"
+         id="text5"><tspan
+           x="523.752"
+           y="214.9"
+           id="tspan5">GLib</tspan></text>
     </g>
-    <g>
-      <rect style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 2; stroke-linejoin: round; stroke: #5a9fd4" x="483.834" y="238.25" width="80" height="36" rx="10" ry="10"/>
-      <text font-size="12.8" style="fill: #646464; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:Lato;font-style:normal;font-weight:500" x="523.834" y="260.9">
-        <tspan x="523.834" y="260.9">libgobject</tspan>
-      </text>
+    <g
+       id="g6">
+      <rect
+         style="fill: none; stroke-opacity: 1; stroke-width: 2; stroke-linejoin: round; stroke: #5a9fd4"
+         x="483.834"
+         y="238.25"
+         width="80"
+         height="36"
+         rx="10"
+         ry="10"
+         id="rect6" />
+      <text
+         font-size="12.8"
+         style="fill: #646464; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:Lato;font-style:normal;font-weight:500"
+         x="523.834"
+         y="260.9"
+         id="text6"><tspan
+           x="523.834"
+           y="260.9"
+           id="tspan6">GObject</tspan></text>
     </g>
-    <g>
-      <line style="fill: none; stroke-opacity: 1; stroke-width: 2; stroke-linejoin: round; stroke: #646464" x1="301.09" y1="232.954" x2="330.289" y2="233.558"/>
-      <polygon style="fill: #646464; fill-opacity: 1; stroke-opacity: 1; stroke-width: 2; stroke: #646464" fill-rule="evenodd" points="334.788,233.651 328.727,236.527 330.289,233.558 328.851,230.528 "/>
+    <g
+       id="g7">
+      <line
+         style="fill: none; stroke-opacity: 1; stroke-width: 2; stroke-linejoin: round; stroke: #646464"
+         x1="301.09"
+         y1="232.954"
+         x2="330.289"
+         y2="233.558"
+         id="line6" />
+      <polygon
+         style="fill: #646464; fill-opacity: 1; stroke-opacity: 1; stroke-width: 2; stroke: #646464"
+         fill-rule="evenodd"
+         points="334.788,233.651 328.727,236.527 330.289,233.558 328.851,230.528 "
+         id="polygon6" />
     </g>
-    <g>
-      <line style="fill: none; stroke-opacity: 1; stroke-width: 2; stroke: #646464" x1="419.6" y1="234.562" x2="449.596" y2="234.796"/>
-      <polygon style="fill: #646464; fill-opacity: 1; stroke-opacity: 1; stroke-width: 2; stroke: #646464" fill-rule="evenodd" points="454.096,234.831 448.073,237.784 449.596,234.796 448.12,231.784 "/>
+    <g
+       id="g8">
+      <line
+         style="fill: none; stroke-opacity: 1; stroke-width: 2; stroke: #646464"
+         x1="419.6"
+         y1="234.562"
+         x2="449.596"
+         y2="234.796"
+         id="line7" />
+      <polygon
+         style="fill: #646464; fill-opacity: 1; stroke-opacity: 1; stroke-width: 2; stroke: #646464"
+         fill-rule="evenodd"
+         points="454.096,234.831 448.073,237.784 449.596,234.796 448.12,231.784 "
+         id="polygon7" />
     </g>
-    <g>
-      <path style="fill: none; stroke-opacity: 1; stroke-width: 2; stroke: #646464" d="M 591.256 234.848 C 615.096,234.848 615.096,200.938 632.302,200.938"/>
-      <polygon style="fill: #646464; fill-opacity: 1; stroke-opacity: 1; stroke-width: 2; stroke: #646464" fill-rule="evenodd" points="636.802,200.938 630.802,203.938 632.302,200.938 630.802,197.938 "/>
+    <g
+       id="g9">
+      <path
+         style="fill: none; stroke-opacity: 1; stroke-width: 2; stroke: #646464"
+         d="M 591.256 234.848 C 615.096,234.848 615.096,200.938 632.302,200.938"
+         id="path8" />
+      <polygon
+         style="fill: #646464; fill-opacity: 1; stroke-opacity: 1; stroke-width: 2; stroke: #646464"
+         fill-rule="evenodd"
+         points="636.802,200.938 630.802,203.938 632.302,200.938 630.802,197.938 "
+         id="polygon8" />
     </g>
-    <g>
-      <path style="fill: none; stroke-opacity: 1; stroke-width: 2; stroke: #646464" d="M 591.256 234.848 C 615.096,234.848 615.096,270.234 631.594,270.234"/>
-      <polygon style="fill: #646464; fill-opacity: 1; stroke-opacity: 1; stroke-width: 2; stroke: #646464" fill-rule="evenodd" points="636.094,270.234 630.094,273.234 631.594,270.234 630.094,267.234 "/>
+    <g
+       id="g10">
+      <path
+         style="fill: none; stroke-opacity: 1; stroke-width: 2; stroke: #646464"
+         d="M 591.256 234.848 C 615.096,234.848 615.096,270.234 631.594,270.234"
+         id="path9" />
+      <polygon
+         style="fill: #646464; fill-opacity: 1; stroke-opacity: 1; stroke-width: 2; stroke: #646464"
+         fill-rule="evenodd"
+         points="636.094,270.234 630.094,273.234 631.594,270.234 630.094,267.234 "
+         id="polygon9" />
     </g>
-    <g>
-      <rect style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 2; stroke: #5a9fd4" x="484" y="285.9" width="80" height="36" rx="10" ry="10"/>
-      <text font-size="12.8" style="fill: #646464; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:Lato;font-style:normal;font-weight:500" x="524" y="308.55">
-        <tspan x="524" y="308.55">libffi</tspan>
-      </text>
+    <g
+       id="g11">
+      <rect
+         style="fill: none; stroke-opacity: 1; stroke-width: 2; stroke: #5a9fd4"
+         x="484"
+         y="285.9"
+         width="80"
+         height="36"
+         rx="10"
+         ry="10"
+         id="rect10" />
+      <text
+         font-size="12.8"
+         style="fill: #646464; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:Lato;font-style:normal;font-weight:500"
+         x="524"
+         y="308.55"
+         id="text10"><tspan
+           x="524"
+           y="308.55"
+           id="tspan10">libffi</tspan></text>
     </g>
-    <g>
-      <rect style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 2; stroke: #5a9fd4" x="639.038" y="182.938" width="104.05" height="36" rx="10" ry="10"/>
-      <text font-size="12.8" style="fill: #646464; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:Lato;font-style:normal;font-weight:500" x="691.063" y="205.588">
-        <tspan x="691.063" y="205.588">Gtk-3.0.typelib</tspan>
-      </text>
+    <g
+       id="g12">
+      <rect
+         style="fill: none; stroke-opacity: 1; stroke-width: 2; stroke: #5a9fd4"
+         x="639.038"
+         y="182.938"
+         width="104.05"
+         height="36"
+         rx="10"
+         ry="10"
+         id="rect11" />
+      <text
+         font-size="12.8"
+         style="fill: #646464; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:Lato;font-style:normal;font-weight:500"
+         x="691.063"
+         y="205.588"
+         id="text11"><tspan
+           x="691.063"
+           y="205.588"
+           id="tspan11">Gtk-4.0.typelib</tspan></text>
     </g>
-    <g>
-      <rect style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 2; stroke: #5a9fd4" x="638.33" y="252.234" width="80" height="36" rx="10" ry="10"/>
-      <text font-size="12.8" style="fill: #646464; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:Lato;font-style:normal;font-weight:500" x="678.33" y="274.884">
-        <tspan x="678.33" y="274.884">libgtk-3.so</tspan>
-      </text>
+    <g
+       id="g13">
+      <rect
+         style="fill: none; stroke-opacity: 1; stroke-width: 2; stroke: #5a9fd4"
+         x="638.33"
+         y="252.234"
+         width="80"
+         height="36"
+         rx="10"
+         ry="10"
+         id="rect12" />
+      <text
+         font-size="12.8"
+         style="fill: #646464; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:Lato;font-style:normal;font-weight:500"
+         x="678.33"
+         y="274.884"
+         id="text12"><tspan
+           x="678.33"
+           y="274.884"
+           id="tspan12">libgtk-4.so</tspan></text>
     </g>
   </g>
 </svg>
