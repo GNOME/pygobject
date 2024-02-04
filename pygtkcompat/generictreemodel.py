@@ -109,7 +109,7 @@ class GenericTreeModel(GObject.GObject, Gtk.TreeModel):
     #
     def __init__(self):
         """Initialize. Make sure to call this from derived classes if overridden."""
-        warnings.warn("pygtkcompat is deprecated, see https://pygobject.readthedocs.io for migration instructions", gi.PyGIDeprecationWarning)
+        warnings.warn("pygtkcompat is deprecated, see https://gnome.pages.gitlab.gnome.org/pygobject for migration instructions", gi.PyGIDeprecationWarning)
         super(GenericTreeModel, self).__init__()
         self.stamp = 0
 

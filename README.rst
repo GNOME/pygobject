@@ -1,4 +1,4 @@
-.. image:: https://pygobject.readthedocs.io/en/latest/_images/pygobject.svg
+.. image:: https://gitlab.gnome.org/GNOME/pygobject/-/raw/master/docs/images/pygobject.svg?ref_type=heads
    :align: center
    :width: 400px
    :height: 98px
@@ -19,4 +19,4 @@ It supports Linux, Windows and macOS and works with **Python 3.8+** and
 
 ----
 
-For more information visit https://pygobject.readthedocs.io
+For more information visit https://gnome.pages.gitlab.gnome.org/pygobject
