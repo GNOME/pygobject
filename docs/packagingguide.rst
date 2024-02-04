@@ -14,7 +14,7 @@ Existing Packages:
 
 Building::
 
-    meson --prefix /usr --buildtype=plain _build -Dc_args=... -Dc_link_args=...
+    meson setup --prefix /usr --buildtype=plain _build -Dc_args=... -Dc_link_args=...
     meson compile -C _build
     meson test -C _build
     DESTDIR=/path/to/staging/root meson install -C _build
