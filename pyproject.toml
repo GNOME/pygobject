@@ -51,7 +51,7 @@ docs = [
 
 
 [tool.pdm.options]
-install = ["--no-isolation"]
+install = ["--no-isolation", "--config-setting=setup-args=-Dtests=true", "--config-setting=setup-args=-Dbuildtype=debug"]
 build = ["--no-wheel"]
 
 [tool.meson-python.args]
