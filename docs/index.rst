@@ -67,6 +67,13 @@ How does it work?
     :width: 600px
     :height: 222px
     :align: center
+    :class: only-light
+
+.. figure:: images/overview-dark.svg
+    :width: 600px
+    :height: 222px
+    :align: center
+    :class: only-dark
 
 PyGObject uses `GLib <https://docs.gtk.org/glib/>`__, `GObject
 <https://docs.gtk.org/gobject/>`__, `GIRepository
