@@ -43,10 +43,9 @@ and their dependencies. Follow the instructions for your platform below.
 |windows-logo| :ref:`Windows <windows-getting-started>` |macosx-logo| :ref:`macOS <macosx-getting-started>`  |opensuse-logo| :ref:`openSUSE <opensuse-getting-started>`
 ======================================================= ==================================================== ==========================================================
 
-After running the example application have a look at the "`Python GTK 3
-Tutorial <https://python-gtk-3-tutorial.readthedocs.io>`__" for more examples
-on how to create GTK apps and the "`PyGObject API Reference
-<https://lazka.github.io/pgi-docs>`__" for API documentation for all supported
+After running the example application have a look at the `PyGObject Guide
+<https://rafaelmardojai.pages.gitlab.gnome.org/pygobject-guide>`__ for tutorials on how to create GTK apps and the `GNOME Python API docs
+<https://amolenaar.pages.gitlab.gnome.org/pygobject-docs>`__ for API documentation for all supported
 libraries. There are also typing stubs available here `PyGObject-stubs <https://pypi.org/project/PyGObject-stubs/>`_.
 
 .. _windows-getting-started:
