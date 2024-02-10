@@ -92,6 +92,7 @@ Who Is Using PyGObject?
 * `Drawing <https://maoschanz.github.io/drawing/>`__ - a drawing application
 * `Feeds <https://gfeeds.gabmus.org/>`__ - an RSS/Atom feed reader
 * `Gajim <https://gajim.org/>`__ - a fully-featured XMPP client
+* `Gameeky <https://github.com/tchx84/gameeky>`__ - a learning tool for making games and learning experiences
 * `Gaphor <https://gaphor.org/>`__ - a simple modeling tool
 * `Getting Things GNOME! <https://wiki.gnome.org/Apps/GTG>`__ - a personal task organizer
 * `Girens <https://gitlab.gnome.org/tijder/girens>`__ - a Plex client for playing movies, TV shows and music from your Plex library
