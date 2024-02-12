@@ -1,3 +1,45 @@
+3.47.0 - 2024-02-12 (pre-release)
+---------------------------------
+
+:Note: This is an unstable release.
+
+:Note: This is the first release using meson-python, and thus meson, instead of
+  setuptools for PEP-517 installations i.e. when installing via pip or similar.
+  Distro packagers can continue to use plain meson to build pygobject, but doing
+  PEP-517 builds should also be possible with meson-python instead of
+  setuptools.
+
+* Drop setuptools in favor of meson-python :mr:`248` :mr:`253` :mr:`254` :mr:`255` :mr:`276`
+* Fundamental type support :mr:`250`
+* Fundamental type support for GValues :mr:`264`
+* pygi-convert.sh: migrate FILE_CHOOSER_CONFIRMATION_* :mr:`266`
+* gimodule, cairo: Use multi-phase initialization as per PEP-489 :mr:`271`
+* Deprecate classes in gi.option module :mr:`272`
+* Deprecate pygtkcompat :mr:`278`
+* Add support for (optional) nullable GErrors :mr:`259`
+* Fix CssProvider not valid in GTK2 :mr:`284`
+* Fix double free if array item cannot be marshalled to Python :mr:`280`
+* Raise exception if a callback property is encountered :mr:`269`
+* build: Fix pycairo detection "script" for Windows :mr:`267`
+* Replace deprecated ``pkgutil.find_loader`` call :mr:`252`
+* Avoid segfault on property access for incompletely initialized objects :mr:`260`
+* pygenum: When getting a member instance, use correct key for the lookup :mr:`262`
+
+Project / Development / CI:
+
+* Remove pborelli from the maintainer list :mr:`251`
+* Add Arjan Molenaar to maintainers :mr:`256`
+* Remove runtests script :mr:`257`
+* test: build in a minimal environment without gtk :mr:`258`
+* CI: add a job for creating sdists :mr:`294`
+
+Documentation:
+
+* Build documentation on GitLab Pages :mr:`287` :mr:`289`
+* Update docs to use Furo theme :mr:`288`
+* Various docs improvements: :mr:`274` :mr:`281` :mr:`282` :mr:`285` :mr:`286` :mr:`292`
+
+
 3.44.2 - 2023-09-29
 -------------------
 
