@@ -1,6 +1,6 @@
 [project]
 name = "PyGObject"
-version = "3.47.0"
+version = "3.47.1"
 description = "Python bindings for GObject Introspection"
 license = { text = "GNU Lesser General Public License v2.1 (LGPLv2.1)" }
 authors = [
