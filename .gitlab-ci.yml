@@ -56,6 +56,15 @@ pages:
   only:
     - master
 
+sdist:
+  stage: build_and_test
+  artifacts:
+    paths:
+      - dist/
+  script:
+    - git config --global --add safe.directory "$CI_PROJECT_DIR"
+    - bash -x ./.gitlab-ci/build-sdists.sh
+
 mingw32:
   variables:
     MSYSTEM: "MINGW32"
