@@ -160,6 +160,33 @@ First, check out the source code:
     git clone https://gitlab.gnome.org/GNOME/pygobject.git
     cd pygobject
 
+With a local copy of PyGObject, there's three ways to start developing:
+
+1. PDM, a modern Python package and dependency manager
+2. Pip, the default Python package installer
+3. Meson, use the Meson build system directly
+
+
+PDM
+---
+
+Make sure you have `PDM <https://pdm-project.org>`_ 2.13 or newer installed.
+
+Then set up the project by running:
+
+.. code:: console
+
+    pdm install
+
+You can run teh unit tests with:
+
+.. code:: console
+
+    pdm run pytest
+
+
+Pip
+---
 
 It's always a good idea to work from within a Python virtual environment.
 PyGObject is built with `Meson <https://mesonbuild.com/>`_.
@@ -171,7 +198,7 @@ Meson-python, Meson, and Ninja should be installed in the virtual environment.
 
     python3 -m venv .venv
     source .venv/bin/activate
-    pip install meson-python meson ninja pycairo
+    pip install meson-python meson ninja pycairo pytest
 
 .. note::
 
@@ -202,19 +229,16 @@ Run the unittests:
 
    pytest
 
-It's also not possible to run the tests from meson:
+
+Meson
+-----
+
+It's also possible to run the tests from Meson. Tests are still run with Pytest, so it's important
+that Pytest is installed.
 
 .. code:: console
 
    meson setup _build  # Needed only once
    meson test -C _build
-
-
-Create a release tarball and wheel:
-
-.. code:: console
-
-    pip install build
-    python -m build
 
 .. _pyenv: https://github.com/pyenv/pyenv
