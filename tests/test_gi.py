@@ -862,14 +862,15 @@ class TestFilename(unittest.TestCase):
 
         paths = [(wdb, b"foo-1"), (wd, u"foo-2"), (wd, u"öäü-3")]
 
-        try:
-            paths.append((wd, os.fsdecode(b"\xff\xfe-4")))
-        except UnicodeDecodeError:
-            # depends on the code page
-            pass
+        if sys.platform != "darwin":
+            try:
+                paths.append((wd, os.fsdecode(b"\xff\xfe-4")))
+            except UnicodeDecodeError:
+                # depends on the code page
+                pass
 
-        if os.name != "nt":
-            paths.append((wdb, b"\xff\xfe-5"))
+            if os.name != "nt":
+                paths.append((wdb, b"\xff\xfe-5"))
 
         def valid_path(p):
             try:
