@@ -5,7 +5,7 @@ Maintainer Guide
 Making a Release
 ----------------
 
-#. Make sure the pyproject.toml has the right version number
+#. Make sure the `meson.build` file contains the right version number
 #. Update the NEWS file
 #. Build new version using ``python3 -m build --sdist``
 #. Commit NEWS as ``"release 3.X.Y"`` and push

@@ -1,6 +1,5 @@
 [project]
 name = "PyGObject"
-version = "3.49.0"
 description = "Python bindings for GObject Introspection"
 license = { text = "GNU Lesser General Public License v2.1 (LGPLv2.1)" }
 authors = [
@@ -20,10 +19,11 @@ classifiers = [
     "Programming Language :: Python",
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
-requires-python = ">=3.9, <4"
+requires-python = ">=3.9, <4.0"
 dependencies = [
     "pycairo>=1.16"
 ]
+dynamic = ["version"]
 
 [project.urls]
 Homepage = "https://gnome.pages.gitlab.gnome.org/pygobject"
