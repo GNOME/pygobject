@@ -45,7 +45,8 @@ fundamental_dealloc (PyGIFundamental *self)
     self->instance = NULL;
 
     PyObject_GC_UnTrack ((PyObject *) self);
-    PyObject_ClearWeakRefs ((PyObject *) self);
+    if (self->weaklist)
+        PyObject_ClearWeakRefs ((PyObject *) self);
 
     Py_TYPE (self)->tp_free ((PyObject *) self);
 }
@@ -242,6 +243,7 @@ pygi_fundamental_register_types (PyObject *m)
     PyGIFundamental_Type.tp_richcompare = fundamental_richcompare;
     PyGIFundamental_Type.tp_repr = (reprfunc) fundamental_repr;
     PyGIFundamental_Type.tp_hash = (hashfunc) fundamental_hash;
+    PyGIFundamental_Type.tp_weaklistoffset = offsetof(PyGIFundamental, weaklist);
 
     if (PyType_Ready (&PyGIFundamental_Type))
         return -1;

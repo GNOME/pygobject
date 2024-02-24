@@ -1,4 +1,5 @@
 import gc
+import weakref
 
 import pytest
 from gi.repository import GObject, Regress
@@ -128,6 +129,18 @@ def test_multiple_objects():
     obj2 = Regress.TestFundamentalSubObject()
 
     assert obj1 != obj2
+
+
+def test_fundamental_weak_ref():
+    obj = Regress.TestFundamentalSubObject()
+    weak = weakref.ref(obj)
+
+    assert weak() == obj
+
+    del obj
+    gc.collect()
+
+    assert weak() is None
 
 
 def test_fundamental_primitive_object():
