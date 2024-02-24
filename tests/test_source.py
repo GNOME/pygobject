@@ -264,10 +264,11 @@ class TestSource(unittest.TestCase):
         assert not self.dispatched
         assert context.find_source_by_id(id_) is None
 
+    @unittest.skipIf(sys.implementation.name == "pypy", "PyPy doesn't __del__ immediately")
     def test_python_unref_during_dispatch(self):
         # Tests a Python derived Source which is free'd in the context of
         # Python, while being dispatched
-        # i.e. finalize is never called as the python object is destroyed
+        # NOTE: Finalize is explicitly called by __del__ for consistency
         self.dispatched = False
         self.finalized = False
 
