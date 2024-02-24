@@ -133,6 +133,7 @@ def test_multiple_objects():
 def test_custom_fundamental_type_vfunc_override(capsys):
     obj = MyCustomFundamentalObject()
     del obj
+    gc.collect()
 
     out = capsys.readouterr().out
 
