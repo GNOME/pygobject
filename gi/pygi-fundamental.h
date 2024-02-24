@@ -37,6 +37,7 @@ extern PyTypeObject PyGIFundamental_Type;
 
 typedef struct {
     PyObject_HEAD
+    PyObject* weaklist;
     gpointer instance;
     GType gtype;
     GIObjectInfoRefFunction ref_func;
