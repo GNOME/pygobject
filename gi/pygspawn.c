@@ -32,22 +32,31 @@ struct _PyGChildSetupData {
     PyObject *data;
 };
 
-PYGI_DEFINE_TYPE("gi._gi.Pid", PyGPid_Type, PyLongObject)
+typedef struct {
+    PyLongObject obj;
+    /*
+     * This exists for two reasons:
+     *  1. We must only close once (ideally we would not have "close" in python)
+     *  2. In PyPy we cannot use PyLong_AsLong during free
+     */
+    GPid unclosed;
+} PyGPid;
 
-static GPid
-pyg_pid_get_pid (PyObject *self)
-{
-#ifdef G_OS_WIN32
-    return (GPid)PyLong_AsVoidPtr (self);
-#else
-    return (GPid)PyLong_AsLong (self);
-#endif
-}
+PYGI_DEFINE_TYPE("gi._gi.Pid", PyGPid_Type, PyGPid)
 
 static PyObject *
 pyg_pid_close(PyObject *self, PyObject *args, PyObject *kwargs)
 {
-    g_spawn_close_pid(pyg_pid_get_pid (self));
+    PyGPid* gpid = (PyGPid*) self;
+
+    if (gpid->unclosed)
+        g_spawn_close_pid(gpid->unclosed);
+#ifdef G_OS_WIN32
+    gpid->unclosed = NULL;
+#else
+    gpid->unclosed = 0;
+#endif
+
     Py_INCREF(Py_None);
     return Py_None;
 }
@@ -58,10 +67,14 @@ static PyMethodDef pyg_pid_methods[] = {
 };
 
 static void
-pyg_pid_free(PyObject *gpid)
+pyg_pid_free(PyObject *self)
 {
-    g_spawn_close_pid(pyg_pid_get_pid (gpid));
-    PyLong_Type.tp_free((void *) gpid);
+    PyGPid* gpid = (PyGPid*) self;
+
+    if (gpid->unclosed)
+        g_spawn_close_pid(gpid->unclosed);
+
+    PyLong_Type.tp_free((void *) self);
 }
 
 static int
