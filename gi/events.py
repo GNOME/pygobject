@@ -130,15 +130,6 @@ class _GLibEventLoopMixin:
             assert len(self._quit_funcs) == 0
             self._stopping = False
 
-    def run_forever(self):
-        # NOTE: self._check_running was only added in 3.8 (with a typo in 3.7)
-        if self.is_running():
-            raise RuntimeError('This event loop is already running')
-
-        with _ossighelper.register_sigint_fallback(self._main_loop.quit):
-            with self.running(self._main_loop.quit):
-                g_main_loop_run(self._main_loop)
-
     def time(self):
         return GLib.get_monotonic_time() / 1000000
 
@@ -170,6 +161,21 @@ class _GLibEventLoopMixin:
             f'closed={self.is_closed()} debug={self.get_debug()} '
             f'ctx=0x{hash(self._context):X} loop=0x{hash(self._main_loop):X}>'
         )
+
+
+class _GLibEventLoopRunMixin:
+    # This class exists so we don't need to copy the ProactorEventLoop.run_forever,
+    # instead, we change the MRO using a metaclass, so that super() sees this class
+    # when called in ProactorEventLoop.run_forever.
+
+    def run_forever(self):
+        # NOTE: self._check_running was only added in 3.8 (with a typo in 3.7)
+        if self.is_running():
+            raise RuntimeError('This event loop is already running')
+
+        with _ossighelper.register_sigint_fallback(self._main_loop.quit):
+            with self.running(self._main_loop.quit):
+                g_main_loop_run(self._main_loop)
 
 
 class _SourceBase(GLib.Source):
@@ -214,7 +220,7 @@ class _SourceBase(GLib.Source):
 
 
 class _SelectorMixin:
-    """A Mixin for common functionlity of the Selector and Proactor."""
+    """A Mixin for common functionality of the Selector and Proactor."""
 
     def __init__(self, context, loop):
         super().__init__()
@@ -232,9 +238,12 @@ class _SelectorMixin:
     def select(self, timeout=None):
         return self._source._get_ready()
 
+    def _real_select(self, timeout=None):
+        return super().select(timeout)
+
 
 if sys.platform != 'win32':
-    class GLibEventLoop(_GLibEventLoopMixin, asyncio.SelectorEventLoop):
+    class GLibEventLoop(_GLibEventLoopMixin, _GLibEventLoopRunMixin, asyncio.SelectorEventLoop):
         """An asyncio event loop that runs the python mainloop inside GLib.
 
         Based on the asyncio.SelectorEventLoop"""
@@ -431,7 +440,156 @@ if sys.platform != 'win32':
 
 
 else:
-        raise AssertionError('No GLibEventLoop implementation for win32!')
+    import _overlapped
+
+    class _PushRunMixinBackMeta(type):
+        # This metaclass changes the MRO so that when run_forever is called, it
+        # first calls asyncio.ProactorEventLoop and then chains into
+        # _GLibEventLoopRunMixin.run_forever using super().
+        # The alternative would be to copy asyncio.ProactorEventLoop.run_forever
+        def mro(cls):
+            mro = type.mro(cls)
+            idx = mro.index(_GLibEventLoopRunMixin)
+
+            return [*mro[:idx], mro[idx + 1], mro[idx], *mro[idx + 2:]]
+
+    class GLibEventLoop(_GLibEventLoopMixin, _GLibEventLoopRunMixin, asyncio.ProactorEventLoop, metaclass=_PushRunMixinBackMeta):
+        """An asyncio event loop that runs the python mainloop inside GLib.
+
+        Based on the asyncio.WindowsProactorEventLoopPolicy"""
+
+        # This is based on the Windows ProactorEventLoop
+        def __init__(self, main_context):
+            _GLibEventLoopMixin.__init__(self, main_context)
+
+            proactor = _Proactor(self._context, self)
+            # Sets both self._proactor and self._selector to the proactor
+            asyncio.ProactorEventLoop.__init__(self, proactor)
+
+            # Used by run_once to not busy loop if the timeout is floor'ed to zero
+            self._clock_resolution = 1e-3
+
+    class _Source(_SourceBase):
+        def __init__(self, proactor):
+            self._proactor = proactor
+            super().__init__(proactor)
+
+            # As the source doesn't register FDs, we can simply disable it internally
+            self._enabled = False
+
+        def _poll_thread(self):
+            # We get started immediately, so wait right away
+            self._poll_sem.acquire()
+            while self._enabled:
+                # Simply calling the original proactor _poll/select method with a zero timeout
+                # would be too simple. The Proactor runs a lot of non-threadsafe python code
+                # which means that doesn't work.
+                # Instead, try to pull a single event from the IO Completion and if that
+                # succeeds simply push it back into the queue and wake up the main context.
+                status = _overlapped.GetQueuedCompletionStatus(self._proactor._iocp, 10000)
+                if status is not None:
+                    err, transferred, key, address = status
+                    _overlapped.PostQueuedCompletionStatus(self._proactor._iocp, transferred, key, address)
+
+                # Mark as not polling and wake up main context
+                self._polling = False
+                self._loop()._context.wakeup()
+
+                # And go to sleep again
+                self._poll_sem.acquire()
+
+        def enable(self):
+            if self._enabled:
+                return
+
+            # Always attached, start the helper thread
+            self._enabled = True
+
+            self._poll_sem = threading.Semaphore(0)
+            self._polling = False
+            self._thread = threading.Thread(target=self._poll_thread)
+            self._thread.start()
+
+        def disable(self):
+            if not self._enabled:
+                return
+
+            # Always attached, but need to wake up thread
+            self._enabled = False
+
+            # Wake up _poll if it is (likely) running
+            if self._polling:
+                self._loop()._write_to_self()
+
+            # Make sure the thread re-checks self._enabled (it might not)
+            self._poll_sem.release()
+
+            self._thread.join()
+
+        def prepare(self):
+            if not self._enabled:
+                return False, -1
+
+            timeout = self._loop()._get_timeout_ms()
+
+            if self._ready:
+                # We have events from the last main context iteration but were
+                # not dispatched (i.e. a higher priority source was dispatched).
+                # Lets grab any new events that happened since so we don't fall
+                # behind too much.
+                self._ready.extend(self._proactor._real_select(0))
+                return True, timeout
+
+            if timeout == 0:
+                # IO events will be polled by check() in this case
+                return False, 0
+
+            if self._polling:
+                # The poll thread is running already, we just have a timeout
+                return False, timeout
+            else:
+                # No poll thread and we don't have any pending IO right now.
+                # Grab pending IO and only start the background thread if there
+                # are no events (i.e. we can expect it to sleep for longer).
+                self._ready.extend(self._proactor._real_select(0))
+                if not self._ready:
+                    self._polling = True
+                    self._poll_sem.release()
+                    return False, timeout
+                else:
+                    return True, timeout
+
+        def check(self):
+            if not self._enabled:
+                return False
+
+            # Grab events if we don't have any yet (from check) and the polling
+            # thread is not waiting at this point.
+            if not self._ready and not self._polling:
+                self._ready.extend(self._proactor._real_select(0))
+
+            timeout = self._loop()._get_timeout_ms()
+            if timeout == 0:
+                return True
+
+            # prepare or the thread filled self._ready if anything is pending
+            return bool(self._ready)
+
+    class _Proactor(_SelectorMixin, asyncio.IocpProactor):
+        """A Proactor for gi.events.GLibEventLoop registering python IO with GLib."""
+
+        def __init__(self, context, loop):
+            super().__init__(context, loop)
+
+            # We always use the same Source on windows, it disables itself
+            self._source = _Source(self)
+            self._source.attach(context)
+
+        def attach(self):
+            self._source.enable()
+
+        def detach(self):
+            self._source.disable()
 
 
 class GLibEventLoopPolicy(asyncio.AbstractEventLoopPolicy):

@@ -1,23 +1,18 @@
 # -*- Mode: Python; py-indent-offset: 4 -*-
 # vim: tabstop=4 shiftwidth=4 expandtab
 
-import sys
 import pytest
 import platform
 import unittest
 
 import asyncio
 from gi.repository import GLib, Gio
-if sys.platform != 'win32':
-    from gi.events import GLibEventLoopPolicy
+from gi.events import GLibEventLoopPolicy
 
 
 class TestAsync(unittest.TestCase):
 
     def setUp(self):
-        if sys.platform == 'win32':
-            raise unittest.SkipTest("Not supported on Windows")
-
         policy = GLibEventLoopPolicy()
         asyncio.set_event_loop_policy(policy)
         self.addCleanup(asyncio.set_event_loop_policy, None)
