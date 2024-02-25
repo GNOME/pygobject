@@ -39,26 +39,22 @@ except AttributeError:
     g_main_loop_run = GLib.MainLoop.run
 
 
-class GLibEventLoop(asyncio.SelectorEventLoop):
-    """An asyncio event loop that runs the python mainloop inside GLib.
+class _GLibEventLoopMixin:
+    """
+    Base functionally required for both proactor and selector.
 
-    Based on the asyncio.SelectorEventLoop"""
+    The proactor/selector is always available through _selector, and we assume
+    it has the following extra functionality that we provide:
+     * _source: the GSource subclass
+     * _dispatching: boolean whether it is dispatching currently
+     * attach/detach: add/remove the GSource from the main context
 
-    # This is based on the selector event loop, but never actually runs select()
-    # in the strict sense.
-    # We use the selector to register all FDs with the main context using our
-    # own GSource. For python timeouts/idle equivalent, we directly query them
-    # from the context by providing the _get_timeout_ms function that the
-    # GSource uses. This in turn accesses _ready and _scheduled to calculate
-    # the timeout and whether python can dispatch anything non-FD based yet.
-    #
-    # To simplify matters, we call the normal _run_once method of the base
-    # class which will call select(). As we know that we are ready at the time
-    # that select() will return immediately with the FD information we have
-    # gathered already.
-    #
-    # With that, we just need to override and slightly modify the run_forever
-    # method so that it calls g_main_loop_run instead of looping _run_once.
+    In principle, we simply override run_forever to call into GLib, with the
+    assumption that a GSource is registered which will then call back into
+    the python mainloop _run_once handler when needed. This in turn calls
+    self._selector.select(), which means we just need to make sure to return
+    our already prepared events at that point.
+    """
 
     def __init__(self, main_context):
         # A mainloop in case we want to run our context
@@ -66,16 +62,6 @@ class GLibEventLoop(asyncio.SelectorEventLoop):
         self._context = main_context
         self._main_loop = GLib.MainLoop.new(self._context, False)
         self._quit_funcs = []
-
-        # _UnixSelectorEventLoop uses _signal_handlers, we could do the same,
-        # with the difference that close() would clean up the handlers for us.
-        self.__signal_handlers = {}
-
-        selector = _Selector(self._context, self)
-        super().__init__(selector)
-
-        # Used by run_once to not busy loop if the timeout is floor'ed to zero
-        self._clock_resolution = 1e-3
 
     @contextmanager
     def paused(self):
@@ -178,13 +164,108 @@ class GLibEventLoop(asyncio.SelectorEventLoop):
         if self._quit_funcs:
             self._quit_funcs[-1]()
 
-    def close(self):
-        super().close()
-        for s in list(self.__signal_handlers):
-            self.remove_signal_handler(s)
+    def __repr__(self):
+        return (
+            f'<{self.__class__.__name__} running={self.is_running()} '
+            f'closed={self.is_closed()} debug={self.get_debug()} '
+            f'ctx=0x{hash(self._context):X} loop=0x{hash(self._main_loop):X}>'
+        )
 
-    if sys.platform != "win32":
+
+class _SourceBase(GLib.Source):
+    """Common Source functionality for both unix and win32"""
+    def __init__(self, selector):
+        super().__init__()
+
+        self._dispatching = False
+
+        # It is *not* safe to run the *python* part of the mainloop recursively.
+        # This error must be caught further up in the chain, otherwise the
+        # mainloop will be blocking without an obvious reason.
+        self.set_can_recurse(False)
+        self.set_name('python asyncio integration')
+
+        self._selector = selector
+        # NOTE: Avoid loop -> selector -> source -> loop reference cycle,
+        # we need the source to be destroyed *after* the selector. Otherwise
+        # we need a flag to deal with FDs being unregistered after __del__ has
+        # been called on the source.
+        self._loop = weakref.ref(selector._loop)
+
+        self._ready = []
+
+    def dispatch(self, callback, args):
+        # Now, wag the dog by its tail
+        self._dispatching = True
+        try:
+            self._loop()._run_once()
+        finally:
+            self._dispatching = False
+
+        return GLib.SOURCE_CONTINUE
+
+    def _get_ready(self):
+        if not self._dispatching:
+            raise RuntimeError("gi.asyncio.Selector.select only works while it is dispatching!")
+
+        ready = self._ready
+        self._ready = []
+        return ready
+
+
+class _SelectorMixin:
+    """A Mixin for common functionlity of the Selector and Proactor."""
+
+    def __init__(self, context, loop):
+        super().__init__()
+
+        self._context = context
+        self._loop = loop
+        self._fd_to_key = {}
+
+        self._source = _Source(self)
+
+    def close(self):
+        self._source.destroy()
+        super().close()
+
+    def select(self, timeout=None):
+        return self._source._get_ready()
+
+
+if sys.platform != 'win32':
+    class GLibEventLoop(_GLibEventLoopMixin, asyncio.SelectorEventLoop):
+        """An asyncio event loop that runs the python mainloop inside GLib.
+
+        Based on the asyncio.SelectorEventLoop"""
+
         _GLIB_SIGNALS = {signal.SIGHUP, signal.SIGINT, signal.SIGTERM, signal.SIGUSR1, signal.SIGUSR2, signal.SIGWINCH}
+
+        # This is based on the selector event loop, but never actually runs select()
+        # in the strict sense.
+        # We use the selector to register all FDs with the main context using our
+        # own GSource. For python timeouts/idle equivalent, we directly query them
+        # from the context by providing the _get_timeout_ms function that the
+        # GSource uses. This in turn accesses _ready and _scheduled to calculate
+        # the timeout and whether python can dispatch anything non-FD based yet.
+        #
+        # The Selector select() method simply returns the information we already
+        # collected.
+        #
+        # The rest is done by the mixin which overrides run_forever to simply
+        # iterate the main context.
+        def __init__(self, main_context):
+            _GLibEventLoopMixin.__init__(self, main_context)
+
+            # _UnixSelectorEventLoop uses _signal_handlers, we could do the same,
+            # with the difference that close() would clean up the handlers for us.
+            self.__signal_handlers = {}
+
+            selector = _Selector(self._context, self)
+            asyncio.SelectorEventLoop.__init__(self, selector)
+
+            # Used by run_once to not busy loop if the timeout is floor'ed to zero
+            self._clock_resolution = 1e-3
 
         def add_signal_handler(self, sig, callback, *args):
             """Add a handler for UNIX signal"""
@@ -244,12 +325,113 @@ class GLibEventLoop(asyncio.SelectorEventLoop):
             # Pass over to python mainloop
             self.call_soon(cb, *args)
 
-    def __repr__(self):
-        return (
-            f'<{self.__class__.__name__} running={self.is_running()} '
-            f'closed={self.is_closed()} debug={self.get_debug()} '
-            f'ctx=0x{hash(self._context):X} loop=0x{hash(self._main_loop):X}>'
-        )
+        def close(self):
+            super().close()
+            for s in list(self.__signal_handlers):
+                self.remove_signal_handler(s)
+
+    def _fileobj_to_fd(fileobj):
+        # Note: SelectorEventloop should only be passing FDs
+        if isinstance(fileobj, int):
+            return fileobj
+        else:
+            return fileobj.fileno()
+
+    class _Source(_SourceBase):
+        def prepare(self):
+            timeout = self._loop()._get_timeout_ms()
+
+            # NOTE: Always return False, FDs are queried in check and the timeout
+            #       needs to be rechecked anyway.
+            return False, timeout
+
+        def check(self):
+            ready = []
+
+            for key in self._selector._fd_to_key.values():
+                condition = self.query_unix_fd(key._tag)
+                events = 0
+                # ERR/HUP/NVAL trigger both read/write (PRI cannot happen)
+                if condition & ~GLib.IOCondition.OUT:
+                    events |= selectors.EVENT_READ
+                if condition & ~GLib.IOCondition.IN:
+                    events |= selectors.EVENT_WRITE
+                if events:
+                    ready.append((key, events))
+            self._ready = ready
+
+            timeout = self._loop()._get_timeout_ms()
+            if timeout == 0:
+                return True
+
+            return bool(ready)
+
+    class _SelectorKey(selectors.SelectorKey):
+        # Subclass to attach _tag
+        pass
+
+    class _Selector(_SelectorMixin, selectors.BaseSelector):
+        """A Selector for gi.events.GLibEventLoop registering python IO with GLib."""
+
+        def attach(self):
+            self._source.attach(self._loop._context)
+
+        def detach(self):
+            self._source.destroy()
+            self._source = _Source(self)
+            # re-register the keys with the new source
+            for key in self._fd_to_key.values():
+                self._register_key(key)
+
+        def _register_key(self, key):
+            condition = GLib.IOCondition(0)
+            if key.events & selectors.EVENT_READ:
+                condition |= GLib.IOCondition.IN
+            if key.events & selectors.EVENT_WRITE:
+                condition |= GLib.IOCondition.OUT
+            key._tag = self._source.add_unix_fd(key.fd, condition)
+
+        def register(self, fileobj, events, data=None):
+            if (not events) or (events & ~(selectors.EVENT_READ | selectors.EVENT_WRITE)):
+                raise ValueError("Invalid events: {!r}".format(events))
+
+            fd = _fileobj_to_fd(fileobj)
+            assert fd not in self._fd_to_key
+
+            key = _SelectorKey(fileobj, fd, events, data)
+
+            self._register_key(key)
+
+            self._fd_to_key[fd] = key
+            return key
+
+        def unregister(self, fileobj):
+            # NOTE: may be called after __del__ has been called.
+            fd = _fileobj_to_fd(fileobj)
+            key = self._fd_to_key[fd]
+
+            if self._source:
+                self._source.remove_unix_fd(key._tag)
+            del self._fd_to_key[fd]
+
+            return key
+
+        # We could override modify, but it is only slightly when the "events" change.
+
+        def get_key(self, fileobj):
+            fd = _fileobj_to_fd(fileobj)
+            return self._fd_to_key[fd]
+
+        def get_map(self):
+            """Return a mapping of file objects to selector keys."""
+            # Horribly inefficient
+            # It should never be called and exists just to prevent issues if e.g.
+            # python decides to use it for debug purposes.
+            return {k.fileobj: k for k in self._fd_to_key.values()}
+
+
+else:
+        raise AssertionError('No GLibEventLoop implementation for win32!')
 
 
 class GLibEventLoopPolicy(asyncio.AbstractEventLoopPolicy):
@@ -372,159 +554,3 @@ class GLibEventLoopPolicy(asyncio.AbstractEventLoopPolicy):
                     self._child_watcher.attach_loop(self.get_event_loop())
 
             return self._child_watcher
-
-
-def _fileobj_to_fd(fileobj):
-    # Note: SelectorEventloop should only be passing FDs
-    if isinstance(fileobj, int):
-        return fileobj
-    else:
-        return fileobj.fileno()
-
-
-class _Source(GLib.Source):
-    def __init__(self, selector):
-        super().__init__()
-
-        self._dispatching = False
-
-        # It is *not* safe to run the *python* part of the mainloop recursively.
-        # This error must be caught further up in the chain, otherwise the
-        # mainloop will be blocking without an obvious reason.
-        self.set_can_recurse(False)
-        self.set_name('python asyncio integration')
-
-        self._selector = selector
-        # NOTE: Avoid loop -> selector -> source -> loop reference cycle,
-        # we need the source to be destroyed *after* the selector. Otherwise
-        # we need a flag to deal with FDs being unregistered after __del__ has
-        # been called on the source.
-        self._loop = weakref.ref(selector._loop)
-        self._ready = []
-
-    def prepare(self):
-        timeout = self._loop()._get_timeout_ms()
-
-        # NOTE: Always return False, FDs are queried in check and the timeout
-        #       needs to be rechecked anyway.
-        return False, timeout
-
-    def check(self):
-        ready = []
-
-        for key in self._selector._fd_to_key.values():
-            condition = self.query_unix_fd(key._tag)
-            events = 0
-            # ERR/HUP/NVAL trigger both read/write (PRI cannot happen)
-            if condition & ~GLib.IOCondition.OUT:
-                events |= selectors.EVENT_READ
-            if condition & ~GLib.IOCondition.IN:
-                events |= selectors.EVENT_WRITE
-            if events:
-                ready.append((key, events))
-        self._ready = ready
-
-        timeout = self._loop()._get_timeout_ms()
-        if timeout == 0:
-            return True
-
-        return bool(ready)
-
-    def dispatch(self, callback, args):
-        # Now, wag the dog by its tail
-        self._dispatching = True
-        try:
-            self._loop()._run_once()
-        finally:
-            self._dispatching = False
-
-        return GLib.SOURCE_CONTINUE
-
-    def _get_ready(self):
-        if not self._dispatching:
-            raise RuntimeError("gi.asyncio.Selector.select only works while it is dispatching!")
-
-        ready = self._ready
-        self._ready = []
-        return ready
-
-
-class _SelectorKey(selectors.SelectorKey):
-    # Subclass to attach _tag
-    pass
-
-
-class _Selector(selectors.BaseSelector):
-    """A Selector for gi.events.GLibEventLoop registering python IO with GLib."""
-
-    def __init__(self, context, loop):
-        super().__init__()
-
-        self._context = context
-        self._loop = loop
-        self._fd_to_key = {}
-
-        self._source = _Source(self)
-
-    def close(self):
-        self._source.destroy()
-        super().close()
-
-    def attach(self):
-        self._source.attach(self._loop._context)
-
-    def detach(self):
-        self._source.destroy()
-        self._source = _Source(self)
-        # re-register the keys with the new source
-        for key in self._fd_to_key.values():
-            self._register_key(key)
-
-    def _register_key(self, key):
-        condition = GLib.IOCondition(0)
-        if key.events & selectors.EVENT_READ:
-            condition |= GLib.IOCondition.IN
-        if key.events & selectors.EVENT_WRITE:
-            condition |= GLib.IOCondition.OUT
-        key._tag = self._source.add_unix_fd(key.fd, condition)
-
-    def register(self, fileobj, events, data=None):
-        if (not events) or (events & ~(selectors.EVENT_READ | selectors.EVENT_WRITE)):
-            raise ValueError("Invalid events: {!r}".format(events))
-
-        fd = _fileobj_to_fd(fileobj)
-        assert fd not in self._fd_to_key
-
-        key = _SelectorKey(fileobj, fd, events, data)
-
-        self._register_key(key)
-
-        self._fd_to_key[fd] = key
-        return key
-
-    def unregister(self, fileobj):
-        # NOTE: may be called after __del__ has been called.
-        fd = _fileobj_to_fd(fileobj)
-        key = self._fd_to_key[fd]
-
-        if self._source:
-            self._source.remove_unix_fd(key._tag)
-        del self._fd_to_key[fd]
-
-        return key
-
-    # We could override modify, but it is only slightly when the "events" change.
-
-    def get_key(self, fileobj):
-        fd = _fileobj_to_fd(fileobj)
-        return self._fd_to_key[fd]
-
-    def get_map(self):
-        """Return a mapping of file objects to selector keys."""
-        # Horribly inefficient
-        # It should never be called and exists just to prevent issues if e.g.
-        # python decides to use it for debug purposes.
-        return {k.fileobj: k for k in self._fd_to_key.values()}
-
-    def select(self, timeout=None):
-        return self._source._get_ready()
