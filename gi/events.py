@@ -440,8 +440,6 @@ if sys.platform != 'win32':
 
 
 else:
-    import _overlapped
-
     class _PushRunMixinBackMeta(type):
         # This metaclass changes the MRO so that when run_forever is called, it
         # first calls asyncio.ProactorEventLoop and then chains into
@@ -474,106 +472,42 @@ else:
             self._proactor = proactor
             super().__init__(proactor)
 
-            # As the source doesn't register FDs, we can simply disable it internally
-            self._enabled = False
-
-        def _poll_thread(self):
-            # We get started immediately, so wait right away
-            self._poll_sem.acquire()
-            while self._enabled:
-                # Simply calling the original proactor _poll/select method with a zero timeout
-                # would be too simple. The Proactor runs a lot of non-threadsafe python code
-                # which means that doesn't work.
-                # Instead, try to pull a single event from the IO Completion and if that
-                # succeeds simply push it back into the queue and wake up the main context.
-                status = _overlapped.GetQueuedCompletionStatus(self._proactor._iocp, 10000)
-                if status is not None:
-                    err, transferred, key, address = status
-                    _overlapped.PostQueuedCompletionStatus(self._proactor._iocp, transferred, key, address)
-
-                # Mark as not polling and wake up main context
-                self._polling = False
-                self._loop()._context.wakeup()
-
-                # And go to sleep again
-                self._poll_sem.acquire()
+            # None denotes it is disabled (and will also not handle timeouts)
+            self._poll_fd = None
 
         def enable(self):
-            if self._enabled:
-                return
+            assert self._poll_fd is None
 
-            # Always attached, start the helper thread
-            self._enabled = True
-
-            self._poll_sem = threading.Semaphore(0)
-            self._polling = False
-            self._thread = threading.Thread(target=self._poll_thread)
-            self._thread.start()
+            self._poll_fd = GLib.PollFD(self._proactor._iocp, GLib.IO_IN)
+            self.add_poll(self._poll_fd)
 
         def disable(self):
-            if not self._enabled:
-                return
-
-            # Always attached, but need to wake up thread
-            self._enabled = False
-
-            # Wake up _poll if it is (likely) running
-            if self._polling:
-                self._loop()._write_to_self()
-
-            # Make sure the thread re-checks self._enabled (it might not)
-            self._poll_sem.release()
-
-            self._thread.join()
+            self.remove_poll(self._poll_fd)
+            self._poll_fd = None
 
         def prepare(self):
-            if not self._enabled:
+            # Disabled, do not handle timeouts either
+            if self._poll_fd is None:
                 return False, -1
 
             timeout = self._loop()._get_timeout_ms()
 
-            if self._ready:
-                # We have events from the last main context iteration but were
-                # not dispatched (i.e. a higher priority source was dispatched).
-                # Lets grab any new events that happened since so we don't fall
-                # behind too much.
-                self._ready.extend(self._proactor._real_select(0))
-                return True, timeout
-
-            if timeout == 0:
-                # IO events will be polled by check() in this case
-                return False, 0
-
-            if self._polling:
-                # The poll thread is running already, we just have a timeout
-                return False, timeout
-            else:
-                # No poll thread and we don't have any pending IO right now.
-                # Grab pending IO and only start the background thread if there
-                # are no events (i.e. we can expect it to sleep for longer).
-                self._ready.extend(self._proactor._real_select(0))
-                if not self._ready:
-                    self._polling = True
-                    self._poll_sem.release()
-                    return False, timeout
-                else:
-                    return True, timeout
+            return bool(self._ready), timeout
 
         def check(self):
-            if not self._enabled:
+            if self._poll_fd is None:
                 return False
 
-            # Grab events if we don't have any yet (from check) and the polling
-            # thread is not waiting at this point.
-            if not self._ready and not self._polling:
+            if self._poll_fd.revents:
                 self._ready.extend(self._proactor._real_select(0))
 
-            timeout = self._loop()._get_timeout_ms()
-            if timeout == 0:
+            if self._ready:
                 return True
 
-            # prepare or the thread filled self._ready if anything is pending
-            return bool(self._ready)
+            if self._loop()._get_timeout_ms() == 0:
+                return True
+
+            return False
 
     class _Proactor(_SelectorMixin, asyncio.IocpProactor):
         """A Proactor for gi.events.GLibEventLoop registering python IO with GLib."""
