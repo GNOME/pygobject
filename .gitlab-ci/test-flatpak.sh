@@ -13,7 +13,7 @@ if [[ "$1" == "inflatpak" ]]; then
     python3 -m venv _venv
     . _venv/bin/activate
     pip install pycairo meson meson-python
-    pip install --no-build-isolation --editable '.[dev]'
+    pip install --config-settings=setup-args="-Dtests=true" --no-build-isolation --editable '.[dev]'
     pytest -v --cov
     python3 -m coverage lcov -o "${COV_DIR}/${COV_KEY}.py.lcov"
     chmod -R 777 "${COV_DIR}"

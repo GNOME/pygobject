@@ -42,7 +42,7 @@ docs = [
 ]
 
 [tool.meson-python.args]
-setup = ["-Dwheel=true", "--wrap-mode=nofallback"]
+setup = ["-Dtests=false", "-Dwheel=true", "--wrap-mode=nofallback"]
 
 [tool.pytest.ini_options]
 testpaths = [
