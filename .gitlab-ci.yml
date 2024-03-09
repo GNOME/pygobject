@@ -1,4 +1,4 @@
-image: registry.gitlab.gnome.org/gnome/pygobject/main:v22
+image: registry.gitlab.gnome.org/gnome/pygobject/main:v23
 
 stages:
   - build_and_test
@@ -111,10 +111,10 @@ python3.12:
     TEST_GTK_VERSION: "3.0"
   <<: *defaults
 
-pypy3.9:
+pypy3:
   allow_failure: true
   variables:
-    PYTHON_VERSION: "pypy3.9"
+    PYTHON_VERSION: "pypy3"
     TEST_GTK_VERSION: "3.0"
   <<: *defaults
 
