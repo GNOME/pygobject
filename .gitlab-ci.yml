@@ -75,12 +75,6 @@ mingw64:
     MSYSTEM: "MINGW64"
   <<: *mingw-defaults
 
-python3.8:
-  variables:
-    PYTHON_VERSION: "3.8"
-    TEST_GTK_VERSION: "3.0"
-  <<: *defaults
-
 python3.9:
   variables:
     PYTHON_VERSION: "3.9"
