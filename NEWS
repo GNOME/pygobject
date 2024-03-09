@@ -1,3 +1,12 @@
+3.48.0 - 2024-03-09
+-------------------
+
+:Note: See 3.47.0 below for more details.
+
+* test: fix some tests on macOS :mr:`296`
+* docs: some dark mode fixes :mr:`291`
+
+
 3.47.0 - 2024-02-12 (pre-release)
 ---------------------------------
 
