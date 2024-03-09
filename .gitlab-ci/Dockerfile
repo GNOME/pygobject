@@ -33,7 +33,7 @@ RUN apt-get update && apt-get install -y \
 
 RUN add-apt-repository -y ppa:pypy/ppa \
     && apt-get update \
-    && apt-get install -y pypy3 pypy3-dev \
+    && apt-get install -y pypy3 pypy3-dev pypy3-venv \
     && rm -rf /var/lib/apt/lists/*
 
 ARG HOST_USER_ID=5555
