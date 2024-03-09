@@ -17,7 +17,6 @@ export G_SLICE="debug-blocks"
 export COVERAGE_FILE="${COV_DIR}/.coverage.${COV_KEY}"
 export CCACHE_BASEDIR="$(pwd)"
 export CCACHE_DIR="${CCACHE_BASEDIR}/_ccache"
-export PATH="$PATH:$(python -m site --user-base)/bin"
 
 # https://docs.python.org/3/using/cmdline.html#envvar-PYTHONDEVMODE
 export PYTHONDEVMODE=1
@@ -26,6 +25,13 @@ export MESONPY_EDITABLE_VERBOSE=1
 mkdir -p "${CCACHE_DIR}"
 mkdir -p "${COV_DIR}"
 
+python -m venv /tmp/venv
+source /tmp/venv/bin/activate
+
+# XXX: meson tries to use this for some reason, but it's not there by default
+mkdir -p /tmp/venv/include/pypy3.9
+
+python -m pip install --upgrade pip
 python -m pip install flake8 meson meson-python pycairo
 
 # CODE QUALITY
