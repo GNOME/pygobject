@@ -38,7 +38,7 @@ python -m pip install flake8 meson meson-python pycairo
 python -m flake8
 
 # BUILD & TEST
-python -m pip install --no-build-isolation --editable '.[dev]'
+python -m pip install --config-settings=setup-args="-Dtests=true" --no-build-isolation --editable '.[dev]'
 
 lcov --config-file .gitlab-ci/lcovrc --directory . --capture --initial --output-file \
     "${COV_DIR}/${CI_JOB_NAME}-baseline.lcov"
