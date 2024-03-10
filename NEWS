@@ -1,3 +1,9 @@
+3.48.1 - 2024-03-10
+-------------------
+
+* Fix installation with pip failing in some environments with
+  ModuleNotFoundError in g-ir-scanner :issue:`622` :mr:`302`
+
 3.48.0 - 2024-03-09
 -------------------
 
