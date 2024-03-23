@@ -55,16 +55,10 @@ fundamental_new (PyTypeObject *type,
                  PyObject     *args,
                  PyObject     *kwargs)
 {
-    static char *kwlist[] = { NULL };
-
     GIBaseInfo *info;
     gpointer pointer;
     PyGIFundamental *self = NULL;
     GType g_type;
-
-    if (!PyArg_ParseTupleAndKeywords (args, kwargs, "", kwlist)) {
-        return NULL;
-    }
 
     info = _pygi_object_get_gi_info ((PyObject *) type, &PyGIObjectInfo_Type);
     if (info == NULL) {
@@ -97,6 +91,19 @@ out:
     g_base_info_unref (info);
 
     return (PyObject *) self;
+}
+
+static int
+fundamental_init(PyObject     *self,
+                 PyObject     *args,
+                 PyObject     *kwargs)
+{
+    static char *kwlist[] = { NULL };
+
+    if (!PyArg_ParseTupleAndKeywords (args, kwargs, ":Fundamental.__init__", kwlist)) {
+        return -1;
+    }
+    return 0;
 }
 
 static PyObject*
@@ -222,6 +229,7 @@ pygi_fundamental_register_types (PyObject *m)
 
     PyGIFundamental_Type.tp_alloc = PyType_GenericAlloc;
     PyGIFundamental_Type.tp_new = (newfunc) fundamental_new;
+    PyGIFundamental_Type.tp_init = (initproc) fundamental_init;
     PyGIFundamental_Type.tp_dealloc = (destructor) fundamental_dealloc;
     PyGIFundamental_Type.tp_flags = (Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE);
     PyGIFundamental_Type.tp_richcompare = fundamental_richcompare;
