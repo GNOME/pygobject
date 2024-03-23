@@ -76,7 +76,7 @@ def get_parent_for_object(object_info):
         if gtype and gtype.pytype:
             return gtype.pytype
 
-        if object_info.get_fundamental():
+        if object_info.get_fundamental() and gtype.is_instantiatable():
             return Fundamental
 
         # Otherwise use builtins.object as the base
