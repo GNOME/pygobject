@@ -90,4 +90,26 @@ typedef struct {
 _GI_TEST_EXTERN
 GType regress_test_action_get_type (void);
 
+
+/**
+ * RegressBitmask:
+ *
+ * A fundamental type that describes a 64-bit bitmask.
+ *
+ * This type resembles GStreamer's Bitmask type.
+ */
+
+/**
+ * REGRESS_TYPE_BITMASK:
+ *
+ * a #GValue type that represents a 64-bit bitmask.
+ *
+ * Returns: the #GType of RegressBitmask (which is not explicitly typed)
+ */
+
+#define REGRESS_TYPE_BITMASK                 (regress_bitmask_get_type())
+
+_GI_TEST_EXTERN
+GType regress_bitmask_get_type (void);
+
 #endif /* REGRESS_EXTRA_H */

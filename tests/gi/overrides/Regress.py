@@ -18,9 +18,30 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
 # USA
 
-from ..importer import modules
+from ..importer import get_introspection_module
+from ..overrides import override
 
-Regress = modules['Regress']._introspection_module
+Regress = get_introspection_module('Regress')
 
 REGRESS_OVERRIDE = 42
-__all__ = ['REGRESS_OVERRIDE']
+
+
+class Bitmask(Regress.Bitmask):
+    """Replicate override of Bitmask (uint64), similar to GStreamer."""
+
+    def __init__(self, v):
+        if not isinstance(v, int):
+            raise TypeError("%s is not an int." % (type(v)))
+
+        self.v = int(v)
+
+    def __str__(self):
+        return hex(self.v)
+
+    def __eq__(self, other):
+        return self.v == other
+
+
+Bitmask = override(Bitmask)
+
+__all__ = ['REGRESS_OVERRIDE', "Bitmask"]
