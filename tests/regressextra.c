@@ -485,3 +485,69 @@ static void regress_test_action_class_init (RegressTestActionClass *klass)
         G_CALLBACK (regress_test_action_do_action2), NULL, NULL,
         NULL, regress_test_action_get_type (), 0);
 }
+
+/*
+ * RegressBitmask
+ *
+ * Mimic a primitive, fundamental type.
+ */
+
+static void
+regress_value_init_bitmask (GValue * value)
+{
+  value->data[0].v_uint64 = 0;
+}
+
+static void
+regress_value_copy_bitmask (const GValue * src_value, GValue * dest_value)
+{
+  dest_value->data[0].v_uint64 = src_value->data[0].v_uint64;
+}
+
+static void
+_value_transform_uint64_bitmask (const GValue * src_value, GValue * dest_value)
+{
+    dest_value->data[0].v_uint64 = src_value->data[0].v_uint64;
+}
+
+static void
+_value_transform_bitmask_uint64 (const GValue * src_value, GValue * dest_value)
+{
+    dest_value->data[0].v_uint64 = src_value->data[0].v_uint64;
+}
+
+static const GTypeValueTable _regress_bitmask_value_table = {
+    regress_value_init_bitmask,
+    NULL,
+    regress_value_copy_bitmask,
+    NULL,
+    (char *) NULL,
+    NULL,
+    (char *) NULL,
+    NULL
+};
+
+GType
+regress_bitmask_get_type (void)
+{
+  static GType regress_bitmask_type = 0;
+
+  if (g_once_init_enter (&regress_bitmask_type)) {
+    GTypeInfo _info = { 0, NULL, NULL, NULL, NULL, NULL, 0, 0, NULL, &_regress_bitmask_value_table };
+    GTypeFundamentalInfo _finfo = { 0 };
+    GType _type = g_type_register_fundamental (
+        g_type_fundamental_next (),
+        "RegressBitmask", &_info, &_finfo, 0);
+
+    g_once_init_leave(&regress_bitmask_type, _type);
+
+    g_value_register_transform_func (
+      REGRESS_TYPE_BITMASK, G_TYPE_UINT64,
+      _value_transform_bitmask_uint64);
+    g_value_register_transform_func (
+      G_TYPE_UINT64, REGRESS_TYPE_BITMASK,
+      _value_transform_uint64_bitmask);
+  }
+
+  return regress_bitmask_type;
+}
