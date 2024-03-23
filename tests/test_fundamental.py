@@ -130,6 +130,12 @@ def test_multiple_objects():
     assert obj1 != obj2
 
 
+def test_fundamental_primitive_object():
+    bitmask = Regress.Bitmask(2)
+
+    assert bitmask.v == 2
+
+
 def test_custom_fundamental_type_vfunc_override(capsys):
     obj = MyCustomFundamentalObject()
     del obj
