@@ -194,10 +194,10 @@ if not for_wheel
 
   pkginfo_conf = configuration_data()
   pkginfo_conf.set('VERSION', py_version)
-  configure_file(input : 'PKG-INFO.in',
-  output : 'PyGObject-@0@.egg-info'.format(py_version),
+  configure_file(input : 'METADATA.in',
+  output : 'METADATA',
   configuration : pkginfo_conf,
-  install_dir : python.get_install_dir(pure : false))
+  install_dir : python.get_install_dir(pure : false) / 'PyGObject-@0@.dist-info'.format(py_version))
 endif
 
 pygobject_dep = declare_dependency(
