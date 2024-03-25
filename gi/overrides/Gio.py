@@ -548,3 +548,21 @@ class ListStore(Gio.ListStore):
 
 ListStore = override(ListStore)
 __all__.append('ListStore')
+
+
+class DataInputStream(Gio.DataInputStream):
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        line = self.read_line_utf8(None)[0]
+
+        if line is not None:
+            return line
+        else:
+            raise StopIteration
+
+
+DataInputStream = override(DataInputStream)
+__all__.append('DataInputStream')
