@@ -1,3 +1,10 @@
+3.48.2 - 2024-04-06
+-------------------
+
+* Fix support for fundamental (primitive) types, such as Gst.Bitmask
+  :issue:`624` :mr:`304`
+
+
 3.48.1 - 2024-03-10
 -------------------
 
