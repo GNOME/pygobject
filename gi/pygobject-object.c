@@ -1595,7 +1595,7 @@ pygbinding_closure_new (PyObject *callback, PyObject *extra_args)
 }
 
 static PyObject *
-pygobject_bind_property(PyGObject *self, PyObject *args)
+pygobject_bind_property(PyGObject *self, PyObject *args, PyObject *kwargs)
 {
 	gchar *source_name, *target_name;
 	gchar *source_canon, *target_canon;
@@ -1608,9 +1608,20 @@ pygobject_bind_property(PyGObject *self, PyObject *args)
 	transform_from = NULL;
 	transform_to = NULL;
 
-	if (!PyArg_ParseTuple(args, "sOs|iOOO:GObject.bind_property",
-			      &source_name, &target, &target_name, &flags,
-			      &transform_to, &transform_from, &user_data))
+	static char *kwlist[] = {
+		"source_property",
+		"target",
+		"target_property",
+		"flags",
+		"transform_to",
+		"transform_from",
+		"user_data",
+		NULL
+	};
+
+	if (!PyArg_ParseTupleAndKeywords(args, kwargs, "sOs|iOOO:GObject.bind_property", kwlist, 
+					 &source_name, &target, &target_name, &flags,
+					 &transform_to, &transform_from, &user_data)) 
 		return NULL;
 
 	CHECK_GOBJECT(self);
