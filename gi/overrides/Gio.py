@@ -594,3 +594,18 @@ class DataInputStream(Gio.DataInputStream):
 
 DataInputStream = override(DataInputStream)
 __all__.append('DataInputStream')
+
+
+class File(Gio.File):
+
+    def __fspath__(self):
+        path = self.peek_path()
+        # A file isn't guaranteed to have a path associated and returning
+        # `None` here will result in a `TypeError` trying to subscribe to it.
+        if path is None or path == '':
+            raise TypeError('File has no associated path.')
+        return path
+
+
+File = override(File)
+__all__.append('File')
