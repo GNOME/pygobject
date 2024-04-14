@@ -107,7 +107,7 @@ def _check_enabled(name, version=None):
 
 
 def enable():
-    warnings.warn("pygtkcompat is deprecated, see https://gnome.pages.gitlab.gnome.org/pygobject for migration instructions", gi.PyGIDeprecationWarning)
+    warnings.warn("pygtkcompat is deprecated, see https://pygobject.gnome.org for migration instructions", gi.PyGIDeprecationWarning)
 
     if _check_enabled(""):
         return

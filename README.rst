@@ -19,4 +19,4 @@ It supports Linux, Windows and macOS and works with **Python 3.9+** and
 
 ----
 
-For more information visit https://gnome.pages.gitlab.gnome.org/pygobject
+For more information visit https://pygobject.gnome.org

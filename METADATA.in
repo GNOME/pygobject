@@ -2,7 +2,7 @@ Metadata-Version: 1.2
 Name: PyGObject
 Version: @VERSION@
 Summary: Python bindings for GObject Introspection
-Home-page: https://gnome.pages.gitlab.gnome.org/pygobject
+Home-page: https://pygobject.gnome.org
 Author: James Henstridge
 Author-email: james@daa.com.au
 Maintainer: Simon Feltman
