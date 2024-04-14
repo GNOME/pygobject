@@ -94,7 +94,7 @@ class Option(optparse.Option):
 
     def __init__(self, *args, **kwargs):
         warnings.warn(
-            "gi.repository.GLib.option.Option is depecated, use gi.repository.GLib.OptionEntry instead",
+            "gi.repository.GLib.option.Option is deprecated, use gi.repository.GLib.OptionEntry instead",
             PyGIDeprecationWarning
         )
         optparse.Option.__init__(self, *args, **kwargs)
@@ -175,7 +175,7 @@ class OptionGroup(optparse.OptionGroup):
                  option_list=None, defaults=None,
                  translation_domain=None):
         warnings.warn(
-            "gi.repository.GLib.option.OptionGroup is depecated, use gi.repository.GLib.OptionContext instead",
+            "gi.repository.GLib.option.OptionGroup is deprecated, use gi.repository.GLib.OptionContext instead",
             PyGIDeprecationWarning
         )
         optparse.OptionContainer.__init__(self, Option, 'error', description)
@@ -270,7 +270,7 @@ class OptionParser(optparse.OptionParser):
 
     def __init__(self, *args, **kwargs):
         warnings.warn(
-            "gi.repository.GLib.option.OptionParser is depecated, use gi.repository.GLib.OptionContext instead",
+            "gi.repository.GLib.option.OptionParser is deprecated, use gi.repository.GLib.OptionContext instead",
             PyGIDeprecationWarning
         )
         if 'option_class' not in kwargs:

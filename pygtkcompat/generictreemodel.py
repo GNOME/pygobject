@@ -113,7 +113,7 @@ class GenericTreeModel(GObject.GObject, Gtk.TreeModel):
         super(GenericTreeModel, self).__init__()
         self.stamp = 0
 
-        #: Dictionary of (id(user_data): user_data), used when leak-refernces=False
+        #: Dictionary of (id(user_data): user_data), used when leak-references=False
         self._held_refs = dict()
 
         # Set initial stamp
