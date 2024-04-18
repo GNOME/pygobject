@@ -46,7 +46,9 @@ and their dependencies. Follow the instructions for your platform below.
 After running the example application have a look at the `PyGObject Guide
 <https://rafaelmardojai.pages.gitlab.gnome.org/pygobject-guide>`__ for tutorials on how to create GTK apps and the `GNOME Python API docs
 <https://amolenaar.pages.gitlab.gnome.org/pygobject-docs>`__ for API documentation for all supported
-libraries. There are also typing stubs available here `PyGObject-stubs <https://pypi.org/project/PyGObject-stubs/>`_.
+libraries. 
+
+For full IDE support (incl. autocomplete) you will also need typing stubs available here `PyGObject-stubs <https://pypi.org/project/PyGObject-stubs/>`_.
 
 .. _windows-getting-started:
 
