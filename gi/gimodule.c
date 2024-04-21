@@ -2035,7 +2035,7 @@ out:
  * A function that can be used as a GDestroyNotify callback that will
  * call Py_DECREF on the data.
  */
-static void
+void
 pyg_destroy_notify(gpointer user_data)
 {
     PyObject *obj = (PyObject *)user_data;

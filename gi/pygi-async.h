@@ -43,6 +43,7 @@ typedef struct {
 
     gboolean log_tb;
 
+    GMainContext *ctx;
     GArray *callbacks;
 } PyGIAsync;
 

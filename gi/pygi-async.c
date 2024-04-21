@@ -20,6 +20,7 @@
 #include <Python.h>
 #include <structmember.h>
 #include <glib.h>
+#include "gimodule.h"
 #include "pygobject-object.h"
 #include "pygboxed.h"
 #include "pygi-async.h"
@@ -117,27 +118,75 @@ async_exception(PyGIAsync *self) {
     return res;
 }
 
-static PyObject*
-call_soon (PyGIAsync *self, PyGIAsyncCallback *cb)
+static void
+call_cb (PyGIAsync *self, PyGIAsyncCallback *cb)
 {
-    PyObject *call_soon;
-    PyObject *args, *kwargs = NULL;
-    PyObject *ret;
+    PyObject *func;
+    PyObject *args;
+    PyObject *res;
 
-    call_soon = PyObject_GetAttrString(self->loop, "call_soon");
-    if (!call_soon)
-        return NULL;
+    if (cb->context) {
+        func = PyObject_GetAttrString (cb->context, "run");
+        args = Py_BuildValue ("(OO)", cb->func, self);
+    } else {
+        func = cb->func;
+        Py_INCREF(func);
+        args = Py_BuildValue ("(O)", self);
+    }
 
-    args = Py_BuildValue ("(OO)", cb->func, self);
-    kwargs = PyDict_New ();
-    PyDict_SetItemString (kwargs, "context", cb->context);
-    ret = PyObject_Call (call_soon, args, kwargs);
+    res = PyObject_Call (func, args, NULL);
 
     Py_CLEAR (args);
-    Py_CLEAR (kwargs);
-    Py_CLEAR (call_soon);
+    Py_CLEAR (func);
 
-    return ret;
+    if (!res) {
+        /* Should we clear the error here? */
+        PyErr_Print();
+        PyErr_Clear();
+    } else {
+        Py_DECREF(res);
+    }
+}
+
+static void
+call_callbacks (PyGIAsync *self)
+{
+    GArray *callbacks = self->callbacks;
+    guint i;
+
+    if (callbacks == NULL)
+        return;
+
+    /*
+     * A new callback might be added from a callback
+     * (which will only be called in the next main context iteration)
+     */
+    self->callbacks = NULL;
+
+    for (i = 0; i < callbacks->len; i++) {
+        PyGIAsyncCallback *cb = &g_array_index (callbacks, PyGIAsyncCallback, i);
+        call_cb (self, cb);
+
+        Py_DECREF(cb->func);
+        Py_DECREF(cb->context);
+    }
+
+    g_array_free(callbacks, TRUE);
+}
+
+static gboolean
+idle_call_done_callbacks (void *data)
+{
+    PyGILState_STATE py_state;
+    PyGIAsync *self = data;
+
+    py_state = PyGILState_Ensure ();
+
+    call_callbacks (self);
+
+    PyGILState_Release (py_state);
+
+    return G_SOURCE_REMOVE;
 }
 
 static PyObject*
@@ -161,18 +210,16 @@ async_add_done_callback (PyGIAsync *self, PyObject *args, PyObject *kwargs)
     else
         Py_INCREF(callback.context);
 
-    /* Note that we don't need to copy the current context in this case. */
-    if (self->result || self->exception) {
-        PyObject *res = call_soon (self, &callback);
+    /* If callbacks is NULL then we need a (new) idle handler to process them. */
+    if (!self->callbacks && (self->result || self->exception)) {
+        GSource *idle_source;
 
-        Py_DECREF(callback.func);
-        Py_DECREF(callback.context);
-        if (res) {
-            Py_DECREF(res);
-            Py_RETURN_NONE;
-        } else {
-            return NULL;
-        }
+        Py_INCREF(self);
+
+        idle_source = g_idle_source_new ();
+        g_source_set_name (idle_source, "gi.Async idle");
+        g_source_attach (idle_source, self->ctx);
+        g_source_set_callback(idle_source, idle_call_done_callbacks, self, pyg_destroy_notify);
     }
 
     if (!self->callbacks)
@@ -210,14 +257,12 @@ static int
 async_init(PyGIAsync *self, PyObject *args, PyObject *kwargs)
 {
     static char *kwlist[] = { "finish_func", "cancellable", NULL };
-    PyObject *context = NULL;
-    GMainContext *ctx = NULL;
-    int ret = -1;
+    static gboolean warned_loop_wrong_context = FALSE;
 
     if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O!|O!$:gi._gi.Async.__init__", kwlist,
                                      &PyGICallableInfo_Type, &self->finish_func,
                                      &PyGObject_Type, &self->cancellable))
-        goto out;
+        return -1;
 
     Py_INCREF(self->finish_func);
 
@@ -229,13 +274,13 @@ async_init(PyGIAsync *self, PyObject *args, PyObject *kwargs)
 
         gio = PyImport_ImportModule("gi.repository.Gio");
         if (gio == NULL)
-            goto out;
+            return -1;
 
         cancellable_info = PyObject_GetAttrString(gio, "Cancellable");
         Py_DECREF(gio);
 
         if (!cancellable_info)
-            goto out;
+            return -1;
     }
 
     if (self->cancellable) {
@@ -245,51 +290,79 @@ async_init(PyGIAsync *self, PyObject *args, PyObject *kwargs)
 
         res = PyObject_IsInstance (self->cancellable, cancellable_info);
         if (res == -1)
-            goto out;
+            return -1;
 
         if (res == 0) {
             PyErr_SetString (PyExc_TypeError, "cancellable argument needs to be of type Gio.Cancellable");
-            goto out;
+            return -1;
         }
     } else {
         self->cancellable = PyObject_CallObject (cancellable_info, NULL);
     }
 
-    self->loop = PyObject_CallObject (asyncio_get_running_loop, NULL);
-    if (!self->loop)
-        goto out;
-
     /* We use g_main_context_ref_thread_default() here, as that is what GTask
-     * does. We then only allow creating an awaitable if python has a *running*
-     * EventLoop iterating this context (i.e. has it as its `_context` attr).
+     * does. We then only allow creating an awaitable if either there is no
+     * python EventLoop, or, if there is, it has to be running and iterating
+     * the same context.
+     *
+     * The point of not requiring a mainloop is to allow custom mini-mainloops
+     * that are not real python EventLoop implementations.
      *
      * NOTE: This is a bit backward. Instead, it would make more sense to just
      * fetch the current EventLoop object for the ref'ed GMainContext.
      * Python will then do the rest and ensure it is not awaited from the wrong
      * EventLoop.
      */
-    ctx = g_main_context_ref_thread_default ();
-    assert(ctx != NULL);
+    self->ctx = g_main_context_ref_thread_default ();
+    if (!self->ctx)
+        return -1;
 
-    /* Duck-type the running loop. It needs to have a _context attribute. */
-    context = PyObject_GetAttrString (self->loop, "_context");
-    if (context == NULL)
-        goto out;
+    /* asyncio.get_running_loop raising an exception is bad, just error out */
+    self->loop = PyObject_CallObject (asyncio_get_running_loop, NULL);
+    if (!self->loop)
+        return -1;
 
-    if (!pyg_boxed_check (context, G_TYPE_MAIN_CONTEXT) ||
-        pyg_boxed_get_ptr (context) != ctx) {
-        PyErr_SetString (PyExc_TypeError, "Running EventLoop is iterating a different GMainContext");
-        goto out;
+    if (self->loop && Py_IsNone(self->loop))
+        Py_CLEAR(self->loop);
+
+    if (self->loop) {
+        PyObject *context = NULL;
+
+        /* Duck-type the running loop. It should have a _context attribute. */
+        context = PyObject_GetAttrString (self->loop, "_context");
+        if (context == NULL) {
+            Py_XDECREF (self->loop);
+            self->loop = NULL;
+
+            return -1;
+        }
+
+        /*
+         * Pointing to the same main context
+         *
+         * One *could* possibly define a good behaviour here. However, if the
+         * loop does not match the current main context, then we always need to
+         * call the completion callback from an idle handler.
+         */
+        if (!pyg_boxed_check (context, G_TYPE_MAIN_CONTEXT) ||
+            pyg_boxed_get_ptr (context) != self->ctx) {
+
+            Py_XDECREF (context);
+            Py_XDECREF (self->loop);
+            self->loop = NULL;
+
+            if (!warned_loop_wrong_context) {
+                warned_loop_wrong_context = TRUE;
+                PyErr_SetString (PyExc_AssertionError,
+                                 "Currently running EventLoop is iterating a different GMainContext. This should probably not happen.");
+            }
+            return -1;
+        }
+
+        Py_XDECREF (context);
     }
 
-    /* Success! */
-    ret = 0;
-
-out:
-    g_main_context_unref (ctx);
-    Py_XDECREF (context);
-
-    return ret;
+    return 0;
 }
 
 static PyMethodDef async_methods[] = {
@@ -334,8 +407,8 @@ async_iternext (PyGIAsync *self) {
         if (e == NULL)
             return NULL;
 
-        PyErr_SetObject(PyExc_StopIteration, e);
-        Py_DECREF(e);
+        PyErr_SetObject (PyExc_StopIteration, e);
+        Py_DECREF (e);
         return NULL;
     }
 }
@@ -369,6 +442,22 @@ async_finalize(PyGIAsync *self)
         if (!message)
             goto finally;
 
+        /*
+         * If we do not have an EventLoop, then we cannot report it properly.
+         * So, nest it inside an AssertionError and report it to sys.excepthook.
+         */
+        if (!self->loop) {
+            PyObject *wrapper;
+
+            wrapper = PyObject_CallFunctionObjArgs(PyExc_AssertionError, message, NULL);
+            PyException_SetCause(wrapper, Py_NewRef(self->exception));
+
+            PyErr_Restore(Py_NewRef(PyExc_AssertionError), wrapper, NULL);
+            PyErr_PrintEx(0);
+
+            goto finally;
+        }
+
         if (PyDict_SetItemString(context, "message", message) < 0 ||
             PyDict_SetItemString(context, "exception", self->exception) < 0 ||
             PyDict_SetItemString(context, "future", (PyObject*) self) < 0)
@@ -401,7 +490,9 @@ finally:
     if (self->exception)
         Py_CLEAR(self->exception);
 
-    /* Precation, cannot happen */
+    g_main_context_unref (self->ctx);
+
+    /* Precaution, cannot happen */
     if (self->callbacks)
         g_array_free (self->callbacks, TRUE);
 }
@@ -424,10 +515,7 @@ pygi_async_finish_cb (GObject *source_object, gpointer res, PyGIAsync *self)
     PyGILState_STATE py_state;
     PyObject *source_pyobj, *res_pyobj, *args;
     PyObject *ret;
-    guint i;
 
-    /* Lock the GIL as we are coming into this code without the lock and we
-      may be executing python code */
     py_state = PyGILState_Ensure ();
 
     /* We might still be called at shutdown time. */
@@ -466,28 +554,15 @@ pygi_async_finish_cb (GObject *source_object, gpointer res, PyGIAsync *self)
         self->result = ret;
     }
 
-    for (i = 0; self->callbacks && i < self->callbacks->len; i++) {
-        PyGIAsyncCallback *cb = &g_array_index (self->callbacks, PyGIAsyncCallback, i);
-        /* We stop calling anything after the first exception, but still clear
-         * the internal state as if we did.
-         * This matches the pure python implementation of Future.
-         */
-        if (!PyErr_Occurred ()) {
-            ret = call_soon (self, cb);
-            if (!ret)
-                PyErr_PrintEx (FALSE);
-            else
-                Py_DECREF(ret);
-        }
+    /*
+     * NOTE: This assumes that the async API is well-behaved.
+     * Any GTask using API will be, but theoretically there may be API that
+     * does not guarante that we are called in a later iteration of the main
+     * context we were stared from.
+     */
+    call_callbacks (self);
 
-        Py_DECREF(cb->func);
-        Py_DECREF(cb->context);
-    }
-    if (self->callbacks)
-        g_array_free(self->callbacks, TRUE);
-    self->callbacks = NULL;
-
-    Py_DECREF(self);
+    Py_DECREF (self);
     PyGILState_Release (py_state);
 }
 
@@ -518,13 +593,13 @@ pygi_async_new(PyObject *finish_func, PyObject *cancellable) {
             Py_DECREF (args);
             Py_DECREF (res);
 
-            /* Ignore exception from object initializer */
-            PyErr_Clear ();
+            /* Dump error from initializer */
+            PyErr_Print ();
 
             return NULL;
         }
 
-        Py_DECREF(args);
+        Py_DECREF (args);
     }
 
     return res;
