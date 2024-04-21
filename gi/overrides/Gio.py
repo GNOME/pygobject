@@ -41,6 +41,14 @@ class Application(Gio.Application):
             with get_event_loop(GLib.MainContext.default()).running(self.quit):
                 return Gio.Application.run(self, *args, **kwargs)
 
+    def __enter__(self):
+        self.hold()
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.release()
+
+        return False
+
 
 Application = override(Application)
 __all__.append('Application')

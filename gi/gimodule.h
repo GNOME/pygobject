@@ -14,4 +14,6 @@ pygobject_object_new_with_properties(GType object_type,
                                      const char *names[],
                                      const GValue values[]);
 
+void pyg_destroy_notify(gpointer user_data);
+
 #endif /*_PYGOBJECT_GIMODULE_H_*/

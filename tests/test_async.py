@@ -1,6 +1,7 @@
 # -*- Mode: Python; py-indent-offset: 4 -*-
 # vim: tabstop=4 shiftwidth=4 expandtab
 
+import sys
 import pytest
 import platform
 import unittest
@@ -114,7 +115,7 @@ class TestAsync(unittest.TestCase):
         self.loop.run_until_complete(run())
 
     def test_async_completed_add_cb(self):
-        """Adding a done cb to a completed future queues it with call_soon"""
+        """Adding a done cb to a completed future queues it on the main context"""
 
         f = Gio.file_new_for_path("./")
 
@@ -174,14 +175,27 @@ class TestAsync(unittest.TestCase):
         self.assertRegex(msg, ".*exception was never retrieved")
         self.assertIsInstance(exc, GLib.GError)
 
-    def test_no_running_loop(self):
+    def test_no_main_loop(self):
         f = Gio.file_new_for_path("./")
 
         res = f.enumerate_children_async("standard::*", 0, GLib.PRIORITY_DEFAULT)
-        self.assertIsNone(res)
+        self.assertIsNone(res._loop)
 
-    def test_wrong_default_context(self):
+    def test_mainloop_nested_context(self):
         f = Gio.file_new_for_path("./")
+
+        def ignore_except_hook(type_, value, tback):
+            nonlocal orig_hook
+
+            if type_ == AssertionError and \
+               value.value == 'Currently running EventLoop is iterating a different GMainContext. This should probably not happen.':
+                return
+
+            orig_hook(type_, value, tback)
+
+        # don't bother with unsetting, we have a wrapper that will do so anyway
+        orig_hook = sys.excepthook
+        sys.excepthook = ignore_except_hook
 
         async def run():
             nonlocal self
@@ -194,3 +208,23 @@ class TestAsync(unittest.TestCase):
             self.assertIsNone(res)
 
         self.loop.run_until_complete(run())
+
+    def test_no_mainloop_nested_context(self):
+        f = Gio.file_new_for_path("./")
+
+        ctx = GLib.MainContext.new()
+        GLib.MainContext.push_thread_default(ctx)
+        self.addCleanup(GLib.MainContext.pop_thread_default, ctx)
+
+        res = f.enumerate_children_async("standard::*", 0, GLib.PRIORITY_DEFAULT)
+        self.assertIsNone(res._loop)
+
+        def done_cb(self):
+            nonlocal done
+            done = True
+
+        res.add_done_callback(done_cb)
+
+        done = False
+        while not done:
+            ctx.iteration(True)
