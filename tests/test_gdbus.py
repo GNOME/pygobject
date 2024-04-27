@@ -253,3 +253,79 @@ class TestGDBusClient(unittest.TestCase):
                 Gio.DBusProxy.__init__(self)
 
         SomeProxy()
+
+
+class TestDBusConnection:
+
+    @unittest.skipUnless(has_dbus, "no dbus running")
+    def test_connection_invocation_ref_count(self):
+        """Invocation object should not leak a reference."""
+        invocation, errors = self.run_server(self.client_call)
+
+        assert not errors
+        assert invocation
+        assert invocation.ref_count == 1
+
+    def run_server(self, client_callback):
+        self.invocation = None
+        self.errors = []
+        self.loop = GLib.MainLoop()
+
+        def on_name_acquired(bus, name):
+            client_callback(bus)
+
+        self.reg_id = None
+        bus = Gio.bus_get_sync(Gio.BusType.SESSION)
+        owner_id = Gio.bus_own_name(Gio.BusType.SESSION,
+                                    "org.pygobject.Test",
+                                    Gio.BusNameOwnerFlags.NONE,
+                                    self.on_bus_acquired,
+                                    on_name_acquired,
+                                    self.on_name_lost)
+        try:
+            self.loop.run()
+        finally:
+            Gio.bus_unown_name(owner_id)
+            if self.reg_id:
+                bus.unregister_object(self.reg_id)
+
+        return (self.invocation, self.errors)
+
+    def on_name_lost(self, _bus, name):
+        self.errors.append(f"Name {name} lost")
+        self.loop.quit()
+
+    def on_bus_acquired(self, bus, name):
+        interface_xml = """
+            <node>
+                <interface name='org.pygobject.Test'>
+                    <method name='test' />
+                </interface>
+            </node>"""
+        self.reg_id = bus.register_object("/pygobject/Test",
+                                          Gio.DBusNodeInfo.new_for_xml(interface_xml).interfaces[0],
+                                          self.on_incoming_method_call,
+                                          None,
+                                          None)
+
+    def on_incoming_method_call(self, bus, sender, object_path, interface_name, method_name, parameters, invocation):
+        invocation.return_value(GLib.Variant("()", ()))
+        self.invocation = invocation
+
+    def client_call(self, bus):
+
+        def call_done(obj, result):
+            try:
+                obj.call_finish(result)
+            finally:
+                self.loop.quit()
+
+        bus.call("org.pygobject.Test",
+                 "/pygobject/Test",
+                 "org.pygobject.Test",
+                 "test",
+                 parameters=None,
+                 reply_type=None,
+                 flags=Gio.DBusCallFlags.NONE,
+                 timeout_msec=5000,
+                 callback=call_done)
