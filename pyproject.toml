@@ -6,8 +6,10 @@ authors = [
     { name="James Henstridge", email="james@daa.com.au" }
 ]
 maintainers = [
-    { name="Simon Feltman", email="sfeltman@src.gnome.org" },
-    { name="Christoph Reiter" },
+    { name="Christoph Reiter", email="creiter@src.gnome.org" },
+    { name="Arjan Molenaar", email="amolenaar@gnome.org" },
+    { name="Dan Yeaw", email="danyeaw@gnome.org" },
+    { name="Ignacio Casal Quinteiro", email="icq@gnome.org" },
 ]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
