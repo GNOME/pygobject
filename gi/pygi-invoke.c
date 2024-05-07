@@ -320,7 +320,7 @@ _caller_alloc (PyGIArgCache *arg_cache, GIArgument *arg)
                                                            GI_TRANSFER_EVERYTHING,
                                                            arg);
         } else {
-                gssize size = g_struct_info_get_size(
+                gssize size = gi_struct_info_get_size(
                     (GIStructInfo *)iface_cache->interface_info);
                 arg->v_pointer = g_malloc0 (size);
         }
@@ -747,7 +747,7 @@ err:
 }
 
 PyObject *
-pygi_callable_info_invoke (PyGICallableInfo *self,
+pygi_callable_info_invoke (GIBaseInfo *self,
                            PyObject *const *py_args, size_t py_nargsf,
                            PyObject *py_kwnames)
 {
@@ -756,10 +756,10 @@ pygi_callable_info_invoke (PyGICallableInfo *self,
         GIBaseInfo *info = self->base.info;
         GIInfoType type = g_base_info_get_type (info);
 
-        if (type == GI_INFO_TYPE_FUNCTION) {
+        if (GI_IS_FUNCTION_INFO (self->info)) {
             GIFunctionInfoFlags flags;
 
-            flags = g_function_info_get_flags ((GIFunctionInfo *)info);
+            flags = gi_function_info_get_flags ((GIFunctionInfo *)info);
 
             if (flags & GI_FUNCTION_IS_CONSTRUCTOR) {
                 function_cache = pygi_constructor_cache_new (info);
@@ -768,9 +768,9 @@ pygi_callable_info_invoke (PyGICallableInfo *self,
             } else {
                 function_cache = pygi_function_cache_new (info);
             }
-        } else if (type == GI_INFO_TYPE_VFUNC) {
+        } else if (GI_IS_VFUNC_INFO (info)) {
             function_cache = pygi_vfunc_cache_new (info);
-        } else if (type == GI_INFO_TYPE_CALLBACK) {
+        } else if (GI_IS_CALLBACK_INFO (info)) {
             g_error ("Cannot invoke callback types");
         } else {
             function_cache = pygi_method_cache_new (info);

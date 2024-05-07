@@ -22,7 +22,7 @@
 
 #include <Python.h>
 
-#include <girepository.h>
+#include <girepository/girepository.h>
 
 #include "pygi-info.h"
 #include "pygi-invoke-state-struct.h"
@@ -33,7 +33,7 @@ PyObject *pygi_invoke_c_callable    (PyGIFunctionCache *function_cache,
                                      PyGIInvokeState *state,
                                      PyObject *const *py_args, size_t py_nargsf,
                                      PyObject *py_kwnames);
-PyObject *pygi_callable_info_invoke (PyGICallableInfo *self,
+PyObject *pygi_callable_info_invoke (GIBaseInfo *self,
                                      PyObject *const *py_args, size_t py_nargsf,
                                      PyObject *kwnames);
 

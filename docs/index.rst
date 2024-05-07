@@ -78,7 +78,7 @@ How does it work?
 
 PyGObject uses `GLib <https://docs.gtk.org/glib/>`__, `GObject
 <https://docs.gtk.org/gobject/>`__, `GIRepository
-<https://gnome.pages.gitlab.gnome.org/gobject-introspection/girepository/GIRepository.html>`__, `libffi
+<https://docs.gtk.org/girepository/>`__, `libffi
 <https://sourceware.org/libffi/>`__ and other libraries to access the C
 library (libgtk-4.so) in combination with the additional metadata from the
 accompanying typelib file (Gtk-4.0.typelib) and dynamically provides a Python

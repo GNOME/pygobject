@@ -29,13 +29,13 @@ PyObject *PyGIRepositoryError;
 PYGI_DEFINE_TYPE("gi.Repository", PyGIRepository_Type, PyGIRepository);
 
 static PyObject *
-_wrap_g_irepository_enumerate_versions (PyGIRepository *self,
+_wrap_gi_repository_enumerate_versions (PyGIRepository *self,
                                         PyObject       *args,
                                         PyObject       *kwargs)
 {
     static char *kwlist[] = { "namespace", NULL };
     const char *namespace_;
-    GList *versions, *item;
+    char **versions = NULL;
     PyObject *ret = NULL;
 
     if (!PyArg_ParseTupleAndKeywords (args, kwargs, "s:Repository.enumerate_versions",
@@ -43,40 +43,22 @@ _wrap_g_irepository_enumerate_versions (PyGIRepository *self,
         return NULL;
     }
 
-    versions = g_irepository_enumerate_versions (self->repository, namespace_);
+    versions = gi_repository_enumerate_versions (self->repository, namespace_, NULL);
     ret = PyList_New(0);
-    for (item = versions; item; item = item->next) {
-        char *version = item->data;
+    for (size_t i = 0; versions[i] != NULL; i++) {
+        char *version = g_steal_pointer (&versions[i]);
         PyObject *py_version = pygi_utf8_to_py (version);
         PyList_Append(ret, py_version);
         Py_DECREF(py_version);
         g_free (version);
     }
-    g_list_free(versions);
+    g_free(versions);
 
     return ret;
 }
 
 static PyObject *
-_wrap_g_irepository_get_default (PyObject *self)
-{
-    static PyGIRepository *repository = NULL;
-
-    if (!repository) {
-        repository = (PyGIRepository *) PyObject_New (PyGIRepository, &PyGIRepository_Type);
-        if (repository == NULL) {
-            return NULL;
-        }
-
-        repository->repository = g_irepository_get_default();
-    }
-
-    Py_INCREF ( (PyObject *) repository);
-    return (PyObject *) repository;
-}
-
-static PyObject *
-_wrap_g_irepository_require (PyGIRepository *self,
+_wrap_gi_repository_require (PyGIRepository *self,
                              PyObject       *args,
                              PyObject       *kwargs)
 {
@@ -94,11 +76,11 @@ _wrap_g_irepository_require (PyGIRepository *self,
     }
 
     if (lazy != NULL && PyObject_IsTrue (lazy)) {
-        flags |= G_IREPOSITORY_LOAD_FLAG_LAZY;
+        flags |= GI_REPOSITORY_LOAD_FLAG_LAZY;
     }
 
     error = NULL;
-    g_irepository_require (self->repository, namespace_, version, flags, &error);
+    gi_repository_require (self->repository, namespace_, version, flags, &error);
     if (error != NULL) {
         PyErr_SetString (PyGIRepositoryError, error->message);
         g_error_free (error);
@@ -109,7 +91,7 @@ _wrap_g_irepository_require (PyGIRepository *self,
 }
 
 static PyObject *
-_wrap_g_irepository_is_registered (PyGIRepository *self,
+_wrap_gi_repository_is_registered (PyGIRepository *self,
                                    PyObject       *args,
                                    PyObject       *kwargs)
 {
@@ -122,12 +104,12 @@ _wrap_g_irepository_is_registered (PyGIRepository *self,
         return NULL;
     }
 
-    return pygi_gboolean_to_py (g_irepository_is_registered (self->repository,
+    return pygi_gboolean_to_py (gi_repository_is_registered (self->repository,
                                                              namespace_, version));
 }
 
 static PyObject *
-_wrap_g_irepository_find_by_name (PyGIRepository *self,
+_wrap_gi_repository_find_by_name (PyGIRepository *self,
                                   PyObject       *args,
                                   PyObject       *kwargs)
 {
@@ -157,7 +139,7 @@ _wrap_g_irepository_find_by_name (PyGIRepository *self,
         }
     }
 
-    info = g_irepository_find_by_name (self->repository, namespace_, name);
+    info = gi_repository_find_by_name (self->repository, namespace_, name);
     g_free (trimmed_name);
 
     if (info == NULL) {
@@ -166,13 +148,13 @@ _wrap_g_irepository_find_by_name (PyGIRepository *self,
 
     py_info = _pygi_info_new (info);
 
-    g_base_info_unref (info);
+    gi_base_info_unref (info);
 
     return py_info;
 }
 
 static PyObject *
-_wrap_g_irepository_get_infos (PyGIRepository *self,
+_wrap_gi_repository_get_infos (PyGIRepository *self,
                                PyObject       *args,
                                PyObject       *kwargs)
 {
@@ -188,7 +170,7 @@ _wrap_g_irepository_get_infos (PyGIRepository *self,
         return NULL;
     }
 
-    n_infos = g_irepository_get_n_infos (self->repository, namespace_);
+    n_infos = gi_repository_get_n_infos (self->repository, namespace_);
     if (n_infos < 0) {
         PyErr_Format (PyExc_RuntimeError, "Namespace '%s' not loaded", namespace_);
         return NULL;
@@ -200,12 +182,12 @@ _wrap_g_irepository_get_infos (PyGIRepository *self,
         GIBaseInfo *info;
         PyObject *py_info;
 
-        info = g_irepository_get_info (self->repository, namespace_, i);
+        info = gi_repository_get_info (self->repository, namespace_, i);
         g_assert (info != NULL);
 
         py_info = _pygi_info_new (info);
 
-        g_base_info_unref (info);
+        gi_base_info_unref (info);
 
         if (py_info == NULL) {
             Py_CLEAR (infos);
@@ -219,7 +201,7 @@ _wrap_g_irepository_get_infos (PyGIRepository *self,
 }
 
 static PyObject *
-_wrap_g_irepository_get_typelib_path (PyGIRepository *self,
+_wrap_gi_repository_get_typelib_path (PyGIRepository *self,
                                       PyObject       *args,
                                       PyObject       *kwargs)
 {
@@ -232,7 +214,7 @@ _wrap_g_irepository_get_typelib_path (PyGIRepository *self,
         return NULL;
     }
 
-    typelib_path = g_irepository_get_typelib_path (self->repository, namespace_);
+    typelib_path = gi_repository_get_typelib_path (self->repository, namespace_);
     if (typelib_path == NULL) {
         PyErr_Format (PyExc_RuntimeError, "Namespace '%s' not loaded", namespace_);
         return NULL;
@@ -242,7 +224,7 @@ _wrap_g_irepository_get_typelib_path (PyGIRepository *self,
 }
 
 static PyObject *
-_wrap_g_irepository_get_version (PyGIRepository *self,
+_wrap_gi_repository_get_version (PyGIRepository *self,
                                  PyObject       *args,
                                  PyObject       *kwargs)
 {
@@ -255,7 +237,7 @@ _wrap_g_irepository_get_version (PyGIRepository *self,
         return NULL;
     }
 
-    version = g_irepository_get_version (self->repository, namespace_);
+    version = gi_repository_get_version (self->repository, namespace_);
     if (version == NULL) {
         PyErr_Format (PyExc_RuntimeError, "Namespace '%s' not loaded", namespace_);
         return NULL;
@@ -265,13 +247,13 @@ _wrap_g_irepository_get_version (PyGIRepository *self,
 }
 
 static PyObject *
-_wrap_g_irepository_get_loaded_namespaces (PyGIRepository *self)
+_wrap_gi_repository_get_loaded_namespaces (PyGIRepository *self)
 {
     char **namespaces;
     PyObject *py_namespaces;
     gssize i;
 
-    namespaces = g_irepository_get_loaded_namespaces (self->repository);
+    namespaces = gi_repository_get_loaded_namespaces (self->repository, NULL);
 
     py_namespaces = PyList_New (0);
     for (i = 0; namespaces[i] != NULL; i++) {
@@ -287,7 +269,7 @@ _wrap_g_irepository_get_loaded_namespaces (PyGIRepository *self)
 }
 
 static PyObject *
-_wrap_g_irepository_get_dependencies (PyGIRepository *self,
+_wrap_gi_repository_get_dependencies (PyGIRepository *self,
                                       PyObject       *args,
                                       PyObject       *kwargs)
 {
@@ -304,7 +286,7 @@ _wrap_g_irepository_get_dependencies (PyGIRepository *self,
 
     py_namespaces = PyList_New (0);
     /* Returns NULL in case of no dependencies */
-    namespaces = g_irepository_get_dependencies (self->repository, namespace_);
+    namespaces = gi_repository_get_dependencies (self->repository, namespace_, NULL);
     if (namespaces == NULL) {
         return py_namespaces;
     }
@@ -322,7 +304,7 @@ _wrap_g_irepository_get_dependencies (PyGIRepository *self,
 
 
 static PyObject *
-_wrap_g_irepository_get_immediate_dependencies (PyGIRepository *self,
+_wrap_gi_repository_get_immediate_dependencies (PyGIRepository *self,
                                                 PyObject       *args,
                                                 PyObject       *kwargs)
 {
@@ -339,8 +321,9 @@ _wrap_g_irepository_get_immediate_dependencies (PyGIRepository *self,
     }
 
     py_namespaces = PyList_New (0);
-    namespaces = g_irepository_get_immediate_dependencies (self->repository,
-                                                           namespace_);
+    namespaces = gi_repository_get_immediate_dependencies (self->repository,
+                                                           namespace_,
+                                                           NULL);
 
     for (i = 0; namespaces[i] != NULL; i++) {
         PyObject *py_namespace = pygi_utf8_to_py (namespaces[i]);
@@ -355,17 +338,16 @@ _wrap_g_irepository_get_immediate_dependencies (PyGIRepository *self,
 
 
 static PyMethodDef _PyGIRepository_methods[] = {
-    { "enumerate_versions", (PyCFunction) _wrap_g_irepository_enumerate_versions, METH_VARARGS | METH_KEYWORDS },
-    { "get_default", (PyCFunction) _wrap_g_irepository_get_default, METH_STATIC | METH_NOARGS },
-    { "require", (PyCFunction) _wrap_g_irepository_require, METH_VARARGS | METH_KEYWORDS },
-    { "get_infos", (PyCFunction) _wrap_g_irepository_get_infos, METH_VARARGS | METH_KEYWORDS },
-    { "find_by_name", (PyCFunction) _wrap_g_irepository_find_by_name, METH_VARARGS | METH_KEYWORDS },
-    { "get_typelib_path", (PyCFunction) _wrap_g_irepository_get_typelib_path, METH_VARARGS | METH_KEYWORDS },
-    { "get_version", (PyCFunction) _wrap_g_irepository_get_version, METH_VARARGS | METH_KEYWORDS },
-    { "get_loaded_namespaces", (PyCFunction) _wrap_g_irepository_get_loaded_namespaces, METH_NOARGS },
-    { "get_dependencies", (PyCFunction) _wrap_g_irepository_get_dependencies, METH_VARARGS | METH_KEYWORDS  },
-    { "get_immediate_dependencies", (PyCFunction) _wrap_g_irepository_get_immediate_dependencies, METH_VARARGS | METH_KEYWORDS  },
-    { "is_registered", (PyCFunction) _wrap_g_irepository_is_registered, METH_VARARGS | METH_KEYWORDS  },
+    { "enumerate_versions", (PyCFunction) _wrap_gi_repository_enumerate_versions, METH_VARARGS | METH_KEYWORDS },
+    { "require", (PyCFunction) _wrap_gi_repository_require, METH_VARARGS | METH_KEYWORDS },
+    { "get_infos", (PyCFunction) _wrap_gi_repository_get_infos, METH_VARARGS | METH_KEYWORDS },
+    { "find_by_name", (PyCFunction) _wrap_gi_repository_find_by_name, METH_VARARGS | METH_KEYWORDS },
+    { "get_typelib_path", (PyCFunction) _wrap_gi_repository_get_typelib_path, METH_VARARGS | METH_KEYWORDS },
+    { "get_version", (PyCFunction) _wrap_gi_repository_get_version, METH_VARARGS | METH_KEYWORDS },
+    { "get_loaded_namespaces", (PyCFunction) _wrap_gi_repository_get_loaded_namespaces, METH_NOARGS },
+    { "get_dependencies", (PyCFunction) _wrap_gi_repository_get_dependencies, METH_VARARGS | METH_KEYWORDS  },
+    { "get_immediate_dependencies", (PyCFunction) _wrap_gi_repository_get_immediate_dependencies, METH_VARARGS | METH_KEYWORDS  },
+    { "is_registered", (PyCFunction) _wrap_gi_repository_is_registered, METH_VARARGS | METH_KEYWORDS  },
     { NULL, NULL, 0 }
 };
 

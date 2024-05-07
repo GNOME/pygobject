@@ -72,16 +72,17 @@ flags_enum_from_gtype (GType g_type,
     GIBaseInfo *info;
     const gchar *type_name;
 
-    repository = g_irepository_get_default ();
-    info = g_irepository_find_by_gtype (repository, g_type);
+    repository = gi_repository_new ();
+    info = gi_repository_find_by_gtype (repository, g_type);
     if (info != NULL) {
-        type_name = g_base_info_get_name (info);
+        type_name = gi_base_info_get_name (info);
         new_type = add_func (NULL, type_name, NULL, g_type);
-        g_base_info_unref (info);
+        gi_base_info_unref (info);
     } else {
         type_name = g_type_name (g_type);
         new_type = add_func (NULL, type_name, NULL, g_type);
     }
+    g_object_unref (repository); /* TODO probably wrong */
 
     return new_type;
 }
@@ -1502,14 +1503,13 @@ _wrap_pyg_enum_register_new_gtype_and_add (PyObject *self,
         return NULL;
     }
 
-    if (!GI_IS_ENUM_INFO (py_info->info) ||
-            g_base_info_get_type ((GIBaseInfo *) py_info->info) != GI_INFO_TYPE_ENUM) {
-        PyErr_SetString (PyExc_TypeError, "info must be an EnumInfo with info type GI_INFO_TYPE_ENUM");
+    if (!GI_IS_ENUM_INFO (py_info->info)) {
+        PyErr_SetString (PyExc_TypeError, "info must be an EnumInfo");
         return NULL;
     }
 
     info = (GIEnumInfo *)py_info->info;
-    n_values = g_enum_info_get_n_values (info);
+    n_values = gi_enum_info_get_n_values (info);
 
     /* The new memory is zero filled which fulfills the registration
      * function requirement that the last item is zeroed out as a terminator.
@@ -1522,14 +1522,14 @@ _wrap_pyg_enum_register_new_gtype_and_add (PyObject *self,
         const gchar *name;
         const gchar *c_identifier;
 
-        value_info = g_enum_info_get_value (info, i);
-        name = g_base_info_get_name ((GIBaseInfo *) value_info);
-        c_identifier = g_base_info_get_attribute ((GIBaseInfo *) value_info,
+        value_info = gi_enum_info_get_value (info, i);
+        name = gi_base_info_get_name ((GIBaseInfo *) value_info);
+        c_identifier = gi_base_info_get_attribute ((GIBaseInfo *) value_info,
                                                   "c:identifier");
 
         enum_value = &g_enum_values[i];
         enum_value->value_nick = g_strdup (name);
-        enum_value->value = (gint)g_value_info_get_value (value_info);
+        enum_value->value = (gint)gi_value_info_get_value (value_info);
 
         if (c_identifier == NULL) {
             enum_value->value_name = enum_value->value_nick;
@@ -1537,14 +1537,14 @@ _wrap_pyg_enum_register_new_gtype_and_add (PyObject *self,
             enum_value->value_name = g_strdup (c_identifier);
         }
 
-        g_base_info_unref ((GIBaseInfo *) value_info);
+        gi_base_info_unref ((GIBaseInfo *) value_info);
     }
 
     /* Obfuscate the full_name by prefixing it with "Py" to avoid conflicts
      * with real GTypes. See: https://bugzilla.gnome.org/show_bug.cgi?id=692515
      */
-    namespace = g_base_info_get_namespace ((GIBaseInfo *) info);
-    type_name = g_base_info_get_name ((GIBaseInfo *) info);
+    namespace = gi_base_info_get_namespace ((GIBaseInfo *) info);
+    type_name = gi_base_info_get_name ((GIBaseInfo *) info);
     full_name = g_strconcat ("Py", namespace, type_name, NULL);
 
     /* If enum registration fails, free all the memory allocated
@@ -1621,14 +1621,13 @@ _wrap_pyg_flags_register_new_gtype_and_add (PyObject *self,
         return NULL;
     }
 
-    if (!GI_IS_ENUM_INFO (py_info->info) ||
-            g_base_info_get_type ((GIBaseInfo *) py_info->info) != GI_INFO_TYPE_FLAGS) {
-        PyErr_SetString (PyExc_TypeError, "info must be an EnumInfo with info type GI_INFO_TYPE_FLAGS");
+    if (!GI_IS_FLAGS_INFO (py_info->info)) {
+        PyErr_SetString (PyExc_TypeError, "info must be a FlagsInfo");
         return NULL;
     }
 
     info = (GIEnumInfo *)py_info->info;
-    n_values = g_enum_info_get_n_values (info);
+    n_values = gi_enum_info_get_n_values (info);
 
     /* The new memory is zero filled which fulfills the registration
      * function requirement that the last item is zeroed out as a terminator.
@@ -1641,14 +1640,14 @@ _wrap_pyg_flags_register_new_gtype_and_add (PyObject *self,
         const gchar *name;
         const gchar *c_identifier;
 
-        value_info = g_enum_info_get_value (info, i);
-        name = g_base_info_get_name ((GIBaseInfo *) value_info);
-        c_identifier = g_base_info_get_attribute ((GIBaseInfo *) value_info,
+        value_info = gi_enum_info_get_value (info, i);
+        name = gi_base_info_get_name ((GIBaseInfo *) value_info);
+        c_identifier = gi_base_info_get_attribute ((GIBaseInfo *) value_info,
                                                   "c:identifier");
 
         flags_value = &g_flags_values[i];
         flags_value->value_nick = g_strdup (name);
-        flags_value->value = (guint)g_value_info_get_value (value_info);
+        flags_value->value = (guint)gi_value_info_get_value (value_info);
 
         if (c_identifier == NULL) {
             flags_value->value_name = flags_value->value_nick;
@@ -1656,14 +1655,14 @@ _wrap_pyg_flags_register_new_gtype_and_add (PyObject *self,
             flags_value->value_name = g_strdup (c_identifier);
         }
 
-        g_base_info_unref ((GIBaseInfo *) value_info);
+        gi_base_info_unref ((GIBaseInfo *) value_info);
     }
 
     /* Obfuscate the full_name by prefixing it with "Py" to avoid conflicts
      * with real GTypes. See: https://bugzilla.gnome.org/show_bug.cgi?id=692515
      */
-    namespace = g_base_info_get_namespace ((GIBaseInfo *) info);
-    type_name = g_base_info_get_name ((GIBaseInfo *) info);
+    namespace = gi_base_info_get_namespace ((GIBaseInfo *) info);
+    type_name = gi_base_info_get_name ((GIBaseInfo *) info);
     full_name = g_strconcat ("Py", namespace, type_name, NULL);
 
     /* If enum registration fails, free all the memory allocated
@@ -1742,10 +1741,10 @@ find_vfunc_info (GIBaseInfo *vfunc_info,
     gboolean is_interface = FALSE;
     GIFieldInfo *field_info;
 
-    ancestor_info = g_base_info_get_container (vfunc_info);
-    is_interface = g_base_info_get_type (ancestor_info) == GI_INFO_TYPE_INTERFACE;
+    ancestor_info = gi_base_info_get_container (vfunc_info);
+    is_interface = GI_IS_INTERFACE_INFO (ancestor_info);
 
-    ancestor_g_type = g_registered_type_info_get_g_type (
+    ancestor_g_type = gi_registered_type_info_get_g_type (
                           (GIRegisteredTypeInfo *) ancestor_info);
     implementor_class = g_type_class_ref (implementor_gtype);
     if (is_interface) {
@@ -1763,29 +1762,29 @@ find_vfunc_info (GIBaseInfo *vfunc_info,
 
         *implementor_vtable_ret = implementor_iface_class;
 
-        struct_info = g_interface_info_get_iface_struct ( (GIInterfaceInfo*) ancestor_info);
+        struct_info = gi_interface_info_get_iface_struct ( (GIInterfaceInfo*) ancestor_info);
     } else {
-        struct_info = g_object_info_get_class_struct ( (GIObjectInfo*) ancestor_info);
+        struct_info = gi_object_info_get_class_struct ( (GIObjectInfo*) ancestor_info);
         *implementor_vtable_ret = implementor_class;
     }
 
     *implementor_class_ret = implementor_class;
 
-    field_info = g_struct_info_find_field (struct_info,
-                                           g_base_info_get_name ( (GIBaseInfo*) vfunc_info));
+    field_info = gi_struct_info_find_field (struct_info,
+                                           gi_base_info_get_name ( (GIBaseInfo*) vfunc_info));
     if (field_info != NULL) {
         GITypeInfo *type_info;
 
-        type_info = g_field_info_get_type (field_info);
-        if (g_type_info_get_tag (type_info) == GI_TYPE_TAG_INTERFACE) {
+        type_info = gi_field_info_get_type_info (field_info);
+        if (gi_type_info_get_tag (type_info) == GI_TYPE_TAG_INTERFACE) {
             *field_info_ret = field_info;
         } else {
-            g_base_info_unref (field_info);
+            gi_base_info_unref (field_info);
         }
-        g_base_info_unref (type_info);
+        gi_base_info_unref (type_info);
     }
 
-    g_base_info_unref (struct_info);
+    gi_base_info_unref (struct_info);
 }
 
 static PyObject *
@@ -1818,28 +1817,24 @@ _wrap_pyg_hook_up_vfunc_implementation (PyObject *self, PyObject *args)
         GICallbackInfo *callback_info;
         gint offset;
 
-        type_info = g_field_info_get_type (field_info);
+        type_info = gi_field_info_get_type_info (field_info);
 
-        interface_info = g_type_info_get_interface (type_info);
-        g_assert (g_base_info_get_type (interface_info) == GI_INFO_TYPE_CALLBACK);
+        interface_info = gi_type_info_get_interface (type_info);
+        g_assert (GI_IS_CALLBACK_INFO (interface_info));
 
         callback_info = (GICallbackInfo*) interface_info;
-        offset = g_field_info_get_offset (field_info);
+        offset = gi_field_info_get_offset (field_info);
         method_ptr = G_STRUCT_MEMBER_P (implementor_vtable, offset);
 
-        cache = pygi_closure_cache_new (callback_info);
+        cache = pygi_closure_cache_new (GI_CALLABLE_INFO (callback_info));
         closure = _pygi_make_native_closure ( (GICallableInfo*) callback_info, cache,
                                               GI_SCOPE_TYPE_NOTIFIED, py_function, NULL);
 
-#if GI_CHECK_VERSION (1, 72, 0)
-        *method_ptr = g_callable_info_get_closure_native_address (callback_info, closure->closure);
-#else
-        *method_ptr = closure->closure;
-#endif
+        *method_ptr = gi_callable_info_get_closure_native_address (GI_CALLABLE_INFO (callback_info), closure->closure);
 
-        g_base_info_unref (interface_info);
-        g_base_info_unref (type_info);
-        g_base_info_unref (field_info);
+        gi_base_info_unref (interface_info);
+        gi_base_info_unref (type_info);
+        gi_base_info_unref (field_info);
     }
     g_type_class_unref (implementor_class);
 
@@ -1873,13 +1868,13 @@ _wrap_pyg_has_vfunc_implementation (PyObject *self, PyObject *args)
         gpointer *method_ptr;
         gint offset;
 
-        offset = g_field_info_get_offset (field_info);
+        offset = gi_field_info_get_offset (field_info);
         method_ptr = G_STRUCT_MEMBER_P (implementor_vtable, offset);
         if (*method_ptr != NULL) {
             py_ret = Py_True;
         }
 
-        g_base_info_unref (field_info);
+        gi_base_info_unref (field_info);
     }
     g_type_class_unref (implementor_class);
 

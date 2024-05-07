@@ -22,8 +22,8 @@
 #define __PYGI_CACHE_H__
 
 #include <Python.h>
-#include <girepository.h>
-#include <girffi.h>
+#include <girepository/girepository.h>
+#include <girepository/girffi.h>
 
 #include "pygi-invoke-state-struct.h"
 
@@ -184,7 +184,8 @@ struct _PyGICallableCache
     gboolean throws;
 
     /* Index of user_data arg passed to a callable. */
-    gssize user_data_index;
+    unsigned int user_data_index;
+    gboolean has_user_data;  /* TODO actually use this everywhere */
 
     /* A user_data arg that can eat variable args passed to a callable. */
     PyGIArgCache *user_data_varargs_arg;
@@ -192,7 +193,7 @@ struct _PyGICallableCache
     /* Number of args already added */
     gssize args_offset;
 
-    /* Number of out args passed to g_function_info_invoke.
+    /* Number of out args passed to gi_function_info_invoke.
      * This is used for the length of PyGIInvokeState.out_values */
     gssize n_to_py_args;
 
@@ -202,7 +203,7 @@ struct _PyGICallableCache
     /* The type used for returning multiple values or NULL */
     PyTypeObject* resulttuple_type;
 
-    /* Number of out args for g_function_info_invoke that will be skipped
+    /* Number of out args for gi_function_info_invoke that will be skipped
      * when marshaling to Python due to them being implicitly available
      * (list/array length).
      */

@@ -29,19 +29,21 @@ _pygi_lookup_signal_from_g_type (GType g_type,
     GIBaseInfo *info;
     GISignalInfo *signal_info = NULL;
 
-    repository = g_irepository_get_default();
-    info = g_irepository_find_by_gtype (repository, g_type);
+    repository = gi_repository_new ();
+    info = gi_repository_find_by_gtype (repository, g_type);
     if (info == NULL)
         return NULL;
 
     if (GI_IS_OBJECT_INFO (info))
-        signal_info = g_object_info_find_signal ((GIObjectInfo *) info,
+        signal_info = gi_object_info_find_signal ((GIObjectInfo *) info,
                                                  signal_name);
     else if (GI_IS_INTERFACE_INFO (info))
-        signal_info = g_interface_info_find_signal ((GIInterfaceInfo *) info,
+        signal_info = gi_interface_info_find_signal ((GIInterfaceInfo *) info,
                                                     signal_name);
 
-    g_base_info_unref (info);
+    gi_base_info_unref (info);
+    g_clear_object (&repository);  // TODO not going to go well
+
     return signal_info;
 }
 
@@ -62,7 +64,7 @@ pygi_signal_closure_invalidate(gpointer data,
     pc->extra_args = NULL;
     pc->swap_data = NULL;
 
-    g_base_info_unref (((PyGISignalClosure *) pc)->signal_info);
+    gi_base_info_unref (((PyGISignalClosure *) pc)->signal_info);
     ((PyGISignalClosure *) pc)->signal_info = NULL;
 }
 
@@ -87,7 +89,7 @@ pygi_signal_closure_marshal(GClosure *closure,
     state = PyGILState_Ensure();
 
     signal_info = ((PyGISignalClosure *)closure)->signal_info;
-    n_sig_info_args = g_callable_info_get_n_args(signal_info);
+    n_sig_info_args = gi_callable_info_get_n_args (GI_CALLABLE_INFO (signal_info));
     g_assert_cmpint (n_sig_info_args, >=, 0);
     /* the first argument to a signal callback is instance,
        but instance is not counted in the introspection data */
@@ -120,12 +122,12 @@ pygi_signal_closure_marshal(GClosure *closure,
             gboolean free_array = FALSE;
             gboolean pass_struct_by_ref = FALSE;
 
-            g_callable_info_load_arg(signal_info, i - 1, &arg_info);
-            g_arg_info_load_type(&arg_info, &type_info);
+            gi_callable_info_load_arg (GI_CALLABLE_INFO (signal_info), i - 1, &arg_info);
+            gi_arg_info_load_type_info (&arg_info, &type_info);
 
             arg = _pygi_argument_from_g_value(&param_values[i], &type_info);
 
-            type_tag = g_type_info_get_tag (&type_info);
+            type_tag = gi_type_info_get_tag (&type_info);
             if (type_tag == GI_TYPE_TAG_ARRAY) {
                 /* Skip the self argument of param_values */
                 arg.v_pointer = _pygi_argument_to_array (&arg,
@@ -145,16 +147,14 @@ pygi_signal_closure_marshal(GClosure *closure,
              * Note the logic here must match the logic path taken in _pygi_argument_to_object.
              */
             if (type_tag == GI_TYPE_TAG_INTERFACE) {
-                GIBaseInfo *info = g_type_info_get_interface (&type_info);
-                GIInfoType info_type = g_base_info_get_type (info);
+                GIBaseInfo *info = gi_type_info_get_interface (&type_info);
 
-                if (info_type == GI_INFO_TYPE_STRUCT ||
-                        info_type == GI_INFO_TYPE_BOXED ||
-                        info_type == GI_INFO_TYPE_UNION) {
+                if (GI_IS_STRUCT_INFO (info) ||
+                    GI_IS_UNION_INFO (info)) {
 
-                    GType gtype = g_registered_type_info_get_g_type ((GIRegisteredTypeInfo *) info);
-                    gboolean is_foreign = (info_type == GI_INFO_TYPE_STRUCT) &&
-                                          (g_struct_info_is_foreign ((GIStructInfo *) info));
+                    GType gtype = gi_registered_type_info_get_g_type ((GIRegisteredTypeInfo *) info);
+                    gboolean is_foreign = (GI_IS_STRUCT_INFO (info)) &&
+                                          (gi_struct_info_is_foreign ((GIStructInfo *) info));
 
                     if (!is_foreign && !g_type_is_a (gtype, G_TYPE_VALUE) &&
                             g_type_is_a (gtype, G_TYPE_BOXED)) {
@@ -162,7 +162,7 @@ pygi_signal_closure_marshal(GClosure *closure,
                     }
                 }
 
-                g_base_info_unref (info);
+                gi_base_info_unref (info);
             }
 
             if (pass_struct_by_ref) {

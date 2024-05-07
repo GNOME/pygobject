@@ -27,7 +27,7 @@
 #include "pygpointer.h"
 #include "pygi-util.h"
 
-#include <girepository.h>
+#include <girepository/girepository.h>
 
 
 static GIBaseInfo *
@@ -50,7 +50,7 @@ struct_get_info (PyTypeObject *type)
     }
 
     info = ( (PyGIBaseInfo *) py_info)->info;
-    g_base_info_ref (info);
+    gi_base_info_ref (info);
 
 out:
     Py_DECREF (py_info);
@@ -70,14 +70,14 @@ struct_dealloc (PyGIStruct *self)
 
     info = struct_get_info (Py_TYPE (self));
 
-    if (info != NULL && g_struct_info_is_foreign ( (GIStructInfo *) info)) {
+    if (info != NULL && gi_struct_info_is_foreign ( (GIStructInfo *) info)) {
         pygi_struct_foreign_release (info, pyg_pointer_get_ptr (self));
     } else if (self->free_on_dealloc) {
         g_free (pyg_pointer_get_ptr (self));
     }
 
     if (info != NULL) {
-        g_base_info_unref (info);
+        gi_base_info_unref (info);
     }
 
     if (have_error)
@@ -110,12 +110,12 @@ struct_new (PyTypeObject *type,
         return NULL;
     }
 
-    size = g_struct_info_get_size ( (GIStructInfo *) info);
+    size = gi_struct_info_get_size ( (GIStructInfo *) info);
     if (size == 0) {
         PyErr_Format (PyExc_TypeError,
             "struct cannot be created directly; try using a constructor, see: help(%s.%s)",
-            g_base_info_get_namespace (info),
-            g_base_info_get_name (info));
+            gi_base_info_get_namespace (info),
+            gi_base_info_get_name (info));
         goto out;
     }
     pointer = g_try_malloc0 (size);
@@ -130,7 +130,7 @@ struct_new (PyTypeObject *type,
     }
 
 out:
-    g_base_info_unref (info);
+    gi_base_info_unref (info);
 
     return (PyObject *) self;
 }
@@ -217,12 +217,12 @@ struct_repr(PyGIStruct *self)
         return NULL;
 
     repr = PyUnicode_FromFormat ("<%s.%s object at %p (%s at %p)>",
-                                 g_base_info_get_namespace (info),
-                                 g_base_info_get_name (info),
+                                 gi_base_info_get_namespace (info),
+                                 gi_base_info_get_name (info),
                                  self, g_type_name (pointer->gtype),
                                  pointer->pointer);
 
-    g_base_info_unref (info);
+    gi_base_info_unref (info);
 
     return repr;
 }

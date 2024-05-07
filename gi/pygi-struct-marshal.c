@@ -41,30 +41,27 @@ _is_union_member (GIInterfaceInfo *interface_info, PyObject *py_arg) {
     gint i;
     gint n_fields;
     GIUnionInfo *union_info;
-    GIInfoType info_type;
     gboolean is_member = FALSE;
 
-    info_type = g_base_info_get_type (interface_info);
-
-    if (info_type != GI_INFO_TYPE_UNION)
+    if (!GI_IS_UNION_INFO (interface_info))
         return FALSE;
 
     union_info = (GIUnionInfo *) interface_info;
-    n_fields = g_union_info_get_n_fields (union_info);
+    n_fields = gi_union_info_get_n_fields (union_info);
 
     for (i = 0; i < n_fields; i++) {
         GIFieldInfo *field_info;
         GITypeInfo *field_type_info;
 
-        field_info = g_union_info_get_field (union_info, i);
-        field_type_info = g_field_info_get_type (field_info);
+        field_info = gi_union_info_get_field (union_info, i);
+        field_type_info = gi_field_info_get_type_info (field_info);
 
         /* we can only check if the members are interfaces */
-        if (g_type_info_get_tag (field_type_info) == GI_TYPE_TAG_INTERFACE) {
+        if (gi_type_info_get_tag (field_type_info) == GI_TYPE_TAG_INTERFACE) {
             GIInterfaceInfo *field_iface_info;
             PyObject *py_type;
 
-            field_iface_info = g_type_info_get_interface (field_type_info);
+            field_iface_info = gi_type_info_get_interface (field_type_info);
             py_type = pygi_type_import_by_gi_info ((GIBaseInfo *) field_iface_info);
 
             if (py_type != NULL && PyObject_IsInstance (py_arg, py_type)) {
@@ -72,11 +69,11 @@ _is_union_member (GIInterfaceInfo *interface_info, PyObject *py_arg) {
             }
 
             Py_XDECREF (py_type);
-            g_base_info_unref ( ( GIBaseInfo *) field_iface_info);
+            gi_base_info_unref ( ( GIBaseInfo *) field_iface_info);
         }
 
-        g_base_info_unref ( ( GIBaseInfo *) field_type_info);
-        g_base_info_unref ( ( GIBaseInfo *) field_info);
+        gi_base_info_unref ( ( GIBaseInfo *) field_type_info);
+        gi_base_info_unref ( ( GIBaseInfo *) field_info);
 
         if (is_member)
             break;
@@ -338,7 +335,7 @@ pygi_arg_struct_from_py_marshal (PyObject *py_arg,
 
 type_error:
     {
-        gchar *type_name = _pygi_g_base_info_get_fullname (interface_info);
+        gchar *type_name = _pygi_gi_base_info_get_fullname (interface_info);
         PyObject *module = PyObject_GetAttrString(py_arg, "__module__");
 
         PyErr_Format (PyExc_TypeError, "argument %s: Expected %s, but got %s%s%s",
@@ -423,7 +420,7 @@ pygi_arg_struct_to_py_marshaller (GIArgument *arg,
                                      arg->v_pointer,
                                      transfer == GI_TRANSFER_EVERYTHING || is_allocated,
                                      is_allocated ?
-                                            g_struct_info_get_size(interface_info) : 0);
+                                            gi_struct_info_get_size(interface_info) : 0);
         }
     } else if (g_type_is_a (g_type, G_TYPE_POINTER)) {
         if (py_type == NULL ||
@@ -568,7 +565,7 @@ arg_struct_from_py_setup (PyGIArgCache     *arg_cache,
 {
     PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)arg_cache;
 
-    if (g_struct_info_is_gtype_struct ((GIStructInfo*)iface_info)) {
+    if (gi_struct_info_is_gtype_struct ((GIStructInfo*)iface_info)) {
         arg_cache->from_py_marshaller = arg_type_class_from_py_marshal;
         /* Since we always add a ref in the marshalling, only unref the
          * GTypeClass when we don't transfer ownership. */
@@ -602,7 +599,7 @@ arg_struct_to_py_setup (PyGIArgCache     *arg_cache,
         arg_cache->to_py_marshaller = arg_struct_to_py_marshal_adapter;
     }
 
-    iface_cache->is_foreign = g_struct_info_is_foreign ( (GIStructInfo*)iface_info);
+    iface_cache->is_foreign = gi_struct_info_is_foreign ( (GIStructInfo*)iface_info);
 
     if (iface_cache->is_foreign)
         arg_cache->to_py_cleanup = arg_foreign_to_py_cleanup;
@@ -631,8 +628,8 @@ pygi_arg_struct_new_from_info (GITypeInfo      *type_info,
         return NULL;
 
     iface_cache = (PyGIInterfaceCache *)cache;
-    iface_cache->is_foreign = (g_base_info_get_type ((GIBaseInfo *) iface_info) == GI_INFO_TYPE_STRUCT) &&
-                              (g_struct_info_is_foreign ((GIStructInfo*) iface_info));
+    iface_cache->is_foreign = (GI_IS_STRUCT_INFO ((GIBaseInfo *) iface_info)) &&
+                              (gi_struct_info_is_foreign ((GIStructInfo*) iface_info));
 
     if (direction & PYGI_DIRECTION_FROM_PYTHON) {
         arg_struct_from_py_setup (cache, iface_info, transfer);

@@ -435,7 +435,7 @@ pygi_arg_glist_setup_from_info (PyGIArgCache      *arg_cache,
                                 PyGIDirection      direction,
                                 PyGICallableCache *callable_cache)
 {
-    GITypeTag type_tag = g_type_info_get_tag (type_info);
+    GITypeTag type_tag = gi_type_info_get_tag (type_info);
 
     if (!pygi_arg_sequence_setup ((PyGISequenceCache *)arg_cache,
                                   type_info,
