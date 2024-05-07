@@ -21,7 +21,7 @@
 #define __PYGI_REPOSITORY_H__
 
 #include <Python.h>
-#include <girepository.h>
+#include <girepository/girepository.h>
 
 G_BEGIN_DECLS
 

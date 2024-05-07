@@ -41,7 +41,7 @@ _pygi_argument_from_g_value(const GValue *value,
 {
     GIArgument arg = { 0, };
 
-    GITypeTag type_tag = g_type_info_get_tag (type_info);
+    GITypeTag type_tag = gi_type_info_get_tag (type_info);
 
     /* For the long handling: long can be equivalent to
        int32 or int64, depending on the architecture, but
@@ -114,49 +114,38 @@ _pygi_argument_from_g_value(const GValue *value,
         case GI_TYPE_TAG_INTERFACE:
         {
             GIBaseInfo *info;
-            GIInfoType info_type;
 
-            info = g_type_info_get_interface (type_info);
-            info_type = g_base_info_get_type (info);
+            info = gi_type_info_get_interface (type_info);
 
-            g_base_info_unref (info);
+            gi_base_info_unref (info);
 
-            switch (info_type) {
-                case GI_INFO_TYPE_FLAGS:
-                    arg.v_uint = g_value_get_flags (value);
-                    break;
-                case GI_INFO_TYPE_ENUM:
-                    arg.v_int = g_value_get_enum (value);
-                    break;
-                case GI_INFO_TYPE_INTERFACE:
-                case GI_INFO_TYPE_OBJECT:
-                    if (G_VALUE_HOLDS_PARAM (value))
-                      arg.v_pointer = g_value_get_param (value);
-                    else if (G_VALUE_HOLDS_OBJECT (value))
-                      arg.v_pointer = g_value_get_object (value);
-                    else
-                      arg.v_pointer = pygi_fundamental_from_value (value);
-                    break;
-                case GI_INFO_TYPE_BOXED:
-                case GI_INFO_TYPE_STRUCT:
-                case GI_INFO_TYPE_UNION:
-                    if (G_VALUE_HOLDS (value, G_TYPE_BOXED)) {
-                        arg.v_pointer = g_value_get_boxed (value);
-                    } else if (G_VALUE_HOLDS (value, G_TYPE_VARIANT)) {
-                        arg.v_pointer = g_value_get_variant (value);
-                    } else if (G_VALUE_HOLDS (value, G_TYPE_POINTER)) {
-                        arg.v_pointer = g_value_get_pointer (value);
-                    } else {
-                        PyErr_Format (PyExc_NotImplementedError,
-                                      "Converting GValue's of type '%s' is not implemented.",
-                                      g_type_name (G_VALUE_TYPE (value)));
-                    }
-                    break;
-                default:
+            if (GI_IS_FLAGS_INFO (info)) {
+                arg.v_uint = g_value_get_flags (value);
+            } else if (GI_IS_ENUM_INFO (info)) {
+                arg.v_int = g_value_get_enum (value);
+            } else if (GI_IS_INTERFACE_INFO (info) || GI_IS_OBJECT_INFO (info)) {
+                if (G_VALUE_HOLDS_PARAM (value))
+                  arg.v_pointer = g_value_get_param (value);
+                else if (G_VALUE_HOLDS_OBJECT (value))
+                  arg.v_pointer = g_value_get_object (value);
+                else
+                  arg.v_pointer = pygi_fundamental_from_value (value);
+            } else if (GI_IS_STRUCT_INFO (info) || GI_IS_UNION_INFO (info)) {
+                if (G_VALUE_HOLDS (value, G_TYPE_BOXED)) {
+                    arg.v_pointer = g_value_get_boxed (value);
+                } else if (G_VALUE_HOLDS (value, G_TYPE_VARIANT)) {
+                    arg.v_pointer = g_value_get_variant (value);
+                } else if (G_VALUE_HOLDS (value, G_TYPE_POINTER)) {
+                    arg.v_pointer = g_value_get_pointer (value);
+                } else {
                     PyErr_Format (PyExc_NotImplementedError,
                                   "Converting GValue's of type '%s' is not implemented.",
-                                  g_info_type_to_string (info_type));
-                    break;
+                                  g_type_name (G_VALUE_TYPE (value)));
+                }
+            } else {
+                PyErr_Format (PyExc_NotImplementedError,
+                              "Converting GValue's of type '%s' is not implemented.",
+                              g_type_name (G_TYPE_FROM_INSTANCE (info)));
             }
             break;
         }
@@ -608,7 +597,7 @@ pyg_value_from_pyobject_with_error(GValue *value, PyObject *obj)
             info = g_irepository_find_by_gtype (repository, value_type);
 
             if (info && GI_IS_OBJECT_INFO (info)) {
-                set_value_func = g_object_info_get_set_value_function_pointer ((GIObjectInfo *) info);
+                set_value_func = gi_object_info_get_set_value_function_pointer ((GIObjectInfo *) info);
                 if (set_value_func) {
                     set_value_func (value, pygi_fundamental_get (obj));
                 } else {
@@ -619,7 +608,7 @@ pyg_value_from_pyobject_with_error(GValue *value, PyObject *obj)
             }
 
             if (info)
-                g_base_info_unref (info);
+                gi_base_info_unref (info);
         }
         break;
     }
@@ -811,9 +800,9 @@ value_to_py_structured_type (const GValue *value, GType fundamental, gboolean co
             break;
 
         if (GI_IS_OBJECT_INFO (info))
-            get_value_func = g_object_info_get_get_value_function_pointer ((GIObjectInfo *) info);
+            get_value_func = gi_object_info_get_get_value_function_pointer ((GIObjectInfo *) info);
 
-        g_base_info_unref (info);
+        gi_base_info_unref (info);
 
         if (get_value_func)
             return pygi_fundamental_new (get_value_func (value));

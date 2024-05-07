@@ -125,14 +125,14 @@ gi_argument_from_py_ssize_t (GIArgument   *arg_out,
     PyErr_Format (PyExc_OverflowError,
                   "Unable to marshal C Py_ssize_t %zd to %s",
                   size_in,
-                  g_type_tag_to_string (type_tag));
+                  gi_type_tag_to_string (type_tag));
     return FALSE;
 
  unhandled_type:
     PyErr_Format (PyExc_TypeError,
                   "Unable to marshal C Py_ssize_t %zd to %s",
                   size_in,
-                  g_type_tag_to_string (type_tag));
+                  gi_type_tag_to_string (type_tag));
     return FALSE;
 }
 
@@ -164,7 +164,7 @@ gi_argument_to_gsize (GIArgument *arg_in,
           if (arg_in->v_uint64 > G_MAXSIZE) {
               PyErr_Format (PyExc_TypeError,
                             "Unable to marshal %s to gsize",
-                            g_type_tag_to_string (type_tag));
+                            gi_type_tag_to_string (type_tag));
               return FALSE;
           }
           *gsize_out = (gsize)arg_in->v_int64;
@@ -173,7 +173,7 @@ gi_argument_to_gsize (GIArgument *arg_in,
           if (arg_in->v_uint64 > G_MAXSIZE) {
               PyErr_Format (PyExc_TypeError,
                             "Unable to marshal %s to gsize",
-                            g_type_tag_to_string (type_tag));
+                            gi_type_tag_to_string (type_tag));
               return FALSE;
           }
           *gsize_out = (gsize)arg_in->v_uint64;
@@ -181,7 +181,7 @@ gi_argument_to_gsize (GIArgument *arg_in,
       default:
           PyErr_Format (PyExc_TypeError,
                         "Unable to marshal %s to gsize",
-                        g_type_tag_to_string (type_tag));
+                        gi_type_tag_to_string (type_tag));
           return FALSE;
     }
 }
@@ -322,42 +322,35 @@ _pygi_marshal_from_py_array (PyGIInvokeState   *state,
             /* Special case handling of flat arrays of gvalue/boxed/struct */
             PyGIInterfaceCache *item_iface_cache = (PyGIInterfaceCache *) sequence_cache->item_cache;
             GIBaseInfo *base_info = (GIBaseInfo *) item_iface_cache->interface_info;
-            GIInfoType info_type = g_base_info_get_type (base_info);
 
-            switch (info_type) {
-                case GI_INFO_TYPE_UNION:
-                case GI_INFO_TYPE_STRUCT:
-                {
-                    PyGIArgCache *item_arg_cache = (PyGIArgCache *)item_iface_cache;
-                    PyGIMarshalCleanupFunc from_py_cleanup = item_arg_cache->from_py_cleanup;
+            if (GI_IS_STRUCT_INFO (base_info) || GI_IS_UNION_INFO (base_info)) {
+                PyGIArgCache *item_arg_cache = (PyGIArgCache *)item_iface_cache;
+                PyGIMarshalCleanupFunc from_py_cleanup = item_arg_cache->from_py_cleanup;
 
-                    if (g_type_is_a (item_iface_cache->g_type, G_TYPE_VALUE)) {
-                        /* Special case GValue flat arrays to properly init and copy the contents. */
-                        GValue* dest = (GValue*)(void*)(array_->data + (i * item_size));
-                        if (item.v_pointer != NULL) {
-                            memset (dest, 0, item_size);
-                            g_value_init (dest, G_VALUE_TYPE ((GValue*) item.v_pointer));
-                            g_value_copy ((GValue*) item.v_pointer, dest);
-                        }
-                        /* Manually increment the length because we are manually setting the memory. */
-                        array_->len++;
-
-                    } else {
-                        /* Handles flat arrays of boxed or struct types. */
-                        g_array_insert_vals (array_, i, item.v_pointer, 1);
+                if (g_type_is_a (item_iface_cache->g_type, G_TYPE_VALUE)) {
+                    /* Special case GValue flat arrays to properly init and copy the contents. */
+                    GValue* dest = (GValue*)(void*)(array_->data + (i * item_size));
+                    if (item.v_pointer != NULL) {
+                        memset (dest, 0, item_size);
+                        g_value_init (dest, G_VALUE_TYPE ((GValue*) item.v_pointer));
+                        g_value_copy ((GValue*) item.v_pointer, dest);
                     }
+                    /* Manually increment the length because we are manually setting the memory. */
+                    array_->len++;
 
-                    /* Cleanup any memory left by the per-item marshaler because
-                     * _pygi_marshal_cleanup_from_py_array will not know about this
-                     * due to "item" being a temporarily marshaled value done on the stack.
-                     */
-                    if (from_py_cleanup)
-                        from_py_cleanup (state, item_arg_cache, py_item, item_cleanup_data, TRUE);
-
-                    break;
+                } else {
+                    /* Handles flat arrays of boxed or struct types. */
+                    g_array_insert_vals (array_, i, item.v_pointer, 1);
                 }
-                default:
-                    g_array_insert_val (array_, i, item);
+
+                /* Cleanup any memory left by the per-item marshaler because
+                 * _pygi_marshal_cleanup_from_py_array will not know about this
+                 * due to "item" being a temporarily marshaled value done on the stack.
+                 */
+                if (from_py_cleanup)
+                    from_py_cleanup (state, item_arg_cache, py_item, item_cleanup_data, TRUE);
+            } else {
+                g_array_insert_val (array_, i, item);
             }
         } else {
             /* default value copy of a simple type */
@@ -635,25 +628,21 @@ _pygi_marshal_to_py_array (PyGIInvokeState   *state,
 
                     /* FIXME: This probably doesn't work with boxed types or gvalues.
                      * See fx. _pygi_marshal_from_py_array() */
-                    switch (g_base_info_get_type (iface_cache->interface_info)) {
-                        case GI_INFO_TYPE_STRUCT:
-                            if (arg_cache->transfer == GI_TRANSFER_EVERYTHING &&
-                                       !g_type_is_a (iface_cache->g_type, G_TYPE_BOXED)) {
-                                /* array elements are structs */
-                                gpointer *_struct = g_malloc (item_size);
-                                memcpy (_struct, array_->data + i * item_size,
-                                        item_size);
-                                item_arg.v_pointer = _struct;
-                            } else {
-                                item_arg.v_pointer = array_->data + i * item_size;
-                            }
-                            break;
-                        case GI_INFO_TYPE_ENUM:
-                            memcpy (&item_arg, array_->data + i * item_size, item_size);
-                            break;
-                        default:
-                            item_arg.v_pointer = g_array_index (array_, gpointer, i);
-                            break;
+                    if (GI_IS_STRUCT_INFO (iface_cache->interface_info)) {
+                        if (arg_cache->transfer == GI_TRANSFER_EVERYTHING &&
+                                   !g_type_is_a (iface_cache->g_type, G_TYPE_BOXED)) {
+                            /* array elements are structs */
+                            gpointer *_struct = g_malloc (item_size);
+                            memcpy (_struct, array_->data + i * item_size,
+                                    item_size);
+                            item_arg.v_pointer = _struct;
+                        } else {
+                            item_arg.v_pointer = array_->data + i * item_size;
+                        }
+                    } else if (GI_IS_ENUM_INFO (iface_cache->interface_info)) {
+                        memcpy (&item_arg, array_->data + i * item_size, item_size);
+                    } else {
+                        item_arg.v_pointer = g_array_index (array_, gpointer, i);
                     }
                 } else {
                     memcpy (&item_arg, array_->data + i * item_size, item_size);
@@ -834,7 +823,7 @@ pygi_arg_garray_len_arg_setup (PyGIArgCache *arg_cache,
 
     /* attempt len_arg_index setup for the first time */
     if (seq_cache->len_arg_index < 0) {
-        seq_cache->len_arg_index = g_type_info_get_array_length (type_info);
+        seq_cache->len_arg_index = gi_type_info_get_array_length (type_info);
 
         /* offset by self arg for methods and vfuncs */
         if (seq_cache->len_arg_index >= 0 && callable_cache != NULL) {
@@ -928,14 +917,14 @@ pygi_arg_garray_setup (PyGIArgGArray     *sc,
     }
 
     ((PyGIArgCache *)sc)->destroy_notify = (GDestroyNotify)_array_cache_free_func;
-    sc->array_type = g_type_info_get_array_type (type_info);
-    sc->is_zero_terminated = g_type_info_is_zero_terminated (type_info);
-    sc->fixed_size = g_type_info_get_array_fixed_size (type_info);
+    sc->array_type = gi_type_info_get_array_type (type_info);
+    sc->is_zero_terminated = gi_type_info_is_zero_terminated (type_info);
+    sc->fixed_size = gi_type_info_get_array_fixed_size (type_info);
     sc->len_arg_index = -1;  /* setup by pygi_arg_garray_len_arg_setup */
 
-    item_type_info = g_type_info_get_param_type (type_info, 0);
-    sc->item_size = _pygi_g_type_info_size (item_type_info);
-    g_base_info_unref ( (GIBaseInfo *)item_type_info);
+    item_type_info = gi_type_info_get_param_type (type_info, 0);
+    sc->item_size = _pygi_gi_type_info_size (item_type_info);
+    gi_base_info_unref ( (GIBaseInfo *)item_type_info);
 
     if (direction & PYGI_DIRECTION_FROM_PYTHON) {
         arg_cache->from_py_marshaller = _pygi_marshal_from_py_array;

@@ -141,13 +141,13 @@ _pygi_marshal_from_py_interface_enum (PyGIInvokeState   *state,
     Py_DECREF (py_long);
 
     /* Write c_long into arg */
-    interface = g_type_info_get_interface (arg_cache->type_info);
-    assert(g_base_info_get_type (interface) == GI_INFO_TYPE_ENUM);
+    interface = gi_type_info_get_interface (arg_cache->type_info);
+    g_assert (GI_IS_ENUM_INFO (interface));
     if (!gi_argument_from_c_long(arg,
                                  c_long,
-                                 g_enum_info_get_storage_type ((GIEnumInfo *)interface))) {
+                                 gi_enum_info_get_storage_type ((GIEnumInfo *)interface))) {
           g_assert_not_reached();
-          g_base_info_unref (interface);
+          gi_base_info_unref (interface);
           return FALSE;
     }
 
@@ -158,11 +158,11 @@ _pygi_marshal_from_py_interface_enum (PyGIInvokeState   *state,
         int i;
         gboolean is_found = FALSE;
 
-        for (i = 0; i < g_enum_info_get_n_values (iface_cache->interface_info); i++) {
+        for (i = 0; i < gi_enum_info_get_n_values (iface_cache->interface_info); i++) {
             GIValueInfo *value_info =
-                g_enum_info_get_value (iface_cache->interface_info, i);
-            gint64 enum_value = g_value_info_get_value (value_info);
-            g_base_info_unref ( (GIBaseInfo *)value_info);
+                gi_enum_info_get_value (iface_cache->interface_info, i);
+            gint64 enum_value = gi_value_info_get_value (value_info);
+            gi_base_info_unref ( (GIBaseInfo *)value_info);
             if (c_long == enum_value) {
                 is_found = TRUE;
                 break;
@@ -173,12 +173,12 @@ _pygi_marshal_from_py_interface_enum (PyGIInvokeState   *state,
             goto err;
     }
 
-    g_base_info_unref (interface);
+    gi_base_info_unref (interface);
     return TRUE;
 
 err:
     if (interface)
-        g_base_info_unref (interface);
+        gi_base_info_unref (interface);
     PyErr_Format (PyExc_TypeError, "Expected a %s, but got %s",
                   iface_cache->type_name, Py_TYPE (py_arg)->tp_name);
     return FALSE;
@@ -214,15 +214,15 @@ _pygi_marshal_from_py_interface_flags (PyGIInvokeState   *state,
         goto err;
 
     /* Write c_long into arg */
-    interface = g_type_info_get_interface (arg_cache->type_info);
-    g_assert (g_base_info_get_type (interface) == GI_INFO_TYPE_FLAGS);
+    interface = gi_type_info_get_interface (arg_cache->type_info);
+    g_assert (GI_IS_FLAGS_INFO (interface));
     if (!gi_argument_from_c_long(arg, c_ulong,
-                                 g_enum_info_get_storage_type ((GIEnumInfo *)interface))) {
-        g_base_info_unref (interface);
+                                 gi_enum_info_get_storage_type ((GIEnumInfo *)interface))) {
+        gi_base_info_unref (interface);
         return FALSE;
     }
 
-    g_base_info_unref (interface);
+    gi_base_info_unref (interface);
     return TRUE;
 
 err:
@@ -244,11 +244,11 @@ _pygi_marshal_to_py_interface_enum (PyGIInvokeState   *state,
     GIBaseInfo *interface;
     long c_long;
 
-    interface = g_type_info_get_interface (arg_cache->type_info);
-    g_assert (g_base_info_get_type (interface) == GI_INFO_TYPE_ENUM);
+    interface = gi_type_info_get_interface (arg_cache->type_info);
+    g_assert (GI_IS_ENUM_INFO (interface));
 
     if (!gi_argument_to_c_long(arg, &c_long,
-                               g_enum_info_get_storage_type ((GIEnumInfo *)interface))) {
+                               gi_enum_info_get_storage_type ((GIEnumInfo *)interface))) {
         return NULL;
     }
 
@@ -257,7 +257,7 @@ _pygi_marshal_to_py_interface_enum (PyGIInvokeState   *state,
     } else {
         py_obj = pyg_enum_from_gtype (iface_cache->g_type, (gint)c_long);
     }
-    g_base_info_unref (interface);
+    gi_base_info_unref (interface);
     return py_obj;
 }
 
@@ -273,16 +273,16 @@ _pygi_marshal_to_py_interface_flags (PyGIInvokeState   *state,
     GIBaseInfo *interface;
     long c_long;
 
-    interface = g_type_info_get_interface (arg_cache->type_info);
-    g_assert (g_base_info_get_type (interface) == GI_INFO_TYPE_FLAGS);
+    interface = gi_type_info_get_interface (arg_cache->type_info);
+    g_assert (GI_IS_FLAGS_INFO (interface));
 
     if (!gi_argument_to_c_long(arg, &c_long,
-                               g_enum_info_get_storage_type ((GIEnumInfo *)interface))) {
-        g_base_info_unref (interface);
+                               gi_enum_info_get_storage_type ((GIEnumInfo *)interface))) {
+        gi_base_info_unref (interface);
         return NULL;
     }
 
-    g_base_info_unref (interface);
+    gi_base_info_unref (interface);
     if (iface_cache->g_type == G_TYPE_NONE) {
         /* An enum with a GType of None is an enum without GType */
 
