@@ -349,8 +349,8 @@ pygi_arg_hash_table_setup_from_info (PyGIHashCache      *hc,
         return FALSE;
 
     ( (PyGIArgCache *)hc)->destroy_notify = (GDestroyNotify)_hash_cache_free_func;
-    key_type_info = g_type_info_get_param_type (type_info, 0);
-    value_type_info = g_type_info_get_param_type (type_info, 1);
+    key_type_info = gi_type_info_get_param_type (type_info, 0);
+    value_type_info = gi_type_info_get_param_type (type_info, 1);
 
     item_transfer =
         transfer == GI_TRANSFER_CONTAINER ? GI_TRANSFER_NOTHING : transfer;
@@ -377,8 +377,8 @@ pygi_arg_hash_table_setup_from_info (PyGIHashCache      *hc,
         return FALSE;
     }
 
-    g_base_info_unref( (GIBaseInfo *)key_type_info);
-    g_base_info_unref( (GIBaseInfo *)value_type_info);
+    gi_base_info_unref( (GIBaseInfo *)key_type_info);
+    gi_base_info_unref( (GIBaseInfo *)value_type_info);
 
     if (direction & PYGI_DIRECTION_FROM_PYTHON) {
         _arg_cache_from_py_ghash_setup ((PyGIArgCache *)hc);

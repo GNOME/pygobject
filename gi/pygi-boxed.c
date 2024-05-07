@@ -26,7 +26,7 @@
 #include "pygi-basictype.h"
 #include "pygi-util.h"
 
-#include <girepository.h>
+#include <girepository/girepository.h>
 
 struct _PyGIBoxed {
     PyGBoxed base;
@@ -77,26 +77,22 @@ pygi_boxed_alloc (GIBaseInfo *info, gsize *size_out)
     gpointer boxed = NULL;
     gsize size = 0;
 
-    switch (g_base_info_get_type (info)) {
-        case GI_INFO_TYPE_UNION:
-            size = g_union_info_get_size ( (GIUnionInfo *) info);
-            break;
-        case GI_INFO_TYPE_BOXED:
-        case GI_INFO_TYPE_STRUCT:
-            size = g_struct_info_get_size ( (GIStructInfo *) info);
-            break;
-        default:
-            PyErr_Format (PyExc_TypeError,
-                          "info should be Boxed or Union, not '%d'",
-                          g_base_info_get_type (info));
-            return NULL;
+    if (GI_IS_UNION_INFO (info)) {
+        size = gi_union_info_get_size ( (GIUnionInfo *) info);
+    } else if (GI_IS_STRUCT_INFO (info)) {
+        size = gi_struct_info_get_size ( (GIStructInfo *) info);
+    } else {
+        PyErr_Format (PyExc_TypeError,
+                      "info should be Boxed or Union, not '%d'",
+                      g_type_name (G_TYPE_FROM_INSTANCE (info)));
+        return NULL;
     }
 
     if (size == 0) {
         PyErr_Format (PyExc_TypeError,
             "boxed cannot be created directly; try using a constructor, see: help(%s.%s)",
-            g_base_info_get_namespace (info),
-            g_base_info_get_name (info));
+            gi_base_info_get_namespace (info),
+            gi_base_info_get_name (info));
         return NULL;
     }
 
@@ -142,7 +138,7 @@ boxed_new (PyTypeObject *type,
     self->slice_allocated = TRUE;
 
 out:
-    g_base_info_unref (info);
+    gi_base_info_unref (info);
 
     return (PyObject *) self;
 }
