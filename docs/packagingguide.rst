@@ -22,7 +22,7 @@ Building::
 Runtime dependencies:
 
     * glib
-    * libgirepository (gobject-introspection)
+    * libgirepository-2.0 (shipped with GLib ≥ 2.80)
     * libffi
     * Python 3
 

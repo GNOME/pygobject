@@ -24,7 +24,7 @@
  */
 
 
-#include <girepository.h>
+#include <girepository/girepository.h>
 
 #include "pygobject-internal.h"
 #include "pygi-info.h"
@@ -89,7 +89,7 @@ fundamental_new (PyTypeObject *type,
     }
 
 out:
-    g_base_info_unref (info);
+    gi_base_info_unref (info);
 
     return (PyObject *) self;
 }
@@ -189,8 +189,8 @@ _pygi_fundamental_new_internal (PyTypeObject *type,
     self->gtype = pyg_type_from_object ((PyObject *) type);
     self->instance = instance;
 
-    self->ref_func = g_object_info_get_ref_function_pointer (info);
-    self->unref_func = g_object_info_get_unref_function_pointer (info);
+    self->ref_func = gi_object_info_get_ref_function_pointer (info);
+    self->unref_func = gi_object_info_get_unref_function_pointer (info);
 
     /* A special case for GParamSpec. It has a floating reference when created.
      * We make sure we have a proper reference, so we can ref/unref normally.
@@ -199,7 +199,7 @@ _pygi_fundamental_new_internal (PyTypeObject *type,
         g_param_spec_ref_sink (self->instance);
     }
 
-    g_base_info_unref (info);
+    gi_base_info_unref (info);
 
     return self;
 }
@@ -265,13 +265,13 @@ pygi_fundamental_from_value (const GValue *value)
         return NULL;
 
     if (GI_IS_OBJECT_INFO (info)) {
-        GIObjectInfoGetValueFunction get_value_func = g_object_info_get_get_value_function_pointer ((GIObjectInfo *) info);
+        GIObjectInfoGetValueFunction get_value_func = gi_object_info_get_get_value_function_pointer ((GIObjectInfo *) info);
         if (get_value_func) {
             instance = get_value_func (value);
         }
     }
 
-    g_base_info_unref (info);
+    gi_base_info_unref (info);
 
     return instance;
 }
@@ -293,13 +293,13 @@ pygi_fundamental_set_value (GValue *value, GTypeInstance *instance)
         return result;
 
     if (GI_IS_OBJECT_INFO (info)) {
-        GIObjectInfoSetValueFunction set_value_func = g_object_info_get_set_value_function_pointer ((GIObjectInfo *) info);
+        GIObjectInfoSetValueFunction set_value_func = gi_object_info_get_set_value_function_pointer ((GIObjectInfo *) info);
         if (set_value_func) {
             set_value_func (value, instance);
             result = TRUE;
         }
     }
 
-    g_base_info_unref (info);
+    gi_base_info_unref (info);
     return result;
 }

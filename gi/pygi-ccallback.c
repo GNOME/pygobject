@@ -22,7 +22,7 @@
 #include "pygi-util.h"
 #include "pygi-ccallback.h"
 
-#include <girepository.h>
+#include <girepository/girepository.h>
 
 
 static PyObject *
@@ -31,7 +31,7 @@ _ccallback_call(PyGICCallback *self, PyObject *args, PyObject *kwargs)
     PyObject *result;
 
     if (self->cache == NULL) {
-        self->cache = (PyGICCallbackCache *)pygi_ccallback_cache_new (self->info,
+        self->cache = (PyGICCallbackCache *)pygi_ccallback_cache_new (GI_CALLABLE_INFO (self->info),
                                                                       self->callback);
         if (self->cache == NULL)
             return NULL;
@@ -68,7 +68,7 @@ _pygi_ccallback_new (GCallback callback,
     self->user_data = user_data;
     self->scope = scope;
     self->destroy_notify_func = destroy_notify;
-    self->info = g_base_info_ref( (GIBaseInfo *) info);
+    self->info = GI_FUNCTION_INFO (gi_base_info_ref (info));
 
     return (PyObject *) self;
 }
@@ -76,7 +76,7 @@ _pygi_ccallback_new (GCallback callback,
 static void
 _ccallback_dealloc (PyGICCallback *self)
 {
-    g_base_info_unref ( (GIBaseInfo *)self->info);
+    gi_base_info_unref ( (GIBaseInfo *)self->info);
 
     if (self->cache != NULL) {
         pygi_callable_cache_free ( (PyGICallableCache *)self->cache);

@@ -19,7 +19,7 @@
 #define __PYGI_CLOSURE_H__
 
 #include <Python.h>
-#include <girffi.h>
+#include <girepository/girffi.h>
 #include <ffi.h>
 
 #include "pygi-cache.h"
