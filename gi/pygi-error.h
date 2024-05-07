@@ -22,7 +22,7 @@
 #ifndef __PYGI_ERROR_H__
 #define __PYGI_ERROR_H__
 
-#include <girepository.h>
+#include <girepository/girepository.h>
 #include "pygi-cache.h"
 
 G_BEGIN_DECLS

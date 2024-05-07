@@ -62,15 +62,16 @@ pygi_type_import_by_g_type (GType g_type)
     GIBaseInfo *info;
     PyObject *type;
 
-    repository = g_irepository_get_default();
+    repository = gi_repository_new ();
 
-    info = g_irepository_find_by_gtype (repository, g_type);
+    info = gi_repository_find_by_gtype (repository, g_type);
     if (info == NULL) {
         return NULL;
     }
 
     type = pygi_type_import_by_gi_info (info);
-    g_base_info_unref (info);
+    gi_base_info_unref (info);
+    g_clear_object (&repository);  // TODO going to explode
 
     return type;
 }
@@ -78,8 +79,8 @@ pygi_type_import_by_g_type (GType g_type)
 PyObject *
 pygi_type_import_by_gi_info (GIBaseInfo *info)
 {
-    return pygi_type_import_by_name (g_base_info_get_namespace (info),
-                                     g_base_info_get_name (info));
+    return pygi_type_import_by_name (gi_base_info_get_namespace (info),
+                                     gi_base_info_get_name (info));
 }
 
 PyObject *

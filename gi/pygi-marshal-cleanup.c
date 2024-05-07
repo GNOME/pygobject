@@ -39,7 +39,7 @@ _cleanup_caller_allocates (PyGIInvokeState    *state,
         gsize size;
         if (was_processed)
             return; /* will be cleaned up at deallocation */
-        size = g_struct_info_get_size (iface_cache->interface_info);
+        size = gi_struct_info_get_size (iface_cache->interface_info);
         g_slice_free1 (size, data);
     } else if (iface_cache->is_foreign) {
         if (was_processed)
