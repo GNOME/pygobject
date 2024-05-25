@@ -20,7 +20,7 @@ rm -Rf _sdist_build
 
 # Now the sdist for pypi
 # Mark odd versions as PEP440 development versions (e.g. 0.1.0 -> 0.1.0.dev0)
-meson rewrite kwargs set project / version ${VERSION}.dev0
+[[ "$VERSION" =~ ^[0-9]\.[0-9]*[13579]\. ]] && meson rewrite kwargs set project / version ${VERSION}.dev0
 
 python -m pip install --upgrade build
 python -m build --sdist
