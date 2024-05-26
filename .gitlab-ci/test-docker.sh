@@ -25,20 +25,27 @@ export MESONPY_EDITABLE_VERBOSE=1
 mkdir -p "${CCACHE_DIR}"
 mkdir -p "${COV_DIR}"
 
-python -m pip install pdm
+python -m venv /tmp/venv
+source /tmp/venv/bin/activate
 
-# BUILD
-python -m pdm install
+# XXX: meson tries to use this for some reason, but it's not there by default
+mkdir -p /tmp/venv/include/pypy3.9
+
+python -m pip install --upgrade pip
+python -m pip install flake8 meson meson-python pycairo pytest pytest-cov
 
 # CODE QUALITY
-python -m pdm run flake8
+python -m flake8
+
+# BUILD & TEST
+python -m pip install --config-settings=setup-args="-Dtests=true" --no-build-isolation --editable '.[dev]'
 
 # TEST
 lcov --config-file .gitlab-ci/lcovrc --directory . --capture --initial --output-file \
     "${COV_DIR}/${CI_JOB_NAME}-baseline.lcov"
 
-xvfb-run -a python -m pdm run pytest -v --cov
-python -m pdm run coverage lcov -o "${COV_DIR}/${COV_KEY}.py.lcov"
+xvfb-run -a python -m pytest -v --cov
+python -m coverage lcov -o "${COV_DIR}/${COV_KEY}.py.lcov"
 
 # COLLECT GCOV COVERAGE
 lcov --config-file .gitlab-ci/lcovrc --directory . --capture --output-file \
