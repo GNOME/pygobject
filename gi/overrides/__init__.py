@@ -346,6 +346,7 @@ def wrap_list_store_sort_func(func):
 
     return wrap
 
+
 def wrap_list_store_equal_func(func):
 
     def wrap(a, b, *user_data):
