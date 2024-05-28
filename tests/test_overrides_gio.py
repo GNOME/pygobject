@@ -1,10 +1,11 @@
-import random
+import os
 import platform
+import random
 import warnings
 
 import pytest
 
-from gi.repository import Gio, GObject
+from gi.repository import Gio, GLib, GObject
 from gi import PyGIWarning
 
 
@@ -393,3 +394,31 @@ def test_list_store_find_with_equal_func():
 
     test()
     test((100, "data"))
+
+
+def test_file_fspath():
+    file, stream = Gio.File.new_tmp('TestGFile.XXXXXX')
+    content = b'hello\0world\x7F!'
+    stream.get_output_stream().write_bytes(GLib.Bytes(content))
+    stream.close()
+    path = file.peek_path()
+    assert isinstance(path, str)
+    fspath = file.__fspath__()
+    assert isinstance(fspath, str)
+    assert fspath == path
+
+    with open(file, 'rb') as file_like:
+        assert file_like.read() == content
+
+
+def test_file_fspath_with_no_path():
+    file = Gio.File.new_for_path('')
+    path = file.peek_path()
+    # In older versions of GLib, creating a GFile for an empty path will result
+    # in one representing the current pwd instead of a GDummyFile with no path.
+    if path is None:
+        with pytest.raises(TypeError):
+            file.__fspath__()
+    else:
+        assert path == file.__fspath__()
+        assert path == os.getcwd()

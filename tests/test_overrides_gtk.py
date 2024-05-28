@@ -36,7 +36,7 @@ def gtkver():
             Gtk.get_micro_version())
 
 
-GTK4 = (Gtk._version == "4.0")
+GTK4 = (Gtk and Gtk._version == "4.0")
 
 
 @contextlib.contextmanager
@@ -62,6 +62,7 @@ def realized(widget):
             window.set_child(widget)
         else:
             window.add(widget)
+        window.show()
 
     widget.realize()
     if Gtk._version == "4.0":
@@ -3020,9 +3021,23 @@ class TestContainer(unittest.TestCase):
         self.assertEqual(padding, 21)
 
 
+@pytest.mark.skipif(not Gtk, reason="Test requires GTK")
 def test_button_focus_on_click():
     b = Gtk.Button()
     b.set_focus_on_click(True)
     assert b.get_focus_on_click()
     b.set_focus_on_click(False)
     assert not b.get_focus_on_click()
+
+
+@pytest.mark.skipif(not Gtk, reason="Test requires GTK")
+@pytest.mark.parametrize(
+    "data",
+    [
+        "* { background: white; }",
+        "* { background: white; }".encode()
+    ]
+)
+def test_css_provider_load_from_data(data):
+    provider = Gtk.CssProvider.new()
+    provider.load_from_data(data)

@@ -688,7 +688,7 @@ class TestProperty(unittest.TestCase):
 
         # we test known-bad values here which cause Gtk-WARNING logs.
         # Explicitly allow these for this test.
-        with capture_glib_warnings(allow_warnings=True):
+        with capture_glib_warnings(allow_warnings=True, allow_criticals=True):
             o = C()
             self.assertEqual(o.prop_int, 1)
 
@@ -1360,3 +1360,35 @@ class TestCGetPropertyMethod(CPropertiesTestBase, unittest.TestCase):
 
     def set_prop(self, obj, name, value):
         obj.set_property(name, value)
+
+
+def test_gobject_inheritance_with_incomplete_initialization():
+    class Test:
+        def __init__(self):
+            # super().__init__() should have been called here
+            pass
+
+    class Bomb(Test, GObject.Object):
+        def __init__(self):
+            super().__init__()
+
+    bomb = Bomb()
+
+    with pytest.raises(RuntimeError, match="is not initialized"):
+        bomb.qdata
+
+
+@pytest.mark.skipif(not hasattr(Regress, "AnnotationObject"), reason="no Regress.AnnotationObject")
+def test_get_function_property():
+    obj = Regress.AnnotationObject()
+
+    with pytest.raises(TypeError):
+        assert obj.props.function_property
+
+
+@pytest.mark.skipif(not hasattr(Regress, "AnnotationObject"), reason="no Regress.AnnotationObject")
+def test_set_function_property():
+    obj = Regress.AnnotationObject()
+
+    with pytest.raises(TypeError):
+        obj.props.function_property = lambda *x: x

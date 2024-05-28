@@ -560,7 +560,7 @@ class TestPropertyBindings(unittest.TestCase):
 
         binding = self.source.bind_property('int_prop', self.target, 'int_prop',
                                             GObject.BindingFlags.DEFAULT,
-                                            transform_to, None, 'test-data')
+                                            transform_to, user_data='test-data')
         binding = binding  # PyFlakes
 
         self.source.int_prop = 1
@@ -578,7 +578,7 @@ class TestPropertyBindings(unittest.TestCase):
 
         binding = self.source.bind_property('int_prop', self.target, 'int_prop',
                                             GObject.BindingFlags.BIDIRECTIONAL,
-                                            None, transform_from)
+                                            transform_from=transform_from)
         binding = binding  # PyFlakes
 
         self.source.int_prop = 1

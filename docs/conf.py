@@ -19,7 +19,7 @@ master_doc = 'index'
 exclude_patterns = ['_build', 'README.rst']
 
 pygments_style = 'tango'
-html_theme = 'sphinx_rtd_theme'
+html_theme = 'furo'
 html_show_copyright = False
 html_favicon = "images/favicon.ico"
 project = "PyGObject"
@@ -33,7 +33,7 @@ html_context = {
     "display_gitlab": True,
     "gitlab_user": "GNOME",
     "gitlab_repo": "pygobject",
-    "gitlab_version": "master",
+    "gitlab_version": "main",
     "conf_py_path": "/docs/",
     "gitlab_host": "gitlab.gnome.org",
 }
@@ -43,17 +43,13 @@ html_static_path = [
     "images/pygobject-small.svg",
 ]
 
-html_theme_options = {
-    "display_version": False,
-}
-
 extlinks = {
-    'bzbug': ('https://bugzilla.gnome.org/show_bug.cgi?id=%s', 'bz#'),
-    'issue': ('https://gitlab.gnome.org/GNOME/pygobject/issues/%s', '#'),
-    'commit': ('https://gitlab.gnome.org/GNOME/pygobject/commit/%s', ''),
+    'bzbug': ('https://bugzilla.gnome.org/show_bug.cgi?id=%s', 'bz#%s'),
+    'issue': ('https://gitlab.gnome.org/GNOME/pygobject/issues/%s', '#%s'),
+    'commit': ('https://gitlab.gnome.org/GNOME/pygobject/commit/%s', '%s'),
     'mr': (
-        'https://gitlab.gnome.org/GNOME/pygobject/merge_requests/%s', '!'),
-    'user': ('https://gitlab.gnome.org/%s', ''),
+        'https://gitlab.gnome.org/GNOME/pygobject/merge_requests/%s', '!%s'),
+    'user': ('https://gitlab.gnome.org/%s', '%s'),
 }
 
 suppress_warnings = ["image.nonlocal_uri"]

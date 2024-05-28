@@ -24,8 +24,10 @@ import random
 import collections
 import ctypes
 import platform
+import warnings
 
 # GObject
+import gi
 from gi.repository import GObject
 from gi.repository import Gtk
 
@@ -107,10 +109,11 @@ class GenericTreeModel(GObject.GObject, Gtk.TreeModel):
     #
     def __init__(self):
         """Initialize. Make sure to call this from derived classes if overridden."""
+        warnings.warn("pygtkcompat is deprecated, see https://pygobject.gnome.org for migration instructions", gi.PyGIDeprecationWarning)
         super(GenericTreeModel, self).__init__()
         self.stamp = 0
 
-        #: Dictionary of (id(user_data): user_data), used when leak-refernces=False
+        #: Dictionary of (id(user_data): user_data), used when leak-references=False
         self._held_refs = dict()
 
         # Set initial stamp

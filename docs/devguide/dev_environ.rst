@@ -12,9 +12,9 @@ instructions on ":ref:`gettingstarted`" first, as they are a pre-requirement.
 
 .. _pipenv-setup:
 
-************
-Pipenv Setup
-************
+*****************
+Environment Setup
+*****************
 
 .. _install-dependencies:
 
@@ -48,7 +48,7 @@ your operating system.
 
 .. code:: console
 
-    sudo dnf install -y python3-venv python3-wheel
+    sudo dnf install -y python3-wheel
     sudo dnf install -y gcc zlib-devel bzip2 bzip2-devel readline-devel \
       sqlite sqlite-devel openssl-devel tk-devel git python3-cairo-devel \
       cairo-gobject-devel gobject-introspection-devel
@@ -61,7 +61,7 @@ your operating system.
 
 .. code:: console
 
-    sudo pacman -S --noconfirm python-virtualenv python-wheel
+    sudo pacman -S --noconfirm python-wheel
     sudo pacman -S --noconfirm base-devel openssl zlib git gobject-introspection
 
 
@@ -72,7 +72,7 @@ your operating system.
 
 .. code:: console
 
-    sudo zypper install -y python3-venv python3-wheel gobject-introspection-devel \
+    sudo zypper install -y python3-wheel gobject-introspection-devel \
       python3-cairo-devel openssl zlib git
     sudo zypper install --type pattern devel_basis
 
@@ -82,30 +82,37 @@ your operating system.
 |windows-logo| Windows
 ----------------------
 
+To develop on Windows you need to have `MSYS2 <https://msys2.org>`_ installed.
+
 .. code:: console
 
-    pacman -S --needed --noconfirm base-devel mingw-w64-i686-toolchain git \
-       mingw-w64-i686-python3 mingw-w64-i686-python3-cairo \
-       mingw-w64-i686-gobject-introspection mingw-w64-i686-libffi
+    pacman -S --needed --noconfirm base-devel mingw-w64-ucrt-x86_64-toolchain git \
+       mingw-w64-ucrt-x86_64-python mingw-w64-ucrt-x86_64-pycairo \
+       mingw-w64-ucrt-x86_64-gobject-introspection mingw-w64-ucrt-x86_64-libffi
 
 .. _macosx-dep:
 
 |macosx-logo| macOS
 -------------------
 
-No extra dependencies needed.
+With homebrew:
+
+.. code:: console
+
+    brew update
+    brew install python3 gobject-introspection libffi
+    export PKG_CONFIG_PATH=/opt/homebrew/opt/libffi/lib/pkgconfig  # use /usr/local/ for older Homebrew installs
 
 
 .. _install-pyenv:
 
-Install `pyenv`_
-================
+Install `pyenv`_ (Optional)
+===========================
 
 `pyenv`_ lets you easily switch between multiple versions of Python.
 
 ============================================= =========================================
 |linux-logo| :ref:`Linux <linux-pyenv>`       |macosx-logo| :ref:`macOS <macosx-pyenv>`
-|windows-logo| :ref:`Windows <windows-pyenv>`
 ============================================= =========================================
 
 .. _linux-pyenv:
@@ -115,26 +122,10 @@ Install `pyenv`_
 
 .. code:: console
 
-    git clone https://github.com/pyenv/pyenv.git ~/.pyenv
-    echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bashrc
-    echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bashrc
-    echo -e 'if command -v pyenv 1>/dev/null 2>&1; then\n  eval "$(pyenv init -)"\nfi' >> ~/.bashrc
-    source ~/.bashrc
-    pyenv install 3.6.4
-
-
-.. _windows-pyenv:
-
-|windows-logo| Windows
-----------------------
-
-TODO: currently no way to install `pyenv`_ in Windows. So we'll use a normal
-`virtualenv`_ instead.
-
-.. code:: console
-
-    virtualenv --python 3 myvenv
-    source myvenv/bin/activate
+    curl https://pyenv.run | bash
+    exec $SHELL
+    pyenv install 3.11
+    pyenv global 3.11
 
 
 .. _macosx-pyenv:
@@ -145,97 +136,12 @@ TODO: currently no way to install `pyenv`_ in Windows. So we'll use a normal
 .. code:: console
 
     brew install pyenv
-    pyenv install 3.6.4
-
-
-.. _install-pipsi:
-
-Install `pipsi`_
-================
-
-`pipsi`_ is a wrapper around virtualenv and pip which installs
-scripts provided by python packages into separate virtualenvs to shield them
-from your system and each other. We'll use this to install pipenv.
-
-============================================= =========================================
-|linux-logo| :ref:`Linux <linux-pipsi>`       |macosx-logo| :ref:`macOS <macosx-pipsi>`
-|windows-logo| :ref:`Windows <windows-pipsi>`
-============================================= =========================================
-
-.. _linux-pipsi:
-
-|linux-logo| Linux
-------------------
-
-.. code:: console
-
-    curl https://raw.githubusercontent.com/mitsuhiko/pipsi/master/get-pipsi.py | python3 - --src=git+https://github.com/mitsuhiko/pipsi.git\#egg=pipsi
-    echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
-    source ~/.bashrc
-    pipsi install pew
-    pipsi install pipenv
-
-
-.. _windows-pipsi:
-
-|windows-logo| Windows
-----------------------
-
-.. code:: console
-
-    curl https://raw.githubusercontent.com/mitsuhiko/pipsi/master/get-pipsi.py | python3 - --src=git+https://github.com/mitsuhiko/pipsi.git\#egg=pipsi
-
-Add C:/\Users/\.local/\bin to your path via Control Panel->All Control Panel
-Items->System->Advanced System Setttings->Environment Variables
-
-.. code:: console
-
-    pipsi install pew
-    pipsi install pipenv
-
-
-.. _macosx-pipsi:
-
-|macosx-logo| macOS
--------------------
-
-With homebrew:
-
-.. code:: console
-
-    brew install pipenv
-
-With pipsi:
-
-.. code:: console
-
-    curl https://raw.githubusercontent.com/mitsuhiko/pipsi/master/get-pipsi.py | python3 - --src=git+https://github.com/mitsuhiko/pipsi.git\#egg=pipsi
-    echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
-    source ~/.bashrc
-    pipsi install pew
-    pipsi install pipenv
+    pyenv install 3.11
+    pyenv global 3.11
 
 
 .. _projects-pygobject-dependencies:
 
-************************************
-Projects with PyGObject Dependencies
-************************************
-
-If you are going to work on a project that has PyGObject as a dependency, then
-do the following additional steps:
-
-.. code:: console
-
-    git clone <url/projectname.git>
-    cd projectname
-    pipenv --python 3
-    pipenv install pycairo
-    pipenv install pygobject
-    pipenv shell
-
-
-.. _work-on-pygobject:
 
 *****************
 Work on PyGObject
@@ -247,21 +153,92 @@ Platform Independent Steps
 ==========================
 
 
-If you are going to work on developing PyGObject itself, then do the following
-additional steps:
+First, check out the source code:
 
 .. code:: console
 
     git clone https://gitlab.gnome.org/GNOME/pygobject.git
     cd pygobject
-    pipenv --python 3
-    pipenv install pytest
-    pipenv install flake8
-    pipenv install pycairo
-    pipenv shell
 
+With a local copy of PyGObject, there's three ways to start developing:
+
+1. PDM, a modern Python package and dependency manager
+2. Pip, the default Python package installer
+3. Meson, use the Meson build system directly
+
+
+PDM
+---
+
+Make sure you have `PDM <https://pdm-project.org>`_ 2.13 or newer installed.
+
+Then set up the project by running:
+
+.. code:: console
+
+    pdm install
+
+You can run teh unit tests with:
+
+.. code:: console
+
+    pdm run pytest
+
+
+Pip
+---
+
+It's always a good idea to work from within a Python virtual environment.
+PyGObject is built with `Meson <https://mesonbuild.com/>`_.
+In order to support 
+`editable installs <https://meson-python.readthedocs.io/en/latest/how-to-guides/editable-installs.html>`_,
+Meson-python, Meson, and Ninja should be installed in the virtual environment.
+
+.. code:: console
+
+    python3 -m venv .venv
+    source .venv/bin/activate
+    pip install meson-python meson ninja pycairo pytest
+
+.. note::
+
+   For Python 3.12 and newer, also install ``setuptools``, since distutils is no longer provided in the standard library.
+
+Install PyGObject in your local environment with the ``--no-build-isolation`` to allow for dynamic rebuilds
+
+.. code:: console
+
+   pip install --no-build-isolation --config-settings=setup-args="-Dtests=true" -e '.[dev]'
+
+By default the C libraries are built in "release" mode (no debug symbols).
+To compile the C libraries with debug symbols, run
+
+.. code:: console
+
+   pip install --no-build-isolation --config-settings=setup-args="-Dbuildtype=debug" --config-settings=setup-args="-Dtests=true" -e '.[dev]'
+   
+Open a Python console:
+
+.. code:: python
+
+   from gi.repository import GObject
+
+Run the unittests:
+
+.. code:: console
+
+   pytest
+
+
+Meson
+-----
+
+It's also possible to run the tests from Meson. Tests are still run with Pytest, so it's important
+that Pytest is installed.
+
+.. code:: console
+
+   meson setup _build  # Needed only once
+   meson test -C _build
 
 .. _pyenv: https://github.com/pyenv/pyenv
-.. _pipsi: https://github.com/mitsuhiko/pipsi
-.. _pipenv: https://github.com/pypa/pipenv
-.. _virtualenv: https://www.virtualenv.org

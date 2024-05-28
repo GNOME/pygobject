@@ -33,6 +33,8 @@
  */
 #include <pygi-foreign-api.h>
 
+static int _gi_cairo_exec (PyObject *module);
+
 /*
  * cairo_t marshaling
  */
@@ -614,13 +616,18 @@ cairo_matrix_from_gvalue (const GValue *value)
 
 static PyMethodDef _gi_cairo_functions[] = { {0,} };
 
+static PyModuleDef_Slot _gi_cairo_slots[] = {
+    {Py_mod_exec, _gi_cairo_exec},
+    {0, NULL}
+};
+
 static struct PyModuleDef __gi_cairomodule = {
     PyModuleDef_HEAD_INIT,
     "_gi_cairo",
     NULL,
-    -1,
+    0,
     _gi_cairo_functions,
-    NULL,
+    _gi_cairo_slots,
     NULL,
     NULL,
     NULL
@@ -630,19 +637,23 @@ PYGI_MODINIT_FUNC PyInit__gi_cairo (void);
 
 PYGI_MODINIT_FUNC PyInit__gi_cairo (void)
 {
-    PyObject *module;
-    module = PyModule_Create (&__gi_cairomodule);
+    return PyModuleDef_Init(&__gi_cairomodule);
+}
 
+
+static int
+_gi_cairo_exec (PyObject *module)
+{
     PyObject *gobject_mod;
 
     import_cairo();
 
     if (Pycairo_CAPI == NULL)
-        return NULL;
+        return -1;
 
     gobject_mod = pygobject_init (3, 13, 2);
     if (gobject_mod == NULL)
-        return NULL;
+        return -1;
     Py_DECREF (gobject_mod);
 
     pygi_register_foreign_struct ("cairo",
@@ -711,5 +722,5 @@ PYGI_MODINIT_FUNC PyInit__gi_cairo (void)
                                cairo_pattern_from_gvalue,
                                cairo_pattern_to_gvalue);
 
-    return module;
+    return 0;
 }

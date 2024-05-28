@@ -15,7 +15,7 @@ class TestThread(unittest.TestCase):
     def from_thread_cb(self, test, enum):
         assert test == self.obj
         assert int(enum) == 0
-        assert type(enum) != int
+        assert type(enum) is not int
         self.called = True
         GLib.idle_add(self.timeout_cb)
 

@@ -122,11 +122,8 @@ class DynamicImporter(object):
         if self._find_module_check(fullname):
             return self
 
-    def load_module(self, fullname):
-        if fullname in sys.modules:
-            return sys.modules[fullname]
-
-        path, namespace = fullname.rsplit('.', 1)
+    def create_module(self, spec):
+        path, namespace = spec.name.rsplit('.', 1)
 
         # is_registered() is faster than enumerate_versions() and
         # in the common case of a namespace getting loaded before its
@@ -149,8 +146,8 @@ class DynamicImporter(object):
                 importlib.import_module('gi.repository.' + dep.split("-")[0])
             dynamic_module = load_overrides(introspection_module)
 
-        dynamic_module.__file__ = '<%s>' % fullname
-        dynamic_module.__loader__ = self
-        sys.modules[fullname] = dynamic_module
-
         return dynamic_module
+
+    def exec_module(self, fullname):
+        # “exec” the module and consequently populate the module’s namespace
+        pass

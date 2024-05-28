@@ -17,11 +17,24 @@ _GI_TEST_EXTERN
 RegressTestBoxedC *regress_test_boxed_c_wrapper_get (RegressTestBoxedCWrapper *self);
 
 _GI_TEST_EXTERN
+gchar** regress_test_array_of_non_utf8_strings (void);
+_GI_TEST_EXTERN
 void regress_test_array_fixed_boxed_none_out (RegressTestBoxedC ***objs);
+_GI_TEST_EXTERN
+void regress_test_gvalue_out_boxed (GValue *value, int init);
 _GI_TEST_EXTERN
 GList *regress_test_glist_boxed_none_return (guint count);
 _GI_TEST_EXTERN
 GList *regress_test_glist_boxed_full_return (guint count);
+
+_GI_TEST_EXTERN
+gboolean regress_test_array_of_fundamental_objects_in (RegressTestFundamentalObject **list, gsize len);
+_GI_TEST_EXTERN
+RegressTestFundamentalObject** regress_test_array_of_fundamental_objects_out (gsize *len);
+_GI_TEST_EXTERN
+gboolean regress_test_fundamental_argument_in (RegressTestFundamentalObject *obj);
+_GI_TEST_EXTERN
+RegressTestFundamentalObject* regress_test_fundamental_argument_out (RegressTestFundamentalObject *obj);
 
 #ifndef _GI_DISABLE_CAIRO
 
@@ -76,5 +89,27 @@ typedef struct {
 
 _GI_TEST_EXTERN
 GType regress_test_action_get_type (void);
+
+
+/**
+ * RegressBitmask:
+ *
+ * A fundamental type that describes a 64-bit bitmask.
+ *
+ * This type resembles GStreamer's Bitmask type.
+ */
+
+/**
+ * REGRESS_TYPE_BITMASK:
+ *
+ * a #GValue type that represents a 64-bit bitmask.
+ *
+ * Returns: the #GType of RegressBitmask (which is not explicitly typed)
+ */
+
+#define REGRESS_TYPE_BITMASK                 (regress_bitmask_get_type())
+
+_GI_TEST_EXTERN
+GType regress_bitmask_get_type (void);
 
 #endif /* REGRESS_EXTRA_H */

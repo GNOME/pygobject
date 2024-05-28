@@ -131,3 +131,8 @@ class Test(unittest.TestCase):
 
         self.assertEqual(A.__doc__, "custom doc")
         self.assertEqual(B.__doc__, "custom doc")
+
+    def test_return_array_with_length_argument(self):
+        self.assertEqual(
+            GIMarshallingTests.enum_array_return_type.__doc__,
+            "enum_array_return_type() -> list")

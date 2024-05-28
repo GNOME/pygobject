@@ -120,7 +120,7 @@ def _generate_callable_info_doc(info):
 
     # Build lists of indices prior to adding the docs because it is possible
     # the index retrieved comes before input arguments being used.
-    ignore_indices = set()
+    ignore_indices = {info.get_return_type().get_array_length()}
     user_data_indices = set()
     for arg in args:
         ignore_indices.add(arg.get_destroy())

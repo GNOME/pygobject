@@ -24,8 +24,9 @@
 #include "pygi-property.h"
 #include "pygi-value.h"
 #include "pygi-argument.h"
-#include "pygparamspec.h"
+#include "pygi-fundamental.h"
 #include "pygi-type.h"
+#include "pygi-fundamental.h"
 
 #include <girepository.h>
 
@@ -105,7 +106,7 @@ pygi_call_do_get_property (PyObject *instance, GParamSpec *pspec)
     PyObject *py_pspec;
     PyObject *retval;
 
-    py_pspec = pyg_param_spec_new (pspec);
+    py_pspec = pygi_fundamental_new (pspec);
     retval = PyObject_CallMethod (instance, "do_get_property", "O", py_pspec);
     Py_DECREF (py_pspec);
     return retval;
@@ -175,6 +176,10 @@ pygi_get_property_value (PyGObject *instance, GParamSpec *pspec)
 
         g_base_info_unref (type_info);
         g_base_info_unref (property_info);
+
+        if (PyErr_Occurred()) {
+            return NULL;
+        }
     }
 
     /* Fallback to GValue marshalling. */
@@ -260,7 +265,14 @@ pygi_set_property_value (PyGObject *instance,
                     break;
                 case GI_INFO_TYPE_INTERFACE:
                 case GI_INFO_TYPE_OBJECT:
-                    g_value_set_object (&value, arg.v_pointer);
+                    if (arg.v_pointer == NULL || G_IS_OBJECT (arg.v_pointer)) {
+                        g_value_set_object (&value, arg.v_pointer);
+                    } else if (!pygi_fundamental_set_value (&value, arg.v_pointer)) {
+                        PyErr_Format (PyExc_NotImplementedError,
+                                      "Setting properties of type '%s' is not implemented",
+                                      g_type_name (type));
+                        goto out;
+                    }
                     break;
                 case GI_INFO_TYPE_BOXED:
                 case GI_INFO_TYPE_STRUCT:

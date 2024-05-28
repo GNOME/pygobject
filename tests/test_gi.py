@@ -862,14 +862,15 @@ class TestFilename(unittest.TestCase):
 
         paths = [(wdb, b"foo-1"), (wd, u"foo-2"), (wd, u"öäü-3")]
 
-        try:
-            paths.append((wd, os.fsdecode(b"\xff\xfe-4")))
-        except UnicodeDecodeError:
-            # depends on the code page
-            pass
+        if sys.platform != "darwin":
+            try:
+                paths.append((wd, os.fsdecode(b"\xff\xfe-4")))
+            except UnicodeDecodeError:
+                # depends on the code page
+                pass
 
-        if os.name != "nt":
-            paths.append((wdb, b"\xff\xfe-5"))
+            if os.name != "nt":
+                paths.append((wdb, b"\xff\xfe-5"))
 
         def valid_path(p):
             try:
@@ -1573,9 +1574,12 @@ class TestGValue(unittest.TestCase):
         self.assertRaises(OverflowError, GIMarshallingTests.gvalue_flat_array,
                           [GLib.MININT - 1, "42", True])
 
+        # FIXME: https://gitlab.gnome.org/GNOME/pygobject/-/issues/582#note_1764164
+        exc_prefix = "Item 0: " if sys.version_info[:2] < (3, 12) else ""
+
         with pytest.raises(
                 OverflowError,
-                match='Item 0: %d not in range %d to %d' % (
+                match=exc_prefix + '%d not in range %d to %d' % (
                     GLib.MAXINT + 1, GLib.MININT, GLib.MAXINT)):
             GIMarshallingTests.gvalue_flat_array([GLib.MAXINT + 1, "42", True])
 
@@ -1583,7 +1587,7 @@ class TestGValue(unittest.TestCase):
 
         with pytest.raises(
                 OverflowError,
-                match='Item 0: %d not in range %d to %d' % (
+                match=exc_prefix + '%d not in range %d to %d' % (
                     GLib.MAXUINT64 * 2, min_, max_)):
             GIMarshallingTests.gvalue_flat_array([GLib.MAXUINT64 * 2, "42", True])
 
@@ -2966,8 +2970,7 @@ class TestDir(unittest.TestCase):
 
 
 class TestParamSpec(unittest.TestCase):
-    # https://bugzilla.gnome.org/show_bug.cgi?id=682355
-    @unittest.expectedFailure
+
     def test_param_spec_in_bool(self):
         ps = GObject.param_spec_boolean('mybool', 'test-bool', 'boolblurb',
                                         True, GObject.ParamFlags.READABLE)

@@ -1,5 +1,5 @@
 [wrap-git]
 directory=pycairo
 url=https://github.com/pygobject/pycairo.git
-revision=pycairo-1.18
+revision=main
 depth=1

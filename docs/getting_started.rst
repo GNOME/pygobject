@@ -13,14 +13,27 @@ the following content and save it somewhere:
 
 .. code:: python
 
-    import gi
-    gi.require_version("Gtk", "3.0")
-    from gi.repository import Gtk
+    import sys
 
-    window = Gtk.Window(title="Hello World")
-    window.show()
-    window.connect("destroy", Gtk.main_quit)
-    Gtk.main()
+    import gi
+
+    gi.require_version("Gtk", "4.0")
+    from gi.repository import GLib, Gtk
+
+
+    class MyApplication(Gtk.Application):
+        def __init__(self):
+            super().__init__(application_id="com.example.MyGtkApplication")
+            GLib.set_application_name('My Gtk Application')
+
+        def do_activate(self):
+            window = Gtk.ApplicationWindow(application=self, title="Hello World")
+            window.present()
+
+
+    app = MyApplication()
+    exit_status = app.run(sys.argv)
+    sys.exit(exit_status)
 
 Before we can run the example application we need to install PyGObject, GTK
 and their dependencies. Follow the instructions for your platform below.
@@ -30,11 +43,12 @@ and their dependencies. Follow the instructions for your platform below.
 |windows-logo| :ref:`Windows <windows-getting-started>` |macosx-logo| :ref:`macOS <macosx-getting-started>`  |opensuse-logo| :ref:`openSUSE <opensuse-getting-started>`
 ======================================================= ==================================================== ==========================================================
 
-After running the example application have a look at the "`Python GTK 3
-Tutorial <https://python-gtk-3-tutorial.readthedocs.io>`__" for more examples
-on how to create GTK apps and the "`PyGObject API Reference
-<https://lazka.github.io/pgi-docs>`__" for API documentation for all supported
-libraries.
+After running the example application have a look at the `PyGObject Guide
+<https://rafaelmardojai.pages.gitlab.gnome.org/pygobject-guide>`__ for tutorials on how to create GTK apps and the `GNOME Python API docs
+<https://amolenaar.pages.gitlab.gnome.org/pygobject-docs>`__ for API documentation for all supported
+libraries. 
+
+For full IDE support (incl. autocomplete) you will also need typing stubs available here `PyGObject-stubs <https://pypi.org/project/PyGObject-stubs/>`_.
 
 .. _windows-getting-started:
 
@@ -43,10 +57,10 @@ libraries.
 
 #) Go to http://www.msys2.org/ and download the x86_64 installer
 #) Follow the instructions on the page for setting up the basic environment
-#) Run ``C:\msys64\mingw64.exe`` - a terminal window should pop up
+#) Run ``C:\msys64\ucrt64.exe`` - a terminal window should pop up
 #) Execute ``pacman -Suy``
-#) Execute ``pacman -S mingw-w64-x86_64-gtk3 mingw-w64-x86_64-python3 mingw-w64-x86_64-python3-gobject``
-#) To test that GTK 3 is working you can run ``gtk3-demo``
+#) Execute ``pacman -S mingw-w64-ucrt-x86_64-gtk4 mingw-w64-ucrt-x86_64-python3 mingw-w64-ucrt-x86_64-python3-gobject``
+#) To test that GTK is working you can run ``gtk4-demo``
 #) Copy the ``hello.py`` script you created to ``C:\msys64\home\<username>``
 #) In the mingw32 terminal execute ``python3 hello.py`` - a window should appear.
 
@@ -61,13 +75,13 @@ libraries.
 
 Installing the system provided PyGObject:
   #) Open a terminal
-  #) Execute ``sudo apt install python3-gi python3-gi-cairo gir1.2-gtk-3.0``
+  #) Execute ``sudo apt install python3-gi python3-gi-cairo gir1.2-gtk-4.0``
   #) Change the directory to where your ``hello.py`` script can be found (e.g. ``cd Desktop``)
   #) Run ``python3 hello.py``
 
 Installing from PyPI with pip:
   #) Open a terminal and enter your virtual environment
-  #) Execute ``sudo apt install libgirepository1.0-dev gcc libcairo2-dev pkg-config python3-dev gir1.2-gtk-3.0``
+  #) Execute ``sudo apt install libgirepository1.0-dev gcc libcairo2-dev pkg-config python3-dev gir1.2-gtk-4.0``
      to install the build dependencies and GTK
   #) Execute ``pip3 install pycairo`` to build and install Pycairo
   #) Execute ``pip3 install PyGObject`` to build and install PyGObject
@@ -85,13 +99,13 @@ Installing from PyPI with pip:
 
 Installing the system provided PyGObject:
   #) Open a terminal
-  #) Execute ``sudo dnf install python3-gobject gtk3``
+  #) Execute ``sudo dnf install python3-gobject gtk4``
   #) Change the working directory to where your ``hello.py`` script can be found
   #) Run ``python3 hello.py``
 
 Installing from PyPI with pip:
   #) Open a terminal and enter your virtual environment
-  #) Execute ``sudo dnf install gcc gobject-introspection-devel cairo-gobject-devel pkg-config python3-devel gtk3``
+  #) Execute ``sudo dnf install gcc gobject-introspection-devel cairo-gobject-devel pkg-config python3-devel gtk4``
      to install the build dependencies and GTK
   #) Execute ``pip3 install pycairo`` to build and install Pycairo
   #) Execute ``pip3 install PyGObject`` to build and install PyGObject
@@ -106,13 +120,13 @@ Installing from PyPI with pip:
 
 Installing the system provided PyGObject:
   #) Open a terminal
-  #) Execute ``sudo pacman -S python-gobject gtk3``
+  #) Execute ``sudo pacman -S python-gobject gtk4``
   #) Change the working directory to where your ``hello.py`` script can be found
   #) Run ``python3 hello.py``
 
 Installing from PyPI with pip:
   #) Open a terminal and enter your virtual environment
-  #) Execute ``sudo pacman -S python cairo pkgconf gobject-introspection gtk3``
+  #) Execute ``sudo pacman -S python cairo pkgconf gobject-introspection gtk4``
      to install the build dependencies and GTK
   #) Execute ``pip3 install pycairo`` to build and install Pycairo
   #) Execute ``pip3 install PyGObject`` to build and install PyGObject
@@ -127,7 +141,7 @@ Installing from PyPI with pip:
 
 Installing the system provided PyGObject:
   #) Open a terminal
-  #) Execute ``sudo zypper install python3-gobject python3-gobject-Gdk typelib-1_0-Gtk-3_0 libgtk-3-0``
+  #) Execute ``sudo zypper install python3-gobject python3-gobject-Gdk typelib-1_0-Gtk-4_0 libgtk-4-1``
   #) Change the directory to where your ``hello.py`` script can be found
   #) Run ``python3 hello.py``
 
@@ -148,7 +162,7 @@ Installing from PyPI with pip:
 
 #) Go to https://brew.sh/ and install homebrew
 #) Open a terminal
-#) Execute ``brew install pygobject3 gtk+3``
+#) Execute ``brew install pygobject3 gtk4``
 #) Change the working directory to where your ``hello.py`` script can be found
 #) Run ``python3 hello.py``
 

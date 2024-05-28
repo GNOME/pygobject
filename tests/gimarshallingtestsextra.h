@@ -44,6 +44,9 @@ GType gi_marshalling_tests_extra_flags_get_type (void) G_GNUC_CONST;
 _GI_TEST_EXTERN
 void gi_marshalling_tests_compare_two_gerrors_in_gvalue (GValue *v, GValue *v1);
 _GI_TEST_EXTERN
+gboolean gi_marshalling_tests_nullable_gerror(GError *error);
+
+_GI_TEST_EXTERN
 void gi_marshalling_tests_ghashtable_enum_none_in (GHashTable *hash_table);
 _GI_TEST_EXTERN
 GHashTable * gi_marshalling_tests_ghashtable_enum_none_return (void);

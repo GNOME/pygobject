@@ -101,7 +101,7 @@ pygi_ccallback_register_types (PyObject *m)
         return -1;
     Py_INCREF ((PyObject *) &PyGICCallback_Type);
     if (PyModule_AddObject (m, "CCallback", (PyObject *) &PyGICCallback_Type) < 0) {
-        Py_INCREF ((PyObject *) &PyGICCallback_Type);
+        Py_DECREF ((PyObject *) &PyGICCallback_Type);
         return -1;
     }
 

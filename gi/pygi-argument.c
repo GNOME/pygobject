@@ -252,13 +252,13 @@ _pygi_argument_to_array (GIArgument  *arg,
     gsize item_size;
     gssize length;
     GArray *g_array;
-    
+
     g_return_val_if_fail (g_type_info_get_tag (type_info) == GI_TYPE_TAG_ARRAY, NULL);
 
     if (arg->v_pointer == NULL) {
         return NULL;
     }
-    
+
     switch (g_type_info_get_array_type (type_info)) {
         case GI_ARRAY_TYPE_C:
             is_zero_terminated = g_type_info_is_zero_terminated (type_info);
@@ -453,8 +453,7 @@ array_success:
 
             switch (info_type) {
                 case GI_INFO_TYPE_CALLBACK:
-                    /* This should be handled in invoke() */
-                    g_assert_not_reached();
+                    PyErr_SetString (PyExc_TypeError, "Cannot translate Python object to callback type");
                     break;
                 case GI_INFO_TYPE_BOXED:
                 case GI_INFO_TYPE_STRUCT:
@@ -490,9 +489,21 @@ array_success:
                     break;
                 }
                 case GI_INFO_TYPE_ENUM:
+                {
+                    GType g_type;
+
+                    g_type = g_registered_type_info_get_g_type ( (GIRegisteredTypeInfo *) info);
+                    if (pyg_enum_get_value(g_type, object, &arg.v_int) < 0)
+                        break;
+
+                    break;
+                }
                 case GI_INFO_TYPE_FLAGS:
                 {
-                    if (!pygi_gint_from_py (object, &arg.v_int))
+                    GType g_type;
+
+                    g_type = g_registered_type_info_get_g_type ( (GIRegisteredTypeInfo *) info);
+                    if (pyg_flags_get_value(g_type, object, &arg.v_uint) < 0)
                         break;
 
                     break;
@@ -735,16 +746,16 @@ _pygi_argument_to_object (GIArgument  *arg,
 
             if (arg->v_pointer == NULL)
                 return PyList_New (0);
-            
+
             item_type_info = g_type_info_get_param_type (type_info, 0);
             g_assert (item_type_info != NULL);
 
             item_type_tag = g_type_info_get_tag (item_type_info);
             item_transfer = transfer == GI_TRANSFER_CONTAINER ? GI_TRANSFER_NOTHING : transfer;
-            
+
             array = arg->v_pointer;
             item_size = g_array_get_element_size (array);
-            
+
             if (G_UNLIKELY (item_size > sizeof(GIArgument))) {
                 g_critical ("Stack overflow protection. "
                             "Can't copy array element into GIArgument.");
@@ -765,7 +776,7 @@ _pygi_argument_to_object (GIArgument  *arg,
                 for (i = 0; i < array->len; i++) {
                     GIArgument item = { 0 };
                     PyObject *py_item;
-                    
+
                     memcpy (&item, array->data + i * item_size, item_size);
 
                     py_item = _pygi_argument_to_object (&item, item_type_info, item_transfer);
@@ -792,9 +803,8 @@ _pygi_argument_to_object (GIArgument  *arg,
 
             switch (info_type) {
                 case GI_INFO_TYPE_CALLBACK:
-                {
-                    g_assert_not_reached();
-                }
+                    PyErr_SetString (PyExc_TypeError, "Cannot translate callback type to Python object");
+                    break;
                 case GI_INFO_TYPE_BOXED:
                 case GI_INFO_TYPE_STRUCT:
                 case GI_INFO_TYPE_UNION:
@@ -859,8 +869,7 @@ _pygi_argument_to_object (GIArgument  *arg,
                 }
                 case GI_INFO_TYPE_INTERFACE:
                 case GI_INFO_TYPE_OBJECT:
-                    object = pygi_arg_gobject_to_py_called_from_c (arg, transfer);
-
+                    object = pygi_arg_object_to_py_called_from_c (arg, transfer);
                     break;
                 default:
                     g_assert_not_reached();

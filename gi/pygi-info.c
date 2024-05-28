@@ -23,11 +23,11 @@
 #include "pygi-info.h"
 #include "pygi-cache.h"
 #include "pygi-invoke.h"
-#include "pygi-type.h"
 #include "pygi-argument.h"
 #include "pygi-util.h"
 #include "pygi-basictype.h"
 #include "pygi-type.h"
+#include "pygi-fundamental.h"
 
 /* _generate_doc_string
  *
@@ -1938,11 +1938,20 @@ _wrap_g_field_info_get_value (PyGIBaseInfo *self,
             pointer = pyg_boxed_get (instance, void);
             break;
         case GI_INFO_TYPE_OBJECT:
-            pointer = pygobject_get (instance);
+            if (pygi_check_fundamental (container_info_type, container_info))
+                pointer = pygi_fundamental_get (instance);
+            else
+                pointer = pygobject_get (instance);
             break;
         default:
             /* Other types don't have fields. */
             g_assert_not_reached();
+    }
+
+    if (pointer == NULL) {
+        PyErr_Format(PyExc_RuntimeError, "object at %p of type %s is not initialized",
+                instance, Py_TYPE(instance)->tp_name);
+        return NULL;
     }
 
     /* Get the field's value. */
@@ -2046,11 +2055,20 @@ _wrap_g_field_info_set_value (PyGIBaseInfo *self,
             pointer = pyg_boxed_get (instance, void);
             break;
         case GI_INFO_TYPE_OBJECT:
-            pointer = pygobject_get (instance);
+            if (pygi_check_fundamental (container_info_type, container_info))
+                pointer = pygi_fundamental_get (instance);
+            else
+                pointer = pygobject_get (instance);
             break;
         default:
             /* Other types don't have fields. */
             g_assert_not_reached();
+    }
+
+    if (pointer == NULL) {
+        PyErr_Format(PyExc_RuntimeError, "object at %p of type %s is not initialized",
+                instance, Py_TYPE(instance)->tp_name);
+        return NULL;
     }
 
     field_type_info = g_field_info_get_type ( (GIFieldInfo *) self->info);

@@ -30,21 +30,34 @@
 
 If you want to write a Python application for `GNOME
 <https://www.gnome.org/>`__ or a Python GUI application using GTK, then
-PyGObject is the way to go. For more information on specific libraries check
-out the "`Python GTK 3 Tutorial
-<https://python-gtk-3-tutorial.readthedocs.io>`__" and the "`Python GI API
+PyGObject is the way to go. To get started, check out the "`GNOME Developer Documentation
+<https://developer.gnome.org/documentation/tutorials/beginners.html>`__". For more
+information on specific libraries, check out the "`Python GI API
 Reference <https://lazka.github.io/pgi-docs>`__".
 
 .. code:: python
 
-    import gi
-    gi.require_version("Gtk", "3.0")
-    from gi.repository import Gtk
+    import sys
 
-    window = Gtk.Window(title="Hello World")
-    window.show()
-    window.connect("destroy", Gtk.main_quit)
-    Gtk.main()
+    import gi
+
+    gi.require_version("Gtk", "4.0")
+    from gi.repository import GLib, Gtk
+
+
+    class MyApplication(Gtk.Application):
+        def __init__(self):
+            super().__init__(application_id="com.example.MyGtkApplication")
+            GLib.set_application_name("My Gtk Application")
+
+        def do_activate(self):
+            window = Gtk.ApplicationWindow(application=self, title="Hello World")
+            window.present()
+
+
+    app = MyApplication()
+    exit_status = app.run(sys.argv)
+    sys.exit(exit_status)
 
 
 How does it work?
@@ -54,13 +67,20 @@ How does it work?
     :width: 600px
     :height: 222px
     :align: center
+    :class: only-light
 
-PyGObject uses `glib <https://developer.gnome.org/glib/stable/>`__, `gobject
-<https://developer.gnome.org/gobject/stable/>`__, `girepository
-<https://developer.gnome.org/gi/stable/>`__, `libffi
+.. figure:: images/overview-dark.svg
+    :width: 600px
+    :height: 222px
+    :align: center
+    :class: only-dark
+
+PyGObject uses `GLib <https://docs.gtk.org/glib/>`__, `GObject
+<https://docs.gtk.org/gobject/>`__, `GIRepository
+<https://gnome.pages.gitlab.gnome.org/gobject-introspection/girepository/GIRepository.html>`__, `libffi
 <https://sourceware.org/libffi/>`__ and other libraries to access the C
-library (libgtk-3.so) in combination with the additional metadata from the
-accompanying typelib file (Gtk-3.0.typelib) and dynamically provides a Python
+library (libgtk-4.so) in combination with the additional metadata from the
+accompanying typelib file (Gtk-4.0.typelib) and dynamically provides a Python
 interface based on that information.
 
 
@@ -68,22 +88,41 @@ Who Is Using PyGObject?
 -----------------------
 
 * `Anaconda <https://fedoraproject.org/wiki/Anaconda>`__ - an installation program used by Fedora, RHEL and others
+* `Apostrophe <https://apps.gnome.org/app/org.gnome.gitlab.somas.Apostrophe/>`__ - a Markdown editor
+* `Blanket <https://apps.gnome.org/app/com.rafaelmardojai.Blanket/>`__ - listen to different sounds
+* `BleachBit <https://www.bleachbit.org/>`__ - delete unnecessary files from the system
+* `Bottles <https://usebottles.com/>`__ - run Windows software on Linux
+* `Cambalache <https://gitlab.gnome.org/jpu/cambalache>`__ - a user interface maker for GTK
 * `D-Feet <https://wiki.gnome.org/action/show/Apps/DFeet>`__ - an easy to use D-Bus debugger
+* `Deluge <https://deluge-torrent.org/>`__ - a BitTorrent client
+* `Dialect <https://apps.gnome.org/app/app.drey.Dialect/>`__ - a translation app
+* `Drawing <https://maoschanz.github.io/drawing/>`__ - a drawing application
+* `Feeds <https://gfeeds.gabmus.org/>`__ - an RSS/Atom feed reader
+* `Gajim <https://gajim.org/>`__ - a fully-featured XMPP client
+* `Gameeky <https://github.com/tchx84/gameeky>`__ - a learning tool for making games and learning experiences
 * `Gaphor <https://gaphor.org/>`__ - a simple modeling tool
+* `Getting Things GNOME! <https://wiki.gnome.org/Apps/GTG>`__ - a personal task organizer
 * `Girens <https://gitlab.gnome.org/tijder/girens>`__ - a Plex client for playing movies, TV shows and music from your Plex library
-* `GNOME Music <https://wiki.gnome.org/Apps/Music>`__ - a music player for GNOME
-* `GNOME Tweak Tool <https://wiki.gnome.org/action/show/Apps/GnomeTweakTool>`__ - a tool to customize advanced GNOME 3 options
+* `GNOME Music <https://apps.gnome.org/app/org.gnome.Music/>`__ - a music player for GNOME
+* `GNOME Tweaks <https://wiki.gnome.org/Apps/Tweaks>`__ - a tool to customize advanced GNOME options
 * `Gramps <https://gramps-project.org/>`__ - a genealogy program
+* `Komikku <https://valos.gitlab.io/Komikku/>`__ - a manga reader
 * `Lollypop <https://wiki.gnome.org/Apps/Lollypop>`__ - a modern music player
-* `Meld <http://meldmerge.org/>`__ - a visual diff and merge tool
+* `Lutris <https://lutris.net/>`__ - a video game manager
+* `Meld <https://meldmerge.org/>`__ - a visual diff and merge tool
+* `Metadata Cleaner <https://apps.gnome.org/app/fr.romainvigier.MetadataCleaner/>`__ - an application to view and clean metadata in files
 * `MyPaint <http://mypaint.org/>`__ - a nimble, distraction-free, and easy tool for digital painters
-* `Nicotine+ <https://nicotine-plus.org/>`__ - a graphical client for the Soulseek file sharing network
+* `Nicotine+ <https://nicotine-plus.org/>`__ - a graphical client for the Soulseek peer-to-peer network
 * `Orca <https://wiki.gnome.org/Projects/Orca>`__ - a flexible and extensible screen reader
+* `Paperwork <https://openpaper.work/>`__ - a personal document manager
 * `Pithos <https://pithos.github.io/>`__ - a Pandora Radio client
-* `Pitivi <http://www.pitivi.org/>`__ - a free and open source video editor
+* `Pitivi <https://www.pitivi.org/>`__ - a free and open source video editor
+* `Plots <https://apps.gnome.org/app/com.github.alexhuntley.Plots/>`__ - a graph plotting app
 * `Quod Libet <https://quodlibet.readthedocs.io/>`__ - a music library manager / player
+* `Secrets <https://apps.gnome.org/app/org.gnome.World.Secrets/>`__ - a password manager
+* `Setzer <https://www.cvfosammmm.org/setzer/>`__ - a LaTeX editor
 * `Terminator <https://gnome-terminator.org/>`__ - The Robot Future of Terminals
-* `Transmageddon <http://www.linuxrising.org/>`__ - a video transcoder
+* `Wike <https://hugolabe.github.io/Wike/>`__ - a Wikipedia reader
 
 
 The following applications or libraries use PyGObject for optional features,

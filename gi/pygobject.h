@@ -75,19 +75,6 @@ typedef struct {
 typedef void (*PyGFatalExceptionFunc) (void);
 typedef void (*PyGThreadBlockFunc) (void);
 
-typedef struct {
-    PyObject_HEAD
-    GParamSpec *pspec;
-} PyGParamSpec;
-
-#define pyg_param_spec_get(v)    (((PyGParamSpec *)v)->pspec)
-#define pyg_param_spec_set(v,p)  (((PyGParamSpec *)v)->pspec = (GParamSpec*)p)
-#define pyg_param_spec_check(v)  (PyObject_TypeCheck(v, &PyGParamSpec_Type))
-
-/* Deprecated in favor of lower case with underscore macros above. */
-#define PyGParamSpec_Get    pyg_param_spec_get
-#define PyGParamSpec_Check  pyg_param_spec_check
-
 typedef int (*PyGClassInitFunc) (gpointer gclass, PyTypeObject *pyclass);
 typedef PyTypeObject * (*PyGTypeRegistrationFunction) (const gchar *name,
 						       gpointer data);

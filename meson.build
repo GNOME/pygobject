@@ -1,8 +1,10 @@
-project('pygobject', 'c',
-  version : '3.43.0',
-  meson_version : '>= 0.47.0',
-  default_options : [ 'warning_level=1',
-                      'buildtype=debugoptimized'])
+project(
+  'pygobject',
+  'c',
+  version : '3.49.0',
+  meson_version : '>= 0.64.0',
+  default_options : ['warning_level=1', 'buildtype=debugoptimized']
+)
 
 pygobject_version = meson.project_version()
 version_arr = pygobject_version.split('.')
@@ -13,16 +15,16 @@ pygobject_version_micro = version_arr[2].to_int()
 platform_version = '@0@.0'.format(pygobject_version_major)
 
 pymod = import('python')
-python = pymod.find_installation(get_option('python'))
+python = pymod.find_installation(get_option('python'), pure: false)
 
-if python.language_version().version_compare('< 3.7')
-  error('Requires Python >= 3.7')
+if python.language_version().version_compare('< 3.9')
+  error('Requires Python >= 3.9')
 endif
 
 python_dep = python.dependency()
 
-glib_version_req = '>= 2.56.0'
-gi_version_req = '>= 1.56.0'
+glib_version_req = '>= 2.64.0'
+gi_version_req = '>= 1.64.0'
 pycairo_version_req = '>= 1.16.0'
 libffi_version_req = '>= 3.0'
 
@@ -54,15 +56,47 @@ if not with_pycairo.disabled()
     endif
   endif
 
-  pycairo_dep = dependency(
-    'py3cairo',
-    version: pycairo_version_req,
-    fallback: ['pycairo', 'pycairo_dep'],
-    default_options: ['python=' + get_option('python')],
-    required: with_pycairo,
+  # Find pycairo with target Python (TODO: extract version as well, see setup.py)
+  r = run_command(
+    python,
+    '-c',
+    '''
+import pathlib, sys
+from importlib.util import find_spec
+spec = find_spec("cairo")
+if spec is None:
+  sys.stderr.write("cairo module spec not found")
+  sys.exit(1)
+src_path = pathlib.Path(r"@0@")
+inc_path = pathlib.Path(spec.origin).parent / "include"
+try:
+  sys.stdout.write(str(inc_path.relative_to(src_path)))
+except ValueError:
+  sys.stdout.write(str(inc_path))
+'''.format(meson.current_source_dir()),
+    check: false,
   )
+
+  if r.returncode() == 0
+    message('Found pycairo with target Python: ' + r.stdout())
+    pycairo_inc_dir = include_directories(r.stdout())
+    pycairo_dep = declare_dependency(
+      include_directories: pycairo_inc_dir,
+    )
+  else
+    message('pycairo not found via target Python, falling back to pkg-config (@0@)'.format(r.stderr()))
+    # Find pycairo with pkg-config
+    pycairo_dep = dependency(
+      'py3cairo',
+      version: pycairo_version_req,
+      fallback: ['pycairo', 'pycairo_dep'],
+      default_options: ['python=' + get_option('python')],
+      required: with_pycairo,
+    )
+  endif
 else
   cairo_dep = dependency('', required: false)
+  pycairo_dep = dependency('', required: false)
 endif
 
 main_c_args = []
@@ -103,12 +137,6 @@ else
     '-Wunused-but-set-variable',
     '-Wwrite-strings',
   ]
-
-  if python.language_version().split('.')[0] == '2'
-    main_c_args += [
-        '-Wdeclaration-after-statement',
-    ]
-  endif
 
   main_c_args += [
     '-Wno-incompatible-pointer-types-discards-qualifiers',
@@ -151,12 +179,28 @@ pkgconf.set('datarootdir', join_paths('${prefix}', get_option('datadir')))
 pkgconf.set('datadir', '${datarootdir}')
 pkgconf.set('VERSION', pygobject_version)
 
-pkg_install_dir = '@0@/pkgconfig'.format(get_option('libdir'))
+for_wheel = get_option('wheel')
+if not for_wheel
+  pkg_install_dir = '@0@/pkgconfig'.format(get_option('libdir'))
 
-configure_file(input : 'pygobject-@0@.pc.in'.format(platform_version),
-  output : 'pygobject-@0@.pc'.format(platform_version),
-  configuration : pkgconf,
-  install_dir : pkg_install_dir)
+  configure_file(input : 'pygobject-@0@.pc.in'.format(platform_version),
+    output : 'pygobject-@0@.pc'.format(platform_version),
+    configuration : pkgconf,
+    install_dir : pkg_install_dir)
+
+  if pygobject_version_minor.is_odd()
+    py_version = '@0@.dev0'.format(pygobject_version)
+  else
+    py_version = pygobject_version
+  endif
+
+  pkginfo_conf = configuration_data()
+  pkginfo_conf.set('VERSION', py_version)
+  configure_file(input : 'METADATA.in',
+  output : 'METADATA',
+  configuration : pkginfo_conf,
+  install_dir : python.get_install_dir(pure : false) / 'PyGObject-@0@.dist-info'.format(py_version))
+endif
 
 pygobject_dep = declare_dependency(
   include_directories: include_directories('gi'),
@@ -164,18 +208,6 @@ pygobject_dep = declare_dependency(
   version: meson.project_version(),
 )
 
-if pygobject_version_minor.is_odd()
-  py_version = '@0@.dev0'.format(pygobject_version)
-else
-  py_version = pygobject_version
-endif
-
-pkginfo_conf = configuration_data()
-pkginfo_conf.set('VERSION', py_version)
-configure_file(input : 'PKG-INFO.in',
-  output : 'PyGObject-@0@.egg-info'.format(py_version),
-  configuration : pkginfo_conf,
-  install_dir : python.get_install_dir(pure : false))
 
 subdir('gi')
 subdir('pygtkcompat')
@@ -183,3 +215,10 @@ with_tests = get_option('tests')
 if with_tests
 subdir('tests')
 endif
+
+devenv = environment()
+devenv.prepend('PYTHONPATH', [
+    meson.current_source_dir(),
+    meson.current_build_dir(),
+])
+meson.add_devenv(devenv)

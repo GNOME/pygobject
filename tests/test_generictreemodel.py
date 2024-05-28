@@ -23,6 +23,7 @@ import sys
 import weakref
 import unittest
 import platform
+import warnings
 
 # pygobject
 from gi.repository import GObject
@@ -57,7 +58,8 @@ class Node(object):
 
 class ATesterModel(GenericTreeModel):
     def __init__(self):
-        super(ATesterModel, self).__init__()
+        with warnings.catch_warnings(record=True):
+            super(ATesterModel, self).__init__()
         self.root = Node('root', 0,
                          Node('spam', 1,
                               Node('sushi', 2),
@@ -363,7 +365,8 @@ class ExceptHook(object):
 @unittest.skipUnless(has_gtk, 'Gtk not available')
 class TestReturnsAfterError(unittest.TestCase):
     def setUp(self):
-        self.model = ErrorModel()
+        with warnings.catch_warnings(record=True):
+            self.model = ErrorModel()
 
     def test_get_flags(self):
         with ExceptHook(NotImplementedError):

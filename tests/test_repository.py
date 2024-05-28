@@ -364,7 +364,7 @@ class Test(unittest.TestCase):
         # also raise a RuntimeError.
         GIMarshallingTests.NoTypeFlags  # cause flags registration
         info = repo.find_by_name('GIMarshallingTests', 'NoTypeFlags')
-        with capture_glib_warnings(allow_warnings=True):
+        with capture_glib_warnings(allow_warnings=True, allow_criticals=True):
             self.assertRaises(RuntimeError,
                               GIRepository.flags_register_new_gtype_and_add,
                               info)
@@ -374,7 +374,7 @@ class Test(unittest.TestCase):
         # also raise a RuntimeError.
         GIMarshallingTests.Enum  # cause enum registration
         info = repo.find_by_name('GIMarshallingTests', 'Enum')
-        with capture_glib_warnings(allow_warnings=True):
+        with capture_glib_warnings(allow_warnings=True, allow_criticals=True):
             self.assertRaises(RuntimeError,
                               GIRepository.enum_register_new_gtype_and_add,
                               info)

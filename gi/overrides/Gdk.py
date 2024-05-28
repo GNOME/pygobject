@@ -29,6 +29,7 @@ from gi import PyGIDeprecationWarning, require_version
 Gdk = get_introspection_module('Gdk')
 GDK2 = Gdk._version == '2.0'
 GDK3 = Gdk._version == '3.0'
+GDK4 = Gdk._version == '4.0'
 
 __all__ = []
 
@@ -53,7 +54,14 @@ if GDK2 or GDK3:
             self.blue = blue
 
         def __eq__(self, other):
+            if not isinstance(other, Gdk.Color):
+                return False
             return self.equal(other)
+
+        # This is required (even when __eq__ is defined) in order
+        # for != operator to work as expected
+        def __ne__(self, other):
+            return not self == other
 
         def __repr__(self):
             return 'Gdk.Color(red=%d, green=%d, blue=%d)' % (self.red, self.green, self.blue)
@@ -94,7 +102,14 @@ if GDK3:
             self.alpha = alpha
 
         def __eq__(self, other):
+            if not isinstance(other, Gdk.RGBA):
+                return False
             return self.equal(other)
+
+        # This is required (even when __eq__ is defined) in order
+        # for != operator to work as expected
+        def __ne__(self, other):
+            return not self == other
 
         def __repr__(self):
             return 'Gdk.RGBA(red=%f, green=%f, blue=%f, alpha=%f)' % (self.red, self.green, self.blue, self.alpha)
@@ -381,6 +396,37 @@ if GDK2 or GDK3:
 
     Gdk.Atom.__str__ = _gdk_atom_str
     Gdk.Atom.__repr__ = _gdk_atom_repr
+
+
+if GDK4:
+    from gi.repository import Gio
+
+    class FileList(Gdk.FileList):
+
+        if hasattr(Gdk.FileList, "new_from_list"):
+            def __new__(cls, files):
+                files_list = []
+                if isinstance(files, (tuple, list)):
+                    for f in files:
+                        if isinstance(f, Gio.File):
+                            files_list.append(f)
+                        else:
+                            raise TypeError('Constructor requires a list or tuple of Gio.File instances')
+                else:
+                    raise TypeError('Constructor requires a list or tuple of Gio.File instances')
+                return Gdk.FileList.new_from_list(files)
+
+        def __iter__(self):
+            return iter(self.get_files())
+
+        def __len__(self):
+            return len(self.get_files())
+
+        def __getitem__(self, index):
+            return self.get_files()[index]
+
+    FileList = override(FileList)
+    __all__.append('FileList')
 
 
 # constants

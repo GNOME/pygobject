@@ -11,6 +11,7 @@ import re
 import platform
 import gc
 import timeit
+import random
 
 import pytest
 
@@ -458,11 +459,10 @@ class TestEverything(unittest.TestCase):
         self.assertEqual(Everything.test_enum_param(Everything.TestEnum.VALUE3), 'value3')
         self.assertRaises(TypeError, Everything.test_enum_param, 'hello')
 
-    # FIXME: ValueError: invalid enum value: 2147483648
-    @unittest.expectedFailure
+    @pytest.mark.xfail("32bit" in platform.architecture() or platform.system() == "Windows", reason="Big enum value doesn't convert to 32 bit (signed) long")
     def test_enum_unsigned(self):
         self.assertEqual(Everything.test_unsigned_enum_param(Everything.TestEnumUnsigned.VALUE1), 'value1')
-        self.assertEqual(Everything.test_unsigned_enum_param(Everything.TestEnumUnsigned.VALUE3), 'value3')
+        self.assertEqual(Everything.test_unsigned_enum_param(Everything.TestEnumUnsigned.VALUE2), 'value2')
         self.assertRaises(TypeError, Everything.test_unsigned_enum_param, 'hello')
 
     def test_flags(self):
@@ -617,6 +617,10 @@ class TestEverything(unittest.TestCase):
 
     def test_array_fixed_size_int_return(self):
         self.assertEqual(Everything.test_array_fixed_size_int_return(), [0, 1, 2, 3, 4])
+
+    def test_array_of_non_utf8_strings(self):
+        with pytest.raises(UnicodeDecodeError):
+            Everything.test_array_of_non_utf8_strings()
 
     def test_garray_container_return(self):
         # GPtrArray transfer container
@@ -1377,6 +1381,12 @@ class TestBoxed(unittest.TestCase):
         assert len(arr) == 2
         assert arr[0].refcount == 2
         assert arr[1].refcount == 2
+
+    def test_gvalue_out_boxed(self):
+        # As corruption is random data, check several times.
+        for i in range(10):
+            int8 = random.randint(GLib.MININT8, GLib.MAXINT8)
+            assert Everything.test_gvalue_out_boxed(int8).some_int8 == int8
 
     def test_glist_boxed_none_return(self):
         assert len(Everything.test_glist_boxed_none_return(0)) == 0

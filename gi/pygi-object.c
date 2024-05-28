@@ -22,8 +22,8 @@
 #include <glib.h>
 
 #include "pygi-object.h"
+#include "pygi-fundamental.h"
 #include "pygobject-object.h"
-#include "pygparamspec.h"
 
 /*
  * GObject from Python
@@ -33,18 +33,26 @@ typedef gboolean (*PyGIObjectMarshalFromPyFunc) (PyObject *py_arg,
                                                  GIArgument *arg,
                                                  GITransfer transfer);
 
-/* _pygi_marshal_from_py_gobject:
+/* _pygi_marshal_from_py_object:
  * py_arg: (in):
  * arg: (out):
  */
 static gboolean
-_pygi_marshal_from_py_gobject (PyObject *py_arg, /*in*/
+_pygi_marshal_from_py_object (PyObject *py_arg, /*in*/
                                GIArgument *arg,  /*out*/
                                GITransfer transfer) {
     GObject *gobj;
 
     if (py_arg == Py_None) {
         arg->v_pointer = NULL;
+        return TRUE;
+    }
+
+    if (PyObject_TypeCheck(py_arg, &PyGIFundamental_Type)) {
+        arg->v_pointer = pygi_fundamental_get (py_arg);
+        if (transfer == GI_TRANSFER_EVERYTHING) {
+            pygi_fundamental_ref ((PyGIFundamental *) py_arg);
+        }
         return TRUE;
     }
 
@@ -86,7 +94,7 @@ pygi_arg_gobject_out_arg_from_py (PyObject *py_arg, /*in*/
                                   GIArgument *arg,  /*out*/
                                   GITransfer transfer) {
     GObject *gobj;
-    if (!_pygi_marshal_from_py_gobject (py_arg, arg, transfer)) {
+    if (!_pygi_marshal_from_py_object (py_arg, arg, transfer)) {
         return FALSE;
     }
 
@@ -200,7 +208,7 @@ _pygi_marshal_from_py_called_from_py_interface_object (PyGIInvokeState   *state,
                                                    py_arg,
                                                    arg,
                                                    cleanup_data,
-                                                   _pygi_marshal_from_py_gobject);
+                                                   _pygi_marshal_from_py_object);
 }
 
 static void
@@ -222,36 +230,31 @@ _pygi_marshal_cleanup_from_py_interface_object (PyGIInvokeState *state,
  * GObject to Python
  */
 
-PyObject *
-pygi_arg_gobject_to_py (GIArgument *arg, GITransfer transfer) {
+static PyObject *
+pygi_arg_object_to_py (GIArgument *arg,
+                       GITransfer  transfer)
+{
     PyObject *pyobj;
 
     if (arg->v_pointer == NULL) {
         pyobj = Py_None;
         Py_INCREF (pyobj);
-
-    } else if (G_IS_PARAM_SPEC(arg->v_pointer)) {
-        pyobj = pyg_param_spec_new (arg->v_pointer);
-        if (transfer == GI_TRANSFER_EVERYTHING)
-            g_param_spec_unref (arg->v_pointer);
-
     } else if (G_IS_OBJECT(arg->v_pointer)) {
          pyobj = pygobject_new_full (arg->v_pointer,
                                      /*steal=*/ transfer == GI_TRANSFER_EVERYTHING,
                                      /*type=*/  NULL);
     } else {
-        PyErr_Format(PyExc_TypeError,
-                     "No means to translate argument or return value for '%s'",
-                     g_type_name_from_instance(arg->v_pointer));
-        return NULL;
+        pyobj = pygi_fundamental_new (arg->v_pointer);
+        if (pyobj && transfer == GI_TRANSFER_EVERYTHING)
+            pygi_fundamental_unref ((PyGIFundamental *) pyobj);
     }
 
     return pyobj;
 }
 
 PyObject *
-pygi_arg_gobject_to_py_called_from_c (GIArgument *arg,
-                                      GITransfer  transfer)
+pygi_arg_object_to_py_called_from_c (GIArgument *arg,
+                                     GITransfer  transfer)
 {
     PyObject *object;
 
@@ -270,10 +273,10 @@ pygi_arg_gobject_to_py_called_from_c (GIArgument *arg,
             g_object_is_floating (arg->v_pointer)) {
 
         g_object_ref (arg->v_pointer);
-        object = pygi_arg_gobject_to_py (arg, GI_TRANSFER_EVERYTHING);
+        object = pygi_arg_object_to_py (arg, GI_TRANSFER_EVERYTHING);
         g_object_force_floating (arg->v_pointer);
     } else {
-        object = pygi_arg_gobject_to_py (arg, transfer);
+        object = pygi_arg_object_to_py (arg, transfer);
     }
 
     return object;
@@ -286,7 +289,7 @@ _pygi_marshal_to_py_called_from_c_interface_object_cache_adapter (PyGIInvokeStat
                                                                   GIArgument        *arg,
                                                                   gpointer          *cleanup_data)
 {
-    return pygi_arg_gobject_to_py_called_from_c (arg, arg_cache->transfer);
+    return pygi_arg_object_to_py_called_from_c (arg, arg_cache->transfer);
 }
 
 static PyObject *
@@ -296,7 +299,7 @@ _pygi_marshal_to_py_called_from_py_interface_object_cache_adapter (PyGIInvokeSta
                                                                    GIArgument        *arg,
                                                                    gpointer          *cleanup_data)
 {
-    return pygi_arg_gobject_to_py (arg, arg_cache->transfer);
+    return pygi_arg_object_to_py (arg, arg_cache->transfer);
 }
 
 static void
@@ -306,10 +309,19 @@ _pygi_marshal_cleanup_to_py_interface_object (PyGIInvokeState *state,
                                               gpointer         data,
                                               gboolean         was_processed)
 {
-    /* If we error out and the object is not marshalled into a PyGObject
-       we must take care of removing the ref */
-    if (!was_processed && arg_cache->transfer == GI_TRANSFER_EVERYTHING)
-        g_object_unref (G_OBJECT(data));
+    if (was_processed && state->failed && data != NULL && arg_cache->transfer == GI_TRANSFER_EVERYTHING) {
+        if (G_IS_OBJECT (data)) {
+            g_object_unref (G_OBJECT(data));
+        } else {
+            PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)arg_cache;
+            GIObjectInfoUnrefFunction unref_func;
+
+            unref_func = g_object_info_get_unref_function_pointer ( (GIObjectInfo *)iface_cache->interface_info);
+            if (unref_func)
+                unref_func (data);
+        }
+    }
+
 }
 
 static gboolean

@@ -2,10 +2,9 @@ import os
 import unittest
 
 try:
-    from gi.repository import Gtk, Atk, Gdk
+    from gi.repository import Gtk, Gdk
 except ImportError:
     Gdk = None
-    Atk = None
     Gtk = None
 
 from .helper import capture_glib_deprecation_warnings
@@ -22,7 +21,7 @@ def is_X11():
 
 
 @unittest.skipUnless(Gdk, 'Gdk not available')
-@unittest.skipIf(Gdk._version == "4.0", 'Gdk4 doesn\'t have GdkAtom')
+@unittest.skipIf(Gdk and Gdk._version == "4.0", 'Gdk4 doesn\'t have GdkAtom')
 class TestGdkAtom(unittest.TestCase):
     def test_create(self):
         atom = Gdk.Atom.intern('my_string', False)

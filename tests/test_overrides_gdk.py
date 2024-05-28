@@ -12,11 +12,21 @@ import gi.overrides
 from gi import PyGIDeprecationWarning
 
 try:
-    from gi.repository import Gdk, GdkPixbuf, Gtk
+    from gi.repository import Gio, Gdk, GdkPixbuf, Gtk
     GDK4 = Gdk._version == "4.0"
 except ImportError:
     Gdk = None
+    Gtk = None
     GDK4 = False
+
+
+def gtkver():
+    if Gtk is None:
+        return (0, 0, 0)
+    return (Gtk.get_major_version(),
+            Gtk.get_minor_version(),
+            Gtk.get_micro_version())
+
 
 try:
     gi.require_foreign('cairo')
@@ -49,6 +59,10 @@ class TestGdk(unittest.TestCase):
         with capture_glib_deprecation_warnings():
             self.assertEqual(color, Gdk.Color(100, 200, 300))
         self.assertNotEqual(color, Gdk.Color(1, 2, 3))
+        self.assertNotEqual(color, None)
+        # assertNotEqual only tests __ne__. Following line explicitly
+        # tests __eq__ with objects of other types
+        self.assertFalse(color == object())
 
     @unittest.skipIf(GDK4, "not in gdk4")
     def test_color_floats(self):
@@ -89,6 +103,10 @@ class TestGdk(unittest.TestCase):
         self.assertEqual(rgba.alpha, 0.4)
         rgba.green = 0.9
         self.assertEqual(rgba.green, 0.9)
+        self.assertNotEqual(rgba, None)
+        # assertNotEqual only tests __ne__. Following line explicitly
+        # tests __eq__ with objects of other types
+        self.assertFalse(rgba == object())
 
         # Iterator/tuple convsersion
         self.assertEqual(tuple(Gdk.RGBA(0.1, 0.2, 0.3, 0.4)),
@@ -297,3 +315,12 @@ class TestGdk(unittest.TestCase):
         atom = Gdk.atom_intern("", True)
         assert re.match(r"<Gdk.Atom\(\d+\)>", repr(atom))
         assert re.match(r"Gdk.Atom<\d+>", str(atom))
+
+    @unittest.skipUnless(GDK4, "only in gdk4")
+    @unittest.skipUnless(gtkver() >= (4, 8, 0), "constructor available since 4.8")
+    def test_file_list(self):
+        f = Gio.File.new_for_path("/tmp")
+        filelist = Gdk.FileList([f])
+        self.assertTrue(isinstance(filelist, Gdk.FileList))
+        self.assertEqual(len(filelist), 1)
+        self.assertEqual(filelist[0], f)

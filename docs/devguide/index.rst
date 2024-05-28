@@ -8,6 +8,5 @@ Development Guide
 
     overview
     dev_environ
-    building_testing
     style_guide
     override_guidelines

@@ -1,19 +1,71 @@
-[tool.poetry]
+[project]
 name = "PyGObject"
-version = "3.43.0"
 description = "Python bindings for GObject Introspection"
-authors = ["Christoph Reiter"]
+license = { text = "GNU Lesser General Public License v2.1 (LGPLv2.1)" }
+authors = [
+    { name="James Henstridge", email="james@daa.com.au" }
+]
+maintainers = [
+    { name="Simon Feltman", email="sfeltman@src.gnome.org" },
+    { name="Christoph Reiter" },
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: GNU Lesser General Public License v2 or later (LGPLv2+)",
+    "Operating System :: POSIX",
+    "Operating System :: Microsoft :: Windows",
+    "Programming Language :: C",
+    "Programming Language :: Python",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+requires-python = ">=3.9, <4.0"
+dependencies = [
+    "pycairo>=1.16"
+]
+dynamic = ["version"]
 
-[tool.poetry.dependencies]
-python = "^3.7"
-pycairo = "^1.16"
+[project.urls]
+Homepage = "https://pygobject.gnome.org"
+Repository = "https://gitlab.gnome.org/GNOME/pygobject.git"
+Changelog = "https://gitlab.gnome.org/GNOME/pygobject/-/blob/main/NEWS"
 
-[tool.poetry.dev-dependencies]
-pytest = "^7.0.0"
-flake8 = "^3.9.1"
-Sphinx = "^3.5.4|^4.2.0"
-sphinx-rtd-theme = "^0.5.2|^1.0.0"
-coverage = "^6.3.2"
+[project.optional-dependencies]
+
+[tool.pdm.dev-dependencies]
+build = [
+    "meson-python",
+    "meson",
+    "ninja",
+    "pycairo",
+]
+test = [
+    "pytest",
+    "pytest-cov",
+    "flake8",
+]
+docs = [
+    "sphinx>=4.0,<5.0",
+    "sphinx-rtd-theme>=0.5,<2.0",
+]
+
+
+[tool.pdm.options]
+install = ["--no-isolation", "--config-setting=setup-args=-Dtests=true", "--config-setting=setup-args=-Dbuildtype=debug"]
+build = ["--no-wheel"]
+
+[tool.meson-python.args]
+setup = ["-Dtests=false", "-Dwheel=true", "--wrap-mode=nofallback"]
+
+[tool.pytest.ini_options]
+testpaths = [
+    "tests",
+]
+python_files = "test_*.py"
+addopts = [
+    "--import-mode=importlib",
+]
 
 [build-system]
-requires = ["setuptools", "wheel", "pycairo"]
+build-backend = "mesonpy"
+requires = ["meson-python>=0.12.1", "pycairo>=1.16"]

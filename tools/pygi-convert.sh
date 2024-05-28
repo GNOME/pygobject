@@ -37,6 +37,7 @@ for f in $FILES_TO_CONVERT; do
     -pe "s/Gtk.EXPAND/Gtk.AttachOptions.EXPAND/g;" \
     -pe "s/Gtk.FALSE/False/g;" \
     -pe "s/Gtk.FILE_CHOOSER_ACTION_/Gtk.FileChooserAction./g;" \
+    -pe "s/Gtk.FILE_CHOOSER_CONFIRMATION_(CONFIRM|ACCEPT_FILENAME|SELECT_AGAIN)/Gtk.FileChooserConfirmation.\1/g;" \
     -pe "s/Gtk.FILL/Gtk.AttachOptions.FILL/g;" \
     -pe "s/Gtk.ICON_LOOKUP_/Gtk.IconLookupFlags./g;" \
     -pe "s/Gtk.ICON_SIZE_/Gtk.IconSize./g;" \

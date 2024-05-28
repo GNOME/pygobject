@@ -22,7 +22,6 @@
 
 #include "pygobject-object.h"
 #include "pyginterface.h"
-#include "pygparamspec.h"
 #include "pygi-type.h"
 #include "pygboxed.h"
 #include "gimodule.h"
@@ -33,6 +32,7 @@
 #include "pygi-property.h"
 #include "pygi-signal-closure.h"
 #include "pygi-basictype.h"
+#include "pygi-fundamental.h"
 
 extern PyObject *PyGIDeprecationWarning;
 
@@ -220,7 +220,7 @@ static PyObject*
 pygobject_props_iter_next(PyGPropsIter *iter)
 {
     if (iter->index < iter->n_props)
-        return pyg_param_spec_new(iter->props[iter->index++]);
+        return pygi_fundamental_new(iter->props[iter->index++]);
     else {
         PyErr_SetNone(PyExc_StopIteration);
         return NULL;
@@ -305,7 +305,7 @@ PyGProps_getattro(PyGProps *self, PyObject *attr)
 
     if (!self->pygobject) {
         /* If we're doing it without an instance, return a GParamSpec */
-        return pyg_param_spec_new(pspec);
+        return pygi_fundamental_new(pspec);
     }
 
     return pygi_get_property_value (self->pygobject, pspec);
@@ -361,7 +361,7 @@ PyGProps_setattro(PyGProps *self, PyObject *attr, PyObject *pvalue)
     char *attr_name, *property_name;
     GObject *obj;
     int ret = -1;
-    
+
     if (pvalue == NULL) {
 	PyErr_SetString(PyExc_TypeError, "properties cannot be "
 			"deleted");
@@ -1595,7 +1595,7 @@ pygbinding_closure_new (PyObject *callback, PyObject *extra_args)
 }
 
 static PyObject *
-pygobject_bind_property(PyGObject *self, PyObject *args)
+pygobject_bind_property(PyGObject *self, PyObject *args, PyObject *kwargs)
 {
 	gchar *source_name, *target_name;
 	gchar *source_canon, *target_canon;
@@ -1608,9 +1608,20 @@ pygobject_bind_property(PyGObject *self, PyObject *args)
 	transform_from = NULL;
 	transform_to = NULL;
 
-	if (!PyArg_ParseTuple(args, "sOs|iOOO:GObject.bind_property",
-			      &source_name, &target, &target_name, &flags,
-			      &transform_to, &transform_from, &user_data))
+	static char *kwlist[] = {
+		"source_property",
+		"target",
+		"target_property",
+		"flags",
+		"transform_to",
+		"transform_from",
+		"user_data",
+		NULL
+	};
+
+	if (!PyArg_ParseTupleAndKeywords(args, kwargs, "sOs|iOOO:GObject.bind_property", kwlist, 
+					 &source_name, &target, &target_name, &flags,
+					 &transform_to, &transform_from, &user_data)) 
 		return NULL;
 
 	CHECK_GOBJECT(self);
