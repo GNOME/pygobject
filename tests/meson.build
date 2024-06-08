@@ -20,6 +20,10 @@ if get_option('default_library') != 'static'
   endif
 endif
 
+# We still need gobject-introspection-1.0 for the gi compiler
+dependency('gobject-introspection-1.0', version : '>= 1.64.0',
+  fallback: ['gobject-introspection', 'girepo_dep'])
+
 marshalling_sources = ['gimarshallingtests.c', 'gimarshallingtestsextra.c']
 marshalling_headers = ['gimarshallingtests.h', 'gimarshallingtestsextra.h']
 
@@ -88,6 +92,10 @@ helperext = python.extension_module('testhelper', helper_sources,
 schemas = gnome.compile_schemas(build_by_default: true)
 
 envdata = environment()
+if gi_dep.type_name() == 'internal'
+  envdata.append('GI_TYPELIB_PATH', join_paths(meson.project_build_root(), 'subprojects', 'glib', 'girepository', 'introspection'))
+endif
+
 if host_machine.system() == 'windows'
     envdata.prepend('PATH', join_paths(get_option('prefix'), get_option('bindir')))
 endif
