@@ -305,7 +305,7 @@ _caller_alloc (PyGIArgCache *arg_cache, GIArgument *arg)
         arg->v_pointer = NULL;
         if (g_type_is_a (iface_cache->g_type, G_TYPE_BOXED)) {
             arg->v_pointer =
-                pygi_boxed_alloc (iface_cache->interface_info, NULL);
+                pygi_boxed_alloc (GI_BASE_INFO (iface_cache->interface_info), NULL);
         } else if (iface_cache->g_type == G_TYPE_VALUE) {
             arg->v_pointer = g_slice_new0 (GValue);
         } else if (iface_cache->is_foreign) {
@@ -747,33 +747,32 @@ err:
 }
 
 PyObject *
-pygi_callable_info_invoke (GIBaseInfo *self,
+pygi_callable_info_invoke (PyGICallableInfo *self,
                            PyObject *const *py_args, size_t py_nargsf,
                            PyObject *py_kwnames)
 {
     if (self->cache == NULL) {
         PyGIFunctionCache *function_cache;
         GIBaseInfo *info = self->base.info;
-        GIInfoType type = g_base_info_get_type (info);
 
-        if (GI_IS_FUNCTION_INFO (self->info)) {
+        if (GI_IS_FUNCTION_INFO (info)) {
             GIFunctionInfoFlags flags;
 
-            flags = gi_function_info_get_flags ((GIFunctionInfo *)info);
+            flags = gi_function_info_get_flags (GI_FUNCTION_INFO (info));
 
             if (flags & GI_FUNCTION_IS_CONSTRUCTOR) {
-                function_cache = pygi_constructor_cache_new (info);
+                function_cache = pygi_constructor_cache_new (GI_CALLABLE_INFO (info));
             } else if (flags & GI_FUNCTION_IS_METHOD) {
-                function_cache = pygi_method_cache_new (info);
+                function_cache = pygi_method_cache_new (GI_CALLABLE_INFO (info));
             } else {
-                function_cache = pygi_function_cache_new (info);
+                function_cache = pygi_function_cache_new (GI_CALLABLE_INFO (info));
             }
         } else if (GI_IS_VFUNC_INFO (info)) {
-            function_cache = pygi_vfunc_cache_new (info);
+            function_cache = pygi_vfunc_cache_new (GI_CALLABLE_INFO (info));
         } else if (GI_IS_CALLBACK_INFO (info)) {
             g_error ("Cannot invoke callback types");
         } else {
-            function_cache = pygi_method_cache_new (info);
+            function_cache = pygi_method_cache_new (GI_CALLABLE_INFO (info));
         }
 
         self->cache = function_cache;

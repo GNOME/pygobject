@@ -30,7 +30,7 @@ typedef PyObject * (*PyGIArgOverrideToGIArgumentFunc)   (PyObject        *value,
 typedef PyObject * (*PyGIArgOverrideFromGIArgumentFunc) (GIInterfaceInfo *interface_info,
                                                          GITransfer       transfer,
                                                          gpointer         data);
-typedef PyObject * (*PyGIArgOverrideReleaseFunc)        (GITypeInfo *type_info,
+typedef PyObject * (*PyGIArgOverrideReleaseFunc)        (GIBaseInfo *base_info,
                                                          gpointer  struct_);
 
 

@@ -60,7 +60,7 @@ gi_argument_from_c_long (GIArgument *arg_out,
           PyErr_Format (PyExc_TypeError,
                         "Unable to marshal C long %ld to %s",
                         c_long_in,
-                        g_type_tag_to_string (type_tag));
+                        gi_type_tag_to_string (type_tag));
           return FALSE;
     }
 }
@@ -93,7 +93,7 @@ gi_argument_to_c_long (GIArgument *arg_in,
           if (arg_in->v_int64 > G_MAXLONG || arg_in->v_int64 < G_MINLONG) {
               PyErr_Format (PyExc_TypeError,
                             "Unable to marshal %s to C long",
-                            g_type_tag_to_string(type_tag));
+                            gi_type_tag_to_string(type_tag));
               return FALSE;
           }
           *c_long_out = (glong)arg_in->v_int64;
@@ -102,7 +102,7 @@ gi_argument_to_c_long (GIArgument *arg_in,
           if (arg_in->v_uint64 > G_MAXLONG) {
               PyErr_Format (PyExc_TypeError,
                             "Unable to marshal %s to C long",
-                            g_type_tag_to_string(type_tag));
+                            gi_type_tag_to_string(type_tag));
               return FALSE;
           }
           *c_long_out = (glong)arg_in->v_uint64;
@@ -110,7 +110,7 @@ gi_argument_to_c_long (GIArgument *arg_in,
       default:
           PyErr_Format (PyExc_TypeError,
                         "Unable to marshal %s to C long",
-                        g_type_tag_to_string (type_tag));
+                        gi_type_tag_to_string (type_tag));
           return FALSE;
     }
 }
@@ -155,12 +155,12 @@ _pygi_marshal_from_py_interface_enum (PyGIInvokeState   *state,
      * we need to check if the value is equivilant to one of the
      * Enum's memebers */
     if (!is_instance) {
-        int i;
+        unsigned int i;
         gboolean is_found = FALSE;
 
-        for (i = 0; i < gi_enum_info_get_n_values (iface_cache->interface_info); i++) {
+        for (i = 0; i < gi_enum_info_get_n_values (GI_ENUM_INFO (iface_cache->interface_info)); i++) {
             GIValueInfo *value_info =
-                gi_enum_info_get_value (iface_cache->interface_info, i);
+                gi_enum_info_get_value (GI_ENUM_INFO (iface_cache->interface_info), i);
             gint64 enum_value = gi_value_info_get_value (value_info);
             gi_base_info_unref ( (GIBaseInfo *)value_info);
             if (c_long == enum_value) {
@@ -286,7 +286,7 @@ _pygi_marshal_to_py_interface_flags (PyGIInvokeState   *state,
     if (iface_cache->g_type == G_TYPE_NONE) {
         /* An enum with a GType of None is an enum without GType */
 
-        PyObject *py_type = pygi_type_import_by_gi_info (iface_cache->interface_info);
+        PyObject *py_type = pygi_type_import_by_gi_info (GI_BASE_INFO (iface_cache->interface_info));
         PyObject *py_args = NULL;
 
         if (!py_type)

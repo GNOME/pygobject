@@ -48,7 +48,7 @@ async_repr(PyGIAsync *self) {
     PyObject *string;
     char *func_descr;
 
-    func_descr = _pygi_g_base_info_get_fullname (self->finish_func->base.info);
+    func_descr = _pygi_gi_base_info_get_fullname (self->finish_func->base.info);
 
     string = PyUnicode_FromFormat ("%s(finish_func=%s, done=%s)",
                                    Py_TYPE(self)->tp_name,

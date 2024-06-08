@@ -98,7 +98,7 @@ _pygi_get_storage_type (GITypeInfo *type_info)
 
     if (type_tag == GI_TYPE_TAG_INTERFACE) {
         GIBaseInfo *interface = gi_type_info_get_interface (type_info);
-        if (GI_IS_ENUM_INFO (interface))
+        if (GI_IS_ENUM_INFO (interface) || GI_IS_FLAGS_INFO (interface))
             type_tag = gi_enum_info_get_storage_type ((GIEnumInfo *)interface);
         else
                 /* FIXME: we might have something to do for other types */
@@ -1086,7 +1086,7 @@ _pygi_argument_release (GIArgument   *arg,
                 } else if (GI_IS_STRUCT_INFO (info) &&
                            gi_struct_info_is_foreign ((GIStructInfo*) info)) {
                     if (direction == GI_DIRECTION_OUT && transfer == GI_TRANSFER_EVERYTHING) {
-                        pygi_struct_foreign_release (info, arg->v_pointer);
+                        pygi_struct_foreign_release (GI_BASE_INFO (info), arg->v_pointer);
                     }
                 } else if (g_type_is_a (type, G_TYPE_BOXED)) {
                 } else if (g_type_is_a (type, G_TYPE_POINTER) || type == G_TYPE_NONE) {

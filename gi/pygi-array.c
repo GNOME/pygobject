@@ -823,7 +823,7 @@ pygi_arg_garray_len_arg_setup (PyGIArgCache *arg_cache,
 
     /* attempt len_arg_index setup for the first time */
     if (seq_cache->len_arg_index < 0) {
-        seq_cache->len_arg_index = gi_type_info_get_array_length (type_info);
+        gi_type_info_get_array_length_index (type_info, &seq_cache->len_arg_index);
 
         /* offset by self arg for methods and vfuncs */
         if (seq_cache->len_arg_index >= 0 && callable_cache != NULL) {
@@ -919,7 +919,7 @@ pygi_arg_garray_setup (PyGIArgGArray     *sc,
     ((PyGIArgCache *)sc)->destroy_notify = (GDestroyNotify)_array_cache_free_func;
     sc->array_type = gi_type_info_get_array_type (type_info);
     sc->is_zero_terminated = gi_type_info_is_zero_terminated (type_info);
-    sc->fixed_size = gi_type_info_get_array_fixed_size (type_info);
+    gi_type_info_get_array_fixed_size (type_info, &sc->fixed_size);
     sc->len_arg_index = -1;  /* setup by pygi_arg_garray_len_arg_setup */
 
     item_type_info = gi_type_info_get_param_type (type_info, 0);

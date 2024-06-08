@@ -21,6 +21,14 @@
 #ifndef __PYGI_CACHE_H__
 #define __PYGI_CACHE_H__
 
+
+/* Workaround for FFI_GO_CLOSURES not being defined on macOS
+ * See also: https://github.com/openjdk/jdk17u-dev/pull/741
+ */
+#ifndef FFI_GO_CLOSURES
+#define FFI_GO_CLOSURES 0
+#endif
+
 #include <Python.h>
 #include <girepository/girepository.h>
 #include <girepository/girffi.h>
@@ -151,8 +159,8 @@ typedef struct _PyGISequenceCache
 typedef struct _PyGIArgGArray
 {
     PyGISequenceCache seq_cache;
-    gssize fixed_size;
-    gssize len_arg_index;
+    size_t fixed_size;
+    unsigned int len_arg_index;
     gboolean is_zero_terminated;
     gsize item_size;
     GIArrayType array_type;

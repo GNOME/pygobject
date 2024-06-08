@@ -76,10 +76,8 @@ _generate_signature(PyGICallableInfo *self)
 }
 
 static PyObject *
-_get_info_string (PyGIBaseInfo *self,
-                  const gchar* (*get_info_string)(GIBaseInfo*))
+_get_info_string (const gchar *value)
 {
-    const gchar *value = get_info_string ((GIBaseInfo*)self->info);
     if (value == NULL) {
         Py_RETURN_NONE;
     }
@@ -313,13 +311,13 @@ _wrap_gi_base_info_get_name (PyGIBaseInfo *self)
 static PyObject *
 _wrap_gi_base_info_get_name_unescaped (PyGIBaseInfo *self)
 {
-    return _get_info_string (self, _safe_base_info_get_name);
+    return _get_info_string (_safe_base_info_get_name(GI_BASE_INFO (self->info)));
 }
 
 static PyObject *
 _wrap_gi_base_info_get_namespace (PyGIBaseInfo *self)
 {
-    return _get_info_string (self, gi_base_info_get_namespace);
+    return _get_info_string (gi_base_info_get_namespace (GI_BASE_INFO (self->info)));
 }
 
 static PyObject *
@@ -946,7 +944,11 @@ _wrap_gi_type_info_get_array_length_index (PyGIBaseInfo *self)
 static PyObject *
 _wrap_gi_type_info_get_array_fixed_size (PyGIBaseInfo *self)
 {
-    return pygi_gint_to_py (gi_type_info_get_array_fixed_size (GI_TYPE_INFO (self->info)));
+    size_t size;
+    if (gi_type_info_get_array_fixed_size (GI_TYPE_INFO (self->info), &size))
+        return pygi_gint_to_py (size);
+
+    g_assert_not_reached ();
 }
 
 static PyObject *
@@ -1050,7 +1052,7 @@ _pygi_g_type_tag_size (GITypeTag type_tag)
         case GI_TYPE_TAG_ERROR:
             PyErr_Format (PyExc_TypeError,
                           "Unable to know the size (assuming %s is not a pointer)",
-                          g_type_tag_to_string (type_tag));
+                          gi_type_tag_to_string (type_tag));
             break;
         default:
             break;
@@ -1142,7 +1144,7 @@ _pygi_gi_type_info_size (GITypeInfo *type_info)
 static PyObject *
 _wrap_gi_function_info_get_symbol (PyGIBaseInfo *self)
 {
-    return _get_info_string (self, gi_function_info_get_symbol);
+    return _get_info_string (gi_function_info_get_symbol (GI_FUNCTION_INFO (self->info)));
 }
 
 static PyObject *
@@ -1179,13 +1181,13 @@ PYGI_DEFINE_TYPE ("gi.RegisteredTypeInfo", PyGIRegisteredTypeInfo_Type, PyGIBase
 static PyObject *
 _wrap_gi_registered_type_info_get_type_name (PyGIBaseInfo *self)
 {
-    return _get_info_string (self, gi_registered_type_info_get_type_name);
+    return _get_info_string (gi_registered_type_info_get_type_name (GI_REGISTERED_TYPE_INFO (self->info)));
 }
 
 static PyObject *
 _wrap_gi_registered_type_info_get_type_init (PyGIBaseInfo *self)
 {
-    return _get_info_string (self, gi_registered_type_info_get_type_init);
+    return _get_info_string (gi_registered_type_info_get_type_init_function_name (GI_REGISTERED_TYPE_INFO (self->info)));
 }
 
 static PyObject *
@@ -1471,13 +1473,13 @@ _wrap_gi_object_info_get_abstract (PyGIBaseInfo *self)
 static PyObject *
 _wrap_gi_object_info_get_type_name (PyGIBaseInfo *self)
 {
-    return _get_info_string (self, gi_object_info_get_type_name);
+    return _get_info_string (gi_object_info_get_type_name (GI_OBJECT_INFO (self->info)));
 }
 
 static PyObject *
 _wrap_gi_object_info_get_type_init (PyGIBaseInfo *self)
 {
-    return _get_info_string (self, gi_object_info_get_type_init);
+    return _get_info_string (gi_object_info_get_type_init_function_name (GI_OBJECT_INFO (self->info)));
 }
 
 static PyObject *
@@ -1501,25 +1503,25 @@ _wrap_gi_object_info_find_vfunc (PyGIBaseInfo *self, PyObject *py_name)
 static PyObject *
 _wrap_gi_object_info_get_unref_function (PyGIBaseInfo *self)
 {
-    return _get_info_string (self, gi_object_info_get_unref_function);
+    return _get_info_string (gi_object_info_get_unref_function_name (GI_OBJECT_INFO (self->info)));
 }
 
 static PyObject *
 _wrap_gi_object_info_get_ref_function (PyGIBaseInfo *self)
 {
-    return _get_info_string (self, gi_object_info_get_ref_function);
+    return _get_info_string (gi_object_info_get_ref_function_name (GI_OBJECT_INFO (self->info)));
 }
 
 static PyObject *
 _wrap_gi_object_info_get_set_value_function (PyGIBaseInfo *self)
 {
-    return _get_info_string (self, gi_object_info_get_set_value_function);
+    return _get_info_string (gi_object_info_get_set_value_function_name (GI_OBJECT_INFO (self->info)));
 }
 
 static PyObject *
 _wrap_gi_object_info_get_get_value_function (PyGIBaseInfo *self)
 {
-    return _get_info_string (self, gi_object_info_get_get_value_function);
+    return _get_info_string (gi_object_info_get_get_value_function_name (GI_OBJECT_INFO (self->info)));
 }
 
 static PyMethodDef _PyGIObjectInfo_methods[] = {
@@ -1823,7 +1825,7 @@ _wrap_gi_field_info_get_value (PyGIBaseInfo *self,
     if (GI_IS_UNION_INFO (container_info) || GI_IS_STRUCT_INFO (container_info)) {
         pointer = pyg_boxed_get (instance, void);
     } else if (GI_IS_OBJECT_INFO (container_info)) {
-        if (pygi_check_fundamental (container_info, container_info))
+        if (pygi_check_fundamental (container_info))
             pointer = pygi_fundamental_get (instance);
         else
             pointer = pygobject_get (instance);
@@ -1905,7 +1907,6 @@ _wrap_gi_field_info_set_value (PyGIBaseInfo *self,
     PyObject *instance;
     PyObject *py_value;
     GIBaseInfo *container_info;
-    GIInfoType container_info_type;
     gpointer pointer;
     GITypeInfo *field_type_info;
     GIArgument value;
@@ -1928,7 +1929,7 @@ _wrap_gi_field_info_set_value (PyGIBaseInfo *self,
     if (GI_IS_UNION_INFO (container_info) || GI_IS_STRUCT_INFO (container_info)) {
         pointer = pyg_boxed_get (instance, void);
     } else if (GI_IS_OBJECT_INFO (container_info)) {
-        if (pygi_check_fundamental (container_info_type, container_info))
+        if (pygi_check_fundamental (container_info))
             pointer = pygi_fundamental_get (instance);
         else
             pointer = pygobject_get (instance);
@@ -2345,7 +2346,6 @@ pygi_info_register_types (PyObject *m)
         _PyGI_ENUM_ADD_VALUE (GI_FUNCTION, IS_GETTER)
         _PyGI_ENUM_ADD_VALUE (GI_FUNCTION, IS_SETTER)
         _PyGI_ENUM_ADD_VALUE (GI_FUNCTION, WRAPS_VFUNC)
-        _PyGI_ENUM_ADD_VALUE (GI_FUNCTION, THROWS)
     _PyGI_ENUM_END
 
     /* GITypeTag */

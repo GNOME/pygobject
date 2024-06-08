@@ -33,7 +33,7 @@ PyObject *pygi_invoke_c_callable    (PyGIFunctionCache *function_cache,
                                      PyGIInvokeState *state,
                                      PyObject *const *py_args, size_t py_nargsf,
                                      PyObject *py_kwnames);
-PyObject *pygi_callable_info_invoke (GIBaseInfo *self,
+PyObject *pygi_callable_info_invoke (PyGICallableInfo *self,
                                      PyObject *const *py_args, size_t py_nargsf,
                                      PyObject *kwnames);
 

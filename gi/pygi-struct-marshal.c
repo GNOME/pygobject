@@ -58,18 +58,18 @@ _is_union_member (GIInterfaceInfo *interface_info, PyObject *py_arg) {
 
         /* we can only check if the members are interfaces */
         if (gi_type_info_get_tag (field_type_info) == GI_TYPE_TAG_INTERFACE) {
-            GIInterfaceInfo *field_iface_info;
+            GIBaseInfo *field_iface_info;
             PyObject *py_type;
 
             field_iface_info = gi_type_info_get_interface (field_type_info);
-            py_type = pygi_type_import_by_gi_info ((GIBaseInfo *) field_iface_info);
+            py_type = pygi_type_import_by_gi_info (field_iface_info);
 
             if (py_type != NULL && PyObject_IsInstance (py_arg, py_type)) {
                 is_member = TRUE;
             }
 
             Py_XDECREF (py_type);
-            gi_base_info_unref ( ( GIBaseInfo *) field_iface_info);
+            gi_base_info_unref (field_iface_info);
         }
 
         gi_base_info_unref ( ( GIBaseInfo *) field_type_info);
@@ -287,7 +287,7 @@ pygi_arg_struct_from_py_marshal (PyObject *py_arg,
         return (success == Py_None);
     } else if (!PyObject_IsInstance (py_arg, py_type)) {
         /* first check to see if this is a member of the expected union */
-        is_union = _is_union_member (interface_info, py_arg);
+        is_union = _is_union_member (GI_INTERFACE_INFO (interface_info), py_arg);
         if (!is_union) {
             goto type_error;
         }
@@ -388,7 +388,7 @@ arg_foreign_from_py_cleanup (PyGIInvokeState *state,
 {
     if (state->failed && was_processed) {
         pygi_struct_foreign_release (
-            ( (PyGIInterfaceCache *)arg_cache)->interface_info,
+            GI_BASE_INFO (((PyGIInterfaceCache *)arg_cache)->interface_info),
             data);
     }
 }
@@ -420,7 +420,7 @@ pygi_arg_struct_to_py_marshaller (GIArgument *arg,
                                      arg->v_pointer,
                                      transfer == GI_TRANSFER_EVERYTHING || is_allocated,
                                      is_allocated ?
-                                            gi_struct_info_get_size(interface_info) : 0);
+                                            gi_struct_info_get_size(GI_STRUCT_INFO (interface_info)) : 0);
         }
     } else if (g_type_is_a (g_type, G_TYPE_POINTER)) {
         if (py_type == NULL ||
@@ -508,7 +508,7 @@ arg_foreign_to_py_cleanup (PyGIInvokeState *state,
 {
     if (!was_processed && arg_cache->transfer == GI_TRANSFER_EVERYTHING) {
         pygi_struct_foreign_release (
-            ( (PyGIInterfaceCache *)arg_cache)->interface_info,
+            GI_BASE_INFO (((PyGIInterfaceCache *)arg_cache)->interface_info),
             data);
     }
 }

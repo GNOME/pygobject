@@ -54,8 +54,8 @@ GTypeInstance* pygi_fundamental_get (PyObject *self);
 
 int pygi_fundamental_register_types (PyObject *m);
 
-#define pygi_check_fundamental(info_type,info) \
-  ((info_type) == GI_INFO_TYPE_OBJECT && \
+#define pygi_check_fundamental(info) \
+  (GI_IS_OBJECT_INFO (info) && \
    gi_object_info_get_fundamental ((GIObjectInfo *)(info)))
 
 GTypeInstance* pygi_fundamental_from_value (const GValue *value);

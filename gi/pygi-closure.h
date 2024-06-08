@@ -18,8 +18,16 @@
 #ifndef __PYGI_CLOSURE_H__
 #define __PYGI_CLOSURE_H__
 
+
+/* Workaround for FFI_GO_CLOSURES not being defined on macOS
+ * See also: https://github.com/openjdk/jdk17u-dev/pull/741
+ */
+#ifndef FFI_GO_CLOSURES
+#define FFI_GO_CLOSURES 0
+#endif
+
 #include <Python.h>
-#include <girepository/girffi.h>
+#include <girepository/girepository.h>
 #include <ffi.h>
 
 #include "pygi-cache.h"

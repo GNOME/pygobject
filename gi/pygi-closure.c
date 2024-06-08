@@ -928,7 +928,7 @@ pygi_arg_callback_setup_from_info (PyGICallbackCache  *arg_cache,
     arg_cache->interface_info = iface_info;
 
     if (direction & PYGI_DIRECTION_FROM_PYTHON) {
-        arg_cache->closure_cache = pygi_closure_cache_new (arg_cache->interface_info);
+        arg_cache->closure_cache = pygi_closure_cache_new (GI_CALLABLE_INFO (arg_cache->interface_info));
         cache->from_py_marshaller = _pygi_marshal_from_py_interface_callback;
         cache->from_py_cleanup = _pygi_marshal_cleanup_from_py_interface_callback;
 

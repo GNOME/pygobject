@@ -24,6 +24,7 @@
 #include "pygobject-object.h"
 #include "pygi-type.h"
 #include "pygi-fundamental.h"
+#include "pygi-repository.h"
 #include "pygenum.h"
 #include "pygpointer.h"
 #include "pygboxed.h"
@@ -593,8 +594,8 @@ pyg_value_from_pyobject_with_error(GValue *value, PyObject *obj)
                 return -1;
             }
 
-            repository = g_irepository_get_default();
-            info = g_irepository_find_by_gtype (repository, value_type);
+            repository = pygi_repository_get_default ();
+            info = gi_repository_find_by_gtype (repository, value_type);
 
             if (info && GI_IS_OBJECT_INFO (info)) {
                 set_value_func = gi_object_info_get_set_value_function_pointer ((GIObjectInfo *) info);
@@ -793,8 +794,8 @@ value_to_py_structured_type (const GValue *value, GType fundamental, gboolean co
         if ((bm = pyg_type_lookup(G_VALUE_TYPE(value))))
             return bm->fromvalue(value);
 
-        repository = g_irepository_get_default ();
-        info = g_irepository_find_by_gtype (repository, fundamental);
+        repository = pygi_repository_get_default ();
+        info = gi_repository_find_by_gtype (repository, fundamental);
 
         if (info == NULL)
             break;
