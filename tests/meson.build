@@ -20,34 +20,13 @@ if get_option('default_library') != 'static'
   endif
 endif
 
-if gobject_introspection_dep.type_name() == 'pkgconfig'
-  gi_datadir = gobject_introspection_dep.get_variable(pkgconfig : 'gidatadir')
-  regress_sources = [join_paths(gi_datadir, 'tests', 'regress.c')]
-  regress_headers = [join_paths(gi_datadir, 'tests', 'regress.h')]
-  regress_sources += [join_paths(gi_datadir, 'tests', 'annotation.c')]
-  regress_headers += [join_paths(gi_datadir, 'tests', 'annotation.h')]
-  regress_incdir = include_directories(join_paths(gi_datadir, 'tests'))
-  marshalling_sources = [join_paths(gi_datadir, 'tests', 'gimarshallingtests.c')]
-  marshalling_headers = [join_paths(gi_datadir, 'tests', 'gimarshallingtests.h')]
-else
-  gi_subproject = subproject('gobject-introspection')
-  regress_sources = gi_subproject.get_variable('test_regress_sources')
-  regress_headers = gi_subproject.get_variable('test_regress_headers')
-  regress_incdir = gi_subproject.get_variable('test_regress_incdirs')
-  marshalling_sources = gi_subproject.get_variable('test_marshalling_sources')
-  marshalling_headers = gi_subproject.get_variable('test_marshalling_headers')
-  gi_datadir = join_paths(meson.source_root(), 'subprojects', 'gobject-introspection', 'tests')
-endif
-
-marshalling_sources += ['gimarshallingtestsextra.c']
-
-marshalling_headers += ['gimarshallingtestsextra.h']
+marshalling_sources = ['gimarshallingtests.c', 'gimarshallingtestsextra.c']
+marshalling_headers = ['gimarshallingtests.h', 'gimarshallingtestsextra.h']
 
 marshalling_lib = library(
   'gimarshallingtests',
   sources : marshalling_sources,
   dependencies : [glib_dep, gobject_dep, gio_dep, gmodule_dep],
-  include_directories : regress_incdir,
   c_args: visibility_args,
 )
 
@@ -63,9 +42,9 @@ gnome.generate_gir(
   extra_args: ['--quiet'],
 )
 
-regress_sources += ['regressextra.c']
 
-regress_headers += ['regressextra.h']
+regress_sources = ['annotation.c', 'regress.c', 'regressextra.c']
+regress_headers = ['annotation.h', 'regress.h', 'regressextra.h']
 
 regress_deps = [glib_dep, gobject_dep, gio_dep, gmodule_dep]
 regress_c_args = []
@@ -80,7 +59,6 @@ regress_lib = library(
   'regress',
   sources : regress_sources,
   dependencies : regress_deps,
-  include_directories : regress_incdir,
   c_args: regress_c_args + visibility_args,
 )
 
