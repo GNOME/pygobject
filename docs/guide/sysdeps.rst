@@ -10,6 +10,7 @@ version of the system dependencies over time.
 3.50.0+:
     * glib: >= 2.80.0
     * libffi: >= 3.0
+    * gobject-introspection: >= 1.64.0 (for tests only)
 
 3.46.0+:
     * glib: >= 2.64.0

@@ -1,0 +1,6 @@
+[wrap-git]
+directory=gobject-introspection
+url=https://gitlab.gnome.org/GNOME/gobject-introspection.git
+push-url=git@gitlab.gnome.org:GNOME/gobject-introspection.git
+revision=main
+depth=1
