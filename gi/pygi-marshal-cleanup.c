@@ -39,12 +39,12 @@ _cleanup_caller_allocates (PyGIInvokeState    *state,
         gsize size;
         if (was_processed)
             return; /* will be cleaned up at deallocation */
-        size = gi_struct_info_get_size (iface_cache->interface_info);
+        size = gi_struct_info_get_size (GI_STRUCT_INFO (iface_cache->interface_info));
         g_slice_free1 (size, data);
     } else if (iface_cache->is_foreign) {
         if (was_processed)
             return; /* will be cleaned up at deallocation */
-        pygi_struct_foreign_release ((GIBaseInfo *)iface_cache->interface_info,
+        pygi_struct_foreign_release (GI_BASE_INFO (iface_cache->interface_info),
                                      data);
     } else {
         if (was_processed)
@@ -127,7 +127,6 @@ pygi_marshal_cleanup_args_to_py_marshal_success (PyGIInvokeState   *state,
                                                  PyGICallableCache *cache)
 {
     GSList *cache_item;
-    guint i = 0;
     PyObject *error_type, *error_value, *error_traceback;
     gboolean have_error = !!PyErr_Occurred ();
 
@@ -166,7 +165,6 @@ pygi_marshal_cleanup_args_to_py_marshal_success (PyGIInvokeState   *state,
                                        TRUE);
         }
 
-        i++;
         cache_item = cache_item->next;
     }
 
