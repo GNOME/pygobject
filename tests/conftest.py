@@ -122,7 +122,7 @@ def init_test_environ():
     if os.path.exists(gi_gir_path):
         os_environ_prepend('GI_TYPELIB_PATH', gi_gir_path)
 
-    gi.require_version("GIRepository", "2.0")
+    gi.require_version("GIRepository", "3.0")
     from gi.repository import GIRepository
     repo = GIRepository.Repository.get_default()
 
