@@ -606,7 +606,7 @@ _callable_cache_generate_args_cache_real (PyGICallableCache *callable_cache,
 
     /* Reverse loop through all the arguments to setup arg_name_list/hash
      * and find the number of required arguments */
-    for (int i=(_pygi_callable_cache_args_len (callable_cache))-1; i >= 0; i--) {
+    for (i=(_pygi_callable_cache_args_len (callable_cache))-1; i >= 0; i--) {
         PyGIArgCache *arg_cache = _pygi_callable_cache_get_arg (callable_cache, i);
 
         if (arg_cache->meta_type != PYGI_META_ARG_TYPE_CHILD &&
@@ -1224,8 +1224,8 @@ pygi_closure_cache_new (GICallableInfo *info)
             continue;
 
         garray_cache = (PyGIArgGArray *) arg_cache;
-        if (garray_cache->len_arg_index == -1)
-            continue;
+        // if (garray_cache->len_arg_index == -1)
+        //     continue;
 
         len_arg_cache = g_ptr_array_index (callable_cache->args_cache,
                                            garray_cache->len_arg_index);
