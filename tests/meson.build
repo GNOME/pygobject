@@ -88,10 +88,6 @@ helperext = python.extension_module('testhelper', helper_sources,
 schemas = gnome.compile_schemas(build_by_default: true)
 
 envdata = environment()
-if gi_dep.type_name() == 'internal'
-  envdata.append('GI_TYPELIB_PATH', join_paths(meson.project_build_root(), 'subprojects', 'gobject-introspection', 'gir'))
-endif
-
 if host_machine.system() == 'windows'
     envdata.prepend('PATH', join_paths(get_option('prefix'), get_option('bindir')))
 endif

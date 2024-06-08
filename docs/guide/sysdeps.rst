@@ -7,6 +7,10 @@ into account by pip's dependency resolver, you may need to restrict the version
 of PyGObject itself for the installation to succeed. This lists the minimum
 version of the system dependencies over time.
 
+3.50.0+:
+    * glib: >= 2.80.0
+    * libffi: >= 3.0
+
 3.46.0+:
     * glib: >= 2.64.0
     * gobject-introspection: >= 1.64.0
