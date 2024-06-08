@@ -20,7 +20,7 @@
 #define EXTRA_TESTS
 
 #include <glib-object.h>
-#include <gitestmacros.h>
+#include "gitestmacros.h"
 
 typedef enum
 {
