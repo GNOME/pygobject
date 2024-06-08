@@ -280,7 +280,7 @@ pygi_arg_struct_from_py_marshal (PyObject *py_arg,
     } else if (is_foreign) {
         PyObject *success;
         success = pygi_struct_foreign_convert_to_g_argument (py_arg,
-                                                             interface_info,
+                                                             GI_INTERFACE_INFO (interface_info),
                                                              transfer,
                                                              arg);
 
@@ -364,7 +364,7 @@ arg_struct_from_py_marshal_adapter (PyGIInvokeState   *state,
     gboolean res =  pygi_arg_struct_from_py_marshal (py_arg,
                                                      arg,
                                                      arg_cache->arg_name,
-                                                     iface_cache->interface_info,
+                                                     GI_BASE_INFO (iface_cache->interface_info),
                                                      iface_cache->g_type,
                                                      iface_cache->py_type,
                                                      arg_cache->transfer,
