@@ -330,7 +330,7 @@ _caller_alloc (PyGIArgCache *arg_cache, GIArgument *arg)
         arg->v_pointer = NULL;
         if (g_type_is_a (iface_cache->g_type, G_TYPE_BOXED)) {
             arg->v_pointer =
-                pygi_boxed_alloc (iface_cache->interface_info, NULL);
+                pygi_boxed_alloc (GI_BASE_INFO (iface_cache->interface_info), NULL);
         } else if (iface_cache->g_type == G_TYPE_VALUE) {
             arg->v_pointer = g_slice_new0 (GValue);
         } else if (iface_cache->is_foreign) {
@@ -785,21 +785,21 @@ _wrap_gi_callable_info_invoke (PyGIBaseInfo *self, PyObject *py_args,
         if (GI_IS_FUNCTION_INFO (self->info)) {
             GIFunctionInfoFlags flags;
 
-            flags = gi_function_info_get_flags ( (GIFunctionInfo *)self->info);
+            flags = gi_function_info_get_flags (GI_FUNCTION_INFO (self->info));
 
             if (flags & GI_FUNCTION_IS_CONSTRUCTOR) {
-                function_cache = pygi_constructor_cache_new (self->info);
+                function_cache = pygi_constructor_cache_new (GI_CALLABLE_INFO (self->info));
             } else if (flags & GI_FUNCTION_IS_METHOD) {
-                function_cache = pygi_method_cache_new (self->info);
+                function_cache = pygi_method_cache_new (GI_CALLABLE_INFO (self->info));
             } else {
-                function_cache = pygi_function_cache_new (self->info);
+                function_cache = pygi_function_cache_new (GI_CALLABLE_INFO (self->info));
             }
         } else if (GI_IS_VFUNC_INFO (self->info)) {
-            function_cache = pygi_vfunc_cache_new (self->info);
+            function_cache = pygi_vfunc_cache_new (GI_CALLABLE_INFO (self->info));
         } else if (GI_IS_CALLBACK_INFO (self->info)) {
             g_error ("Cannot invoke callback types");
         } else {
-            function_cache = pygi_method_cache_new (self->info);
+            function_cache = pygi_method_cache_new (GI_CALLABLE_INFO (self->info));
         }
 
         self->cache = (PyGICallableCache *)function_cache;
