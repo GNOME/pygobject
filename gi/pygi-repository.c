@@ -41,6 +41,24 @@ pygi_repository_get_default (void)
 }
 
 static PyObject *
+_wrap_pygi_repository_get_default (PyObject *self)
+{
+    static PyGIRepository *repository = NULL;
+
+    if (!repository) {
+        repository = (PyGIRepository *) PyObject_New (PyGIRepository, &PyGIRepository_Type);
+        if (repository == NULL) {
+            return NULL;
+        }
+
+        repository->repository = pygi_repository_get_default ();
+    }
+
+    Py_INCREF ( (PyObject *) repository);
+    return (PyObject *) repository;
+}
+
+static PyObject *
 _wrap_gi_repository_enumerate_versions (PyGIRepository *self,
                                         PyObject       *args,
                                         PyObject       *kwargs)
@@ -350,6 +368,7 @@ _wrap_gi_repository_get_immediate_dependencies (PyGIRepository *self,
 
 
 static PyMethodDef _PyGIRepository_methods[] = {
+    { "get_default", (PyCFunction) _wrap_pygi_repository_get_default, METH_NOARGS | METH_STATIC },
     { "enumerate_versions", (PyCFunction) _wrap_gi_repository_enumerate_versions, METH_VARARGS | METH_KEYWORDS },
     { "require", (PyCFunction) _wrap_gi_repository_require, METH_VARARGS | METH_KEYWORDS },
     { "get_infos", (PyCFunction) _wrap_gi_repository_get_infos, METH_VARARGS | METH_KEYWORDS },
