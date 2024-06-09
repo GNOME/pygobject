@@ -80,7 +80,7 @@ Installing the system provided PyGObject:
 
 Installing from PyPI with pip:
   #) Open a terminal and enter your virtual environment
-  #) Execute ``sudo apt install libgirepository2.0-dev gcc libcairo2-dev pkg-config python3-dev gir1.2-gtk-4.0``
+  #) Execute ``sudo apt install libgirepository-2.0-dev gcc libcairo2-dev pkg-config python3-dev gir1.2-gtk-4.0``
      to install the build dependencies and GTK
   #) Execute ``pip3 install pycairo`` to build and install Pycairo
   #) Execute ``pip3 install PyGObject`` to build and install PyGObject
