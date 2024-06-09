@@ -24,7 +24,6 @@
 #include "pygi-basictype.h"
 #include "pygi-util.h"
 
-static GIRepository *_default_repository = NULL;
 
 PyObject *PyGIRepositoryError;
 
@@ -34,10 +33,12 @@ PYGI_DEFINE_TYPE("gi.Repository", PyGIRepository_Type, PyGIRepository);
 GIRepository*
 pygi_repository_get_default (void)
 {
-    if (_default_repository == NULL)
-        _default_repository = gi_repository_new ();
+    static GIRepository *default_repository = NULL;
+    
+    if (default_repository == NULL)
+        default_repository = gi_repository_new ();
 
-    return _default_repository;
+    return default_repository;
 }
 
 static PyObject *

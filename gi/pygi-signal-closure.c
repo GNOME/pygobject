@@ -20,6 +20,7 @@
 #include "pygi-value.h"
 #include "pygi-argument.h"
 #include "pygi-boxed.h"
+#include "pygi-repository.h"
 
 static GISignalInfo *
 _pygi_lookup_signal_from_g_type (GType g_type,
@@ -29,7 +30,7 @@ _pygi_lookup_signal_from_g_type (GType g_type,
     GIBaseInfo *info;
     GISignalInfo *signal_info = NULL;
 
-    repository = gi_repository_new ();
+    repository = pygi_repository_get_default ();
     info = gi_repository_find_by_gtype (repository, g_type);
     if (info == NULL)
         return NULL;
@@ -42,7 +43,6 @@ _pygi_lookup_signal_from_g_type (GType g_type,
                                                     signal_name);
 
     gi_base_info_unref (info);
-    g_clear_object (&repository);  // TODO not going to go well
 
     return signal_info;
 }

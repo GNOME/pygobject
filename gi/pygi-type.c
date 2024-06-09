@@ -29,6 +29,7 @@
 #include "pygi-type.h"
 #include "pygi-value.h"
 #include "pygi-basictype.h"
+#include "pygi-repository.h"
 
 PyObject *
 pygi_type_import_by_name (const char *namespace_,
@@ -62,7 +63,7 @@ pygi_type_import_by_g_type (GType g_type)
     GIBaseInfo *info;
     PyObject *type;
 
-    repository = gi_repository_new ();
+    repository = pygi_repository_get_default ();
 
     info = gi_repository_find_by_gtype (repository, g_type);
     if (info == NULL) {
@@ -71,7 +72,6 @@ pygi_type_import_by_g_type (GType g_type)
 
     type = pygi_type_import_by_gi_info (info);
     gi_base_info_unref (info);
-    g_clear_object (&repository);  // TODO going to explode
 
     return type;
 }

@@ -27,6 +27,7 @@
 #include "pygi-fundamental.h"
 #include "pygi-type.h"
 #include "pygi-fundamental.h"
+#include "pygi-repository.h"
 
 #include <girepository/girepository.h>
 
@@ -84,7 +85,7 @@ _pygi_lookup_property_from_g_type (GType g_type, const gchar *attr_name)
     GIRepository *repository;
     GIBaseInfo *info;
 
-    repository = gi_repository_new ();
+    repository = pygi_repository_get_default ();
     info = gi_repository_find_by_gtype (repository, g_type);
     if (info == NULL)
        return NULL;
@@ -97,7 +98,6 @@ _pygi_lookup_property_from_g_type (GType g_type, const gchar *attr_name)
                                                    attr_name);
 
     gi_base_info_unref (info);
-    g_clear_object (&repository);  // TODO going to explode
 
     return ret;
 }
