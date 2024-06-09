@@ -72,7 +72,7 @@ flags_enum_from_gtype (GType g_type,
     GIBaseInfo *info;
     const gchar *type_name;
 
-    repository = gi_repository_new ();
+    repository = pygi_repository_get_default ();
     info = gi_repository_find_by_gtype (repository, g_type);
     if (info != NULL) {
         type_name = gi_base_info_get_name (info);
@@ -82,7 +82,6 @@ flags_enum_from_gtype (GType g_type,
         type_name = g_type_name (g_type);
         new_type = add_func (NULL, type_name, NULL, g_type);
     }
-    g_object_unref (repository); /* TODO probably wrong */
 
     return new_type;
 }
