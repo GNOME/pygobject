@@ -1,4 +1,4 @@
-FROM ubuntu:jammy
+FROM ubuntu:noble
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -16,7 +16,7 @@ RUN apt-get update && apt-get install -y \
     libbz2-dev \
     libcairo2-dev \
     libffi-dev \
-    libgirepository2.0-dev \
+    libgirepository-2.0-dev \
     libglib2.0-dev \
     libgtk-3-0 \
     libgtk-4-1 \
