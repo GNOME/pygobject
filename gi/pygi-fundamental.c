@@ -174,7 +174,7 @@ _pygi_fundamental_new_internal (PyTypeObject *type,
         return NULL;
     }
 
-    info = (GIObjectInfo*) _pygi_object_get_gi_info ( (PyObject *) type, &PyGIObjectInfo_Type);
+    info = GI_OBJECT_INFO (_pygi_object_get_gi_info ( (PyObject *) type, &PyGIObjectInfo_Type));
     if (info == NULL) {
         if (PyErr_ExceptionMatches (PyExc_AttributeError)) {
             PyErr_Format (PyExc_TypeError, "missing introspection information");

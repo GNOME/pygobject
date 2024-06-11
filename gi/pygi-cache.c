@@ -466,7 +466,7 @@ _callable_cache_generate_args_cache_real (PyGICallableCache *callable_cache,
     GITransfer return_transfer;
     PyGIArgCache *return_cache;
     PyGIDirection return_direction;
-	gssize last_explicit_arg_index;
+    gssize last_explicit_arg_index;
     PyObject *tuple_names;
     GSList *arg_cache_item;
     PyTypeObject* resulttuple_type;
@@ -494,7 +494,7 @@ _callable_cache_generate_args_cache_real (PyGICallableCache *callable_cache,
     callable_cache->return_cache = return_cache;
     gi_base_info_unref (return_info);
 
-    callable_cache->user_data_index = -1;
+    callable_cache->has_user_data = FALSE;
 
     for (i = 0, arg_index = (guint)callable_cache->args_offset;
          arg_index < _pygi_callable_cache_args_len (callable_cache);
@@ -509,6 +509,7 @@ _callable_cache_generate_args_cache_real (PyGICallableCache *callable_cache,
         /* This only happens when dealing with callbacks */
         if (gi_arg_info_get_closure_index (arg_info, &closure_index) && closure_index == i) {
             callable_cache->user_data_index = i;
+            callable_cache->has_user_data = TRUE;
 
             arg_cache = pygi_arg_cache_alloc ();
             _pygi_callable_cache_set_arg (callable_cache, arg_index, arg_cache);
@@ -1259,6 +1260,7 @@ pygi_closure_cache_new (GICallableInfo *info)
                 arg_cache->is_pointer) {
 
                 callable_cache->user_data_index = i;
+                callable_cache->has_user_data = TRUE;
                 break;
             }
         }
