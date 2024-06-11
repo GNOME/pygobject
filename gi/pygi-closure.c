@@ -822,19 +822,14 @@ _pygi_marshal_to_py_interface_callback (PyGIInvokeState   *state,
                                         gpointer          *arg_cleanup_data)
 {
     PyGICallbackCache *callback_cache = (PyGICallbackCache *) arg_cache;
-    unsigned int user_data_index;
-    unsigned int destroy_notify_index;
     gpointer user_data = NULL;
     GDestroyNotify destroy_notify = NULL;
 
-    user_data_index = callback_cache->user_data_index;
-    destroy_notify_index = callback_cache->destroy_notify_index;
-
     if (callback_cache->has_user_data)
-        user_data = state->args[user_data_index].arg_value.v_pointer;
+        user_data = state->args[callback_cache->user_data_index].arg_value.v_pointer;
 
     if (callback_cache->has_destroy_notify)
-        destroy_notify = state->args[destroy_notify_index].arg_value.v_pointer;
+        destroy_notify = state->args[callback_cache->destroy_notify_index].arg_value.v_pointer;
 
     return _pygi_ccallback_new (arg->v_pointer,
                                 user_data,
