@@ -113,9 +113,9 @@ def init_test_environ():
     # Force the default theme so broken themes don't affect the tests
     os.environ['GTK_THEME'] = 'Adwaita'
 
-    gi.require_version("GIRepository", "3.0")
-    from gi.repository import GIRepository
-    repo = GIRepository.Repository.get_default()
+    # gi.require_version("GIRepository", "3.0")
+    # from gi.repository import GIRepository
+    repo = gi.Repository.get_default()
     repo.prepend_library_path(os.path.join(tests_builddir))
     repo.prepend_search_path(tests_builddir)
 
