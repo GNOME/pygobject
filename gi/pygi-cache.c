@@ -607,40 +607,42 @@ _callable_cache_generate_args_cache_real (PyGICallableCache *callable_cache,
 
     /* Reverse loop through all the arguments to setup arg_name_hash
      * and find the number of required arguments */
-    for (i=(_pygi_callable_cache_args_len (callable_cache))-1; i >= 0; i--) {
-        PyGIArgCache *arg_cache = _pygi_callable_cache_get_arg (callable_cache, i);
+    if (_pygi_callable_cache_args_len (callable_cache) > 0) {
+        for (i=_pygi_callable_cache_args_len (callable_cache) - 1; i >= 0; i--) {
+            PyGIArgCache *arg_cache = _pygi_callable_cache_get_arg (callable_cache, i);
 
-        if (arg_cache->meta_type != PYGI_META_ARG_TYPE_CHILD &&
-                arg_cache->meta_type != PYGI_META_ARG_TYPE_CLOSURE &&
-                arg_cache->direction & PYGI_DIRECTION_FROM_PYTHON) {
+            if (arg_cache->meta_type != PYGI_META_ARG_TYPE_CHILD &&
+                    arg_cache->meta_type != PYGI_META_ARG_TYPE_CLOSURE &&
+                    arg_cache->direction & PYGI_DIRECTION_FROM_PYTHON) {
 
-            /* Setup arg_name_hash */
-            gpointer arg_name = (gpointer)arg_cache->arg_name;
-            if (arg_name != NULL) {
-                g_hash_table_insert (callable_cache->arg_name_hash,
-                                     arg_name, arg_cache);
-            }
+                /* Setup arg_name_hash */
+                gpointer arg_name = (gpointer)arg_cache->arg_name;
+                if (arg_name != NULL) {
+                    g_hash_table_insert (callable_cache->arg_name_hash,
+                                        arg_name, arg_cache);
+                }
 
-            /* The first tail argument without a default will force all the preceding
-             * argument defaults off. This limits support of default args to the
-             * tail of an args list.
-             */
-            if (callable_cache->n_py_required_args > 0) {
-                arg_cache->has_default = FALSE;
-                callable_cache->n_py_required_args += 1;
-            } else if (!arg_cache->has_default) {
-                callable_cache->n_py_required_args += 1;
-            }
+                /* The first tail argument without a default will force all the preceding
+                * argument defaults off. This limits support of default args to the
+                * tail of an args list.
+                */
+                if (callable_cache->n_py_required_args > 0) {
+                    arg_cache->has_default = FALSE;
+                    callable_cache->n_py_required_args += 1;
+                } else if (!arg_cache->has_default) {
+                    callable_cache->n_py_required_args += 1;
+                }
 
-            if (last_explicit_arg_index == -1) {
-                last_explicit_arg_index = i;
+                if (last_explicit_arg_index == -1) {
+                    last_explicit_arg_index = i;
 
-                /* If the last "from python" argument in the args list is a child
-                 * with pyarg (currently only callback user_data). Set it to eat
-                 * variable args in the callable cache.
-                 */
-                if (arg_cache->meta_type == PYGI_META_ARG_TYPE_CHILD_WITH_PYARG)
-                    callable_cache->user_data_varargs_arg = arg_cache;
+                    /* If the last "from python" argument in the args list is a child
+                    * with pyarg (currently only callback user_data). Set it to eat
+                    * variable args in the callable cache.
+                    */
+                    if (arg_cache->meta_type == PYGI_META_ARG_TYPE_CHILD_WITH_PYARG)
+                        callable_cache->user_data_varargs_arg = arg_cache;
+                }
             }
         }
     }
