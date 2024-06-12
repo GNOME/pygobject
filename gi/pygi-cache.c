@@ -1239,7 +1239,7 @@ pygi_closure_cache_new (GICallableInfo *info)
             continue;
 
         garray_cache = (PyGIArgGArray *) arg_cache;
-        if (garray_cache->len_arg_index == -1)
+        if (!garray_cache->has_len_arg)
             continue;
 
         len_arg_cache = g_ptr_array_index (callable_cache->args_cache,
