@@ -160,7 +160,8 @@ typedef struct _PyGIArgGArray
 {
     PyGISequenceCache seq_cache;
     size_t fixed_size;  /* TODO: was changed from gssize (signed) to size_t (unsigned)*/
-    gssize len_arg_index;
+    unsigned int len_arg_index;
+    gboolean has_len_arg;
     gboolean is_zero_terminated;
     gsize item_size;
     GIArrayType array_type;
