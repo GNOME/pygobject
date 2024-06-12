@@ -60,6 +60,43 @@ _wrap_pygi_repository_get_default (PyObject *self)
 }
 
 static PyObject *
+_wrap_gi_repository_prepend_library_path (PyGIRepository *self,
+                                          PyObject       *args,
+                                          PyObject       *kwargs)
+{
+    static char *kwlist[] = { "directory", NULL };
+    const char *directory;
+
+    if (!PyArg_ParseTupleAndKeywords (args, kwargs, "s:Repository.prepend_library_path",
+                                      kwlist, &directory)) {
+        return NULL;
+    }
+
+    gi_repository_prepend_library_path (self->repository, directory);
+
+    Py_RETURN_NONE;
+}
+
+static PyObject *
+_wrap_gi_repository_prepend_search_path (PyGIRepository *self,
+                                         PyObject       *args,
+                                         PyObject       *kwargs)
+{
+    static char *kwlist[] = { "directory", NULL };
+    const char *directory;
+
+    if (!PyArg_ParseTupleAndKeywords (args, kwargs, "s:Repository.prepend_search_path",
+                                      kwlist, &directory)) {
+        return NULL;
+    }
+
+    gi_repository_prepend_search_path (self->repository, directory);
+
+    Py_RETURN_NONE;
+}
+
+
+static PyObject *
 _wrap_gi_repository_enumerate_versions (PyGIRepository *self,
                                         PyObject       *args,
                                         PyObject       *kwargs)
@@ -380,6 +417,8 @@ static PyMethodDef _PyGIRepository_methods[] = {
     { "get_dependencies", (PyCFunction) _wrap_gi_repository_get_dependencies, METH_VARARGS | METH_KEYWORDS  },
     { "get_immediate_dependencies", (PyCFunction) _wrap_gi_repository_get_immediate_dependencies, METH_VARARGS | METH_KEYWORDS  },
     { "is_registered", (PyCFunction) _wrap_gi_repository_is_registered, METH_VARARGS | METH_KEYWORDS  },
+    { "prepend_library_path", (PyCFunction) _wrap_gi_repository_prepend_library_path, METH_VARARGS | METH_KEYWORDS },
+    { "prepend_search_path", (PyCFunction) _wrap_gi_repository_prepend_search_path, METH_VARARGS | METH_KEYWORDS },
     { NULL, NULL, 0 }
 };
 
