@@ -123,8 +123,7 @@ def init_test_environ():
         os_environ_prepend('GI_TYPELIB_PATH', gi_gir_path)
 
     gi.require_version("GIRepository", "3.0")
-    from gi.repository import GIRepository
-    repo = GIRepository.Repository.get_default()
+    repo = gi.Repository.get_default()
 
     gi_tests_path = os.path.join(builddir, "subprojects", "gobject-introspection-tests")
     repo.prepend_library_path(gi_tests_path)
