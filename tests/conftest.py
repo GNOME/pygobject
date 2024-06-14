@@ -127,8 +127,8 @@ def init_test_environ():
             sys.modules["gi.repository." + namespace] = None
 
     # Optional
-    try_require_version("Gtk", os.environ.get("TEST_GTK_VERSION", "3.0"))
-    try_require_version("Gdk", os.environ.get("TEST_GTK_VERSION", "3.0"))
+    try_require_version("Gtk", os.environ.get("TEST_GTK_VERSION", "4.0"))
+    try_require_version("Gdk", os.environ.get("TEST_GTK_VERSION", "4.0"))
     try_require_version("GdkPixbuf", "2.0")
     try_require_version("Pango", "1.0")
     try_require_version("PangoCairo", "1.0")
