@@ -342,7 +342,7 @@ pygi_closure_cache_new      (GICallableInfo *info);
 
 inline static guint
 _pygi_callable_cache_args_len (PyGICallableCache *cache) {
-    return ((cache)->args_cache)->len;
+    return cache->args_cache->len;
 }
 
 inline static PyGIArgCache *
