@@ -1636,7 +1636,7 @@ _wrap_gi_constant_info_get_value (PyGIBaseInfo *self)
     PyObject *py_value;
     gboolean free_array = FALSE;
 
-    if (gi_constant_info_get_value ( (GIConstantInfo *) self->info, &value) < 0) {
+    if (gi_constant_info_get_value ( (GIConstantInfo *) self->info, &value) == 0) {
         PyErr_SetString (PyExc_RuntimeError, "unable to get value");
         return NULL;
     }
