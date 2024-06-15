@@ -109,13 +109,13 @@ pygi_struct_foreign_lookup (GIBaseInfo *base_info)
 
 PyObject *
 pygi_struct_foreign_convert_to_g_argument (PyObject        *value,
-                                           GIInterfaceInfo *interface_info,
+                                           GIRegisteredTypeInfo *interface_info,
                                            GITransfer       transfer,
                                            GIArgument      *arg)
 {
     PyObject *result;
 
-    GIBaseInfo *base_info = (GIBaseInfo *) interface_info;
+    GIBaseInfo *base_info = GI_BASE_INFO (interface_info);
     PyGIForeignStruct *foreign_struct = pygi_struct_foreign_lookup (base_info);
 
     if (foreign_struct == NULL) {
@@ -129,11 +129,11 @@ pygi_struct_foreign_convert_to_g_argument (PyObject        *value,
 }
 
 PyObject *
-pygi_struct_foreign_convert_from_g_argument (GIInterfaceInfo *interface_info,
+pygi_struct_foreign_convert_from_g_argument (GIRegisteredTypeInfo *interface_info,
                                              GITransfer       transfer,
                                              GIArgument      *arg)
 {
-    GIBaseInfo *base_info = (GIBaseInfo *) interface_info;
+    GIBaseInfo *base_info = GI_BASE_INFO (interface_info);
     PyGIForeignStruct *foreign_struct = pygi_struct_foreign_lookup (base_info);
 
     if (foreign_struct == NULL)
