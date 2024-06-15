@@ -465,7 +465,7 @@ array_success:
                 pygi_arg_struct_from_py_marshal (object,
                                                  &arg,
                                                  NULL, /*arg_name*/
-                                                 info, /*interface_info*/
+                                                 GI_REGISTERED_TYPE_INFO (info),
                                                  g_type,
                                                  py_type,
                                                  transfer,
@@ -790,7 +790,7 @@ _pygi_argument_to_object (GIArgument  *arg,
                 }
 
                 object = pygi_arg_struct_to_py_marshal (arg,
-                                                        GI_INTERFACE_INFO (info),
+                                                        GI_REGISTERED_TYPE_INFO (info),
                                                         g_type,
                                                         py_type,
                                                         transfer,
