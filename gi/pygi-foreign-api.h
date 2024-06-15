@@ -24,10 +24,10 @@
 #include <pygobject.h>
 
 typedef PyObject * (*PyGIArgOverrideToGIArgumentFunc)   (PyObject        *value,
-                                                         GIInterfaceInfo *interface_info,
+                                                         GIRegisteredTypeInfo *interface_info,
                                                          GITransfer       transfer,
                                                          GIArgument      *arg);
-typedef PyObject * (*PyGIArgOverrideFromGIArgumentFunc) (GIInterfaceInfo *interface_info,
+typedef PyObject * (*PyGIArgOverrideFromGIArgumentFunc) (GIRegisteredTypeInfo *interface_info,
                                                          GITransfer       transfer,
                                                          gpointer         data);
 typedef PyObject * (*PyGIArgOverrideReleaseFunc)        (GIBaseInfo *base_info,

@@ -39,7 +39,7 @@ pygi_arg_gobject_new_from_info       (GITypeInfo        *type_info,
                                       GIArgInfo         *arg_info,   /* may be null */
                                       GITransfer         transfer,
                                       PyGIDirection      direction,
-                                      GIInterfaceInfo   *iface_info,
+                                      GIRegisteredTypeInfo *iface_info,
                                       PyGICallableCache *callable_cache);
 
 G_END_DECLS
