@@ -118,8 +118,6 @@ _pygi_argument_from_g_value(const GValue *value,
 
             info = gi_type_info_get_interface (type_info);
 
-            gi_base_info_unref (info);
-
             if (GI_IS_FLAGS_INFO (info)) {
                 arg.v_uint = g_value_get_flags (value);
             } else if (GI_IS_ENUM_INFO (info)) {
@@ -148,6 +146,9 @@ _pygi_argument_from_g_value(const GValue *value,
                               "Converting GValue's of type '%s' is not implemented.",
                               g_type_name (G_TYPE_FROM_INSTANCE (info)));
             }
+
+            gi_base_info_unref (info);
+
             break;
         }
         case GI_TYPE_TAG_ERROR:

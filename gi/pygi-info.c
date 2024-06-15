@@ -1855,10 +1855,10 @@ _wrap_gi_field_info_get_value (PyGIBaseInfo *self,
 
         info = gi_type_info_get_interface (field_type_info);
 
-        gi_base_info_unref (info);
-
         if (GI_IS_UNION_INFO (info)) {
             PyErr_SetString (PyExc_NotImplementedError, "getting an union is not supported yet");
+            gi_base_info_unref (info);
+
             goto out;
         } else if (GI_IS_STRUCT_INFO (info)) {
             gsize offset;
@@ -1867,8 +1867,12 @@ _wrap_gi_field_info_get_value (PyGIBaseInfo *self,
 
             value.v_pointer = (char*) pointer + offset;
 
+            gi_base_info_unref (info);
+
             goto argument_to_object;
         } else {
+            gi_base_info_unref (info);
+
             /* Fallback. */
         }
     }
