@@ -352,7 +352,7 @@ This will be the last release supporting Python 2.
 * GLib.Variant: implement __bool__ for maybe types
 * cairo: Fix GValue converters in case of NULL
 * setup.py: Print an install command hint when pkg-config is missing
-* pygi-info: wrap gi_union_info_get_alignment()
+* pygi-info: wrap g_union_info_get_alignment()
   :mr:`105` (:user:`Tomasz Miąsko <tmiasko>`)
 
 
@@ -516,7 +516,7 @@ Documentation:
   :issue:`52`
 * Various documentation improvements. :mr:`29` (:user:`Dan Yeaw <danyeaw>`)
 * Add PEP518/pyproject.toml file. :mr:`44` (:user:`James Tocknell <aragilar>`)
-* Avoid truncating value returned from gi_value_info_get_value. :mr:`51`
+* Avoid truncating value returned from g_value_info_get_value. :mr:`51`
   (:user:`Tomasz Miąsko <tmiasko>`)
 * Fix typo in BoundSignal disconnect. :mr:`55`
   (:user:`Vladislav Glinsky <cl0ne>`)
@@ -751,7 +751,7 @@ Documentation:
 * pygtkcompat: Allow multiple calls to enable(), enable_gtk() as long as the version matches (Christoph Reiter) (:bzbug:`759009`)
 * tests: Update Makefile for building tests on OS X (Simon Feltman) (:bzbug:`762176`)
 * testhelper: propagate exception if _gobject could not be imported (Mikhail Fludkov) (:bzbug:`772949`)
-* pygi-info: initialize GIArgument before passing it to gi_constant_info_get_value (Christoph Reiter) (:bzbug:`772949`)
+* pygi-info: initialize GIArgument before passing it to g_constant_info_get_value (Christoph Reiter) (:bzbug:`772949`)
 * tests: build libregress with disabled cairo (Mikhail Fludkov) (:bzbug:`772949`)
 * tests: use g-ir utils found by pkg-config (Mikhail Fludkov) (:bzbug:`772949`)
 * Add a foreign type for cairo_region_t. (Shyouzou Sugitani) (:bzbug:`667959`)
@@ -765,7 +765,7 @@ Documentation:
 3.24.1 - 2017-04-10
 -------------------
 
-* pygi-info: initialize GIArgument before passing it to gi_constant_info_get_value (Christoph Reiter) (:bzbug:`772949`)
+* pygi-info: initialize GIArgument before passing it to g_constant_info_get_value (Christoph Reiter) (:bzbug:`772949`)
 * configure.ac: post-release version bump to 3.24.1 (Christoph Reiter)
 
 3.24.0 - 2017-03-20
@@ -1131,7 +1131,7 @@ Documentation:
 3.11.91 - 2014-03-03
 --------------------
 
-* Use ffi_call directly instead of gi_callable_info_invoke
+* Use ffi_call directly instead of g_callable_info_invoke
   (Simon Feltman) (:bzbug:`723642`)
 * configure.ac: Use -std=c90 and error on declaration-after-statement
   (Simon Feltman)
@@ -1364,7 +1364,7 @@ Documentation:
   (Simon Feltman)
 * Use correct class for GtkEditable's get_selection_bounds() function
   (Mike Ruprecht) (:bzbug:`699096`)
-* Test results of gi_base_info_get_name for NULL (Simon Feltman)
+* Test results of g_base_info_get_name for NULL (Simon Feltman)
   (:bzbug:`698829`)
 * Change interpretation of NULL pointer field from None to 0
   (Simon Feltman) (:bzbug:`698366`)
@@ -1382,7 +1382,7 @@ Documentation:
   (:bzbug:`698547`)
 * Use correct class for GtkEditable's get_selection_bounds() function
   (Mike Ruprecht) (:bzbug:`699096`)
-* Test results of gi_base_info_get_name for NULL (Simon Feltman)
+* Test results of g_base_info_get_name for NULL (Simon Feltman)
   (:bzbug:`698829`)
 * Add ObjectInfo.get_class_struct() (Johan Dahlin) (:bzbug:`685218`)
 * Change interpretation of NULL pointer field from None to 0
@@ -2707,7 +2707,7 @@ Documentation:
 * Amend previous enum wrapping commit to remove redundant setting of __info__ attribute. (Laszlo Pandy)
 * pygi-convert.sh: Handle GdkPixbuf.InterpType (Martin Pitt)
 * Fix wrapping of enums: Create new Python type for each non-gtype enum. (Laszlo Pandy)
-* Use gi_vfunc_info_invoke for chaining up in vfuncs (Tomeu Vizoso)
+* Use g_vfunc_info_invoke for chaining up in vfuncs (Tomeu Vizoso)
 * Move pyglib_{main_context, option_context, option_group}_new into _PyGLib_API (Simon van der Linden)
 * pygi-convert.sh: Handle Gdk.DragAction (Martin Pitt)
 * pygi-convert.sh: Generalize Gtk.Settings migration (Martin Pitt)
