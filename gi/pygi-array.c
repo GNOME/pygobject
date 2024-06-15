@@ -225,8 +225,7 @@ _pygi_marshal_from_py_array (PyGIInvokeState   *state,
     if (!pygi_guint_from_pyssize (py_length, &length))
         return FALSE;
 
-    if (array_cache->fixed_size >= 0 &&
-            (guint)array_cache->fixed_size != length) {
+    if (array_cache->has_fixed_size && (guint) array_cache->fixed_size != length) {
         PyErr_Format (PyExc_ValueError, "Must contain %zd items, not %u",
                       array_cache->fixed_size, length);
 
@@ -531,8 +530,8 @@ _pygi_marshal_to_py_array (PyGIInvokeState   *state,
       * we allocate a GArray if the argument was a C array
       */
     if (array_cache->array_type == GI_ARRAY_TYPE_C) {
-        gsize len;
-        if (array_cache->fixed_size >= 0) {
+        gsize len = 0;
+        if (array_cache->has_fixed_size) {
             g_assert(arg->v_pointer != NULL);
             len = array_cache->fixed_size;
         } else if (array_cache->is_zero_terminated) {
@@ -706,7 +705,7 @@ _wrap_c_array (PyGIInvokeState   *state,
     GArray *array_;
     gsize   len = 0;
 
-    if (array_cache->fixed_size >= 0) {
+    if (array_cache->has_fixed_size) {
         len = array_cache->fixed_size;
     } else if (array_cache->is_zero_terminated) {
         if (array_cache->item_size == sizeof(gpointer))
@@ -919,7 +918,7 @@ pygi_arg_garray_setup (PyGIArgGArray     *sc,
     ((PyGIArgCache *)sc)->destroy_notify = (GDestroyNotify)_array_cache_free_func;
     sc->array_type = gi_type_info_get_array_type (type_info);
     sc->is_zero_terminated = gi_type_info_is_zero_terminated (type_info);
-    gi_type_info_get_array_fixed_size (type_info, &sc->fixed_size);
+    sc->has_fixed_size = gi_type_info_get_array_fixed_size (type_info, &sc->fixed_size);
     sc->has_len_arg = FALSE;  /* setup by pygi_arg_garray_len_arg_setup */
 
     item_type_info = gi_type_info_get_param_type (type_info, 0);
