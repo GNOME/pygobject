@@ -246,6 +246,7 @@ _pygi_argument_to_array (GIArgument  *arg,
     gboolean is_zero_terminated;
     gsize item_size;
     size_t length;
+    gssize length_policy;
     GArray *g_array;
 
     g_return_val_if_fail (gi_type_info_get_tag (type_info) == GI_TYPE_TAG_ARRAY, NULL);
@@ -290,10 +291,11 @@ _pygi_argument_to_array (GIArgument  *arg,
                     has_array_length = gi_type_info_get_array_length_index (type_info, &length_arg_pos);
                     g_assert (has_array_length);
 
-                    length = array_length_policy (length_arg_pos, user_data1, user_data2);
-                    if (length < 0) {
+                    length_policy = array_length_policy (length_arg_pos, user_data1, user_data2);
+                    if (length_policy < 0) {
                         return NULL;
                     }
+                    length = (size_t) length_policy;
                 }
             }
 
