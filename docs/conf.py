@@ -2,6 +2,7 @@ extensions = [
     'sphinx.ext.todo',
     'sphinx.ext.intersphinx',
     'sphinx.ext.extlinks',
+    'sphinx_copybutton',
 ]
 
 intersphinx_mapping = {
