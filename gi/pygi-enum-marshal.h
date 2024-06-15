@@ -29,13 +29,13 @@ PyGIArgCache *pygi_arg_enum_new_from_info   (GITypeInfo      *type_info,
                                              GIArgInfo       *arg_info,   /* may be null */
                                              GITransfer       transfer,
                                              PyGIDirection    direction,
-                                             GIInterfaceInfo *iface_info);
+                                             GIEnumInfo      *iface_info);
 
 PyGIArgCache *pygi_arg_flags_new_from_info  (GITypeInfo      *type_info,
                                              GIArgInfo       *arg_info,   /* may be null */
                                              GITransfer       transfer,
                                              PyGIDirection    direction,
-                                             GIInterfaceInfo *iface_info);
+                                             GIFlagsInfo      *iface_info);
 
 G_END_DECLS
 

@@ -36,10 +36,10 @@ _pygi_lookup_signal_from_g_type (GType g_type,
         return NULL;
 
     if (GI_IS_OBJECT_INFO (info))
-        signal_info = gi_object_info_find_signal ((GIObjectInfo *) info,
+        signal_info = gi_object_info_find_signal (GI_OBJECT_INFO (info),
                                                  signal_name);
     else if (GI_IS_INTERFACE_INFO (info))
-        signal_info = gi_interface_info_find_signal ((GIInterfaceInfo *) info,
+        signal_info = gi_interface_info_find_signal (GI_INTERFACE_INFO (info),
                                                     signal_name);
 
     gi_base_info_unref (info);

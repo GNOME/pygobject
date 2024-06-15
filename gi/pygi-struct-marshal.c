@@ -37,7 +37,7 @@
  * expected C union
  */
 static gboolean
-_is_union_member (GIInterfaceInfo *interface_info, PyObject *py_arg) {
+_is_union_member (GIRegisteredTypeInfo *interface_info, PyObject *py_arg) {
     gint i;
     gint n_fields;
     GIUnionInfo *union_info;
@@ -251,7 +251,7 @@ gboolean
 pygi_arg_struct_from_py_marshal (PyObject *py_arg,
                                  GIArgument *arg,
                                  const gchar *arg_name,
-                                 GIBaseInfo *interface_info,
+                                 GIRegisteredTypeInfo *interface_info,
                                  GType g_type,
                                  PyObject *py_type,
                                  GITransfer transfer,
@@ -280,14 +280,14 @@ pygi_arg_struct_from_py_marshal (PyObject *py_arg,
     } else if (is_foreign) {
         PyObject *success;
         success = pygi_struct_foreign_convert_to_g_argument (py_arg,
-                                                             GI_INTERFACE_INFO (interface_info),
+                                                             GI_REGISTERED_TYPE_INFO (interface_info),
                                                              transfer,
                                                              arg);
 
         return (success == Py_None);
     } else if (!PyObject_IsInstance (py_arg, py_type)) {
         /* first check to see if this is a member of the expected union */
-        is_union = _is_union_member (GI_INTERFACE_INFO (interface_info), py_arg);
+        is_union = _is_union_member (GI_REGISTERED_TYPE_INFO (interface_info), py_arg);
         if (!is_union) {
             goto type_error;
         }
@@ -335,7 +335,7 @@ pygi_arg_struct_from_py_marshal (PyObject *py_arg,
 
 type_error:
     {
-        gchar *type_name = _pygi_gi_base_info_get_fullname (interface_info);
+        gchar *type_name = _pygi_gi_base_info_get_fullname (GI_BASE_INFO (interface_info));
         PyObject *module = PyObject_GetAttrString(py_arg, "__module__");
 
         PyErr_Format (PyExc_TypeError, "argument %s: Expected %s, but got %s%s%s",
@@ -364,7 +364,7 @@ arg_struct_from_py_marshal_adapter (PyGIInvokeState   *state,
     gboolean res =  pygi_arg_struct_from_py_marshal (py_arg,
                                                      arg,
                                                      arg_cache->arg_name,
-                                                     GI_BASE_INFO (iface_cache->interface_info),
+                                                     GI_REGISTERED_TYPE_INFO (iface_cache->interface_info),
                                                      iface_cache->g_type,
                                                      iface_cache->py_type,
                                                      arg_cache->transfer,
@@ -395,7 +395,7 @@ arg_foreign_from_py_cleanup (PyGIInvokeState *state,
 
 static PyObject *
 pygi_arg_struct_to_py_marshaller (GIArgument *arg,
-                                  GIInterfaceInfo *interface_info,
+                                  GIRegisteredTypeInfo *interface_info,
                                   GType g_type,
                                   PyObject *py_type,
                                   GITransfer transfer,
@@ -461,7 +461,7 @@ pygi_arg_struct_to_py_marshaller (GIArgument *arg,
 
 PyObject *
 pygi_arg_struct_to_py_marshal (GIArgument *arg,
-                               GIInterfaceInfo *interface_info,
+                               GIRegisteredTypeInfo *interface_info,
                                GType g_type,
                                PyObject *py_type,
                                GITransfer transfer,
@@ -560,7 +560,7 @@ arg_type_class_from_py_cleanup (PyGIInvokeState *state,
 
 static void
 arg_struct_from_py_setup (PyGIArgCache     *arg_cache,
-                          GIInterfaceInfo  *iface_info,
+                          GIRegisteredTypeInfo  *iface_info,
                           GITransfer        transfer)
 {
     PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)arg_cache;
@@ -590,7 +590,7 @@ arg_struct_from_py_setup (PyGIArgCache     *arg_cache,
 
 static void
 arg_struct_to_py_setup (PyGIArgCache     *arg_cache,
-                        GIInterfaceInfo  *iface_info,
+                        GIRegisteredTypeInfo  *iface_info,
                         GITransfer        transfer)
 {
     PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)arg_cache;
@@ -614,7 +614,7 @@ pygi_arg_struct_new_from_info (GITypeInfo      *type_info,
                                GIArgInfo       *arg_info,
                                GITransfer       transfer,
                                PyGIDirection    direction,
-                               GIInterfaceInfo *iface_info)
+                               GIRegisteredTypeInfo *iface_info)
 {
     PyGIArgCache *cache = NULL;
     PyGIInterfaceCache *iface_cache;

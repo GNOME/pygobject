@@ -332,7 +332,7 @@ pygi_arg_enum_new_from_info (GITypeInfo      *type_info,
                              GIArgInfo       *arg_info,
                              GITransfer       transfer,
                              PyGIDirection    direction,
-                             GIInterfaceInfo *iface_info)
+                             GIEnumInfo      *iface_info)
 {
     gboolean res = FALSE;
     PyGIArgCache *cache = NULL;
@@ -341,7 +341,7 @@ pygi_arg_enum_new_from_info (GITypeInfo      *type_info,
                                               arg_info,
                                               transfer,
                                               direction,
-                                              iface_info);
+                                              GI_REGISTERED_TYPE_INFO (iface_info));
     if (cache == NULL)
         return NULL;
 
@@ -380,7 +380,7 @@ pygi_arg_flags_new_from_info (GITypeInfo      *type_info,
                               GIArgInfo       *arg_info,
                               GITransfer       transfer,
                               PyGIDirection    direction,
-                              GIInterfaceInfo *iface_info)
+                              GIFlagsInfo     *iface_info)
 {
     gboolean res = FALSE;
     PyGIArgCache *cache = NULL;
@@ -389,7 +389,7 @@ pygi_arg_flags_new_from_info (GITypeInfo      *type_info,
                                               arg_info,
                                               transfer,
                                               direction,
-                                              iface_info);
+                                              GI_REGISTERED_TYPE_INFO (iface_info));
     if (cache == NULL)
         return NULL;
 

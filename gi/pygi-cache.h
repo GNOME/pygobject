@@ -174,7 +174,7 @@ typedef struct _PyGIInterfaceCache
     gboolean is_foreign;
     GType g_type;
     PyObject *py_type;
-    GIInterfaceInfo *interface_info;
+    GIRegisteredTypeInfo *interface_info;
     gchar *type_name;
 } PyGIInterfaceCache;
 
@@ -270,7 +270,7 @@ pygi_arg_interface_setup (PyGIInterfaceCache *iface_cache,
                           GIArgInfo          *arg_info,  /* may be NULL for return arguments */
                           GITransfer          transfer,
                           PyGIDirection       direction,
-                          GIInterfaceInfo    *iface_info);
+                          GIRegisteredTypeInfo *iface_info);
 
 gboolean
 pygi_arg_sequence_setup  (PyGISequenceCache  *sc,
@@ -285,7 +285,7 @@ pygi_arg_interface_new_from_info (GITypeInfo         *type_info,
                                   GIArgInfo          *arg_info,     /* may be NULL for return arguments */
                                   GITransfer          transfer,
                                   PyGIDirection       direction,
-                                  GIInterfaceInfo    *iface_info);
+                                  GIRegisteredTypeInfo *iface_info);
 
 PyGIArgCache *
 pygi_arg_cache_alloc     (void);

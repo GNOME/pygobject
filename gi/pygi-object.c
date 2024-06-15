@@ -364,7 +364,7 @@ pygi_arg_gobject_new_from_info (GITypeInfo        *type_info,
                                 GIArgInfo         *arg_info,
                                 GITransfer         transfer,
                                 PyGIDirection      direction,
-                                GIInterfaceInfo   *iface_info,
+                                GIRegisteredTypeInfo *iface_info,
                                 PyGICallableCache *callable_cache)
 {
     gboolean res = FALSE;

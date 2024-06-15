@@ -153,8 +153,10 @@ pygi_arg_interface_setup (PyGIInterfaceCache *iface_cache,
                           GIArgInfo          *arg_info,    /* may be NULL for return arguments */
                           GITransfer          transfer,
                           PyGIDirection       direction,
-                          GIInterfaceInfo    *iface_info)
+                          GIRegisteredTypeInfo *iface_info)
 {
+    GIBaseInfo *base_info = GI_BASE_INFO (iface_info);
+
     if (!pygi_arg_base_setup ((PyGIArgCache *)iface_cache,
                               type_info,
                               arg_info,
@@ -165,12 +167,12 @@ pygi_arg_interface_setup (PyGIInterfaceCache *iface_cache,
 
     ( (PyGIArgCache *)iface_cache)->destroy_notify = (GDestroyNotify)_interface_cache_free_func;
 
-    gi_base_info_ref ( (GIBaseInfo *)iface_info);
+    gi_base_info_ref (base_info);
     iface_cache->interface_info = iface_info;
     iface_cache->arg_cache.type_tag = GI_TYPE_TAG_INTERFACE;
-    iface_cache->type_name = _pygi_gi_base_info_get_fullname (GI_BASE_INFO (iface_info));
-    iface_cache->g_type = gi_registered_type_info_get_g_type ( (GIRegisteredTypeInfo *)iface_info);
-    iface_cache->py_type = pygi_type_import_by_gi_info ( (GIBaseInfo *) iface_info);
+    iface_cache->type_name = _pygi_gi_base_info_get_fullname (base_info);
+    iface_cache->g_type = gi_registered_type_info_get_g_type (iface_info);
+    iface_cache->py_type = pygi_type_import_by_gi_info (base_info);
 
     if (g_type_is_a (iface_cache->g_type, G_TYPE_OBJECT)) {
         if (g_str_equal (g_type_name (iface_cache->g_type), "GCancellable"))
@@ -189,7 +191,7 @@ pygi_arg_interface_new_from_info (GITypeInfo         *type_info,
                                   GIArgInfo          *arg_info,    /* may be NULL for return arguments */
                                   GITransfer          transfer,
                                   PyGIDirection       direction,
-                                  GIInterfaceInfo    *iface_info)
+                                  GIRegisteredTypeInfo *iface_info)
 {
     PyGIInterfaceCache *ic;
 
@@ -278,7 +280,7 @@ pygi_arg_cache_alloc (void)
 }
 
 static PyGIArgCache *
-_arg_cache_new_for_interface (GIInterfaceInfo   *iface_info,
+_arg_cache_new_for_interface (GIBaseInfo        *iface_info,
                               GITypeInfo        *type_info,
                               GIArgInfo         *arg_info,
                               GITransfer         transfer,
@@ -290,33 +292,33 @@ _arg_cache_new_for_interface (GIInterfaceInfo   *iface_info,
                                                 arg_info,
                                                 transfer,
                                                 direction,
-                                                iface_info,
+                                                GI_CALLBACK_INFO (iface_info),
                                                 callable_cache);
     } else if (GI_IS_OBJECT_INFO (iface_info) || GI_IS_INTERFACE_INFO (iface_info)) {
         return pygi_arg_gobject_new_from_info (type_info,
                                                arg_info,
                                                transfer,
                                                direction,
-                                               iface_info,
+                                               GI_REGISTERED_TYPE_INFO (iface_info),
                                                callable_cache);
     } else if (GI_IS_STRUCT_INFO (iface_info) || GI_IS_UNION_INFO (iface_info)) {
         return pygi_arg_struct_new_from_info (type_info,
                                               arg_info,
                                               transfer,
                                               direction,
-                                              iface_info);
+                                              GI_REGISTERED_TYPE_INFO (iface_info));
     } else if (GI_IS_ENUM_INFO (iface_info)) {
         return pygi_arg_enum_new_from_info (type_info,
                                             arg_info,
                                             transfer,
                                             direction,
-                                            iface_info);
+                                            GI_ENUM_INFO (iface_info));
     } else if (GI_IS_FLAGS_INFO (iface_info)) {
         return pygi_arg_flags_new_from_info (type_info,
                                              arg_info,
                                              transfer,
                                              direction,
-                                             iface_info);
+                                             GI_FLAGS_INFO (iface_info));
     } else {
         g_assert_not_reached ();
     }
@@ -405,16 +407,15 @@ pygi_arg_cache_new (GITypeInfo *type_info,
            break;
 
        case GI_TYPE_TAG_INTERFACE:
-           {
-               GIInterfaceInfo *interface_info = GI_INTERFACE_INFO (gi_type_info_get_interface (type_info));
+            {
+               GIBaseInfo *interface_info = gi_type_info_get_interface (type_info);
                arg_cache = _arg_cache_new_for_interface (interface_info,
                                                          type_info,
                                                          arg_info,
                                                          transfer,
                                                          direction,
                                                          callable_cache);
-
-               gi_base_info_unref ( (GIBaseInfo *)interface_info);
+               gi_base_info_unref (interface_info);
            }
            break;
 
@@ -1057,11 +1058,11 @@ static gboolean
 _function_with_instance_cache_generate_args_cache_real (PyGICallableCache *callable_cache,
                                                         GICallableInfo *callable_info)
 {
-    GIInterfaceInfo *interface_info;
+    GIBaseInfo *interface_info;
     PyGIArgCache *instance_cache;
     GITransfer transfer;
 
-    interface_info = GI_INTERFACE_INFO (gi_base_info_get_container ((GIBaseInfo *) callable_info));
+    interface_info = gi_base_info_get_container ((GIBaseInfo *) callable_info);
     transfer = gi_callable_info_get_instance_ownership_transfer (callable_info);
 
     instance_cache =

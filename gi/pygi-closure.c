@@ -35,7 +35,7 @@ typedef struct _PyGICallbackCache
     unsigned int destroy_notify_index;
     gboolean has_destroy_notify;
     GIScopeType scope;
-    GIInterfaceInfo *interface_info;
+    GIBaseInfo *interface_info;
     PyGIClosureCache *closure_cache;
 } PyGICallbackCache;
 
@@ -95,7 +95,7 @@ _pygi_closure_assign_pyobj_to_retval (gpointer retval,
             break;
         case GI_TYPE_TAG_INTERFACE:
             {
-                GIInterfaceInfo *interface_info;
+                GIRegisteredTypeInfo *interface_info;
 
                 interface_info = ((PyGIInterfaceCache *) arg_cache)->interface_info;
 
@@ -165,7 +165,7 @@ _pygi_closure_assign_pyobj_to_out_argument (gpointer out_arg,
             break;
         case GI_TYPE_TAG_INTERFACE:
         {
-            GIInterfaceInfo *interface_info;
+            GIRegisteredTypeInfo *interface_info;
 
             interface_info = ((PyGIInterfaceCache *) arg_cache)->interface_info;
 
@@ -256,7 +256,7 @@ _pygi_closure_convert_ffi_arguments (PyGIInvokeArgState *state,
                 break;
             case GI_TYPE_TAG_INTERFACE:
             {
-                GIInterfaceInfo *interface;
+                GIRegisteredTypeInfo *interface;
 
                 interface = ((PyGIInterfaceCache *) arg_cache)->interface_info;
 
@@ -874,7 +874,7 @@ pygi_arg_callback_setup_from_info (PyGICallbackCache  *arg_cache,
                                    GIArgInfo          *arg_info,   /* may be null */
                                    GITransfer          transfer,
                                    PyGIDirection       direction,
-                                   GIInterfaceInfo    *iface_info,
+                                   GICallbackInfo     *iface_info,
                                    PyGICallableCache  *callable_cache)
 {
     PyGIArgCache *cache = (PyGIArgCache *)arg_cache;
@@ -919,8 +919,8 @@ pygi_arg_callback_setup_from_info (PyGICallbackCache  *arg_cache,
     }
 
     arg_cache->scope = gi_arg_info_get_scope (arg_info);
-    gi_base_info_ref( (GIBaseInfo *)iface_info);
-    arg_cache->interface_info = iface_info;
+    gi_base_info_ref(iface_info);
+    arg_cache->interface_info = GI_BASE_INFO (iface_info);
 
     if (direction & PYGI_DIRECTION_FROM_PYTHON) {
         arg_cache->closure_cache = pygi_closure_cache_new (GI_CALLABLE_INFO (arg_cache->interface_info));
@@ -943,7 +943,7 @@ pygi_arg_callback_new_from_info  (GITypeInfo        *type_info,
                                   GIArgInfo         *arg_info,   /* may be null */
                                   GITransfer         transfer,
                                   PyGIDirection      direction,
-                                  GIInterfaceInfo   *iface_info,
+                                  GICallbackInfo    *iface_info,
                                   PyGICallableCache *callable_cache)
 {
     gboolean res = FALSE;
