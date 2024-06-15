@@ -67,7 +67,7 @@ PyGIArgCache *pygi_arg_callback_new_from_info  (GITypeInfo        *type_info,
                                                 GIArgInfo         *arg_info,   /* may be null */
                                                 GITransfer         transfer,
                                                 PyGIDirection      direction,
-                                                GIInterfaceInfo   *iface_info,
+                                                GICallbackInfo    *iface_info,
                                                 PyGICallableCache *callable_cache);
 
 G_END_DECLS

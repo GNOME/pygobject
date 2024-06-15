@@ -41,7 +41,7 @@ static int _gi_cairo_exec (PyObject *module);
 
 static PyObject *
 cairo_context_to_arg (PyObject        *value,
-                      GIInterfaceInfo *interface_info,
+                      GIRegisteredTypeInfo *interface_info,
                       GITransfer       transfer,
                       GIArgument      *arg)
 {
@@ -65,7 +65,7 @@ cairo_context_to_arg (PyObject        *value,
 }
 
 static PyObject *
-cairo_context_from_arg (GIInterfaceInfo *interface_info,
+cairo_context_from_arg (GIRegisteredTypeInfo *interface_info,
                         GITransfer       transfer,
                         gpointer         data)
 {
@@ -126,7 +126,7 @@ cairo_context_from_gvalue (const GValue *value)
 
 static PyObject *
 cairo_surface_to_arg (PyObject        *value,
-                      GIInterfaceInfo *interface_info,
+                      GIRegisteredTypeInfo *interface_info,
                       GITransfer       transfer,
                       GIArgument      *arg)
 {
@@ -151,7 +151,7 @@ cairo_surface_to_arg (PyObject        *value,
 }
 
 static PyObject *
-cairo_surface_from_arg (GIInterfaceInfo *interface_info,
+cairo_surface_from_arg (GIRegisteredTypeInfo *interface_info,
                         GITransfer       transfer,
                         gpointer         data)
 {
@@ -227,7 +227,7 @@ _cairo_path_copy (cairo_path_t *path) {
 
 static PyObject *
 cairo_path_to_arg (PyObject        *value,
-                   GIInterfaceInfo *interface_info,
+                   GIRegisteredTypeInfo *interface_info,
                    GITransfer       transfer,
                    GIArgument      *arg)
 {
@@ -252,7 +252,7 @@ cairo_path_to_arg (PyObject        *value,
 }
 
 static PyObject *
-cairo_path_from_arg (GIInterfaceInfo *interface_info,
+cairo_path_from_arg (GIRegisteredTypeInfo *interface_info,
                      GITransfer       transfer,
                      gpointer         data)
 {
@@ -316,7 +316,7 @@ cairo_font_face_from_gvalue (const GValue *value)
 
 static PyObject *
 cairo_font_options_to_arg (PyObject        *value,
-                           GIInterfaceInfo *interface_info,
+                           GIRegisteredTypeInfo *interface_info,
                            GITransfer       transfer,
                            GIArgument      *arg)
 {
@@ -341,7 +341,7 @@ cairo_font_options_to_arg (PyObject        *value,
 }
 
 static PyObject *
-cairo_font_options_from_arg (GIInterfaceInfo *interface_info,
+cairo_font_options_from_arg (GIRegisteredTypeInfo *interface_info,
                              GITransfer       transfer,
                              gpointer         data)
 {
@@ -406,7 +406,7 @@ cairo_scaled_font_from_gvalue (const GValue *value)
 
 static PyObject *
 cairo_pattern_to_arg (PyObject        *value,
-                      GIInterfaceInfo *interface_info,
+                      GIRegisteredTypeInfo *interface_info,
                       GITransfer       transfer,
                       GIArgument      *arg)
 {
@@ -431,7 +431,7 @@ cairo_pattern_to_arg (PyObject        *value,
 }
 
 static PyObject *
-cairo_pattern_from_arg (GIInterfaceInfo *interface_info,
+cairo_pattern_from_arg (GIRegisteredTypeInfo *interface_info,
                         GITransfer       transfer,
                         gpointer         data)
 {
@@ -486,7 +486,7 @@ cairo_pattern_from_gvalue (const GValue *value)
 
 static PyObject *
 cairo_region_to_arg (PyObject        *value,
-                     GIInterfaceInfo *interface_info,
+                     GIRegisteredTypeInfo *interface_info,
                      GITransfer       transfer,
                      GIArgument      *arg)
 {
@@ -511,7 +511,7 @@ cairo_region_to_arg (PyObject        *value,
 }
 
 static PyObject *
-cairo_region_from_arg (GIInterfaceInfo *interface_info,
+cairo_region_from_arg (GIRegisteredTypeInfo *interface_info,
                        GITransfer transfer,
                        gpointer data)
 {
@@ -532,7 +532,7 @@ cairo_region_release (GIBaseInfo *base_info,
 }
 
 static PyObject *
-cairo_matrix_from_arg (GIInterfaceInfo *interface_info,
+cairo_matrix_from_arg (GIRegisteredTypeInfo *interface_info,
                        GITransfer transfer,
                        gpointer data)
 {
@@ -554,7 +554,7 @@ cairo_matrix_from_arg (GIInterfaceInfo *interface_info,
 
 static PyObject *
 cairo_matrix_to_arg (PyObject        *value,
-                     GIInterfaceInfo *interface_info,
+                     GIRegisteredTypeInfo *interface_info,
                      GITransfer       transfer,
                      GIArgument      *arg)
 {
