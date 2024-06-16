@@ -6,11 +6,6 @@ extensions = [
 ]
 
 intersphinx_mapping = {
-    'gtk': ('https://lazka.github.io/pgi-docs/Gtk-3.0', None),
-    'gobject': ('https://lazka.github.io/pgi-docs/GObject-2.0', None),
-    'glib': ('https://lazka.github.io/pgi-docs/GLib-2.0', None),
-    'gdk': ('https://lazka.github.io/pgi-docs/Gdk-3.0', None),
-    'gio': ('https://lazka.github.io/pgi-docs/Gio-2.0', None),
     'python': ('https://docs.python.org/3', None),
     'cairo': ('https://pycairo.readthedocs.io/en/latest', None),
     'apidocs': (

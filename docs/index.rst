@@ -33,8 +33,8 @@ If you want to write a Python application for `GNOME
 <https://www.gnome.org/>`__ or a Python GUI application using GTK, then
 PyGObject is the way to go. To get started, check out the "`GNOME Developer Documentation
 <https://developer.gnome.org/documentation/tutorials/beginners.html>`__". For more
-information on specific libraries, check out the "`Python GI API
-Reference <https://lazka.github.io/pgi-docs>`__".
+information on specific libraries, check out the
+`GNOME Python API documentation <https://amolenaar.pages.gitlab.gnome.org/pygobject-docs/>`__.
 
 .. code:: python
 
