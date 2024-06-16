@@ -15,7 +15,7 @@ Adwaita also have :class:`Adw.ApplicationWindow`, it's a subclass of :class:`Gtk
 that provides the same "freform" features from :class:`Adw.Window`.
 
 .. note::
-    Using :class:`Adw.Application` will also call :meth:`Adw.init` for you, this
+    Using :class:`Adw.Application` will also call :func:`Adw.init` for you, this
     function initialize de library, making sure that translations, types,
     themes, icons and stylesheets needed  by the library are set up properly.
 

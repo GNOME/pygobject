@@ -8,7 +8,7 @@ https://download.gnome.org/sources/pygobject
 
 Existing Packages:
 
-* https://www.archlinux.org/packages/extra/x86_64/python-gobject
+* https://archlinux.org/packages/extra/x86_64/python-gobject
 * https://tracker.debian.org/pkg/pygobject
 * https://github.com/MSYS2/MINGW-packages/tree/master/mingw-w64-pygobject
 

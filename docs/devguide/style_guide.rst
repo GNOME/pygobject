@@ -5,8 +5,7 @@ Style Guidelines
 Python Code
 -----------
 
-* Generally follow Python's `PEP8
-  <https://www.python.org/dev/peps/pep-0008/>`__ style guidelines. We run the
+* Generally follow Python's :pep:`8` style guidelines. We run the
   pep8 command to verify this during unittest runs.
 
 * Break up logical blocks of related code with a newline. Specifically add a
@@ -46,8 +45,8 @@ Python Doc Strings
 ------------------
 
 * Doc strings should generally follow
-  `PEP257 <https://www.python.org/dev/peps/pep-0257/>`__ unless noted here.
-* Use `reStructuredText (resST) <http://sphinx-doc.org/rest.html>`__
+  :pep:`257` unless noted here.
+* Use `reStructuredText (reST) <https://www.sphinx-doc.org/en/master/usage/restructuredtext/>`__
   annotations.
 * Use three double quotes for doc strings (``"""``).
 * Use a brief description on the same line as the triple quote.

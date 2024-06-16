@@ -69,7 +69,7 @@ SnakeViz - cProfile Based Visualization
 Sysprof - System-wide Performance Profiler for Linux
 ----------------------------------------------------
 
-* http://sysprof.com/
+* https://www.sysprof.com/
 
 ::
 

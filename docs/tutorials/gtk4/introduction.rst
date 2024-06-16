@@ -113,7 +113,7 @@ The next three lines are used to create a button widget, connect to its
 .. literalinclude:: examples/extended_example.py
     :lines: 11-13
 
-Accordingly, the method :meth:`on_button_clicked` will be called if you click on
+Accordingly, the method `on_button_clicked` will be called if you click on
 the button. In this example we are using the method to print ``Hello World`` and
 calling the window :meth:`Gtk.Window.close` method to close the window.
 

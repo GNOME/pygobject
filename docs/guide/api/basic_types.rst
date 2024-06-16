@@ -10,7 +10,7 @@ cases where it's appropriate it will use default Python types like :obj:`int`,
 Number Types
 ------------
 
-All glib integer types get mapped to :obj:`int`, :obj:`long` and :obj:`float`.
+All glib integer types get mapped to :obj:`int` and :obj:`float`.
 Since the glib integer types are always range limited, conversions from Python
 int/long can fail with :class:`OverflowError`:
 

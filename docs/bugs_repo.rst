@@ -9,8 +9,8 @@ Bug Tracker / Git / Source
 
 We use the GNOME GitLab issue tracker:
 
-* List of existing issues: https://gitlab.gnome.org/GNOME/pygobject/issues
-* Create a new issue: https://gitlab.gnome.org/GNOME/pygobject/issues/new
+* List of existing issues: https://gitlab.gnome.org/GNOME/pygobject/-/issues
+* Create a new issue: https://gitlab.gnome.org/GNOME/pygobject/-/issues/new
 
 
 |git-logo| Git Repo

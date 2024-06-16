@@ -21,7 +21,7 @@ You can set any simple value like text with :meth:`Gdk.Clipboard.set`.
 For more complex data you must use the :meth:`Gdk.Clipboard.set_content` method
 were you have to pass a :class:`Gdk.ContentProvider`.
 A content provider is usually created using
-:meth:`Gtk.ContentProvider.new_for_value` where you only pass the value.
+:meth:`Gdk.ContentProvider.new_for_value` where you only pass the value.
 
 To read the clipboard values :class:`Gdk.Clipboard` provides three async methods.
 For textual or image data use :meth:`Gdk.Clipboard.read_text_async` or

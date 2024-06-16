@@ -25,7 +25,7 @@ A :class:`Gtk.Widget` is an inherited class of a :class:`GObject.Object`.
 It may be interesting to make an inherited class to create a new widget, like a
 settings dialog.
 
-To inherit from :class:`GObject.Object`, you must call :meth:`super().__init__`
+To inherit from :class:`GObject.Object`, you must call `super().__init__`
 in your constructor to initialize the gobjects you are inheriting, like in the
 example below:
 
@@ -38,7 +38,7 @@ example below:
         def __init__(self):
             super().__init__(self)
 
-You can also pass arguments to :meth:`super().__init__`, for example to change
+You can also pass arguments to `super().__init__`, for example to change
 some property of your parent gobject:
 
 .. code:: python
@@ -172,7 +172,7 @@ There is also a way to define minimum and maximum values for numbers:
     my_object = AnotherObject()
     my_object.prop_int = 200  # This will fail
 
-Alternatively you can use the more verbose :attr:`__gproperties__` class
+Alternatively you can use the more verbose `__gproperties__` class
 attribute to define properties:
 
 .. code:: python
@@ -281,7 +281,7 @@ Signals can be emitted using :meth:`GObject.Object.emit`.
     my_object.emit('noarg_signal')
 
 
-Alternatively you can use the more verbose :attr:`__gsignals__` class
+Alternatively you can use the more verbose `__gsignals__` class
 attribute to define signals.
 When a new signal is created, a method handler can also be defined in the form
 of ``do_signal_name``, it will be called each time the signal is emitted.

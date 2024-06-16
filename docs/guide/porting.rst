@@ -58,7 +58,7 @@ to port your code to GTK 3.0 right away.
 
 For some general advice regarding the migration from GTK 2.0 to 3.0 see the
 `offical migration guide
-<https://developer.gnome.org/gtk3/stable/gtk-migrating-2-to-3.html>`__. If you
+<https://docs.gtk.org/gtk3/migrating-2to3.html>`__. If you
 need to know how a C symbol is exposed in Python have a look at the `symbol
 mapping listing <https://lazka.github.io/pgi-docs/#Gtk-3.0/mapping.html>`__.
 

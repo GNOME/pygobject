@@ -119,9 +119,9 @@ class TextViewWindow(Gtk.ApplicationWindow):
         self.textview = Gtk.TextView()
         self.textbuffer = self.textview.get_buffer()
         self.textbuffer.set_text(
-            'This is some text inside of a Gtk.TextView. '
-            + 'Select text and click one of the buttons "bold", "italic", '
-            + 'or "underline" to modify the text accordingly.'
+            'This is some text inside of a Gtk.TextView. ' +
+            'Select text and click one of the buttons "bold", "italic", ' +
+            'or "underline" to modify the text accordingly.'
         )
         scrolledwindow.set_child(self.textview)
 
