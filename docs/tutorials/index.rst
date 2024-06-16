@@ -57,10 +57,6 @@ Other Resources
    :hidden:
    :caption: External Resources
 
-   API Reference <https://amolenaar.pages.gitlab.gnome.org/pygobject-docs/>
-   PyGObject Documentation <https://pygobject.gnome.org/>
-   GNOME Developer Documentation <https://developer.gnome.org/documentation/>
-
 .. toctree::
    :maxdepth: 1
    :hidden:
