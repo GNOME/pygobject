@@ -7,6 +7,7 @@ User Guide
     :titlesonly:
     :maxdepth: 1
 
+    imports
     api/index
     cairo_integration
     gtk_template
@@ -16,4 +17,5 @@ User Guide
     testing
     porting
     sysdeps
+    flatpaking
     faq

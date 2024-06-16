@@ -44,7 +44,6 @@ Other Resources
    :hidden:
    :caption: Contents
 
-   pygobject
    gobject
    gtk4
    libadwaita
