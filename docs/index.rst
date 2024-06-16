@@ -8,6 +8,7 @@
     :maxdepth: 1
 
     getting_started
+    tutorials/index
     changelog
     bugs_repo
     guide/index

@@ -1,3 +1,5 @@
+.. _guide-gtk-template:
+
 ============
 Gtk.Template
 ============

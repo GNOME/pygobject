@@ -13,6 +13,10 @@ intersphinx_mapping = {
     'gio': ('https://lazka.github.io/pgi-docs/Gio-2.0', None),
     'python': ('https://docs.python.org/3', None),
     'cairo': ('https://pycairo.readthedocs.io/en/latest', None),
+    'apidocs': (
+        'https://amolenaar.pages.gitlab.gnome.org/pygobject-docs',
+        None,
+    ),
 }
 
 source_suffix = '.rst'
@@ -25,6 +29,9 @@ html_show_copyright = False
 html_favicon = "images/favicon.ico"
 project = "PyGObject"
 html_title = project
+html_theme_options = {
+    'source_edit_link': 'https://gitlab.gnome.org/GNOME/pygobject/-/blob/main/docs/{filename}',
+}
 
 html_context = {
     'extra_css_files': [
@@ -51,6 +58,8 @@ extlinks = {
     'mr': (
         'https://gitlab.gnome.org/GNOME/pygobject/merge_requests/%s', '!%s'),
     'user': ('https://gitlab.gnome.org/%s', '%s'),
+    'devdocs': ('https://developer.gnome.org/documentation/%s.html', None)
 }
 
 suppress_warnings = ["image.nonlocal_uri"]
+

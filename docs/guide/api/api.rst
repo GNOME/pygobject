@@ -1,3 +1,5 @@
+.. _guide-api:
+
 ================
 GI Documentation
 ================
