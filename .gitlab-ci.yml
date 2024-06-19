@@ -46,9 +46,9 @@ pages:
     - coverage
   before_script:
     - python -m pip install pdm
-    - pdm install --with docs
+    - python -m pdm install --with docs
   script:
-    - pdm run python -m sphinx -T -E -W --keep-going -b html -d _build/doctrees -D language=en docs/ public
+    - python -m pdm run sphinx -T -E -W --keep-going -b html -d _build/doctrees -D language=en docs/ public
     - mv coverage/ public/
   artifacts:
     paths:
