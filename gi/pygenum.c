@@ -204,6 +204,11 @@ pyg_enum_from_gtype (GType gtype, int value)
 
     values = PyDict_GetItemString(((PyTypeObject *)pyclass)->tp_dict,
 				  "__enum_values__");
+    if (values == NULL) {
+        PyErr_Format (PyExc_ValueError, "__enum_values__ is unassigned for type '%s'", g_type_name (gtype));
+        return NULL;
+    }
+
     intvalue = PyLong_FromLong(value);
     retval = PyDict_GetItem(values, intvalue);
     if (retval) {
