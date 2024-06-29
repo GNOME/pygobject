@@ -258,6 +258,34 @@ class TestGDBusClient(unittest.TestCase):
 class TestDBusConnection:
 
     @unittest.skipUnless(has_dbus, "no dbus running")
+    def test_register_object(self):
+        object_path = "/pygobject/Test"
+        interface_xml = """
+            <node>
+                <interface name='org.pygobject.Test'>
+                    <method name='test' />
+                </interface>
+            </node>"""
+        interface_info = Gio.DBusNodeInfo.new_for_xml(interface_xml).interfaces[0]
+        bus = Gio.bus_get_sync(Gio.BusType.SESSION)
+
+        for args in (
+            (object_path, interface_info),
+            (object_path, interface_info, None, None, None)
+        ):
+            reg_id = bus.register_object(*args)
+            bus.unregister_object(reg_id)
+
+        for kwargs in (
+            {"object_path": object_path, "interface_info": interface_info},
+            {"object_path": object_path, "interface_info": interface_info,
+             "method_call_closure": None, "get_property_closure": None,
+             "set_property_closure": None},
+        ):
+            reg_id = bus.register_object(**kwargs)
+            bus.unregister_object(reg_id)
+
+    @unittest.skipUnless(has_dbus, "no dbus running")
     def test_connection_invocation_ref_count(self):
         """Invocation object should not leak a reference."""
         invocation, errors = self.run_server(self.client_call)
