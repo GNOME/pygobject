@@ -150,6 +150,17 @@ gnome-master-gtk4:
   script:
     - bash -x ./.gitlab-ci/test-flatpak.sh
 
+python3.12-pdm:
+  stage: build_and_test
+  variables:
+    PYTHON_VERSION: "3.12"
+    TEST_GTK_VERSION: "3.0"
+  before_script:
+    - python -m pip install pdm
+    - python -m pdm install -v
+  script:
+    - xvfb-run -a python -m pdm run pytest
+
 minimal-meson:
   allow_failure: true
   stage: build_and_test

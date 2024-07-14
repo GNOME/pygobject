@@ -49,10 +49,12 @@ docs = [
     "furo",
 ]
 
-
 [tool.pdm.options]
 install = ["--no-isolation", "--config-setting=setup-args=-Dtests=true", "--config-setting=setup-args=-Dbuildtype=debug"]
 build = ["--no-wheel"]
+
+[tool.pdm.scripts]
+pre_install = "{pdm} sync --skip=:all --group=build --no-self"
 
 [tool.meson-python.args]
 setup = ["-Dtests=false", "-Dwheel=true", "--wrap-mode=nofallback"]
