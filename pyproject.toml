@@ -50,7 +50,12 @@ docs = [
 ]
 
 [tool.pdm.options]
-install = ["--no-isolation", "--config-setting=setup-args=-Dtests=true", "--config-setting=setup-args=-Dbuildtype=debug"]
+install = [
+    "--no-isolation",
+    "--config-setting=setup-args=-Dtests=true",
+    "--config-setting=setup-args=-Dbuildtype=debug",
+    "--config-setting=editable-verbose=true",
+]
 build = ["--no-wheel"]
 
 [tool.pdm.scripts]
