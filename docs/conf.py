@@ -2,6 +2,7 @@ extensions = [
     'sphinx.ext.todo',
     'sphinx.ext.intersphinx',
     'sphinx.ext.extlinks',
+    'sphinx_copybutton',
 ]
 
 intersphinx_mapping = {
@@ -12,6 +13,10 @@ intersphinx_mapping = {
     'gio': ('https://lazka.github.io/pgi-docs/Gio-2.0', None),
     'python': ('https://docs.python.org/3', None),
     'cairo': ('https://pycairo.readthedocs.io/en/latest', None),
+    'apidocs': (
+        'https://amolenaar.pages.gitlab.gnome.org/pygobject-docs',
+        None,
+    ),
 }
 
 source_suffix = '.rst'
@@ -24,6 +29,9 @@ html_show_copyright = False
 html_favicon = "images/favicon.ico"
 project = "PyGObject"
 html_title = project
+html_theme_options = {
+    'source_edit_link': 'https://gitlab.gnome.org/GNOME/pygobject/-/blob/main/docs/{filename}',
+}
 
 html_context = {
     'extra_css_files': [
@@ -45,11 +53,12 @@ html_static_path = [
 
 extlinks = {
     'bzbug': ('https://bugzilla.gnome.org/show_bug.cgi?id=%s', 'bz#%s'),
-    'issue': ('https://gitlab.gnome.org/GNOME/pygobject/issues/%s', '#%s'),
+    'issue': ('https://gitlab.gnome.org/GNOME/pygobject/-/issues/%s', '#%s'),
     'commit': ('https://gitlab.gnome.org/GNOME/pygobject/commit/%s', '%s'),
     'mr': (
-        'https://gitlab.gnome.org/GNOME/pygobject/merge_requests/%s', '!%s'),
+        'https://gitlab.gnome.org/GNOME/pygobject/-/merge_requests/%s', '!%s'),
     'user': ('https://gitlab.gnome.org/%s', '%s'),
+    'devdocs': ('https://developer.gnome.org/documentation/%s.html', None)
 }
 
 suppress_warnings = ["image.nonlocal_uri"]

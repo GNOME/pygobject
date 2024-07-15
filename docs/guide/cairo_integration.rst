@@ -22,7 +22,7 @@ If your application requires the cairo integration you can use
         print("No pycairo integration :(")
 
 Note that PyGObject currently does not support `cairocffi
-<https://pypi.python.org/pypi/cairocffi>`__, only pycairo.
+<https://pypi.org/pypi/cairocffi>`__, only pycairo.
 
 
 Demo

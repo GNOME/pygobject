@@ -30,8 +30,6 @@ Homepage = "https://pygobject.gnome.org"
 Repository = "https://gitlab.gnome.org/GNOME/pygobject.git"
 Changelog = "https://gitlab.gnome.org/GNOME/pygobject/-/blob/main/NEWS"
 
-[project.optional-dependencies]
-
 [tool.pdm.dev-dependencies]
 build = [
     "meson-python",
@@ -45,8 +43,10 @@ test = [
     "flake8",
 ]
 docs = [
-    "sphinx>=4.0,<5.0",
-    "sphinx-rtd-theme>=0.5,<2.0",
+    "sphinx",
+    "sphinx-rtd-theme",
+    "sphinx-copybutton>=0.5.2",
+    "furo",
 ]
 
 

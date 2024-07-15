@@ -5,8 +5,7 @@ Python Override Guidelines
 This document serves as a guide for developers creating new PyGObject
 overrides or modifying existing ones. This document is not intended as hard
 rules as there may always be pragmatic exceptions to what is listed here. It
-is also a good idea to study the `Zen of Python by Tim Peters
-<https://www.python.org/dev/peps/pep-0020/>`__.
+is also a good idea to study the Zen of Python by Tim Peters in  :pep:`20`.
 
 In general, overrides should be minimized and preference should always be
 placed on updating the underlying API to be more bindable, adding features to

@@ -23,7 +23,7 @@ import warnings
 import sys
 import socket
 
-from .._ossighelper import wakeup_on_signal, register_sigint_fallback
+from .._ossighelper import register_sigint_fallback, get_event_loop
 from ..module import get_introspection_module
 from .._gi import (variant_type_from_string, source_new,
                    source_set_callback, io_channel_read)
@@ -493,7 +493,7 @@ class MainLoop(GLib.MainLoop):
 
     def run(self):
         with register_sigint_fallback(self.quit):
-            with wakeup_on_signal():
+            with get_event_loop(self.get_context()).running(self.quit):
                 super(MainLoop, self).run()
 
 
@@ -504,7 +504,8 @@ __all__.append('MainLoop')
 class MainContext(GLib.MainContext):
     # Backwards compatible API with default value
     def iteration(self, may_block=True):
-        return super(MainContext, self).iteration(may_block)
+        with get_event_loop(self).paused():
+            return super(MainContext, self).iteration(may_block)
 
 
 MainContext = override(MainContext)

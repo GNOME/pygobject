@@ -1,3 +1,5 @@
+.. _guide-api:
+
 ================
 GI Documentation
 ================
@@ -9,7 +11,7 @@ This is the API provided by the toplevel "gi" package.
 
     :param str namespace: The namespace
     :param str version: The version of the namespace which should be loaded
-    :raises: :obj:`ValueError <exceptions.ValueError>`
+    :raises: ..py:exception:: ValueError
 
     Ensures the namespace gets loaded with the given version. If the namespace
     was already loaded with a different version or a different version was
@@ -28,7 +30,7 @@ This is the API provided by the toplevel "gi" package.
     :param symbol:
         Optional symbol typename to ensure a converter exists.
     :type symbol: :obj:`str` or :obj:`None`
-    :raises: :obj:`ImportError <exceptions.ImportError>`
+    :raises: ..py:exception:: ImportError
 
     Ensure the given foreign marshaling module is available and loaded.
 
@@ -45,7 +47,7 @@ This is the API provided by the toplevel "gi" package.
 .. function:: gi.check_version(version)
 
     :param tuple version: A version tuple
-    :raises: :obj:`ValueError <exceptions.ValueError>`
+    :raises: ..py:exception:: ValueError
 
     Compares the passed in version tuple with the gi version and does nothing
     if gi version is the same or newer. Otherwise raises ValueError.

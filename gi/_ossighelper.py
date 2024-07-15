@@ -18,6 +18,7 @@ from __future__ import print_function
 import os
 import socket
 import signal
+import asyncio
 import threading
 from contextlib import closing, contextmanager
 
@@ -127,6 +128,7 @@ def wakeup_on_signal():
 
 
 PyOS_getsig = _gi.pyos_getsig
+PyOS_setsig = _gi.pyos_setsig
 
 # We save the signal pointer so we can detect if glib has changed the
 # signal handler behind Python's back (GLib.unix_signal_add)
@@ -237,3 +239,37 @@ def register_sigint_fallback(callback):
             signal.default_int_handler(signal.SIGINT, None)
         else:
             _callback_stack.pop()
+
+
+class DummyEventLoop():
+    @classmethod
+    @contextmanager
+    def paused(cls):
+        yield
+
+    @classmethod
+    @contextmanager
+    def running(cls, quit_func):
+        with wakeup_on_signal():
+            yield
+
+
+def get_event_loop(ctx):
+    """Return the correct GLibEventLoop or a dummy that just registers the
+    signal wakeup mechanism."""
+
+    # Try to use the running loop. If there is none, get the policy and
+    # try getting one in the hope that this will give us an event loop for the
+    # correct context.
+    loop = asyncio._get_running_loop()
+    if loop is None:
+        try:
+            loop = asyncio.get_event_loop_policy().get_event_loop_for_context(ctx)
+        except:
+            pass
+
+    if loop and hasattr(loop, '_context'):
+        if ctx is not None and hash(loop._context) == hash(ctx):
+            return loop
+
+    return DummyEventLoop

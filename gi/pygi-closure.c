@@ -23,6 +23,7 @@
 #include "pygi-invoke.h"
 #include "pygi-ccallback.h"
 #include "pygi-info.h"
+#include "pygi-async.h"
 
 extern PyObject *_PyGIDefaultArgPlaceholder;
 
@@ -720,6 +721,23 @@ _pygi_marshal_from_py_interface_callback (PyGIInvokeState   *state,
 
     callback_cache = (PyGICallbackCache *)arg_cache;
 
+    if (py_arg == _PyGIDefaultArgPlaceholder) {
+        /* We need to have an async to "marshal" instead in this case. */
+        if (!state->py_async)
+            return FALSE;
+
+        if (callback_cache->user_data_index <= 0)
+            return FALSE;
+
+        user_data_cache = _pygi_callable_cache_get_arg (callable_cache, (guint)callback_cache->user_data_index);
+
+        Py_INCREF (state->py_async);
+        arg->v_pointer = pygi_async_finish_cb;
+        state->args[user_data_cache->c_arg_index].arg_value.v_pointer = state->py_async;
+
+        return TRUE;
+    }
+
     if (callback_cache->user_data_index > 0) {
         user_data_cache = _pygi_callable_cache_get_arg (callable_cache, (guint)callback_cache->user_data_index);
         if (user_data_cache->py_arg_index < state->n_py_in_args) {
@@ -937,6 +955,9 @@ pygi_arg_callback_setup_from_info (PyGICallbackCache  *arg_cache,
         arg_cache->closure_cache = pygi_closure_cache_new (arg_cache->interface_info);
         cache->from_py_marshaller = _pygi_marshal_from_py_interface_callback;
         cache->from_py_cleanup = _pygi_marshal_cleanup_from_py_interface_callback;
+
+        if (arg_cache->scope == GI_SCOPE_TYPE_ASYNC)
+            arg_cache->arg_cache.async_context = PYGI_ASYNC_CONTEXT_CALLBACK;
     }
 
     if (direction & PYGI_DIRECTION_TO_PYTHON) {

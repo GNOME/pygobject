@@ -55,7 +55,7 @@ For full IDE support (incl. autocomplete) you will also need typing stubs availa
 |windows-logo| Windows
 ----------------------
 
-#) Go to http://www.msys2.org/ and download the x86_64 installer
+#) Go to https://www.msys2.org/ and download the x86_64 installer
 #) Follow the instructions on the page for setting up the basic environment
 #) Run ``C:\msys64\ucrt64.exe`` - a terminal window should pop up
 #) Execute ``pacman -Suy``

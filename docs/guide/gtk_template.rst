@@ -1,9 +1,11 @@
+.. _guide-gtk-template:
+
 ============
 Gtk.Template
 ============
 
 A GtkWidget subclass can use a
-`GtkBuilder UI Definition <https://developer.gnome.org/gtk3/stable/GtkBuilder.html#BUILDER-UI>`__
+`GtkBuilder UI Definition <https://docs.gtk.org/gtk4/class.Builder.html#gtkbuilder-ui-definitions>`__
 XML document as a template to create child widgets and set its own
 properties, without creating a GtkBuilder instance. This is implemented
 for Python by PyGObject with Gtk.Template.
