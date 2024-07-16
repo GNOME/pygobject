@@ -43,8 +43,7 @@ and their dependencies. Follow the instructions for your platform below.
 |windows-logo| :ref:`Windows <windows-getting-started>` |macosx-logo| :ref:`macOS <macosx-getting-started>`  |opensuse-logo| :ref:`openSUSE <opensuse-getting-started>`
 ======================================================= ==================================================== ==========================================================
 
-After running the example application have a look at the `PyGObject Guide
-<https://rafaelmardojai.pages.gitlab.gnome.org/pygobject-guide>`__ for tutorials on how to create GTK apps and the `GNOME Python API docs
+After running the example application have a look at the :doc:`/tutorials/index` for an overview of how to create GTK apps and the `GNOME Python API docs
 <https://amolenaar.pages.gitlab.gnome.org/pygobject-docs>`__ for API documentation for all supported
 libraries. 
 

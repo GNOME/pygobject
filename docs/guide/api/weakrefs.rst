@@ -8,7 +8,7 @@ The wrapper can get garbage collected and a new wrapper created again at a
 later point.
 
 If you want to get notified when the underlying GObject gets finalized use
-``GObject.Object.weak_ref``:
+:meth:`GObject.Object.weak_ref`:
 
 
 .. method:: GObject.Object.weak_ref(callback, *user_data)

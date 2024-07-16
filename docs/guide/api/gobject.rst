@@ -1,3 +1,5 @@
+.. currentmodule:: gi.repository
+
 ==============
 GObject.Object
 ==============

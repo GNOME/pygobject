@@ -1,3 +1,5 @@
+.. currentmodule:: gi.repository
+
 ==============
 Error Handling
 ==============
