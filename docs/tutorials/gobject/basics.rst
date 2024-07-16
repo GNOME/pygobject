@@ -94,7 +94,7 @@ the binding.
 :attr:`GObject.BindingFlags.INVERT_BOOLEAN` works only for boolean properties
 and setting one property to ``True`` will result in the other being set to
 ``False`` and vice versa (this flag cannot be used when passing custom
-transformation functions to :meth:`GObject.Object.bind_property_full`).
+transformation functions to :meth:`GObject.Object.bind_property`).
 
 .. code:: python
 
@@ -109,6 +109,42 @@ to bind.
 target property.
 Every time someone changes the ``text`` property of the entry the label
 ``label`` will be updated as well with the same value.
+
+Property Bindings with Transformations
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Sometimes you may want to bind two properties that are incompatible, or you
+simply need to apply some transformation between these values. 
+For these scenarios :meth:`GObject.Object.bind_property` also accepts custom
+transformation functions that serve to this purpose.
+
+The transformation functions take as first argument the :class:`GObject.Binding`
+instance for this binding and as second argument the property value depending
+on the direction of the transformation.
+For ``transform_to`` this will be the value of the source property and for
+``transform_from`` the value of the target property.
+Each function should return the value to be set in the other object's property,
+with the correct type.
+
+In this example we'll do an ``int`` to ``bool`` type conversion between two
+objects:
+
+.. code:: python
+
+    def transform_to(_binding, value):
+       return bool(value)  # Return int converted to a bool
+
+    def transform_from(_binding, value):
+        return int(value)  # Return bool converted to a int
+
+    source.bind_property(
+        'int_prop',
+        target,
+        'bool_prop',
+        GObject.BindingFlags.BIDIRECTIONAL,
+        transform_to,
+        transform_from
+    )
 
 .. _basics-signals:
 
@@ -142,15 +178,31 @@ has been connected to:
 .. code:: python
 
     gobject.disconnect(handler_id)
+    
+When creating the callback function for a signal, the arguments it accepts will
+depend on the specific signal, but for a signal with no arguments it will look
+like this:
 
+.. code:: python
+
+    def on_event(gobject, data):
+        ...
+
+    my_object.connect('event', on_event, data)
+
+Where ``gobject`` is the object that triggered the signal and ``data`` is the
+additional data that we previously passed to the :meth:`GObject.Object.connect`
+method.
+If the signal had arguments, they will come before the optional data argument.
 
 The ``notify`` signal
 ^^^^^^^^^^^^^^^^^^^^^
 
-GObject properties will emit the ``notify`` signal when they are changed.
-This is a "detailed" signal meaning that you can connect to a subset of the
+When any of a GObject's properties change, it will emit the ``notify`` signal.
+This is a "detailed" signal, meaning that you can listen to a subset of the
 signal, in this case a specific property.
-You can connect to the signal in the form of ``notify::property-name``:
+For example, you can connect to the signal in the form of
+``notify::property-name``:
 
 .. code:: python
 
@@ -159,3 +211,4 @@ You can connect to the signal in the form of ``notify::property-name``:
 
     label = Gtk.Label()
     label.connect('notify::label', callback)
+
