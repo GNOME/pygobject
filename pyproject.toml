@@ -33,7 +33,6 @@ Changelog = "https://gitlab.gnome.org/GNOME/pygobject/-/blob/main/NEWS"
 [tool.pdm.dev-dependencies]
 build = [
     "meson-python",
-    "meson",
     "ninja",
     "pycairo",
 ]
