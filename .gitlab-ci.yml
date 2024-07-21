@@ -107,7 +107,6 @@ python3.12:
   <<: *defaults
 
 pypy3:
-  allow_failure: true
   variables:
     PYTHON_VERSION: "pypy3"
     TEST_GTK_VERSION: "3.0"
@@ -123,7 +122,6 @@ old-i386-py3:
    - bash -x ./.gitlab-ci/test-docker-old.sh
 
 gnome-master:
-  allow_failure: true
   stage: build_and_test
   image: quay.io/gnome_infrastructure/gnome-runtime-images:gnome-master
   tags:
@@ -137,7 +135,6 @@ gnome-master:
     - bash -x ./.gitlab-ci/test-flatpak.sh
 
 gnome-master-gtk4:
-  allow_failure: true
   stage: build_and_test
   image: quay.io/gnome_infrastructure/gnome-runtime-images:gnome-master
   tags:
