@@ -10,6 +10,7 @@ if [[ "$1" == "inflatpak" ]]; then
     export COVERAGE_FILE="${COV_DIR}/.coverage.${COV_KEY}"
     mkdir -p "${COV_DIR}"
 
+    python3 --version
     python3 -m venv _venv
     . _venv/bin/activate
     pip install pycairo meson meson-python pytest pytest-cov
