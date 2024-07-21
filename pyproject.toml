@@ -32,6 +32,7 @@ Changelog = "https://gitlab.gnome.org/GNOME/pygobject/-/blob/main/NEWS"
 
 [tool.pdm.dev-dependencies]
 build = [
+    "setuptools",
     "meson-python",
     "ninja",
     "pycairo",
@@ -56,9 +57,6 @@ install = [
     "--config-setting=editable-verbose=true",
 ]
 build = ["--no-wheel"]
-
-[tool.pdm.scripts]
-pre_install = "{pdm} sync --skip=:all --group=build --no-self"
 
 [tool.meson-python.args]
 setup = ["-Dtests=false", "-Dwheel=true", "--wrap-mode=nofallback"]
