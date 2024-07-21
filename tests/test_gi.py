@@ -2269,12 +2269,12 @@ class TestStructure(unittest.TestCase):
         self.assertRegex(
             repr(GIMarshallingTests.PointerStruct()),
             r"<GIMarshallingTests.PointerStruct object at 0x[^\s]+ "
-            r"\(void at 0x[^\s]+\)>")
+            r"\((void|GIMarshallingTestsPointerStruct) at 0x[^\s]+\)>")
 
         self.assertRegex(
             repr(GIMarshallingTests.SimpleStruct()),
             r"<GIMarshallingTests.SimpleStruct object at 0x[^\s]+ "
-            r"\(void at 0x[^\s]+\)>")
+            r"\((void|GIMarshallingTestsSimpleStruct) at 0x[^\s]+\)>")
 
         self.assertRegex(
             repr(GIMarshallingTests.Union()),
