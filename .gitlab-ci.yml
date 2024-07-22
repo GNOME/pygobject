@@ -120,6 +120,12 @@ old-i386-py3:
       - coverage/
   script:
    - bash -x ./.gitlab-ci/test-docker-old.sh
+  # This build sometimes fails with message:
+  #   ninja: error: loading 'build.ninja': Value too large for defined data type
+  retry:
+    max: 2
+    when: runner_system_failure
+    exit_codes: 1
 
 gnome-master:
   stage: build_and_test
