@@ -788,7 +788,7 @@ static void
 _function_cache_deinit_real (PyGICallableCache *callable_cache)
 {
     PyGIFunctionCache *function_cache = (PyGIFunctionCache *) callable_cache;
-    g_function_invoker_destroy (&function_cache->invoker);
+    gi_function_invoker_clear (&function_cache->invoker);
 
     Py_CLEAR (function_cache->async_finish);
 
@@ -842,7 +842,7 @@ _function_cache_init (PyGIFunctionCache *function_cache,
         }
 
         if (cancellable && async_callback) {
-            GIBaseInfo *container = g_base_info_get_container ((GIBaseInfo*) callable_info);
+            GIBaseInfo *container = gi_base_info_get_container ((GIBaseInfo*) callable_info);
             GIBaseInfo *async_finish = NULL;
             gint name_len;
             gchar *finish_name = NULL;
@@ -860,26 +860,26 @@ _function_cache_init (PyGIFunctionCache *function_cache,
             strncat (finish_name, callable_cache->name, name_len);
             strcat (finish_name, "_finish");
 
-            if (container && g_base_info_get_type (container) == GI_INFO_TYPE_OBJECT) {
-                async_finish = g_object_info_find_method ((GIObjectInfo *) container, finish_name);
-            } else if (container && g_base_info_get_type (container) == GI_INFO_TYPE_INTERFACE) {
-                async_finish = g_interface_info_find_method ((GIInterfaceInfo *) container, finish_name);
+            if (container && GI_IS_OBJECT_INFO (container)) {
+                async_finish = GI_BASE_INFO (gi_object_info_find_method ((GIObjectInfo *) container, finish_name));
+            } else if (container && GI_IS_INTERFACE_INFO (container)) {
+                async_finish = GI_BASE_INFO (gi_interface_info_find_method ((GIInterfaceInfo *) container, finish_name));
             } else if (!container) {
-                async_finish = g_irepository_find_by_name (NULL,
+                async_finish = gi_repository_find_by_name (NULL,
                                                            callable_cache->namespace,
                                                            finish_name);
             } else {
                 g_debug ("Awaitable async functions only work on GObjects and as toplevel functions.");
             }
 
-            if (async_finish && g_base_info_get_type (async_finish)) {
+            if (async_finish && GI_IS_BASE_INFO (async_finish)) {
                 function_cache->async_finish = _pygi_info_new ((GIBaseInfo *) async_finish);
                 function_cache->async_cancellable = cancellable;
                 function_cache->async_callback = async_callback;
             }
 
             if (async_finish)
-                g_base_info_unref (async_finish);
+                gi_base_info_unref (async_finish);
 
             g_free (finish_name);
         }

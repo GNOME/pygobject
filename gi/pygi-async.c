@@ -48,7 +48,7 @@ async_repr(PyGIAsync *self) {
     PyObject *string;
     char *func_descr;
 
-    func_descr = _pygi_g_base_info_get_fullname (self->finish_func->base.info);
+    func_descr = _pygi_gi_base_info_get_fullname (self->finish_func->base.info);
 
     string = PyUnicode_FromFormat ("%s(finish_func=%s, done=%s)",
                                    Py_TYPE(self)->tp_name,
@@ -444,7 +444,7 @@ pygi_async_finish_cb (GObject *source_object, gpointer res, PyGIAsync *self)
         source_pyobj = NULL;
         args = Py_BuildValue ("(O)", res_pyobj);
     }
-    ret = _wrap_g_callable_info_invoke ((PyGIBaseInfo *) self->finish_func, args, NULL);
+    ret = _wrap_gi_callable_info_invoke ((PyGIBaseInfo *) self->finish_func, args, NULL);
     Py_XDECREF (res_pyobj);
     Py_XDECREF (source_pyobj);
     Py_XDECREF (args);
