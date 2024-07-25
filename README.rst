@@ -21,8 +21,23 @@ Homepage
 
 https://pygobject.gnome.org
 
+Installation
+------------
+
+The latest version from PyGObject can be installed from `PyPI <https://pypi.org/project/PyGObject/>`__:
+
+    pip install PyGObject
+
+PyGObject is only distributed as source distribution, so you need a C compiler installed on your host.
+
+Development
+~~~~~~~~~~~
+
+Our website contains instructions on how to `set up a development environment
+<https://pygobject.gnome.org/devguide/dev_environ.html>`__.
+
 Default branch renamed to ``main``
-----------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The default development branch of PyGObject has been renamed
 to ``main``. To update your local checkout, use::
