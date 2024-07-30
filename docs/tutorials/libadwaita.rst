@@ -13,6 +13,3 @@ the GNOME desktop and follow its `Human Interface Guidelines <https://developer.
    :caption: Contents
 
    libadwaita/application
-   libadwaita/style-manager
-   libadwaita/window
-   libadwaita/adaptive-layouts

@@ -48,8 +48,6 @@ Other Resources
    gtk4
    libadwaita
    gtk3
-   glib
-   gio
 
 .. toctree::
    :maxdepth: 1

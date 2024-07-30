@@ -15,7 +15,6 @@ input, or windows.
    gtk4/layout-widgets
    gtk4/controls
    gtk4/display-widgets
-   gtk4/list-widgets
    gtk4/popovers
    gtk4/textview
    gtk4/clipboard
