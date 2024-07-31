@@ -59,7 +59,7 @@ class Test(unittest.TestCase):
         self.assertTrue(repo.is_registered("GIRepository"))
         self.assertTrue(repo.is_registered("GIRepository", None))
         self.assertTrue(isinstance(repo.is_registered("GIRepository"), bool))
-        self.assertTrue(repo.is_registered("GIRepository", "2.0"))
+        self.assertTrue(repo.is_registered("GIRepository", "3.0"))
         self.assertFalse(repo.is_registered("GIRepository", ""))
         self.assertFalse(repo.is_registered("GIRepository", "99.0"))
         self.assertFalse(repo.is_registered("GIRepository", "1.0"))
@@ -88,10 +88,10 @@ class Test(unittest.TestCase):
         self.assertFalse(arg.is_optional())
         self.assertFalse(arg.is_return_value())
         self.assertFalse(arg.may_be_null())
-        self.assertEqual(arg.get_destroy(), -1)
+        self.assertEqual(arg.get_destroy_index(), -1)
         self.assertEqual(arg.get_ownership_transfer(), GIRepository.Transfer.NOTHING)
         self.assertEqual(arg.get_scope(), GIRepository.ScopeType.INVALID)
-        self.assertEqual(arg.get_type().get_tag(), GIRepository.TypeTag.ARRAY)
+        self.assertEqual(arg.get_type_info().get_tag(), GIRepository.TypeTag.ARRAY)
 
     def test_base_info(self):
         info = repo.find_by_name('GIMarshallingTests', 'Object')
@@ -101,12 +101,12 @@ class Test(unittest.TestCase):
         self.assertEqual(info.get_name_unescaped(), 'Object')
         self.assertEqual(info.get_namespace(), 'GIMarshallingTests')
         self.assertEqual(info.get_container(), None)
+
         info2 = repo.find_by_name('GIMarshallingTests', 'Object')
         self.assertFalse(info is info2)
         self.assertEqual(info, info2)
         self.assertTrue(info.equal(info2))
         assert isinstance(info.is_deprecated(), bool)
-        assert isinstance(info.get_type(), int)
         assert info.get_attribute("nopenope") is None
 
     def test_object_info(self):
@@ -211,7 +211,7 @@ class Test(unittest.TestCase):
     def test_type_info(self):
         func_info = repo.find_by_name('GIMarshallingTests', 'array_fixed_out_struct')
         arg_info, = func_info.get_arguments()
-        type_info = arg_info.get_type()
+        type_info = arg_info.get_type_info()
 
         self.assertTrue(type_info.is_pointer())
         self.assertEqual(type_info.get_tag(), GIRepository.TypeTag.ARRAY)
@@ -221,7 +221,7 @@ class Test(unittest.TestCase):
         self.assertEqual(type_info.get_param_type(0).get_interface(),
                          repo.find_by_name('GIMarshallingTests', 'SimpleStruct'))
         self.assertEqual(type_info.get_interface(), None)
-        self.assertEqual(type_info.get_array_length(), -1)
+        self.assertEqual(type_info.get_array_length_index(), -1)
         self.assertEqual(type_info.get_array_fixed_size(), 2)
         self.assertFalse(type_info.is_zero_terminated())
         self.assertEqual(type_info.get_array_type(), GIRepository.ArrayType.C)
@@ -232,7 +232,7 @@ class Test(unittest.TestCase):
         self.assertEqual(field.get_name(), 'test_int8_in')
         self.assertTrue(field.get_flags() & GIRepository.FieldInfoFlags.IS_READABLE)
         self.assertFalse(field.get_flags() & GIRepository.FieldInfoFlags.IS_WRITABLE)
-        self.assertEqual(field.get_type().get_tag(), GIRepository.TypeTag.INTERFACE)
+        self.assertEqual(field.get_type_info().get_tag(), GIRepository.TypeTag.INTERFACE)
 
         # don't test actual values because that might fail with architecture differences
         self.assertTrue(isinstance(field.get_size(), int))
@@ -244,8 +244,8 @@ class Test(unittest.TestCase):
 
         flags = GObject.ParamFlags.READABLE | GObject.ParamFlags.WRITABLE | GObject.ParamFlags.CONSTRUCT
         self.assertEqual(prop.get_flags(), flags)
-        self.assertEqual(prop.get_type().get_tag(), GIRepository.TypeTag.INTERFACE)
-        self.assertEqual(prop.get_type().get_interface(),
+        self.assertEqual(prop.get_type_info().get_tag(), GIRepository.TypeTag.INTERFACE)
+        self.assertEqual(prop.get_type_info().get_interface(),
                          repo.find_by_name('GObject', 'Object'))
         self.assertEqual(prop.get_ownership_transfer(), GIRepository.Transfer.NOTHING)
 
@@ -307,7 +307,6 @@ class Test(unittest.TestCase):
         self.assertFalse(flags & GIRepository.FunctionInfoFlags.IS_GETTER)
         self.assertFalse(flags & GIRepository.FunctionInfoFlags.IS_SETTER)
         self.assertFalse(flags & GIRepository.FunctionInfoFlags.WRAPS_VFUNC)
-        self.assertFalse(flags & GIRepository.FunctionInfoFlags.THROWS)
 
     def test_method_info(self):
         info = repo.find_by_name('GIMarshallingTests', 'Object')
@@ -327,7 +326,6 @@ class Test(unittest.TestCase):
         self.assertFalse(flags & GIRepository.FunctionInfoFlags.IS_GETTER)
         self.assertFalse(flags & GIRepository.FunctionInfoFlags.IS_SETTER)
         self.assertFalse(flags & GIRepository.FunctionInfoFlags.WRAPS_VFUNC)
-        self.assertFalse(flags & GIRepository.FunctionInfoFlags.THROWS)
 
     def test_vfunc_info(self):
         info = repo.find_by_name('GIMarshallingTests', 'Object')
@@ -388,7 +386,6 @@ class Test(unittest.TestCase):
         self.assertTrue(hasattr(GIRepository, 'FieldInfoFlags'))
         self.assertTrue(hasattr(GIRepository, 'FunctionInfoFlags'))
         self.assertTrue(hasattr(GIRepository, 'TypeTag'))
-        self.assertTrue(hasattr(GIRepository, 'InfoType'))
 
     def test_introspected_argument_info(self):
         self.assertTrue(isinstance(IntrospectedRepository.Argument.__info__,
