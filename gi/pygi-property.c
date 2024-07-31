@@ -218,6 +218,7 @@ pygi_set_property_value (PyGObject *instance,
 {
     GIPropertyInfo *property_info = NULL;
     GITypeInfo *type_info = NULL;
+    GIBaseInfo *info = NULL;
     GITypeTag type_tag;
     GITransfer transfer;
     GValue value = { 0, };
@@ -248,13 +249,10 @@ pygi_set_property_value (PyGObject *instance,
     switch (type_tag) {
         case GI_TYPE_TAG_INTERFACE:
         {
-            GIBaseInfo *info;
             GType type;
 
             info = gi_type_info_get_interface (type_info);
             type = gi_registered_type_info_get_g_type (GI_REGISTERED_TYPE_INFO (info));
-
-            gi_base_info_unref (info);
 
             if (GI_IS_FLAGS_INFO (info)) {
                 g_value_set_flags (&value, arg.v_uint);
@@ -383,6 +381,8 @@ out:
         gi_base_info_unref (property_info);
     if (type_info != NULL)
         gi_base_info_unref (type_info);
+    if (info != NULL)
+        gi_base_info_unref (info);
 
     return ret_value;
 }
