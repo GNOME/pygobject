@@ -1,6 +1,7 @@
 [project]
 name = "PyGObject"
 description = "Python bindings for GObject Introspection"
+readme = 'README.rst'
 license = { text = "GNU Lesser General Public License v2.1 (LGPLv2.1)" }
 authors = [
     { name="James Henstridge", email="james@daa.com.au" }
