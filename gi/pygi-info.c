@@ -852,16 +852,21 @@ static PyObject *
 _wrap_gi_arg_info_get_closure_index (PyGIBaseInfo *self)
 {
     unsigned int closure_index;
-    g_assert (gi_arg_info_get_closure_index ((GIArgInfo *)self->info, &closure_index));
-    return pygi_guint_to_py (closure_index);
+
+    if (gi_arg_info_get_closure_index ((GIArgInfo *)self->info, &closure_index))
+        return pygi_guint_to_py (closure_index);
+    else
+        return pygi_gint_to_py (-1);
 }
 
 static PyObject *
 _wrap_gi_arg_info_get_destroy_index (PyGIBaseInfo *self)
 {
     unsigned int destroy_index;
-    g_assert (gi_arg_info_get_destroy_index ((GIArgInfo *)self->info, &destroy_index));
-    return pygi_guint_to_py (destroy_index);
+    if (gi_arg_info_get_destroy_index ((GIArgInfo *)self->info, &destroy_index))
+        return pygi_guint_to_py (destroy_index);
+    else
+        return pygi_gint_to_py (-1);
 }
 
 static PyObject *
@@ -937,8 +942,11 @@ static PyObject *
 _wrap_gi_type_info_get_array_length_index (PyGIBaseInfo *self)
 {
     unsigned int idx;
-    g_assert (gi_type_info_get_array_length_index (GI_TYPE_INFO (self->info), &idx));  /* TODO better than this */
-    return pygi_gint_to_py (idx);
+
+    if (gi_type_info_get_array_length_index (GI_TYPE_INFO (self->info), &idx))
+        return pygi_guint_to_py (idx);
+    else
+        return pygi_gint_to_py (-1);
 }
 
 static PyObject *
