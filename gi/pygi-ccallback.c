@@ -50,7 +50,7 @@ PyObject *
 _pygi_ccallback_new (GCallback callback,
                      gpointer user_data,
                      GIScopeType scope,
-                     GIFunctionInfo *info,
+                     GICallableInfo *info,
                      GDestroyNotify destroy_notify)
 {
     PyGICCallback *self;
@@ -68,7 +68,7 @@ _pygi_ccallback_new (GCallback callback,
     self->user_data = user_data;
     self->scope = scope;
     self->destroy_notify_func = destroy_notify;
-    self->info = GI_FUNCTION_INFO (gi_base_info_ref (info));
+    self->info = GI_CALLABLE_INFO (gi_base_info_ref (info));
 
     return (PyObject *) self;
 }
