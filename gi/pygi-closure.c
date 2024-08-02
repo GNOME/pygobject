@@ -834,7 +834,7 @@ _pygi_marshal_to_py_interface_callback (PyGIInvokeState   *state,
     return _pygi_ccallback_new (arg->v_pointer,
                                 user_data,
                                 callback_cache->scope,
-                                (GIFunctionInfo *) callback_cache->interface_info,
+                                GI_CALLABLE_INFO (callback_cache->interface_info),
                                 destroy_notify);
 }
 
