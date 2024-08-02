@@ -763,7 +763,7 @@ _pygi_marshal_from_py_interface_callback (PyGIInvokeState   *state,
         py_arg, py_user_data);
 
     if (closure->closure != NULL)
-        arg->v_pointer = GI_BASE_INFO (gi_callable_info_get_closure_native_address (callable_info, closure->closure));
+        arg->v_pointer = gi_callable_info_get_closure_native_address (callable_info, closure->closure);
     else
         arg->v_pointer = NULL;
 
