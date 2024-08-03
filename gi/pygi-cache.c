@@ -508,7 +508,7 @@ _callable_cache_generate_args_cache_real (PyGICallableCache *callable_cache,
         arg_info = gi_callable_info_get_arg (callable_info, i);
 
         /* This only happens when dealing with callbacks */
-        if (gi_arg_info_get_closure_index (arg_info, &closure_index) && closure_index == i) {
+        if (gi_arg_info_get_closure_index (arg_info, &closure_index) && ((gssize) closure_index) == i) {
             callable_cache->user_data_index = i;
             callable_cache->has_user_data = TRUE;
 
