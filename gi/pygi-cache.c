@@ -307,18 +307,18 @@ _arg_cache_new_for_interface (GIBaseInfo        *iface_info,
                                               transfer,
                                               direction,
                                               GI_REGISTERED_TYPE_INFO (iface_info));
-    } else if (GI_IS_ENUM_INFO (iface_info)) {
-        return pygi_arg_enum_new_from_info (type_info,
-                                            arg_info,
-                                            transfer,
-                                            direction,
-                                            GI_ENUM_INFO (iface_info));
     } else if (GI_IS_FLAGS_INFO (iface_info)) {
         return pygi_arg_flags_new_from_info (type_info,
                                              arg_info,
                                              transfer,
                                              direction,
                                              GI_FLAGS_INFO (iface_info));
+    } else if (GI_IS_ENUM_INFO (iface_info)) {
+        return pygi_arg_enum_new_from_info (type_info,
+                                            arg_info,
+                                            transfer,
+                                            direction,
+                                            GI_ENUM_INFO (iface_info));
     } else {
         g_assert_not_reached ();
     }
