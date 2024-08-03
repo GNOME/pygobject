@@ -873,7 +873,7 @@ pygi_arg_garray_len_arg_setup (PyGIArgCache *arg_cache,
          * When the length comes before the array parameter we need to update
          * indexes of arguments after the index argument.
          */
-        if (seq_cache->len_arg_index < arg_index && direction & PYGI_DIRECTION_FROM_PYTHON) {
+        if (((gssize) seq_cache->len_arg_index) < arg_index && direction & PYGI_DIRECTION_FROM_PYTHON) {
             guint i;
             (*py_arg_index) -= 1;
             callable_cache->n_py_args -= 1;

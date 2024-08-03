@@ -351,7 +351,7 @@ _pygi_closure_convert_arguments (PyGIInvokeState *state,
         if (arg_cache->direction & PYGI_DIRECTION_TO_PYTHON) {
             PyObject *value;
 
-            if (cache->has_user_data && cache->user_data_index == i) {
+            if (cache->has_user_data && ((gssize) cache->user_data_index) == i) {
                 if (state->user_data == NULL) {
                     /* user_data can be NULL for connect functions which don't accept
                      * user_data or as the default for user_data in the middle of function
