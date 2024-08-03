@@ -8,6 +8,8 @@ RUN apt-get update && apt-get install -y \
     ccache \
     curl \
     dbus \
+    gir1.2-freedesktop-dev \
+    gir1.2-girepository-3.0-dev \
     gir1.2-gtk-3.0 \
     gir1.2-gtk-4.0 \
     git \
