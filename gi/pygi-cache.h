@@ -159,7 +159,7 @@ typedef struct _PyGISequenceCache
 typedef struct _PyGIArgGArray
 {
     PyGISequenceCache seq_cache;
-    size_t fixed_size;  /* TODO: was changed from gssize (signed) to size_t (unsigned)*/
+    size_t fixed_size;
     unsigned int len_arg_index;
     gboolean has_fixed_size;
     gboolean has_len_arg;
@@ -195,7 +195,7 @@ struct _PyGICallableCache
 
     /* Index of user_data arg passed to a callable. */
     unsigned int user_data_index;
-    gboolean has_user_data;  /* TODO actually use this everywhere */
+    gboolean has_user_data;
 
     /* A user_data arg that can eat variable args passed to a callable. */
     PyGIArgCache *user_data_varargs_arg;
