@@ -523,17 +523,8 @@ ListModel = override(ListModel)
 __all__.append('ListModel')
 
 
-if (GLib.MAJOR_VERSION, GLib.MINOR_VERSION, GLib.MICRO_VERSION) < (2, 57, 1):
-    # The "additions" functionality in splice() was broken in older glib
-    # https://bugzilla.gnome.org/show_bug.cgi?id=795307
-    # This is a slower fallback which emits a signal per added item
-    def _list_store_splice(self, position, n_removals, additions):
-        self.splice(position, n_removals, [])
-        for v in reversed(additions):
-            self.insert(position, v)
-else:
-    def _list_store_splice(self, position, n_removals, additions):
-        self.splice(position, n_removals, additions)
+def _list_store_splice(self, position, n_removals, additions):
+    self.splice(position, n_removals, additions)
 
 
 class ListStore(Gio.ListStore):
