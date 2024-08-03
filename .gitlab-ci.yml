@@ -1,4 +1,4 @@
-image: registry.gitlab.gnome.org/gnome/pygobject/main:v23
+image: registry.gitlab.gnome.org/gnome/pygobject/main:v24
 
 stages:
   - build_and_test
