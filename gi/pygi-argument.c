@@ -98,7 +98,7 @@ _pygi_get_storage_type (GITypeInfo *type_info)
 
     if (type_tag == GI_TYPE_TAG_INTERFACE) {
         GIBaseInfo *interface = gi_type_info_get_interface (type_info);
-        if (GI_IS_ENUM_INFO (interface) || GI_IS_FLAGS_INFO (interface))
+        if (GI_IS_ENUM_INFO (interface))
             type_tag = gi_enum_info_get_storage_type ((GIEnumInfo *)interface);
         else
                 /* FIXME: we might have something to do for other types */
@@ -474,17 +474,17 @@ array_success:
                                                  gi_type_info_is_pointer (type_info));
 
                 Py_DECREF (py_type);
-            } else if (GI_IS_ENUM_INFO (info)) {
-                GType g_type;
-
-                g_type = gi_registered_type_info_get_g_type ( (GIRegisteredTypeInfo *) info);
-                if (pyg_enum_get_value(g_type, object, &arg.v_int) < 0)
-                    break;
             } else if (GI_IS_FLAGS_INFO (info)) {
                 GType g_type;
 
                 g_type = gi_registered_type_info_get_g_type ( (GIRegisteredTypeInfo *) info);
                 if (pyg_flags_get_value(g_type, object, &arg.v_uint) < 0)
+                    break;
+            } else if (GI_IS_ENUM_INFO (info)) {
+                GType g_type;
+
+                g_type = gi_registered_type_info_get_g_type ( (GIRegisteredTypeInfo *) info);
+                if (pyg_enum_get_value(g_type, object, &arg.v_int) < 0)
                     break;
             } else if (GI_IS_INTERFACE_INFO (info) || GI_IS_OBJECT_INFO (info)) {
                 /* An error within this call will result in a NULL arg */
