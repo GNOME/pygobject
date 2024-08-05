@@ -19,6 +19,8 @@ mkdir -p "${CCACHE_DIR}"
 python -m pip install --upgrade pip
 python -m pip install pycairo pytest pytest-cov meson ninja
 
+export GI_TYPELIB_PATH=/usr/lib/i386-linux-gnu/girepository-1.0/
+
 meson setup _build
-PYTEST_ADDOPTS="--cov" xvfb-run -a meson test --suite pygobject --timeout-multiplier 4 -C _build -v
+PYTEST_ADDOPTS="--cov -s" xvfb-run -a meson test --suite pygobject --timeout-multiplier 4 -C _build -v
 python -m coverage lcov -o "${COV_DIR}/${COV_KEY}.py.lcov"
