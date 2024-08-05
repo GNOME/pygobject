@@ -159,7 +159,7 @@ python3.12-pdm:
     PYTHON_VERSION: "3.12"
     TEST_GTK_VERSION: "3.0"
   before_script:
-    - python -m pip install pdm
+    - python -m pip install "pdm!=2.17.3"
     - python -m pdm install -v
   script:
     - xvfb-run -a python -m pdm run pytest
