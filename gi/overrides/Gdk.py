@@ -27,7 +27,6 @@ from ..module import get_introspection_module
 from gi import PyGIDeprecationWarning, require_version
 
 Gdk = get_introspection_module('Gdk')
-GDK2 = Gdk._version == '2.0'
 GDK3 = Gdk._version == '3.0'
 GDK4 = Gdk._version == '4.0'
 
@@ -42,7 +41,7 @@ try:
 except (ValueError, ImportError):
     pass
 
-if GDK2 or GDK3:
+if GDK3:
     # Gdk.Color was deprecated since 3.14 and dropped in Gtk-4.0
     class Color(Gdk.Color):
         MAX_VALUE = 65535
@@ -138,22 +137,7 @@ if GDK3:
     RGBA = override(RGBA)
     __all__.append('RGBA')
 
-if GDK2:
-    class Rectangle(Gdk.Rectangle):
-
-        def __init__(self, x, y, width, height):
-            Gdk.Rectangle.__init__(self)
-            self.x = x
-            self.y = y
-            self.width = width
-            self.height = height
-
-        def __repr__(self):
-            return 'Gdk.Rectangle(x=%d, y=%d, width=%d, height=%d)' % (self.x, self.y, self.height, self.width)
-
-    Rectangle = override(Rectangle)
-    __all__.append('Rectangle')
-elif GDK3:
+if GDK3:
     # Newer GTK/gobject-introspection (3.17.x) include GdkRectangle in the
     # typelib. See https://bugzilla.gnome.org/show_bug.cgi?id=748832 and
     # https://bugzilla.gnome.org/show_bug.cgi?id=748833
@@ -171,14 +155,7 @@ elif GDK3:
         __all__.append('rectangle_intersect')
         __all__.append('rectangle_union')
 
-if GDK2:
-    class Drawable(Gdk.Drawable):
-        def cairo_create(self):
-            return Gdk.cairo_create(self)
-
-    Drawable = override(Drawable)
-    __all__.append('Drawable')
-elif GDK3:
+if GDK3:
     class Window(Gdk.Window):
         def __new__(cls, parent, attributes, attributes_mask):
             # Gdk.Window had to be made abstract,
@@ -194,7 +171,7 @@ elif GDK3:
     Window = override(Window)
     __all__.append('Window')
 
-if GDK2 or GDK3:
+if GDK3:
     Gdk.EventType._2BUTTON_PRESS = getattr(Gdk.EventType, "2BUTTON_PRESS")
     Gdk.EventType._3BUTTON_PRESS = getattr(Gdk.EventType, "3BUTTON_PRESS")
 
@@ -232,9 +209,6 @@ if GDK2 or GDK3:
             Gdk.EventType.MAP: 'any',
             Gdk.EventType.UNMAP: 'any',
         }
-
-        if GDK2:
-            _UNION_MEMBERS[Gdk.EventType.NO_EXPOSE] = 'no_expose'
 
         if hasattr(Gdk.EventType, 'TOUCH_BEGIN'):
             _UNION_MEMBERS.update(
@@ -292,9 +266,6 @@ if GDK2 or GDK3:
                             'EventOwnerChange',
                             'EventWindowState',
                             'EventVisibility']
-
-    if GDK2:
-        event_member_classes.append('EventNoExpose')
 
     if hasattr(Gdk, 'EventTouch'):
         event_member_classes.append('EventTouch')
@@ -356,17 +327,6 @@ if GDK2 or GDK3:
                               'See: https://wiki.gnome.org/PyGObject/InitializerDeprecations',
                               PyGIDeprecationWarning)
                 return cls.new_from_pixbuf(*args, **kwds)
-
-            elif total_len == 6:
-                if not GDK2:
-                    # pixmaps don't exist in Gdk 3.0
-                    raise ValueError("Wrong number of parameters")
-
-                warnings.warn('Calling "Gdk.Cursor(source, mask, fg, bg, x, y)" has been deprecated. '
-                              'Please use Gdk.Cursor.new_from_pixmap(source, mask, fg, bg, x, y). '
-                              'See: https://wiki.gnome.org/PyGObject/InitializerDeprecations',
-                              PyGIDeprecationWarning)
-                return cls.new_from_pixmap(*args, **kwds)
 
             else:
                 raise ValueError("Wrong number of parameters")
@@ -479,6 +439,6 @@ if GDK3:
     SELECTION_TYPE_STRING = Gdk.atom_intern('STRING', True)
     __all__.append('SELECTION_TYPE_STRING')
 
-if GDK2 or GDK3:
+if GDK3:
     import sys
     initialized, argv = Gdk.init_check(sys.argv)
