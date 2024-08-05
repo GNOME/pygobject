@@ -138,7 +138,7 @@ class DynamicImporter(object):
             try:
                 introspection_module = get_introspection_module(namespace)
             except RepositoryError as e:
-                raise ImportError(e)
+                raise ImportError(e) from e
             # Import all dependencies first so their init functions
             # (gdk_init, ..) in overrides get called.
             # https://bugzilla.gnome.org/show_bug.cgi?id=656314
