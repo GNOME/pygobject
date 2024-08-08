@@ -46,7 +46,7 @@ pages:
     - coverage
   before_script:
     - python -m pip install pdm
-    - python -m pdm install --with docs
+    - python -m pdm install -v
   script:
     - python -m pdm run sphinx-build -T -E -W --keep-going -b html -d _build/doctrees -D language=en docs/ public
     - mv coverage/ public/
@@ -107,7 +107,6 @@ python3.12:
   <<: *defaults
 
 pypy3:
-  allow_failure: true
   variables:
     PYTHON_VERSION: "pypy3"
     TEST_GTK_VERSION: "3.0"
@@ -121,9 +120,14 @@ old-i386-py3:
       - coverage/
   script:
    - bash -x ./.gitlab-ci/test-docker-old.sh
+  # This build sometimes fails with message:
+  #   ninja: error: loading 'build.ninja': Value too large for defined data type
+  retry:
+    max: 2
+    when: runner_system_failure
+    exit_codes: 1
 
 gnome-master:
-  allow_failure: true
   stage: build_and_test
   image: quay.io/gnome_infrastructure/gnome-runtime-images:gnome-master
   tags:
@@ -137,7 +141,6 @@ gnome-master:
     - bash -x ./.gitlab-ci/test-flatpak.sh
 
 gnome-master-gtk4:
-  allow_failure: true
   stage: build_and_test
   image: quay.io/gnome_infrastructure/gnome-runtime-images:gnome-master
   tags:
@@ -149,6 +152,17 @@ gnome-master-gtk4:
     TEST_GTK_VERSION: "4.0"
   script:
     - bash -x ./.gitlab-ci/test-flatpak.sh
+
+python3.12-pdm:
+  stage: build_and_test
+  variables:
+    PYTHON_VERSION: "3.12"
+    TEST_GTK_VERSION: "3.0"
+  before_script:
+    - python -m pip install pdm
+    - python -m pdm install -v
+  script:
+    - xvfb-run -a python -m pdm run pytest
 
 minimal-meson:
   allow_failure: true
