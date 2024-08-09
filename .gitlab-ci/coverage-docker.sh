@@ -16,6 +16,8 @@ for path in coverage/*.lcov; do
     lcov --config-file .gitlab-ci/lcovrc -r "${path}" '*tmp-introspect*' -o "${path}"
 done
 
+ls -l coverage
+
 genhtml --ignore-errors=source --config-file .gitlab-ci/lcovrc \
     coverage/*.lcov -o coverage/
 
