@@ -19,6 +19,14 @@ find a detailed description of the API for each library. Also there's a
 `Python-specific reference <https://amolenaar.pages.gitlab.gnome.org/pygobject-docs/>`_
 available.
 
+.. note::
+    Our tutorial list is still not as extensive as we would like, so if you
+    have experience with PyGObject, contributing docs is a great way to help.
+    
+    Some areas that could use your help: libadwaita components, GLib and Gio
+    features.
+
+
 .. _api-references:
 
 API References
