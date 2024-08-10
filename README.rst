@@ -30,6 +30,9 @@ The latest version from PyGObject can be installed from `PyPI <https://pypi.org/
 
 PyGObject is only distributed as source distribution, so you need a C compiler installed on your host.
 
+Please have a look at our `Getting Started <https://pygobject.gnome.org/getting_started.html>`__ documentation
+for OS specific installation instructions.
+
 Development
 ~~~~~~~~~~~
 
