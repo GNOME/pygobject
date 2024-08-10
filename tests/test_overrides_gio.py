@@ -389,6 +389,10 @@ def test_file_fspath_with_no_path():
         assert path == os.getcwd()
 
 
+@pytest.mark.skipif(
+    not hasattr(Gio.ListStore, "find_with_equal_func_full"),
+    reason="ListStore.find_with_equal_func_full() is available in Gio 2.74"
+)
 def test_list_store_find_with_equal_func():
 
     def test(*user_data):
