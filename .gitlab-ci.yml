@@ -45,7 +45,7 @@ pages:
   dependencies:
     - coverage
   before_script:
-    - python -m pip install pdm
+    - python -m pip install "pdm!=2.17.3"
     - python -m pdm install -v
   script:
     - python -m pdm run sphinx-build -T -E -W --keep-going -b html -d _build/doctrees -D language=en docs/ public
