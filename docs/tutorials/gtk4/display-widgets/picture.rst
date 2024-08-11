@@ -17,7 +17,7 @@ original size.
 
 Sometimes an application will want to avoid depending on external data files,
 such as image files.
-See the documentation of :doc:`/tutorials/gio/gresource` inside GIO, for details.
+See the documentation of :class:`Gio.Resource` inside GIO, for details.
 In this case, :meth:`Gtk.Picture.new_for_resource` and 
 :meth:`Gtk.Picture.set_resource`, should be used.
 

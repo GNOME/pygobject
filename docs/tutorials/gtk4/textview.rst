@@ -4,7 +4,7 @@ Text View
 =========
 
 The :class:`Gtk.TextView` widget can be used to display and edit large amounts
-of formatted text. Like the :doc:`/tutorials/gtk4/list-widgets`, it has a model/view
+of formatted text. Like the :class:`Gtk.ListView`, it has a model/view
 design.
 In this case the :class:`Gtk.TextBuffer` is the model which represents the text
 being edited. This allows two or more :class:`Gtk.TextView` widgets to share the

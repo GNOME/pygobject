@@ -15,6 +15,6 @@ an image at is actual size.
 
 Sometimes an application will want to avoid depending on external data files,
 such as image files.
-See the documentation of :doc:`/tutorials/gio/gresource` inside GIO, for details.
+See the documentation of :class:`Gio.Resource` inside GIO, for details.
 In this case, :attr:`Gtk.Image.props.resource` and
 :meth:`Gtk.Image.new_from_resource`, should be used.
