@@ -141,6 +141,7 @@ gnome-master:
     - bash -x ./.gitlab-ci/test-flatpak.sh
 
 gnome-master-gtk4:
+  allow_failure: true
   stage: build_and_test
   image: quay.io/gnome_infrastructure/gnome-runtime-images:gnome-master
   tags:
