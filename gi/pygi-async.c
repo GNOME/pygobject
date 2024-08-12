@@ -453,26 +453,15 @@ pygi_async_finish_cb (GObject *source_object, gpointer res, PyGIAsync *self)
 
     if (PyErr_Occurred ()) {
         PyObject *exc = NULL, *value = NULL, *traceback = NULL;
-        PyObject *exc_val;
 
+        /* NOTE: cPython >=3.12 has PyErr_{Get,Set}RaisedException */
         PyErr_Fetch (&exc, &value, &traceback);
+        PyErr_NormalizeException(&exc, &value, &traceback);
 
-        Py_XDECREF (ret);
-
-        if (!value)
-            exc_val = PyObject_CallFunction(exc, "");
-        else
-            exc_val = PyObject_CallFunction(exc, "O", value);
-
-        if (exc_val == NULL)
-            exc_val = PyObject_CallFunction(PyExc_TypeError, "Invalid exception from _finish function call!");
-
-        g_assert (exc_val);
-        self->exception = exc_val;
+        self->exception = value;
         self->log_tb = TRUE;
 
         Py_XDECREF (exc);
-        Py_XDECREF (value);
         Py_XDECREF (traceback);
         Py_XDECREF (ret);
     } else {

@@ -173,6 +173,7 @@ class TestAsync(unittest.TestCase):
 
         self.assertRegex(msg, ".*exception was never retrieved")
         self.assertIsInstance(exc, GLib.GError)
+        assert exc.matches(Gio.io_error_quark(), Gio.IOErrorEnum.CANCELLED)
 
     def test_no_running_loop(self):
         f = Gio.file_new_for_path("./")
