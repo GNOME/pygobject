@@ -770,9 +770,6 @@ class IOChannel(GLib.IOChannel):
             return buf
         raise StopIteration
 
-    # Python 2.x compatibility
-    next = __next__
-
 
 IOChannel = override(IOChannel)
 __all__.append('IOChannel')

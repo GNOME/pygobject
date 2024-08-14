@@ -160,9 +160,6 @@ if GTK3:
         def __bool__(self):
             return True
 
-        # alias for Python 2.x object protocol
-        __nonzero__ = __bool__
-
         def child_get_property(self, child, property_name, value=None):
             if value is None:
                 prop = self.find_child_property(property_name)
@@ -804,10 +801,6 @@ class TreeModel(Gtk.TreeModel):
     def __bool__(self):
         return True
 
-    if GTK3:
-        # alias for Python 2.x object protocol
-        __nonzero__ = __bool__
-
     def _getiter(self, key):
         if isinstance(key, Gtk.TreeIter):
             return key
@@ -1189,10 +1182,6 @@ class TreeModelRowIter(object):
         row = TreeModelRow(self.model, self.iter)
         self.iter = self.model.iter_next(self.iter)
         return row
-
-    if GTK3:
-        # alias for Python 2.x object protocol
-        next = __next__
 
     def __iter__(self):
         return self

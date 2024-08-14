@@ -242,9 +242,6 @@ class FileEnumerator(Gio.FileEnumerator):
         else:
             raise StopIteration
 
-    # python 2 compat for the iter protocol
-    next = __next__
-
 
 FileEnumerator = override(FileEnumerator)
 __all__.append('FileEnumerator')
@@ -280,9 +277,6 @@ class Settings(Gio.Settings):
         # for "if mysettings" we don't want a dictionary-like test here, just
         # if the object isn't None
         return True
-
-    # alias for Python 2.x object protocol
-    __nonzero__ = __bool__
 
     def __getitem__(self, key):
         # get_value() aborts the program on an unknown key
