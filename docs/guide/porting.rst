@@ -28,6 +28,8 @@ to move to PyGObject and GStreamer 1.0 at the same time.
 **pygobject 2** supports glib 2.0 and Python 2. The new bindings also support
 glib 2.0 and Python 2/3.
 
+.. note::
+    Python 2 is no longer supported since PyGObject 3.38.0.
 
 General Porting Tips
 --------------------

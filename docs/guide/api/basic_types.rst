@@ -28,17 +28,7 @@ int/long can fail with :class:`OverflowError`:
 Text Types
 ----------
 
-In case you use Python 2 then text is utf-8 encoded :obj:`str`, in case of
-Python 3 :obj:`str` is used.
-
-
-Platform String Types
----------------------
-
-* Windows + Python 2: utf-8 encoded :obj:`str`
-* Windows + Python 3: :obj:`str`
-* Unix + Python 2: :obj:`str`
-* Unix + Python 3: :obj:`str`
+Text types are mapped to :obj:`str`.
 
 
 Other Types
