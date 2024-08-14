@@ -11,6 +11,7 @@ User Guide
     api/index
     cairo_integration
     gtk_template
+    asynchronous
     threading
     debug_profile
     deploy
