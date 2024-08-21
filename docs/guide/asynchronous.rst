@@ -9,12 +9,15 @@ Asynchronous programming (asyncio)
     You can use the async integration (we encourage you to try!), but the API is not guaranteed stable;
     it might change if we find problems.
 
-Since PyGObject 3.50.0, PyGObject has support for asynchronous programming using ``async`` and ``await``.
+Since PyGObject 3.50.0, PyGObject has integration with the :mod:`asyncio` module. There are two parts
+to this integration. First, PyGObject provides an :mod:`asyncio` event loop so that Python code using
+:mod:`asyncio` will run normally. The second part to the integration is that Gio asynchronous functions
+can return an awaitable object, which allows using ``await`` on them within a Python coroutine.
 
-In Python this is implemented by the :mod:`asyncio` module. PyGObject can make the asyncio event loop
-part of GLib's main loop.
+Event Loop integration
+----------------------
 
-To integrate asyncio in GLib
+To use the :mod:`asyncio` event loop integration in GLib
 
 .. code-block:: python
 
@@ -41,6 +44,23 @@ At this point you can fetch the event loop and start submitting tasks:
 
     Note that you'll need to keep a reference to the tasks you create, since the asyncio module will only
     maintain a weak reference.
+
+Gio asynchronous function integration
+--------------------------------------
+
+If the callback parameter of an asynchronous Gio function is skipped, then PyGObject will automatically
+return an awaitable object similar to a :obj:`asyncio.Future`. This can be used to `await` the operation
+from within a coroutine as well as cancelling it.
+
+.. code-block:: python
+    loop = policy.get_event_loop()
+
+    async def list_files():
+        f = Gio.file_new_for_path("/")
+        for info in await f.enumerate_children_async("standard::*", 0, GLib.PRIORITY_DEFAULT):
+            print(info.get_display_name())
+
+    task = loop.create_task(list_files())
 
 
 Examples
