@@ -2,7 +2,7 @@
 Tutorials
 =========
 
-These tutorials gives an introduction to writing GTK/GNOME applications in
+These tutorials give an introduction to writing GTK/GNOME applications in
 Python.
 
 Prior to working through these tutorials, it is recommended that you have a
