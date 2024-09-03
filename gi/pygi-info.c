@@ -55,6 +55,27 @@ _generate_doc_string(PyGIBaseInfo *self)
 }
 
 static PyObject *
+_generate_signature(PyGICallableInfo *self)
+{
+    static PyObject *_py_generate_signature = NULL;
+
+    if (_py_generate_signature == NULL) {
+        PyObject *mod = PyImport_ImportModule ("gi._signature");
+        if (!mod)
+            return NULL;
+
+        _py_generate_signature = PyObject_GetAttrString (mod, "generate_signature");
+        if (_py_generate_signature == NULL) {
+            Py_DECREF (mod);
+            return NULL;
+        }
+        Py_DECREF (mod);
+    }
+
+    return PyObject_CallFunctionObjArgs (_py_generate_signature, self, NULL);
+}
+
+static PyObject *
 _get_info_string (PyGIBaseInfo *self,
                   const gchar* (*get_info_string)(GIBaseInfo*))
 {
@@ -701,6 +722,17 @@ static PyMethodDef _PyGICallableInfo_methods[] = {
     { "get_return_attribute", (PyCFunction) _wrap_g_callable_info_get_return_attribute, METH_O },
     { "can_throw_gerror", (PyCFunction) _wrap_g_callable_info_can_throw_gerror, METH_NOARGS },
     { NULL, NULL, 0 }
+};
+
+static PyObject *
+_callable_info_signature (PyGICallableInfo *self)
+{
+    return _generate_signature (self);
+}
+
+static PyGetSetDef _PyGICallableInfo_getsets[] = {
+    { "__signature__", (getter)_callable_info_signature, (setter)NULL },
+    { NULL, NULL, NULL }
 };
 
 /* CallbackInfo */
@@ -2265,21 +2297,14 @@ pygi_info_register_types (PyObject *m)
 
     PyGICallableInfo_Type.tp_call = (ternaryfunc) _callable_info_call;
     PyGICallableInfo_Type.tp_repr = (reprfunc) _callable_info_repr;
+    PyGICallableInfo_Type.tp_getset = _PyGICallableInfo_getsets;
     _PyGI_REGISTER_TYPE (m, PyGICallableInfo_Type, CallableInfo,
                          PyGIBaseInfo_Type);
 
-    // FIXME: this is to work around a pylint issue
-    // https://gitlab.gnome.org/GNOME/pygobject/issues/217
-#ifndef PYPY_VERSION
-    _PyGI_REGISTER_TYPE (m, PyGIFunctionInfo_Type, FunctionInfo,
-                         PyGICallableInfo_Type);
-#endif
     PyGIFunctionInfo_Type.tp_call = (ternaryfunc) _function_info_call;
     PyGIFunctionInfo_Type.tp_descr_get = (descrgetfunc) _function_info_descr_get;
-#ifdef PYPY_VERSION
     _PyGI_REGISTER_TYPE (m, PyGIFunctionInfo_Type, FunctionInfo,
                          PyGICallableInfo_Type);
-#endif
 
     PyGIVFuncInfo_Type.tp_descr_get = (descrgetfunc) _vfunc_info_descr_get;
     _PyGI_REGISTER_TYPE (m, PyGIVFuncInfo_Type, VFuncInfo,
