@@ -4,7 +4,7 @@ Basics
 ======
 
 .. hint::
-    In this example, we will use GTK widgets to demonstrate a GObject 
+    In this example, we will use GTK widgets to demonstrate GObject 
     capabilities.
 
 GObject Initialization
