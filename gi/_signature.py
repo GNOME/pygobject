@@ -20,11 +20,75 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
 # USA
 
+from importlib import import_module
 from inspect import Parameter, Signature
+from typing import Optional
 
-from ._gi import VFuncInfo, FunctionInfo, CallableInfo, Direction
+from ._gi import (
+    VFuncInfo,
+    FunctionInfo,
+    CallableInfo,
+    Direction,
+    GType,
+    TypeInfo,
+    TypeTag,
+)
 
 __all__ = ["generate_signature"]
+
+
+tag_pytype = {
+    TypeTag.VOID: None,
+    TypeTag.BOOLEAN: bool,
+    TypeTag.INT8: int,
+    TypeTag.UINT8: int,
+    TypeTag.INT16: int,
+    TypeTag.UINT16: int,
+    TypeTag.INT32: int,
+    TypeTag.UINT32: int,
+    TypeTag.INT64: int,
+    TypeTag.UINT64: int,
+    TypeTag.FLOAT: float,
+    TypeTag.DOUBLE: float,
+    TypeTag.GTYPE: GType,
+    TypeTag.UTF8: str,
+    TypeTag.FILENAME: str,
+    TypeTag.UNICHAR: str,
+}
+
+list_tag_types = {TypeTag.GLIST, TypeTag.GSLIST, TypeTag.ARRAY}
+
+
+def get_pytype(gi_type: TypeInfo) -> object:
+    tag = gi_type.get_tag()
+    try:
+        return tag_pytype[tag]
+    except KeyError:
+        pass
+    if tag in list_tag_types:
+        value_type = get_pytype(gi_type.get_param_type(0))
+        if value_type is Parameter.empty:
+            return list
+        return list[value_type]
+    elif tag == TypeTag.GHASH:
+        key_type = get_pytype(gi_type.get_param_type(0))
+        value_type = get_pytype(gi_type.get_param_type(1))
+        if key_type is Parameter.empty or value_type is Parameter.empty:
+            return dict
+        return dict[key_type, value_type]
+    elif tag == TypeTag.INTERFACE:
+        iface = gi_type.get_interface()
+        iface_name = iface.get_name()
+        if not iface_name:
+            return gi_type.get_tag_as_string()
+        iface_namespace = iface.get_namespace()
+        module = import_module(f"gi.repository.{iface_namespace}")
+        try:
+            return getattr(module, iface_name)
+        except NotImplementedError:
+            return f"{iface_namespace}.{iface_name}"
+    else:
+        return gi_type.get_tag_as_string()
 
 
 def generate_signature(info: CallableInfo) -> Signature:
@@ -52,15 +116,56 @@ def generate_signature(info: CallableInfo) -> Signature:
             continue
 
         default = Parameter.empty
+        annotation = get_pytype(arg.get_type())
         if arg.may_be_null() or i in user_data_indices:
             # allow-none or user_data from a closure
             default = None
+            if annotation is not Parameter.empty:
+                annotation = Optional[annotation]
         elif arg.is_optional():
             # TODO: Can we retrieve the default value?
             default = ...
 
         params.append(
-            Parameter(arg.get_name(), Parameter.POSITIONAL_OR_KEYWORD, default=default)
+            Parameter(
+                arg.get_name(),
+                Parameter.POSITIONAL_OR_KEYWORD,
+                default=default,
+                annotation=annotation,
+            )
         )
 
-    return Signature(params)
+    # Remove defaults from params after the last required parameter.
+    last_required = max(
+        (i for (i, param) in enumerate(params) if param.default is Parameter.empty),
+        default=0,
+    )
+    for i, param in enumerate(params):
+        if i >= last_required:
+            break
+        if param.default is not Parameter.empty:
+            params[i] = param.replace(default=Parameter.empty)
+
+    return_annotation = get_pytype(info.get_return_type())
+    if info.may_return_null():
+        return_annotation = Optional[return_annotation]
+
+    out_args = []
+    for i, arg in enumerate(args):
+        if arg.get_direction() == Direction.IN:
+            continue  # skip exclusively input args
+        if i in ignore_indices:
+            continue
+        annotation = get_pytype(arg.get_type())
+        if arg.may_be_null() and annotation is not Parameter.empty:
+            annotation = Optional[annotation]
+        out_args.append(annotation)
+
+    if return_annotation is not None:
+        out_args.insert(0, return_annotation)
+    if len(out_args) > 1:
+        return_annotation = tuple[*out_args]
+    elif len(out_args) == 1:
+        return_annotation = out_args[0]
+
+    return Signature(params, return_annotation=return_annotation)
