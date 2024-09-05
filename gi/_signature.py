@@ -22,7 +22,7 @@
 
 from importlib import import_module
 from inspect import Parameter, Signature
-from typing import Optional, Tuple
+from typing import Callable, Optional, Tuple
 
 from ._gi import (
     VFuncInfo,
@@ -30,6 +30,7 @@ from ._gi import (
     CallableInfo,
     Direction,
     GType,
+    InfoType,
     TypeInfo,
     TypeTag,
 )
@@ -77,16 +78,22 @@ def get_pytype(gi_type: TypeInfo) -> object:
             return dict
         return dict[key_type, value_type]
     elif tag == TypeTag.INTERFACE:
-        iface = gi_type.get_interface()
-        iface_name = iface.get_name()
-        if not iface_name:
+        info = gi_type.get_interface()
+        if info.get_type() == InfoType.CALLBACK:
+            sig = generate_signature(info)
+            return Callable[
+                [param.annotation for param in sig.parameters.values()],
+                sig.return_annotation,
+            ]
+        info_name = info.get_name()
+        if not info_name:
             return gi_type.get_tag_as_string()
-        iface_namespace = iface.get_namespace()
-        module = import_module(f"gi.repository.{iface_namespace}")
+        info_namespace = info.get_namespace()
+        module = import_module(f"gi.repository.{info_namespace}")
         try:
-            return getattr(module, iface_name)
+            return getattr(module, info_name)
         except NotImplementedError:
-            return f"{iface_namespace}.{iface_name}"
+            return f"{info_namespace}.{info_name}"
     else:
         return gi_type.get_tag_as_string()
 
