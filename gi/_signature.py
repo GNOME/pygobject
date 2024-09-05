@@ -22,7 +22,7 @@
 
 from importlib import import_module
 from inspect import Parameter, Signature
-from typing import Callable, Optional, Tuple
+from typing import Any, Callable, Optional, Tuple
 
 from ._error import GError
 from ._gi import (
@@ -40,7 +40,6 @@ __all__ = ["generate_signature"]
 
 
 tag_pytype = {
-    TypeTag.VOID: None,
     TypeTag.BOOLEAN: bool,
     TypeTag.INT8: int,
     TypeTag.UINT8: int,
@@ -68,7 +67,12 @@ def get_pytype(gi_type: TypeInfo) -> object:
         return tag_pytype[tag]
     except KeyError:
         pass
-    if tag in list_tag_types:
+    if tag == TypeTag.VOID:
+        if gi_type.is_pointer():
+            return Any
+        else:
+            return None
+    elif tag in list_tag_types:
         value_type = get_pytype(gi_type.get_param_type(0))
         if value_type is Parameter.empty:
             return list
@@ -129,7 +133,7 @@ def generate_signature(info: CallableInfo) -> Signature:
         if arg.may_be_null() or i in user_data_indices:
             # allow-none or user_data from a closure
             default = None
-            if annotation is not Parameter.empty:
+            if annotation is not Parameter.empty and annotation is not Any:
                 annotation = Optional[annotation]
         elif arg.is_optional():
             # TODO: Can we retrieve the default value?
