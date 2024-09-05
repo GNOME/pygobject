@@ -1,6 +1,6 @@
 .. currentmodule:: gi.repository
 
-Asynchronous programming (asyncio)
+Asynchronous Programming (asyncio)
 ==================================
 
 .. attention::
