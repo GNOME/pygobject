@@ -75,7 +75,7 @@ regress_c_args = []
 if cairo_dep.found()
   regress_deps += [cairo_dep, cairo_gobject_dep]
 else
-  regress_c_args += ['-D_GI_DISABLE_CAIRO']
+  regress_c_args += ['-D_GI_DISABLE_CAIRO', '-DGI_TEST_DISABLE_CAIRO']
 endif
 
 regress_lib = library(
