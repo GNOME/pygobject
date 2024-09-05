@@ -24,6 +24,7 @@ from importlib import import_module
 from inspect import Parameter, Signature
 from typing import Callable, Optional, Tuple
 
+from ._error import GError
 from ._gi import (
     VFuncInfo,
     FunctionInfo,
@@ -55,6 +56,7 @@ tag_pytype = {
     TypeTag.UTF8: str,
     TypeTag.FILENAME: str,
     TypeTag.UNICHAR: str,
+    TypeTag.ERROR: GError,
 }
 
 list_tag_types = {TypeTag.GLIST, TypeTag.GSLIST, TypeTag.ARRAY}
