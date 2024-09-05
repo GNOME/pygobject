@@ -14,7 +14,7 @@ intersphinx_mapping = {
     ),
 }
 
-source_suffix = '.rst'
+source_suffix = {'.rst': 'restructuredtext'}
 master_doc = 'index'
 exclude_patterns = ['_build', 'README.rst']
 
