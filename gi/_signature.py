@@ -22,7 +22,7 @@
 
 from importlib import import_module
 from inspect import Parameter, Signature
-from typing import Optional
+from typing import Optional, Tuple
 
 from ._gi import (
     VFuncInfo,
@@ -164,7 +164,7 @@ def generate_signature(info: CallableInfo) -> Signature:
     if return_annotation is not None:
         out_args.insert(0, return_annotation)
     if len(out_args) > 1:
-        return_annotation = tuple[*out_args]
+        return_annotation = Tuple[tuple(out_args)]
     elif len(out_args) == 1:
         return_annotation = out_args[0]
 
