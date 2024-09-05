@@ -9,12 +9,15 @@ if get_option('default_library') != 'static'
   if host_system == 'windows'
     visibility_args += ['-DDLL_EXPORT']
     if cc.get_id() == 'msvc'
+      visibility_args += ['-DGI_TEST_EXTERN=__declspec(dllexport) extern']
       visibility_args += ['-D_GI_EXTERN=__declspec(dllexport) extern']
     elif cc.has_argument('-fvisibility=hidden')
+      visibility_args += ['-DGI_TEST_EXTERN=__attribute__((visibility("default"))) __declspec(dllexport) extern']
       visibility_args += ['-D_GI_EXTERN=__attribute__((visibility("default"))) __declspec(dllexport) extern']
       visibility_args += ['-fvisibility=hidden']
     endif
   elif cc.has_argument('-fvisibility=hidden')
+    visibility_args += ['-DGI_TEST_EXTERN=__attribute__((visibility("default"))) extern']
     visibility_args += ['-D_GI_EXTERN=__attribute__((visibility("default"))) extern']
     visibility_args += ['-fvisibility=hidden']
   endif
@@ -40,7 +43,6 @@ else
 endif
 
 marshalling_sources += ['gimarshallingtestsextra.c']
-
 marshalling_headers += ['gimarshallingtestsextra.h']
 
 marshalling_lib = library(
