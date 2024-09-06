@@ -87,6 +87,7 @@ class MetaClassHelper(object):
             vfunc_info = None
             for base in cls.__mro__:
                 method = getattr(base, vfunc_name, None)
+                method = getattr(method, "__func__", method)
                 if method is not None and isinstance(method, VFuncInfo):
                     vfunc_info = method
                     break

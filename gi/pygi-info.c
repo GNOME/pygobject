@@ -524,40 +524,7 @@ PYGI_DEFINE_TYPE ("gi.CallableInfo", PyGICallableInfo_Type, PyGICallableInfo);
 static PyObject *
 _callable_info_call (PyGICallableInfo *self, PyObject *args, PyObject *kwargs)
 {
-    /* Insert the bound arg at the beginning of the invoke method args. */
-    if (self->py_bound_arg) {
-        int i;
-        PyObject *result;
-        Py_ssize_t argcount = PyTuple_Size (args);
-        PyObject *newargs = PyTuple_New (argcount + 1);
-        if (newargs == NULL)
-            return NULL;
-
-        Py_INCREF (self->py_bound_arg);
-        PyTuple_SET_ITEM (newargs, 0, self->py_bound_arg);
-
-        for (i = 0; i < argcount; i++) {
-            PyObject *v = PyTuple_GET_ITEM (args, i);
-            Py_XINCREF (v);
-            PyTuple_SET_ITEM (newargs, i+1, v);
-        }
-
-        /* Invoke with the original GI info struct this wrapper was based upon.
-         * This is necessary to maintain the same cache for all bound versions.
-         */
-        result = _wrap_g_callable_info_invoke ((PyGIBaseInfo *)self->py_unbound_info,
-                                               newargs, kwargs);
-        Py_DECREF (newargs);
-        return result;
-
-    } else {
-        /* We should never have an unbound info when calling when calling invoke
-         * at this point because the descriptor implementation on sub-classes
-         * should return "self" not a copy when there is no bound arg.
-         */
-        g_assert (self->py_unbound_info == NULL);
-        return _wrap_g_callable_info_invoke ((PyGIBaseInfo *)self, args, kwargs);
-    }
+    return _wrap_g_callable_info_invoke ((PyGIBaseInfo *)self, args, kwargs);
 }
 
 static PyObject *
@@ -596,41 +563,44 @@ out:
 static PyObject *
 _function_info_call (PyGICallableInfo *self, PyObject *args, PyObject *kwargs)
 {
-    if (self->py_bound_arg) {
-        GIFunctionInfoFlags flags;
+    GIFunctionInfoFlags flags;
 
-        /* Ensure constructors are only called as class methods on the class
-         * implementing the constructor and not on sub-classes.
-         */
-        flags = g_function_info_get_flags ( (GIFunctionInfo*) self->base.info);
-        if (flags & GI_FUNCTION_IS_CONSTRUCTOR) {
-            PyObject *py_str_name;
-            const gchar *str_name;
-            GIBaseInfo *container_info = g_base_info_get_container (self->base.info);
-            g_assert (container_info != NULL);
+    /* Ensure constructors are only called as class methods on the class
+     * implementing the constructor and not on sub-classes.
+     */
+    flags = g_function_info_get_flags ((GIFunctionInfo*) self->base.info);
+    if (flags & GI_FUNCTION_IS_CONSTRUCTOR) {
+	PyObject *cls;
+	PyObject *py_str_name;
+	const gchar *str_name;
+	GIBaseInfo *container_info = g_base_info_get_container (self->base.info);
 
-            py_str_name = PyObject_GetAttrString (self->py_bound_arg, "__name__");
-            if (py_str_name == NULL)
-                return NULL;
+	g_assert (container_info != NULL);
 
-            if (PyUnicode_Check (py_str_name) ) {
-                PyObject *tmp = PyUnicode_AsUTF8String (py_str_name);
-                Py_DECREF (py_str_name);
-                py_str_name = tmp;
-            }
+	cls = PyTuple_GetItem(args, 0);
+	if (cls == NULL)
+	    return NULL;
+	py_str_name = PyObject_GetAttrString (cls, "__name__");
+	if (py_str_name == NULL)
+	    return NULL;
 
-            str_name = PyBytes_AsString (py_str_name);
-            if (strcmp (str_name, _safe_base_info_get_name (container_info))) {
-                PyErr_Format (PyExc_TypeError,
-                              "%s constructor cannot be used to create instances of "
-                              "a subclass %s",
-                              _safe_base_info_get_name (container_info),
-                              str_name);
-                Py_DECREF (py_str_name);
-                return NULL;
-            }
-            Py_DECREF (py_str_name);
-        }
+	if (PyUnicode_Check (py_str_name) ) {
+	    PyObject *tmp = PyUnicode_AsUTF8String (py_str_name);
+	    Py_DECREF (py_str_name);
+	    py_str_name = tmp;
+	}
+
+	str_name = PyBytes_AsString (py_str_name);
+	if (strcmp (str_name, _safe_base_info_get_name (container_info))) {
+	    PyErr_Format (PyExc_TypeError,
+			  "%s constructor cannot be used to create instances of "
+			  "a subclass %s",
+			  _safe_base_info_get_name (container_info),
+			  str_name);
+	    Py_DECREF (py_str_name);
+	    return NULL;
+	}
+	Py_DECREF (py_str_name);
     }
 
     return _callable_info_call (self, args, kwargs);
@@ -671,19 +641,19 @@ _new_bound_callable_info (PyGICallableInfo *self, PyObject *bound_arg)
 static PyObject *
 _function_info_descr_get (PyGICallableInfo *self, PyObject *obj, PyObject *type) {
     GIFunctionInfoFlags flags;
-    PyObject *bound_arg = NULL;
 
-    flags = g_function_info_get_flags ( (GIFunctionInfo*) self->base.info);
+    flags = g_function_info_get_flags ((GIFunctionInfo*) self->base.info);
     if (flags & GI_FUNCTION_IS_CONSTRUCTOR) {
         if (type == NULL)
-            bound_arg = (PyObject *)(Py_TYPE(obj));
-        else
-            bound_arg = type;
+            type = (PyObject *)(Py_TYPE(obj));
+	return PyMethod_New((PyObject *)self, type);
     } else if (flags & GI_FUNCTION_IS_METHOD) {
-        bound_arg = obj;
+	if (obj != NULL && obj != Py_None)
+	    return PyMethod_New((PyObject *)self, obj);
     }
 
-    return (PyObject *)_new_bound_callable_info (self, bound_arg);
+    Py_INCREF(self);
+    return (PyObject *)self;
 }
 
 /* _vfunc_info_descr_get
@@ -695,12 +665,15 @@ _vfunc_info_descr_get (PyGICallableInfo *self, PyObject *obj, PyObject *type) {
     PyObject *result;
     PyObject *bound_arg = NULL;
 
+    if (type == NULL)
+	type = (PyObject *)Py_TYPE(obj);
+
     bound_arg = PyObject_GetAttrString (type, "__gtype__");
     if (bound_arg == NULL)
         return NULL;
 
     /* _new_bound_callable_info adds its own ref so free the one from GetAttrString */
-    result = (PyObject *)_new_bound_callable_info (self, bound_arg);
+    result = PyMethod_New((PyObject *)self, bound_arg);
     Py_DECREF (bound_arg);
     return result;
 }
