@@ -1,7 +1,21 @@
-3.48.3 - Unreleased
--------------------
+3.49.0 - 2024-09-06 (pre-release)
+---------------------------------
 
 * Rename master branch to main
+* Drop support for Python 3.8 :mr:`300`
+* Add Override for Gio.DataInputStream :mr:`293`
+* Treat GParamSpec as any other fundamental type :mr:`268`
+* override connection.register_object to prevent an invocation object from
+  leaking :mr:`219`
+* Various PyPy related fixes :mr:`299`
+* bind_property: Accept keyword arguments :mr:`309`
+* Various documentation improvements :mr:`342` :mr:`343` :mr:`338`
+  :mr:`336` :mr:`335` :mr:`328` :mr:`329` :mr:`330` :mr:`325` :mr:`322` :mr:`312`
+* Python2 / GTK2 cleanups :mr:`338` :mr:`331`
+* asyncio integration with support to await Gio async functions :mr:`189`
+* meson: move from .egg-info to .dist-info/METADATA :mr:`306`
+* build: fixes for building with gobject-introspection 1.81 :mr:`344`
+
 
 3.48.2 - 2024-04-06
 -------------------
