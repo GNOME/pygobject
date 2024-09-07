@@ -28,8 +28,6 @@ gi_version_req = '>= 2.79.1'
 pycairo_version_req = '>= 1.16.0'
 libffi_version_req = '>= 3.0'
 
-gobject_introspection_dep = dependency('gobject-introspection-1.0')
-
 gi_dep = dependency('girepository-2.0', version : gi_version_req,
   fallback: ['glib', 'libgirepository_dep'])
 glib_dep = dependency('glib-2.0', version : glib_version_req,
