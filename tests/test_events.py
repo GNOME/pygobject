@@ -46,7 +46,12 @@ import gi
 import gi.events
 import asyncio
 import threading
-from gi.repository import GLib, Gtk
+from gi.repository import GLib
+
+try:
+    from gi.repository import Gtk
+except ImportError:
+    Gtk = None
 
 
 GTK4 = (Gtk and Gtk._version == "4.0")
@@ -232,6 +237,7 @@ class GLibEventLoopPolicyTests(unittest.TestCase):
         loop.close()
         self.assertEqual(called, True)
 
+    @unittest.skipUnless(Gtk, 'no Gtk')
     def test_recursive_stop(self):
         """Calling stop() on the EventLoop will quit it, even if iteration
         is done recursively."""
