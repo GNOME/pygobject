@@ -36,15 +36,6 @@ typedef struct {
 
 typedef struct {
     PyGIBaseInfo base;
-
-    /* Reference the unbound version of this struct.
-     * We use this for the actual call to invoke because it manages the cache.
-     */
-    struct PyGICallableInfo *py_unbound_info;
-
-    /* Holds bound argument for instance, class, and vfunc methods. */
-    PyObject *py_bound_arg;
-
 } PyGICallableInfo;
 
 
