@@ -29,6 +29,7 @@ cache:
     when: always
     paths:
       - coverage/
+      - _build/meson-logs
       - test-results.xml
     reports:
       junit: test-results.xml
