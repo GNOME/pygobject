@@ -1,3 +1,9 @@
+3.50.0 - 2024-09-12
+-------------------
+
+* tests: Fix event test errors when GTK is not installed :mr:`347`
+
+
 3.49.0 - 2024-09-06 (pre-release)
 ---------------------------------
 
