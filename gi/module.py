@@ -22,6 +22,7 @@
 
 import importlib
 from threading import Lock
+from types import ModuleType
 
 import gi
 
@@ -100,7 +101,7 @@ def get_interfaces_for_object(object_info):
     return interfaces
 
 
-class IntrospectionModule(object):
+class IntrospectionModule(ModuleType):
     """An object which wraps an introspection typelib.
 
     This wrapping creates a python module like representation of the typelib
@@ -112,9 +113,9 @@ class IntrospectionModule(object):
         """Might raise gi._gi.RepositoryError"""
 
         repository.require(namespace, version)
+        super().__init__(f'gi.repository.{namespace}')
         self._namespace = namespace
         self._version = version
-        self.__name__ = 'gi.repository.' + namespace
 
         path = repository.get_typelib_path(self._namespace)
         self.__path__ = [path]
@@ -151,7 +152,7 @@ class IntrospectionModule(object):
                             wrapper = enum_register_new_gtype_and_add(info)
 
                     wrapper.__info__ = info
-                    wrapper.__module__ = 'gi.repository.' + info.get_namespace()
+                    wrapper.__module__ = self.__name__
 
                     # Don't use upper() here to avoid locale specific
                     # identifier conversion (e. g. in Turkish 'i'.upper() == 'i')
@@ -211,7 +212,7 @@ class IntrospectionModule(object):
 
                 dict_ = {
                     '__info__': info,
-                    '__module__': 'gi.repository.' + self._namespace,
+                    '__module__': self.__name__,
                     '__gtype__': g_type
                 }
                 wrapper = metaclass(name, bases, dict_)
@@ -238,9 +239,7 @@ class IntrospectionModule(object):
         return "<IntrospectionModule %r from %r>" % (self._namespace, path)
 
     def __dir__(self):
-        # Python's default dir() is just dir(self.__class__) + self.__dict__.keys()
-        result = set(dir(self.__class__))
-        result.update(self.__dict__.keys())
+        result = set(super().__dir__())
 
         # update *set* because some repository attributes have already been
         # wrapped by __getattr__() and included in self.__dict__; but skip

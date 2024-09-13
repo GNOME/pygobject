@@ -5,6 +5,7 @@ import sys
 
 import unittest
 import tempfile
+import types
 import shutil
 import os
 import gc
@@ -3100,6 +3101,9 @@ class TestKeywords(unittest.TestCase):
 
 
 class TestModule(unittest.TestCase):
+    def test_type(self):
+        self.assertIsInstance(GIMarshallingTests, types.ModuleType)
+
     def test_path(self):
         path = GIMarshallingTests.__path__
         assert isinstance(path, list)
