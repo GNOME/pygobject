@@ -116,8 +116,10 @@ def init_test_environ():
     gi.require_version("GIRepository", "2.0")
     from gi.repository import GIRepository
     repo = GIRepository.Repository.get_default()
-    repo.prepend_library_path(os.path.join(tests_builddir))
-    repo.prepend_search_path(tests_builddir)
+
+    gi_tests_path = os.path.join(builddir, "subprojects", "gobject-introspection-tests")
+    repo.prepend_library_path(gi_tests_path)
+    repo.prepend_search_path(gi_tests_path)
 
     def try_require_version(namespace, version):
         try:

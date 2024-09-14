@@ -26,6 +26,7 @@
 /pygobject.egg-info/
 /docs/_build
 /PyGObject.egg-info/
+/subprojects/*/
 *.pyd
 *.dll.a
 .coverage

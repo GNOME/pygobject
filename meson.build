@@ -213,6 +213,7 @@ subdir('gi')
 subdir('pygtkcompat')
 with_tests = get_option('tests')
 if with_tests
+gi_tests = subproject('gobject-introspection-tests')
 subdir('tests')
 endif
 
