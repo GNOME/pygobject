@@ -45,6 +45,11 @@ def set_dll_search_path():
             pass
 
 
+def os_environ_prepend(envvar, path):
+    current = os.environ.get(envvar)
+    os.environ[envvar] = os.path.pathsep.join([path, current] if current else [path])
+
+
 def init_test_environ():
 
     set_dll_search_path()
@@ -112,6 +117,10 @@ def init_test_environ():
 
     # Force the default theme so broken themes don't affect the tests
     os.environ['GTK_THEME'] = 'Adwaita'
+
+    gi_gir_path = os.path.join(builddir, "subprojects", "gobject-introspection", "gir")
+    if os.path.exists(gi_gir_path):
+        os_environ_prepend('GI_TYPELIB_PATH', gi_gir_path)
 
     gi.require_version("GIRepository", "2.0")
     from gi.repository import GIRepository
