@@ -213,7 +213,7 @@ subdir('gi')
 subdir('pygtkcompat')
 with_tests = get_option('tests')
 if with_tests
-gi_tests = subproject('gobject-introspection-tests')
+gi_tests = subproject('gobject-introspection-tests', default_options : ['cairo=' + cairo_dep.found().to_string()])
 subdir('tests')
 endif
 
