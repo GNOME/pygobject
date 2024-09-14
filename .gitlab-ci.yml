@@ -168,7 +168,7 @@ python3.12-pdm:
 minimal-meson:
   allow_failure: true
   stage: build_and_test
-  image: quay.io/fedora/fedora:39 
+  image: quay.io/fedora/fedora:40
   before_script:
     - dnf install --assumeyes gcc meson git flex bison diffutils python3-devel python3-pytest
   script:
