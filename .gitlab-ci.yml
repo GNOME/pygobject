@@ -174,4 +174,4 @@ minimal-meson:
   script:
     - meson setup _build
     - meson compile -C _build
-    - PYTEST_ADDOPTS="-sv -k 'not test_cairo'" meson test -C _build --suite pygobject --verbose
+    - PYTEST_ADDOPTS="-sv -k 'not unowned'" meson test -C _build --suite pygobject --verbose

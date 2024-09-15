@@ -7,6 +7,7 @@ import gc
 import sys
 import warnings
 
+import pytest
 from gi.repository import GObject
 from gi.repository import GIMarshallingTests
 
@@ -273,6 +274,7 @@ class TestVFuncsWithFloatingArg(unittest.TestCase):
         gc.collect()
         self.assertTrue(vfuncs.object_ref() is None)
 
+    @pytest.mark.unowned
     def test_vfunc_in_object_transfer_none_with_floating(self):
         vfuncs = self.VFuncs()
         ref_count, is_floating = vfuncs.get_ref_info_for_vfunc_in_object_transfer_none(self.VFuncs.Object)
@@ -520,6 +522,7 @@ class TestVFuncsWithHeldFloatingArg(unittest.TestCase):
         gc.collect()
         self.assertTrue(held_object_ref() is None)
 
+    @pytest.mark.unowned
     def test_vfunc_in_floating_transfer_none_with_held_floating(self):
         vfuncs = self.VFuncs()
         ref_count, is_floating = vfuncs.get_ref_info_for_vfunc_in_object_transfer_none(self.VFuncs.Object)
