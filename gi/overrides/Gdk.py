@@ -90,37 +90,38 @@ if GDK3:
     Color = override(Color)
     __all__.append('Color')
 
-if GDK3:
-    # Introduced since Gtk-3.0
-    class RGBA(Gdk.RGBA):
-        def __init__(self, red=1.0, green=1.0, blue=1.0, alpha=1.0):
-            Gdk.RGBA.__init__(self)
-            self.red = red
-            self.green = green
-            self.blue = blue
-            self.alpha = alpha
 
-        def __eq__(self, other):
-            if not isinstance(other, Gdk.RGBA):
-                return False
-            return self.equal(other)
+# Introduced since Gtk-3.0
+class RGBA(Gdk.RGBA):
+    def __init__(self, red=1.0, green=1.0, blue=1.0, alpha=1.0):
+        Gdk.RGBA.__init__(self)
+        self.red = red
+        self.green = green
+        self.blue = blue
+        self.alpha = alpha
 
-        # This is required (even when __eq__ is defined) in order
-        # for != operator to work as expected
-        def __ne__(self, other):
-            return not self == other
+    def __eq__(self, other):
+        if not isinstance(other, Gdk.RGBA):
+            return False
+        return self.equal(other)
 
-        def __repr__(self):
-            return 'Gdk.RGBA(red=%f, green=%f, blue=%f, alpha=%f)' % (self.red, self.green, self.blue, self.alpha)
+    # This is required (even when __eq__ is defined) in order
+    # for != operator to work as expected
+    def __ne__(self, other):
+        return not self == other
 
-        def __iter__(self):
-            """Iterator which allows easy conversion to tuple and list types."""
+    def __repr__(self):
+        return 'Gdk.RGBA(red=%f, green=%f, blue=%f, alpha=%f)' % (self.red, self.green, self.blue, self.alpha)
 
-            yield self.red
-            yield self.green
-            yield self.blue
-            yield self.alpha
+    def __iter__(self):
+        """Iterator which allows easy conversion to tuple and list types."""
 
+        yield self.red
+        yield self.green
+        yield self.blue
+        yield self.alpha
+
+    if GDK3:
         def to_color(self):
             """Converts this RGBA into a Color instance which excludes alpha."""
 
@@ -134,8 +135,10 @@ if GDK3:
 
             return cls(color.red_float, color.green_float, color.blue_float)
 
-    RGBA = override(RGBA)
-    __all__.append('RGBA')
+
+RGBA = override(RGBA)
+__all__.append('RGBA')
+
 
 if GDK3:
     # Newer GTK/gobject-introspection (3.17.x) include GdkRectangle in the

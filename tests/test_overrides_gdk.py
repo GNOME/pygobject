@@ -91,30 +91,28 @@ class TestGdk(unittest.TestCase):
         color.blue_float = 0
         assert color.blue_float == 0
 
-    @unittest.skipIf(GDK4, "not in gdk4")
     def test_rgba(self):
         self.assertEqual(Gdk.RGBA, gi.overrides.Gdk.RGBA)
         rgba = Gdk.RGBA(0.1, 0.2, 0.3, 0.4)
         self.assertEqual(rgba, Gdk.RGBA(0.1, 0.2, 0.3, 0.4))
         self.assertNotEqual(rgba, Gdk.RGBA(0.0, 0.2, 0.3, 0.4))
-        self.assertEqual(rgba.red, 0.1)
-        self.assertEqual(rgba.green, 0.2)
-        self.assertEqual(rgba.blue, 0.3)
-        self.assertEqual(rgba.alpha, 0.4)
+        self.assertAlmostEqual(rgba.red, 0.1)
+        self.assertAlmostEqual(rgba.green, 0.2)
+        self.assertAlmostEqual(rgba.blue, 0.3)
+        self.assertAlmostEqual(rgba.alpha, 0.4)
         rgba.green = 0.9
-        self.assertEqual(rgba.green, 0.9)
+        self.assertAlmostEqual(rgba.green, 0.9)
         self.assertNotEqual(rgba, None)
         # assertNotEqual only tests __ne__. Following line explicitly
         # tests __eq__ with objects of other types
         self.assertFalse(rgba == object())
 
         # Iterator/tuple convsersion
-        self.assertEqual(tuple(Gdk.RGBA(0.1, 0.2, 0.3, 0.4)),
-                         (0.1, 0.2, 0.3, 0.4))
+        assert tuple(Gdk.RGBA(0.1, 0.2, 0.3, 0.4)) == pytest.approx((0.1, 0.2, 0.3, 0.4))
 
     @unittest.skipUnless(GDK4, "only in gdk4")
     def test_rgba_gtk4(self):
-        c = Gdk.RGBA()
+        c = Gdk.RGBA(0, 0, 0, 0)
         assert c.to_string() == "rgba(0,0,0,0)"
 
     @unittest.skipIf(not has_cairo or GDK4, "not in gdk4")
@@ -297,6 +295,7 @@ class TestGdk(unittest.TestCase):
         color = Gdk.Color(red=65535, green=32896, blue=1)
         self.assertEqual(eval(repr(color)), color)
 
+    def test_rgba_representations(self):
         rgba = Gdk.RGBA(red=1.0, green=0.8, blue=0.6, alpha=0.4)
         self.assertEqual(eval(repr(rgba)), rgba)
 
