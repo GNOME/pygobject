@@ -258,17 +258,18 @@ def get_event_loop(ctx):
     """Return the correct GLibEventLoop or a dummy that just registers the
     signal wakeup mechanism."""
 
+    from . import events
+
     # Try to use the running loop. If there is none, get the policy and
     # try getting one in the hope that this will give us an event loop for the
     # correct context.
     loop = asyncio._get_running_loop()
     if loop is None:
-        try:
-            loop = asyncio.get_event_loop_policy().get_event_loop_for_context(ctx)
-        except:
-            pass
+        policy = asyncio.get_event_loop_policy()
+        if isinstance(policy, events.GLibEventLoopPolicy):
+            loop = policy.get_event_loop_for_context(ctx)
 
-    if loop and hasattr(loop, '_context'):
+    if isinstance(loop, events.GLibEventLoop):
         if ctx is not None and hash(loop._context) == hash(ctx):
             return loop
 
