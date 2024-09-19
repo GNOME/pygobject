@@ -106,9 +106,13 @@ def get_pytype(gi_type: TypeInfo) -> object:
 
 def generate_signature(info: CallableInfo) -> Signature:
     params = []
-    if isinstance(info, VFuncInfo) or (
-        isinstance(info, FunctionInfo) and info.is_method()
-    ):
+    if isinstance(info, FunctionInfo):
+        if info.is_constructor():
+            params.append(Parameter("cls", Parameter.POSITIONAL_OR_KEYWORD))
+        elif info.is_method():
+            params.append(Parameter("self", Parameter.POSITIONAL_OR_KEYWORD))
+    elif isinstance(info, VFuncInfo):
+        params.append(Parameter("type", Parameter.POSITIONAL_OR_KEYWORD))
         params.append(Parameter("self", Parameter.POSITIONAL_OR_KEYWORD))
 
     args = info.get_arguments()
