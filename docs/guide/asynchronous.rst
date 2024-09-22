@@ -74,6 +74,8 @@ A GTK window with a counter.
    :language: python
 
 
+TODO: low prio sleep.
+
 Points of attention
 -------------------
 
