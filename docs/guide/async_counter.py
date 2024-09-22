@@ -38,22 +38,33 @@ def on_activate(app):
     label = Gtk.Label.new("-")
     win.set_child(label)
 
-    t = create_background_task(update_label(label))
+    create_background_task(update_label(label))
 
-    def do_unmap(win):
-        t.cancel()
+    # Approach 1: cancel the task when the window is unmapped.
+    # def do_unmap(win):
+    #     t.cancel()
 
-    win.connect("unmap", do_unmap)
+    # win.connect("unmap", do_unmap)
+
     win.present()
+
+
+# Approach 2: cancel all background tasks when the application shuts down.
+def on_shutdown(app):
+    """Cancel background tasks."""
+    for t in background_tasks:
+        t.cancel()
 
 
 def main():
     asyncio.set_event_loop_policy(GLibEventLoopPolicy())
     app = Gtk.Application()
     app.connect("activate", on_activate)
+    app.connect("shutdown", on_shutdown)
     app.run()
+    
+    print(f"Bye. background_tasks={background_tasks}")
     assert not background_tasks
-    print("Bye.")
 
 
 if __name__ == "__main__":
