@@ -46,7 +46,7 @@ import gi
 import gi.events
 import asyncio
 import threading
-from gi.repository import GLib
+from gi.repository import GLib, Gio
 
 try:
     from gi.repository import Gtk
@@ -102,6 +102,28 @@ class GLibEventLoopPolicyTests(unittest.TestCase):
         # Attaching a loop to the main thread fails
         with self.assertRaises(RuntimeError):
             policy.set_event_loop(loop)
+
+    def test_application(self):
+        policy = self.create_policy()
+        asyncio.set_event_loop_policy(policy)
+
+        task_completed = False
+
+        async def task():
+            nonlocal task_completed
+            await asyncio.sleep(1)
+            task_completed = True
+
+        def activate(app):
+            app.hold()
+            app.create_asyncio_task(task())
+            GLib.timeout_add(500, app.release)
+
+        app = Gio.Application()
+        app.connect("activate", activate)
+        app.run()
+
+        self.assertTrue(task_completed)
 
     def test_nested_context_iteration(self):
         policy = self.create_policy()

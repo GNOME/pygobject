@@ -18,6 +18,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
 # USA
 
+import asyncio
 import warnings
 
 from .._ossighelper import register_sigint_fallback, get_event_loop
@@ -36,10 +37,47 @@ __all__ = []
 
 class Application(Gio.Application):
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self._asyncio_tasks = set()
+
     def run(self, *args, **kwargs):
         with register_sigint_fallback(self.quit):
             with get_event_loop(GLib.MainContext.default()).running(self.quit):
                 return Gio.Application.run(self, *args, **kwargs)
+
+    def create_asyncio_task(self, coro):
+        """
+        Safely create an asyncio task. The application will not quit until the
+        task completes. For potentially longer running tasks, you should add
+        cancellation logic to abort a task when it is not needed anymore (e.g.
+        cancelling it from the Gtk.Window.do_unmap event).
+
+        Note that python will only log a raised exception if the Task is
+        destroyed without the result having been collected. However, this does
+        also not happen when the task is cancelled. As such, be careful to not
+        cancel tasks that are already finished.
+
+        You can deal with this by either only storing a weak reference to the
+        Task, by explicitly collecting the result, or by only cancelling it if
+        it is not done already.
+        """
+        # First create the task (in case it raises an exception)
+        task = asyncio.create_task(coro)
+
+        self.hold()
+
+        # Store a reference to the task so that it cannot be garbage collected
+        self._asyncio_tasks.add(task)
+
+        def done_cb(task):
+            nonlocal self
+            self._asyncio_tasks.discard(task)
+            self.release()
+
+        task.add_done_callback(done_cb)
+        return task
 
 
 Application = override(Application)
