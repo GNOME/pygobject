@@ -347,49 +347,50 @@ static PyAsyncMethods async_async_methods = {
 static void
 async_finalize(PyGIAsync *self)
 {
-    PyObject *error_type, *error_value, *error_traceback;
-    PyObject *context = NULL;
-    PyObject *message = NULL;
-    PyObject *call_exception_handler = NULL;
-    PyObject *res = NULL;
+    if (self->log_tb) {
+        PyObject *error_type, *error_value, *error_traceback;
+        PyObject *context = NULL;
+        PyObject *message = NULL;
+        PyObject *call_exception_handler = NULL;
+        PyObject *res = NULL;
 
-    if (!self->log_tb)
-        return;
+        assert(self->exception != NULL);
+        self->log_tb = 0;
 
-    assert(self->exception != NULL);
-    self->log_tb = 0;
+        /* Save the current exception, if any. */
+        PyErr_Fetch(&error_type, &error_value, &error_traceback);
 
-    /* Save the current exception, if any. */
-    PyErr_Fetch(&error_type, &error_value, &error_traceback);
+        context = PyDict_New();
+        if (!context)
+            goto finally;
 
-    context = PyDict_New();
-    if (context == NULL) {
-        goto finally;
-    }
+        message = PyUnicode_FromFormat(
+            "%s exception was never retrieved", Py_TYPE(self)->tp_name);
+        if (!message)
+            goto finally;
 
-    message = PyUnicode_FromFormat(
-        "%s exception was never retrieved", Py_TYPE(self)->tp_name);
-    if (message == NULL)
-        goto finally;
+        if (PyDict_SetItemString(context, "message", message) < 0 ||
+            PyDict_SetItemString(context, "exception", self->exception) < 0 ||
+            PyDict_SetItemString(context, "future", (PyObject*) self) < 0)
+            goto finally;
 
-    if (PyDict_SetItemString(context, "message", message) < 0 ||
-        PyDict_SetItemString(context, "exception", self->exception) < 0 ||
-        PyDict_SetItemString(context, "future", (PyObject*) self) < 0)
-        goto finally;
+        call_exception_handler = PyObject_GetAttrString(self->loop, "call_exception_handler");
+        if (!call_exception_handler)
+            goto finally;
 
-    call_exception_handler = PyObject_GetAttrString(self->loop, "call_exception_handler");
-    if (!call_exception_handler)
-        goto finally;
-
-    res = PyObject_CallFunction(call_exception_handler, "(O)", context);
-    if (res == NULL)
-        PyErr_WriteUnraisable(context);
+        res = PyObject_CallFunction(call_exception_handler, "(O)", context);
+        if (res == NULL)
+            PyErr_WriteUnraisable(context);
 
 finally:
-    Py_CLEAR (res);
-    Py_CLEAR (context);
-    Py_CLEAR (message);
-    Py_CLEAR (call_exception_handler);
+        Py_CLEAR (res);
+        Py_CLEAR (context);
+        Py_CLEAR (message);
+        Py_CLEAR (call_exception_handler);
+
+        /* Restore the saved exception. */
+        PyErr_Restore(error_type, error_value, error_traceback);
+    }
 
     Py_CLEAR(self->loop);
     Py_CLEAR(self->finish_func);
@@ -403,9 +404,6 @@ finally:
     /* Precation, cannot happen */
     if (self->callbacks)
         g_array_free (self->callbacks, TRUE);
-
-    /* Restore the saved exception. */
-    PyErr_Restore(error_type, error_value, error_traceback);
 }
 
 static void
