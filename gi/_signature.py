@@ -63,10 +63,8 @@ list_tag_types = {TypeTag.GLIST, TypeTag.GSLIST, TypeTag.ARRAY}
 
 def get_pytype(gi_type: TypeInfo) -> object:
     tag = gi_type.get_tag()
-    try:
-        return tag_pytype[tag]
-    except KeyError:
-        pass
+    if pytype := tag_pytype.get(tag):
+        return pytype
     if tag == TypeTag.VOID:
         if gi_type.is_pointer():
             return Any
