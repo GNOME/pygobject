@@ -39,6 +39,34 @@ except AttributeError:
     g_main_loop_run = GLib.MainLoop.run
 
 
+class _IdleSource(GLib.Source):
+    """"Internal helper source for idle task handling
+
+    The only advantage is that we can keep the source around."""
+    def __init__(self, loop):
+        super().__init__()
+
+        self._loop = loop
+        # _may_iterate will be False anyway, but might as well set it
+        self.set_can_recurse(False)
+
+    def prepare(self):
+        if not self._loop._may_iterate:
+            return False, -1
+
+        return bool(self._loop._idle_tasks), -1
+
+    def check(self):
+        if not self._loop._may_iterate:
+            return False
+
+        return bool(self._loop._idle_tasks)
+
+    def dispatch(self, callback, args):
+        self._loop._glib_idle_dispatch()
+        return GLib.SOURCE_CONTINUE
+
+
 class _GLibEventLoopMixin:
     """
     Base functionally required for both proactor and selector.
@@ -62,6 +90,8 @@ class _GLibEventLoopMixin:
         self._context = main_context
         self._main_loop = GLib.MainLoop.new(self._context, False)
         self._quit_funcs = []
+        self._idle_tasks = []
+        self._may_iterate = False
 
     @contextmanager
     def paused(self):
@@ -70,14 +100,16 @@ class _GLibEventLoopMixin:
         It purely exist to handle the case where python code iterates the main
         context more gracefully."""
         # Nothing to do if we are not running or dispatched by ourselves
-        if not self.is_running() or self._selector._source._dispatching:
+        if not self._may_iterate:
             yield
             return
 
         try:
+            self._may_iterate = False
             self._selector.detach()
             yield
         finally:
+            self._may_iterate = True
             self._selector.attach()
 
     @contextmanager
@@ -113,9 +145,18 @@ class _GLibEventLoopMixin:
         try:
             asyncio._set_running_loop(self)
             assert not self._selector._source._dispatching
+            self._may_iterate = True
             self._selector.attach()
+            self._idle_source = _IdleSource(self)
+            self._idle_source.attach(self._context)
+            self._idle_source.set_name("GLibEventLoop._idle_source")
+            if self._idle_tasks:
+                self._idle_source.set_priority(self._idle_tasks[0][0])
             yield
         finally:
+            self._may_iterate = False
+            self._idle_source.destroy()
+            self._idle_source = None
             self._selector.detach()
             self._context.release()
             self._thread_id = None
@@ -148,6 +189,57 @@ class _GLibEventLoopMixin:
             return timeout if timeout >= 0 else 0
 
         return -1
+
+    def _call_soon(self, callback, args, context):
+        try:
+            # Try to access the corresponding Task (or whatever) through the
+            # self parameter of the bound method.
+            # If _glib_idle_priority does not exist or it is not a bound method
+            # then we'll just catch the AttributeError exception.
+            priority = callback.__self__._glib_idle_priority
+        except AttributeError:
+            priority = GLib.PRIORITY_DEFAULT
+
+        if priority == GLib.PRIORITY_DEFAULT:
+            # Just use the underlying python dispatch.
+            return super()._call_soon(callback, args, context)
+
+        handle = asyncio.Handle(callback, args, self, context)
+        self._idle_tasks.append((priority, handle))
+        self._idle_tasks.sort(key=lambda x: x[0])
+
+        # Update priority
+        self._idle_source.set_priority(self._idle_tasks[0][0])
+
+        return handle
+
+    def _glib_dispatch(self):
+        assert self._may_iterate
+
+        # The idle source disables itself and we are in the other which will not recurse
+        self._may_iterate = False
+        self._run_once()
+        self._may_iterate = True
+
+    def _glib_idle_dispatch(self):
+        assert self._may_iterate
+
+        # Pause so that the main Source is not going to dispatch
+        # Note that this is pretty expensive, we could optimize it by detecting
+        # it when it happens and only doing the detach/attach dance if needed.
+        with self.paused():
+            priority = self._idle_source.get_priority()
+
+            ready_handles = []
+            while self._idle_tasks and self._idle_tasks[0][0] == priority:
+                ready_handles.append(self._idle_tasks.pop(0)[1])
+
+            for handle in ready_handles:
+                handle._run()
+
+            # There are (new) tasks available to run, ensure the priority is correct
+            if self._idle_tasks:
+                self._idle_source.set_priority(self._idle_tasks[0][0])
 
     def stop(self):
         # Simply quit the mainloop
@@ -204,7 +296,7 @@ class _SourceBase(GLib.Source):
         # Now, wag the dog by its tail
         self._dispatching = True
         try:
-            self._loop()._run_once()
+            self._loop()._glib_dispatch()
         finally:
             self._dispatching = False
 

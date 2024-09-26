@@ -262,3 +262,40 @@ class GLibEventLoopPolicyTests(unittest.TestCase):
         GLib.MainLoop().run()
 
         loop.close()
+
+    def test_glib_task_prio(self):
+        """Check that we can set a task priority."""
+        policy = self.create_policy()
+        loop = policy.new_event_loop()
+
+        order = []
+
+        async def run_prio(priority):
+            # Note that asyncio.sleep(0) is a special case that not sleep
+            nonlocal order
+            await asyncio.sleep(0)
+            order.append(priority)
+            await asyncio.sleep(0)
+            order.append(priority)
+            await asyncio.sleep(0)
+            order.append(priority)
+
+        async def run():
+            t1 = asyncio.create_task(run_prio(GLib.PRIORITY_DEFAULT_IDLE))
+            t1._glib_idle_priority = GLib.PRIORITY_DEFAULT_IDLE
+            t2 = asyncio.create_task(run_prio(GLib.PRIORITY_DEFAULT))
+            t2._glib_idle_priority = GLib.PRIORITY_DEFAULT
+            t3 = asyncio.create_task(run_prio(GLib.PRIORITY_HIGH))
+            t3._glib_idle_priority = GLib.PRIORITY_HIGH
+
+            pending = (t1, t2, t3)
+            while pending:
+                _, pending = await asyncio.wait(pending)
+
+        loop.run_until_complete(run())
+        loop.close()
+
+        # Check that the order was correct
+        self.assertEqual(order, [GLib.PRIORITY_HIGH] * 3 +
+                                [GLib.PRIORITY_DEFAULT] * 3 +
+                                [GLib.PRIORITY_DEFAULT_IDLE] * 3)
