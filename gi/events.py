@@ -67,6 +67,33 @@ class _IdleSource(GLib.Source):
         return GLib.SOURCE_CONTINUE
 
 
+class GLibTask(asyncio.Task):
+    """
+    This is a simple asyncio.Task subclass that will be returned when using the
+    GLibEventLoop. It adds functionality to set the priority that is used to
+    iterate the task's coroutine.
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self._glib_idle_priority = GLib.PRIORITY_DEFAULT
+
+    def set_priority(self, priority):
+        """Set the GLib priority used to iterate the task's coroutine"""
+        assert isinstance(priority, int)
+
+        self._glib_idle_priority = priority
+
+    def get_priority(self, priority):
+        """Get the GLib priority used to iterate the task's coroutine"""
+        return self._glib_idle_priority
+
+    @classmethod
+    def _factory(cls, loop, coro, **kwargs):
+        return GLibTask(coro, loop=loop, **kwargs)
+
+
 class _GLibEventLoopMixin:
     """
     Base functionally required for both proactor and selector.
@@ -370,6 +397,9 @@ if sys.platform != 'win32':
             # Used by run_once to not busy loop if the timeout is floor'ed to zero
             self._clock_resolution = 1e-3
 
+            # Use our custom Task subclass
+            self._task_factory = GLibTask._factory
+
         def add_signal_handler(self, sig, callback, *args):
             """Add a handler for UNIX signal"""
 
@@ -560,6 +590,9 @@ else:
 
             # Used by run_once to not busy loop if the timeout is floor'ed to zero
             self._clock_resolution = 1e-3
+
+            # Use our custom Task subclass
+            self._task_factory = GLibTask._factory
 
     class _Source(_SourceBase):
         def __init__(self, proactor):

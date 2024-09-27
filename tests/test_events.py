@@ -282,11 +282,11 @@ class GLibEventLoopPolicyTests(unittest.TestCase):
 
         async def run():
             t1 = asyncio.create_task(run_prio(GLib.PRIORITY_DEFAULT_IDLE))
-            t1._glib_idle_priority = GLib.PRIORITY_DEFAULT_IDLE
+            t1.set_priority(GLib.PRIORITY_DEFAULT_IDLE)
             t2 = asyncio.create_task(run_prio(GLib.PRIORITY_DEFAULT))
-            t2._glib_idle_priority = GLib.PRIORITY_DEFAULT
+            t2.set_priority(GLib.PRIORITY_DEFAULT)
             t3 = asyncio.create_task(run_prio(GLib.PRIORITY_HIGH))
-            t3._glib_idle_priority = GLib.PRIORITY_HIGH
+            t3.set_priority(GLib.PRIORITY_HIGH)
 
             pending = (t1, t2, t3)
             while pending:
