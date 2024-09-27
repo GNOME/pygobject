@@ -674,6 +674,8 @@ class GLibEventLoopPolicy(asyncio.AbstractEventLoopPolicy):
         self._loops = {}
         self._child_watcher = None
 
+        self.__orig_policy = None
+
     def get_event_loop(self):
         """Get the event loop for the current context.
 
@@ -754,6 +756,24 @@ class GLibEventLoopPolicy(asyncio.AbstractEventLoopPolicy):
         GLib.MainContext."""
 
         return GLibEventLoop(GLib.MainContext())
+
+    def __enter__(self):
+        self.__orig_policy = asyncio.get_event_loop_policy()
+        asyncio.set_event_loop_policy(self)
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        # We shouldn't have any running loops at this point, and the ones that
+        # got created should be closed eventually.
+        # Explicitly close all loops here, it is not reasonable for them to be
+        # used after we unregister the EventLoopPolicy below.
+        for loop in self._loops.values():
+            loop.close()
+
+        asyncio.set_event_loop_policy(self.__orig_policy)
+
+        # Do not supress any exceptions
+        return False
 
     # NOTE: We do *not* provide a GLib based ChildWatcher implementation!
     # This is *intentional* and *required*. The issue is that python provides

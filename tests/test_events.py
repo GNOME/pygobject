@@ -104,9 +104,6 @@ class GLibEventLoopPolicyTests(unittest.TestCase):
             policy.set_event_loop(loop)
 
     def test_application(self):
-        policy = self.create_policy()
-        asyncio.set_event_loop_policy(policy)
-
         task_completed = False
 
         async def task():
@@ -121,7 +118,8 @@ class GLibEventLoopPolicyTests(unittest.TestCase):
 
         app = Gio.Application()
         app.connect("activate", activate)
-        app.run()
+        with self.create_policy():
+            app.run()
 
         self.assertTrue(task_completed)
 
