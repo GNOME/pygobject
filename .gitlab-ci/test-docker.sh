@@ -38,13 +38,13 @@ python -m pip install flake8 meson meson-python pycairo pytest pytest-cov
 python -m flake8
 
 # BUILD & TEST
-python -m pip install --config-settings=setup-args="-Dtests=true" --no-build-isolation --editable '.[dev]'
+python -m pip install --config-settings=setup-args="-Dtests=true" --no-build-isolation --editable .
 
 # TEST
 lcov --config-file .gitlab-ci/lcovrc --directory . --capture --initial --output-file \
     "${COV_DIR}/${CI_JOB_NAME}-baseline.lcov"
 
-xvfb-run -a python -m pytest -v --cov
+xvfb-run -a python -m pytest -vs --cov
 python -m coverage lcov -o "${COV_DIR}/${COV_KEY}.py.lcov"
 
 # COLLECT GCOV COVERAGE
