@@ -94,6 +94,7 @@ Who Is Using PyGObject?
 * `BleachBit <https://www.bleachbit.org/>`__ - delete unnecessary files from the system
 * `Bottles <https://usebottles.com/>`__ - run Windows software on Linux
 * `Cambalache <https://gitlab.gnome.org/jpu/cambalache>`__ - a user interface maker for GTK
+* `Cozy <https://github.com/geigi/cozy>`__ - the audiobook app for Linux
 * `D-Feet <https://wiki.gnome.org/action/show/Apps/DFeet>`__ - an easy to use D-Bus debugger
 * `Deluge <https://deluge-torrent.org/>`__ - a BitTorrent client
 * `Dialect <https://apps.gnome.org/Dialect/>`__ - a translation app
