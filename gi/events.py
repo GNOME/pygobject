@@ -601,7 +601,6 @@ else:
 
     class _Source(_SourceBase):
         def __init__(self, proactor):
-            self._proactor = proactor
             super().__init__(proactor)
 
             # None denotes it is disabled (and will also not handle timeouts)
@@ -610,7 +609,7 @@ else:
         def enable(self):
             assert self._poll_fd is None
 
-            self._poll_fd = GLib.PollFD(self._proactor._iocp, GLib.IO_IN)
+            self._poll_fd = GLib.PollFD(self._selector()._iocp, GLib.IO_IN)
             self.add_poll(self._poll_fd)
 
         def disable(self):
@@ -631,7 +630,7 @@ else:
                 return False
 
             if self._poll_fd.revents:
-                self._ready.extend(self._proactor._real_select(0))
+                self._ready.extend(self._selector()._real_select(0))
 
             if self._ready:
                 return True
