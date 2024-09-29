@@ -310,14 +310,19 @@ class _SourceBase(GLib.Source):
         self.set_can_recurse(False)
         self.set_name('python asyncio integration')
 
-        self._selector = selector
-        # NOTE: Avoid loop -> selector -> source -> loop reference cycle,
-        # we need the source to be destroyed *after* the selector. Otherwise
-        # we need a flag to deal with FDs being unregistered after __del__ has
-        # been called on the source.
-        self._loop = weakref.ref(selector._loop)
+        # WARNING: We must not under *any* circumstance have a reference back
+        # and creating a loop. The GLib.Source.__del__ handler sets the pointer
+        # to NULL and the BaseEventLoop.__del__ tries to close the loop causing
+        # FDs to be unregistered.
+        # By making sure there are no references back we (hopefully) force the
+        # GC to be well behaved and first clean up the eventloop and selector
+        # before destroying the source.
+        self._selector = weakref.ref(selector)
 
         self._ready = []
+
+    def _loop(self):
+        return self._selector()._loop
 
     def dispatch(self, callback, args):
         # Now, wag the dog by its tail
@@ -481,7 +486,7 @@ if sys.platform != 'win32':
         def check(self):
             ready = []
 
-            for key in self._selector._fd_to_key.values():
+            for key in self._selector()._fd_to_key.values():
                 condition = self.query_unix_fd(key._tag)
                 events = 0
                 # ERR/HUP/NVAL trigger both read/write (PRI cannot happen)

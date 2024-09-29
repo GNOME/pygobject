@@ -1,4 +1,5 @@
 import sys
+import pytest
 import unittest
 
 try:
@@ -122,6 +123,30 @@ class GLibEventLoopPolicyTests(unittest.TestCase):
             app.run()
 
         self.assertTrue(task_completed)
+
+    def test_implicit_close(self):
+        """Verify that implicitly closing the EventLoop (from __del__) works."""
+        task_completed = False
+
+        async def task():
+            nonlocal task_completed
+            await asyncio.sleep(1)
+            task_completed = True
+
+        policy = self.create_policy()
+        loop = policy.new_event_loop()
+
+        loop.run_until_complete(task())
+
+        self.assertTrue(task_completed)
+
+        with pytest.warns(ResourceWarning, match='unclosed event loop'):
+            del loop
+
+            # For some reason, PyPy needs two collect() steps
+            import gc
+            gc.collect()
+            gc.collect()
 
     def test_nested_context_iteration(self):
         policy = self.create_policy()
