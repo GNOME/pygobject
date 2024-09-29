@@ -616,11 +616,12 @@ int pygi_async_register_types(PyObject *module) {
 
 #if defined(PYPY_VERSION)
     contextvars = PyImport_ImportModule("contextvars");
-    if (asyncio == NULL) {
+    if (contextvars == NULL) {
         goto fail;
     }
 
     contextvars_copy_context = PyObject_GetAttrString(contextvars, "copy_context");
+    Py_CLEAR(contextvars);
     if (contextvars_copy_context == NULL)
         goto fail;
 #endif
