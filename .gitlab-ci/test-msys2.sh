@@ -33,6 +33,9 @@ COV_KEY="${CI_JOB_NAME}"
 mkdir -p "${COV_DIR}"
 export COVERAGE_FILE="${COV_DIR}/.coverage.${COV_KEY}"
 
+# Test results
+JUNIT_XML="test-results.xml"
+
 # https://docs.python.org/3/using/cmdline.html#envvar-PYTHONDEVMODE
 export PYTHONDEVMODE=1
 
@@ -44,7 +47,7 @@ lcov \
     --directory "$(pwd)" --capture --initial --output-file \
     "${COV_DIR}/${COV_KEY}-baseline.lcov"
 
-MSYSTEM= PYTEST_ADDOPTS="--cov" meson test --suite pygobject --timeout-multiplier 4 -C _build -v
+MSYSTEM= PYTEST_ADDOPTS="--cov --junit-xml=${JUNIT_XML}" meson test --suite pygobject --timeout-multiplier 4 -C _build -v
 MSYSTEM= python -m coverage lcov -o "${COV_DIR}/${COV_KEY}.py.lcov"
 
 lcov \

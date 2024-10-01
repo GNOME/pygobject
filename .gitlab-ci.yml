@@ -12,8 +12,12 @@ cache:
 .defaults: &defaults
   stage: build_and_test
   artifacts:
+    when: always
     paths:
       - coverage/
+      - test-results.xml
+    reports:
+      junit: test-results.xml
   script:
    - bash -x ./.gitlab-ci/test-docker.sh
 
@@ -22,8 +26,12 @@ cache:
   tags:
     - win32-ps
   artifacts:
+    when: always
     paths:
       - coverage/
+      - test-results.xml
+    reports:
+      junit: test-results.xml
   script:
     - $env:CHERE_INVOKING = 'yes'
     - C:\msys64\usr\bin\pacman --noconfirm -Syyuu

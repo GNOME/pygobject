@@ -9,6 +9,7 @@ PYIMPL=$(python -c "import sys, platform; sys.stdout.write(platform.python_imple
 SOURCE_DIR="$(pwd)"
 COV_DIR="${SOURCE_DIR}/coverage"
 COV_KEY="${CI_JOB_NAME}"
+JUNIT_XML="${SOURCE_DIR}/test-results.xml"
 
 export CFLAGS="-coverage -ftest-coverage -fprofile-arcs -Werror"
 export MALLOC_CHECK_=3
@@ -44,7 +45,7 @@ python -m pip install --config-settings=setup-args="-Dtests=true" --no-build-iso
 lcov --config-file .gitlab-ci/lcovrc --directory . --capture --initial --output-file \
     "${COV_DIR}/${CI_JOB_NAME}-baseline.lcov"
 
-xvfb-run -a python -m pytest -vs --cov
+xvfb-run -a python -m pytest -vs --cov --junit-xml="${JUNIT_XML}"
 python -m coverage lcov -o "${COV_DIR}/${COV_KEY}.py.lcov"
 
 # COLLECT GCOV COVERAGE
