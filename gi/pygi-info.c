@@ -613,17 +613,8 @@ _function_info_call (PyGICallableInfo *self, PyObject *args, PyObject *kwargs)
  */
 static PyObject *
 _function_info_descr_get (PyGICallableInfo *self, PyObject *obj, PyObject *type) {
-    GIFunctionInfoFlags flags;
-
-    flags = g_function_info_get_flags ((GIFunctionInfo*) self->base.info);
-    if (flags & GI_FUNCTION_IS_CONSTRUCTOR) {
-        if (type == NULL)
-            type = (PyObject *)(Py_TYPE(obj));
-	return PyMethod_New((PyObject *)self, type);
-    } else if (flags & GI_FUNCTION_IS_METHOD) {
-	if (obj != NULL && obj != Py_None)
-	    return PyMethod_New((PyObject *)self, obj);
-    }
+    if (obj != NULL && obj != Py_None)
+	return PyMethod_New((PyObject *)self, obj);
 
     Py_INCREF(self);
     return (PyObject *)self;
@@ -2264,7 +2255,7 @@ pygi_info_register_types (PyObject *m)
 {
 #define _PyGI_REGISTER_TYPE(m, type, cname, base) \
     Py_SET_TYPE(&type, &PyType_Type); \
-    type.tp_flags = (Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE); \
+    type.tp_flags |= (Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE); \
     type.tp_weaklistoffset = offsetof(PyGIBaseInfo, inst_weakreflist); \
     type.tp_methods = _PyGI##cname##_methods; \
     type.tp_base = &base; \
@@ -2301,6 +2292,7 @@ pygi_info_register_types (PyObject *m)
     _PyGI_REGISTER_TYPE (m, PyGICallableInfo_Type, CallableInfo,
                          PyGIBaseInfo_Type);
 
+    PyGIFunctionInfo_Type.tp_flags |= Py_TPFLAGS_METHOD_DESCRIPTOR;
     PyGIFunctionInfo_Type.tp_call = (ternaryfunc) _function_info_call;
     PyGIFunctionInfo_Type.tp_descr_get = (descrgetfunc) _function_info_descr_get;
     _PyGI_REGISTER_TYPE (m, PyGIFunctionInfo_Type, FunctionInfo,

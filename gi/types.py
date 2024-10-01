@@ -49,7 +49,12 @@ def snake_case(name):
 class MetaClassHelper(object):
     def _setup_methods(cls):
         for method_info in cls.__info__.get_methods():
-            setattr(cls, method_info.__name__, method_info)
+            name = method_info.__name__
+            if method_info.is_constructor():
+                method_info = classmethod(method_info)
+            elif not method_info.is_method():
+                method_info = staticmethod(method_info)
+            setattr(cls, name, method_info)
 
     def _setup_class_methods(cls):
         info = cls.__info__
