@@ -20,6 +20,7 @@
 
 #include <config.h>
 
+#include "pythoncapi_compat.h"
 #include "pygobject-object.h"
 #include "pyginterface.h"
 #include "pygi-type.h"
@@ -213,7 +214,7 @@ static void
 pyg_props_iter_dealloc(PyGPropsIter *self)
 {
     g_free(self->props);
-    PyObject_Del((PyObject*) self);
+    PyObject_Free((PyObject*) self);
 }
 
 static PyObject*
@@ -426,7 +427,7 @@ pygobject_props_get_iter(PyGProps *self)
     PyGPropsIter *iter;
     GObjectClass *class;
 
-    iter = PyObject_NEW(PyGPropsIter, &PyGPropsIter_Type);
+    iter = PyObject_New(PyGPropsIter, &PyGPropsIter_Type);
     class = g_type_class_ref(self->gtype);
     iter->props = g_object_class_list_properties(class, &iter->n_props);
     iter->index = 0;
@@ -486,7 +487,7 @@ pyg_props_descr_descr_get(PyObject *self, PyObject *obj, PyObject *type)
     PyGProps *gprops;
 
     gprops = PyObject_GC_New(PyGProps, &PyGProps_Type);
-    if (obj == NULL || obj == Py_None) {
+    if (obj == NULL || Py_IsNone(obj)) {
         gprops->pygobject = NULL;
         gprops->gtype = pyg_type_from_object(type);
     } else {
@@ -1550,7 +1551,7 @@ pygbinding_marshal (GClosure     *closure,
     if (!ret) {
         PyErr_Print ();
         goto out;
-    } else if (ret == Py_None) {
+    } else if (Py_IsNone(ret)) {
         g_value_set_boolean (return_value, FALSE);
         goto out;
     }
@@ -1582,7 +1583,7 @@ pygbinding_closure_new (PyObject *callback, PyObject *extra_args)
     g_closure_set_marshal(closure, pygbinding_marshal);
     Py_INCREF(callback);
     ((PyGClosure *)closure)->callback = callback;
-    if (extra_args && extra_args != Py_None) {
+    if (extra_args && !Py_IsNone(extra_args)) {
         Py_INCREF(extra_args);
         if (!PyTuple_Check(extra_args)) {
             PyObject *tmp = PyTuple_New(1);
@@ -1630,7 +1631,7 @@ pygobject_bind_property(PyGObject *self, PyObject *args, PyObject *kwargs)
 		return NULL;
 	}
 
-	if (transform_to && transform_to != Py_None) {
+	if (transform_to && !Py_IsNone(transform_to)) {
 		if (!PyCallable_Check (transform_to)) {
 			PyErr_SetString (PyExc_TypeError,
 					 "transform_to must be callable or None");
@@ -1639,7 +1640,7 @@ pygobject_bind_property(PyGObject *self, PyObject *args, PyObject *kwargs)
 		to_closure = pygbinding_closure_new (transform_to, user_data);
 	}
 
-	if (transform_from && transform_from != Py_None) {
+	if (transform_from && !Py_IsNone(transform_from)) {
 		if (!PyCallable_Check (transform_from)) {
 			PyErr_SetString (PyExc_TypeError,
 					 "transform_from must be callable or None");
@@ -2290,7 +2291,7 @@ pygobject_weak_ref_notify(PyGObjectWeakRef *self, GObject *dummy)
         PyGILState_STATE state = PyGILState_Ensure();
         retval = PyObject_Call(self->callback, self->user_data, NULL);
         if (retval) {
-            if (retval != Py_None)
+            if (!Py_IsNone(retval))
                 PyErr_Format(PyExc_TypeError,
                              "GObject weak notify callback returned a value"
                              " of type %s, should return None",

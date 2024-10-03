@@ -18,8 +18,7 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <Python.h>
-
+#include "pythoncapi_compat.h"
 #include "pygi-type.h"
 #include "pygi-basictype.h"
 #include "pygi-argument.h"
@@ -44,7 +43,7 @@ pygi_gpointer_from_py (PyObject *py_arg, gpointer *result)
 {
     void* temp;
 
-    if (py_arg == Py_None) {
+    if (Py_IsNone(py_arg)) {
         *result = NULL;
         return TRUE;
     } else if (PyCapsule_CheckExact (py_arg)) {
@@ -184,7 +183,7 @@ pygi_gunichar_from_py (PyObject *py_arg, gunichar *result)
     Py_ssize_t size;
     gchar *string_;
 
-    if (py_arg == Py_None) {
+    if (Py_IsNone(py_arg)) {
         *result = 0;
         return FALSE;
     }
@@ -267,7 +266,7 @@ pygi_utf8_from_py (PyObject *py_arg, gchar **result)
 {
     gchar *string_;
 
-    if (py_arg == Py_None) {
+    if (Py_IsNone(py_arg)) {
         *result = NULL;
         return TRUE;
     }
@@ -296,7 +295,7 @@ filename_from_py_unix (PyObject *py_arg, gchar **result)
 {
     gchar *filename;
 
-    if (py_arg == Py_None) {
+    if (Py_IsNone(py_arg)) {
         *result = NULL;
         return TRUE;
     }
@@ -340,7 +339,7 @@ filename_from_py_win32 (PyObject *py_arg, gchar **result)
 {
     gchar *filename;
 
-    if (py_arg == Py_None) {
+    if (Py_IsNone(py_arg)) {
         *result = NULL;
         return TRUE;
     }

@@ -18,7 +18,7 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <Python.h>
+#include "pythoncapi_compat.h"
 #include "pygi-list.h"
 #include "pygi-argument.h"
 #include "pygi-util.h"
@@ -43,7 +43,7 @@ _pygi_marshal_from_py_glist (PyGIInvokeState   *state,
     PyGISequenceCache *sequence_cache = (PyGISequenceCache *)arg_cache;
 
 
-    if (py_arg == Py_None) {
+    if (Py_IsNone(py_arg)) {
         arg->v_pointer = NULL;
         return TRUE;
     }
@@ -120,7 +120,7 @@ _pygi_marshal_from_py_gslist (PyGIInvokeState   *state,
     GSList *list_ = NULL;
     PyGISequenceCache *sequence_cache = (PyGISequenceCache *)arg_cache;
 
-    if (py_arg == Py_None) {
+    if (Py_IsNone(py_arg)) {
         arg->v_pointer = NULL;
         return TRUE;
     }

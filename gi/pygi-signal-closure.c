@@ -16,6 +16,7 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "pythoncapi_compat.h"
 #include "pygi-signal-closure.h"
 #include "pygi-value.h"
 #include "pygi-argument.h"
@@ -264,7 +265,7 @@ pygi_signal_closure_new (PyGObject *instance,
     Py_INCREF(callback);
     pygi_closure->pyg_closure.callback = callback;
 
-    if (extra_args != NULL && extra_args != Py_None) {
+    if (extra_args != NULL && !Py_IsNone(extra_args)) {
         Py_INCREF(extra_args);
         if (!PyTuple_Check(extra_args)) {
             PyObject *tmp = PyTuple_New(1);
