@@ -1,7 +1,9 @@
-#include "pythoncapi_compat.h"
-#include "pygobject.h"
+#include <string.h>
+#include <glib-object.h>
 #include <gobject/gmarshal.h>
 
+#include "pythoncapi_compat.h"
+#include "pygobject.h"
 #include "test-thread.h"
 #include "test-unknown.h"
 #include "test-floating.h"
@@ -104,8 +106,7 @@ _wrap_test_interface_iface_method(PyGObject *self, PyObject *args, PyObject *kwa
     
     test_interface_iface_method(TEST_INTERFACE(self->obj));
     
-    Py_INCREF(Py_None);
-    return Py_None;
+    return Py_NewRef(Py_None);
 }
 
 static const PyMethodDef _PyTestInterface_methods[] = {
@@ -138,8 +139,7 @@ _wrap_TestInterface__do_iface_method(PyObject *cls, PyObject *args, PyObject *kw
 		    "interface method TestInterface.iface_method not implemented");
     return NULL;
   }
-  Py_INCREF(Py_None);
-  return Py_None;
+  return Py_NewRef(Py_None);
 }
 
 PYGI_DEFINE_TYPE("testhelper.Unknown", PyTestUnknown_Type, PyGObject);
@@ -259,10 +259,6 @@ static const PyMethodDef _PyTestFloatingAndSunk_methods[] = {
     { "release", (PyCFunction)_wrap_test_floating_and_sunk_release, METH_NOARGS, NULL },
     { NULL, NULL, 0, NULL }
 };
-
-
-#include <string.h>
-#include <glib-object.h>
 
 static void
 test1_callback (GObject *object, char *data)
@@ -490,8 +486,7 @@ _wrap_connectcallbacks(PyObject * self, PyObject *args)
 
     connectcallbacks (G_OBJECT (obj->obj));
 
-    Py_INCREF(Py_None);
-    return Py_None;
+    return Py_NewRef(Py_None);
 }
 
 static PyObject *
@@ -615,8 +610,7 @@ _wrap_test_gerror_exception(PyObject *self, PyObject *args)
     Py_DECREF(py_args);
     Py_DECREF(py_ret);
 
-    Py_INCREF(Py_None);
-    return Py_None;
+    return Py_NewRef(Py_None);
 }
 
 static PyObject *

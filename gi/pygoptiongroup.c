@@ -1,3 +1,5 @@
+#include "pythoncapi_compat.h"
+
 /* -*- Mode: C; c-basic-offset: 4 -*-
  * pygobject - Python bindings for the GLib, GObject and GIO
  * Copyright (C) 2006  Johannes Hoelzl
@@ -102,8 +104,7 @@ pyg_option_group_init(PyGOptionGroup *self, PyObject *args, PyObject *kwargs)
     self->other_owner = FALSE;
     self->is_in_context = FALSE;
 
-    Py_INCREF(callback);
-    self->callback = callback;
+    self->callback = Py_NewRef(callback);
 
     return 0;
 }
@@ -229,8 +230,7 @@ pyg_option_group_add_entries(PyGOptionGroup *self, PyObject *args,
 
     g_free(entries);
 
-    Py_INCREF(Py_None);
-    return Py_None;
+    return Py_NewRef(Py_None);
 }
 
 
@@ -260,8 +260,7 @@ pyg_option_group_set_translation_domain(PyGOptionGroup *self,
 
     g_option_group_set_translation_domain(self->group, domain);
 
-    Py_INCREF(Py_None);
-    return Py_None;
+    return Py_NewRef(Py_None);
 }
 
 static PyObject*
@@ -273,8 +272,7 @@ pyg_option_group_richcompare(PyObject *self, PyObject *other, int op)
                                    ((PyGOptionGroup*)other)->group,
                                    op);
     } else {
-        Py_INCREF(Py_NotImplemented);
-        return Py_NotImplemented;
+        return Py_NewRef(Py_NotImplemented);
     }
 }
 

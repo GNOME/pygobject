@@ -20,9 +20,9 @@
 
 #include <config.h>
 
-#include <Python.h>
 #include <glib-object.h>
 
+#include "pythoncapi_compat.h"
 #include "pygboxed.h"
 #include "pygi-type.h"
 #include "pygi-type.h"
@@ -53,8 +53,7 @@ gboxed_richcompare(PyObject *self, PyObject *other, int op)
                                     pyg_boxed_get_ptr (other),
                                     op);
     else {
-        Py_INCREF(Py_NotImplemented);
-        return Py_NotImplemented;
+        return Py_NewRef(Py_NotImplemented);
     }
 }
 

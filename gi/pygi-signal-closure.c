@@ -262,8 +262,7 @@ pygi_signal_closure_new (PyGObject *instance,
     pygi_closure = (PyGISignalClosure *)closure;
 
     pygi_closure->signal_info = signal_info;
-    Py_INCREF(callback);
-    pygi_closure->pyg_closure.callback = callback;
+    pygi_closure->pyg_closure.callback = Py_NewRef(callback);
 
     if (extra_args != NULL && !Py_IsNone(extra_args)) {
         Py_INCREF(extra_args);
@@ -275,8 +274,7 @@ pygi_signal_closure_new (PyGObject *instance,
         pygi_closure->pyg_closure.extra_args = extra_args;
     }
     if (swap_data) {
-        Py_INCREF(swap_data);
-        pygi_closure->pyg_closure.swap_data = swap_data;
+        pygi_closure->pyg_closure.swap_data = Py_NewRef(swap_data);
         closure->derivative_flag = TRUE;
     }
 
