@@ -53,7 +53,7 @@ pyg_enum_richcompare(PyGEnum *self, PyObject *other, int op)
     static char warning[256];
 
     if (!PyLong_Check (other)) {
-	return Py_NewRef(Py_NotImplemented);
+	Py_RETURN_NOTIMPLEMENTED;
     }
 
     if (PyObject_TypeCheck(other, &PyGEnum_Type) && ((PyGEnum*)other)->gtype != self->gtype) {

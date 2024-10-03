@@ -167,7 +167,7 @@ pyg_type_wrapper_richcompare(PyObject *self, PyObject *other, int op)
                                         ((PyGTypeWrapper*)other)->type,
                                         op);
     else {
-        return Py_NewRef(Py_NotImplemented);
+        Py_RETURN_NOTIMPLEMENTED;
     }
 }
 
