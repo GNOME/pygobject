@@ -53,7 +53,7 @@ gboxed_richcompare(PyObject *self, PyObject *other, int op)
                                     pyg_boxed_get_ptr (other),
                                     op);
     else {
-        return Py_NewRef(Py_NotImplemented);
+        Py_RETURN_NOTIMPLEMENTED;
     }
 }
 

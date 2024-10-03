@@ -2237,7 +2237,7 @@ pyg__install_metaclass(PyObject *dummy, PyTypeObject *metaclass)
     PyGObject_MetaType = (PyTypeObject *) Py_NewRef(metaclass);
     Py_SET_TYPE(&PyGObject_Type, (PyTypeObject *) Py_NewRef(metaclass));
 
-    return Py_NewRef(Py_None);
+    Py_RETURN_NONE;
 }
 
 static PyObject *
