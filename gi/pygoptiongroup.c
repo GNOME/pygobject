@@ -230,7 +230,7 @@ pyg_option_group_add_entries(PyGOptionGroup *self, PyObject *args,
 
     g_free(entries);
 
-    return Py_NewRef(Py_None);
+    Py_RETURN_NONE;
 }
 
 
@@ -260,7 +260,7 @@ pyg_option_group_set_translation_domain(PyGOptionGroup *self,
 
     g_option_group_set_translation_domain(self->group, domain);
 
-    return Py_NewRef(Py_None);
+    Py_RETURN_NONE;
 }
 
 static PyObject*
@@ -272,7 +272,7 @@ pyg_option_group_richcompare(PyObject *self, PyObject *other, int op)
                                    ((PyGOptionGroup*)other)->group,
                                    op);
     } else {
-        return Py_NewRef(Py_NotImplemented);
+        Py_RETURN_NOTIMPLEMENTED;
     }
 }
 

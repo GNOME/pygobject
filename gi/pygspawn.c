@@ -57,7 +57,7 @@ pyg_pid_close(PyObject *self, PyObject *args, PyObject *kwargs)
     gpid->unclosed = 0;
 #endif
 
-    return Py_NewRef(Py_None);
+    Py_RETURN_NONE;
 }
 
 static PyMethodDef pyg_pid_methods[] = {

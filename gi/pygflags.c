@@ -53,7 +53,7 @@ pyg_flags_richcompare(PyGFlags *self, PyObject *other, int op)
     static char warning[256];
 
     if (!PyLong_Check (other)) {
-        return Py_NewRef(Py_NotImplemented);
+        Py_RETURN_NOTIMPLEMENTED;
     }
 
     if (PyObject_TypeCheck(other, &PyGFlags_Type) && ((PyGFlags*)other)->gtype != self->gtype) {
@@ -372,7 +372,7 @@ pyg_flags_warn (PyObject *self, PyObject *args)
     if (PyErr_Warn(PyExc_Warning, "unsupported arithmetic operation for flags type"))
 	return NULL;
 
-    return Py_NewRef(Py_None);
+    Py_RETURN_NONE;
 }
 
 static PyObject *

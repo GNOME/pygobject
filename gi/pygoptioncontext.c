@@ -205,7 +205,7 @@ pyg_option_context_set_help_enabled(PyGOptionContext *self,
 
     g_option_context_set_help_enabled(self->context, PyObject_IsTrue(help_enabled));
 
-    return Py_NewRef(Py_None);
+    Py_RETURN_NONE;
 }
 
 static PyObject *
@@ -231,7 +231,7 @@ pyg_option_context_set_ignore_unknown_options(PyGOptionContext *self,
 						PyObject_IsTrue(ignore_unknown_options));
     
 
-    return Py_NewRef(Py_None);
+    Py_RETURN_NONE;
 }
 
 static PyObject *
@@ -273,7 +273,7 @@ pyg_option_context_set_main_group(PyGOptionContext *self,
 
     self->main_group = (PyGOptionGroup *) Py_NewRef(group);
 
-    return Py_NewRef(Py_None);
+    Py_RETURN_NONE;
 }
 
 static PyObject *
@@ -281,7 +281,7 @@ pyg_option_context_get_main_group(PyGOptionContext *self)
 {
     if (self->main_group == NULL)
     {
-        return Py_NewRef(Py_None);
+        Py_RETURN_NONE;
     }
     return Py_NewRef(self->main_group);
 }
@@ -317,7 +317,7 @@ pyg_option_context_add_group(PyGOptionContext *self,
 
     g_option_context_add_group(self->context, g_group);
 
-    return Py_NewRef(Py_None);
+    Py_RETURN_NONE;
 }
 
 static PyObject*
@@ -328,7 +328,7 @@ pyg_option_context_richcompare(PyObject *self, PyObject *other, int op)
                                    ((PyGOptionContext*)other)->context,
                                    op);
     else {
-       return Py_NewRef(Py_NotImplemented);
+       Py_RETURN_NOTIMPLEMENTED;
     }
 }
 

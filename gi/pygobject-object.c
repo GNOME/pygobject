@@ -1137,13 +1137,13 @@ pygobject_richcompare(PyObject *self, PyObject *other, int op)
     if (isinst == -1)
         return NULL;
     if (!isinst) {
-        return Py_NewRef(Py_NotImplemented);
+        Py_RETURN_NOTIMPLEMENTED;
     }
     isinst = PyObject_IsInstance(other, (PyObject*)&PyGObject_Type);
     if (isinst == -1)
         return NULL;
     if (!isinst) {
-        return Py_NewRef(Py_NotImplemented);
+        Py_RETURN_NOTIMPLEMENTED;
     }
 
     return pyg_ptr_richcompare(((PyGObject*)self)->obj,
@@ -1441,7 +1441,7 @@ pygobject_set_property(PyGObject *self, PyObject *args)
 
 done:
 
-    return Py_NewRef(Py_None);
+    Py_RETURN_NONE;
 }
 
 static PyObject *
@@ -2352,7 +2352,7 @@ pygobject_weak_ref_unref(PyGObjectWeakRef *self, PyObject *args)
         self->have_floating_ref = FALSE;
         Py_DECREF(self);
     }
-    return Py_NewRef(Py_None);
+    Py_RETURN_NONE;
 }
 
 static PyMethodDef pygobject_weak_ref_methods[] = {
@@ -2371,7 +2371,7 @@ pygobject_weak_ref_call(PyGObjectWeakRef *self, PyObject *args, PyObject *kw)
     if (self->obj)
         return pygobject_new(self->obj);
     else {
-        return Py_NewRef(Py_None);
+        Py_RETURN_NONE;
     }
 }
 

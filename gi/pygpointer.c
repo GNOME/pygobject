@@ -48,7 +48,7 @@ pyg_pointer_richcompare(PyObject *self, PyObject *other, int op)
                                     pyg_pointer_get_ptr (other),
                                     op);
     else {
-        return Py_NewRef(Py_NotImplemented);
+        Py_RETURN_NOTIMPLEMENTED;
     }
 }
 

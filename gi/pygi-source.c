@@ -245,7 +245,7 @@ pygi_source_set_callback (PyGObject *self_module, PyObject *args)
 			  handler_marshal, data,
 			  destroy_notify);
 
-    return Py_NewRef(Py_None);
+    Py_RETURN_NONE;
 }
 
 /**

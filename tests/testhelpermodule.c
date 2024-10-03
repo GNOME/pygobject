@@ -106,7 +106,7 @@ _wrap_test_interface_iface_method(PyGObject *self, PyObject *args, PyObject *kwa
     
     test_interface_iface_method(TEST_INTERFACE(self->obj));
     
-    return Py_NewRef(Py_None);
+    Py_RETURN_NONE;
 }
 
 static const PyMethodDef _PyTestInterface_methods[] = {
@@ -139,7 +139,7 @@ _wrap_TestInterface__do_iface_method(PyObject *cls, PyObject *args, PyObject *kw
 		    "interface method TestInterface.iface_method not implemented");
     return NULL;
   }
-  return Py_NewRef(Py_None);
+  Py_RETURN_NONE;
 }
 
 PYGI_DEFINE_TYPE("testhelper.Unknown", PyTestUnknown_Type, PyGObject);
@@ -486,7 +486,7 @@ _wrap_connectcallbacks(PyObject * self, PyObject *args)
 
     connectcallbacks (G_OBJECT (obj->obj));
 
-    return Py_NewRef(Py_None);
+    Py_RETURN_NONE;
 }
 
 static PyObject *
@@ -610,7 +610,7 @@ _wrap_test_gerror_exception(PyObject *self, PyObject *args)
     Py_DECREF(py_args);
     Py_DECREF(py_ret);
 
-    return Py_NewRef(Py_None);
+    Py_RETURN_NONE;
 }
 
 static PyObject *
