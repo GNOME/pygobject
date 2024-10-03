@@ -21,6 +21,7 @@
 
 #include <config.h>
 
+#include "pythoncapi_compat.h"
 #include "pygi-type.h"
 #include "pygi-util.h"
 #include "pygi-type.h"
@@ -52,8 +53,7 @@ pyg_flags_richcompare(PyGFlags *self, PyObject *other, int op)
     static char warning[256];
 
     if (!PyLong_Check (other)) {
-        Py_INCREF(Py_NotImplemented);
-        return Py_NotImplemented;
+        return Py_NewRef(Py_NotImplemented);
     }
 
     if (PyObject_TypeCheck(other, &PyGFlags_Type) && ((PyGFlags*)other)->gtype != self->gtype) {
@@ -372,8 +372,7 @@ pyg_flags_warn (PyObject *self, PyObject *args)
     if (PyErr_Warn(PyExc_Warning, "unsupported arithmetic operation for flags type"))
 	return NULL;
 
-    Py_INCREF(Py_None);
-    return Py_None;
+    return Py_NewRef(Py_None);
 }
 
 static PyObject *
@@ -389,8 +388,7 @@ pyg_flags_get_first_value_name(PyGFlags *self, void *closure)
   if (flags_value)
       retval = PyUnicode_FromString (flags_value->value_name);
   else {
-      retval = Py_None;
-      Py_INCREF(Py_None);
+      retval = Py_NewRef(Py_None);
   }
   g_type_class_unref(flags_class);
 
@@ -411,8 +409,7 @@ pyg_flags_get_first_value_nick(PyGFlags *self, void *closure)
   if (flags_value)
       retval = PyUnicode_FromString (flags_value->value_nick);
   else {
-      retval = Py_None;
-      Py_INCREF(Py_None);
+      retval = Py_NewRef(Py_None);
   }
   g_type_class_unref(flags_class);
 

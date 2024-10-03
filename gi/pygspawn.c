@@ -57,8 +57,7 @@ pyg_pid_close(PyObject *self, PyObject *args, PyObject *kwargs)
     gpid->unclosed = 0;
 #endif
 
-    Py_INCREF(Py_None);
-    return Py_None;
+    return Py_NewRef(Py_None);
 }
 
 static PyMethodDef pyg_pid_methods[] = {
@@ -252,22 +251,19 @@ pyglib_spawn_async(PyObject *object, PyObject *args, PyObject *kwargs)
     if (standard_input)
         pystdin = pygi_gint_to_py(*standard_input);
     else {
-        Py_INCREF(Py_None);
-        pystdin = Py_None;
+        pystdin = Py_NewRef(Py_None);
     }
 
     if (standard_output)
         pystdout = pygi_gint_to_py(*standard_output);
     else {
-        Py_INCREF(Py_None);
-        pystdout = Py_None;
+        pystdout = Py_NewRef(Py_None);
     }
 
     if (standard_error)
         pystderr = pygi_gint_to_py(*standard_error);
     else {
-        Py_INCREF(Py_None);
-        pystderr = Py_None;
+        pystderr = Py_NewRef(Py_None);
     }
 
     return Py_BuildValue("NNNN", pyg_pid_new(child_pid), pystdin, pystdout, pystderr);
