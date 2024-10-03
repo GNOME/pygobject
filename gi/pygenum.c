@@ -21,6 +21,7 @@
 
 #include <config.h>
 
+#include "pythoncapi_compat.h"
 #include "pygi-type.h"
 #include "pygi-util.h"
 #include "pygi-type.h"
@@ -52,8 +53,7 @@ pyg_enum_richcompare(PyGEnum *self, PyObject *other, int op)
     static char warning[256];
 
     if (!PyLong_Check (other)) {
-	Py_INCREF(Py_NotImplemented);
-	return Py_NotImplemented;
+	return Py_NewRef(Py_NotImplemented);
     }
 
     if (PyObject_TypeCheck(other, &PyGEnum_Type) && ((PyGEnum*)other)->gtype != self->gtype) {
