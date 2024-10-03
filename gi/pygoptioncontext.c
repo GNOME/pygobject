@@ -1,3 +1,5 @@
+#include "pythoncapi_compat.h"
+
 /* -*- Mode: C; c-basic-offset: 4 -*-
  * pygtk- Python bindings for the GTK toolkit.
  * Copyright (C) 2006  Johannes Hoelzl
@@ -203,8 +205,7 @@ pyg_option_context_set_help_enabled(PyGOptionContext *self,
 
     g_option_context_set_help_enabled(self->context, PyObject_IsTrue(help_enabled));
 
-    Py_INCREF(Py_None);
-    return Py_None;
+    return Py_NewRef(Py_None);
 }
 
 static PyObject *
@@ -230,8 +231,7 @@ pyg_option_context_set_ignore_unknown_options(PyGOptionContext *self,
 						PyObject_IsTrue(ignore_unknown_options));
     
 
-    Py_INCREF(Py_None);
-    return Py_None;
+    return Py_NewRef(Py_None);
 }
 
 static PyObject *
@@ -271,11 +271,9 @@ pyg_option_context_set_main_group(PyGOptionContext *self,
 
     g_option_context_set_main_group(self->context, g_group);
 
-    Py_INCREF(group);
-    self->main_group = (PyGOptionGroup*) group;
+    self->main_group = (PyGOptionGroup *) Py_NewRef(group);
 
-    Py_INCREF(Py_None);
-    return Py_None;
+    return Py_NewRef(Py_None);
 }
 
 static PyObject *
@@ -283,11 +281,9 @@ pyg_option_context_get_main_group(PyGOptionContext *self)
 {
     if (self->main_group == NULL)
     {
-        Py_INCREF(Py_None);
-        return Py_None;
+        return Py_NewRef(Py_None);
     }
-    Py_INCREF(self->main_group);
-    return (PyObject*) self->main_group;
+    return Py_NewRef(self->main_group);
 }
 
 static PyObject *
@@ -321,8 +317,7 @@ pyg_option_context_add_group(PyGOptionContext *self,
 
     g_option_context_add_group(self->context, g_group);
 
-    Py_INCREF(Py_None);
-    return Py_None;
+    return Py_NewRef(Py_None);
 }
 
 static PyObject*
@@ -333,8 +328,7 @@ pyg_option_context_richcompare(PyObject *self, PyObject *other, int op)
                                    ((PyGOptionContext*)other)->context,
                                    op);
     else {
-       Py_INCREF(Py_NotImplemented);
-       return Py_NotImplemented;
+       return Py_NewRef(Py_NotImplemented);
     }
 }
 

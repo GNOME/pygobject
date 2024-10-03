@@ -248,8 +248,7 @@ _base_info_richcompare (PyGIBaseInfo *self, PyObject *other, int op)
             res = Py_NotImplemented;
             break;
     }
-    Py_INCREF(res);
-    return res;
+    return Py_NewRef(res);
 }
 
 PYGI_DEFINE_TYPE("gi.BaseInfo", PyGIBaseInfo_Type, PyGIBaseInfo);

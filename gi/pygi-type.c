@@ -152,8 +152,7 @@ generic_gsize_richcompare(gsize a, gsize b, int op)
         break;
 
       default:
-        res = Py_NotImplemented;
-        Py_INCREF(res);
+        res = Py_NewRef(Py_NotImplemented);
         break;
     }
 
@@ -168,8 +167,7 @@ pyg_type_wrapper_richcompare(PyObject *self, PyObject *other, int op)
                                         ((PyGTypeWrapper*)other)->type,
                                         op);
     else {
-        Py_INCREF(Py_NotImplemented);
-        return Py_NotImplemented;
+        return Py_NewRef(Py_NotImplemented);
     }
 }
 
@@ -229,8 +227,7 @@ _wrap_g_type_wrapper__get_pytype(PyGTypeWrapper *self, void *closure)
     if (!py_type)
       py_type = Py_None;
 
-    Py_INCREF(py_type);
-    return py_type;
+    return Py_NewRef(py_type);
 }
 
 static int

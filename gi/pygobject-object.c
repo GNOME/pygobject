@@ -238,13 +238,9 @@ typedef struct {
 static void
 PyGProps_dealloc(PyGProps* self)
 {
-    PyGObject *tmp;
-
     PyObject_GC_UnTrack((PyObject*)self);
 
-    tmp = self->pygobject;
-    self->pygobject = NULL;
-    Py_XDECREF(tmp);
+    Py_XSETREF(self->pygobject, NULL);
 
     PyObject_GC_Del((PyObject*)self);
 }
@@ -496,8 +492,7 @@ pyg_props_descr_descr_get(PyObject *self, PyObject *obj, PyObject *type)
                             " descriptor on non-GObject instances");
             return NULL;
         }
-        Py_INCREF(obj);
-        gprops->pygobject = (PyGObject *) obj;
+        gprops->pygobject = (PyGObject *) Py_NewRef(obj);
         gprops->gtype = pyg_type_from_object(obj);
     }
     return (PyObject *) gprops;
@@ -1142,15 +1137,13 @@ pygobject_richcompare(PyObject *self, PyObject *other, int op)
     if (isinst == -1)
         return NULL;
     if (!isinst) {
-        Py_INCREF(Py_NotImplemented);
-        return Py_NotImplemented;
+        return Py_NewRef(Py_NotImplemented);
     }
     isinst = PyObject_IsInstance(other, (PyObject*)&PyGObject_Type);
     if (isinst == -1)
         return NULL;
     if (!isinst) {
-        Py_INCREF(Py_NotImplemented);
-        return Py_NotImplemented;
+        return Py_NewRef(Py_NotImplemented);
     }
 
     return pyg_ptr_richcompare(((PyGObject*)self)->obj,
@@ -1448,8 +1441,7 @@ pygobject_set_property(PyGObject *self, PyObject *args)
 
 done:
 
-    Py_INCREF(Py_None);
-    return Py_None;
+    return Py_NewRef(Py_None);
 }
 
 static PyObject *
@@ -1501,8 +1493,7 @@ pygobject_set_properties(PyGObject *self, PyObject *args, PyObject *kwargs)
 
  exit:
     g_object_thaw_notify (G_OBJECT(self->obj));
-    Py_XINCREF(result);
-    return result;
+    return Py_XNewRef(result);
 }
 
 /* custom closure for gobject bindings */
@@ -1961,8 +1952,7 @@ pygobject_emit(PyGObject *self, PyObject *args)
       if (!was_floating)
 	      g_value_unset(&ret);
     } else {
-	Py_INCREF(Py_None);
-	py_ret = Py_None;
+	py_ret = Py_NewRef(Py_None);
     }
 
     return py_ret;
@@ -2043,8 +2033,7 @@ pygobject_chain_from_overridden(PyGObject *self, PyObject *args)
 	py_ret = pyg_value_as_pyobject(&ret, TRUE);
 	g_value_unset(&ret);
     } else {
-	Py_INCREF(Py_None);
-	py_ret = Py_None;
+	py_ret = Py_NewRef(Py_None);
     }
     return py_ret;
 }
@@ -2219,8 +2208,7 @@ pygobject_get_dict(PyGObject *self, void *closure)
         self->inst_dict = PyDict_New();
         pygobject_toggle_ref_ensure (self);
     }
-    Py_INCREF(self->inst_dict);
-    return self->inst_dict;
+    return Py_NewRef(self->inst_dict);
 }
 #endif
 
@@ -2364,8 +2352,7 @@ pygobject_weak_ref_unref(PyGObjectWeakRef *self, PyObject *args)
         self->have_floating_ref = FALSE;
         Py_DECREF(self);
     }
-    Py_INCREF(Py_None);
-    return Py_None;
+    return Py_NewRef(Py_None);
 }
 
 static PyMethodDef pygobject_weak_ref_methods[] = {
@@ -2384,8 +2371,7 @@ pygobject_weak_ref_call(PyGObjectWeakRef *self, PyObject *args, PyObject *kw)
     if (self->obj)
         return pygobject_new(self->obj);
     else {
-        Py_INCREF(Py_None);
-        return Py_None;
+        return Py_NewRef(Py_None);
     }
 }
 

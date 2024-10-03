@@ -648,8 +648,7 @@ _pyg_signal_accumulator(GSignalInvocationHint *ihint,
     if (ihint->detail)
         py_detail = PyUnicode_FromString (g_quark_to_string(ihint->detail));
     else {
-        Py_INCREF(Py_None);
-        py_detail = Py_None;
+        py_detail = Py_NewRef(Py_None);
     }
 
     py_ihint = Py_BuildValue("lNi", (long int) ihint->signal_id,
@@ -751,10 +750,8 @@ create_signal (GType instance_type, const gchar *signal_name, PyObject *tuple)
 
     if (py_accum != NULL && !Py_IsNone(py_accum)) {
         accum_data = g_new(PyGSignalAccumulatorData, 1);
-        accum_data->callable = py_accum;
-        Py_INCREF(py_accum);
-        accum_data->user_data = py_accum_data;
-        Py_XINCREF(py_accum_data);
+        accum_data->callable = Py_NewRef(py_accum);
+        accum_data->user_data = Py_XNewRef(py_accum_data);
         accumulator = _pyg_signal_accumulator;
     }
 
@@ -1368,8 +1365,7 @@ _wrap_pyg_type_register(PyObject *self, PyObject *args)
             return NULL;
     }
 
-    Py_INCREF(class);
-    return (PyObject *) class;
+    return Py_NewRef(class);
 }
 
 static GHashTable *log_handlers = NULL;
@@ -1883,8 +1879,7 @@ _wrap_pyg_has_vfunc_implementation (PyObject *self, PyObject *args)
     }
     g_type_class_unref (implementor_class);
 
-    Py_INCREF(py_ret);
-    return py_ret;
+    return Py_NewRef(py_ret);
 }
 #endif
 
@@ -2239,14 +2234,10 @@ pyg_object_class_list_properties (PyObject *self, PyObject *args)
 static PyObject *
 pyg__install_metaclass(PyObject *dummy, PyTypeObject *metaclass)
 {
-    Py_INCREF(metaclass);
-    PyGObject_MetaType = metaclass;
-    Py_INCREF(metaclass);
+    PyGObject_MetaType = (PyTypeObject *) Py_NewRef(metaclass);
+    Py_SET_TYPE(&PyGObject_Type, (PyTypeObject *) Py_NewRef(metaclass));
 
-    Py_SET_TYPE(&PyGObject_Type, metaclass);
-
-    Py_INCREF(Py_None);
-    return Py_None;
+    return Py_NewRef(Py_None);
 }
 
 static PyObject *

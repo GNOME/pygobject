@@ -23,6 +23,7 @@
  * IN THE SOFTWARE.
  */
 
+#include "pythoncapi_compat.h"
 #include "pygi-info.h"
 #include "pygi-boxed.h"
 #include "pygi-type.h"
@@ -244,8 +245,7 @@ pygi_source_set_callback (PyGObject *self_module, PyObject *args)
 			  handler_marshal, data,
 			  destroy_notify);
 
-    Py_INCREF(Py_None);
-    return Py_None;
+    return Py_NewRef(Py_None);
 }
 
 /**

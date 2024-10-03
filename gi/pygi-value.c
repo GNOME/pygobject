@@ -746,8 +746,7 @@ value_to_py_structured_type (const GValue *value, GType fundamental, gboolean co
         if (G_VALUE_HOLDS(value, PY_TYPE_OBJECT)) {
             PyObject *ret = (PyObject *)g_value_dup_boxed(value);
             if (ret == NULL) {
-                Py_INCREF(Py_None);
-                return Py_None;
+                return Py_NewRef(Py_None);
             }
             return ret;
         } else if (G_VALUE_HOLDS(value, G_TYPE_VALUE)) {
@@ -785,8 +784,7 @@ value_to_py_structured_type (const GValue *value, GType fundamental, gboolean co
     {
         GVariant *v = g_value_get_variant(value);
         if (v == NULL) {
-            Py_INCREF(Py_None);
-            return Py_None;
+            return Py_NewRef(Py_None);
         }
         return pygi_struct_new_from_g_type (G_TYPE_VARIANT, g_variant_ref(v), FALSE);
     }

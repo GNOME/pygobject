@@ -1,3 +1,5 @@
+#include "pythoncapi_compat.h"
+
 /* -*- Mode: C; c-basic-offset: 4 -*-
  * pygtk- Python bindings for the GTK toolkit.
  * Copyright (C) 1998-2003  James Henstridge
@@ -49,8 +51,7 @@ pyg_integer_richcompare(PyObject *v, PyObject *w, int op)
     }
 
     result = t ? Py_True : Py_False;
-    Py_INCREF(result);
-    return result;
+    return Py_NewRef(result);
 }
 
 PyObject*
@@ -82,8 +83,7 @@ pyg_ptr_richcompare(void* a, void *b, int op)
         break;
     }
 
-    Py_INCREF(res);
-    return res;
+    return Py_NewRef(res);
 }
 
 /**

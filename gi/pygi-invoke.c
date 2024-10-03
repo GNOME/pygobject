@@ -680,8 +680,7 @@ _invoke_marshal_out_args (PyGIInvokeState *state, PyGIFunctionCache *function_ca
         g_assert (cache->return_cache->is_skipped || cache->return_cache->type_tag == GI_TYPE_TAG_VOID);
 
         Py_DECREF(py_return);
-        Py_INCREF(state->py_async);
-        return state->py_async;
+        return Py_NewRef(state->py_async);
     }
 
     if (n_out_args == 0) {
@@ -691,8 +690,7 @@ _invoke_marshal_out_args (PyGIInvokeState *state, PyGIFunctionCache *function_ca
              * otherwise Python will expect an exception.
              */
             g_assert (py_return == NULL);
-            Py_INCREF(Py_None);
-            py_return = Py_None;
+            py_return = Py_NewRef(Py_None);
         }
 
         py_out = py_return;
