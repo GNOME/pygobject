@@ -1,4 +1,3 @@
-
 /* -*- Mode: C; c-basic-offset: 4 -*-
  * vim: tabstop=4 shiftwidth=4 expandtab
  *
@@ -16,7 +15,7 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <Python.h>
+#include "pythoncapi_compat.h"
 #include "pygi-value.h"
 #include "pygi-struct.h"
 #include "pygi-basictype.h"
@@ -212,7 +211,7 @@ pyg_value_array_from_pyobject(GValue *value,
 
         if (pspec && pspec->element_spec)
             type = G_PARAM_SPEC_VALUE_TYPE(pspec->element_spec);
-        else if (item == Py_None)
+        else if (Py_IsNone(item))
             type = G_TYPE_POINTER; /* store None as NULL */
         else {
             type = pyg_type_from_object((PyObject*)Py_TYPE(item));
@@ -280,7 +279,7 @@ pyg_array_from_pyobject(GValue *value,
             return -1;
         }
 
-        if (item == Py_None)
+        if (Py_IsNone(item))
             type = G_TYPE_POINTER; /* store None as NULL */
         else {
             type = pyg_type_from_object((PyObject*)Py_TYPE(item));
@@ -330,7 +329,7 @@ pyg_value_from_pyobject_with_error(GValue *value, PyObject *obj)
     case G_TYPE_INTERFACE:
         /* we only handle interface types that have a GObject prereq */
         if (g_type_is_a(value_type, G_TYPE_OBJECT)) {
-            if (obj == Py_None)
+            if (Py_IsNone(obj))
                 g_value_set_object(value, NULL);
             else {
                 if (!PyObject_TypeCheck(obj, &PyGObject_Type)) {
@@ -490,7 +489,7 @@ pyg_value_from_pyobject_with_error(GValue *value, PyObject *obj)
         }
     }
     case G_TYPE_POINTER:
-        if (obj == Py_None)
+        if (Py_IsNone(obj))
             g_value_set_pointer(value, NULL);
         else if (PyObject_TypeCheck(obj, &PyGPointer_Type) &&
                 G_VALUE_HOLDS(value, ((PyGPointer *)obj)->gtype))
@@ -512,7 +511,7 @@ pyg_value_from_pyobject_with_error(GValue *value, PyObject *obj)
         holds_value_array = G_VALUE_HOLDS(value, PYGI_TYPE_VALUE_ARRAY);
         G_GNUC_END_IGNORE_DEPRECATIONS
 
-        if (obj == Py_None)
+        if (Py_IsNone(obj))
             g_value_set_boxed(value, NULL);
         else if (G_VALUE_HOLDS(value, PY_TYPE_OBJECT))
             g_value_set_boxed(value, obj);
@@ -562,7 +561,7 @@ pyg_value_from_pyobject_with_error(GValue *value, PyObject *obj)
         break;
     }
     case G_TYPE_OBJECT:
-        if (obj == Py_None) {
+        if (Py_IsNone(obj)) {
             g_value_set_object(value, NULL);
         } else if (PyObject_TypeCheck(obj, &PyGObject_Type) &&
                 G_TYPE_CHECK_INSTANCE_TYPE(pygobject_get(obj),
@@ -575,7 +574,7 @@ pyg_value_from_pyobject_with_error(GValue *value, PyObject *obj)
         break;
     case G_TYPE_VARIANT:
     {
-        if (obj == Py_None)
+        if (Py_IsNone(obj))
             g_value_set_variant(value, NULL);
         else if (pyg_type_from_object_strict(obj, FALSE) == G_TYPE_VARIANT)
             g_value_set_variant(value, pyg_boxed_get(obj, GVariant));

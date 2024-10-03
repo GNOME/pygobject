@@ -49,7 +49,7 @@ pyg_interface_init(PyObject *self, PyObject *args, PyObject *kwargs)
 static void
 pyg_interface_free(PyObject *op)
 {
-    PyObject_FREE(op);
+    PyObject_Free(op);
 }
 
 /**

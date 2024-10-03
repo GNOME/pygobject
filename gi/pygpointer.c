@@ -88,7 +88,7 @@ pyg_pointer_init(PyGPointer *self, PyObject *args, PyObject *kwargs)
 static void
 pyg_pointer_free(PyObject *op)
 {
-  PyObject_FREE(op);
+  PyObject_Free(op);
 }
 
 /**
@@ -168,7 +168,7 @@ pyg_pointer_new(GType pointer_type, gpointer pointer)
 
     if (!tp)
 	tp = (PyTypeObject *)&PyGPointer_Type; /* fallback */
-    self = PyObject_NEW(PyGPointer, tp);
+    self = PyObject_New(PyGPointer, tp);
 
     PyGILState_Release(state);
 

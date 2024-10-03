@@ -19,9 +19,9 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <Python.h>
 #include <glib.h>
 
+#include "pythoncapi_compat.h"
 #include "pygi-util.h"
 #include "pygi-basictype.h"
 #include "pygspawn.h"
@@ -210,7 +210,7 @@ pyglib_spawn_async(PyObject *object, PyObject *args, PyObject *kwargs)
         }
     }
 
-    if (func != Py_None) {
+    if (!Py_IsNone(func)) {
         if (!PyCallable_Check(func)) {
             PyErr_SetString(PyExc_TypeError, "child_setup parameter must be callable or None");
             g_free(argv);
@@ -227,7 +227,7 @@ pyglib_spawn_async(PyObject *object, PyObject *args, PyObject *kwargs)
     }
 
     if (!g_spawn_async_with_pipes(working_directory, argv, envp, flags,
-                                  (func != Py_None ? _pyg_spawn_async_callback : NULL),
+                                  (!Py_IsNone(func) ? _pyg_spawn_async_callback : NULL),
                                   callback_data, &child_pid,
                                   standard_input,
                                   standard_output,
