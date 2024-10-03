@@ -20,6 +20,7 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "pythoncapi_compat.h"
 #include "pygi-invoke.h"
 #include "pygi-marshal-cleanup.h"
 #include "pygi-error.h"
@@ -603,7 +604,7 @@ _invoke_marshal_in_args (PyGIInvokeState *state, PyGIFunctionCache *function_cac
             gboolean success;
             gpointer cleanup_data = NULL;
 
-            if (!arg_cache->allow_none && py_arg == Py_None) {
+            if (!arg_cache->allow_none && Py_IsNone(py_arg)) {
                 PyErr_Format (PyExc_TypeError,
                               "Argument %zd does not allow None as a value",
                               i);

@@ -21,10 +21,10 @@
  * USA
  */
 
-#include <Python.h>
 #include <glib-object.h>
 
 #include "config.h"
+#include "pythoncapi_compat.h"
 #include "pyginterface.h"
 #include "pygi-repository.h"
 #include "pygi-type.h"
@@ -386,7 +386,7 @@ create_property (const gchar  *prop_name,
 
 	    if (!PyArg_ParseTuple(args, "O", &pydefault))
 		return NULL;
-            if (pydefault != Py_None)
+            if (!Py_IsNone(pydefault))
                 default_value = pyg_boxed_get (pydefault, GVariant);
 	    pspec = g_param_spec_variant (prop_name, nick, blurb, G_VARIANT_TYPE_ANY, default_value, flags);
 	}
@@ -708,7 +708,7 @@ create_signal (GType instance_type, const gchar *signal_name, PyObject *tuple)
 	return FALSE;
     }
 
-    if (py_accum && py_accum != Py_None && !PyCallable_Check(py_accum))
+    if (py_accum && !Py_IsNone(py_accum) && !PyCallable_Check(py_accum))
     {
 	gchar buf[128];
 
@@ -749,7 +749,7 @@ create_signal (GType instance_type, const gchar *signal_name, PyObject *tuple)
 	Py_DECREF(item);
     }
 
-    if (py_accum != NULL && py_accum != Py_None) {
+    if (py_accum != NULL && !Py_IsNone(py_accum)) {
         accum_data = g_new(PyGSignalAccumulatorData, 1);
         accum_data->callable = py_accum;
         Py_INCREF(py_accum);
@@ -798,7 +798,7 @@ add_signals (GObjectClass *klass, PyObject *signals)
 	}
 	signal_name = PyUnicode_AsUTF8 (key);
 
-	if (value == Py_None ||
+	if (Py_IsNone(value) ||
 	    (PyUnicode_Check(value) &&
 	     !strcmp(PyUnicode_AsUTF8 (value), "override")))
         {
@@ -2021,7 +2021,7 @@ marshal_emission_hook(GSignalInvocationHint *ihint,
         PyErr_Print();
     }
 
-    retval = (retobj == Py_True ? TRUE : FALSE);
+    retval = (Py_IsTrue(retobj) ? TRUE : FALSE);
     Py_XDECREF(retobj);
 out:
     PyGILState_Release(state);

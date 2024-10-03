@@ -1,3 +1,5 @@
+#include "pythoncapi_compat.h"
+
 /* -*- Mode: C; c-basic-offset: 4 -*-
  * vim: tabstop=4 shiftwidth=4 expandtab
  *
@@ -509,7 +511,7 @@ pygi_async_new(PyObject *finish_func, PyObject *cancellable) {
     res = PyGIAsync_Type.tp_alloc (&PyGIAsync_Type, 0);
 
     if (res) {
-        if (cancellable && cancellable != Py_None)
+        if (cancellable && !Py_IsNone(cancellable))
             args = Py_BuildValue ("(OO)", finish_func, cancellable);
         else
             args = Py_BuildValue ("(O)", finish_func);

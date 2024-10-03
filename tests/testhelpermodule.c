@@ -1,3 +1,4 @@
+#include "pythoncapi_compat.h"
 #include "pygobject.h"
 #include <gobject/gmarshal.h>
 
@@ -180,7 +181,7 @@ _wrap_TestInterface__proxy_do_iface_method(TestInterface *self)
         PyGILState_Release(__py_state);
         return;
     }
-    if (py_retval != Py_None) {
+    if (!Py_IsNone(py_retval)) {
         if (PyErr_Occurred())
             PyErr_Print();
         PyErr_SetString(PyExc_TypeError, "retval should be None");

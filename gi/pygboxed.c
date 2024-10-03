@@ -116,7 +116,7 @@ gboxed_init(PyGBoxed *self, PyObject *args, PyObject *kwargs)
 static void
 gboxed_free(PyObject *op)
 {
-  PyObject_FREE(op);
+  PyObject_Free(op);
 }
 
 static PyObject *

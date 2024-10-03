@@ -20,6 +20,7 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "pythoncapi_compat.h"
 #include "pygi-info.h"
 #include "pygi-cache.h"
 #include "pygi-invoke.h"
@@ -236,7 +237,7 @@ _base_info_richcompare (PyGIBaseInfo *self, PyObject *other, int op)
             return _wrap_g_base_info_equal (self, other);
         case Py_NE:
             res = _wrap_g_base_info_equal (self, other);
-            if (res == Py_True) {
+            if (Py_IsTrue(res)) {
                 Py_DECREF (res);
                 Py_RETURN_FALSE;
             } else {
@@ -636,8 +637,7 @@ _function_info_descr_get (PyGICallableInfo *self, PyObject *obj, PyObject *type)
     if (obj != NULL && obj != Py_None)
 	return PyMethod_New((PyObject *)self, obj);
 
-    Py_INCREF(self);
-    return (PyObject *)self;
+    return Py_NewRef(self);
 }
 
 /* _vfunc_info_descr_get

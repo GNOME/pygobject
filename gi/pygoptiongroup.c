@@ -40,7 +40,7 @@ pyg_option_group_new (GOptionGroup *group)
 {
     PyGOptionGroup *self;
 
-    self = (PyGOptionGroup *)PyObject_NEW(PyGOptionGroup,
+    self = (PyGOptionGroup *)PyObject_New(PyGOptionGroup,
                       &PyGOptionGroup_Type);
     if (self == NULL)
         return NULL;
@@ -122,7 +122,7 @@ pyg_option_group_dealloc(PyGOptionGroup *self)
 	}
     }
 
-    PyObject_Del(self);
+    PyObject_Free(self);
 }
 
 static gboolean

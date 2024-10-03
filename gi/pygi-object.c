@@ -18,9 +18,9 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <Python.h>
 #include <glib.h>
 
+#include "pythoncapi_compat.h"
 #include "pygi-object.h"
 #include "pygi-fundamental.h"
 #include "pygobject-object.h"
@@ -43,7 +43,7 @@ _pygi_marshal_from_py_object (PyObject *py_arg, /*in*/
                                GITransfer transfer) {
     GObject *gobj;
 
-    if (py_arg == Py_None) {
+    if (Py_IsNone(py_arg)) {
         arg->v_pointer = NULL;
         return TRUE;
     }
@@ -148,7 +148,7 @@ _pygi_marshal_from_py_interface_object (PyGIInvokeState             *state,
 {
     PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)arg_cache;
 
-    if (py_arg == Py_None) {
+    if (Py_IsNone(py_arg)) {
         arg->v_pointer = NULL;
         return TRUE;
     }

@@ -18,6 +18,7 @@
 
 #include <config.h>
 
+#include "pythoncapi_compat.h"
 #include "pygobject-object.h"
 #include "pygboxed.h"
 #include "pygenum.h"
@@ -94,7 +95,7 @@ pygi_type_get_from_g_type (GType g_type)
     }
 
     py_type = PyObject_GetAttrString (py_g_type, "pytype");
-    if (py_type == Py_None) {
+    if (Py_IsNone(py_type)) {
         py_type = pygi_type_import_by_g_type (g_type);
     }
 
@@ -192,7 +193,7 @@ pyg_type_wrapper_repr(PyGTypeWrapper *self)
 static void
 pyg_type_wrapper_dealloc(PyGTypeWrapper *self)
 {
-    PyObject_DEL(self);
+    PyObject_Free(self);
 }
 
 static GQuark
@@ -242,7 +243,7 @@ _wrap_g_type_wrapper__set_pytype(PyGTypeWrapper *self, PyObject* value, void *cl
 
     py_type = g_type_get_qdata(self->type, key);
     Py_CLEAR(py_type);
-    if (value == Py_None)
+    if (Py_IsNone(value))
 	g_type_set_qdata(self->type, key, NULL);
     else if (PyType_Check(value)) {
 	Py_INCREF(value);
@@ -460,7 +461,7 @@ pyg_type_wrapper_new(GType type)
     PyGTypeWrapper *self;
 
     g_assert (Py_TYPE (&PyGTypeWrapper_Type) != NULL);
-    self = (PyGTypeWrapper *)PyObject_NEW(PyGTypeWrapper,
+    self = (PyGTypeWrapper *)PyObject_New(PyGTypeWrapper,
 					  &PyGTypeWrapper_Type);
     if (self == NULL)
 	return NULL;
@@ -495,7 +496,7 @@ pyg_type_from_object_strict(PyObject *obj, gboolean strict)
     }
 
     /* map some standard types to primitive GTypes ... */
-    if (obj == Py_None)
+    if (Py_IsNone(obj))
 	return G_TYPE_NONE;
     if (PyType_Check(obj)) {
 	PyTypeObject *tp = (PyTypeObject *)obj;
@@ -914,7 +915,7 @@ pyg_closure_new(PyObject *callback, PyObject *extra_args, PyObject *swap_data)
     g_closure_set_marshal(closure, pyg_closure_marshal);
     Py_INCREF(callback);
     ((PyGClosure *)closure)->callback = callback;
-    if (extra_args && extra_args != Py_None) {
+    if (extra_args && !Py_IsNone(extra_args)) {
 	Py_INCREF(extra_args);
 	if (!PyTuple_Check(extra_args)) {
 	    PyObject *tmp = PyTuple_New(1);
@@ -1091,7 +1092,7 @@ pyg_signal_class_closure_get(void)
 static void
 object_doc_dealloc(PyObject *self)
 {
-    PyObject_FREE(self);
+    PyObject_Free(self);
 }
 
 /* append information about signals of a particular gtype */
@@ -1258,7 +1259,7 @@ pyg_object_descr_doc_get(void)
 	if (PyType_Ready(&PyGObjectDoc_Type))
 	    return NULL;
 
-	doc_descr = PyObject_NEW(PyObject, &PyGObjectDoc_Type);
+	doc_descr = PyObject_New(PyObject, &PyGObjectDoc_Type);
 	if (doc_descr == NULL)
 	    return NULL;
     }

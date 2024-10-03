@@ -18,9 +18,9 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <Python.h>
 #include <girepository.h>
 
+#include "pythoncapi_compat.h"
 #include "pygi-type.h"
 #include "pygi-info.h"
 #include "pygi-cache.h"
@@ -1014,7 +1014,7 @@ _constructor_cache_invoke_real (PyGIFunctionCache *function_cache,
     if (ret == NULL || cache->return_cache->is_skipped)
         return ret;
 
-    if (ret != Py_None) {
+    if (!Py_IsNone(ret)) {
         if (!PyTuple_Check (ret))
             return ret;
 

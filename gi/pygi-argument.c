@@ -19,11 +19,10 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <Python.h>
-
 #include <string.h>
 #include <time.h>
 
+#include "pythoncapi_compat.h"
 #include "pygobject-internal.h"
 
 #include <pygenum.h>
@@ -361,7 +360,7 @@ _pygi_argument_from_object (PyObject   *object,
             GArray *array;
             GITransfer item_transfer;
 
-            if (object == Py_None) {
+            if (Py_IsNone(object)) {
                 arg.v_pointer = NULL;
                 break;
             }
@@ -529,7 +528,7 @@ array_success:
             GITransfer item_transfer;
             Py_ssize_t i;
 
-            if (object == Py_None) {
+            if (Py_IsNone(object)) {
                 arg.v_pointer = NULL;
                 break;
             }
@@ -600,7 +599,7 @@ list_item_error:
             Py_ssize_t i;
 
 
-            if (object == Py_None) {
+            if (Py_IsNone(object)) {
                 arg.v_pointer = NULL;
                 break;
             }

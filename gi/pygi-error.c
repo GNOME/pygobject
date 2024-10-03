@@ -20,7 +20,7 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <Python.h>
+#include "pythoncapi_compat.h"
 #include "pygi-error.h"
 #include "pygi-type.h"
 #include "pygi-util.h"
@@ -234,7 +234,7 @@ _pygi_marshal_from_py_gerror (PyGIInvokeState   *state,
                               gpointer          *cleanup_data)
 {
     GError *error = NULL;
-    if (py_arg == Py_None) {
+    if (Py_IsNone(py_arg)) {
         arg->v_pointer = NULL;
         *cleanup_data = NULL;
         return TRUE;
