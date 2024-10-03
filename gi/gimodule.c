@@ -2016,7 +2016,7 @@ marshal_emission_hook(GSignalInvocationHint *ihint,
         PyErr_Print();
     }
 
-    retval = (Py_IsTrue(retobj) ? TRUE : FALSE);
+    retval = Py_IsTrue(retobj);
     Py_XDECREF(retobj);
 out:
     PyGILState_Release(state);
