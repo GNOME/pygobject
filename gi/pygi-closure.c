@@ -17,6 +17,7 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "pythoncapi_compat.h"
 #include "pygi-closure.h"
 #include "pygi-error.h"
 #include "pygi-marshal-cleanup.h"
@@ -764,7 +765,7 @@ _pygi_marshal_from_py_interface_callback (PyGIInvokeState   *state,
         }
     }
 
-    if (py_arg == Py_None) {
+    if (Py_IsNone(py_arg)) {
         return TRUE;
     }
 

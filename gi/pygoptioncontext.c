@@ -73,7 +73,7 @@ pyg_option_context_new (GOptionContext *context)
 {
     PyGOptionContext *self;
 
-    self = (PyGOptionContext *)PyObject_NEW(PyGOptionContext, &PyGOptionContext_Type);
+    self = (PyGOptionContext *)PyObject_New(PyGOptionContext, &PyGOptionContext_Type);
     if (self == NULL)
         return NULL;
 
@@ -110,7 +110,7 @@ pyg_option_context_dealloc(PyGOptionContext *self)
         g_option_context_free(tmp);
     }
 
-    PyObject_Del(self);
+    PyObject_Free(self);
 }
 
 static PyObject *

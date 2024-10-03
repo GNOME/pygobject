@@ -17,8 +17,8 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <Python.h>
 #include <glib.h>
+#include "pythoncapi_compat.h"
 #include "pygi-resulttuple.h"
 #include "pygi-util.h"
 
@@ -214,7 +214,7 @@ pygi_resulttuple_new_type(PyObject *tuple_names) {
     for (i = 0; i < len; i++) {
         PyObject *item, *named_args, *named_build, *index;
         item = PyList_GET_ITEM (tuple_names, i);
-        if (item == Py_None) {
+        if (Py_IsNone(item)) {
             PyList_Append (format_list, empty_format);
         } else {
             named_args = Py_BuildValue ("(O)", item);
