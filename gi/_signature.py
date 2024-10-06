@@ -29,9 +29,9 @@ from ._gi import (
     VFuncInfo,
     FunctionInfo,
     CallableInfo,
+    CallbackInfo,
     Direction,
     GType,
-    InfoType,
     TypeInfo,
     TypeTag,
 )
@@ -83,7 +83,7 @@ def get_pytype(gi_type: TypeInfo) -> object:
         return dict[key_type, value_type]
     elif tag == TypeTag.INTERFACE:
         info = gi_type.get_interface()
-        if info.get_type() == InfoType.CALLBACK:
+        if isinstance(info, CallbackInfo):
             sig = generate_signature(info)
             return Callable[
                 [param.annotation for param in sig.parameters.values()],
@@ -117,12 +117,12 @@ def generate_signature(info: CallableInfo) -> Signature:
 
     # Build lists of indices prior to adding the docs because it is possible
     # the index retrieved comes before input arguments being used.
-    ignore_indices = {info.get_return_type().get_array_length()}
+    ignore_indices = {info.get_return_type().get_array_length_index()}
     user_data_indices = set()
     for arg in args:
-        ignore_indices.add(arg.get_destroy())
-        ignore_indices.add(arg.get_type().get_array_length())
-        user_data_indices.add(arg.get_closure())
+        ignore_indices.add(arg.get_destroy_index())
+        ignore_indices.add(arg.get_type_info().get_array_length_index())
+        user_data_indices.add(arg.get_closure_index())
 
     for i, arg in enumerate(args):
         if arg.get_direction() == Direction.OUT:
@@ -131,7 +131,7 @@ def generate_signature(info: CallableInfo) -> Signature:
             continue
 
         default = Parameter.empty
-        annotation = get_pytype(arg.get_type())
+        annotation = get_pytype(arg.get_type_info())
         if arg.may_be_null() or i in user_data_indices:
             # allow-none or user_data from a closure
             default = None
@@ -171,7 +171,7 @@ def generate_signature(info: CallableInfo) -> Signature:
             continue  # skip exclusively input args
         if i in ignore_indices:
             continue
-        annotation = get_pytype(arg.get_type())
+        annotation = get_pytype(arg.get_type_info())
         if arg.may_be_null() and annotation is not Parameter.empty:
             annotation = Optional[annotation]
         out_args.append(annotation)
