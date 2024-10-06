@@ -33,7 +33,7 @@ test_thread_enum_get_type (void)
 
 G_DEFINE_TYPE(TestThread, test_thread, G_TYPE_OBJECT);
 
-static void
+static G_NORETURN void
 other_thread_cb (TestThread *self)
 {
   g_signal_emit_by_name (self, "from-thread", 0, NULL);
