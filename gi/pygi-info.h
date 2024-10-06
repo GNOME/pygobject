@@ -68,8 +68,6 @@ extern PyTypeObject PyGIPropertyInfo_Type;
 extern PyTypeObject PyGIArgInfo_Type;
 extern PyTypeObject PyGITypeInfo_Type;
 
-#define PyGIBaseInfo_GET_GI_INFO(object) gi_base_info_ref(((PyGIBaseInfo *)object)->info)
-
 PyObject* _pygi_info_new (GIBaseInfo *info);
 GIBaseInfo* _pygi_object_get_gi_info (PyObject     *object,
                                       PyTypeObject *type);
