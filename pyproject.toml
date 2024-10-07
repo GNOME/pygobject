@@ -35,7 +35,9 @@ Changelog = "https://gitlab.gnome.org/GNOME/pygobject/-/blob/main/NEWS"
 
 [tool.pdm.dev-dependencies]
 build = [
-    "setuptools",
+    # Setuptools 74 removed msvccompiler, required by g-ir-scanner (<1.82.0)
+    # See https://gitlab.gnome.org/GNOME/gobject-introspection/-/issues/515
+    "setuptools<74",
     "meson-python",
     "ninja",
     "pycairo",
