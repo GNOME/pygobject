@@ -23,12 +23,12 @@ endif
 
 python_dep = python.dependency()
 
-glib_version_req = '>= 2.64.0'
-gi_version_req = '>= 2.79.1'
+glib_version_req = '>= 2.79.1'
+gi_version_req = '>= 1.64.0'
 pycairo_version_req = '>= 1.16.0'
 libffi_version_req = '>= 3.0'
 
-gi_dep = dependency('girepository-2.0', version : gi_version_req,
+gi_dep = dependency('girepository-2.0', version : glib_version_req,
   fallback: ['glib', 'libgirepository_dep'])
 glib_dep = dependency('glib-2.0', version : glib_version_req,
   fallback: ['glib', 'libglib_dep'])
@@ -213,8 +213,9 @@ subdir('gi')
 subdir('pygtkcompat')
 with_tests = get_option('tests')
 if with_tests
-gi_tests = subproject('gobject-introspection-tests', default_options : ['cairo=' + cairo_dep.found().to_string()])
-subdir('tests')
+  dependency('gobject-introspection-1.0', version : gi_version_req, fallback: ['gobject-introspection', 'girepo_dep'])
+  subproject('gobject-introspection-tests', default_options : ['cairo=' + cairo_dep.found().to_string()])
+  subdir('tests')
 endif
 
 devenv = environment()
