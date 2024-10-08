@@ -118,7 +118,7 @@ def init_test_environ():
     # Force the default theme so broken themes don't affect the tests
     os.environ['GTK_THEME'] = 'Adwaita'
 
-    gi_gir_path = os.path.join(builddir, "subprojects", "gobject-introspection", "gir")
+    gi_gir_path = os.path.join(builddir, "subprojects", "glib", "girepository", "introspection")
     if os.path.exists(gi_gir_path):
         os_environ_prepend('GI_TYPELIB_PATH', gi_gir_path)
 
