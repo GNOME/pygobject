@@ -275,18 +275,39 @@ class TestVFuncsWithFloatingArg(unittest.TestCase):
 
     def test_vfunc_in_object_transfer_none_with_floating(self):
         vfuncs = self.VFuncs()
+
+        def ref(obj):
+            obj._ref()
+            # FIXME: Add an item dictionary so that the python wrapper cannot
+            # be destroyed because it is unused. Unfortunately, a weakref does
+            # not trigger this handling (though it may be possible through
+            # object resurrection).
+            obj._something = None
+            return weakref.ref(obj)
+
+        vfuncs.ObjectRef = ref
+
         ref_count, is_floating = vfuncs.get_ref_info_for_vfunc_in_object_transfer_none(self.VFuncs.Object)
 
         gc.collect()
 
         # python wrapper should maintain the object as floating and add an additional ref
-        self.assertEqual(vfuncs.in_object_grefcount, 2)
+        # So, two plus the one we added explicitly. No extra toggle reference to keep the wrapper alive.
+        self.assertEqual(vfuncs.in_object_grefcount, 2 + 1)
         self.assertTrue(vfuncs.in_object_is_floating)
 
         # vfunc caller should only have a single floating ref after the vfunc finishes
+        # Add to that the explicit reference we added and then the toggle reference for the dict
         if hasattr(sys, "getrefcount"):
-            self.assertEqual(ref_count, 1)
+            self.assertEqual(ref_count, 1 + 2)
         self.assertTrue(is_floating)
+
+        # There are two references now, one explicit and one from the wrapper
+        self.assertEqual(vfuncs.object_ref().__grefcount__, 2)
+        self.assertTrue(vfuncs.object_ref().is_floating())
+        # Sinking and unref'ing our "C" one will drop both (as the second is a toggle ref)
+        vfuncs.object_ref()._ref_sink()
+        vfuncs.object_ref()._unref()
 
         gc.collect()
         gc.collect()
@@ -535,6 +556,13 @@ class TestVFuncsWithHeldFloatingArg(unittest.TestCase):
 
         # Current ref count after C cleans up its reference
         self.assertEqual(vfuncs.object_ref().__grefcount__, 1)
+
+        # Our reference is still floating at this point ...
+        self.assertTrue(vfuncs.object_ref().is_floating())
+        # ... usually it should have been sunk within C at some point,
+        # do it here to avoid a critical warning.
+        vfuncs.object_ref()._ref_sink()
+        # However, that means that the above comment of "sinks and owns" is wrong.
 
         held_object_ref = weakref.ref(vfuncs.object_ref())
         del vfuncs.object_ref
