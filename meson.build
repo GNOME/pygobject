@@ -31,13 +31,11 @@ libffi_version_req = '>= 3.0'
 gi_dep = dependency('girepository-2.0', version : glib_version_req,
   fallback: ['glib', 'libgirepository_dep'])
 glib_dep = dependency('glib-2.0', version : glib_version_req,
-  fallback: ['glib', 'libglib_dep'])
+  fallback: ['glib', 'libglib_dep'], default_options: ['-Dintrospection=enabled'])
 gobject_dep = dependency('gobject-2.0', version : glib_version_req,
   fallback: ['glib', 'libgobject_dep'])
 gio_dep = dependency('gio-2.0', version : glib_version_req,
   fallback: ['glib', 'libgio_dep'])
-gmodule_dep = dependency('gmodule-2.0', version : glib_version_req,
-  fallback: ['glib', 'libgmodule_dep'])
 ffi_dep = dependency('libffi', version : libffi_version_req,
   fallback : ['libffi', 'ffi_dep'])
 
@@ -213,7 +211,11 @@ subdir('gi')
 subdir('pygtkcompat')
 with_tests = get_option('tests')
 if with_tests
-  dependency('gobject-introspection-1.0', version : gi_version_req, fallback: ['gobject-introspection', 'girepo_dep'])
+  # We cannot depend on gobject-introspection-1.0 fallback if we also need GLib to build.
+  # All we need is the g-ir-scanner and friends
+  if glib_dep.type_name() != 'internal'
+    dependency('gobject-introspection-1.0', version : gi_version_req, fallback: ['gobject-introspection', 'girepo_dep'])
+  endif
   subproject('gobject-introspection-tests', default_options : ['cairo=' + cairo_dep.found().to_string()])
   subdir('tests')
 endif
