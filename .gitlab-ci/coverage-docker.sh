@@ -18,7 +18,7 @@ for path in coverage/*.lcov; do
     test -s "${path}" || rm "${path}"
 done
 
-genhtml --ignore-errors=source --config-file .gitlab-ci/lcovrc \
+genhtml --config-file .gitlab-ci/lcovrc \
     coverage/*.lcov -o coverage/
 
 cd coverage
