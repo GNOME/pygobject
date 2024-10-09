@@ -1,6 +1,10 @@
-image: registry.gitlab.gnome.org/gnome/pygobject/main:v25
+variables:
+  REGISTRY: registry.gitlab.gnome.org/gnome/pygobject
+
+image: $REGISTRY/ci:$CI_PIPELINE_ID
 
 stages:
+  - pre_build
   - build_and_test
   - coverage
   - deploy
@@ -9,8 +13,35 @@ cache:
   paths:
     - _ccache/
 
+build-image:
+  stage: pre_build
+  interruptible: true
+  image: quay.io/buildah/stable:latest
+  variables:
+    STORAGE_DRIVER: vfs
+    BUILDAH_ISOLATION: chroot
+
+#   rules:
+#     - changes:
+#       - ".gitlab-ci/Dockerfile"
+#       - ".gitlab-ci/set_env.sh"
+  script:
+    - echo "$CI_REGISTRY_PASSWORD" | buildah login $CI_REGISTRY -u $CI_REGISTRY_USER --password-stdin
+    # Hopefully save ourselves some work by pulling the latest main and branch images
+    # - buildah pull $REGISTRY/$CI_DEFAULT_BRANCH || true
+    # - test -n "$CI_COMMIT_BRANCH" && buildah pull $REGISTRY/$CI_COMMIT_BRANCH || true
+    # Create a new image
+    - buildah build -t $REGISTRY/ci:$CI_PIPELINE_ID --layers --cache-from=$CACHE --cache-to=$CACHE -f Dockerfile .gitlab-ci
+    # Publish for later use in the pipeline
+    - buildah push $REGISTRY/ci:$CI_PIPELINE_ID
+    - >
+      test -n "$CI_COMMIT_BRANCH" &&
+      buildah push $REGISTRY/ci:$CI_PIPELINE_ID docker://$REGISTRY/$CI_COMMIT_BRANCH || true
+
 .defaults: &defaults
   stage: build_and_test
+  needs:
+    - build-image
   artifacts:
     when: always
     paths:
