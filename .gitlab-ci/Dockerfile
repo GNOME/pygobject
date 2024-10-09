@@ -1,4 +1,4 @@
-FROM ubuntu:jammy
+FROM debian:bookworm
 
 ENV DEBIAN_FRONTEND=noninteractive
 
