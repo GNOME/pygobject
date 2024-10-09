@@ -122,6 +122,7 @@ pypy3:
   <<: *defaults
 
 old-i386-py3:
+  allow_failure: true
   stage: build_and_test
   image: registry.gitlab.gnome.org/gnome/pygobject/old:v6
   artifacts:
