@@ -1,6 +1,10 @@
-image: registry.gitlab.gnome.org/gnome/pygobject/main:v23
+variables:
+  BUILD_IMAGE: registry.gitlab.gnome.org/gnome/pygobject/main:v23
+
+image: $BUILD_IMAGE
 
 stages:
+  - pre_build
   - build_and_test
   - coverage
   - deploy
@@ -8,6 +12,22 @@ stages:
 cache:
   paths:
     - _ccache/
+
+build-image:
+  stage: pre_build
+  interruptible: true
+  image: quay.io/gnome_infrastructure/buildah:latest
+  rules:
+    - changes:
+      - ".gitlab-ci/Dockerfile"
+      - ".gitlab-ci/set_env.sh"
+  script:
+    - buildah bud -t registry.gitlab.gnome.org/gnome/pygobject/main:v23 -f Dockerfile .gitlab-ci
+    # - >-
+    #   if [ "$CI_COMMIT_REF_PROTECTED" == "true" ]; then
+    #     buildah login -u ${OCI_REGISTRY_USER} -p ${OCI_REGISTRY_PASSWORD} ${OCI_REGISTRY}
+    #     buildah push ${OCI_REGISTRY}/gnome_infrastructure/${CI_JOB_NAME}:latest
+    #   fi
 
 .defaults: &defaults
   stage: build_and_test
