@@ -21,7 +21,7 @@
 #ifndef __PYGI_TYPE_H__ 
 #define __PYGI_TYPE_H__
 
-#include <Python.h>
+#include <pythoncapi_compat.h>
 #include <glib-object.h>
 #include <girepository.h>
 #include "pygobject-internal.h"

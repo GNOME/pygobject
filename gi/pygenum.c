@@ -21,7 +21,7 @@
 
 #include <config.h>
 
-#include "pythoncapi_compat.h"
+#include <pythoncapi_compat.h>
 #include "pygi-type.h"
 #include "pygi-util.h"
 #include "pygi-type.h"

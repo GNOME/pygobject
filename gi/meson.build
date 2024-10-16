@@ -75,7 +75,7 @@ else
 endif
 
 giext = python.extension_module('_gi', sources,
-  dependencies : [python_ext_dep, glib_dep, gi_dep, ffi_dep],
+  dependencies : [python_ext_dep, glib_dep, gi_dep, ffi_dep, pythoncapi_compat_dep],
   include_directories: include_directories('..'),
   install: true,
   subdir : 'gi',
@@ -84,7 +84,7 @@ giext = python.extension_module('_gi', sources,
 
 if cairo_dep.found()
   gicairoext = python.extension_module('_gi_cairo', ['pygi-foreign-cairo.c'],
-    dependencies : [python_ext_dep, glib_dep, gi_dep, ffi_dep, pycairo_dep, cairo_dep, cairo_gobject_dep],
+    dependencies : [python_ext_dep, glib_dep, gi_dep, ffi_dep, pycairo_dep, cairo_dep, cairo_gobject_dep, pythoncapi_compat_dep],
     install: true,
     subdir : 'gi',
     c_args: pyext_c_args + main_c_args)

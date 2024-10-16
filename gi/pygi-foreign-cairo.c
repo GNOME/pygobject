@@ -21,7 +21,7 @@
  * IN THE SOFTWARE.
  */
 
-#include <Python.h>
+#include <pythoncapi_compat.h>
 #include <cairo.h>
 #include <py3cairo.h>
 
