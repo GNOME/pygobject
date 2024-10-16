@@ -782,11 +782,12 @@ pygi_callable_cache_free (PyGICallableCache *cache)
 static PyObject *
 _function_cache_invoke_real (PyGIFunctionCache *function_cache,
                              PyGIInvokeState *state,
-                             PyObject *py_args,
-                             PyObject *py_kwargs)
+                             PyObject *const *py_args,
+                             size_t py_nargsf,
+                             PyObject *py_kwnames)
 {
     return pygi_invoke_c_callable (function_cache, state,
-                                   py_args, py_kwargs);
+                                   py_args, py_nargsf, py_kwnames);
 }
 
 static void
@@ -933,13 +934,14 @@ pygi_function_cache_new (GICallableInfo *info)
 
 PyObject *
 pygi_function_cache_invoke (PyGIFunctionCache *function_cache,
-                            PyObject *py_args,
-                            PyObject *py_kwargs)
+                            PyObject *const *py_args,
+                            size_t py_nargsf,
+                            PyObject *py_kwnames)
 {
     PyGIInvokeState state = { 0, };
 
     return function_cache->invoke (function_cache, &state,
-                                   py_args, py_kwargs);
+                                   py_args, py_nargsf, py_kwnames);
 }
 
 /* PyGICCallbackCache */
@@ -966,8 +968,9 @@ pygi_ccallback_cache_new (GICallableInfo *info,
 
 PyObject *
 pygi_ccallback_cache_invoke (PyGICCallbackCache *ccallback_cache,
-                             PyObject *py_args,
-                             PyObject *py_kwargs,
+                             PyObject *const *py_args,
+                             size_t py_nargsf,
+                             PyObject *py_kwnames,
                              gpointer user_data)
 {
     PyGIFunctionCache *function_cache = (PyGIFunctionCache *) ccallback_cache;
@@ -976,7 +979,7 @@ pygi_ccallback_cache_invoke (PyGICCallbackCache *ccallback_cache,
     state.user_data = user_data;
 
     return function_cache->invoke (function_cache, &state,
-                                   py_args, py_kwargs);
+                                   py_args, py_nargsf, py_kwnames);
 }
 
 /* PyGIConstructorCache */
@@ -984,17 +987,18 @@ pygi_ccallback_cache_invoke (PyGICCallbackCache *ccallback_cache,
 static PyObject *
 _constructor_cache_invoke_real (PyGIFunctionCache *function_cache,
                                 PyGIInvokeState *state,
-                                PyObject *py_args,
-                                PyObject *py_kwargs)
+                                PyObject *const *py_args,
+                                size_t py_nargsf,
+                                PyObject *py_kwnames)
 {
     PyGICallableCache *cache = (PyGICallableCache *) function_cache;
+    Py_ssize_t nargs = PyVectorcall_NARGS (py_nargsf);
     PyObject *constructor_class;
     PyObject *ret;
 
-    constructor_class = PyTuple_GetItem (py_args, 0);
+    constructor_class = nargs > 0 ? py_args[0] : NULL;
     if (constructor_class == NULL) {
         gchar *full_name = pygi_callable_cache_get_full_name (cache);
-        PyErr_Clear ();
         PyErr_Format (PyExc_TypeError,
                       "Constructors require the class to be passed in as an argument, "
                       "No arguments passed to the %s constructor.",
@@ -1004,10 +1008,8 @@ _constructor_cache_invoke_real (PyGIFunctionCache *function_cache,
         return FALSE;
     }
 
-    py_args = PyTuple_GetSlice (py_args, 1, PyTuple_Size (py_args));
     ret = _function_cache_invoke_real (function_cache, state,
-                                       py_args, py_kwargs);
-    Py_DECREF (py_args);
+                                       py_args + 1, nargs - 1, py_kwnames);
 
     if (ret == NULL || cache->return_cache->is_skipped)
         return ret;
@@ -1119,16 +1121,18 @@ pygi_method_cache_new (GICallableInfo *info)
 static PyObject *
 _vfunc_cache_invoke_real (PyGIFunctionCache *function_cache,
                           PyGIInvokeState *state,
-                          PyObject *py_args,
-                          PyObject *py_kwargs)
+                          PyObject *const *py_args,
+                          size_t py_nargsf,
+                          PyObject *py_kwnames)
 {
     PyGIVFuncCache *vfunc_cache = (PyGIVFuncCache *) function_cache;
+    Py_ssize_t nargs = PyVectorcall_NARGS (py_nargsf);
     PyObject *py_gtype;
     GType implementor_gtype;
     GError *error = NULL;
     PyObject *ret;
 
-    py_gtype = PyTuple_GetItem (py_args, 0);
+    py_gtype = nargs > 0 ? py_args[0] : NULL;
     if (py_gtype == NULL) {
         PyErr_SetString (PyExc_TypeError,
                          "need the GType of the implementor class");
@@ -1151,10 +1155,8 @@ _vfunc_cache_invoke_real (PyGIFunctionCache *function_cache,
         return FALSE;
     }
 
-    py_args = PyTuple_GetSlice (py_args, 1, PyTuple_Size (py_args));
     ret = _function_cache_invoke_real (function_cache, state,
-                                       py_args, py_kwargs);
-    Py_DECREF (py_args);
+                                       py_args + 1, nargs - 1, py_kwnames);
 
     return ret;
 }

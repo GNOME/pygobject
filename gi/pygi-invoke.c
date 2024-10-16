@@ -69,7 +69,7 @@ _check_for_unexpected_kwargs (PyGICallableCache *cache,
 }
 
 /**
- * _py_args_combine_and_check_length:
+ * _py_old_args_combine_and_check_length:
  * @cache: PyGICallableCache
  * @py_args: the tuple of positional arguments.
  * @py_kwargs: the dict of keyword arguments to be merged with py_args.
@@ -77,9 +77,9 @@ _check_for_unexpected_kwargs (PyGICallableCache *cache,
  * Returns: New value reference to the combined py_args and py_kwargs.
  */
 static PyObject *
-_py_args_combine_and_check_length (PyGICallableCache *cache,
-                                   PyObject    *py_args,
-                                   PyObject    *py_kwargs)
+_py_old_args_combine_and_check_length (PyGICallableCache *cache,
+                                       PyObject    *py_args,
+                                       PyObject    *py_kwargs)
 {
     PyObject *combined_py_args = NULL;
     Py_ssize_t n_py_args, n_py_kwargs, i;
@@ -215,6 +215,50 @@ _py_args_combine_and_check_length (PyGICallableCache *cache,
     return combined_py_args;
 }
 
+static PyObject *
+_py_args_combine_and_check_length (PyGICallableCache *cache,
+                                   PyObject *const *args,
+                                   size_t nargsf,
+                                   PyObject *kwnames)
+{
+    PyObject *py_args = NULL, *py_kwargs = NULL, *ret = NULL;
+    Py_ssize_t nargs, nkwargs, i;
+
+    /* construct traditional args and kwargs from vector */
+    nargs = PyVectorcall_NARGS (nargsf);
+    if (kwnames != NULL)
+        nkwargs = PyTuple_GET_SIZE (kwnames);
+    else
+        nkwargs = 0;
+
+    py_args = PyTuple_New (nargs);
+    if (py_args == NULL)
+        goto out;
+    for (i = 0; i < nargs; i++) {
+        Py_INCREF (args[i]);
+        PyTuple_SET_ITEM (py_args, i, args[i]);
+    }
+
+    if (nkwargs > 0) {
+        py_kwargs = PyDict_New();
+        if (py_kwargs == NULL)
+            goto out;
+        for (i = 0; i < nkwargs; i++) {
+            PyObject *key = PyTuple_GET_ITEM (kwnames, i);
+            PyObject *value = args[nargs + i];
+            if (PyDict_SetItem (py_kwargs, key, value) < 0)
+                goto out;
+        }
+    }
+
+    ret = _py_old_args_combine_and_check_length (cache, py_args, py_kwargs);
+
+out:
+    Py_XDECREF (py_args);
+    Py_XDECREF (py_kwargs);
+    return ret;
+}
+
 /* To reduce calls to g_slice_*() we (1) allocate all the memory depended on
  * the argument count in one go and (2) keep one version per argument count
  * around for faster reuse.
@@ -271,8 +315,9 @@ _pygi_invoke_arg_state_free(PyGIInvokeState *state) {
 static gboolean
 _invoke_state_init_from_cache (PyGIInvokeState *state,
                                PyGIFunctionCache *function_cache,
-                               PyObject *py_args,
-                               PyObject *kwargs)
+                               PyObject *const *py_args,
+                               size_t py_nargsf,
+                               PyObject *kwnames)
 {
     PyGICallableCache *cache = (PyGICallableCache *) function_cache;
 
@@ -290,7 +335,8 @@ _invoke_state_init_from_cache (PyGIInvokeState *state,
 
     state->py_in_args = _py_args_combine_and_check_length (cache,
                                                            py_args,
-                                                           kwargs);
+                                                           py_nargsf,
+                                                           kwnames);
 
     if (state->py_in_args == NULL) {
         return FALSE;
@@ -712,15 +758,16 @@ _invoke_marshal_out_args (PyGIInvokeState *state, PyGIFunctionCache *function_ca
 PyObject *
 pygi_invoke_c_callable (PyGIFunctionCache *function_cache,
                         PyGIInvokeState *state,
-                        PyObject *py_args,
-                        PyObject *py_kwargs)
+                        PyObject *const *py_args,
+                        size_t py_nargsf,
+                        PyObject *py_kwnames)
 {
     PyGICallableCache *cache = (PyGICallableCache *) function_cache;
     GIFFIReturnValue ffi_return_value = {0};
     PyObject *ret = NULL;
 
     if (!_invoke_state_init_from_cache (state, function_cache,
-                                        py_args, py_kwargs))
+                                        py_args, py_nargsf, py_kwnames))
          goto err;
 
     if (!_invoke_marshal_in_args (state, function_cache))
@@ -767,17 +814,19 @@ err:
 }
 
 PyObject *
-pygi_callable_info_invoke (GIBaseInfo *info, PyObject *py_args,
-                           PyObject *kwargs, PyGICallableCache *cache,
+pygi_callable_info_invoke (GIBaseInfo *info,
+                           PyObject *const *py_args, size_t py_nargsf,
+                           PyObject *py_kwnames, PyGICallableCache *cache,
                            gpointer user_data)
 {
     return pygi_function_cache_invoke ((PyGIFunctionCache *) cache,
-                                       py_args, kwargs);
+                                       py_args, py_nargsf, py_kwnames);
 }
 
 PyObject *
-_wrap_g_callable_info_invoke (PyGIBaseInfo *self, PyObject *py_args,
-                              PyObject *kwargs)
+_wrap_g_callable_info_invoke (PyGIBaseInfo *self,
+                              PyObject *const *py_args, size_t py_nargsf,
+                              PyObject *py_kwnames)
 {
     if (self->cache == NULL) {
         PyGIFunctionCache *function_cache;
@@ -808,5 +857,5 @@ _wrap_g_callable_info_invoke (PyGIBaseInfo *self, PyObject *py_args,
             return NULL;
     }
 
-    return pygi_callable_info_invoke (self->info, py_args, kwargs, self->cache, NULL);
+    return pygi_callable_info_invoke (self->info, py_args, py_nargsf, py_kwnames, self->cache, NULL);
 }

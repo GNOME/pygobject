@@ -33,6 +33,7 @@ typedef struct {
     GIScopeType scope;
     GDestroyNotify destroy_notify_func;
     PyGICCallbackCache *cache;
+    vectorcallfunc vectorcall;
 } PyGICCallback;
 
 extern PyTypeObject PyGICCallback_Type;

@@ -234,8 +234,9 @@ struct _PyGIFunctionCache {
 
     PyObject *(*invoke) (PyGIFunctionCache *function_cache,
                          PyGIInvokeState *state,
-                         PyObject *py_args,
-                         PyObject *py_kwargs);
+                         PyObject *const *py_args,
+                         size_t py_nargsf,
+                         PyObject *py_kwnames);
 } ;
 
 struct _PyGIVFuncCache {
@@ -302,8 +303,9 @@ pygi_function_cache_new     (GICallableInfo *info);
 
 PyObject *
 pygi_function_cache_invoke  (PyGIFunctionCache *function_cache,
-                             PyObject *py_args,
-                             PyObject *py_kwargs);
+                             PyObject *const *py_args,
+                             size_t py_nargsf,
+                             PyObject *py_kwnames);
 
 PyGIFunctionCache *
 pygi_ccallback_cache_new    (GICallableInfo *info,
@@ -311,8 +313,9 @@ pygi_ccallback_cache_new    (GICallableInfo *info,
 
 PyObject *
 pygi_ccallback_cache_invoke (PyGIFunctionCache *function_cache,
-                             PyObject *py_args,
-                             PyObject *py_kwargs,
+                             PyObject *const *py_args,
+                             size_t py_nargsf,
+                             PyObject *py_kwnames,
                              gpointer user_data);
 
 PyGIFunctionCache *

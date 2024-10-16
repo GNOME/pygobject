@@ -36,6 +36,7 @@ typedef struct {
 
 typedef struct {
     PyGIBaseInfo base;
+    vectorcallfunc vectorcall;
 } PyGICallableInfo;
 
 

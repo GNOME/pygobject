@@ -426,11 +426,15 @@ static PyGetSetDef _base_info_getsets[] = {
     { NULL, 0, 0 }
 };
 
+static PyObject *_callable_info_vectorcall (PyGICallableInfo *self, PyObject *const *args, size_t nargsf, PyObject *kwnames);
+static PyObject *_function_info_vectorcall (PyGICallableInfo *self, PyObject *const *args, size_t nargsf, PyObject *kwnames);
+
 PyObject *
 _pygi_info_new (GIBaseInfo *info)
 {
     GIInfoType info_type;
     PyTypeObject *type = NULL;
+    vectorcallfunc vectorcall = NULL;
     PyGIBaseInfo *self;
 
     info_type = g_base_info_get_type (info);
@@ -442,9 +446,11 @@ _pygi_info_new (GIBaseInfo *info)
             return NULL;
         case GI_INFO_TYPE_FUNCTION:
             type = &PyGIFunctionInfo_Type;
+            vectorcall = (vectorcallfunc)_function_info_vectorcall;
             break;
         case GI_INFO_TYPE_CALLBACK:
             type = &PyGICallbackInfo_Type;
+            vectorcall = (vectorcallfunc)_callable_info_vectorcall;
             break;
         case GI_INFO_TYPE_STRUCT:
         case GI_INFO_TYPE_BOXED:
@@ -471,9 +477,11 @@ _pygi_info_new (GIBaseInfo *info)
             break;
         case GI_INFO_TYPE_SIGNAL:
             type = &PyGISignalInfo_Type;
+            vectorcall = (vectorcallfunc)_callable_info_vectorcall;
             break;
         case GI_INFO_TYPE_VFUNC:
             type = &PyGIVFuncInfo_Type;
+            vectorcall = (vectorcallfunc)_callable_info_vectorcall;
             break;
         case GI_INFO_TYPE_PROPERTY:
             type = &PyGIPropertyInfo_Type;
@@ -503,6 +511,10 @@ _pygi_info_new (GIBaseInfo *info)
     self->info = g_base_info_ref (info);
     self->inst_weakreflist = NULL;
     self->cache = NULL;
+
+    if (vectorcall != NULL) {
+        ((PyGICallableInfo *)self)->vectorcall = vectorcall;
+    }
 
     return (PyObject *) self;
 }
@@ -543,9 +555,9 @@ PYGI_DEFINE_TYPE ("gi.CallableInfo", PyGICallableInfo_Type, PyGICallableInfo);
  * or unbound (function or static method).
  */
 static PyObject *
-_callable_info_call (PyGICallableInfo *self, PyObject *args, PyObject *kwargs)
+_callable_info_vectorcall (PyGICallableInfo *self, PyObject *const *args, size_t nargsf, PyObject *kwnames)
 {
-    return _wrap_g_callable_info_invoke ((PyGIBaseInfo *)self, args, kwargs);
+    return _wrap_g_callable_info_invoke ((PyGIBaseInfo *)self, args, nargsf, kwnames);
 }
 
 static PyObject *
@@ -556,13 +568,13 @@ _callable_info_repr (PyGICallableInfo *self)
 				 _safe_base_info_get_name (self->base.info));
 }
 
-/* _function_info_call:
+/* _function_info_vectorcall:
  *
  * Specialization of _callable_info_call for GIFunctionInfo which
  * handles constructor error conditions.
  */
 static PyObject *
-_function_info_call (PyGICallableInfo *self, PyObject *args, PyObject *kwargs)
+_function_info_vectorcall (PyGICallableInfo *self, PyObject *const *args, size_t nargsf, PyObject *kwnames)
 {
     GIFunctionInfoFlags flags;
 
@@ -571,6 +583,7 @@ _function_info_call (PyGICallableInfo *self, PyObject *args, PyObject *kwargs)
      */
     flags = g_function_info_get_flags ((GIFunctionInfo*) self->base.info);
     if (flags & GI_FUNCTION_IS_CONSTRUCTOR) {
+        Py_ssize_t nargs;
 	PyObject *cls;
 	PyObject *py_str_name;
 	const gchar *str_name;
@@ -578,9 +591,12 @@ _function_info_call (PyGICallableInfo *self, PyObject *args, PyObject *kwargs)
 
 	g_assert (container_info != NULL);
 
-	cls = PyTuple_GetItem(args, 0);
-	if (cls == NULL)
-	    return NULL;
+        nargs = PyVectorcall_NARGS(nargsf);
+        cls = nargs > 0 ? args[0] : NULL;
+        if (cls == NULL) {
+            PyErr_BadArgument();
+            return NULL;
+        }
 	py_str_name = PyObject_GetAttrString (cls, "__name__");
 	if (py_str_name == NULL)
 	    return NULL;
@@ -604,7 +620,7 @@ _function_info_call (PyGICallableInfo *self, PyObject *args, PyObject *kwargs)
 	Py_DECREF (py_str_name);
     }
 
-    return _callable_info_call (self, args, kwargs);
+    return _callable_info_vectorcall (self, args, nargsf, kwnames);
 }
 
 /* _function_info_descr_get
@@ -704,7 +720,7 @@ _wrap_g_callable_info_can_throw_gerror (PyGIBaseInfo *self)
 }
 
 static PyMethodDef _PyGICallableInfo_methods[] = {
-    { "invoke", (PyCFunction) _wrap_g_callable_info_invoke, METH_VARARGS | METH_KEYWORDS },
+    { "invoke", (PyCFunction) PyObject_Call, METH_VARARGS | METH_KEYWORDS },
     { "get_arguments", (PyCFunction) _wrap_g_callable_info_get_arguments, METH_NOARGS },
     { "get_return_type", (PyCFunction) _wrap_g_callable_info_get_return_type, METH_NOARGS },
     { "get_caller_owns", (PyCFunction) _wrap_g_callable_info_get_caller_owns, METH_NOARGS },
@@ -2286,14 +2302,15 @@ pygi_info_register_types (PyObject *m)
         return -1;
     }
 
-    PyGICallableInfo_Type.tp_call = (ternaryfunc) _callable_info_call;
+    PyGICallableInfo_Type.tp_flags |= Py_TPFLAGS_HAVE_VECTORCALL;
+    PyGICallableInfo_Type.tp_vectorcall_offset = offsetof (PyGICallableInfo, vectorcall);
+    PyGICallableInfo_Type.tp_call = PyVectorcall_Call;
     PyGICallableInfo_Type.tp_repr = (reprfunc) _callable_info_repr;
     PyGICallableInfo_Type.tp_getset = _PyGICallableInfo_getsets;
     _PyGI_REGISTER_TYPE (m, PyGICallableInfo_Type, CallableInfo,
                          PyGIBaseInfo_Type);
 
     PyGIFunctionInfo_Type.tp_flags |= Py_TPFLAGS_METHOD_DESCRIPTOR;
-    PyGIFunctionInfo_Type.tp_call = (ternaryfunc) _function_info_call;
     PyGIFunctionInfo_Type.tp_descr_get = (descrgetfunc) _function_info_descr_get;
     _PyGI_REGISTER_TYPE (m, PyGIFunctionInfo_Type, FunctionInfo,
                          PyGICallableInfo_Type);

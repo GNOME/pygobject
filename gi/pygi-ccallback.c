@@ -26,7 +26,7 @@
 
 
 static PyObject *
-_ccallback_call(PyGICCallback *self, PyObject *args, PyObject *kwargs)
+_ccallback_vectorcall(PyGICCallback *self, PyObject *const *args, size_t nargsf, PyObject *kwnames)
 {
     PyObject *result;
 
@@ -39,7 +39,8 @@ _ccallback_call(PyGICCallback *self, PyObject *args, PyObject *kwargs)
 
     result = pygi_ccallback_cache_invoke (self->cache,
                                           args,
-                                          kwargs,
+                                          nargsf,
+                                          kwnames,
                                           self->user_data);
     return result;
 }
@@ -69,6 +70,7 @@ _pygi_ccallback_new (GCallback callback,
     self->scope = scope;
     self->destroy_notify_func = destroy_notify;
     self->info = g_base_info_ref( (GIBaseInfo *) info);
+    self->vectorcall = (vectorcallfunc)_ccallback_vectorcall;
 
     return (PyObject *) self;
 }
@@ -92,9 +94,10 @@ int
 pygi_ccallback_register_types (PyObject *m)
 {
     Py_SET_TYPE(&PyGICCallback_Type, &PyType_Type);
-    PyGICCallback_Type.tp_flags = (Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE);
+    PyGICCallback_Type.tp_flags = (Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE | Py_TPFLAGS_HAVE_VECTORCALL);
     PyGICCallback_Type.tp_dealloc = (destructor) _ccallback_dealloc;
-    PyGICCallback_Type.tp_call = (ternaryfunc) _ccallback_call;
+    PyGICCallback_Type.tp_call = PyVectorcall_Call;
+    PyGICCallback_Type.tp_vectorcall_offset = offsetof (PyGICCallback, vectorcall);
 
 
     if (PyType_Ready (&PyGICCallback_Type) < 0)
