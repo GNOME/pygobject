@@ -20,9 +20,9 @@
 
 #include <config.h>
 
+#include <pythoncapi_compat.h>
 #include <glib-object.h>
 
-#include "pythoncapi_compat.h"
 #include "pygboxed.h"
 #include "pygi-type.h"
 #include "pygi-type.h"

@@ -18,7 +18,7 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "pythoncapi_compat.h"
+#include <pythoncapi_compat.h>
 #include "pygi-type.h"
 #include "pygi-basictype.h"
 #include "pygi-argument.h"

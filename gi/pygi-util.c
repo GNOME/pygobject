@@ -1,5 +1,3 @@
-#include "pythoncapi_compat.h"
-
 /* -*- Mode: C; c-basic-offset: 4 -*-
  * pygtk- Python bindings for the GTK toolkit.
  * Copyright (C) 1998-2003  James Henstridge
@@ -18,6 +16,7 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <pythoncapi_compat.h>
 #include "pygi-util.h"
 
 gboolean

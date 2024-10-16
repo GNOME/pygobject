@@ -18,7 +18,7 @@
 #ifndef __PYGI_CLOSURE_H__
 #define __PYGI_CLOSURE_H__
 
-#include <Python.h>
+#include <pythoncapi_compat.h>
 #include <girffi.h>
 #include <ffi.h>
 

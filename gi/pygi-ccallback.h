@@ -20,7 +20,7 @@
 #ifndef __PYGI_CCLOSURE_H__
 #define __PYGI_CCLOSURE_H__
 
-#include <Python.h>
+#include <pythoncapi_compat.h>
 #include "pygi-cache.h"
 
 G_BEGIN_DECLS

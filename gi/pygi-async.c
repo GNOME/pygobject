@@ -1,5 +1,3 @@
-#include "pythoncapi_compat.h"
-
 /* -*- Mode: C; c-basic-offset: 4 -*-
  * vim: tabstop=4 shiftwidth=4 expandtab
  *
@@ -19,7 +17,7 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <Python.h>
+#include <pythoncapi_compat.h>
 #include <structmember.h>
 #include <glib.h>
 #include "pygobject-object.h"
