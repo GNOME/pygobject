@@ -18,7 +18,7 @@
 #ifndef __PYGI_VALUE_H__
 #define __PYGI_VALUE_H__
 
-#include <Python.h>
+#include <pythoncapi_compat.h>
 #include <glib-object.h>
 #include <girepository.h>
 

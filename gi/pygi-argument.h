@@ -20,7 +20,7 @@
 #ifndef __PYGI_ARGUMENT_H__
 #define __PYGI_ARGUMENT_H__
 
-#include <Python.h>
+#include <pythoncapi_compat.h>
 
 #include <girepository.h>
 

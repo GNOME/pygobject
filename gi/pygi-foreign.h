@@ -25,7 +25,7 @@
 #ifndef __PYGI_FOREIGN_H__
 #define __PYGI_FOREIGN_H__
 
-#include <Python.h>
+#include <pythoncapi_compat.h>
 #include "pygi-foreign-api.h"
 
 PyObject *pygi_struct_foreign_convert_to_g_argument (PyObject           *value,

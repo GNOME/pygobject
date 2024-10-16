@@ -1,5 +1,3 @@
-#include "pythoncapi_compat.h"
-
 /* -*- Mode: C; c-basic-offset: 4 -*-
  * pygtk- Python bindings for the GTK toolkit.
  * Copyright (C) 1998-2003  James Henstridge
@@ -22,7 +20,7 @@
 
 #include <config.h>
 
-#include <Python.h>
+#include <pythoncapi_compat.h>
 #include <glib-object.h>
 #include "pygpointer.h"
 #include "pygi-type.h"

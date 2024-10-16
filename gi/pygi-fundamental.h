@@ -24,7 +24,7 @@
 #ifndef __PYGI_FUNDAMENTAL_H__
 #define __PYGI_FUNDAMENTAL_H__
 
-#include <Python.h>
+#include <pythoncapi_compat.h>
 #include <girepository.h>
 
 #include "pygobject-internal.h"

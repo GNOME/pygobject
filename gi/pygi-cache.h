@@ -21,7 +21,7 @@
 #ifndef __PYGI_CACHE_H__
 #define __PYGI_CACHE_H__
 
-#include <Python.h>
+#include <pythoncapi_compat.h>
 #include <girepository.h>
 #include <girffi.h>
 

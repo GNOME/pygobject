@@ -21,7 +21,7 @@
 
 #include <glib.h>
 
-#include "pythoncapi_compat.h"
+#include <pythoncapi_compat.h>
 #include "pygi-util.h"
 #include "pygi-basictype.h"
 #include "pygspawn.h"

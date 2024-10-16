@@ -18,7 +18,7 @@
 
 #include <config.h>
 
-#include "pythoncapi_compat.h"
+#include <pythoncapi_compat.h>
 #include "pygobject-object.h"
 #include "pygboxed.h"
 #include "pygenum.h"

@@ -17,7 +17,7 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "pythoncapi_compat.h"
+#include <pythoncapi_compat.h>
 #include "pygi-closure.h"
 #include "pygi-error.h"
 #include "pygi-marshal-cleanup.h"

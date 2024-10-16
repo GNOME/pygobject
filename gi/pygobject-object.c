@@ -20,7 +20,7 @@
 
 #include <config.h>
 
-#include "pythoncapi_compat.h"
+#include <pythoncapi_compat.h>
 #include "pygobject-object.h"
 #include "pyginterface.h"
 #include "pygi-type.h"

@@ -22,7 +22,7 @@
 #include <string.h>
 #include <time.h>
 
-#include "pythoncapi_compat.h"
+#include <pythoncapi_compat.h>
 #include "pygobject-internal.h"
 
 #include <pygenum.h>
