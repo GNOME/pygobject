@@ -251,7 +251,12 @@ _py_args_combine_and_check_length (PyGICallableCache *cache,
         }
     }
 
+    if (Py_EnterRecursiveCall (" while calling a GICallable"))
+        goto out;
+
     ret = _py_old_args_combine_and_check_length (cache, py_args, py_kwargs);
+
+    Py_LeaveRecursiveCall ();
 
 out:
     Py_XDECREF (py_args);
