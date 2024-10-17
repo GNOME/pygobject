@@ -31,11 +31,11 @@ typedef struct {
     PyObject_HEAD
     GIBaseInfo *info;
     PyObject *inst_weakreflist;
-    PyGICallableCache *cache;
 } PyGIBaseInfo;
 
 typedef struct {
     PyGIBaseInfo base;
+    PyGIFunctionCache *cache;
     vectorcallfunc vectorcall;
 } PyGICallableInfo;
 

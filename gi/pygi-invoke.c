@@ -814,48 +814,39 @@ err:
 }
 
 PyObject *
-pygi_callable_info_invoke (GIBaseInfo *info,
+pygi_callable_info_invoke (PyGICallableInfo *self,
                            PyObject *const *py_args, size_t py_nargsf,
-                           PyObject *py_kwnames, PyGICallableCache *cache,
-                           gpointer user_data)
-{
-    return pygi_function_cache_invoke ((PyGIFunctionCache *) cache,
-                                       py_args, py_nargsf, py_kwnames);
-}
-
-PyObject *
-_wrap_g_callable_info_invoke (PyGIBaseInfo *self,
-                              PyObject *const *py_args, size_t py_nargsf,
-                              PyObject *py_kwnames)
+                           PyObject *py_kwnames)
 {
     if (self->cache == NULL) {
         PyGIFunctionCache *function_cache;
-        GIInfoType type = g_base_info_get_type (self->info);
+        GIBaseInfo *info = self->base.info;
+        GIInfoType type = g_base_info_get_type (info);
 
         if (type == GI_INFO_TYPE_FUNCTION) {
             GIFunctionInfoFlags flags;
 
-            flags = g_function_info_get_flags ( (GIFunctionInfo *)self->info);
+            flags = g_function_info_get_flags ((GIFunctionInfo *)info);
 
             if (flags & GI_FUNCTION_IS_CONSTRUCTOR) {
-                function_cache = pygi_constructor_cache_new (self->info);
+                function_cache = pygi_constructor_cache_new (info);
             } else if (flags & GI_FUNCTION_IS_METHOD) {
-                function_cache = pygi_method_cache_new (self->info);
+                function_cache = pygi_method_cache_new (info);
             } else {
-                function_cache = pygi_function_cache_new (self->info);
+                function_cache = pygi_function_cache_new (info);
             }
         } else if (type == GI_INFO_TYPE_VFUNC) {
-            function_cache = pygi_vfunc_cache_new (self->info);
+            function_cache = pygi_vfunc_cache_new (info);
         } else if (type == GI_INFO_TYPE_CALLBACK) {
             g_error ("Cannot invoke callback types");
         } else {
-            function_cache = pygi_method_cache_new (self->info);
+            function_cache = pygi_method_cache_new (info);
         }
 
-        self->cache = (PyGICallableCache *)function_cache;
+        self->cache = function_cache;
         if (self->cache == NULL)
             return NULL;
     }
 
-    return pygi_callable_info_invoke (self->info, py_args, py_nargsf, py_kwnames, self->cache, NULL);
+    return pygi_function_cache_invoke (self->cache, py_args, py_nargsf, py_kwnames);
 }

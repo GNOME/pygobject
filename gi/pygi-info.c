@@ -196,9 +196,6 @@ _base_info_dealloc (PyGIBaseInfo *self)
 
     g_base_info_unref (self->info);
 
-    if (self->cache != NULL)
-        pygi_callable_cache_free ( (PyGICallableCache *) self->cache);
-
     Py_TYPE (self)->tp_free ((PyObject *)self);
 }
 
@@ -510,7 +507,6 @@ _pygi_info_new (GIBaseInfo *info)
 
     self->info = g_base_info_ref (info);
     self->inst_weakreflist = NULL;
-    self->cache = NULL;
 
     if (vectorcall != NULL) {
         ((PyGICallableInfo *)self)->vectorcall = vectorcall;
@@ -549,6 +545,14 @@ out:
 /* CallableInfo */
 PYGI_DEFINE_TYPE ("gi.CallableInfo", PyGICallableInfo_Type, PyGICallableInfo);
 
+static void
+_callable_info_dealloc (PyGICallableInfo *self)
+{
+    if (self->cache != NULL)
+	pygi_callable_cache_free ((PyGICallableCache *)self->cache);
+    _base_info_dealloc ((PyGIBaseInfo *)self);
+}
+
 /* _callable_info_call:
  *
  * Shared wrapper for invoke which can be bound (instance method or class constructor)
@@ -557,7 +561,7 @@ PYGI_DEFINE_TYPE ("gi.CallableInfo", PyGICallableInfo_Type, PyGICallableInfo);
 static PyObject *
 _callable_info_vectorcall (PyGICallableInfo *self, PyObject *const *args, size_t nargsf, PyObject *kwnames)
 {
-    return _wrap_g_callable_info_invoke ((PyGIBaseInfo *)self, args, nargsf, kwnames);
+    return pygi_callable_info_invoke (self, args, nargsf, kwnames);
 }
 
 static PyObject *
@@ -2302,6 +2306,7 @@ pygi_info_register_types (PyObject *m)
         return -1;
     }
 
+    PyGICallableInfo_Type.tp_dealloc = (destructor) _callable_info_dealloc;
     PyGICallableInfo_Type.tp_flags |= Py_TPFLAGS_HAVE_VECTORCALL;
     PyGICallableInfo_Type.tp_vectorcall_offset = offsetof (PyGICallableInfo, vectorcall);
     PyGICallableInfo_Type.tp_call = PyVectorcall_Call;
