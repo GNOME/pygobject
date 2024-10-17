@@ -74,9 +74,10 @@ else
   python_ext_dep = python_dep.partial_dependency(compile_args: true)
 endif
 
+configure_file(output : 'config.h', configuration : cdata)
+
 giext = python.extension_module('_gi', sources,
   dependencies : [python_ext_dep, glib_dep, gi_dep, ffi_dep, pythoncapi_compat_dep],
-  include_directories: include_directories('..'),
   install: true,
   subdir : 'gi',
   c_args: pyext_c_args + main_c_args
