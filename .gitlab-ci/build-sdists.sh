@@ -11,7 +11,7 @@ mkdir -p dist
 python -m pip install --upgrade meson pycairo
 rm -Rf _sdist_build
 meson setup _sdist_build
-meson dist --no-tests --allow-dirty -C _sdist_build
+meson dist --no-tests --allow-dirty --include-subprojects -C _sdist_build
 mv _sdist_build/meson-dist/*.tar.xz dist/
 
 VERSION=$(meson introspect --projectinfo --indent _sdist_build | python -c 'import json, sys; print(json.load(sys.stdin)["version"])')
