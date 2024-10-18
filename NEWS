@@ -1,3 +1,16 @@
+3.51.0 - yyyy-mm-dd (pre-release)
+---------------------------------
+
+* Improved API for asyncio :mr:`352` :mr:`353`
+* Deprecation: The pygtkcompat module now throws an exception when imported :mr:`261`
+* Method signatures are exposed from PyGObject now! :mr:`341`
+* Various code improvements :mr:`346` :mr:`348` :mr:`358`
+* Use [gobject-introspection-tests](https://gitlab.gnome.org/GNOME/gobject-introspection-tests) for testing :mr:`349`
+* Convenience API for Gdk.RGBA got GDK 4, similar to GDK 3 :mr:`351`
+
+Note: the pygtkcompat module will be removed during the 3.53 development cycle.
+
+
 3.50.0 - 2024-09-12
 -------------------
 
@@ -18,7 +31,7 @@
 * Various documentation improvements :mr:`342` :mr:`343` :mr:`338`
   :mr:`336` :mr:`335` :mr:`328` :mr:`329` :mr:`330` :mr:`325` :mr:`322` :mr:`312`
 * Python2 / GTK2 cleanups :mr:`338` :mr:`331`
-* asyncio integration with support to await Gio async functions :mr:`189`
+* Experimental: asyncio integration with support to await Gio async functions :mr:`189`
 * meson: move from .egg-info to .dist-info/METADATA :mr:`306`
 * build: fixes for building with gobject-introspection 1.81 :mr:`344`
 
