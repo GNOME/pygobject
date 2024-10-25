@@ -57,6 +57,13 @@ __version__ = "{0}.{1}.{2}".format(*version_info)
 
 _gi.register_foreign()
 
+# Options which can be enabled or disabled after importing 'gi'. This may affect
+# repository imports or binding machinery in a backwards incompatible way.
+_options = {
+    # When True, importing Gtk or Gdk will call Gtk.init() or Gdk.init() respectively.
+    'legacy_autoinit': True,
+}
+
 
 class _DummyStaticModule(types.ModuleType):
     __path__ = None
@@ -173,3 +180,25 @@ def require_foreign(namespace, symbol=None):
     except Exception as e:
         raise ImportError(str(e))
     importlib.import_module('gi.repository', namespace)
+
+
+def get_option(name):
+    """Get option by name.
+
+    :param str name:
+        Name of the option.
+    """
+    return _options.get(name)
+
+
+def disable_legacy_autoinit():
+    """Disable the legacy initialization of Gdk and Gtk.
+
+    These modules are automatically initialized on import from `gi.repository`.
+    This is not required, and was only kept for backwards compatibility reason.
+    This behavior may eventually be dropped for future Gtk major releases.
+
+    Usually, users should not manually perform these initializations but let
+    e.g. `Gtk.Application` manage it when needed.
+    """
+    _options['legacy_autoinit'] = False

@@ -28,7 +28,7 @@ from .._gtktemplate import Template, _extract_handler_and_args
 from ..overrides import (override, strip_boolean_result, deprecated_init,
                          wrap_list_store_sort_func)
 from ..module import get_introspection_module
-from gi import PyGIDeprecationWarning
+from gi import PyGIDeprecationWarning, get_option
 
 
 Gtk = get_introspection_module('Gtk')
@@ -501,7 +501,7 @@ else:
 
 class Window(Gtk.Window):
     def __init__(self, *args, **kwargs):
-        if not initialized:
+        if not initialized and get_option('legacy_autoinit'):  # TODO: and not GTK5
             raise RuntimeError(
                 "Gtk couldn't be initialized. "
                 "Use Gtk.init_check() if you want to handle this case.")
@@ -1700,7 +1700,9 @@ if GTK3:
     stock_lookup = strip_boolean_result(Gtk.stock_lookup)
     __all__.append('stock_lookup')
 
-if GTK4:
+if not get_option('legacy_autoinit'):  # TODO: or GTK5
+    initialized = False
+elif GTK4:
     initialized = Gtk.init_check()
 else:
     initialized, argv = Gtk.init_check(sys.argv)

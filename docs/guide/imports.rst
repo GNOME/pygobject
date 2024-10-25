@@ -22,6 +22,23 @@ If you want to ensure a specific version of a library you can use :func:`gi.requ
     from gi.repository import Gtk, GLib
 
 
+Currently, when importing ``Gdk`` or ``Gtk``, their init functions
+(``Gdk.init_check()`` and ``Gtk.init_check()`` respectively) will be
+automatically called for backwards-compatibility reasons.
+This prevents, among other things, to use ``Gtk.disable_setlocale()``, as
+it shall be called before ``Gtk`` initialization.
+
+This behavior may be dropped in the future, but in the meanwhile you can
+use :func:`gi.disable_legacy_autoinit` before the import to skip the
+auto-init.
+
+.. code:: python
+
+    import gi
+    gi.disable_legacy_autoinit()
+    from gi.repository import Gtk
+
+
 To avoid `PEP8/E402 <https://www.flake8rules.com/rules/E402.html>`_ you can
 use a try block.
 

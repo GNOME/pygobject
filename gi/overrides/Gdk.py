@@ -24,7 +24,7 @@ import warnings
 
 from ..overrides import override, strip_boolean_result
 from ..module import get_introspection_module
-from gi import PyGIDeprecationWarning, require_version
+from gi import PyGIDeprecationWarning, require_version, get_option
 
 Gdk = get_introspection_module('Gdk')
 GDK3 = Gdk._version == '3.0'
@@ -442,6 +442,6 @@ if GDK3:
     SELECTION_TYPE_STRING = Gdk.atom_intern('STRING', True)
     __all__.append('SELECTION_TYPE_STRING')
 
-if GDK3:
+if GDK3 and get_option('legacy_autoinit'):
     import sys
     initialized, argv = Gdk.init_check(sys.argv)
