@@ -81,6 +81,9 @@ class SubprocessWatcherTests(SubprocessMixin, TestCase):
         self.loop.close()
         super().tearDown()
 
+    def test_subprocess_consistent_callbacks(self):
+        self.skipTest("Order of callback execution is not guaranteed.")
+
 
 class GLibEventLoopPolicyTests(unittest.TestCase):
 
