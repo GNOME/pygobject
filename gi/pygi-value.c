@@ -119,6 +119,7 @@ _pygi_argument_from_g_value(const GValue *value,
             info = gi_type_info_get_interface (type_info);
 
             if (GI_IS_FLAGS_INFO (info)) {
+                /* Check flags before enums: flags are a subtype of enum. */
                 arg.v_uint = g_value_get_flags (value);
             } else if (GI_IS_ENUM_INFO (info)) {
                 arg.v_int = g_value_get_enum (value);

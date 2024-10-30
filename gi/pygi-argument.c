@@ -475,6 +475,7 @@ array_success:
 
                 Py_DECREF (py_type);
             } else if (GI_IS_FLAGS_INFO (info)) {
+                /* Check flags before enums: flags are a subtype of enum. */
                 GType g_type;
 
                 g_type = gi_registered_type_info_get_g_type ( (GIRegisteredTypeInfo *) info);

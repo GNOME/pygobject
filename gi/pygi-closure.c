@@ -100,6 +100,7 @@ _pygi_closure_assign_pyobj_to_retval (gpointer retval,
                 interface_info = ((PyGIInterfaceCache *) arg_cache)->interface_info;
 
                 if (GI_IS_FLAGS_INFO (interface_info)) {
+                    /* Check flags before enums: flags are a subtype of enum. */
                     *(ffi_arg *) retval = arg->v_uint;
                 } else if (GI_IS_ENUM_INFO (interface_info)) {
                     *(ffi_sarg *) retval = arg->v_int;
@@ -170,6 +171,7 @@ _pygi_closure_assign_pyobj_to_out_argument (gpointer out_arg,
             interface_info = ((PyGIInterfaceCache *) arg_cache)->interface_info;
 
             if (GI_IS_FLAGS_INFO (interface_info)) {
+                /* Check flags before enums: flags are a subtype of enum. */
                 *(guint *) out_arg = arg->v_uint;
             } else if (GI_IS_ENUM_INFO (interface_info)) {
                 *(gint *) out_arg = arg->v_int;
@@ -261,6 +263,7 @@ _pygi_closure_convert_ffi_arguments (PyGIInvokeArgState *state,
                 interface = ((PyGIInterfaceCache *) arg_cache)->interface_info;
 
                 if (GI_IS_FLAGS_INFO (interface)) {
+                    /* Check flags before enums: flags are a subtype of enum. */
                     state[i].arg_value.v_uint = * (guint *) arg_pointer;
                 } else if (GI_IS_ENUM_INFO (interface)) {
                     state[i].arg_value.v_int = * (gint *) arg_pointer;

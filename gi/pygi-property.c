@@ -255,6 +255,7 @@ pygi_set_property_value (PyGObject *instance,
             type = gi_registered_type_info_get_g_type (GI_REGISTERED_TYPE_INFO (info));
 
             if (GI_IS_FLAGS_INFO (info)) {
+                /* Check flags before enums: flags are a subtype of enum. */
                 g_value_set_flags (&value, arg.v_uint);
             } else if (GI_IS_ENUM_INFO (info)) {
                 g_value_set_enum (&value, arg.v_int);

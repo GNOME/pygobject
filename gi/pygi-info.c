@@ -1385,6 +1385,7 @@ static PyObject *
 _wrap_gi_enum_info_is_flags (PyGIBaseInfo *self)
 {
     if (GI_IS_FLAGS_INFO (self->info)) {
+        /* Check flags before enums: flags are a subtype of enum. */
         Py_RETURN_TRUE;
     } else if (GI_IS_ENUM_INFO (self->info)) {
         Py_RETURN_FALSE;
