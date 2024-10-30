@@ -23,7 +23,7 @@ endif
 
 python_dep = python.dependency()
 
-glib_version_req = '>= 2.79.1'
+glib_version_req = '>= 2.80.0'
 gi_version_req = '>= 1.64.0'
 pycairo_version_req = '>= 1.16.0'
 libffi_version_req = '>= 3.0'
