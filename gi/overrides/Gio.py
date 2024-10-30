@@ -523,10 +523,6 @@ ListModel = override(ListModel)
 __all__.append('ListModel')
 
 
-def _list_store_splice(self, position, n_removals, additions):
-    self.splice(position, n_removals, additions)
-
-
 class ListStore(Gio.ListStore):
 
     def sort(self, compare_func, *user_data):
@@ -542,9 +538,9 @@ class ListStore(Gio.ListStore):
         if isinstance(key, slice):
             start, stop, step = key.indices(len(self))
             if step == 1:
-                _list_store_splice(self, start, max(stop - start, 0), [])
+                self.splice(start, max(stop - start, 0), [])
             elif step == -1:
-                _list_store_splice(self, stop + 1, max(start - stop, 0), [])
+                self.splice(stop + 1, max(start - stop, 0), [])
             else:
                 for i in sorted(range(start, stop, step), reverse=True):
                     self.remove(i)
@@ -570,19 +566,17 @@ class ListStore(Gio.ListStore):
 
             start, stop, step = key.indices(len(self))
             if step == 1:
-                _list_store_splice(
-                    self, start, max(stop - start, 0), valuelist)
+                self.splice(start, max(stop - start, 0), valuelist)
             else:
                 indices = list(range(start, stop, step))
                 if len(indices) != len(valuelist):
                     raise ValueError
 
                 if step == -1:
-                    _list_store_splice(
-                        self, stop + 1, max(start - stop, 0), valuelist[::-1])
+                    self.splice(stop + 1, max(start - stop, 0), valuelist[::-1])
                 else:
                     for i, v in zip(indices, valuelist):
-                        _list_store_splice(self, i, 1, [v])
+                        self.splice(i, 1, [v])
         elif isinstance(key, int):
             if key < 0:
                 key += len(self)
@@ -595,7 +589,7 @@ class ListStore(Gio.ListStore):
                     "Expected type %s.%s" % (
                         pytype.__module__, pytype.__name__))
 
-            _list_store_splice(self, key, 1, [value])
+            self.splice(key, 1, [value])
         else:
             raise TypeError
 
