@@ -1502,7 +1502,7 @@ _wrap_pyg_enum_register_new_gtype_and_add (PyObject *self,
         return NULL;
     }
 
-    if (!GI_IS_ENUM_INFO (py_info->info)) {
+    if (!GI_IS_ENUM_INFO (py_info->info) || GI_IS_FLAGS_INFO (py_info->info)) {
         PyErr_SetString (PyExc_TypeError, "info must be an EnumInfo");
         return NULL;
     }

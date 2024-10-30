@@ -245,7 +245,7 @@ _pygi_marshal_to_py_interface_enum (PyGIInvokeState   *state,
     long c_long;
 
     interface = gi_type_info_get_interface (arg_cache->type_info);
-    g_assert (GI_IS_ENUM_INFO (interface));
+    g_assert (GI_IS_ENUM_INFO (interface) && !GI_IS_FLAGS_INFO (interface));
 
     if (!gi_argument_to_c_long(arg, &c_long,
                                gi_enum_info_get_storage_type ((GIEnumInfo *)interface))) {
