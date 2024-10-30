@@ -1812,26 +1812,21 @@ _wrap_pyg_hook_up_vfunc_implementation (PyObject *self, PyObject *args)
     find_vfunc_info (py_info->info, implementor_gtype, &implementor_class, &implementor_vtable, &field_info);
     if (field_info != NULL) {
         GITypeInfo *type_info;
-        GIBaseInfo *interface_info;
-        GICallbackInfo *callback_info;
+        GICallableInfo *callable_info;
         gint offset;
 
         type_info = gi_field_info_get_type_info (field_info);
-
-        interface_info = gi_type_info_get_interface (type_info);
-        g_assert (GI_IS_CALLBACK_INFO (interface_info));
-
-        callback_info = (GICallbackInfo*) interface_info;
+        callable_info = GI_CALLABLE_INFO (gi_type_info_get_interface (type_info));
         offset = gi_field_info_get_offset (field_info);
         method_ptr = G_STRUCT_MEMBER_P (implementor_vtable, offset);
 
-        cache = pygi_closure_cache_new (GI_CALLABLE_INFO (callback_info));
-        closure = _pygi_make_native_closure ( (GICallableInfo*) callback_info, cache,
+        cache = pygi_closure_cache_new (callable_info);
+        closure = _pygi_make_native_closure ( (GICallableInfo*) callable_info, cache,
                                               GI_SCOPE_TYPE_NOTIFIED, py_function, NULL);
 
-        *method_ptr = gi_callable_info_get_closure_native_address (GI_CALLABLE_INFO (callback_info), closure->closure);
+        *method_ptr = gi_callable_info_get_closure_native_address (callable_info, closure->closure);
 
-        gi_base_info_unref (interface_info);
+        gi_base_info_unref (callable_info);
         gi_base_info_unref (type_info);
         gi_base_info_unref (field_info);
     }

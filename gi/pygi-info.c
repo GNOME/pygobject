@@ -311,13 +311,13 @@ _wrap_gi_base_info_get_name (PyGIBaseInfo *self)
 static PyObject *
 _wrap_gi_base_info_get_name_unescaped (PyGIBaseInfo *self)
 {
-    return _get_info_string (_safe_base_info_get_name(GI_BASE_INFO (self->info)));
+    return _get_info_string (_safe_base_info_get_name(self->info));
 }
 
 static PyObject *
 _wrap_gi_base_info_get_namespace (PyGIBaseInfo *self)
 {
-    return _get_info_string (gi_base_info_get_namespace (GI_BASE_INFO (self->info)));
+    return _get_info_string (gi_base_info_get_namespace (self->info));
 }
 
 static PyObject *
