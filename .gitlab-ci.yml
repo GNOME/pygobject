@@ -84,19 +84,19 @@ mingw64:
     MSYSTEM: "MINGW64"
   <<: *mingw-defaults
 
-python3.9:
+python3.9-gtk3:
   variables:
     PYTHON_VERSION: "3.9"
     TEST_GTK_VERSION: "3.0"
   <<: *defaults
 
-python3.10:
+python3.10-gtk3:
   variables:
     PYTHON_VERSION: "3.10"
     TEST_GTK_VERSION: "3.0"
   <<: *defaults
 
-python3.11:
+python3.11-gtk3:
   variables:
     PYTHON_VERSION: "3.11"
     TEST_GTK_VERSION: "3.0"
@@ -108,19 +108,19 @@ python3.11-gtk4:
     TEST_GTK_VERSION: "4.0"
   <<: *defaults
 
-python3.12:
+python3.12-gtk3:
   variables:
     PYTHON_VERSION: "3.12"
     TEST_GTK_VERSION: "3.0"
   <<: *defaults
 
-python3.13:
+python3.13-gtk4:
   variables:
     PYTHON_VERSION: "3.13"
-    TEST_GTK_VERSION: "3.0"
+    TEST_GTK_VERSION: "4.0"
   <<: *defaults
 
-pypy3:
+pypy3-gtk3:
   variables:
     PYTHON_VERSION: "pypy3"
     TEST_GTK_VERSION: "3.0"
