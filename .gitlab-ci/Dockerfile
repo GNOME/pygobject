@@ -37,21 +37,21 @@ RUN add-apt-repository -y ppa:pypy/ppa \
     && rm -rf /var/lib/apt/lists/*
 
 ARG HOST_USER_ID=5555
-ENV HOST_USER_ID ${HOST_USER_ID}
+ENV HOST_USER_ID=${HOST_USER_ID}
 RUN useradd -u $HOST_USER_ID -ms /bin/bash user
 RUN echo 'user ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
 USER user
 WORKDIR /home/user
 
-ENV LANG C.UTF-8
-ENV CI true
-ENV PYENV_ROOT /home/user/.pyenv
+ENV LANG=C.UTF-8
+ENV CI=true
+ENV PYENV_ROOT=/home/user/.pyenv
 ENV PATH="${PYENV_ROOT}/shims:${PYENV_ROOT}/bin:${PATH}"
 ENV PYTHON_CONFIGURE_OPTS="--enable-shared"
 
 # https://github.com/pyenv/pyenv/releases
-ENV PYENV_GIT_TAG v2.4.17
+ENV PYENV_GIT_TAG=v2.4.17
 RUN curl -L https://raw.githubusercontent.com/pyenv/pyenv-installer/master/bin/pyenv-installer | bash
 
 # Register the pypy3 system installation
