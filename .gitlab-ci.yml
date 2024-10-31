@@ -12,6 +12,7 @@ stages:
 cache:
   paths:
     - _ccache/
+    - $HOME/.cache/pip/
 
 build-image:
   stage: pre_build
