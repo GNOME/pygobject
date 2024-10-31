@@ -21,18 +21,13 @@ build-image:
     STORAGE_DRIVER: vfs
     BUILDAH_ISOLATION: chroot
     CACHE: registry.gitlab.gnome.org/gnome/pygobject/cache
-#   rules:
-#     - changes:
-#       - ".gitlab-ci/Dockerfile"
-#       - ".gitlab-ci/set_env.sh"
+  # rules:
+  #   - changes:
+  #     - ".gitlab-ci/Dockerfile"
+  #     - ".gitlab-ci/set_env.sh"
   script:
     - echo "$CI_REGISTRY_PASSWORD" | buildah login $CI_REGISTRY -u $CI_REGISTRY_USER --password-stdin
-    # Hopefully save ourselves some work by pulling the latest main and branch images
-    # - buildah pull $REGISTRY/$CI_DEFAULT_BRANCH || true
-    # - test -n "$CI_COMMIT_BRANCH" && buildah pull $REGISTRY/$CI_COMMIT_BRANCH || true
-    # Create a new image
     - buildah build -t $REGISTRY/ci:$CI_PIPELINE_ID --layers --cache-from=$CACHE --cache-to=$CACHE -f Dockerfile .gitlab-ci
-    # Publish for later use in the pipeline
     - buildah push $REGISTRY/ci:$CI_PIPELINE_ID
     # if branch is main -> also push main:latest
   cache:
@@ -50,7 +45,7 @@ tag-image:
   script:
     - gitlab-ci/docker-tag.sh main:latest main:$CI_PIPELINE_ID
 
-.defaults: &defaults
+.defaults:
   stage: build_and_test
   needs:
     - build-image
@@ -62,9 +57,9 @@ tag-image:
     reports:
       junit: test-results.xml
   script:
-   - bash -x ./.gitlab-ci/test-docker.sh
+    - bash -x ./.gitlab-ci/test-docker.sh
 
-.mingw-defaults: &mingw-defaults
+.mingw-defaults:
   stage: build_and_test
   tags:
     - win32-ps
@@ -118,56 +113,56 @@ sdist:
     - bash -x ./.gitlab-ci/build-sdists.sh
 
 mingw32:
+  extends: .mingw-defaults
   variables:
     MSYSTEM: "MINGW32"
-  <<: *mingw-defaults
 
 mingw64:
+  extends: .mingw-defaults
   variables:
     MSYSTEM: "MINGW64"
-  <<: *mingw-defaults
 
 python3.9-gtk3:
+  extends: .defaults
   variables:
     PYTHON_VERSION: "3.9"
     TEST_GTK_VERSION: "3.0"
-  <<: *defaults
 
 python3.10-gtk3:
+  extends: .defaults
   variables:
     PYTHON_VERSION: "3.10"
     TEST_GTK_VERSION: "3.0"
-  <<: *defaults
 
 python3.11-gtk3:
+  extends: .defaults
   variables:
     PYTHON_VERSION: "3.11"
     TEST_GTK_VERSION: "3.0"
-  <<: *defaults
 
 python3.11-gtk4:
+  extends: .defaults
   variables:
     PYTHON_VERSION: "3.11"
     TEST_GTK_VERSION: "4.0"
-  <<: *defaults
 
 python3.12-gtk3:
+  extends: .defaults
   variables:
     PYTHON_VERSION: "3.12"
     TEST_GTK_VERSION: "3.0"
-  <<: *defaults
 
 python3.13-gtk4:
+  extends: .defaults
   variables:
     PYTHON_VERSION: "3.13"
     TEST_GTK_VERSION: "4.0"
-  <<: *defaults
 
 pypy3-gtk3:
+  extends: .defaults
   variables:
     PYTHON_VERSION: "pypy3"
     TEST_GTK_VERSION: "3.0"
-  <<: *defaults
 
 gnome-master:
   stage: build_and_test
