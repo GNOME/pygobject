@@ -41,6 +41,9 @@ ENV HOST_USER_ID=${HOST_USER_ID}
 RUN useradd -u $HOST_USER_ID -ms /bin/bash user
 RUN echo 'user ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
+# XXX: meson tries to use this for some reason, but it's not there by default
+RUN mkdir -p /build/pypy3-NFj72f/pypy3-7.3.17+dfsg/include/pypy3.10
+
 USER user
 WORKDIR /home/user
 

@@ -29,9 +29,6 @@ mkdir -p "${COV_DIR}"
 python -m venv /tmp/venv
 source /tmp/venv/bin/activate
 
-# XXX: meson tries to use this for some reason, but it's not there by default
-mkdir -p /tmp/venv/include/pypy3.9
-
 python -m pip install --upgrade pip
 python -m pip install flake8 meson meson-python pycairo pytest pytest-cov
 
