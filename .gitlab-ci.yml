@@ -23,18 +23,13 @@ build-image:
     STORAGE_DRIVER: vfs
     BUILDAH_ISOLATION: chroot
     CACHE: registry.gitlab.gnome.org/gnome/pygobject/cache
-#   rules:
-#     - changes:
-#       - ".gitlab-ci/Dockerfile"
-#       - ".gitlab-ci/set_env.sh"
+  # rules:
+  #   - changes:
+  #     - ".gitlab-ci/Dockerfile"
+  #     - ".gitlab-ci/set_env.sh"
   script:
     - echo "$CI_REGISTRY_PASSWORD" | buildah login $CI_REGISTRY -u $CI_REGISTRY_USER --password-stdin
-    # Hopefully save ourselves some work by pulling the latest main and branch images
-    # - buildah pull $REGISTRY/$CI_DEFAULT_BRANCH || true
-    # - test -n "$CI_COMMIT_BRANCH" && buildah pull $REGISTRY/$CI_COMMIT_BRANCH || true
-    # Create a new image
     - buildah build -t $REGISTRY/ci:$CI_PIPELINE_ID --layers --cache-from=$CACHE --cache-to=$CACHE -f Dockerfile .gitlab-ci
-    # Publish for later use in the pipeline
     - buildah push $REGISTRY/ci:$CI_PIPELINE_ID
     # if branch is main -> also push main:latest
   cache:
@@ -94,7 +89,7 @@ linux:
     reports:
       junit: test-results.xml
   script:
-   - bash -x ./.gitlab-ci/test-docker.sh
+    - bash -x ./.gitlab-ci/test-docker.sh
 
 windows:
   stage: build_and_test
