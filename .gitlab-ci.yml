@@ -15,6 +15,11 @@ variables:
   REGISTRY: registry.gitlab.gnome.org/gnome/pygobject
   TARBALL_ARTIFACT_PATH: "dist/${CI_PROJECT_NAME}-${CI_COMMIT_TAG}.tar.gz"
 
+cache:
+  paths:
+    - _ccache/
+    - $HOME/.cache/pip/
+
 build-image:
   stage: pre_build
   interruptible: true
@@ -49,9 +54,6 @@ tag-image:
 
 default:
   image: $REGISTRY/ci:$CI_PIPELINE_ID
-  cache:
-    paths:
-      - _ccache/
 
 pre-commit:
   stage: pre_commit
