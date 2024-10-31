@@ -22,7 +22,7 @@ build-image:
   variables:
     STORAGE_DRIVER: vfs
     BUILDAH_ISOLATION: chroot
-
+    CACHE: registry.gitlab.gnome.org/gnome/pygobject/cache
 #   rules:
 #     - changes:
 #       - ".gitlab-ci/Dockerfile"
@@ -36,9 +36,21 @@ build-image:
     - buildah build -t $REGISTRY/ci:$CI_PIPELINE_ID --layers --cache-from=$CACHE --cache-to=$CACHE -f Dockerfile .gitlab-ci
     # Publish for later use in the pipeline
     - buildah push $REGISTRY/ci:$CI_PIPELINE_ID
-    - >
-      test -n "$CI_COMMIT_BRANCH" &&
-      buildah push $REGISTRY/ci:$CI_PIPELINE_ID docker://$REGISTRY/$CI_COMMIT_BRANCH || true
+    # if branch is main -> also push main:latest
+  cache:
+    paths:
+      - /var/lib/containers
+
+tag-image:
+  rules:
+    - if: true
+      changes:
+        - ".gitlab-ci/Dockerfile"
+        - ".gitlab-ci/set_env.sh"
+      when: never
+    - when: on_success
+  script:
+    - gitlab-ci/docker-tag.sh main:latest main:$CI_PIPELINE_ID
 
 default:
   image: $REGISTRY/ci:$CI_PIPELINE_ID
