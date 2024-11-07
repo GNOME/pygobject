@@ -30,73 +30,30 @@
 
 extern PyObject *_PyGIDefaultArgPlaceholder;
 
-static gboolean
-_check_for_unexpected_kwargs (PyGICallableCache *cache,
-                              GHashTable  *arg_name_hash,
-                              PyObject    *py_kwargs)
-{
-    PyObject *dict_key, *dict_value;
-    Py_ssize_t dict_iter_pos = 0;
-
-    while (PyDict_Next (py_kwargs, &dict_iter_pos, &dict_key, &dict_value)) {
-        PyObject *key;
-
-        {
-            key = PyUnicode_AsUTF8String (dict_key);
-            if (key == NULL) {
-                return FALSE;
-            }
-        }
-
-        /* Use extended lookup because it returns whether or not the key actually
-         * exists in the hash table. g_hash_table_lookup returns NULL for keys not
-         * found which maps to index 0 for our hash lookup.
-         */
-        if (!g_hash_table_lookup_extended (arg_name_hash, PyBytes_AsString(key), NULL, NULL)) {
-            char *full_name = pygi_callable_cache_get_full_name (cache);
-            PyErr_Format (PyExc_TypeError,
-                          "%.200s() got an unexpected keyword argument '%.400s'",
-                          full_name,
-                          PyBytes_AsString (key));
-            Py_DECREF (key);
-            g_free (full_name);
-            return FALSE;
-        }
-
-        Py_DECREF (key);
-    }
-    return TRUE;
-}
-
 /**
- * _py_old_args_combine_and_check_length:
+ * _py_args_combine_and_check_length:
  * @cache: PyGICallableCache
- * @py_args: the tuple of positional arguments.
- * @py_kwargs: the dict of keyword arguments to be merged with py_args.
+ * @py_args: an array of arguments as in the vectorcall protocol
+ * @py_nargsf: the argument count plus flags
+ * @py_kwnames: a tuple of keyword names
  *
  * Returns: New value reference to the combined py_args and py_kwargs.
  */
 static PyObject *
-_py_old_args_combine_and_check_length (PyGICallableCache *cache,
-                                       PyObject    *py_args,
-                                       PyObject    *py_kwargs)
+_py_args_combine_and_check_length (PyGICallableCache *cache,
+                                   PyObject    *const *py_args,
+                                   size_t       py_nargsf,
+                                   PyObject    *py_kwnames)
 {
     PyObject *combined_py_args = NULL;
     Py_ssize_t n_py_args, n_py_kwargs, i;
     gssize n_expected_args = cache->n_py_args;
-    GSList *l;
 
-    n_py_args = PyTuple_GET_SIZE (py_args);
-    if (py_kwargs == NULL)
+    n_py_args = PyVectorcall_NARGS (py_nargsf);
+    if (py_kwnames == NULL)
         n_py_kwargs = 0;
     else
-        n_py_kwargs = PyDict_Size (py_kwargs);
-
-    /* Fast path, we already have the exact number of args and not kwargs. */
-    if (n_py_kwargs == 0 && n_py_args == n_expected_args && cache->user_data_varargs_index < 0) {
-        Py_INCREF (py_args);
-        return py_args;
-    }
+        n_py_kwargs = PyTuple_GET_SIZE (py_kwnames);
 
     if (cache->user_data_varargs_index < 0 && n_expected_args < n_py_args) {
         char *full_name = pygi_callable_cache_get_full_name (cache);
@@ -120,148 +77,137 @@ _py_old_args_combine_and_check_length (PyGICallableCache *cache,
         return NULL;
     }
 
-    if (n_py_kwargs > 0 && !_check_for_unexpected_kwargs (cache,
-                                                          cache->arg_name_hash,
-                                                          py_kwargs)) {
-        return NULL;
-    }
-
     /* will hold arguments from both py_args and py_kwargs
      * when they are combined into a single tuple */
     combined_py_args = PyTuple_New (n_expected_args);
 
-    for (i = 0, l = cache->arg_name_list; i < n_expected_args && l; i++, l = l->next) {
-        PyObject *py_arg_item = NULL;
-        PyObject *kw_arg_item = NULL;
-        const gchar *arg_name = l->data;
-        int arg_cache_index = -1;
-        gboolean is_varargs_user_data = FALSE;
+    /* Add the positional arguments */
+    for (i = 0; i < n_py_args && i < n_expected_args; i++) {
+        if (i == cache->user_data_varargs_index) {
+            PyObject *user_data = PyTuple_New (n_py_args - i);
+            Py_ssize_t j;
 
-        if (arg_name != NULL)
-            arg_cache_index = GPOINTER_TO_INT (g_hash_table_lookup (cache->arg_name_hash, arg_name));
-
-        is_varargs_user_data = cache->user_data_varargs_index >= 0 &&
-                                arg_cache_index == cache->user_data_varargs_index;
-
-        if (n_py_kwargs > 0 && arg_name != NULL) {
-            /* NULL means this argument has no keyword name */
-            /* ex. the first argument to a method or constructor */
-            kw_arg_item = PyDict_GetItemString (py_kwargs, arg_name);
+            for (j = i; j < n_py_args; j++) {
+                Py_INCREF (py_args[j]);
+                PyTuple_SET_ITEM (user_data, j - i, py_args[j]);
+            }
+            PyTuple_SET_ITEM (combined_py_args, i, user_data);
+        } else {
+            Py_INCREF (py_args[i]);
+            PyTuple_SET_ITEM (combined_py_args, i, py_args[i]);
         }
+    }
 
-        /* use a bounded retrieval of the original input */
-        if (i < n_py_args)
-            py_arg_item = PyTuple_GET_ITEM (py_args, i);
+    /* Process keyword arguments */
+    for (i = 0; i < n_py_kwargs; i++) {
+        PyObject *py_kwname, *arg_item;
+        const char *kwname;
+        gpointer arg_idx_ptr;
+        Py_ssize_t arg_idx;
+        PyGIArgCache *arg_cache;
+        gboolean is_varargs_user_data;
 
-        if (kw_arg_item == NULL && py_arg_item != NULL) {
-            if (is_varargs_user_data) {
-                /* For tail end user_data varargs, pull a slice off and we are done. */
-                PyObject *user_data = PyTuple_GetSlice (py_args, i, PY_SSIZE_T_MAX);
-                PyTuple_SET_ITEM (combined_py_args, i, user_data);
-                return combined_py_args;
-            } else {
-                Py_INCREF (py_arg_item);
-                PyTuple_SET_ITEM (combined_py_args, i, py_arg_item);
-            }
-        } else if (kw_arg_item != NULL && py_arg_item == NULL) {
-            if (is_varargs_user_data) {
-                /* Special case where user_data is passed as a keyword argument (user_data=foo)
-                 * Wrap the value in a tuple to represent variable args for marshaling later on.
-                 */
-                PyObject *user_data = Py_BuildValue("(O)", kw_arg_item, NULL);
-                PyTuple_SET_ITEM (combined_py_args, i, user_data);
-            } else {
-                Py_INCREF (kw_arg_item);
-                PyTuple_SET_ITEM (combined_py_args, i, kw_arg_item);
-            }
+        py_kwname = PyTuple_GET_ITEM (py_kwnames, i);
+        kwname = PyUnicode_AsUTF8AndSize (py_kwname, NULL);
+        if (kwname == NULL) {
+            Py_DECREF (combined_py_args);
+            return NULL;
+        }
+        /* Use extended lookup because it returns whether or not the key actually
+         * exists in the hash table. g_hash_table_lookup returns NULL for keys not
+         * found which maps to index 0 for our hash lookup.
+         */
+        if (!g_hash_table_lookup_extended (cache->arg_name_hash, kwname, NULL, &arg_idx_ptr)) {
+            char *full_name = pygi_callable_cache_get_full_name (cache);
+            PyErr_Format (PyExc_TypeError,
+                          "%.200s() got an unexpected keyword argument '%.400s'",
+                          full_name,
+                          kwname);
+            g_free (full_name);
+            Py_DECREF (combined_py_args);
+            return NULL;
+        }
+        arg_idx = GPOINTER_TO_INT (arg_idx_ptr);
+        arg_cache = _pygi_callable_cache_get_arg(cache, arg_idx);
+        is_varargs_user_data = arg_idx == cache->user_data_varargs_index;
 
-        } else if (kw_arg_item == NULL && py_arg_item == NULL) {
-            if (is_varargs_user_data) {
-                /* For varargs user_data, pass an empty tuple when nothing is given. */
-                PyTuple_SET_ITEM (combined_py_args, i, PyTuple_New (0));
-            } else if (arg_cache_index >= 0 && _pygi_callable_cache_get_arg (cache, arg_cache_index)->has_default) {
-                /* If the argument supports a default, use a place holder in the
-                 * argument tuple, this will be checked later during marshaling.
-                 */
-                Py_INCREF (_PyGIDefaultArgPlaceholder);
-                PyTuple_SET_ITEM (combined_py_args, i, _PyGIDefaultArgPlaceholder);
-            } else {
-                char *full_name = pygi_callable_cache_get_full_name (cache);
-                PyErr_Format (PyExc_TypeError,
-                              "%.200s() takes exactly %zd %sargument%s (%zd given)",
-                              full_name,
-                              n_expected_args,
-                              n_py_kwargs > 0 ? "non-keyword " : "",
-                              n_expected_args == 1 ? "" : "s",
-                              n_py_args);
-                g_free (full_name);
-
-                Py_DECREF (combined_py_args);
-                return NULL;
-            }
-        } else if (kw_arg_item != NULL && py_arg_item != NULL) {
+        /* Have we already seen this argument? */
+        arg_item = PyTuple_GET_ITEM (combined_py_args, arg_cache->py_arg_index);
+        if (arg_item != NULL) {
             char *full_name = pygi_callable_cache_get_full_name (cache);
             PyErr_Format (PyExc_TypeError,
                           "%.200s() got multiple values for keyword argument '%.200s'",
                           full_name,
-                          arg_name);
-
-            Py_DECREF (combined_py_args);
+                          kwname);
             g_free (full_name);
+            Py_DECREF (combined_py_args);
+            return NULL;
+        }
+        arg_item = py_args[n_py_args + i];
+        if (is_varargs_user_data) {
+            /* Special case where user_data is passed as a keyword
+             * argument (user_data=foo) Wrap the value in a tuple to
+             * represent variable args for marshaling later on.
+             */
+            PyObject *user_data = Py_BuildValue("(O)", arg_item, NULL);
+            PyTuple_SET_ITEM (combined_py_args, arg_cache->py_arg_index, user_data);
+        } else {
+            Py_INCREF (arg_item);
+            PyTuple_SET_ITEM (combined_py_args, arg_cache->py_arg_index, arg_item);
+        }
+    }
+
+    /* Fill in defaults and check for missing arguments */
+    for (i = n_py_args; i < n_expected_args; i++) {
+        PyObject *arg_item = PyTuple_GET_ITEM (combined_py_args, i);
+        PyGIArgCache *arg_cache;
+
+        if (arg_item != NULL) continue;
+
+        if (i == cache->user_data_varargs_index) {
+            /* For varargs user_data, pass an empty tuple when nothing
+             * is given. */
+            PyTuple_SET_ITEM(combined_py_args, i, PyTuple_New(0));
+            continue;
+        }
+
+        /* XXX: this should be simpler */
+        {
+            Py_ssize_t j;
+            for (j = 0; j < _pygi_callable_cache_args_len(cache); j++) {
+                arg_cache = _pygi_callable_cache_get_arg(cache, j);
+                if (arg_cache->py_arg_index == i)
+                    break;
+                arg_cache = NULL;
+            }
+            if (!arg_cache) {
+                PyErr_BadArgument ();
+                Py_DECREF (combined_py_args);
+                return NULL;
+            }
+        }
+        if (arg_cache->has_default) {
+            /* If the argument supports a default, use a place holder in the
+             * argument tuple, this will be checked later during marshaling.
+             */
+            Py_INCREF (_PyGIDefaultArgPlaceholder);
+            PyTuple_SET_ITEM (combined_py_args, i, _PyGIDefaultArgPlaceholder);
+        } else {
+            char *full_name = pygi_callable_cache_get_full_name (cache);
+            PyErr_Format (PyExc_TypeError,
+                          "%.200s() takes exactly %zd %sargument%s (%zd given)",
+                          full_name,
+                          n_expected_args,
+                          n_py_kwargs > 0 ? "non-keyword " : "",
+                          n_expected_args == 1 ? "" : "s",
+                          n_py_args);
+            g_free (full_name);
+            Py_DECREF (combined_py_args);
             return NULL;
         }
     }
 
     return combined_py_args;
-}
-
-static PyObject *
-_py_args_combine_and_check_length (PyGICallableCache *cache,
-                                   PyObject *const *args,
-                                   size_t nargsf,
-                                   PyObject *kwnames)
-{
-    PyObject *py_args = NULL, *py_kwargs = NULL, *ret = NULL;
-    Py_ssize_t nargs, nkwargs, i;
-
-    /* construct traditional args and kwargs from vector */
-    nargs = PyVectorcall_NARGS (nargsf);
-    if (kwnames != NULL)
-        nkwargs = PyTuple_GET_SIZE (kwnames);
-    else
-        nkwargs = 0;
-
-    py_args = PyTuple_New (nargs);
-    if (py_args == NULL)
-        goto out;
-    for (i = 0; i < nargs; i++) {
-        Py_INCREF (args[i]);
-        PyTuple_SET_ITEM (py_args, i, args[i]);
-    }
-
-    if (nkwargs > 0) {
-        py_kwargs = PyDict_New();
-        if (py_kwargs == NULL)
-            goto out;
-        for (i = 0; i < nkwargs; i++) {
-            PyObject *key = PyTuple_GET_ITEM (kwnames, i);
-            PyObject *value = args[nargs + i];
-            if (PyDict_SetItem (py_kwargs, key, value) < 0)
-                goto out;
-        }
-    }
-
-    if (Py_EnterRecursiveCall (" while calling a GICallable"))
-        goto out;
-
-    ret = _py_old_args_combine_and_check_length (cache, py_args, py_kwargs);
-
-    Py_LeaveRecursiveCall ();
-
-out:
-    Py_XDECREF (py_args);
-    Py_XDECREF (py_kwargs);
-    return ret;
 }
 
 /* To reduce calls to g_slice_*() we (1) allocate all the memory depended on
@@ -771,6 +717,9 @@ pygi_invoke_c_callable (PyGIFunctionCache *function_cache,
     GIFFIReturnValue ffi_return_value = {0};
     PyObject *ret = NULL;
 
+    if (Py_EnterRecursiveCall(" while calling a GICallable"))
+	return NULL;;
+
     if (!_invoke_state_init_from_cache (state, function_cache,
                                         py_args, py_nargsf, py_kwnames))
          goto err;
@@ -815,6 +764,7 @@ pygi_invoke_c_callable (PyGIFunctionCache *function_cache,
 
 err:
     _invoke_state_clear (state, function_cache);
+    Py_LeaveRecursiveCall();
     return ret;
 }
 
