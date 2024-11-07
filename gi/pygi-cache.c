@@ -611,7 +611,7 @@ _callable_cache_generate_args_cache_real (PyGICallableCache *callable_cache,
 
     last_explicit_arg_index = -1;
 
-    /* Reverse loop through all the arguments to setup arg_name_list/hash
+    /* Reverse loop through all the arguments to setup arg_name_hash
      * and find the number of required arguments */
     for (i=(_pygi_callable_cache_args_len (callable_cache))-1; i >= 0; i--) {
         PyGIArgCache *arg_cache = _pygi_callable_cache_get_arg (callable_cache, i);
@@ -620,10 +620,8 @@ _callable_cache_generate_args_cache_real (PyGICallableCache *callable_cache,
                 arg_cache->meta_type != PYGI_META_ARG_TYPE_CLOSURE &&
                 arg_cache->direction & PYGI_DIRECTION_FROM_PYTHON) {
 
-            /* Setup arg_name_list and arg_name_hash */
+            /* Setup arg_name_hash */
             gpointer arg_name = (gpointer)arg_cache->arg_name;
-            callable_cache->arg_name_list = g_slist_prepend (callable_cache->arg_name_list,
-                                                             arg_name);
             if (arg_name != NULL) {
                 g_hash_table_insert (callable_cache->arg_name_hash,
                                      arg_name,
@@ -691,7 +689,6 @@ static void
 _callable_cache_deinit_real (PyGICallableCache *cache)
 {
     g_clear_pointer (&cache->to_py_args, g_slist_free);
-    g_clear_pointer (&cache->arg_name_list, g_slist_free);
     g_clear_pointer (&cache->arg_name_hash, g_hash_table_unref);
     g_clear_pointer (&cache->args_cache, g_ptr_array_unref);
     Py_CLEAR (cache->resulttuple_type);

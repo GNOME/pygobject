@@ -179,7 +179,6 @@ struct _PyGICallableCache
     PyGIArgCache *return_cache;
     GPtrArray *args_cache;
     GSList *to_py_args;
-    GSList *arg_name_list; /* for keyword arg matching */
     GHashTable *arg_name_hash;
     gboolean throws;
 
