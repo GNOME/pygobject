@@ -83,7 +83,9 @@ _py_args_combine_and_check_length (PyGICallableCache *cache,
 
     /* Add the positional arguments */
     for (i = 0; i < n_py_args && i < n_expected_args; i++) {
-        if (i == cache->user_data_varargs_index) {
+        PyGIArgCache *arg_cache = g_ptr_array_index (cache->py_args, i);
+
+        if (arg_cache == cache->user_data_varargs_arg) {
             PyObject *user_data = PyTuple_New (n_py_args - i);
             Py_ssize_t j;
 
@@ -157,29 +159,12 @@ _py_args_combine_and_check_length (PyGICallableCache *cache,
 
         if (arg_item != NULL) continue;
 
-        if (i == cache->user_data_varargs_index) {
+        arg_cache = g_ptr_array_index (cache->py_args, i);
+        if (arg_cache == cache->user_data_varargs_arg) {
             /* For varargs user_data, pass an empty tuple when nothing
              * is given. */
             PyTuple_SET_ITEM(combined_py_args, i, PyTuple_New(0));
-            continue;
-        }
-
-        /* XXX: this should be simpler */
-        {
-            Py_ssize_t j;
-            for (j = 0; j < _pygi_callable_cache_args_len(cache); j++) {
-                arg_cache = _pygi_callable_cache_get_arg(cache, j);
-                if (arg_cache->py_arg_index == i)
-                    break;
-                arg_cache = NULL;
-            }
-            if (!arg_cache) {
-                PyErr_BadArgument ();
-                Py_DECREF (combined_py_args);
-                return NULL;
-            }
-        }
-        if (arg_cache->has_default) {
+        } else if (arg_cache->has_default) {
             /* If the argument supports a default, use a place holder in the
              * argument tuple, this will be checked later during marshaling.
              */

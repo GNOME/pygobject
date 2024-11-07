@@ -178,6 +178,7 @@ struct _PyGICallableCache
 
     PyGIArgCache *return_cache;
     GPtrArray *args_cache;
+    GPtrArray *py_args;
     GSList *to_py_args;
     GHashTable *arg_name_hash;
     gboolean throws;
