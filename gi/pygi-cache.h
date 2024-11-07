@@ -186,8 +186,7 @@ struct _PyGICallableCache
     /* Index of user_data arg passed to a callable. */
     gssize user_data_index;
 
-    /* Index of user_data arg that can eat variable args passed to a callable. */
-    gssize user_data_varargs_index;
+    /* A user_data arg that can eat variable args passed to a callable. */
     PyGIArgCache *user_data_varargs_arg;
 
     /* Number of args already added */

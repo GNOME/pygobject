@@ -750,7 +750,7 @@ _pygi_marshal_from_py_interface_callback (PyGIInvokeState   *state,
              */
             if (py_user_data == _PyGIDefaultArgPlaceholder) {
                 py_user_data = NULL;
-            } else if (callable_cache->user_data_varargs_index < 0) {
+            } else if (callable_cache->user_data_varargs_arg == NULL) {
                 /* For non-variable length user data, place the user data in a
                  * single item tuple which is concatenated to the callbacks arguments.
                  * This allows callback input arg marshaling to always expect a
