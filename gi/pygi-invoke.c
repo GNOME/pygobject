@@ -55,7 +55,7 @@ _py_args_combine_and_check_length (PyGICallableCache *cache,
     else
         n_py_kwargs = PyTuple_GET_SIZE (py_kwnames);
 
-    if (cache->user_data_varargs_index < 0 && n_expected_args < n_py_args) {
+    if (cache->user_data_varargs_arg == NULL && n_expected_args < n_py_args) {
         char *full_name = pygi_callable_cache_get_full_name (cache);
         PyErr_Format (PyExc_TypeError,
                       "%.200s() takes exactly %zd %sargument%s (%zd given)",
@@ -68,7 +68,7 @@ _py_args_combine_and_check_length (PyGICallableCache *cache,
         return NULL;
     }
 
-    if (cache->user_data_varargs_index >= 0 && n_py_kwargs > 0 && n_expected_args < n_py_args) {
+    if (cache->user_data_varargs_arg != NULL && n_py_kwargs > 0 && n_expected_args < n_py_args) {
         char *full_name = pygi_callable_cache_get_full_name (cache);
         PyErr_Format (PyExc_TypeError,
                       "%.200s() cannot use variable user data arguments with keyword arguments",
@@ -102,8 +102,6 @@ _py_args_combine_and_check_length (PyGICallableCache *cache,
     for (i = 0; i < n_py_kwargs; i++) {
         PyObject *py_kwname, *arg_item;
         const char *kwname;
-        gpointer arg_idx_ptr;
-        Py_ssize_t arg_idx;
         PyGIArgCache *arg_cache;
         gboolean is_varargs_user_data;
 
@@ -113,11 +111,8 @@ _py_args_combine_and_check_length (PyGICallableCache *cache,
             Py_DECREF (combined_py_args);
             return NULL;
         }
-        /* Use extended lookup because it returns whether or not the key actually
-         * exists in the hash table. g_hash_table_lookup returns NULL for keys not
-         * found which maps to index 0 for our hash lookup.
-         */
-        if (!g_hash_table_lookup_extended (cache->arg_name_hash, kwname, NULL, &arg_idx_ptr)) {
+        arg_cache = g_hash_table_lookup (cache->arg_name_hash, kwname);
+        if (!arg_cache) {
             char *full_name = pygi_callable_cache_get_full_name (cache);
             PyErr_Format (PyExc_TypeError,
                           "%.200s() got an unexpected keyword argument '%.400s'",
@@ -127,9 +122,7 @@ _py_args_combine_and_check_length (PyGICallableCache *cache,
             Py_DECREF (combined_py_args);
             return NULL;
         }
-        arg_idx = GPOINTER_TO_INT (arg_idx_ptr);
-        arg_cache = _pygi_callable_cache_get_arg(cache, arg_idx);
-        is_varargs_user_data = arg_idx == cache->user_data_varargs_index;
+        is_varargs_user_data = arg_cache == cache->user_data_varargs_arg;
 
         /* Have we already seen this argument? */
         arg_item = PyTuple_GET_ITEM (combined_py_args, arg_cache->py_arg_index);

@@ -608,6 +608,7 @@ _callable_cache_generate_args_cache_real (PyGICallableCache *callable_cache,
     }
     callable_cache->n_py_required_args = 0;
     callable_cache->user_data_varargs_index = -1;
+    callable_cache->user_data_varargs_arg = NULL;
 
     last_explicit_arg_index = -1;
 
@@ -624,8 +625,7 @@ _callable_cache_generate_args_cache_real (PyGICallableCache *callable_cache,
             gpointer arg_name = (gpointer)arg_cache->arg_name;
             if (arg_name != NULL) {
                 g_hash_table_insert (callable_cache->arg_name_hash,
-                                     arg_name,
-                                     GINT_TO_POINTER(i));
+                                     arg_name, arg_cache);
             }
 
             /* The first tail argument without a default will force all the preceding
@@ -646,8 +646,10 @@ _callable_cache_generate_args_cache_real (PyGICallableCache *callable_cache,
                  * with pyarg (currently only callback user_data). Set it to eat
                  * variable args in the callable cache.
                  */
-                if (arg_cache->meta_type == PYGI_META_ARG_TYPE_CHILD_WITH_PYARG)
+                if (arg_cache->meta_type == PYGI_META_ARG_TYPE_CHILD_WITH_PYARG) {
                     callable_cache->user_data_varargs_index = i;
+                    callable_cache->user_data_varargs_arg = arg_cache;
+                }
             }
         }
     }
