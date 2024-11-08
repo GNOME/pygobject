@@ -41,16 +41,16 @@ build-image:
     paths:
       - /var/lib/containers
 
-tag-image:
-  rules:
-    - if: true
-      changes:
-        - ".gitlab-ci/Dockerfile"
-        - ".gitlab-ci/set_env.sh"
-      when: never
-    - when: on_success
-  script:
-    - gitlab-ci/docker-tag.sh main:latest main:$CI_PIPELINE_ID
+# tag-image:
+#   rules:
+#     - if: true
+#       changes:
+#         - ".gitlab-ci/Dockerfile"
+#         - ".gitlab-ci/set_env.sh"
+#       when: never
+#     - when: on_success
+#   script:
+#     - gitlab-ci/docker-tag.sh main:latest main:$CI_PIPELINE_ID
 
 default:
   image: $REGISTRY/ci:$CI_PIPELINE_ID
