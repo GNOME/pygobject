@@ -34,12 +34,12 @@ build-image:
   #     - ".gitlab-ci/set_env.sh"
   script:
     - echo "$CI_REGISTRY_PASSWORD" | buildah login $CI_REGISTRY -u $CI_REGISTRY_USER --password-stdin
-    - buildah build -t $REGISTRY/ci:$CI_PIPELINE_ID --layers --cache-from=$CACHE --cache-to=$CACHE -f Dockerfile .gitlab-ci
-    - buildah push $REGISTRY/ci:$CI_PIPELINE_ID
+    - buildah --root .containers build -t $REGISTRY/ci:$CI_PIPELINE_ID --layers --cache-from=$CACHE --cache-to=$CACHE -f Dockerfile .gitlab-ci
+    - buildah --root .containers push $REGISTRY/ci:$CI_PIPELINE_ID
     # if branch is main -> also push main:latest
   cache:
     paths:
-      - /var/lib/containers
+      - .containers
 
 # tag-image:
 #   rules:
