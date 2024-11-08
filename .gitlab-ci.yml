@@ -39,7 +39,7 @@ build-image:
     # if branch is main -> also push main:latest
   cache:
     paths:
-      - .containers
+      - .containers/overlay-images
 
 # tag-image:
 #   rules:
