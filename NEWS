@@ -1,6 +1,11 @@
 3.51.0 - yyyy-mm-dd (pre-release)
 ---------------------------------
 
+From this version onwards girepository-2.0 is used for introspection.
+This means that you'll need GLib >= 2.80.
+
+* Use `girepository` 2.0 for GIR mappings :mr:`320`
+* Use Python's vectorcall protocol internally :mr:`346` :mr:`356`
 * Improved API for asyncio :mr:`352` :mr:`353`
 * Deprecation: The pygtkcompat module now throws an exception when imported :mr:`261`
 * Method signatures are exposed from PyGObject now! :mr:`341`
