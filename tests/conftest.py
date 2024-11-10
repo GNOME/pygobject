@@ -23,12 +23,12 @@ def pytest_runtest_call(item):
     orig_excepthook = sys.excepthook
     sys.excepthook = on_hook
     try:
-        yield
+        outcome = yield
     finally:
         sys.excepthook = orig_excepthook
         if exceptions:
             tp, value, tb = exceptions[0]
-            raise tp(value).with_traceback(tb)
+            outcome.force_exception(tp(value).with_traceback(tb))
 
 
 def set_dll_search_path():

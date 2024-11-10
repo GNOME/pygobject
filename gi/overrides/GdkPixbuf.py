@@ -39,10 +39,10 @@ class Pixbuf(GdkPixbuf.Pixbuf):
 
         if destroy_fn is not None:
             w = PyGIDeprecationWarning("destroy_fn argument deprecated")
-            warnings.warn(w)
+            warnings.warn(w, stacklevel=2)
         if destroy_fn_data:
             w = PyGIDeprecationWarning("destroy_fn_data argument deprecated")
-            warnings.warn(w)
+            warnings.warn(w, stacklevel=2)
 
         data = GLib.Bytes.new(data)
         return cls.new_from_bytes(
