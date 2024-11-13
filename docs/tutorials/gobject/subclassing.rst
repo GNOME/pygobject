@@ -36,7 +36,7 @@ example below:
     class MyObject(GObject.Object):
 
         def __init__(self):
-            super().__init__(self)
+            super().__init__()
 
 You can also pass arguments to `super().__init__`, for example to change
 some property of your parent gobject:
@@ -46,7 +46,7 @@ some property of your parent gobject:
     class MyWindow(Gtk.Window):
 
         def __init__(self):
-            super().__init__(self, title='Custom title')
+            super().__init__(title='Custom title')
 
 
 In case you want to specify the GType name we have to provide a
@@ -58,7 +58,7 @@ In case you want to specify the GType name we have to provide a
         __gtype_name__ = 'MyWindow'
 
         def __init__(self):
-            super().__init__(self)
+            super().__init__()
 
 
 Properties
@@ -86,7 +86,7 @@ property can be created using :func:`GObject.Property`.
         property_float = GObject.Property(type=float)
 
         def __init__(self):
-            super().__init__(self)
+            super().__init__()
 
 Properties can also be read-only, if you want some properties to be readable but
 not writable. To do so, you can add some flags to the property definition, to 
@@ -115,7 +115,7 @@ You can also define new read-only properties with a new method decorated with
     class MyObject(GObject.Object):
 
         def __init__(self):
-            super().__init__(self)
+            super().__init__()
 
         @GObject.Property
         def readonly(self):
@@ -194,7 +194,7 @@ attribute to define properties:
         }
 
         def __init__(self):
-            super().__init__(self)
+            super().__init__()
             self.int_prop = 2
 
         def do_get_property(self, prop):
@@ -255,7 +255,7 @@ Signals can be emitted using :meth:`GObject.Object.emit`.
     class MyObject(GObject.Object):
 
         def __init__(self):
-            super().__init__(self)
+            super().__init__()
 
         @GObject.Signal(flags=GObject.SignalFlags.RUN_LAST, arg_types=(int,))
         def arg_signal(self, number):
@@ -329,11 +329,11 @@ In PyGObject these methods are prefixed with ``do_``. Some examples are
     class MyObject(SomeOject):
 
         def __init__(self):
-            super().__init__(self)
+            super().__init__()
 
         def do_virtual_method(self):
             # Call the original method to keep its original behavior
-            super().do_virtual_method(self)
+            super().do_virtual_method()
 
             # Run some extra code
             ...
