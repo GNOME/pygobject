@@ -8,7 +8,7 @@ PYVER=$(python -c "import sys; sys.stdout.write('.'.join(map(str, sys.version_in
 PYIMPL=$(python -c "import sys, platform; sys.stdout.write(platform.python_implementation())")
 SOURCE_DIR="$(pwd)"
 COV_DIR="${SOURCE_DIR}/coverage"
-COV_KEY="${CI_JOB_NAME}"
+COV_KEY="${CI_JOB_NAME_SLUG}"
 JUNIT_XML="${SOURCE_DIR}/test-results.xml"
 
 export CFLAGS="-coverage -ftest-coverage -fprofile-arcs -Werror"
@@ -40,11 +40,11 @@ python -m pip install --config-settings=setup-args="-Dtests=true" --no-build-iso
 
 # TEST
 lcov --config-file .gitlab-ci/lcovrc --directory . --capture --initial --output-file \
-    "${COV_DIR}/${CI_JOB_NAME}-baseline.lcov"
+    "${COV_DIR}/${CI_JOB_NAME_SLUG}-baseline.lcov"
 
 xvfb-run -a python -m pytest -vs --cov --junit-xml="${JUNIT_XML}"
 python -m coverage lcov -o "${COV_DIR}/${COV_KEY}.py.lcov"
 
 # COLLECT GCOV COVERAGE
 lcov --config-file .gitlab-ci/lcovrc --directory . --capture --output-file \
-    "${COV_DIR}/${CI_JOB_NAME}.lcov"
+    "${COV_DIR}/${CI_JOB_NAME_SLUG}.lcov"

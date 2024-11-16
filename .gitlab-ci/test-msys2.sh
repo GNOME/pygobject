@@ -29,7 +29,7 @@ export CCACHE_DIR="${CCACHE_BASEDIR}/_ccache"
 
 # coverage setup
 COV_DIR="$(pwd)/coverage"
-COV_KEY="${CI_JOB_NAME}"
+COV_KEY="${CI_JOB_NAME_SLUG}"
 mkdir -p "${COV_DIR}"
 export COVERAGE_FILE="${COV_DIR}/.coverage.${COV_KEY}"
 
