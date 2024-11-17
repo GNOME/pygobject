@@ -1,13 +1,13 @@
-image: registry.gitlab.gnome.org/gnome/pygobject/main:v26
-
 stages:
   - build_and_test
   - coverage
   - deploy
 
-cache:
-  paths:
-    - _ccache/
+default:
+  image: registry.gitlab.gnome.org/gnome/pygobject/main:v26
+  cache:
+    paths:
+      - _ccache/
 
 linux:
   stage: build_and_test
@@ -80,8 +80,8 @@ pages:
     paths:
       - public
     expire_in: 30 days
-  only:
-    - main
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
 
 sdist:
   stage: build_and_test
