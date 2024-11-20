@@ -52,7 +52,7 @@ spawn_async = _gi.spawn_async
 
 def threads_init():
     warnings.warn('Since version 3.11, calling threads_init is no longer needed. '
-                  'See: https://wiki.gnome.org/PyGObject/Threading',
+                  'See: https://pygobject.gnome.org/guide/threading.html#threads-faq',
                   PyGIDeprecationWarning, stacklevel=2)
 
 
