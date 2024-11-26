@@ -23,21 +23,19 @@ endif
 
 python_dep = python.dependency()
 
-glib_version_req = '>= 2.64.0'
+glib_version_req = '>= 2.80.0'
 gi_version_req = '>= 1.64.0'
 pycairo_version_req = '>= 1.16.0'
 libffi_version_req = '>= 3.0'
 
-gi_dep = dependency('gobject-introspection-1.0', version : gi_version_req,
-  fallback: ['gobject-introspection', 'girepo_dep'])
+gi_dep = dependency('girepository-2.0', version : glib_version_req,
+  fallback: ['glib', 'libgirepository_dep'])
 glib_dep = dependency('glib-2.0', version : glib_version_req,
-  fallback: ['glib', 'libglib_dep'])
+  fallback: ['glib', 'libglib_dep'], default_options: ['-Dintrospection=enabled'])
 gobject_dep = dependency('gobject-2.0', version : glib_version_req,
   fallback: ['glib', 'libgobject_dep'])
 gio_dep = dependency('gio-2.0', version : glib_version_req,
   fallback: ['glib', 'libgio_dep'])
-gmodule_dep = dependency('gmodule-2.0', version : glib_version_req,
-  fallback: ['glib', 'libgmodule_dep'])
 ffi_dep = dependency('libffi', version : libffi_version_req,
   fallback : ['libffi', 'ffi_dep'])
 
@@ -173,6 +171,8 @@ if gio_dep.version().version_compare('< 2.67.4')
   cdata.set('g_memdup2(ptr,sz)', '(G_LIKELY(((guint64)(sz)) < G_MAXUINT)) ? g_memdup(ptr,sz) : (g_abort(),NULL)')
 endif
 
+configure_file(output : 'config.h', configuration : cdata)
+
 pkgconf = configuration_data()
 
 pkgconf.set('prefix', join_paths(get_option('prefix')))
@@ -216,8 +216,13 @@ subdir('gi')
 subdir('pygtkcompat')
 with_tests = get_option('tests')
 if with_tests
-gi_tests = subproject('gobject-introspection-tests', default_options : ['cairo=' + cairo_dep.found().to_string()])
-subdir('tests')
+  # We cannot depend on gobject-introspection-1.0 fallback if we also need GLib to build.
+  # All we need is the g-ir-scanner and friends
+  if glib_dep.type_name() != 'internal'
+    dependency('gobject-introspection-1.0', version : gi_version_req, fallback: ['gobject-introspection', 'girepo_dep'])
+  endif
+  subproject('gobject-introspection-tests', default_options : ['cairo=' + cairo_dep.found().to_string()])
+  subdir('tests')
 endif
 
 devenv = environment()

@@ -2,6 +2,7 @@
 
 import unittest
 
+from gi import PyGIDeprecationWarning
 from gi.repository import GLib
 
 from .helper import capture_exceptions
@@ -10,41 +11,44 @@ from .helper import capture_exceptions
 class TestOption(unittest.TestCase):
 
     def setUp(self):
-        self.parser = GLib.option.OptionParser("NAMES...",
-                                               description="Option unit test")
-        self.parser.add_option("-t", "--test", help="Unit test option",
-                               action="store_false", dest="test", default=True)
-        self.parser.add_option("--g-fatal-warnings",
-                               action="store_true",
-                               dest="fatal_warnings",
-                               help="dummy"),
+        with self.assertWarns(PyGIDeprecationWarning):
+            self.parser = GLib.option.OptionParser(
+                "NAMES...", description="Option unit test")
+            self.parser.add_option("-t", "--test", help="Unit test option",
+                                   action="store_false", dest="test",
+                                   default=True)
+            self.parser.add_option("--g-fatal-warnings",
+                                   action="store_true",
+                                   dest="fatal_warnings",
+                                   help="dummy"),
 
     def _create_group(self):
         def option_callback(option, opt, value, parser):
             raise Exception("foo")
 
-        group = GLib.option.OptionGroup(
-            "unittest", "Unit test options", "Show all unittest options",
-            option_list=[
-                GLib.option.make_option("-f", "-u", "--file", "--unit-file",
-                                        type="filename",
-                                        dest="unit_file",
-                                        help="Unit test option"),
-                GLib.option.make_option("--test-integer",
-                                        type="int",
-                                        dest="test_integer",
-                                        help="Unit integer option"),
-                GLib.option.make_option("--callback-failure-test",
-                                        action="callback",
-                                        callback=option_callback,
-                                        dest="test_integer",
-                                        help="Unit integer option"),
-            ])
-        group.add_option("-t", "--test",
-                         action="store_false",
-                         dest="test",
-                         default=True,
-                         help="Unit test option")
+        with self.assertWarns(PyGIDeprecationWarning):
+            group = GLib.option.OptionGroup(
+                "unittest", "Unit test options", "Show all unittest options",
+                option_list=[
+                    GLib.option.make_option("-f", "-u", "--file", "--unit-file",
+                                            type="filename",
+                                            dest="unit_file",
+                                            help="Unit test option"),
+                    GLib.option.make_option("--test-integer",
+                                            type="int",
+                                            dest="test_integer",
+                                            help="Unit integer option"),
+                    GLib.option.make_option("--callback-failure-test",
+                                            action="callback",
+                                            callback=option_callback,
+                                            dest="test_integer",
+                                            help="Unit integer option"),
+                ])
+            group.add_option("-t", "--test",
+                             action="store_false",
+                             dest="test",
+                             default=True,
+                             help="Unit test option")
         self.parser.add_option_group(group)
         return group
 

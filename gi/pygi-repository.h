@@ -21,7 +21,7 @@
 #define __PYGI_REPOSITORY_H__
 
 #include <pythoncapi_compat.h>
-#include <girepository.h>
+#include <girepository/girepository.h>
 
 G_BEGIN_DECLS
 
@@ -35,6 +35,8 @@ typedef struct {
 extern PyTypeObject PyGIRepository_Type;
 
 extern PyObject *PyGIRepositoryError;
+
+GIRepository* pygi_repository_get_default (void);
 
 int pygi_repository_register_types (PyObject *m);
 

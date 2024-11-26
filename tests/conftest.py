@@ -23,12 +23,12 @@ def pytest_runtest_call(item):
     orig_excepthook = sys.excepthook
     sys.excepthook = on_hook
     try:
-        yield
+        outcome = yield
     finally:
         sys.excepthook = orig_excepthook
         if exceptions:
             tp, value, tb = exceptions[0]
-            raise tp(value).with_traceback(tb)
+            outcome.force_exception(tp(value).with_traceback(tb))
 
 
 def set_dll_search_path():
@@ -118,13 +118,12 @@ def init_test_environ():
     # Force the default theme so broken themes don't affect the tests
     os.environ['GTK_THEME'] = 'Adwaita'
 
-    gi_gir_path = os.path.join(builddir, "subprojects", "gobject-introspection", "gir")
+    gi_gir_path = os.path.join(builddir, "subprojects", "glib", "girepository", "introspection")
     if os.path.exists(gi_gir_path):
         os_environ_prepend('GI_TYPELIB_PATH', gi_gir_path)
 
-    gi.require_version("GIRepository", "2.0")
-    from gi.repository import GIRepository
-    repo = GIRepository.Repository.get_default()
+    gi.require_version("GIRepository", "3.0")
+    repo = gi.Repository.get_default()
 
     gi_tests_path = os.path.join(builddir, "subprojects", "gobject-introspection-tests")
     repo.prepend_library_path(gi_tests_path)

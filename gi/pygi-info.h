@@ -22,7 +22,7 @@
 
 #include <pythoncapi_compat.h>
 
-#include <girepository.h>
+#include <girepository/girepository.h>
 #include "pygi-cache.h"
 
 G_BEGIN_DECLS
@@ -40,7 +40,7 @@ typedef struct {
 } PyGICallableInfo;
 
 
-gboolean pygi_g_struct_info_is_simple (GIStructInfo *struct_info);
+gboolean pygi_gi_struct_info_is_simple (GIStructInfo *struct_info);
 
 
 /* Private */
@@ -68,16 +68,14 @@ extern PyTypeObject PyGIPropertyInfo_Type;
 extern PyTypeObject PyGIArgInfo_Type;
 extern PyTypeObject PyGITypeInfo_Type;
 
-#define PyGIBaseInfo_GET_GI_INFO(object) g_base_info_ref(((PyGIBaseInfo *)object)->info)
-
 PyObject* _pygi_info_new (GIBaseInfo *info);
 GIBaseInfo* _pygi_object_get_gi_info (PyObject     *object,
                                       PyTypeObject *type);
 
-gchar* _pygi_g_base_info_get_fullname (GIBaseInfo *info);
+gchar* _pygi_gi_base_info_get_fullname (GIBaseInfo *info);
 
 gsize _pygi_g_type_tag_size (GITypeTag type_tag);
-gsize _pygi_g_type_info_size (GITypeInfo *type_info);
+gsize _pygi_gi_type_info_size (GITypeInfo *type_info);
 
 int pygi_info_register_types (PyObject *m);
 

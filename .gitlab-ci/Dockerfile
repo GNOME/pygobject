@@ -1,4 +1,4 @@
-FROM ubuntu:jammy
+FROM ubuntu:noble
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -8,6 +8,8 @@ RUN apt-get update && apt-get install -y \
     ccache \
     curl \
     dbus \
+    gir1.2-freedesktop-dev \
+    gir1.2-girepository-3.0-dev \
     gir1.2-gtk-3.0 \
     gir1.2-gtk-4.0 \
     git \
@@ -16,7 +18,7 @@ RUN apt-get update && apt-get install -y \
     libbz2-dev \
     libcairo2-dev \
     libffi-dev \
-    libgirepository1.0-dev \
+    libgirepository-2.0-dev \
     libglib2.0-dev \
     libgtk-3-0 \
     libgtk-4-1 \
@@ -34,15 +36,13 @@ RUN apt-get update && apt-get install -y \
 RUN add-apt-repository -y ppa:pypy/ppa \
     && apt-get update \
     && apt-get install -y pypy3 pypy3-dev pypy3-venv \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && sed -i 's#/build/pypy3-[^/]*/[^/]*#/usr#g' /usr/lib/pypy3.*/_sysconfigdata__x86_64-linux-gnu.py
 
 ARG HOST_USER_ID=5555
 ENV HOST_USER_ID=${HOST_USER_ID}
-RUN useradd -u $HOST_USER_ID -ms /bin/bash user
-RUN echo 'user ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
-
-# XXX: meson tries to use this for some reason, but it's not there by default
-RUN mkdir -p /build/pypy3-NFj72f/pypy3-7.3.17+dfsg/include/pypy3.10
+RUN useradd -u $HOST_USER_ID -ms /bin/bash user \
+    && echo 'user ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
 USER user
 WORKDIR /home/user
@@ -58,9 +58,9 @@ ENV PYENV_GIT_TAG=v2.4.17
 RUN curl -L https://raw.githubusercontent.com/pyenv/pyenv-installer/master/bin/pyenv-installer | bash
 
 # Register the pypy3 system installation
-RUN mkdir -p "${PYENV_ROOT}/versions/pypy3-system/bin/"
-RUN sudo ln -s /usr/bin/pypy3 "${PYENV_ROOT}/versions/pypy3-system/bin/python"
-RUN pyenv rehash
+RUN mkdir -p "${PYENV_ROOT}/versions/pypy3-system/bin/" \
+    && sudo ln -s /usr/bin/pypy3 "${PYENV_ROOT}/versions/pypy3-system/bin/python" \
+    && pyenv rehash
 
 RUN pyenv install --debug 3.9
 RUN pyenv install --debug 3.10

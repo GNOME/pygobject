@@ -22,12 +22,13 @@
 
 #include <pythoncapi_compat.h>
 
-#include <girepository.h>
+#include <girepository/girepository.h>
 
 G_BEGIN_DECLS
 
 
 /* Private */
+/* TODO: change signature: length as arg, return boolean */
 typedef gssize (*PyGIArgArrayLengthPolicy) (gsize item_index,
                                             void *user_data1,
                                             void *user_data2);

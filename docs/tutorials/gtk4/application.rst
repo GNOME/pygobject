@@ -27,8 +27,8 @@ either be activated or have a state changed (if they contain state).
 
 The reason to use actions is to separate out the logic from the UI. For example
 this allows using a menubar on OSX and a gear menu on GNOME both simply
-referencing the name of an action. The main implementation of this you will
-be using is :class:`Gio.SimpleAction` which will be demonstrated later.
+referencing the name of an action. On the main implementation of this, what you will
+be using is :class:`Gio.SimpleAction`, which will be demonstrated later.
 
 Many classes such as :class:`Gio.MenuItem` and :class:`Gtk.Actionable` interface
 implementations like :class:`Gtk.Button` support properties to set an action

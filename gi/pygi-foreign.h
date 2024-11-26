@@ -29,13 +29,13 @@
 #include "pygi-foreign-api.h"
 
 PyObject *pygi_struct_foreign_convert_to_g_argument (PyObject           *value,
-                                                     GIInterfaceInfo    *interface_info,
+                                                     GIRegisteredTypeInfo *interface_info,
                                                      GITransfer          transfer,
                                                      GIArgument         *arg);
-PyObject *pygi_struct_foreign_convert_from_g_argument (GIInterfaceInfo *interface_info,
+PyObject *pygi_struct_foreign_convert_from_g_argument (GIRegisteredTypeInfo *interface_info,
                                                        GITransfer       transfer,
                                                        GIArgument      *arg);
-PyObject *pygi_struct_foreign_release (GITypeInfo *type_info,
+PyObject *pygi_struct_foreign_release (GIBaseInfo *base_info,
                                        gpointer struct_);
 
 void pygi_register_foreign_struct (const char* namespace_,

@@ -120,12 +120,12 @@ def _generate_callable_info_doc(info):
 
     # Build lists of indices prior to adding the docs because it is possible
     # the index retrieved comes before input arguments being used.
-    ignore_indices = {info.get_return_type().get_array_length()}
+    ignore_indices = {info.get_return_type().get_array_length_index()}
     user_data_indices = set()
     for arg in args:
-        ignore_indices.add(arg.get_destroy())
-        ignore_indices.add(arg.get_type().get_array_length())
-        user_data_indices.add(arg.get_closure())
+        ignore_indices.add(arg.get_destroy_index())
+        ignore_indices.add(arg.get_type_info().get_array_length_index())
+        user_data_indices.add(arg.get_closure_index())
 
     # Build input argument strings
     for i, arg in enumerate(args):
@@ -134,7 +134,7 @@ def _generate_callable_info_doc(info):
         if i in ignore_indices:
             continue
         argstr = arg.get_name()
-        hint = _get_pytype_hint(arg.get_type())
+        hint = _get_pytype_hint(arg.get_type_info())
         if hint not in hint_blacklist:
             argstr += ':' + hint
         if arg.may_be_null() or i in user_data_indices:
@@ -160,7 +160,7 @@ def _generate_callable_info_doc(info):
         if i in ignore_indices:
             continue
         argstr = arg.get_name()
-        hint = _get_pytype_hint(arg.get_type())
+        hint = _get_pytype_hint(arg.get_type_info())
         if hint not in hint_blacklist:
             argstr += ':' + hint
         out_args_strs.append(argstr)

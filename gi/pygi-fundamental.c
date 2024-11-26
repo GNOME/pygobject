@@ -24,12 +24,13 @@
  */
 
 
-#include <girepository.h>
+#include <girepository/girepository.h>
 
 #include "pygobject-internal.h"
 #include "pygi-info.h"
 #include "pygi-util.h"
 #include "pygi-fundamental.h"
+#include "pygi-repository.h"
 #include "pygobject-object.h" // for pygobject_lookup_class
 
 
@@ -89,7 +90,7 @@ fundamental_new (PyTypeObject *type,
     }
 
 out:
-    g_base_info_unref (info);
+    gi_base_info_unref (info);
 
     return (PyObject *) self;
 }
@@ -173,7 +174,7 @@ _pygi_fundamental_new_internal (PyTypeObject *type,
         return NULL;
     }
 
-    info = _pygi_object_get_gi_info ( (PyObject *) type, &PyGIObjectInfo_Type);
+    info = GI_OBJECT_INFO (_pygi_object_get_gi_info ( (PyObject *) type, &PyGIObjectInfo_Type));
     if (info == NULL) {
         if (PyErr_ExceptionMatches (PyExc_AttributeError)) {
             PyErr_Format (PyExc_TypeError, "missing introspection information");
@@ -189,8 +190,8 @@ _pygi_fundamental_new_internal (PyTypeObject *type,
     self->gtype = pyg_type_from_object ((PyObject *) type);
     self->instance = instance;
 
-    self->ref_func = g_object_info_get_ref_function_pointer (info);
-    self->unref_func = g_object_info_get_unref_function_pointer (info);
+    self->ref_func = gi_object_info_get_ref_function_pointer (info);
+    self->unref_func = gi_object_info_get_unref_function_pointer (info);
 
     /* A special case for GParamSpec. It has a floating reference when created.
      * We make sure we have a proper reference, so we can ref/unref normally.
@@ -199,7 +200,7 @@ _pygi_fundamental_new_internal (PyTypeObject *type,
         g_param_spec_ref_sink (self->instance);
     }
 
-    g_base_info_unref (info);
+    gi_base_info_unref (info);
 
     return self;
 }
@@ -257,21 +258,21 @@ pygi_fundamental_register_types (PyObject *m)
 GTypeInstance*
 pygi_fundamental_from_value (const GValue *value)
 {
-    GIRepository *repository = g_irepository_get_default ();
-    GIBaseInfo *info = g_irepository_find_by_gtype (repository, G_VALUE_TYPE (value));
+    GIRepository *repository = pygi_repository_get_default (); // Access to system wide (default) repo instead
+    GIBaseInfo *info = gi_repository_find_by_gtype (repository, G_VALUE_TYPE (value));
     GTypeInstance *instance = NULL;
 
     if (info == NULL)
         return NULL;
 
     if (GI_IS_OBJECT_INFO (info)) {
-        GIObjectInfoGetValueFunction get_value_func = g_object_info_get_get_value_function_pointer ((GIObjectInfo *) info);
+        GIObjectInfoGetValueFunction get_value_func = gi_object_info_get_get_value_function_pointer ((GIObjectInfo *) info);
         if (get_value_func) {
             instance = get_value_func (value);
         }
     }
 
-    g_base_info_unref (info);
+    gi_base_info_unref (info);
 
     return instance;
 }
@@ -286,20 +287,20 @@ pygi_fundamental_set_value (GValue *value, GTypeInstance *instance)
     if (instance == NULL) 
         return result;
 
-    repository = g_irepository_get_default ();
-    info = g_irepository_find_by_gtype (repository, G_TYPE_FROM_INSTANCE (instance));
+    repository = pygi_repository_get_default ();
+    info = gi_repository_find_by_gtype (repository, G_TYPE_FROM_INSTANCE (instance));
 
     if (info == NULL)
         return result;
 
     if (GI_IS_OBJECT_INFO (info)) {
-        GIObjectInfoSetValueFunction set_value_func = g_object_info_get_set_value_function_pointer ((GIObjectInfo *) info);
+        GIObjectInfoSetValueFunction set_value_func = gi_object_info_get_set_value_function_pointer ((GIObjectInfo *) info);
         if (set_value_func) {
             set_value_func (value, instance);
             result = TRUE;
         }
     }
 
-    g_base_info_unref (info);
+    gi_base_info_unref (info);
     return result;
 }

@@ -6,7 +6,6 @@ from gi.repository import Regress
 from gi.repository import GIMarshallingTests
 from gi.repository import Gio
 from gi.repository import GObject
-from gi.repository import GLib
 
 try:
     from gi.repository import Gtk
@@ -61,8 +60,6 @@ class Test(unittest.TestCase):
         self.assertEqual(GIMarshallingTests.boolean_return_true.__doc__,
                          'boolean_return_true() -> bool')
 
-    @unittest.skipUnless((GLib.MAJOR_VERSION, GLib.MINOR_VERSION) >= (2, 42),
-                         "nullable was added in newer glib/gi")
     # https://bugzilla.gnome.org/show_bug.cgi?id=740301
     def test_may_return_none(self):
         self.assertEqual(Gio.File.get_basename.__doc__,

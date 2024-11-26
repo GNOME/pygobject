@@ -316,7 +316,7 @@ _pygi_marshal_cleanup_to_py_interface_object (PyGIInvokeState *state,
             PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)arg_cache;
             GIObjectInfoUnrefFunction unref_func;
 
-            unref_func = g_object_info_get_unref_function_pointer ( (GIObjectInfo *)iface_cache->interface_info);
+            unref_func = gi_object_info_get_unref_function_pointer ( (GIObjectInfo *)iface_cache->interface_info);
             if (unref_func)
                 unref_func (data);
         }
@@ -364,7 +364,7 @@ pygi_arg_gobject_new_from_info (GITypeInfo        *type_info,
                                 GIArgInfo         *arg_info,
                                 GITransfer         transfer,
                                 PyGIDirection      direction,
-                                GIInterfaceInfo   *iface_info,
+                                GIRegisteredTypeInfo *iface_info,
                                 PyGICallableCache *callable_cache)
 {
     gboolean res = FALSE;

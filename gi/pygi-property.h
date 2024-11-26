@@ -25,7 +25,7 @@
 #define __PYGI_PROPERTY_H__
 
 #include <pythoncapi_compat.h>
-#include <girepository.h>
+#include <girepository/girepository.h>
 
 #include "pygobject-internal.h"
 

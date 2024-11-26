@@ -3,7 +3,7 @@
 
 #include <pythoncapi_compat.h>
 
-#include <girepository.h>
+#include <girepository/girepository.h>
 
 G_BEGIN_DECLS
 

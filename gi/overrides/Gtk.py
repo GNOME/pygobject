@@ -541,7 +541,7 @@ class Dialog(Gtk.Dialog, Container):
             if add_buttons is not None and not isinstance(add_buttons, Gtk.ButtonsType):
                 warnings.warn('The "buttons" argument must be a Gtk.ButtonsType enum value. '
                               'Please use the "add_buttons" method for adding buttons. '
-                              'See: https://wiki.gnome.org/PyGObject/InitializerDeprecations',
+                              'See: https://wiki.gnome.org/Projects/PyGObject/InitializerDeprecations',
                               PyGTKDeprecationWarning, stacklevel=stacklevel)
                 new_kwargs.pop('buttons', None)
             else:
@@ -551,7 +551,7 @@ class Dialog(Gtk.Dialog, Container):
             if flags:
                 warnings.warn('The "flags" argument for dialog construction is deprecated. '
                               'Please use initializer keywords: modal=True and/or destroy_with_parent=True. '
-                              'See: https://wiki.gnome.org/PyGObject/InitializerDeprecations',
+                              'See: https://wiki.gnome.org/Projects/PyGObject/InitializerDeprecations',
                               PyGTKDeprecationWarning, stacklevel=stacklevel)
 
                 if flags & Gtk.DialogFlags.MODAL:

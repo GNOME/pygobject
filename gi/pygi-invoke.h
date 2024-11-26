@@ -22,7 +22,7 @@
 
 #include <pythoncapi_compat.h>
 
-#include <girepository.h>
+#include <girepository/girepository.h>
 
 #include "pygi-info.h"
 #include "pygi-invoke-state-struct.h"

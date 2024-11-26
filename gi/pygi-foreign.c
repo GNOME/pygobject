@@ -27,7 +27,7 @@
 #include "pygobject-internal.h"
 #include "pygi-foreign.h"
 
-#include <girepository.h>
+#include <girepository/girepository.h>
 
 typedef struct {
     const char *namespace;
@@ -101,26 +101,26 @@ pygi_struct_foreign_lookup_by_name (const char *namespace, const char *name)
 static PyGIForeignStruct *
 pygi_struct_foreign_lookup (GIBaseInfo *base_info)
 {
-    const gchar *namespace = g_base_info_get_namespace (base_info);
-    const gchar *name = g_base_info_get_name (base_info);
+    const gchar *namespace = gi_base_info_get_namespace (base_info);
+    const gchar *name = gi_base_info_get_name (base_info);
 
     return pygi_struct_foreign_lookup_by_name (namespace, name);
 }
 
 PyObject *
 pygi_struct_foreign_convert_to_g_argument (PyObject        *value,
-                                           GIInterfaceInfo *interface_info,
+                                           GIRegisteredTypeInfo *interface_info,
                                            GITransfer       transfer,
                                            GIArgument      *arg)
 {
     PyObject *result;
 
-    GIBaseInfo *base_info = (GIBaseInfo *) interface_info;
+    GIBaseInfo *base_info = GI_BASE_INFO (interface_info);
     PyGIForeignStruct *foreign_struct = pygi_struct_foreign_lookup (base_info);
 
     if (foreign_struct == NULL) {
         PyErr_Format(PyExc_KeyError, "could not find foreign type %s",
-                     g_base_info_get_name (base_info));
+                     gi_base_info_get_name (base_info));
         return FALSE;
     }
 
@@ -129,11 +129,11 @@ pygi_struct_foreign_convert_to_g_argument (PyObject        *value,
 }
 
 PyObject *
-pygi_struct_foreign_convert_from_g_argument (GIInterfaceInfo *interface_info,
+pygi_struct_foreign_convert_from_g_argument (GIRegisteredTypeInfo *interface_info,
                                              GITransfer       transfer,
                                              GIArgument      *arg)
 {
-    GIBaseInfo *base_info = (GIBaseInfo *) interface_info;
+    GIBaseInfo *base_info = GI_BASE_INFO (interface_info);
     PyGIForeignStruct *foreign_struct = pygi_struct_foreign_lookup (base_info);
 
     if (foreign_struct == NULL)

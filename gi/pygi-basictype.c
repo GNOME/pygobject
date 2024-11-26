@@ -1258,7 +1258,7 @@ arg_basic_type_setup_from_info (PyGIArgCache  *arg_cache,
                                 GITransfer     transfer,
                                 PyGIDirection  direction)
 {
-    GITypeTag type_tag = g_type_info_get_tag (type_info);
+    GITypeTag type_tag = gi_type_info_get_tag (type_info);
 
     if (!pygi_arg_base_setup (arg_cache, type_info, arg_info, transfer, direction))
         return FALSE;

@@ -21,9 +21,17 @@
 #ifndef __PYGI_CACHE_H__
 #define __PYGI_CACHE_H__
 
+
+/* Workaround for FFI_GO_CLOSURES not being defined on macOS
+ * See also: https://github.com/openjdk/jdk17u-dev/pull/741
+ */
+#ifndef FFI_GO_CLOSURES
+#define FFI_GO_CLOSURES 0
+#endif
+
 #include <pythoncapi_compat.h>
-#include <girepository.h>
-#include <girffi.h>
+#include <girepository/girepository.h>
+#include <girepository/girffi.h>
 
 #include "pygi-invoke-state-struct.h"
 
@@ -151,8 +159,10 @@ typedef struct _PyGISequenceCache
 typedef struct _PyGIArgGArray
 {
     PyGISequenceCache seq_cache;
-    gssize fixed_size;
-    gssize len_arg_index;
+    size_t fixed_size;
+    unsigned int len_arg_index;
+    gboolean has_fixed_size;
+    gboolean has_len_arg;
     gboolean is_zero_terminated;
     gsize item_size;
     GIArrayType array_type;
@@ -164,7 +174,7 @@ typedef struct _PyGIInterfaceCache
     gboolean is_foreign;
     GType g_type;
     PyObject *py_type;
-    GIInterfaceInfo *interface_info;
+    GIRegisteredTypeInfo *interface_info;
     gchar *type_name;
 } PyGIInterfaceCache;
 
@@ -178,21 +188,22 @@ struct _PyGICallableCache
 
     PyGIArgCache *return_cache;
     GPtrArray *args_cache;
+    GPtrArray *py_args;
     GSList *to_py_args;
-    GSList *arg_name_list; /* for keyword arg matching */
     GHashTable *arg_name_hash;
     gboolean throws;
 
     /* Index of user_data arg passed to a callable. */
-    gssize user_data_index;
+    unsigned int user_data_index;
+    gboolean has_user_data;
 
-    /* Index of user_data arg that can eat variable args passed to a callable. */
-    gssize user_data_varargs_index;
+    /* A user_data arg that can eat variable args passed to a callable. */
+    PyGIArgCache *user_data_varargs_arg;
 
     /* Number of args already added */
     gssize args_offset;
 
-    /* Number of out args passed to g_function_info_invoke.
+    /* Number of out args passed to gi_function_info_invoke.
      * This is used for the length of PyGIInvokeState.out_values */
     gssize n_to_py_args;
 
@@ -202,7 +213,7 @@ struct _PyGICallableCache
     /* The type used for returning multiple values or NULL */
     PyTypeObject* resulttuple_type;
 
-    /* Number of out args for g_function_info_invoke that will be skipped
+    /* Number of out args for gi_function_info_invoke that will be skipped
      * when marshaling to Python due to them being implicitly available
      * (list/array length).
      */
@@ -259,7 +270,7 @@ pygi_arg_interface_setup (PyGIInterfaceCache *iface_cache,
                           GIArgInfo          *arg_info,  /* may be NULL for return arguments */
                           GITransfer          transfer,
                           PyGIDirection       direction,
-                          GIInterfaceInfo    *iface_info);
+                          GIRegisteredTypeInfo *iface_info);
 
 gboolean
 pygi_arg_sequence_setup  (PyGISequenceCache  *sc,
@@ -274,7 +285,7 @@ pygi_arg_interface_new_from_info (GITypeInfo         *type_info,
                                   GIArgInfo          *arg_info,     /* may be NULL for return arguments */
                                   GITransfer          transfer,
                                   PyGIDirection       direction,
-                                  GIInterfaceInfo    *iface_info);
+                                  GIRegisteredTypeInfo *iface_info);
 
 PyGIArgCache *
 pygi_arg_cache_alloc     (void);
@@ -332,7 +343,7 @@ pygi_closure_cache_new      (GICallableInfo *info);
 
 inline static guint
 _pygi_callable_cache_args_len (PyGICallableCache *cache) {
-    return ((cache)->args_cache)->len;
+    return cache->args_cache->len;
 }
 
 inline static PyGIArgCache *

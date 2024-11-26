@@ -18,8 +18,16 @@
 #ifndef __PYGI_CLOSURE_H__
 #define __PYGI_CLOSURE_H__
 
+
+/* Workaround for FFI_GO_CLOSURES not being defined on macOS
+ * See also: https://github.com/openjdk/jdk17u-dev/pull/741
+ */
+#ifndef FFI_GO_CLOSURES
+#define FFI_GO_CLOSURES 0
+#endif
+
 #include <pythoncapi_compat.h>
-#include <girffi.h>
+#include <girepository/girepository.h>
 #include <ffi.h>
 
 #include "pygi-cache.h"
@@ -59,7 +67,7 @@ PyGIArgCache *pygi_arg_callback_new_from_info  (GITypeInfo        *type_info,
                                                 GIArgInfo         *arg_info,   /* may be null */
                                                 GITransfer         transfer,
                                                 PyGIDirection      direction,
-                                                GIInterfaceInfo   *iface_info,
+                                                GICallbackInfo    *iface_info,
                                                 PyGICallableCache *callable_cache);
 
 G_END_DECLS

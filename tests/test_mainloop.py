@@ -4,6 +4,7 @@ import os
 import select
 import signal
 import unittest
+import warnings
 
 from gi.repository import GLib
 
@@ -16,7 +17,9 @@ class TestMainLoop(unittest.TestCase):
     def test_exception_handling(self):
         pipe_r, pipe_w = os.pipe()
 
-        pid = os.fork()
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", ".*may lead to deadlock.*")
+            pid = os.fork()
         if pid == 0:
             os.close(pipe_w)
             select.select([pipe_r], [], [])
@@ -45,7 +48,9 @@ class TestMainLoop(unittest.TestCase):
     @unittest.skipIf(os.environ.get("PYGI_TEST_GDB"), "SIGINT stops gdb")
     def test_sigint(self):
         r, w = os.pipe()
-        pid = os.fork()
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", ".*may lead to deadlock.*")
+            pid = os.fork()
         if pid == 0:
             # wait for the parent process loop to start
             os.read(r, 1)

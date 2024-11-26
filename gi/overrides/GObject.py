@@ -641,17 +641,6 @@ class Binding(GObjectModule.Binding):
                       PyGIDeprecationWarning, stacklevel=2)
         return self
 
-    def unbind(self):
-        # Fixed in newer glib
-        if (GLib.MAJOR_VERSION, GLib.MINOR_VERSION, GLib.MICRO_VERSION) >= (2, 57, 3):
-            return super(Binding, self).unbind()
-
-        if hasattr(self, '_unbound'):
-            raise ValueError('binding has already been cleared out')
-        else:
-            setattr(self, '_unbound', True)
-            super(Binding, self).unbind()
-
 
 Binding = override(Binding)
 __all__.append('Binding')

@@ -36,7 +36,7 @@ your operating system.
 .. code:: console
 
     sudo apt-get install -y python3-venv python3-wheel python3-dev
-    sudo apt-get install -y libgirepository1.0-dev build-essential \
+    sudo apt-get install -y gobject-introspection libgirepository-2.0-dev build-essential \
       libbz2-dev libreadline-dev libssl-dev zlib1g-dev libsqlite3-dev wget \
       curl llvm libncurses5-dev libncursesw5-dev xz-utils tk-dev libcairo2-dev
 
@@ -101,7 +101,7 @@ With homebrew:
 
     brew update
     brew install python3 gobject-introspection libffi
-    export PKG_CONFIG_PATH=/opt/homebrew/opt/libffi/lib/pkgconfig  # use /usr/local/ for older Homebrew installs
+    export PKG_CONFIG_PATH=$(brew --prefix libffi)/lib/pkgconfig  # use /usr/local/ for older Homebrew installs
 
 
 .. _install-pyenv:
@@ -178,7 +178,7 @@ Then set up the project by running:
 
     pdm install
 
-You can run teh unit tests with:
+You can run the unit tests with:
 
 .. code:: console
 

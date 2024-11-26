@@ -23,7 +23,7 @@
 
 #include <pythoncapi_compat.h>
 #include <glib-object.h>
-#include <girepository.h>
+#include <girepository/girepository.h>
 #include "pygobject-internal.h"
 
 extern PyTypeObject PyGTypeWrapper_Type;

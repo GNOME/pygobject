@@ -269,7 +269,7 @@ def deprecated_init(super_init_func, arg_names, ignore=tuple(),
         if args:
             warnings.warn('Using positional arguments with the GObject constructor has been deprecated. '
                           'Please specify keyword(s) for "%s" or use a class specific constructor. '
-                          'See: https://wiki.gnome.org/PyGObject/InitializerDeprecations' %
+                          'See: https://wiki.gnome.org/Projects/PyGObject/InitializerDeprecations' %
                           ', '.join(arg_names[:len(args)]),
                           category, stacklevel=stacklevel)
             new_kwargs = dict(zip(arg_names, args))
@@ -286,7 +286,7 @@ def deprecated_init(super_init_func, arg_names, ignore=tuple(),
 
         if aliases_used:
             warnings.warn('The keyword(s) "%s" have been deprecated in favor of "%s" respectively. '
-                          'See: https://wiki.gnome.org/PyGObject/InitializerDeprecations' %
+                          'See: https://wiki.gnome.org/Projects/PyGObject/InitializerDeprecations' %
                           (', '.join(deprecated_aliases[k] for k in sorted(aliases_used)),
                            ', '.join(sorted(aliases_used))),
                           category, stacklevel=stacklevel)
@@ -301,7 +301,7 @@ def deprecated_init(super_init_func, arg_names, ignore=tuple(),
         if defaults_used:
             warnings.warn('Initializer is relying on deprecated non-standard '
                           'defaults. Please update to explicitly use: %s '
-                          'See: https://wiki.gnome.org/PyGObject/InitializerDeprecations' %
+                          'See: https://wiki.gnome.org/Projects/PyGObject/InitializerDeprecations' %
                           ', '.join('%s=%s' % (k, deprecated_defaults[k]) for k in sorted(defaults_used)),
                           category, stacklevel=stacklevel)
 

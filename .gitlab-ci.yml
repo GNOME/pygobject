@@ -1,16 +1,28 @@
-image: registry.gitlab.gnome.org/gnome/pygobject/main:v25
-
 stages:
   - build_and_test
   - coverage
   - deploy
 
-cache:
-  paths:
-    - _ccache/
+default:
+  image: registry.gitlab.gnome.org/gnome/pygobject/main:v26
+  cache:
+    paths:
+      - _ccache/
 
-.defaults: &defaults
+linux:
   stage: build_and_test
+  parallel:
+    matrix:
+      - PYTHON_VERSION:
+          - "3.9"
+          - "3.10"
+          - "3.11"
+          - "3.12"
+          - "3.13"
+          - "pypy3"
+        TEST_GTK_VERSION: "3.0"
+      - PYTHON_VERSION: "3.11"
+        TEST_GTK_VERSION: "4.0"
   artifacts:
     when: always
     paths:
@@ -21,14 +33,20 @@ cache:
   script:
    - bash -x ./.gitlab-ci/test-docker.sh
 
-.mingw-defaults: &mingw-defaults
+windows:
   stage: build_and_test
   tags:
     - win32-ps
+  parallel:
+    matrix:
+      - MSYSTEM:
+          - "MINGW32"
+          - "MINGW64"
   artifacts:
     when: always
     paths:
       - coverage/
+      - _build/meson-logs
       - test-results.xml
     reports:
       junit: test-results.xml
@@ -62,8 +80,8 @@ pages:
     paths:
       - public
     expire_in: 30 days
-  only:
-    - main
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
 
 sdist:
   stage: build_and_test
@@ -74,82 +92,19 @@ sdist:
     - git config --global --add safe.directory "$CI_PROJECT_DIR"
     - bash -x ./.gitlab-ci/build-sdists.sh
 
-mingw32:
-  variables:
-    MSYSTEM: "MINGW32"
-  <<: *mingw-defaults
-
-mingw64:
-  variables:
-    MSYSTEM: "MINGW64"
-  <<: *mingw-defaults
-
-python3.9:
-  variables:
-    PYTHON_VERSION: "3.9"
-    TEST_GTK_VERSION: "3.0"
-  <<: *defaults
-
-python3.10:
-  variables:
-    PYTHON_VERSION: "3.10"
-    TEST_GTK_VERSION: "3.0"
-  <<: *defaults
-
-python3.11:
-  variables:
-    PYTHON_VERSION: "3.11"
-    TEST_GTK_VERSION: "3.0"
-  <<: *defaults
-
-python3.11-gtk4:
-  variables:
-    PYTHON_VERSION: "3.11"
-    TEST_GTK_VERSION: "4.0"
-  <<: *defaults
-
-python3.12:
-  variables:
-    PYTHON_VERSION: "3.12"
-    TEST_GTK_VERSION: "3.0"
-  <<: *defaults
-
-python3.13:
-  variables:
-    PYTHON_VERSION: "3.13"
-    TEST_GTK_VERSION: "3.0"
-  <<: *defaults
-
-pypy3:
-  variables:
-    PYTHON_VERSION: "pypy3"
-    TEST_GTK_VERSION: "3.0"
-  <<: *defaults
-
 gnome-master:
   stage: build_and_test
   image: quay.io/gnome_infrastructure/gnome-runtime-images:gnome-master
   tags:
     - flatpak
+  parallel:
+    matrix:
+      - TEST_GTK_VERSION:
+          - "3.0"
+          - "4.0"
   artifacts:
     paths:
       - coverage/
-  variables:
-    TEST_GTK_VERSION: "3.0"
-  script:
-    - bash -x ./.gitlab-ci/test-flatpak.sh
-
-gnome-master-gtk4:
-  allow_failure: true
-  stage: build_and_test
-  image: quay.io/gnome_infrastructure/gnome-runtime-images:gnome-master
-  tags:
-    - flatpak
-  artifacts:
-    paths:
-      - coverage/
-  variables:
-    TEST_GTK_VERSION: "4.0"
   script:
     - bash -x ./.gitlab-ci/test-flatpak.sh
 
@@ -169,7 +124,7 @@ minimal-meson:
   stage: build_and_test
   image: quay.io/fedora/fedora:40
   before_script:
-    - dnf install --assumeyes gcc meson git flex bison diffutils python3-devel python3-pytest
+    - dnf install --assumeyes gcc meson git flex bison diffutils python3-devel python3-pytest gobject-introspection-devel
   script:
     - meson setup _build
     - meson compile -C _build

@@ -22,7 +22,7 @@
 #include "pygi-util.h"
 #include "pygi-ccallback.h"
 
-#include <girepository.h>
+#include <girepository/girepository.h>
 
 
 static PyObject *
@@ -31,7 +31,7 @@ _ccallback_vectorcall(PyGICCallback *self, PyObject *const *args, size_t nargsf,
     PyObject *result;
 
     if (self->cache == NULL) {
-        self->cache = (PyGICCallbackCache *)pygi_ccallback_cache_new (self->info,
+        self->cache = (PyGICCallbackCache *)pygi_ccallback_cache_new (GI_CALLABLE_INFO (self->info),
                                                                       self->callback);
         if (self->cache == NULL)
             return NULL;
@@ -51,7 +51,7 @@ PyObject *
 _pygi_ccallback_new (GCallback callback,
                      gpointer user_data,
                      GIScopeType scope,
-                     GIFunctionInfo *info,
+                     GICallableInfo *info,
                      GDestroyNotify destroy_notify)
 {
     PyGICCallback *self;
@@ -69,7 +69,7 @@ _pygi_ccallback_new (GCallback callback,
     self->user_data = user_data;
     self->scope = scope;
     self->destroy_notify_func = destroy_notify;
-    self->info = g_base_info_ref( (GIBaseInfo *) info);
+    self->info = GI_CALLABLE_INFO (gi_base_info_ref (info));
     self->vectorcall = (vectorcallfunc)_ccallback_vectorcall;
 
     return (PyObject *) self;
@@ -78,7 +78,7 @@ _pygi_ccallback_new (GCallback callback,
 static void
 _ccallback_dealloc (PyGICCallback *self)
 {
-    g_base_info_unref ( (GIBaseInfo *)self->info);
+    gi_base_info_unref ( (GIBaseInfo *)self->info);
 
     if (self->cache != NULL) {
         pygi_callable_cache_free ( (PyGICallableCache *)self->cache);

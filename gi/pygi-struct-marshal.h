@@ -21,7 +21,7 @@
 #ifndef __PYGI_STRUCT_MARSHAL_H__
 #define __PYGI_STRUCT_MARSHAL_H__
 
-#include <girepository.h>
+#include <girepository/girepository.h>
 #include "pygi-cache.h"
 
 G_BEGIN_DECLS
@@ -30,7 +30,7 @@ PyGIArgCache *pygi_arg_struct_new_from_info  (GITypeInfo      *type_info,
                                               GIArgInfo       *arg_info,   /* may be null */
                                               GITransfer       transfer,
                                               PyGIDirection    direction,
-                                              GIInterfaceInfo *iface_info);
+                                              GIRegisteredTypeInfo *iface_info);
 
 
 gboolean pygi_arg_gvalue_from_py_marshal     (PyObject        *py_arg, /*in*/
@@ -41,7 +41,7 @@ gboolean pygi_arg_gvalue_from_py_marshal     (PyObject        *py_arg, /*in*/
 gboolean pygi_arg_struct_from_py_marshal     (PyObject        *py_arg,
                                               GIArgument      *arg,
                                               const gchar     *arg_name,
-                                              GIBaseInfo      *interface_info,
+                                              GIRegisteredTypeInfo *interface_info,
                                               GType            g_type,
                                               PyObject        *py_type,
                                               GITransfer       transfer,
@@ -50,7 +50,7 @@ gboolean pygi_arg_struct_from_py_marshal     (PyObject        *py_arg,
                                               gboolean         is_pointer);
 
 PyObject *pygi_arg_struct_to_py_marshal      (GIArgument      *arg,
-                                              GIInterfaceInfo *interface_info,
+                                              GIRegisteredTypeInfo *interface_info,
                                               GType            g_type,
                                               PyObject        *py_type,
                                               GITransfer       transfer,

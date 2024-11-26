@@ -27,8 +27,9 @@
 #include "pygi-fundamental.h"
 #include "pygi-type.h"
 #include "pygi-fundamental.h"
+#include "pygi-repository.h"
 
-#include <girepository.h>
+#include <girepository/girepository.h>
 
 static GIPropertyInfo *
 lookup_property_from_object_info (GIObjectInfo *info, const gchar *attr_name)
@@ -36,18 +37,18 @@ lookup_property_from_object_info (GIObjectInfo *info, const gchar *attr_name)
     gssize n_infos;
     gint i;
 
-    n_infos = g_object_info_get_n_properties (info);
+    n_infos = gi_object_info_get_n_properties (info);
     for (i = 0; i < n_infos; i++) {
         GIPropertyInfo *property_info;
 
-        property_info = g_object_info_get_property (info, i);
+        property_info = gi_object_info_get_property (info, i);
         g_assert (info != NULL);
 
-        if (strcmp (attr_name, g_base_info_get_name (property_info)) == 0) {
+        if (strcmp (attr_name, gi_base_info_get_name (GI_BASE_INFO (property_info))) == 0) {
             return property_info;
         }
 
-        g_base_info_unref (property_info);
+        gi_base_info_unref (property_info);
     }
 
     return NULL;
@@ -60,18 +61,18 @@ lookup_property_from_interface_info (GIInterfaceInfo *info,
     gssize n_infos;
     gint i;
 
-    n_infos = g_interface_info_get_n_properties (info);
+    n_infos = gi_interface_info_get_n_properties (info);
     for (i = 0; i < n_infos; i++) {
         GIPropertyInfo *property_info;
 
-        property_info = g_interface_info_get_property (info, i);
+        property_info = gi_interface_info_get_property (info, i);
         g_assert (info != NULL);
 
-        if (strcmp (attr_name, g_base_info_get_name (property_info)) == 0) {
+        if (strcmp (attr_name, gi_base_info_get_name (GI_BASE_INFO (property_info))) == 0) {
             return property_info;
         }
 
-        g_base_info_unref (property_info);
+        gi_base_info_unref (property_info);
     }
 
     return NULL;
@@ -84,8 +85,8 @@ _pygi_lookup_property_from_g_type (GType g_type, const gchar *attr_name)
     GIRepository *repository;
     GIBaseInfo *info;
 
-    repository = g_irepository_get_default();
-    info = g_irepository_find_by_gtype (repository, g_type);
+    repository = pygi_repository_get_default ();
+    info = gi_repository_find_by_gtype (repository, g_type);
     if (info == NULL)
        return NULL;
 
@@ -96,7 +97,8 @@ _pygi_lookup_property_from_g_type (GType g_type, const gchar *attr_name)
         ret = lookup_property_from_interface_info ((GIInterfaceInfo *) info,
                                                    attr_name);
 
-    g_base_info_unref (info);
+    gi_base_info_unref (info);
+
     return ret;
 }
 
@@ -156,11 +158,11 @@ pygi_get_property_value (PyGObject *instance, GParamSpec *pspec)
         GIArgument arg = { 0, };
         GITransfer transfer = GI_TRANSFER_NOTHING;
 
-        type_info = g_property_info_get_type (property_info);
+        type_info = gi_property_info_get_type_info (property_info);
         arg = _pygi_argument_from_g_value (&value, type_info);
 
         /* Arrays are special cased, see note in _pygi_argument_to_array. */
-        if (g_type_info_get_tag (type_info) == GI_TYPE_TAG_ARRAY) {
+        if (gi_type_info_get_tag (type_info) == GI_TYPE_TAG_ARRAY) {
             arg.v_pointer = _pygi_argument_to_array (&arg, NULL, NULL, NULL,
                                                      type_info, &free_array);
         } else if (g_type_is_a (pspec->value_type, G_TYPE_BOXED)) {
@@ -174,8 +176,8 @@ pygi_get_property_value (PyGObject *instance, GParamSpec *pspec)
             g_array_free (arg.v_pointer, FALSE);
         }
 
-        g_base_info_unref (type_info);
-        g_base_info_unref (property_info);
+        gi_base_info_unref (type_info);
+        gi_base_info_unref (property_info);
 
         if (PyErr_Occurred()) {
             return NULL;
@@ -216,6 +218,7 @@ pygi_set_property_value (PyGObject *instance,
 {
     GIPropertyInfo *property_info = NULL;
     GITypeInfo *type_info = NULL;
+    GIBaseInfo *info = NULL;
     GITypeTag type_tag;
     GITransfer transfer;
     GValue value = { 0, };
@@ -232,8 +235,8 @@ pygi_set_property_value (PyGObject *instance,
     if (! (pspec->flags & G_PARAM_WRITABLE))
         goto out;
 
-    type_info = g_property_info_get_type (property_info);
-    transfer = g_property_info_get_ownership_transfer (property_info);
+    type_info = gi_property_info_get_type_info (property_info);
+    transfer = gi_property_info_get_ownership_transfer (property_info);
     arg = _pygi_argument_from_object (py_value, type_info, transfer);
 
     if (PyErr_Occurred())
@@ -242,57 +245,45 @@ pygi_set_property_value (PyGObject *instance,
     g_value_init (&value, G_PARAM_SPEC_VALUE_TYPE (pspec));
 
     /* FIXME: Lots of types still unhandled */
-    type_tag = g_type_info_get_tag (type_info);
+    type_tag = gi_type_info_get_tag (type_info);
     switch (type_tag) {
         case GI_TYPE_TAG_INTERFACE:
         {
-            GIBaseInfo *info;
-            GIInfoType info_type;
             GType type;
 
-            info = g_type_info_get_interface (type_info);
-            type = g_registered_type_info_get_g_type (info);
-            info_type = g_base_info_get_type (info);
+            info = gi_type_info_get_interface (type_info);
+            type = gi_registered_type_info_get_g_type (GI_REGISTERED_TYPE_INFO (info));
 
-            g_base_info_unref (info);
-
-            switch (info_type) {
-                case GI_INFO_TYPE_ENUM:
-                    g_value_set_enum (&value, arg.v_int);
-                    break;
-                case GI_INFO_TYPE_FLAGS:
-                    g_value_set_flags (&value, arg.v_uint);
-                    break;
-                case GI_INFO_TYPE_INTERFACE:
-                case GI_INFO_TYPE_OBJECT:
-                    if (arg.v_pointer == NULL || G_IS_OBJECT (arg.v_pointer)) {
-                        g_value_set_object (&value, arg.v_pointer);
-                    } else if (!pygi_fundamental_set_value (&value, arg.v_pointer)) {
-                        PyErr_Format (PyExc_NotImplementedError,
-                                      "Setting properties of type '%s' is not implemented",
-                                      g_type_name (type));
-                        goto out;
-                    }
-                    break;
-                case GI_INFO_TYPE_BOXED:
-                case GI_INFO_TYPE_STRUCT:
-                case GI_INFO_TYPE_UNION:
-                    if (g_type_is_a (type, G_TYPE_BOXED)) {
-                        g_value_set_boxed (&value, arg.v_pointer);
-                    } else if (g_type_is_a (type, G_TYPE_VARIANT)) {
-                        g_value_set_variant (&value, arg.v_pointer);
-                    } else {
-                        PyErr_Format (PyExc_NotImplementedError,
-                                      "Setting properties of type '%s' is not implemented",
-                                      g_type_name (type));
-                        goto out;
-                    }
-                    break;
-                default:
+            if (GI_IS_FLAGS_INFO (info)) {
+                /* Check flags before enums: flags are a subtype of enum. */
+                g_value_set_flags (&value, arg.v_uint);
+            } else if (GI_IS_ENUM_INFO (info)) {
+                g_value_set_enum (&value, arg.v_int);
+            } else if (GI_IS_INTERFACE_INFO (info) || GI_IS_OBJECT_INFO (info)) {
+                if (arg.v_pointer == NULL || G_IS_OBJECT (arg.v_pointer)) {
+                    g_value_set_object (&value, arg.v_pointer);
+                } else if (!pygi_fundamental_set_value (&value, arg.v_pointer)) {
                     PyErr_Format (PyExc_NotImplementedError,
                                   "Setting properties of type '%s' is not implemented",
                                   g_type_name (type));
                     goto out;
+                }
+            } else if (GI_IS_STRUCT_INFO (info) || GI_IS_UNION_INFO (info)) {
+                if (g_type_is_a (type, G_TYPE_BOXED)) {
+                    g_value_set_boxed (&value, arg.v_pointer);
+                } else if (g_type_is_a (type, G_TYPE_VARIANT)) {
+                    g_value_set_variant (&value, arg.v_pointer);
+                } else {
+                    PyErr_Format (PyExc_NotImplementedError,
+                                  "Setting properties of type '%s' is not implemented",
+                                  g_type_name (type));
+                    goto out;
+                }
+            } else {
+                PyErr_Format (PyExc_NotImplementedError,
+                              "Setting properties of type '%s' is not implemented",
+                              g_type_name (type));
+                goto out;
             }
             break;
         }
@@ -377,7 +368,7 @@ pygi_set_property_value (PyGObject *instance,
         default:
             PyErr_Format (PyExc_NotImplementedError,
                           "Setting properties of type %s is not implemented",
-                          g_type_tag_to_string (g_type_info_get_tag (type_info)));
+                          gi_type_tag_to_string (gi_type_info_get_tag (type_info)));
             goto out;
     }
 
@@ -388,9 +379,11 @@ pygi_set_property_value (PyGObject *instance,
 
 out:
     if (property_info != NULL)
-        g_base_info_unref (property_info);
+        gi_base_info_unref (property_info);
     if (type_info != NULL)
-        g_base_info_unref (type_info);
+        gi_base_info_unref (type_info);
+    if (info != NULL)
+        gi_base_info_unref (info);
 
     return ret_value;
 }
