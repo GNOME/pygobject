@@ -1,4 +1,4 @@
-.. image:: https://gitlab.gnome.org/GNOME/pygobject/-/raw/master/docs/images/pygobject.svg?ref_type=heads
+.. image:: https://gitlab.gnome.org/GNOME/pygobject/-/raw/main/docs/images/pygobject.svg?ref_type=heads
    :align: center
    :width: 400px
    :height: 98px
