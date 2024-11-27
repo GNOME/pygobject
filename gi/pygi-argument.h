@@ -22,10 +22,7 @@
 
 #include <pythoncapi_compat.h>
 
-#include <girepository/girepository.h>
-
 G_BEGIN_DECLS
-
 
 /* Private */
 /* TODO: change signature: length as arg, return boolean */

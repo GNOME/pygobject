@@ -26,9 +26,9 @@
 #define FFI_GO_CLOSURES 0
 #endif
 
+#include <ffi.h>
 #include <pythoncapi_compat.h>
 #include <girepository/girepository.h>
-#include <ffi.h>
 
 #include "pygi-cache.h"
 

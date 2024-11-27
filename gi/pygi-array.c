@@ -18,13 +18,13 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <pythoncapi_compat.h>
 #include <glib.h>
+#include <pythoncapi_compat.h>
 
 #include "pygi-array.h"
+#include "pygi-basictype.h"
 #include "pygi-info.h"
 #include "pygi-marshal-cleanup.h"
-#include "pygi-basictype.h"
 #include "pygi-util.h"
 
 /* Needed for _pygi_marshal_cleanup_from_py_interface_struct_gvalue hack */

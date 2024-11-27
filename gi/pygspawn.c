@@ -20,12 +20,12 @@
  */
 
 #include <glib.h>
-
 #include <pythoncapi_compat.h>
-#include "pygi-util.h"
+
 #include "pygi-basictype.h"
-#include "pygspawn.h"
 #include "pygi-error.h"
+#include "pygi-util.h"
+#include "pygspawn.h"
 
 struct _PyGChildSetupData {
     PyObject *func;

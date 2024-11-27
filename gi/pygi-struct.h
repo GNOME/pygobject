@@ -20,8 +20,8 @@
 #ifndef __PYGI_STRUCT_H__
 #define __PYGI_STRUCT_H__
 
-#include <pythoncapi_compat.h>
 #include <pygobject-internal.h>
+#include <pythoncapi_compat.h>
 
 G_BEGIN_DECLS
 

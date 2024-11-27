@@ -20,8 +20,9 @@
 #ifndef __PYGI_BOXED_H__
 #define __PYGI_BOXED_H__
 
-#include <pythoncapi_compat.h>
 #include <girepository/girepository.h>
+#include <pythoncapi_compat.h>
+
 #include "pygobject-internal.h"
 
 G_BEGIN_DECLS

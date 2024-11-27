@@ -17,11 +17,13 @@
  */
 
 #include <pythoncapi_compat.h>
+
 #include "pygi-signal-closure.h"
-#include "pygi-value.h"
+
 #include "pygi-argument.h"
 #include "pygi-boxed.h"
 #include "pygi-repository.h"
+#include "pygi-value.h"
 
 static GISignalInfo *
 _pygi_lookup_signal_from_g_type (GType g_type,

@@ -21,10 +21,11 @@
 #include <config.h>
 
 #include <pythoncapi_compat.h>
-#include "pygoptioncontext.h"
+
+#include "pygi-basictype.h"
 #include "pygi-error.h"
 #include "pygi-util.h"
-#include "pygi-basictype.h"
+#include "pygoptioncontext.h"
 
 PYGI_DEFINE_TYPE("gi._gi.OptionContext", PyGOptionContext_Type, PyGOptionContext)
 

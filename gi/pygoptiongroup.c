@@ -21,9 +21,10 @@
 #include <config.h>
 
 #include <pythoncapi_compat.h>
-#include "pygoptiongroup.h"
+
 #include "pygi-error.h"
 #include "pygi-util.h"
+#include "pygoptiongroup.h"
 
 PYGI_DEFINE_TYPE("gi._gi.OptionGroup", PyGOptionGroup_Type, PyGOptionGroup)
 

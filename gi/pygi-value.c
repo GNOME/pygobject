@@ -16,18 +16,19 @@
  */
 
 #include <pythoncapi_compat.h>
+
 #include "pygi-value.h"
-#include "pygi-struct.h"
+
+#include "pygboxed.h"
+#include "pygenum.h"
+#include "pygflags.h"
 #include "pygi-basictype.h"
 #include "pygi-fundamental.h"
-#include "pygobject-object.h"
-#include "pygi-type.h"
-#include "pygi-fundamental.h"
 #include "pygi-repository.h"
-#include "pygenum.h"
+#include "pygi-struct.h"
+#include "pygi-type.h"
+#include "pygobject-object.h"
 #include "pygpointer.h"
-#include "pygboxed.h"
-#include "pygflags.h"
 
 
 /* glib 2.62 has started to print warnings for these which can't be disabled selectively, so just copy them here */

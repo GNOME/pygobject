@@ -21,15 +21,14 @@
  * IN THE SOFTWARE.
  */
 
-#include "pygi-property.h"
-#include "pygi-value.h"
+#include <girepository/girepository.h>
+
 #include "pygi-argument.h"
 #include "pygi-fundamental.h"
-#include "pygi-type.h"
-#include "pygi-fundamental.h"
+#include "pygi-property.h"
 #include "pygi-repository.h"
-
-#include <girepository/girepository.h>
+#include "pygi-type.h"
+#include "pygi-value.h"
 
 static GIPropertyInfo *
 lookup_property_from_object_info (GIObjectInfo *info, const gchar *attr_name)

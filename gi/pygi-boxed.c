@@ -19,14 +19,15 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <girepository/girepository.h>
+
+#include "pygi-type.h"
+
+#include "pygboxed.h"
+#include "pygi-basictype.h"
 #include "pygi-boxed.h"
 #include "pygi-info.h"
-#include "pygboxed.h"
-#include "pygi-type.h"
-#include "pygi-basictype.h"
 #include "pygi-util.h"
-
-#include <girepository/girepository.h>
 
 struct _PyGIBoxed {
     PyGBoxed base;

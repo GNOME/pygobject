@@ -21,14 +21,16 @@
  */
 
 #include <pythoncapi_compat.h>
-#include "pygi-info.h"
-#include "pygi-cache.h"
-#include "pygi-invoke.h"
-#include "pygi-argument.h"
-#include "pygi-util.h"
-#include "pygi-basictype.h"
+
 #include "pygi-type.h"
+
+#include "pygi-argument.h"
+#include "pygi-basictype.h"
+#include "pygi-cache.h"
 #include "pygi-fundamental.h"
+#include "pygi-info.h"
+#include "pygi-invoke.h"
+#include "pygi-util.h"
 
 /* _generate_doc_string
  *

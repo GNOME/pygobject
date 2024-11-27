@@ -19,18 +19,19 @@
 #include <config.h>
 
 #include <pythoncapi_compat.h>
+
 #include "pygobject-object.h"
+
 #include "pygboxed.h"
 #include "pygenum.h"
 #include "pygflags.h"
-#include "pygi-util.h"
-#include "pygpointer.h"
-#include "pyginterface.h"
-
-#include "pygi-type.h"
-#include "pygi-value.h"
 #include "pygi-basictype.h"
 #include "pygi-repository.h"
+#include "pygi-type.h"
+#include "pygi-util.h"
+#include "pygi-value.h"
+#include "pyginterface.h"
+#include "pygpointer.h"
 
 PyObject *
 pygi_type_import_by_name (const char *namespace_,

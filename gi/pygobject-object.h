@@ -1,8 +1,9 @@
 #ifndef _PYGOBJECT_OBJECT_H_
 #define _PYGOBJECT_OBJECT_H_
 
-#include <pythoncapi_compat.h>
 #include <glib-object.h>
+#include <pythoncapi_compat.h>
+
 #include "pygobject-internal.h"
 
 /* Data that belongs to the GObject instance, not the Python wrapper */

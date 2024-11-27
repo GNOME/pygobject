@@ -21,39 +21,38 @@
  * USA
  */
 
-#include <pythoncapi_compat.h>
 #include <glib-object.h>
+#include <pythoncapi_compat.h>
 
 #include "config.h"
-#include "pyginterface.h"
-#include "pygi-repository.h"
-#include "pygi-type.h"
-#include "pygenum.h"
+#include "gimodule.h"
 #include "pygboxed.h"
+#include "pygenum.h"
 #include "pygflags.h"
-#include "pygi-error.h"
-#include "pygi-foreign.h"
-#include "pygi-resulttuple.h"
 #include "pygi-async.h"
-#include "pygi-source.h"
+#include "pygi-basictype.h"
+#include "pygi-boxed.h"
 #include "pygi-ccallback.h"
 #include "pygi-closure.h"
-#include "pygi-type.h"
-#include "pygi-boxed.h"
+#include "pygi-error.h"
+#include "pygi-foreign.h"
 #include "pygi-fundamental.h"
 #include "pygi-info.h"
+#include "pygi-property.h"
+#include "pygi-repository.h"
+#include "pygi-resulttuple.h"
+#include "pygi-source.h"
 #include "pygi-struct.h"
+#include "pygi-type.h"
+#include "pygi-util.h"
+#include "pygi-value.h"
+#include "pyginterface.h"
+#include "pygobject-internal.h"
 #include "pygobject-object.h"
 #include "pygoptioncontext.h"
 #include "pygoptiongroup.h"
-#include "pygspawn.h"
 #include "pygpointer.h"
-#include "pygobject-internal.h"
-#include "pygi-value.h"
-#include "pygi-property.h"
-#include "pygi-util.h"
-#include "gimodule.h"
-#include "pygi-basictype.h"
+#include "pygspawn.h"
 
 PyObject *PyGIWarning;
 PyObject *PyGIDeprecationWarning;

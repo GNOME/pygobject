@@ -21,9 +21,10 @@
 #ifndef __PYGI_TYPE_H__ 
 #define __PYGI_TYPE_H__
 
-#include <pythoncapi_compat.h>
-#include <glib-object.h>
 #include <girepository/girepository.h>
+#include <glib-object.h>
+#include <pythoncapi_compat.h>
+
 #include "pygobject-internal.h"
 
 extern PyTypeObject PyGTypeWrapper_Type;

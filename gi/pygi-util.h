@@ -1,8 +1,8 @@
 #ifndef __PYGI_UTIL_H__
 #define __PYGI_UTIL_H__
 
-#include <pythoncapi_compat.h>
 #include <glib.h>
+#include <pythoncapi_compat.h>
 
 G_BEGIN_DECLS
 

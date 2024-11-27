@@ -20,13 +20,12 @@
 
 #include <config.h>
 
-#include <pythoncapi_compat.h>
 #include <glib-object.h>
-#include "pygpointer.h"
-#include "pygi-type.h"
+#include <pythoncapi_compat.h>
+
 #include "pygi-type.h"
 #include "pygi-util.h"
-
+#include "pygpointer.h"
 
 GQuark pygpointer_class_key;
 

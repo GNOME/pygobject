@@ -19,10 +19,10 @@
  */
 
 #include <glib.h>
-
 #include <pythoncapi_compat.h>
-#include "pygi-object.h"
+
 #include "pygi-fundamental.h"
+#include "pygi-object.h"
 #include "pygobject-object.h"
 
 /*

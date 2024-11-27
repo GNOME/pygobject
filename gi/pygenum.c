@@ -22,12 +22,13 @@
 #include <config.h>
 
 #include <pythoncapi_compat.h>
+
 #include "pygi-type.h"
-#include "pygi-util.h"
-#include "pygi-type.h"
-#include "pygi-basictype.h"
-#include "pygenum.h"
+
 #include "pygboxed.h"
+#include "pygenum.h"
+#include "pygi-basictype.h"
+#include "pygi-util.h"
 
 GQuark pygenum_class_key;
 

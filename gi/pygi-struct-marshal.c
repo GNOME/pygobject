@@ -19,18 +19,18 @@
  */
 
 #include <glib.h>
-
 #include <pythoncapi_compat.h>
+
 #include "pygi-struct-marshal.h"
-#include "pygi-struct.h"
-#include "pygi-foreign.h"
-#include "pygi-value.h"
-#include "pygi-type.h"
-#include "pygi-boxed.h"
-#include "pygi-info.h"
-#include "pygpointer.h"
+
 #include "pygboxed.h"
+#include "pygi-boxed.h"
+#include "pygi-foreign.h"
+#include "pygi-info.h"
+#include "pygi-struct.h"
 #include "pygi-type.h"
+#include "pygi-value.h"
+#include "pygpointer.h"
 
 /*
  * _is_union_member - check to see if the py_arg is actually a member of the

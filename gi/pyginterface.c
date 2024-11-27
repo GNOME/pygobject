@@ -20,12 +20,12 @@
 
 #include <config.h>
 
-#include <pythoncapi_compat.h>
 #include <glib-object.h>
+#include <pythoncapi_compat.h>
 
+#include "pygi-type.h"
 #include "pygi-util.h"
 #include "pyginterface.h"
-#include "pygi-type.h"
 
 GQuark pyginterface_type_key;
 GQuark pyginterface_info_key;

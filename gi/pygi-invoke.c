@@ -21,13 +21,14 @@
  */
 
 #include <pythoncapi_compat.h>
+
+#include "pygi-async.h"
+#include "pygi-boxed.h"
+#include "pygi-error.h"
+#include "pygi-foreign.h"
 #include "pygi-invoke.h"
 #include "pygi-marshal-cleanup.h"
-#include "pygi-error.h"
 #include "pygi-resulttuple.h"
-#include "pygi-async.h"
-#include "pygi-foreign.h"
-#include "pygi-boxed.h"
 
 extern PyObject *_PyGIDefaultArgPlaceholder;
 

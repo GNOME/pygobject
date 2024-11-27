@@ -1,12 +1,13 @@
 #include <string.h>
+
 #include <glib-object.h>
 #include <gobject/gmarshal.h>
-
 #include <pythoncapi_compat.h>
+
 #include "pygobject.h"
+#include "test-floating.h"
 #include "test-thread.h"
 #include "test-unknown.h"
-#include "test-floating.h"
 
 #define PYGI_DEFINE_TYPE(typename, symbol, csymbol)	\
 PyTypeObject symbol = {                                 \

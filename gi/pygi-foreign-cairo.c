@@ -21,11 +21,10 @@
  * IN THE SOFTWARE.
  */
 
-#include <pythoncapi_compat.h>
+#include <cairo-gobject.h>
 #include <cairo.h>
 #include <py3cairo.h>
-
-#include <cairo-gobject.h>
+#include <pythoncapi_compat.h>
 
 /* Limit includes from PyGI to APIs which do not have link dependencies
  * (pygobject.h and pygi-foreign-api.h) since _gi_cairo is built as a separate

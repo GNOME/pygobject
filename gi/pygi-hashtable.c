@@ -19,7 +19,9 @@
  */
 
 #include <pythoncapi_compat.h>
+
 #include "pygi-hashtable.h"
+
 #include "pygi-argument.h"
 #include "pygi-util.h"
 

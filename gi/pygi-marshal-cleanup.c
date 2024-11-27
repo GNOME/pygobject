@@ -18,8 +18,10 @@
  */
 
 #include "pygi-marshal-cleanup.h"
-#include "pygi-foreign.h"
+
 #include <glib.h>
+
+#include "pygi-foreign.h"
 
 static inline void
 _cleanup_caller_allocates (PyGIInvokeState    *state,

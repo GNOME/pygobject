@@ -21,11 +21,11 @@
  */
 
 #include <pythoncapi_compat.h>
+
+#include "pygi-basictype.h"
 #include "pygi-error.h"
 #include "pygi-type.h"
 #include "pygi-util.h"
-#include "pygi-basictype.h"
-
 
 PyObject *PyGError = NULL;
 

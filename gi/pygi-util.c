@@ -17,6 +17,7 @@
  */
 
 #include <pythoncapi_compat.h>
+
 #include "pygi-util.h"
 
 gboolean

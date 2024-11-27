@@ -24,10 +24,11 @@
 
 #include <config.h>
 
-#include "pygobject-internal.h"
-#include "pygi-foreign.h"
-
 #include <girepository/girepository.h>
+
+#include "pygobject-internal.h"
+
+#include "pygi-foreign.h"
 
 typedef struct {
     const char *namespace;

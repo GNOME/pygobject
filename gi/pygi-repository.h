@@ -20,8 +20,8 @@
 #ifndef __PYGI_REPOSITORY_H__
 #define __PYGI_REPOSITORY_H__
 
-#include <pythoncapi_compat.h>
 #include <girepository/girepository.h>
+#include <pythoncapi_compat.h>
 
 G_BEGIN_DECLS
 

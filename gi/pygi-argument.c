@@ -22,23 +22,23 @@
 #include <string.h>
 #include <time.h>
 
-#include <pythoncapi_compat.h>
 #include "pygobject-internal.h"
 
+#include <pythoncapi_compat.h>
 #include <pygenum.h>
 #include <pygflags.h>
 
+#include "pygi-type.h"
+
 #include "pygi-argument.h"
-#include "pygi-info.h"
-#include "pygi-value.h"
 #include "pygi-basictype.h"
-#include "pygi-object.h"
-#include "pygi-struct-marshal.h"
 #include "pygi-error.h"
 #include "pygi-foreign.h"
-#include "pygi-type.h"
+#include "pygi-info.h"
+#include "pygi-object.h"
+#include "pygi-struct-marshal.h"
 #include "pygi-util.h"
-
+#include "pygi-value.h"
 
 gboolean
 pygi_argument_to_gssize (GIArgument *arg_in,

@@ -2,10 +2,9 @@
 #ifndef _PYGOBJECT_H_
 #define _PYGOBJECT_H_
 
-#include <pythoncapi_compat.h>
-
 #include <glib.h>
 #include <glib-object.h>
+#include <pythoncapi_compat.h>
 
 G_BEGIN_DECLS
 

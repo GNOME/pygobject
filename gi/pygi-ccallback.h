@@ -21,6 +21,7 @@
 #define __PYGI_CCLOSURE_H__
 
 #include <pythoncapi_compat.h>
+
 #include "pygi-cache.h"
 
 G_BEGIN_DECLS

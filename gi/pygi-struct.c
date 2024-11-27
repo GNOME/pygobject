@@ -20,12 +20,12 @@
  */
 
 #include "pygi-struct.h"
+
 #include "pygi-foreign.h"
 #include "pygi-info.h"
 #include "pygi-type.h"
-#include "pygi-type.h"
-#include "pygpointer.h"
 #include "pygi-util.h"
+#include "pygpointer.h"
 
 #include <girepository/girepository.h>
 

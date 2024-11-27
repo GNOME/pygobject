@@ -19,9 +19,11 @@
  */
 
 #include <pythoncapi_compat.h>
+
 #include "pygi-type.h"
-#include "pygi-basictype.h"
+
 #include "pygi-argument.h"
+#include "pygi-basictype.h"
 #include "pygi-util.h"
 
 #if defined(G_OS_WIN32)

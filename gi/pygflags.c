@@ -22,11 +22,12 @@
 #include <config.h>
 
 #include <pythoncapi_compat.h>
+
 #include "pygi-type.h"
-#include "pygi-util.h"
-#include "pygi-type.h"
-#include "pygflags.h"
+
 #include "pygboxed.h"
+#include "pygflags.h"
+#include "pygi-util.h"
 
 GQuark pygflags_class_key;
 

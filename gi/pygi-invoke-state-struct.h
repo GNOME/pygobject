@@ -1,9 +1,8 @@
 #ifndef __PYGI_INVOKE_STATE_STRUCT_H__
 #define __PYGI_INVOKE_STATE_STRUCT_H__
 
-#include <pythoncapi_compat.h>
-
 #include <girepository/girepository.h>
+#include <pythoncapi_compat.h>
 
 G_BEGIN_DECLS
 

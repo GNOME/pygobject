@@ -21,19 +21,18 @@
 #include <config.h>
 
 #include <pythoncapi_compat.h>
-#include "pygobject-object.h"
-#include "pyginterface.h"
-#include "pygi-type.h"
-#include "pygboxed.h"
-#include "gimodule.h"
 
-#include "pygi-util.h"
-#include "pygi-value.h"
-#include "pygi-type.h"
-#include "pygi-property.h"
-#include "pygi-signal-closure.h"
+#include "gimodule.h"
+#include "pygboxed.h"
 #include "pygi-basictype.h"
 #include "pygi-fundamental.h"
+#include "pygi-property.h"
+#include "pygi-signal-closure.h"
+#include "pygi-type.h"
+#include "pygi-util.h"
+#include "pygi-value.h"
+#include "pyginterface.h"
+#include "pygobject-object.h"
 
 extern PyObject *PyGIDeprecationWarning;
 
