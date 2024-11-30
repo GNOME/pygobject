@@ -1831,6 +1831,12 @@ class TestEnum(unittest.TestCase):
                          "<enum GI_MARSHALLING_TESTS_ENUM_VALUE3 of type "
                          "GIMarshallingTests.Enum>")
 
+    def test_enum_field_set(self):
+        option = GLib.OptionEntry()
+        # GLib.OptionEntry.arg is of type GLib.OptionArg, which is not
+        # registered with the GObject type system by libglib.
+        option.arg = GLib.OptionArg.NONE
+
 
 class TestEnumVFuncResults(unittest.TestCase):
     class EnumTester(GIMarshallingTests.Object):
