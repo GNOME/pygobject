@@ -569,7 +569,7 @@ class Object(GObjectModule.Object):
         super(Object, self).freeze_notify()
         return _FreezeNotifyManager(self)
 
-    def connect_data(self, detailed_signal, handler, *data, **kwargs):
+    def connect_data(self, detailed_signal, handler, *data, connect_flags=0):
         """Connect a callback to the given signal with optional user data.
 
         :param str detailed_signal:
@@ -583,13 +583,12 @@ class Object(GObjectModule.Object):
         :returns:
             A signal id which can be used with disconnect.
         """
-        flags = kwargs.get('connect_flags', 0)
-        if flags & GObjectModule.ConnectFlags.AFTER:
+        if connect_flags & GObjectModule.ConnectFlags.AFTER:
             connect_func = _gi.GObject.connect_after
         else:
             connect_func = _gi.GObject.connect
 
-        if flags & GObjectModule.ConnectFlags.SWAPPED:
+        if connect_flags & GObjectModule.ConnectFlags.SWAPPED:
             if len(data) != 1:
                 raise ValueError('Using GObject.ConnectFlags.SWAPPED requires exactly '
                                  'one argument for user data, got: %s' % [data])

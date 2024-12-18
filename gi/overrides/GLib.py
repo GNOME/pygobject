@@ -604,24 +604,22 @@ __all__.append('Timeout')
 
 
 # backwards compatible API
-def idle_add(function, *user_data, **kwargs):
-    priority = kwargs.get('priority', GLib.PRIORITY_DEFAULT_IDLE)
+def idle_add(function, *user_data, priority=GLib.PRIORITY_DEFAULT_IDLE):
     return GLib.idle_add(priority, function, *user_data)
 
 
 __all__.append('idle_add')
 
 
-def timeout_add(interval, function, *user_data, **kwargs):
-    priority = kwargs.get('priority', GLib.PRIORITY_DEFAULT)
+def timeout_add(interval, function, *user_data, priority=GLib.PRIORITY_DEFAULT):
     return GLib.timeout_add(priority, interval, function, *user_data)
 
 
 __all__.append('timeout_add')
 
 
-def timeout_add_seconds(interval, function, *user_data, **kwargs):
-    priority = kwargs.get('priority', GLib.PRIORITY_DEFAULT)
+def timeout_add_seconds(interval, function, *user_data,
+                        priority=GLib.PRIORITY_DEFAULT):
     return GLib.timeout_add_seconds(priority, interval, function, *user_data)
 
 
@@ -755,8 +753,8 @@ class IOChannel(GLib.IOChannel):
             raise ValueError("invalid 'whence' value")
         return self.seek_position(offset, w)
 
-    def add_watch(self, condition, callback, *user_data, **kwargs):
-        priority = kwargs.get('priority', GLib.PRIORITY_DEFAULT)
+    def add_watch(self, condition, callback, *user_data,
+                  priority=GLib.PRIORITY_DEFAULT):
         return io_add_watch(self, priority, condition, callback, *user_data)
 
     add_watch = deprecated(add_watch, 'GLib.io_add_watch()')

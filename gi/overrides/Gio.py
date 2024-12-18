@@ -386,7 +386,8 @@ class _DBusProxyMethodCall:
 
         result_callback(obj, self._unpack_result(ret), real_user_data)
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self, *args, result_handler=None, error_handler=None,
+                 user_data=None, flags=0, timeout=-1):
         # the first positional argument is the signature, unless we are calling
         # a method without arguments; then signature is implied to be '()'.
         if args:
@@ -399,20 +400,16 @@ class _DBusProxyMethodCall:
 
         arg_variant = GLib.Variant(signature, tuple(args))
 
-        if 'result_handler' in kwargs:
+        if result_handler is not None:
             # asynchronous call
-            user_data = (kwargs['result_handler'],
-                         kwargs.get('error_handler'),
-                         kwargs.get('user_data'))
+            user_data = (result_handler, error_handler, user_data)
             self.dbus_proxy.call(self.method_name, arg_variant,
-                                 kwargs.get('flags', 0), kwargs.get('timeout', -1), None,
+                                 flags, timeout, None,
                                  self.__async_result_handler, user_data)
         else:
             # synchronous call
             result = self.dbus_proxy.call_sync(self.method_name, arg_variant,
-                                               kwargs.get('flags', 0),
-                                               kwargs.get('timeout', -1),
-                                               None)
+                                               flags, timeout, None)
             return self._unpack_result(result)
 
     @classmethod
