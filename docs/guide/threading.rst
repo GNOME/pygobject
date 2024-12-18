@@ -1,6 +1,6 @@
-=====================
-Threads & Concurrency
-=====================
+===============
+Multi Threading
+===============
 
 Operations which could potentially block should not be executed in the main 
 loop. The main loop is in charge of input processing and drawing and 
@@ -20,11 +20,9 @@ The following examples show
 * how Python threads, running in parallel to GTK, can interact with the UI
 * how to use and control asynchronous I/O operations in glib
 
+This page will discuss multi-threading. A separate page discusses :doc:asynchronous.
 
-Threads
--------
-
-The first example uses a Python thread to execute code in the background 
+This example uses a Python thread to execute code in the background 
 while still showing feedback on the progress in a window.
 
 .. code:: python
@@ -149,148 +147,3 @@ Threads: FAQ
   Similar to I/O operations in Python, all PyGObject calls release the 
   GIL during their execution and other Python threads can be executed 
   during that time.
-
-
-Asynchronous Operations
------------------------
-
-In addition to functions for blocking I/O glib also provides corresponding
-asynchronous versions, usually with the same name plus a ``_async`` suffix.
-These functions do the same operation as the synchronous ones but don't block
-during their execution. Instead of blocking they execute the operation in the
-background and call a callback once the operation is finished or got canceled.
-
-The following example shows how to download a web page and display the 
-source in a text field. In addition it's possible to abort the running 
-operation.
-
-
-.. code:: python
-
-    import time
-    import gi
-
-    gi.require_version('Gtk', '4.0')
-    from gi.repository import Gio, GLib, Gtk
-
-
-    class DownloadWindow(Gtk.ApplicationWindow):
-
-        def __init__(self, *args, **kwargs):
-            super().__init__(*args, **kwargs, default_width=500, default_height=400,
-                             title="Async I/O Example")
-
-            self.cancellable = Gio.Cancellable()
-
-            self.cancel_button = Gtk.Button(label="Cancel")
-            self.cancel_button.connect("clicked", self.on_cancel_clicked)
-            self.cancel_button.set_sensitive(False)
-
-            self.start_button = Gtk.Button(label="Load")
-            self.start_button.connect("clicked", self.on_start_clicked)
-
-            textview = Gtk.TextView(vexpand=True)
-            self.textbuffer = textview.get_buffer()
-            scrolled = Gtk.ScrolledWindow()
-            scrolled.set_child(textview)
-
-            box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6,
-                          margin_start=12, margin_end=12, margin_top=12, margin_bottom=12)
-            box.append(self.start_button)
-            box.append(self.cancel_button)
-            box.append(scrolled)
-
-            self.set_child(box)
-
-        def append_text(self, text):
-            iter_ = self.textbuffer.get_end_iter()
-            self.textbuffer.insert(iter_, f"[{time.time()}] {text}\n")
-
-        def on_start_clicked(self, button):
-            button.set_sensitive(False)
-            self.cancel_button.set_sensitive(True)
-            self.append_text("Start clicked...")
-
-            file_ = Gio.File.new_for_uri(
-                "http://python-gtk-3-tutorial.readthedocs.org/")
-            file_.load_contents_async(
-                self.cancellable, self.on_ready_callback, None)
-
-        def on_cancel_clicked(self, button):
-            self.append_text("Cancel clicked...")
-            self.cancellable.cancel()
-
-        def on_ready_callback(self, source_object, result, user_data):
-            try:
-                succes, content, etag = source_object.load_contents_finish(result)
-            except GLib.GError as e:
-                self.append_text(f"Error: {e.message}")
-            else:
-                content_text = content[:100].decode("utf-8")
-                self.append_text(f"Got content: {content_text}...")
-            finally:
-                self.cancellable.reset()
-                self.cancel_button.set_sensitive(False)
-                self.start_button.set_sensitive(True)
-
-
-    class Application(Gtk.Application):
-
-        def do_activate(self):
-            window = DownloadWindow(application=self)
-            window.present()
-
-
-    app = Application()
-    app.run()
-
-
-The example uses the asynchronous version of :meth:`Gio.File.load_contents` to
-load the content of an URI pointing to a web page, but first we look at the
-simpler blocking alternative:
-
-We create a :class:`Gio.File` instance for our URI and call
-:meth:`Gio.File.load_contents`, which, if it doesn't raise an error, returns
-the content of the web page we wanted.
-
-.. code:: python
-
-    file = Gio.File.new_for_uri("https://developer.gnome.org/documentation/tutorials/beginners.html")
-    try:
-        status, contents, etag_out = file.load_contents(None)
-    except GLib.GError:
-        print("Error!")
-    else:
-        print(contents)
-
-In the asynchronous variant we need two more things:
-
-* A :class:`Gio.Cancellable`, which we can use during the operation to 
-  abort or cancel it.
-* And a :func:`Gio.AsyncReadyCallback` callback function, which gets called
-  once the operation is finished and we can collect the result.
-
-The window contains two buttons for which we register ``clicked`` signal
-handlers:
-
-* The ``on_start_clicked()`` signal handler calls 
-  :meth:`Gio.File.load_contents_async` with a :class:`Gio.Cancellable` 
-  and ``on_ready_callback()`` as :func:`Gio.AsyncReadyCallback`.
-* The ``on_cancel_clicked()`` signal handler calls 
-  :meth:`Gio.Cancellable.cancel` to cancel the running operation.
-
-Once the operation is finished, either because the result is available, an
-error occurred or the operation was canceled, ``on_ready_callback()`` will be
-called with the :class:`Gio.File` instance and a :class:`Gio.AsyncResult`
-instance which holds the result.
-
-To get the result we now have to call :meth:`Gio.File.load_contents_finish` 
-which returns the same things as :meth:`Gio.File.load_contents` except in 
-this case the result is already there and it will return immediately 
-without blocking.
-
-After all this is done we call :meth:`Gio.Cancellable.reset` so the 
-:class:`Gio.Cancellable` can be re-used for new operations and we can click 
-the "Load" button again. This works since we made sure that only one 
-operation can be active at any time by deactivating the "Load" button using 
-:meth:`Gtk.Widget.set_sensitive`.
