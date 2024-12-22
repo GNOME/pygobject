@@ -2,7 +2,7 @@ import asyncio
 import time
 import gi
 
-gi.require_version('Gtk', '4.0')
+gi.require_version("Gtk", "4.0")
 from gi.repository import Gio, GLib, Gtk
 from gi.events import GLibEventLoopPolicy
 
@@ -10,7 +10,13 @@ from gi.events import GLibEventLoopPolicy
 class DownloadWindow(Gtk.ApplicationWindow):
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs, default_width=500, default_height=400, title="Async I/O Example")
+        super().__init__(
+            *args,
+            **kwargs,
+            default_width=500,
+            default_height=400,
+            title="Async I/O Example",
+        )
 
         self.background_task = None
 
@@ -27,8 +33,13 @@ class DownloadWindow(Gtk.ApplicationWindow):
         scrolled.set_child(textview)
 
         box = Gtk.Box(
-            orientation=Gtk.Orientation.VERTICAL, spacing=6,
-            margin_start=12, margin_end=12, margin_top=12, margin_bottom=12)
+            orientation=Gtk.Orientation.VERTICAL,
+            spacing=6,
+            margin_start=12,
+            margin_end=12,
+            margin_top=12,
+            margin_bottom=12,
+        )
         box.append(self.start_button)
         box.append(self.cancel_button)
         box.append(scrolled)

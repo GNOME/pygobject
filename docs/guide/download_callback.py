@@ -1,14 +1,20 @@
 import time
 import gi
 
-gi.require_version('Gtk', '4.0')
+gi.require_version("Gtk", "4.0")
 from gi.repository import Gio, GLib, Gtk
 
 
 class DownloadWindow(Gtk.ApplicationWindow):
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs, default_width=500, default_height=400, title="Async I/O Example")
+        super().__init__(
+            *args,
+            **kwargs,
+            default_width=500,
+            default_height=400,
+            title="Async I/O Example",
+        )
 
         self.cancellable = Gio.Cancellable()
 
@@ -25,8 +31,12 @@ class DownloadWindow(Gtk.ApplicationWindow):
         scrolled.set_child(textview)
 
         box = Gtk.Box(
-            orientation=Gtk.Orientation.VERTICAL, spacing=6,
-            margin_start=12, margin_end=12, margin_top=12, margin_bottom=12
+            orientation=Gtk.Orientation.VERTICAL,
+            spacing=6,
+            margin_start=12,
+            margin_end=12,
+            margin_top=12,
+            margin_bottom=12,
         )
         box.append(self.start_button)
         box.append(self.cancel_button)
@@ -44,8 +54,7 @@ class DownloadWindow(Gtk.ApplicationWindow):
         self.append_text("Start clicked...")
 
         file_ = Gio.File.new_for_uri("https://pygobject.gnome.org/")
-        file_.load_contents_async(
-            self.cancellable, self.on_ready_callback, None)
+        file_.load_contents_async(self.cancellable, self.on_ready_callback, None)
 
     def on_cancel_clicked(self, button):
         self.append_text("Cancel clicked...")
