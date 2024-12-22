@@ -1,125 +1,136 @@
 .. currentmodule:: gi.repository
 
-Asynchronous Programming
-========================
+Asynchronous Programming with GLib and PyGObject
+================================================
 
-In addition to functions for blocking I/O glib also provides corresponding
-asynchronous versions, usually with the same name plus a ``_async`` suffix.
-These functions do the same operation as the synchronous ones but don't block
-during their execution. Instead of blocking they execute the operation in the
-background and call a callback once the operation is finished or got canceled.
+Asynchronous programming is an essential paradigm for handling tasks like I/O
+operations, ensuring that your application remains responsive. GLib supports
+asynchronous operations alongside its synchronous counterparts. These
+asynchronous functions typically have a ``_async`` suffix and execute tasks in
+the background, invoking a callback or returning a future-like object upon
+completion or cancellation.
 
-Asynchronous programming can be done in two ways:
+PyGObject offers two primary ways to implement asynchronous programming:
 
-1. asyncio, also known as ``async``/``await``
-2. callbacks
-
-Callbacks is the classic approach. Since PyGObject 3.50 it's also possible to use Python's build in
-:mod:`asyncio` module. 
+1. **Using Python's `asyncio` module** (available since PyGObject 3.50)
+2. **Using callbacks** (the traditional approach)
 
 Asynchronous Programming with ``asyncio``
 -----------------------------------------
 
 .. attention::
-    Asyncio support for PyGObject is **experimental**.
-    
-    You can use the async integration (we encourage you to try!), but the API is not guaranteed stable;
-    it might change if we find problems.
+   Asyncio support for PyGObject is **experimental**. Feel free
+   to explore its integration, but note that the API is subject to change as
+   potential issues are addressed.
 
-PyGObject has integration with the :mod:`asyncio` module. There are two parts
-to this integration. First, PyGObject provides an :mod:`asyncio` event loop so that Python code using
-:mod:`asyncio` will run normally. The second part to the integration is that Gio asynchronous functions
-can return an awaitable object, which allows using ``await`` on them within a Python coroutine.
+Overview of `asyncio` Integration
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Event Loop integration
+PyGObject integrates seamlessly with Python's :mod:`asyncio` module by
+providing:
+
+1. An :mod:`asyncio` event loop implementation, enabling normal operation of
+Python's asynchronous code.
+2. Awaitable objects for Gio's asynchronous functions, allowing ``await``
+syntax within Python coroutines.
+
+Event Loop Integration
 ~~~~~~~~~~~~~~~~~~~~~~
 
-To use the :mod:`asyncio` event loop integration in GLib
+To use the :mod:`asyncio` event loop with GLib, set up the GLib-based event loop
+policy:
 
 .. code-block:: python
 
     import asyncio
     from gi.events import GLibEventLoopPolicy
 
-    # Setup the GLib event loop
+    # Set up the GLib event loop
     policy = GLibEventLoopPolicy()
     asyncio.set_event_loop_policy(policy)
 
-At this point you can fetch the event loop and start submitting tasks:
+Now, fetch the event loop and submit tasks:
 
 .. code-block:: python
 
     loop = policy.get_event_loop()
 
+
     async def do_some_work():
         await asyncio.sleep(2)
-        print("done working")
+        print("Done working!")
+
 
     task = loop.create_task(do_some_work())
 
 .. note::
 
-    Note that you'll need to keep a reference to the tasks you create, since the asyncio module will only
-    maintain a weak reference.
+    Keep a reference to the tasks you create, as :mod:`asyncio` only
+    maintains weak references to them.
 
-Gio asynchronous function integration
+Gio Asynchronous Function Integration
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-If the callback parameter of an asynchronous Gio function is skipped, then PyGObject will automatically
-return an awaitable object similar to a :obj:`asyncio.Future`. This can be used to `await` the operation
-from within a coroutine as well as cancelling it.
+If the callback parameter of a Gio asynchronous function is omitted, PyGObject
+automatically returns an awaitable object (similar to :class:`asyncio.Future`).
+This allows you to use ``await`` and cancel operations from within a coroutine.
 
 .. code-block:: python
 
     loop = policy.get_event_loop()
 
+
     async def list_files():
         f = Gio.file_new_for_path("/")
-        for info in await f.enumerate_children_async("standard::*", 0, GLib.PRIORITY_DEFAULT):
+        for info in await f.enumerate_children_async(
+            "standard::*", 0, GLib.PRIORITY_DEFAULT
+        ):
             print(info.get_display_name())
+
 
     task = loop.create_task(list_files())
 
+Example: Download Window with Async Feedback
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Example
-~~~~~~~
-
-A download window with asynchronous feedback.
+Here is a full example illustrating asynchronous programming with
+:mod:`asyncio` for a download window with async feedback.
 
 .. literalinclude:: download_asyncio.py
-   :language: python
+:language: python
 
+Key Considerations
+~~~~~~~~~~~~~~~~~~
 
-Points of attention
-~~~~~~~~~~~~~~~~~~~
+* Async tasks use :obj:`GLib.PRIORITY_DEFAULT`. For background tasks,
+  consider using a lower priority to avoid affecting the responsiveness of
+  your GTK UI.
+* Prefer starting your application using
+  :obj:`Gio.Application` or :obj:`Gtk.Application` instead of
+  :func:`asyncio.run`, which is incompatible.
 
- * async tasks run with :obj:`GLib.PRIORITY_DEFAULT`. Background work is often done with a lower priority.
-   E.g. when running async routines your GTK GUI may not update.
- * The preferred way to start an application is by using :obj:`Gio.Application` or :obj:`Gtk.Application`.
-   :obj:`asyncio.run` will not work.
-
-Asynchronous Programming with callbacks
+Asynchronous Programming with Callbacks
 ---------------------------------------
 
-The following example shows how to download a web page and display the 
-source in a text field. In addition it's possible to abort the running 
-operation.
+The traditional callback approach is a robust alternative for asynchronous
+programming in PyGObject. Consider this example of downloading a web page and
+displaying its source in a text field. The operation can also be canceled
+mid-execution.
 
 .. literalinclude:: download_callback.py
    :language: python
 
-The example uses the asynchronous version of :meth:`Gio.File.load_contents` to
-load the content of an URI pointing to a web page, but first we look at the
-simpler blocking alternative.
+Synchronous Comparison
+~~~~~~~~~~~~~~~~~~~~~~
 
+   Before exploring the asynchronous method, let’s review the simpler blocking
+   approach:
 
-We create a :class:`Gio.File` instance for our URI and call
-:meth:`Gio.File.load_contents`, which, if it doesn't raise an error, returns
-the content of the web page we wanted.
+.. code-block:: python
 
-.. code:: python
-
-    file = Gio.File.new_for_uri("https://developer.gnome.org/documentation/tutorials/beginners.html")
+    file = Gio.File.new_for_uri(
+        "https://developer.gnome.org/documentation/tutorials/beginners.html"
+    )
     try:
         status, contents, etag_out = file.load_contents(None)
     except GLib.GError:
@@ -127,34 +138,33 @@ the content of the web page we wanted.
     else:
         print(contents)
 
-In the asynchronous variant we need two more things:
+Asynchronous Workflow with Callbacks
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-* A :class:`Gio.Cancellable`, which we can use during the operation to 
-  abort or cancel it.
-* And a :func:`Gio.AsyncReadyCallback` callback function, which gets called
-  once the operation is finished and we can collect the result.
+For asynchronous tasks, you’ll need:
 
-The window contains two buttons for which we register ``clicked`` signal
-handlers:
+1. A :class:`Gio.Cancellable` to allow task cancellation.
+2. A :class:`Gio.AsyncReadyCallback` function to handle the result upon task
+   completion.
 
-* The ``on_start_clicked()`` signal handler calls 
-  :meth:`Gio.File.load_contents_async` with a :class:`Gio.Cancellable` 
-  and ``on_ready_callback()`` as :func:`Gio.AsyncReadyCallback`.
-* The ``on_cancel_clicked()`` signal handler calls 
-  :meth:`Gio.Cancellable.cancel` to cancel the running operation.
+The example setup includes:
 
-Once the operation is finished, either because the result is available, an
-error occurred or the operation was canceled, ``on_ready_callback()`` will be
-called with the :class:`Gio.File` instance and a :class:`Gio.AsyncResult`
-instance which holds the result.
+* **Start Button**: The handler calls :meth:`Gio.File.load_contents_async`
+  with a cancellable and a callback function.
+* **Cancel Button**: The handler calls :meth:`Gio.Cancellable.cancel` to stop
+  the operation.
 
-To get the result we now have to call :meth:`Gio.File.load_contents_finish` 
-which returns the same things as :meth:`Gio.File.load_contents` except in 
-this case the result is already there and it will return immediately 
-without blocking.
+Once the operation completes—whether successfully, due to an error, or because
+it was canceled—the ``on_ready_callback()`` function is invoked. This callback
+receives two arguments: the :class:`Gio.File` instance and a
+:class:`Gio.AsyncResult` instance containing the operation's result.
 
-After all this is done we call :meth:`Gio.Cancellable.reset` so the 
-:class:`Gio.Cancellable` can be re-used for new operations and we can click 
-the "Load" button again. This works since we made sure that only one 
-operation can be active at any time by deactivating the "Load" button using 
-:meth:`Gtk.Widget.set_sensitive`.
+To retrieve the result, call :meth:`Gio.File.load_contents_finish`. This method
+behaves like :meth:`Gio.File.load_contents`, but since the operation has
+already completed, it returns immediately without blocking.
+
+After handling the result, call :meth:`Gio.Cancellable.reset` to prepare the
+:class:`Gio.Cancellable` for reuse in future operations. This ensures that the
+"Load" button can be clicked again to initiate another task. The application
+enforces that only one operation is active at a time by disabling the "Load"
+button during an ongoing task using :meth:`Gtk.Widget.set_sensitive`.
