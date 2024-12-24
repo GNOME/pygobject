@@ -67,8 +67,7 @@ def test_value_invalid_type():
     with pytest.raises(ValueError, match="Invalid GType"):
         v.init(GObject.TYPE_INVALID)
 
-    with pytest.raises(
-            TypeError, match="GObject.Value needs to be initialized first"):
+    with pytest.raises(TypeError, match=r"GObject.Value needs to be initialized first"):
         v.set_value(None)
 
     assert v.get_value() is None
@@ -118,9 +117,7 @@ def test_value_ulong():
 def test_value_float():
     v = GObject.Value(GObject.TYPE_FLOAT)
 
-    for getter, setter in [(v.get_value, v.set_value),
-                           (v.get_float, v.set_float)]:
-
+    for getter, setter in [(v.get_value, v.set_value), (v.get_float, v.set_float)]:
         assert getter() == 0.0
         setter(0)
         assert getter() == 0
@@ -256,7 +253,7 @@ def test_value_gtype():
 def test_value_variant():
     v = GObject.Value(GObject.TYPE_VARIANT)
     assert v.get_value() is None
-    variant = GLib.Variant('i', 42)
+    variant = GLib.Variant("i", 42)
     v.set_value(variant)
     assert v.get_value() == variant
 
@@ -275,16 +272,14 @@ def test_value_param():
 
 def test_value_string():
     v = GObject.Value(GObject.TYPE_STRING)
-    for getter, setter in [(v.get_value, v.set_value),
-                           (v.get_string, v.set_string)]:
-
+    for getter, setter in [(v.get_value, v.set_value), (v.get_string, v.set_string)]:
         assert getter() is None
 
         with pytest.raises(TypeError):
             setter(b"bar")
 
-        setter(u"quux")
-        assert getter() == u"quux"
+        setter("quux")
+        assert getter() == "quux"
         assert isinstance(getter(), str)
 
         setter(None)
@@ -294,7 +289,7 @@ def test_value_string():
 
 
 def test_value_pyobject():
-    class Foo(object):
+    class Foo:
         pass
 
     v = GObject.Value(GObject.TYPE_PYOBJECT)
@@ -318,7 +313,7 @@ def test_value_char():
     assert v.get_value() == 0
 
     with pytest.raises(TypeError):
-        v.set_value(u"a")
+        v.set_value("a")
 
     with pytest.raises(OverflowError):
         v.set_value(128)
@@ -335,7 +330,7 @@ def test_value_uchar():
     assert v.get_value() == 0
 
     with pytest.raises(TypeError):
-        v.set_value(u"a")
+        v.set_value("a")
 
     with pytest.raises(OverflowError):
         v.set_value(256)
@@ -351,8 +346,7 @@ def test_value_set_boxed_deprecate_non_boxed():
 
 def test_value_boolean():
     v = GObject.Value(GObject.TYPE_BOOLEAN)
-    for getter, setter in [(v.get_value, v.set_value),
-                           (v.get_boolean, v.set_boolean)]:
+    for getter, setter in [(v.get_value, v.set_value), (v.get_boolean, v.set_boolean)]:
         assert getter() is False
         assert isinstance(getter(), bool)
 
@@ -377,8 +371,7 @@ def test_value_enum():
     t = GIMarshallingTests.GEnum
     v = GObject.Value(t)
 
-    for getter, setter in [(v.get_value, v.set_value),
-                           (v.get_enum, v.set_enum)]:
+    for getter, setter in [(v.get_value, v.set_value), (v.get_enum, v.set_enum)]:
         assert v.g_type == t.__gtype__
         assert getter() == 0
 
@@ -406,8 +399,7 @@ def test_value_object():
     v = GObject.Value(GIMarshallingTests.Object)
     assert v.g_type.is_a(GObject.TYPE_OBJECT)
 
-    for getter, setter in [(v.get_value, v.set_value),
-                           (v.get_object, v.set_object)]:
+    for getter, setter in [(v.get_value, v.set_value), (v.get_object, v.set_object)]:
         assert getter() is None
 
         setter(None)

@@ -26,7 +26,7 @@ if the list of options is long. To enable the search entry, use
 :attr:`Gtk.DropDown.props.selected_item`, and the position of that item on
 :attr:`Gtk.DropDown.props.selected`. To know when the selection has changed just
 connect to ``notify::selected-item`` or ``notify::selected``.
- 
+
 
 Example
 ^^^^^^^

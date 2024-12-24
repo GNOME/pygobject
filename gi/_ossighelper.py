@@ -13,7 +13,6 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library; if not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import print_function
 
 import os
 import socket
@@ -26,21 +25,20 @@ from . import _gi
 
 
 def ensure_socket_not_inheritable(sock):
-    """Ensures that the socket is not inherited by child processes
+    """Ensures that the socket is not inherited by child processes.
 
     Raises:
         EnvironmentError
         NotImplementedError: With Python <3.4 on Windows
-    """
 
+    """
     if hasattr(sock, "set_inheritable"):
         sock.set_inheritable(False)
     else:
         try:
             import fcntl
         except ImportError:
-            raise NotImplementedError(
-                "Not implemented for older Python on Windows")
+            raise NotImplementedError("Not implemented for older Python on Windows")
         else:
             fd = sock.fileno()
             flags = fcntl.fcntl(fd, fcntl.F_GETFD)
@@ -65,7 +63,6 @@ def wakeup_on_signal():
     In case the wrapped function is not called from the main thread it will be
     called as is and it will not wake up the default loop for signals.
     """
-
     global _wakeup_fd_is_active
 
     if _wakeup_fd_is_active:
@@ -76,7 +73,6 @@ def wakeup_on_signal():
 
     read_socket, write_socket = socket.socketpair()
     with closing(read_socket), closing(write_socket):
-
         for sock in [read_socket, write_socket]:
             sock.setblocking(False)
             ensure_socket_not_inheritable(sock)
@@ -94,26 +90,28 @@ def wakeup_on_signal():
             if condition & GLib.IO_IN:
                 try:
                     return bool(read_socket.recv(1))
-                except EnvironmentError as e:
-                    print(e)
+                except OSError:
                     return False
                 return True
-            else:
-                return False
+            return False
 
         try:
             if os.name == "nt":
-                channel = GLib.IOChannel.win32_new_socket(
-                    read_socket.fileno())
+                channel = GLib.IOChannel.win32_new_socket(read_socket.fileno())
             else:
                 channel = GLib.IOChannel.unix_new(read_socket.fileno())
 
             source_id = GLib.io_add_watch(
                 channel,
                 GLib.PRIORITY_DEFAULT,
-                (GLib.IOCondition.IN | GLib.IOCondition.HUP |
-                 GLib.IOCondition.NVAL | GLib.IOCondition.ERR),
-                signal_notify)
+                (
+                    GLib.IOCondition.IN
+                    | GLib.IOCondition.HUP
+                    | GLib.IOCondition.NVAL
+                    | GLib.IOCondition.ERR
+                ),
+                signal_notify,
+            )
             try:
                 yield
             finally:
@@ -141,10 +139,11 @@ else:
 
 
 def sigint_handler_is_default():
-    """Returns if on SIGINT the default Python handler would be called"""
-
-    return (signal.getsignal(signal.SIGINT) is signal.default_int_handler and
-            PyOS_getsig(signal.SIGINT) == startup_sigint_ptr)
+    """Returns if on SIGINT the default Python handler would be called."""
+    return (
+        signal.getsignal(signal.SIGINT) is signal.default_int_handler
+        and PyOS_getsig(signal.SIGINT) == startup_sigint_ptr
+    )
 
 
 @contextmanager
@@ -154,7 +153,6 @@ def sigint_handler_set_and_restore_default(handler):
     Will only restore the default handler again if the handler is not changed
     while the context is active.
     """
-
     assert sigint_handler_is_default()
 
     signal.signal(signal.SIGINT, handler)
@@ -162,14 +160,15 @@ def sigint_handler_set_and_restore_default(handler):
     try:
         yield
     finally:
-        if signal.getsignal(signal.SIGINT) is handler and \
-                PyOS_getsig(signal.SIGINT) == sig_ptr:
+        if (
+            signal.getsignal(signal.SIGINT) is handler
+            and PyOS_getsig(signal.SIGINT) == sig_ptr
+        ):
             signal.signal(signal.SIGINT, signal.default_int_handler)
 
 
 def is_main_thread():
-    """Returns True in case the function is called from the main thread"""
-
+    """Returns True in case the function is called from the main thread."""
     return threading.current_thread().name == "MainThread"
 
 
@@ -191,7 +190,6 @@ def register_sigint_fallback(callback):
     The old signal handler will be restored in case no signal handler is
     registered while the context is active.
     """
-
     # To handle multiple levels of event loops we need to call the last
     # callback first, wait until the inner most event loop returns control
     # and only then call the next callback, and so on... until we
@@ -241,7 +239,7 @@ def register_sigint_fallback(callback):
             _callback_stack.pop()
 
 
-class DummyEventLoop():
+class DummyEventLoop:
     @classmethod
     @contextmanager
     def paused(cls):
@@ -256,8 +254,8 @@ class DummyEventLoop():
 
 def get_event_loop(ctx):
     """Return the correct GLibEventLoop or a dummy that just registers the
-    signal wakeup mechanism."""
-
+    signal wakeup mechanism.
+    """
     from . import events
 
     # Try to use the running loop. If there is none, get the policy and
@@ -269,8 +267,11 @@ def get_event_loop(ctx):
         if isinstance(policy, events.GLibEventLoopPolicy):
             loop = policy.get_event_loop_for_context(ctx)
 
-    if isinstance(loop, events.GLibEventLoop):
-        if ctx is not None and hash(loop._context) == hash(ctx):
-            return loop
+    if (
+        isinstance(loop, events.GLibEventLoop)
+        and ctx is not None
+        and hash(loop._context) == hash(ctx)
+    ):
+        return loop
 
     return DummyEventLoop

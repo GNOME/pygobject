@@ -3,7 +3,7 @@ include:
     inputs:
       dist-job-name: "sdist"
       tarball-artifact-path: "${TARBALL_ARTIFACT_PATH}"
-      
+
 stages:
   - pre-commit
   - build_and_test

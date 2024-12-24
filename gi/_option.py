@@ -1,4 +1,3 @@
-# -*- Mode: Python -*-
 # pygobject - Python bindings for the GObject library
 # Copyright (C) 2006  Johannes Hoelzl
 #
@@ -17,7 +16,7 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library; if not, see <http://www.gnu.org/licenses/>.
 
-"""GOption command line parser
+"""GOption command line parser.
 
 Extends optparse to use the GOptionGroup, GOptionEntry and GOptionContext
 objects. So it is possible to use the gtk, gnome_program and gstreamer command
@@ -30,31 +29,37 @@ GOptionGroup in glib.
 import sys
 import optparse
 import warnings
-from optparse import OptParseError, OptionError, OptionValueError, \
-    BadOptionError, OptionConflictError
+from optparse import (
+    OptParseError,
+    OptionError,
+    OptionValueError,
+    BadOptionError,
+    OptionConflictError,
+)
 from .module import get_introspection_module
 
 from gi import _gi, PyGIDeprecationWarning
 from gi._error import GError
-GLib = get_introspection_module('GLib')
+
+GLib = get_introspection_module("GLib")
 
 OPTION_CONTEXT_ERROR_QUARK = GLib.quark_to_string(GLib.option_error_quark())
 
 __all__ = [
-    "OptParseError",
-    "OptionError",
-    "OptionValueError",
     "BadOptionError",
-    "OptionConflictError",
+    "OptParseError",
     "Option",
+    "OptionConflictError",
+    "OptionError",
     "OptionGroup",
     "OptionParser",
+    "OptionValueError",
     "make_option",
 ]
 
 
 class Option(optparse.Option):
-    """Represents a command line option
+    """Represents a command line option.
 
     To use the extended possibilities of the GOption API Option
     (and make_option) are extended with new types and attributes.
@@ -80,23 +85,18 @@ class Option(optparse.Option):
 
     For further help, see optparse.Option.
     """
-    TYPES = optparse.Option.TYPES + (
-        'filename',
-    )
 
-    ATTRS = optparse.Option.ATTRS + [
-        'hidden',
-        'in_main',
-        'optional_arg',
-    ]
+    TYPES = (*optparse.Option.TYPES, "filename")
 
-    REMAINING = '--' + GLib.OPTION_REMAINING
+    ATTRS = [*optparse.Option.ATTRS, "hidden", "in_main", "optional_arg"]
+
+    REMAINING = "--" + GLib.OPTION_REMAINING
 
     def __init__(self, *args, **kwargs):
         warnings.warn(
             "gi.repository.GLib.option.Option is deprecated, use gi.repository.GLib.OptionEntry instead",
             PyGIDeprecationWarning,
-            stacklevel=2
+            stacklevel=2,
         )
         optparse.Option.__init__(self, *args, **kwargs)
         if not self._long_opts:
@@ -104,7 +104,8 @@ class Option(optparse.Option):
 
         if len(self._long_opts) < len(self._short_opts):
             raise ValueError(
-                "%s at least more long option names than short option names.")
+                "%s at least more long option names than short option names."
+            )
 
         if not self.help:
             raise ValueError("%s needs a help message.", self._long_opts[0])
@@ -114,8 +115,9 @@ class Option(optparse.Option):
             self._long_opts.append(self.REMAINING)
         optparse.Option._set_opt_string(self, opts)
         if len(self._short_opts) > len(self._long_opts):
-            raise OptionError("goption.Option needs more long option names "
-                              "than short option names")
+            raise OptionError(
+                "goption.Option needs more long option names than short option names"
+            )
 
     def _to_goptionentries(self):
         flags = 0
@@ -132,17 +134,17 @@ class Option(optparse.Option):
         else:
             flags |= GLib.OptionFlags.NO_ARG
 
-        if self.type == 'filename':
+        if self.type == "filename":
             flags |= GLib.OptionFlags.FILENAME
 
-        for (long_name, short_name) in zip(self._long_opts, self._short_opts):
+        for long_name, short_name in zip(self._long_opts, self._short_opts):
             short_bytes = short_name[1]
             if not isinstance(short_bytes, bytes):
                 short_bytes = short_bytes.encode("utf-8")
             yield (long_name[2:], short_bytes, flags, self.help, self.metavar)
 
-        for long_name in self._long_opts[len(self._short_opts):]:
-            yield (long_name[2:], b'\0', flags, self.help, self.metavar)
+        for long_name in self._long_opts[len(self._short_opts) :]:
+            yield (long_name[2:], b"\0", flags, self.help, self.metavar)
 
 
 class OptionGroup(optparse.OptionGroup):
@@ -172,15 +174,22 @@ class OptionGroup(optparse.OptionGroup):
 
     For further help, see optparse.OptionGroup.
     """
-    def __init__(self, name, description, help_description="",
-                 option_list=None, defaults=None,
-                 translation_domain=None):
+
+    def __init__(
+        self,
+        name,
+        description,
+        help_description="",
+        option_list=None,
+        defaults=None,
+        translation_domain=None,
+    ):
         warnings.warn(
             "gi.repository.GLib.option.OptionGroup is deprecated, use gi.repository.GLib.OptionContext instead",
             PyGIDeprecationWarning,
-            stacklevel=2
+            stacklevel=2,
         )
-        optparse.OptionContainer.__init__(self, Option, 'error', description)
+        optparse.OptionContainer.__init__(self, Option, "error", description)
         self.name = name
         self.parser = None
         self.help_description = help_description
@@ -201,7 +210,7 @@ class OptionGroup(optparse.OptionGroup):
 
     def _to_goptiongroup(self, parser):
         def callback(option_name, option_value, group):
-            if option_name.startswith('--'):
+            if option_name.startswith("--"):
                 opt = self._long_opt[option_name]
             else:
                 opt = self._short_opt[option_name]
@@ -216,8 +225,9 @@ class OptionGroup(optparse.OptionGroup):
                 gerror.message = str(error)
                 raise gerror
 
-        group = _gi.OptionGroup(self.name, self.description,
-                                self.help_description, callback)
+        group = _gi.OptionGroup(
+            self.name, self.description, self.help_description, callback
+        )
         if self.translation_domain:
             group.set_translation_domain(self.translation_domain)
 
@@ -230,7 +240,7 @@ class OptionGroup(optparse.OptionGroup):
         return group
 
     def get_option_group(self, parser=None):
-        """ Returns the corresponding GOptionGroup object.
+        """Returns the corresponding GOptionGroup object.
 
         Can be used as parameter for gnome_program_init(), gtk_init().
         """
@@ -242,8 +252,7 @@ class OptionGroup(optparse.OptionGroup):
             default = self.defaults.get(option.dest)
             if isinstance(default, str):
                 opt_str = option.get_opt_string()
-                self.defaults[option.dest] = option.check_value(
-                    opt_str, default)
+                self.defaults[option.dest] = option.check_value(opt_str, default)
         self.values = optparse.Values(self.defaults)
 
 
@@ -274,21 +283,19 @@ class OptionParser(optparse.OptionParser):
         warnings.warn(
             "gi.repository.GLib.option.OptionParser is deprecated, use gi.repository.GLib.OptionContext instead",
             PyGIDeprecationWarning,
-            stacklevel=2
+            stacklevel=2,
         )
-        if 'option_class' not in kwargs:
-            kwargs['option_class'] = Option
-        self.help_enabled = kwargs.pop('help_enabled', True)
-        self.ignore_unknown_options = kwargs.pop('ignore_unknown_options',
-                                                 False)
-        optparse.OptionParser.__init__(self, add_help_option=False,
-                                       *args, **kwargs)
+        if "option_class" not in kwargs:
+            kwargs["option_class"] = Option
+        self.help_enabled = kwargs.pop("help_enabled", True)
+        self.ignore_unknown_options = kwargs.pop("ignore_unknown_options", False)
+        optparse.OptionParser.__init__(self, add_help_option=False, *args, **kwargs)
 
     def set_usage(self, usage):
         if usage is None:
-            self.usage = ''
+            self.usage = ""
         elif usage.startswith("%prog"):
-            self.usage = usage[len("%prog"):]
+            self.usage = usage[len("%prog") :]
         else:
             self.usage = usage
 
@@ -309,7 +316,7 @@ class OptionParser(optparse.OptionParser):
             context.add_group(g_group)
 
         def callback(option_name, option_value, group):
-            if option_name.startswith('--'):
+            if option_name.startswith("--"):
                 opt = self._long_opt[option_name]
             else:
                 opt = self._short_opt[option_name]
@@ -326,10 +333,11 @@ class OptionParser(optparse.OptionParser):
 
     def add_option_group(self, *args, **kwargs):
         if isinstance(args[0], str):
-            optparse.OptionParser.add_option_group(self,
-                                                   OptionGroup(self, *args, **kwargs))
+            optparse.OptionParser.add_option_group(
+                self, OptionGroup(self, *args, **kwargs)
+            )
             return
-        elif len(args) == 1 and not kwargs:
+        if len(args) == 1 and not kwargs:
             if isinstance(args[0], OptionGroup):
                 if not args[0].parser:
                     args[0].parser = self
@@ -353,24 +361,22 @@ class OptionParser(optparse.OptionParser):
         # _process_args() returns the remaining parameters in rargs.
         # The prepended program name is used to all g_set_prgname()
         # The program name is cut away so it doesn't appear in the result.
-        rargs[:] = context.parse([sys.argv[0]] + rargs)[1:]
+        rargs[:] = context.parse([sys.argv[0], *rargs])[1:]
 
     def parse_args(self, args=None, values=None):
         try:
-            options, args = optparse.OptionParser.parse_args(
-                self, args, values)
+            options, args = optparse.OptionParser.parse_args(self, args, values)
         except GError:
             error = sys.exc_info()[1]
             if error.domain != OPTION_CONTEXT_ERROR_QUARK:
                 raise
             if error.code == GLib.OptionError.BAD_VALUE:
                 raise OptionValueError(error.message)
-            elif error.code == GLib.OptionError.UNKNOWN_OPTION:
+            if error.code == GLib.OptionError.UNKNOWN_OPTION:
                 raise BadOptionError(error.message)
-            elif error.code == GLib.OptionError.FAILED:
+            if error.code == GLib.OptionError.FAILED:
                 raise OptParseError(error.message)
-            else:
-                raise
+            raise
 
         for group in self.option_groups:
             for key, value in group.values.__dict__.items():

@@ -29,64 +29,62 @@
 
 GQuark pygpointer_class_key;
 
-PYGI_DEFINE_TYPE("gobject.GPointer", PyGPointer_Type, PyGPointer);
+PYGI_DEFINE_TYPE ("gobject.GPointer", PyGPointer_Type, PyGPointer);
 
 static void
-pyg_pointer_dealloc(PyGPointer *self)
+pyg_pointer_dealloc (PyGPointer *self)
 {
-    Py_TYPE(self)->tp_free((PyObject *)self);
+    Py_TYPE (self)->tp_free ((PyObject *)self);
 }
 
-static PyObject*
-pyg_pointer_richcompare(PyObject *self, PyObject *other, int op)
+static PyObject *
+pyg_pointer_richcompare (PyObject *self, PyObject *other, int op)
 {
-    if (Py_TYPE(self) == Py_TYPE(other))
+    if (Py_TYPE (self) == Py_TYPE (other))
         return pyg_ptr_richcompare (pyg_pointer_get_ptr (self),
-                                    pyg_pointer_get_ptr (other),
-                                    op);
+                                    pyg_pointer_get_ptr (other), op);
     else {
         Py_RETURN_NOTIMPLEMENTED;
     }
 }
 
 static Py_hash_t
-pyg_pointer_hash(PyGPointer *self)
+pyg_pointer_hash (PyGPointer *self)
 {
     return (Py_hash_t)(gintptr)(pyg_pointer_get_ptr (self));
 }
 
 static PyObject *
-pyg_pointer_repr(PyGPointer *self)
+pyg_pointer_repr (PyGPointer *self)
 {
     gchar buf[128];
 
-    g_snprintf(buf, sizeof(buf), "<%s at 0x%" G_GUINTPTR_FORMAT ">",
-               g_type_name(self->gtype),
-               (guintptr)pyg_pointer_get_ptr (self));
+    g_snprintf (buf, sizeof (buf), "<%s at 0x%" G_GUINTPTR_FORMAT ">",
+                g_type_name (self->gtype),
+                (guintptr)pyg_pointer_get_ptr (self));
     return PyUnicode_FromString (buf);
 }
 
 static int
-pyg_pointer_init(PyGPointer *self, PyObject *args, PyObject *kwargs)
+pyg_pointer_init (PyGPointer *self, PyObject *args, PyObject *kwargs)
 {
     gchar buf[512];
 
-    if (!PyArg_ParseTuple(args, ":GPointer.__init__"))
-	return -1;
+    if (!PyArg_ParseTuple (args, ":GPointer.__init__")) return -1;
 
     pyg_pointer_set_ptr (self, NULL);
     self->gtype = 0;
 
-    g_snprintf(buf, sizeof(buf), "%s can not be constructed",
-	       Py_TYPE(self)->tp_name);
-    PyErr_SetString(PyExc_NotImplementedError, buf);
+    g_snprintf (buf, sizeof (buf), "%s can not be constructed",
+                Py_TYPE (self)->tp_name);
+    PyErr_SetString (PyExc_NotImplementedError, buf);
     return -1;
 }
 
 static void
-pyg_pointer_free(PyObject *op)
+pyg_pointer_free (PyObject *op)
 {
-  PyObject_Free(op);
+    PyObject_Free (op);
 }
 
 /**
@@ -101,33 +99,33 @@ pyg_pointer_free(PyObject *op)
  * class will be stored in the provided module dictionary.
  */
 void
-pyg_register_pointer(PyObject *dict, const gchar *class_name,
-		     GType pointer_type, PyTypeObject *type)
+pyg_register_pointer (PyObject *dict, const gchar *class_name,
+                      GType pointer_type, PyTypeObject *type)
 {
     PyObject *o;
 
-    g_return_if_fail(dict != NULL);
-    g_return_if_fail(class_name != NULL);
-    g_return_if_fail(pointer_type != 0);
+    g_return_if_fail (dict != NULL);
+    g_return_if_fail (class_name != NULL);
+    g_return_if_fail (pointer_type != 0);
 
     if (!type->tp_dealloc) type->tp_dealloc = (destructor)pyg_pointer_dealloc;
 
-    Py_SET_TYPE(type, &PyType_Type);
+    Py_SET_TYPE (type, &PyType_Type);
     g_assert (Py_TYPE (&PyGPointer_Type) != NULL);
     type->tp_base = &PyGPointer_Type;
 
-    if (PyType_Ready(type) < 0) {
-	g_warning("could not get type `%s' ready", type->tp_name);
-	return;
+    if (PyType_Ready (type) < 0) {
+        g_warning ("could not get type `%s' ready", type->tp_name);
+        return;
     }
 
-    PyDict_SetItemString(type->tp_dict, "__gtype__",
-			 o=pyg_type_wrapper_new(pointer_type));
-    Py_DECREF(o);
+    PyDict_SetItemString (type->tp_dict, "__gtype__",
+                          o = pyg_type_wrapper_new (pointer_type));
+    Py_DECREF (o);
 
-    g_type_set_qdata(pointer_type, pygpointer_class_key, type);
+    g_type_set_qdata (pointer_type, pygpointer_class_key, type);
 
-    PyDict_SetItemString(dict, (char *)class_name, (PyObject *)type);
+    PyDict_SetItemString (dict, (char *)class_name, (PyObject *)type);
 }
 
 /**
@@ -144,34 +142,31 @@ pyg_register_pointer(PyObject *dict, const gchar *class_name,
  * Returns: the boxed wrapper.
  */
 PyObject *
-pyg_pointer_new(GType pointer_type, gpointer pointer)
+pyg_pointer_new (GType pointer_type, gpointer pointer)
 {
     PyGILState_STATE state;
     PyGPointer *self;
     PyTypeObject *tp;
-    g_return_val_if_fail(pointer_type != 0, NULL);
+    g_return_val_if_fail (pointer_type != 0, NULL);
 
-    state = PyGILState_Ensure();
+    state = PyGILState_Ensure ();
 
     if (!pointer) {
-	Py_INCREF(Py_None);
-	PyGILState_Release(state);
-	return Py_None;
+        Py_INCREF (Py_None);
+        PyGILState_Release (state);
+        return Py_None;
     }
 
-    tp = g_type_get_qdata(pointer_type, pygpointer_class_key);
+    tp = g_type_get_qdata (pointer_type, pygpointer_class_key);
 
-    if (!tp)
-        tp = (PyTypeObject *)pygi_type_import_by_g_type(pointer_type);
+    if (!tp) tp = (PyTypeObject *)pygi_type_import_by_g_type (pointer_type);
 
-    if (!tp)
-	tp = (PyTypeObject *)&PyGPointer_Type; /* fallback */
-    self = PyObject_New(PyGPointer, tp);
+    if (!tp) tp = (PyTypeObject *)&PyGPointer_Type; /* fallback */
+    self = PyObject_New (PyGPointer, tp);
 
-    PyGILState_Release(state);
+    PyGILState_Release (state);
 
-    if (self == NULL)
-	return NULL;
+    if (self == NULL) return NULL;
 
     pyg_pointer_set_ptr (self, pointer);
     self->gtype = pointer_type;
@@ -183,11 +178,11 @@ pyg_pointer_new(GType pointer_type, gpointer pointer)
  * Returns 0 on success, or -1 and sets an exception.
  */
 int
-pygi_pointer_register_types(PyObject *d)
+pygi_pointer_register_types (PyObject *d)
 {
     PyObject *pygtype;
 
-    pygpointer_class_key     = g_quark_from_static_string("PyGPointer::class");
+    pygpointer_class_key = g_quark_from_static_string ("PyGPointer::class");
 
     PyGPointer_Type.tp_dealloc = (destructor)pyg_pointer_dealloc;
     PyGPointer_Type.tp_richcompare = pyg_pointer_richcompare;
@@ -198,14 +193,13 @@ pygi_pointer_register_types(PyObject *d)
     PyGPointer_Type.tp_free = (freefunc)pyg_pointer_free;
     PyGPointer_Type.tp_alloc = PyType_GenericAlloc;
     PyGPointer_Type.tp_new = PyType_GenericNew;
-    if (PyType_Ready(&PyGPointer_Type))
-        return -1;
+    if (PyType_Ready (&PyGPointer_Type)) return -1;
 
     pygtype = pyg_type_wrapper_new (G_TYPE_POINTER);
     PyDict_SetItemString (PyGPointer_Type.tp_dict, "__gtype__", pygtype);
     Py_DECREF (pygtype);
 
-    PyDict_SetItemString(d, "GPointer", (PyObject *)&PyGPointer_Type);
+    PyDict_SetItemString (d, "GPointer", (PyObject *)&PyGPointer_Type);
 
     return 0;
 }

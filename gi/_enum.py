@@ -1,6 +1,3 @@
-# -*- Mode: Python; py-indent-offset: 4 -*-
-# vim: tabstop=4 shiftwidth=4 expandtab
-#
 # Copyright (C) 2025 James Henstridge <james@jamesh.id.au>
 #
 #   _enum.py: base classes for enumeration and flags types.
@@ -26,14 +23,13 @@ from . import _gi
 
 
 class GEnumMeta(enum.EnumMeta):
-
     def __new__(metacls, name, bases, classdict, /, **kwargs):
         enum_class = super().__new__(metacls, name, bases, classdict, **kwargs)
 
         # If __gtype__ is not set, this is a new enum or flags defined
         # from Python. Register a new GType for it.
-        if '__gtype__' not in enum_class.__dict__:
-            type_name = enum_class.__dict__.get('__gtype_name__')
+        if "__gtype__" not in enum_class.__dict__:
+            type_name = enum_class.__dict__.get("__gtype_name__")
             if issubclass(enum_class, GFlags):
                 _gi.flags_register(enum_class, type_name)
             elif issubclass(enum_class, GEnum):

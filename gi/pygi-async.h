@@ -47,13 +47,11 @@ typedef struct {
 } PyGIAsync;
 
 
-int
-pygi_async_register_types (PyObject *d);
+int pygi_async_register_types (PyObject *d);
 
-void
-pygi_async_finish_cb (GObject *source_object, gpointer res, PyGIAsync *async);
+void pygi_async_finish_cb (GObject *source_object, gpointer res,
+                           PyGIAsync *async);
 
-PyObject*
-pygi_async_new (PyObject *async_finish, PyObject *cancellable);
+PyObject *pygi_async_new (PyObject *async_finish, PyObject *cancellable);
 
 #endif /* __PYGI_ASYNCRESULT_H__ */
