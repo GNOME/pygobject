@@ -1,12 +1,12 @@
-#!/bin/sh
+#!/bin/bash
 
 if [ -n "$1" ]; then
-    FILES_TO_CONVERT="$@"
+    FILES_TO_CONVERT=( "$@" )
 else
-    FILES_TO_CONVERT="$(find . -name '*.py')"
+    FILES_TO_CONVERT=( "$(find . -name '*.py')" )
 fi
 
-for f in $FILES_TO_CONVERT; do
+for f in "${FILES_TO_CONVERT[@]}"; do
     perl -i -0 \
     -pe "s/import gconf\n/from gi.repository import GConf\n/g;" \
     -pe "s/gconf\./GConf\./g;" \
@@ -368,7 +368,7 @@ for f in $FILES_TO_CONVERT; do
     -pe "s/Gst.element_make_from_uri/Gst.Element.make_from_uri/g;" \
     -pe "s/Gst.event_new_seek/Gst.Event.new_seek/g;" \
     -pe "s/Gst.GhostPad\(/Gst.GhostPad.new\(/g;" \
-    $f
+    "$f"
 done
 
 
