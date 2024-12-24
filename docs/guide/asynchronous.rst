@@ -104,7 +104,8 @@ Key Considerations
 
 * Async tasks use :obj:`GLib.PRIORITY_DEFAULT`. For background tasks,
   consider using a lower priority to avoid affecting the responsiveness of
-  your GTK UI.
+  your GTK UI. Please see the `PRIORITY_* GLib Constants
+  <https://docs.gtk.org/glib/index.html#constants>` for other settings.
 * Prefer starting your application using
   :obj:`Gio.Application` or :obj:`Gtk.Application` instead of
   :func:`asyncio.run`, which is incompatible.
