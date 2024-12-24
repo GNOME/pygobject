@@ -34,59 +34,115 @@ from gi import _signalhelper as signalhelper
 from gi import _gi
 
 
-GObjectModule = gi.module.get_introspection_module('GObject')
+GObjectModule = gi.module.get_introspection_module("GObject")
 
 __all__ = []
 
 
 from gi import _option as option
+
 option = option
 
 
 # API aliases for backwards compatibility
-for name in ['markup_escape_text', 'get_application_name',
-             'set_application_name', 'get_prgname', 'set_prgname',
-             'main_depth', 'filename_display_basename',
-             'filename_display_name', 'filename_from_utf8',
-             'uri_list_extract_uris',
-             'MainLoop', 'MainContext', 'main_context_default',
-             'source_remove', 'Source', 'Idle', 'Timeout', 'PollFD',
-             'idle_add', 'timeout_add', 'timeout_add_seconds',
-             'io_add_watch', 'child_watch_add', 'get_current_time',
-             'spawn_async']:
+for name in [
+    "markup_escape_text",
+    "get_application_name",
+    "set_application_name",
+    "get_prgname",
+    "set_prgname",
+    "main_depth",
+    "filename_display_basename",
+    "filename_display_name",
+    "filename_from_utf8",
+    "uri_list_extract_uris",
+    "MainLoop",
+    "MainContext",
+    "main_context_default",
+    "source_remove",
+    "Source",
+    "Idle",
+    "Timeout",
+    "PollFD",
+    "idle_add",
+    "timeout_add",
+    "timeout_add_seconds",
+    "io_add_watch",
+    "child_watch_add",
+    "get_current_time",
+    "spawn_async",
+]:
     globals()[name] = getattr(GLib, name)
     deprecated_attr("GObject", name, "GLib." + name)
     __all__.append(name)
 
 # deprecated constants
-for name in ['PRIORITY_DEFAULT', 'PRIORITY_DEFAULT_IDLE', 'PRIORITY_HIGH',
-             'PRIORITY_HIGH_IDLE', 'PRIORITY_LOW',
-             'IO_IN', 'IO_OUT', 'IO_PRI', 'IO_ERR', 'IO_HUP', 'IO_NVAL',
-             'IO_STATUS_ERROR', 'IO_STATUS_NORMAL', 'IO_STATUS_EOF',
-             'IO_STATUS_AGAIN', 'IO_FLAG_APPEND', 'IO_FLAG_NONBLOCK',
-             'IO_FLAG_IS_READABLE', 'IO_FLAG_IS_WRITEABLE',
-             'IO_FLAG_IS_SEEKABLE', 'IO_FLAG_MASK', 'IO_FLAG_GET_MASK',
-             'IO_FLAG_SET_MASK',
-             'SPAWN_LEAVE_DESCRIPTORS_OPEN', 'SPAWN_DO_NOT_REAP_CHILD',
-             'SPAWN_SEARCH_PATH', 'SPAWN_STDOUT_TO_DEV_NULL',
-             'SPAWN_STDERR_TO_DEV_NULL', 'SPAWN_CHILD_INHERITS_STDIN',
-             'SPAWN_FILE_AND_ARGV_ZERO',
-             'OPTION_FLAG_HIDDEN', 'OPTION_FLAG_IN_MAIN', 'OPTION_FLAG_REVERSE',
-             'OPTION_FLAG_NO_ARG', 'OPTION_FLAG_FILENAME', 'OPTION_FLAG_OPTIONAL_ARG',
-             'OPTION_FLAG_NOALIAS', 'OPTION_ERROR_UNKNOWN_OPTION',
-             'OPTION_ERROR_BAD_VALUE', 'OPTION_ERROR_FAILED', 'OPTION_REMAINING',
-             'glib_version']:
+for name in [
+    "PRIORITY_DEFAULT",
+    "PRIORITY_DEFAULT_IDLE",
+    "PRIORITY_HIGH",
+    "PRIORITY_HIGH_IDLE",
+    "PRIORITY_LOW",
+    "IO_IN",
+    "IO_OUT",
+    "IO_PRI",
+    "IO_ERR",
+    "IO_HUP",
+    "IO_NVAL",
+    "IO_STATUS_ERROR",
+    "IO_STATUS_NORMAL",
+    "IO_STATUS_EOF",
+    "IO_STATUS_AGAIN",
+    "IO_FLAG_APPEND",
+    "IO_FLAG_NONBLOCK",
+    "IO_FLAG_IS_READABLE",
+    "IO_FLAG_IS_WRITEABLE",
+    "IO_FLAG_IS_SEEKABLE",
+    "IO_FLAG_MASK",
+    "IO_FLAG_GET_MASK",
+    "IO_FLAG_SET_MASK",
+    "SPAWN_LEAVE_DESCRIPTORS_OPEN",
+    "SPAWN_DO_NOT_REAP_CHILD",
+    "SPAWN_SEARCH_PATH",
+    "SPAWN_STDOUT_TO_DEV_NULL",
+    "SPAWN_STDERR_TO_DEV_NULL",
+    "SPAWN_CHILD_INHERITS_STDIN",
+    "SPAWN_FILE_AND_ARGV_ZERO",
+    "OPTION_FLAG_HIDDEN",
+    "OPTION_FLAG_IN_MAIN",
+    "OPTION_FLAG_REVERSE",
+    "OPTION_FLAG_NO_ARG",
+    "OPTION_FLAG_FILENAME",
+    "OPTION_FLAG_OPTIONAL_ARG",
+    "OPTION_FLAG_NOALIAS",
+    "OPTION_ERROR_UNKNOWN_OPTION",
+    "OPTION_ERROR_BAD_VALUE",
+    "OPTION_ERROR_FAILED",
+    "OPTION_REMAINING",
+    "glib_version",
+]:
     with warnings.catch_warnings():
         # TODO: this uses deprecated Glib attributes, silence for now
-        warnings.simplefilter('ignore', PyGIDeprecationWarning)
+        warnings.simplefilter("ignore", PyGIDeprecationWarning)
         globals()[name] = getattr(GLib, name)
     deprecated_attr("GObject", name, "GLib." + name)
     __all__.append(name)
 
 
-for name in ['G_MININT8', 'G_MAXINT8', 'G_MAXUINT8', 'G_MININT16',
-             'G_MAXINT16', 'G_MAXUINT16', 'G_MININT32', 'G_MAXINT32',
-             'G_MAXUINT32', 'G_MININT64', 'G_MAXINT64', 'G_MAXUINT64']:
+for name in [
+    "G_MININT8",
+    "G_MAXINT8",
+    "G_MAXUINT8",
+    "G_MININT16",
+    "G_MAXINT16",
+    "G_MAXUINT16",
+    "G_MININT32",
+    "G_MAXINT32",
+    "G_MAXUINT32",
+    "G_MININT64",
+    "G_MAXINT64",
+    "G_MAXUINT64",
+]:
     new_name = name.split("_", 1)[-1]
     globals()[name] = getattr(GLib, new_name)
     deprecated_attr("GObject", name, "GLib." + new_name)
@@ -94,63 +150,107 @@ for name in ['G_MININT8', 'G_MAXINT8', 'G_MAXUINT8', 'G_MININT16',
 
 # these are not currently exported in GLib gir, presumably because they are
 # platform dependent; so get them from our static bindings
-for name in ['G_MINFLOAT', 'G_MAXFLOAT', 'G_MINDOUBLE', 'G_MAXDOUBLE',
-             'G_MINSHORT', 'G_MAXSHORT', 'G_MAXUSHORT', 'G_MININT', 'G_MAXINT',
-             'G_MAXUINT', 'G_MINLONG', 'G_MAXLONG', 'G_MAXULONG', 'G_MAXSIZE',
-             'G_MINSSIZE', 'G_MAXSSIZE', 'G_MINOFFSET', 'G_MAXOFFSET']:
+for name in [
+    "G_MINFLOAT",
+    "G_MAXFLOAT",
+    "G_MINDOUBLE",
+    "G_MAXDOUBLE",
+    "G_MINSHORT",
+    "G_MAXSHORT",
+    "G_MAXUSHORT",
+    "G_MININT",
+    "G_MAXINT",
+    "G_MAXUINT",
+    "G_MINLONG",
+    "G_MAXLONG",
+    "G_MAXULONG",
+    "G_MAXSIZE",
+    "G_MINSSIZE",
+    "G_MAXSSIZE",
+    "G_MINOFFSET",
+    "G_MAXOFFSET",
+]:
     new_name = name.split("_", 1)[-1]
     globals()[name] = getattr(GLib, new_name)
     deprecated_attr("GObject", name, "GLib." + new_name)
     __all__.append(name)
 
 
-TYPE_INVALID = GObjectModule.type_from_name('invalid')
-TYPE_NONE = GObjectModule.type_from_name('void')
-TYPE_INTERFACE = GObjectModule.type_from_name('GInterface')
-TYPE_CHAR = GObjectModule.type_from_name('gchar')
-TYPE_UCHAR = GObjectModule.type_from_name('guchar')
-TYPE_BOOLEAN = GObjectModule.type_from_name('gboolean')
-TYPE_INT = GObjectModule.type_from_name('gint')
-TYPE_UINT = GObjectModule.type_from_name('guint')
-TYPE_LONG = GObjectModule.type_from_name('glong')
-TYPE_ULONG = GObjectModule.type_from_name('gulong')
-TYPE_INT64 = GObjectModule.type_from_name('gint64')
-TYPE_UINT64 = GObjectModule.type_from_name('guint64')
-TYPE_ENUM = GObjectModule.type_from_name('GEnum')
-TYPE_FLAGS = GObjectModule.type_from_name('GFlags')
-TYPE_FLOAT = GObjectModule.type_from_name('gfloat')
-TYPE_DOUBLE = GObjectModule.type_from_name('gdouble')
-TYPE_STRING = GObjectModule.type_from_name('gchararray')
-TYPE_POINTER = GObjectModule.type_from_name('gpointer')
-TYPE_BOXED = GObjectModule.type_from_name('GBoxed')
-TYPE_PARAM = GObjectModule.type_from_name('GParam')
-TYPE_OBJECT = GObjectModule.type_from_name('GObject')
-TYPE_PYOBJECT = GObjectModule.type_from_name('PyObject')
-TYPE_GTYPE = GObjectModule.type_from_name('GType')
-TYPE_STRV = GObjectModule.type_from_name('GStrv')
-TYPE_VARIANT = GObjectModule.type_from_name('GVariant')
-TYPE_GSTRING = GObjectModule.type_from_name('GString')
+TYPE_INVALID = GObjectModule.type_from_name("invalid")
+TYPE_NONE = GObjectModule.type_from_name("void")
+TYPE_INTERFACE = GObjectModule.type_from_name("GInterface")
+TYPE_CHAR = GObjectModule.type_from_name("gchar")
+TYPE_UCHAR = GObjectModule.type_from_name("guchar")
+TYPE_BOOLEAN = GObjectModule.type_from_name("gboolean")
+TYPE_INT = GObjectModule.type_from_name("gint")
+TYPE_UINT = GObjectModule.type_from_name("guint")
+TYPE_LONG = GObjectModule.type_from_name("glong")
+TYPE_ULONG = GObjectModule.type_from_name("gulong")
+TYPE_INT64 = GObjectModule.type_from_name("gint64")
+TYPE_UINT64 = GObjectModule.type_from_name("guint64")
+TYPE_ENUM = GObjectModule.type_from_name("GEnum")
+TYPE_FLAGS = GObjectModule.type_from_name("GFlags")
+TYPE_FLOAT = GObjectModule.type_from_name("gfloat")
+TYPE_DOUBLE = GObjectModule.type_from_name("gdouble")
+TYPE_STRING = GObjectModule.type_from_name("gchararray")
+TYPE_POINTER = GObjectModule.type_from_name("gpointer")
+TYPE_BOXED = GObjectModule.type_from_name("GBoxed")
+TYPE_PARAM = GObjectModule.type_from_name("GParam")
+TYPE_OBJECT = GObjectModule.type_from_name("GObject")
+TYPE_PYOBJECT = GObjectModule.type_from_name("PyObject")
+TYPE_GTYPE = GObjectModule.type_from_name("GType")
+TYPE_STRV = GObjectModule.type_from_name("GStrv")
+TYPE_VARIANT = GObjectModule.type_from_name("GVariant")
+TYPE_GSTRING = GObjectModule.type_from_name("GString")
 TYPE_VALUE = GObjectModule.Value.__gtype__
 TYPE_UNICHAR = TYPE_UINT
-__all__ += ['TYPE_INVALID', 'TYPE_NONE', 'TYPE_INTERFACE', 'TYPE_CHAR',
-            'TYPE_UCHAR', 'TYPE_BOOLEAN', 'TYPE_INT', 'TYPE_UINT', 'TYPE_LONG',
-            'TYPE_ULONG', 'TYPE_INT64', 'TYPE_UINT64', 'TYPE_ENUM', 'TYPE_FLAGS',
-            'TYPE_FLOAT', 'TYPE_DOUBLE', 'TYPE_STRING', 'TYPE_POINTER',
-            'TYPE_BOXED', 'TYPE_PARAM', 'TYPE_OBJECT', 'TYPE_PYOBJECT',
-            'TYPE_GTYPE', 'TYPE_STRV', 'TYPE_VARIANT', 'TYPE_GSTRING',
-            'TYPE_UNICHAR', 'TYPE_VALUE']
+__all__ += [
+    "TYPE_BOOLEAN",
+    "TYPE_BOXED",
+    "TYPE_CHAR",
+    "TYPE_DOUBLE",
+    "TYPE_ENUM",
+    "TYPE_FLAGS",
+    "TYPE_FLOAT",
+    "TYPE_GSTRING",
+    "TYPE_GTYPE",
+    "TYPE_INT",
+    "TYPE_INT64",
+    "TYPE_INTERFACE",
+    "TYPE_INVALID",
+    "TYPE_LONG",
+    "TYPE_NONE",
+    "TYPE_OBJECT",
+    "TYPE_PARAM",
+    "TYPE_POINTER",
+    "TYPE_PYOBJECT",
+    "TYPE_STRING",
+    "TYPE_STRV",
+    "TYPE_UCHAR",
+    "TYPE_UINT",
+    "TYPE_UINT64",
+    "TYPE_ULONG",
+    "TYPE_UNICHAR",
+    "TYPE_VALUE",
+    "TYPE_VARIANT",
+]
 
 
 # Deprecated, use GLib directly
-for name in ['Pid', 'GError', 'OptionGroup', 'OptionContext']:
+for name in ["Pid", "GError", "OptionGroup", "OptionContext"]:
     globals()[name] = getattr(GLib, name)
     deprecated_attr("GObject", name, "GLib." + name)
     __all__.append(name)
 
 
 # Deprecated, use: GObject.ParamFlags.* directly
-for name in ['PARAM_CONSTRUCT', 'PARAM_CONSTRUCT_ONLY', 'PARAM_LAX_VALIDATION',
-             'PARAM_READABLE', 'PARAM_WRITABLE']:
+for name in [
+    "PARAM_CONSTRUCT",
+    "PARAM_CONSTRUCT_ONLY",
+    "PARAM_LAX_VALIDATION",
+    "PARAM_READABLE",
+    "PARAM_WRITABLE",
+]:
     new_name = name.split("_", 1)[-1]
     globals()[name] = getattr(GObjectModule.ParamFlags, new_name)
     deprecated_attr("GObject", name, "GObject.ParamFlags." + new_name)
@@ -158,16 +258,21 @@ for name in ['PARAM_CONSTRUCT', 'PARAM_CONSTRUCT_ONLY', 'PARAM_LAX_VALIDATION',
 
 # PARAM_READWRITE should come from the gi module but cannot due to:
 # https://gitlab.gnome.org/GNOME/gobject-introspection/issues/75
-PARAM_READWRITE = GObjectModule.ParamFlags.READABLE | \
-    GObjectModule.ParamFlags.WRITABLE
+PARAM_READWRITE = GObjectModule.ParamFlags.READABLE | GObjectModule.ParamFlags.WRITABLE
 deprecated_attr("GObject", "PARAM_READWRITE", "GObject.ParamFlags.READWRITE")
 __all__.append("PARAM_READWRITE")
 
 
 # Deprecated, use: GObject.SignalFlags.* directly
-for name in ['SIGNAL_ACTION', 'SIGNAL_DETAILED', 'SIGNAL_NO_HOOKS',
-             'SIGNAL_NO_RECURSE', 'SIGNAL_RUN_CLEANUP', 'SIGNAL_RUN_FIRST',
-             'SIGNAL_RUN_LAST']:
+for name in [
+    "SIGNAL_ACTION",
+    "SIGNAL_DETAILED",
+    "SIGNAL_NO_HOOKS",
+    "SIGNAL_NO_RECURSE",
+    "SIGNAL_RUN_CLEANUP",
+    "SIGNAL_RUN_FIRST",
+    "SIGNAL_RUN_LAST",
+]:
     new_name = name.split("_", 1)[-1]
     globals()[name] = getattr(GObjectModule.SignalFlags, new_name)
     deprecated_attr("GObject", name, "GObject.SignalFlags." + new_name)
@@ -183,18 +288,33 @@ GObjectWeakRef = _gi.GObjectWeakRef
 GPointer = _gi.GPointer
 GType = _gi.GType
 Warning = _gi.Warning
-__all__ += ['GBoxed', 'GEnum', 'GFlags', 'GInterface', 'GObject',
-            'GObjectWeakRef', 'GPointer', 'GType', 'Warning']
+__all__ += [
+    "GBoxed",
+    "GEnum",
+    "GFlags",
+    "GInterface",
+    "GObject",
+    "GObjectWeakRef",
+    "GPointer",
+    "GType",
+    "Warning",
+]
 
 
-features = {'generic-c-marshaller': True}
+features = {"generic-c-marshaller": True}
 list_properties = _gi.list_properties
 new = _gi.new
 pygobject_version = _gi.pygobject_version
 threads_init = GLib.threads_init
 type_register = _gi.type_register
-__all__ += ['features', 'list_properties', 'new',
-            'pygobject_version', 'threads_init', 'type_register']
+__all__ += [
+    "features",
+    "list_properties",
+    "new",
+    "pygobject_version",
+    "threads_init",
+    "type_register",
+]
 
 
 class Value(GObjectModule.Value):
@@ -213,8 +333,11 @@ class Value(GObjectModule.Value):
 
     def set_boxed(self, boxed):
         if not self.__g_type.is_a(TYPE_BOXED):
-            warnings.warn('Calling set_boxed() on a non-boxed type deprecated',
-                          PyGIDeprecationWarning, stacklevel=2)
+            warnings.warn(
+                "Calling set_boxed() on a non-boxed type deprecated",
+                PyGIDeprecationWarning,
+                stacklevel=2,
+            )
         # Workaround the introspection marshalers inability to know
         # these methods should be marshaling boxed types. This is because
         # the type information is stored on the GValue.
@@ -222,8 +345,11 @@ class Value(GObjectModule.Value):
 
     def get_boxed(self):
         if not self.__g_type.is_a(TYPE_BOXED):
-            warnings.warn('Calling get_boxed() on a non-boxed type deprecated',
-                          PyGIDeprecationWarning, stacklevel=2)
+            warnings.warn(
+                "Calling get_boxed() on a non-boxed type deprecated",
+                PyGIDeprecationWarning,
+                stacklevel=2,
+            )
         return _gi._gvalue_get(self)
 
     def set_value(self, py_value):
@@ -235,8 +361,7 @@ class Value(GObjectModule.Value):
             self.set_uchar(py_value)
         elif gtype == TYPE_STRING:
             if not isinstance(py_value, str) and py_value is not None:
-                raise TypeError("Expected string but got %s%s" %
-                                (py_value, type(py_value)))
+                raise TypeError(f"Expected string but got {py_value}{type(py_value)}")
             _gi._gvalue_set(self, py_value)
         elif gtype == TYPE_PARAM:
             self.set_param(py_value)
@@ -263,63 +388,62 @@ class Value(GObjectModule.Value):
 
         if gtype == TYPE_CHAR:
             return self.get_char()
-        elif gtype == TYPE_UCHAR:
+        if gtype == TYPE_UCHAR:
             return self.get_uchar()
-        elif gtype == TYPE_PARAM:
+        if gtype == TYPE_PARAM:
             return self.get_param()
-        elif gtype.is_a(TYPE_ENUM):
+        if gtype.is_a(TYPE_ENUM):
             return self.get_enum()
-        elif gtype.is_a(TYPE_FLAGS):
+        if gtype.is_a(TYPE_FLAGS):
             return self.get_flags()
-        elif gtype == TYPE_POINTER:
+        if gtype == TYPE_POINTER:
             return self.get_pointer()
-        elif gtype == TYPE_GTYPE:
+        if gtype == TYPE_GTYPE:
             return self.get_gtype()
-        elif gtype == TYPE_VARIANT:
+        if gtype == TYPE_VARIANT:
             # get_variant was missing annotations
             # https://gitlab.gnome.org/GNOME/glib/merge_requests/492
             return self.dup_variant()
-        else:
-            try:
-                return _gi._gvalue_get(self)
-            except TypeError:
-                if gtype == TYPE_INVALID:
-                    return None
-                raise
+        try:
+            return _gi._gvalue_get(self)
+        except TypeError:
+            if gtype == TYPE_INVALID:
+                return None
+            raise
 
     def __repr__(self):
-        return '<Value (%s) %s>' % (self.__g_type.name, self.get_value())
+        return f"<Value ({self.__g_type.name}) {self.get_value()}>"
 
 
 Value = override(Value)
-__all__.append('Value')
+__all__.append("Value")
 
 
 def type_from_name(name):
     type_ = GObjectModule.type_from_name(name)
     if type_ == TYPE_INVALID:
-        raise RuntimeError('unknown type name: %s' % name)
+        raise RuntimeError(f"unknown type name: {name}")
     return type_
 
 
-__all__.append('type_from_name')
+__all__.append("type_from_name")
 
 
 def type_parent(type_):
     parent = GObjectModule.type_parent(type_)
     if parent == TYPE_INVALID:
-        raise RuntimeError('no parent for type')
+        raise RuntimeError("no parent for type")
     return parent
 
 
-__all__.append('type_parent')
+__all__.append("type_parent")
 
 
 def _validate_type_for_signal_method(type_):
-    if hasattr(type_, '__gtype__'):
+    if hasattr(type_, "__gtype__"):
         type_ = type_.__gtype__
     if not type_.is_instantiatable() and not type_.is_interface():
-        raise TypeError('type must be instantiable or an interface, got %s' % type_)
+        raise TypeError(f"type must be instantiable or an interface, got {type_}")
 
 
 def signal_list_ids(type_):
@@ -327,7 +451,7 @@ def signal_list_ids(type_):
     return GObjectModule.signal_list_ids(type_)
 
 
-__all__.append('signal_list_ids')
+__all__.append("signal_list_ids")
 
 
 def signal_list_names(type_):
@@ -335,7 +459,7 @@ def signal_list_names(type_):
     return tuple(GObjectModule.signal_name(i) for i in ids)
 
 
-__all__.append('signal_list_names')
+__all__.append("signal_list_names")
 
 
 def signal_lookup(name, type_):
@@ -343,17 +467,21 @@ def signal_lookup(name, type_):
     return GObjectModule.signal_lookup(name, type_)
 
 
-__all__.append('signal_lookup')
+__all__.append("signal_lookup")
 
 
-SignalQuery = namedtuple('SignalQuery',
-                         ['signal_id',
-                          'signal_name',
-                          'itype',
-                          'signal_flags',
-                          'return_type',
-                          # n_params',
-                          'param_types'])
+SignalQuery = namedtuple(
+    "SignalQuery",
+    [
+        "signal_id",
+        "signal_name",
+        "itype",
+        "signal_flags",
+        "return_type",
+        # n_params',
+        "param_types",
+    ],
+)
 
 
 def signal_query(id_or_name, type_=None):
@@ -370,15 +498,20 @@ def signal_query(id_or_name, type_=None):
     # static bindings along with field like access of the gi struct.
     # Note however that the n_params was not returned from the static bindings
     # so we must skip over it.
-    return SignalQuery(res.signal_id, res.signal_name, res.itype,
-                       res.signal_flags, res.return_type,
-                       tuple(res.param_types))
+    return SignalQuery(
+        res.signal_id,
+        res.signal_name,
+        res.itype,
+        res.signal_flags,
+        res.return_type,
+        tuple(res.param_types),
+    )
 
 
-__all__.append('signal_query')
+__all__.append("signal_query")
 
 
-class _HandlerBlockManager(object):
+class _HandlerBlockManager:
     def __init__(self, obj, handler_id):
         self.obj = obj
         self.handler_id = handler_id
@@ -411,7 +544,7 @@ def signal_handler_block(obj, handler_id):
     return _HandlerBlockManager(obj, handler_id)
 
 
-__all__.append('signal_handler_block')
+__all__.append("signal_handler_block")
 
 
 def signal_parse_name(detailed_signal, itype, force_detail_quark):
@@ -425,34 +558,35 @@ def signal_parse_name(detailed_signal, itype, force_detail_quark):
     :raises ValueError:
         If the given signal is unknown.
     """
-    res, signal_id, detail = GObjectModule.signal_parse_name(detailed_signal, itype,
-                                                             force_detail_quark)
+    res, signal_id, detail = GObjectModule.signal_parse_name(
+        detailed_signal, itype, force_detail_quark
+    )
     if res:
         return signal_id, detail
-    else:
-        raise ValueError('%s: unknown signal name: %s' % (itype, detailed_signal))
+    raise ValueError(f"{itype}: unknown signal name: {detailed_signal}")
 
 
-__all__.append('signal_parse_name')
+__all__.append("signal_parse_name")
 
 
 def remove_emission_hook(obj, detailed_signal, hook_id):
-    signal_id, detail = signal_parse_name(detailed_signal, obj, True)
+    signal_id, _detail = signal_parse_name(detailed_signal, obj, True)
     GObjectModule.signal_remove_emission_hook(signal_id, hook_id)
 
 
-__all__.append('remove_emission_hook')
+__all__.append("remove_emission_hook")
 
 
 # GObject accumulators with pure Python implementations
 # These return a tuple of (continue_emission, accumulation_result)
+
 
 def signal_accumulator_first_wins(ihint, return_accu, handler_return, user_data=None):
     # Stop emission but return the result of the last handler
     return (False, handler_return)
 
 
-__all__.append('signal_accumulator_first_wins')
+__all__.append("signal_accumulator_first_wins")
 
 
 def signal_accumulator_true_handled(ihint, return_accu, handler_return, user_data=None):
@@ -460,7 +594,7 @@ def signal_accumulator_true_handled(ihint, return_accu, handler_return, user_dat
     return (not handler_return, handler_return)
 
 
-__all__.append('signal_accumulator_true_handled')
+__all__.append("signal_accumulator_true_handled")
 
 
 # Statically bound signal functions which need to clobber GI (for now)
@@ -468,10 +602,10 @@ __all__.append('signal_accumulator_true_handled')
 add_emission_hook = _gi.add_emission_hook
 signal_new = _gi.signal_new
 
-__all__ += ['add_emission_hook', 'signal_new']
+__all__ += ["add_emission_hook", "signal_new"]
 
 
-class _FreezeNotifyManager(object):
+class _FreezeNotifyManager:
     def __init__(self, obj):
         self.obj = obj
 
@@ -489,16 +623,18 @@ def _signalmethod(func):
     @functools.wraps(func)
     def meth(*args, **kwargs):
         return func(*args, **kwargs)
+
     return meth
 
 
 class Object(GObjectModule.Object):
     def _unsupported_method(self, *args, **kargs):
-        raise RuntimeError('This method is currently unsupported.')
+        raise RuntimeError("This method is currently unsupported.")
 
     def _unsupported_data_method(self, *args, **kargs):
-        raise RuntimeError('Data access methods are unsupported. '
-                           'Use normal Python attributes instead')
+        raise RuntimeError(
+            "Data access methods are unsupported. Use normal Python attributes instead"
+        )
 
     # Generic data methods are not needed in python as it can be handled
     # with standard attribute access: https://bugzilla.gnome.org/show_bug.cgi?id=641944
@@ -566,7 +702,7 @@ class Object(GObjectModule.Object):
             with obj.freeze_notify():
                 pass
         """
-        super(Object, self).freeze_notify()
+        super().freeze_notify()
         return _FreezeNotifyManager(self)
 
     def connect_data(self, detailed_signal, handler, *data, connect_flags=0):
@@ -590,15 +726,17 @@ class Object(GObjectModule.Object):
 
         if connect_flags & GObjectModule.ConnectFlags.SWAPPED:
             if len(data) != 1:
-                raise ValueError('Using GObject.ConnectFlags.SWAPPED requires exactly '
-                                 'one argument for user data, got: %s' % [data])
+                raise ValueError(
+                    "Using GObject.ConnectFlags.SWAPPED requires exactly "
+                    "one argument for user data, got: %s" % [data]
+                )
 
             def new_handler(obj, *args):
                 # Swap obj with the last element in args which will be the user
                 # data passed to the connect function.
                 args = list(args)
                 swap = args.pop()
-                args = args + [obj]
+                args = [*args, obj]
                 return handler(swap, *args)
         else:
             new_handler = handler
@@ -630,19 +768,22 @@ class Object(GObjectModule.Object):
 
 Object = override(Object)
 GObject = Object
-__all__ += ['Object', 'GObject']
+__all__ += ["GObject", "Object"]
 
 
 class Binding(GObjectModule.Binding):
     def __call__(self):
-        warnings.warn('Using parentheses (binding()) to retrieve the Binding object is no '
-                      'longer needed because the binding is returned directly from "bind_property.',
-                      PyGIDeprecationWarning, stacklevel=2)
+        warnings.warn(
+            "Using parentheses (binding()) to retrieve the Binding object is no "
+            'longer needed because the binding is returned directly from "bind_property.',
+            PyGIDeprecationWarning,
+            stacklevel=2,
+        )
         return self
 
 
 Binding = override(Binding)
-__all__.append('Binding')
+__all__.append("Binding")
 
 
 Property = propertyhelper.Property
@@ -652,12 +793,11 @@ SignalOverride = signalhelper.SignalOverride
 # Keep this at the end of the file to avoid clobbering the builtin.
 property = Property
 deprecated_attr("GObject", "property", "GObject.Property")
-__all__ += ['Property', 'Signal', 'SignalOverride', 'property']
+__all__ += ["Property", "Signal", "SignalOverride", "property"]
 
 
 @override
 class ParamSpec(GObjectModule.ParamSpec):
-
     @property
     def nick(self):
         return self._nick
@@ -677,45 +817,41 @@ class ParamSpec(GObjectModule.ParamSpec):
 
 GParamSpec = ParamSpec
 deprecated_attr("GObject", "GParamSpec", "GObject.ParamSpec")
-__all__ += ["ParamSpec", "GParamSpec"]
+__all__ += ["GParamSpec", "ParamSpec"]
 
 
 @override
 class ParamSpecEnum(GObjectModule.ParamSpecEnum):
-
     @property
     def enum_class(self):
         gtype = super().enum_class.g_type_class.g_type
         if pytype := gtype.pytype:
             return pytype
-        else:
-            return _gi.enum_add(None, gtype.name, gtype, None)
+        return _gi.enum_add(None, gtype.name, gtype, None)
 
 
-__all__.append('ParamSpecEnum')
+__all__.append("ParamSpecEnum")
 
 
 @override
 class ParamSpecFlags(GObjectModule.ParamSpecFlags):
-
     @property
     def flags_class(self):
         gtype = super().flags_class.g_type_class.g_type
         if pytype := gtype.pytype:
             return pytype
-        else:
-            return _gi.flags_add(None, gtype.name, gtype, None)
+        return _gi.flags_add(None, gtype.name, gtype, None)
 
 
-__all__.append('ParamSpecFlags')
+__all__.append("ParamSpecFlags")
 
 
 class Float(float):
-    '''
-    A wrapper to force conversion to G_TYPE_FLOAT instead of G_TYPE_DOUBLE when
+    """A wrapper to force conversion to G_TYPE_FLOAT instead of G_TYPE_DOUBLE when
     used in GValue APIs.
-    '''
+    """
+
     __gtype__ = TYPE_FLOAT
 
 
-__all__.append('Float')
+__all__.append("Float")

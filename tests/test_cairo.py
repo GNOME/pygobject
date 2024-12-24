@@ -1,14 +1,12 @@
-# -*- Mode: Python; py-indent-offset: 4 -*-
-# vim: tabstop=4 shiftwidth=4 expandtab
-
 import unittest
 import pytest
 
 import gi
 
 try:
-    gi.require_foreign('cairo')
+    gi.require_foreign("cairo")
     import cairo
+
     has_cairo = True
 except ImportError:
     has_cairo = False
@@ -17,28 +15,28 @@ has_region = has_cairo and hasattr(cairo, "Region")
 
 try:
     from gi.repository import Gtk, Gdk
-    Gtk, Gdk  # pyflakes
-except:
+
+    Gtk, Gdk
+except ImportError:
     Gtk = None
     Gdk = None
 
 from gi.repository import GObject, Regress
 
 
-@unittest.skipUnless(has_cairo, 'built without cairo support')
+@unittest.skipUnless(has_cairo, "built without cairo support")
 class Test(unittest.TestCase):
-
     def test_gvalue_converters(self):
         surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, 10, 10)
         context = cairo.Context(surface)
         matrix = cairo.Matrix()
         objects = {
-            'CairoContext': context,
-            'CairoSurface': surface,
-            'CairoFontFace': context.get_font_face(),
-            'CairoScaledFont': context.get_scaled_font(),
-            'CairoPattern': context.get_source(),
-            'CairoMatrix': matrix,
+            "CairoContext": context,
+            "CairoSurface": surface,
+            "CairoFontFace": context.get_font_face(),
+            "CairoScaledFont": context.get_scaled_font(),
+            "CairoPattern": context.get_source(),
+            "CairoMatrix": matrix,
         }
         for type_name, cairo_obj in objects.items():
             gtype = GObject.type_from_name(type_name)
@@ -204,18 +202,19 @@ class Test(unittest.TestCase):
             Regress.test_cairo_surface_full_in(object())
 
     def test_require_foreign(self):
-        self.assertEqual(gi.require_foreign('cairo'), None)
-        self.assertEqual(gi.require_foreign('cairo', 'Context'), None)
-        self.assertRaises(ImportError, gi.require_foreign, 'invalid_module')
-        self.assertRaises(ImportError, gi.require_foreign, 'invalid_module', 'invalid_symbol')
-        self.assertRaises(ImportError, gi.require_foreign, 'cairo', 'invalid_symbol')
+        self.assertEqual(gi.require_foreign("cairo"), None)
+        self.assertEqual(gi.require_foreign("cairo", "Context"), None)
+        self.assertRaises(ImportError, gi.require_foreign, "invalid_module")
+        self.assertRaises(
+            ImportError, gi.require_foreign, "invalid_module", "invalid_symbol"
+        )
+        self.assertRaises(ImportError, gi.require_foreign, "cairo", "invalid_symbol")
 
 
-@unittest.skipUnless(has_cairo, 'built without cairo support')
-@unittest.skipUnless(has_region, 'built without cairo.Region support')
-@unittest.skipUnless(Gdk, 'Gdk not available')
+@unittest.skipUnless(has_cairo, "built without cairo support")
+@unittest.skipUnless(has_region, "built without cairo.Region support")
+@unittest.skipUnless(Gdk, "Gdk not available")
 class TestRegion(unittest.TestCase):
-
     def test_region_to_py(self):
         surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, 10, 10)
         context = cairo.Context(surface)
@@ -232,10 +231,9 @@ class TestRegion(unittest.TestCase):
         self.assertTrue("42" in repr(list(context.copy_path())))
 
 
-@unittest.skipUnless(has_cairo, 'built without cairo support')
-@unittest.skipUnless(Gtk, 'Gtk not available')
+@unittest.skipUnless(has_cairo, "built without cairo support")
+@unittest.skipUnless(Gtk, "Gtk not available")
 class TestPango(unittest.TestCase):
-
     def test_cairo_font_options(self):
         window = Gtk.Window()
         if Gtk._version == "4.0":
@@ -260,7 +258,7 @@ if has_cairo:
         sig_pattern = GObject.Signal(arg_types=[CairoGObject.Pattern])
 
 
-@unittest.skipUnless(has_cairo, 'built without cairo support')
+@unittest.skipUnless(has_cairo, "built without cairo support")
 class TestSignalMarshaling(unittest.TestCase):
     # Tests round tripping of cairo objects through non-introspected signals.
 
@@ -271,7 +269,8 @@ class TestSignalMarshaling(unittest.TestCase):
 
     def pass_object_through_signal(self, obj, signal):
         """Pass the given `obj` through the `signal` emission storing the
-        `obj` passed through the signal and returning it."""
+        `obj` passed through the signal and returning it.
+        """
         passthrough_result = []
 
         def callback(instance, passthrough):
@@ -302,15 +301,21 @@ class TestSignalMarshaling(unittest.TestCase):
             self.pass_object_through_signal(object(), self.tester.sig_font_face)
 
     def test_scaled_font(self):
-        scaled_font = cairo.ScaledFont(self.context.get_font_face(),
-                                       cairo.Matrix(),
-                                       cairo.Matrix(),
-                                       self.context.get_font_options())
-        result = self.pass_object_through_signal(scaled_font, self.tester.sig_scaled_font)
+        scaled_font = cairo.ScaledFont(
+            self.context.get_font_face(),
+            cairo.Matrix(),
+            cairo.Matrix(),
+            self.context.get_font_options(),
+        )
+        result = self.pass_object_through_signal(
+            scaled_font, self.tester.sig_scaled_font
+        )
         self.assertTrue(isinstance(result, cairo.ScaledFont))
 
         with pytest.raises(TypeError):
-            result = self.pass_object_through_signal(object(), self.tester.sig_scaled_font)
+            result = self.pass_object_through_signal(
+                object(), self.tester.sig_scaled_font
+            )
 
     def test_pattern(self):
         pattern = cairo.SolidPattern(1, 1, 1, 1)

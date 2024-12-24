@@ -47,7 +47,7 @@ For full IDE support (incl. autocomplete) you will also need typing stubs availa
 
 After running the example application have a look at the :doc:`/tutorials/index` for an overview of how to create GTK apps and the `GNOME Python API docs
 <https://api.pygobject.gnome.org/>`__ for API documentation for all supported
-libraries. 
+libraries.
 
 
 .. _windows-getting-started:

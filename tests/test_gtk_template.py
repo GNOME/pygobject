@@ -9,12 +9,12 @@ Gio = pytest.importorskip("gi.repository.Gio")
 
 from .helper import capture_exceptions
 
-GTK4 = (Gtk._version == "4.0")
+GTK4 = Gtk._version == "4.0"
 
 
 def new_gtype_name(_count=[0]):
     _count[0] += 1
-    return "GtkTemplateTest%d" % _count[0]
+    return f"GtkTemplateTest{_count[0]:d}"
 
 
 def ensure_resource_registered():
@@ -31,21 +31,21 @@ def ensure_resource_registered():
         return resource_path
 
     gresource_data = (
-        b'GVariant\x00\x00\x00\x00\x00\x00\x00\x00\x18\x00\x00\x00'
-        b'\xc8\x00\x00\x00\x00\x00\x00(\x06\x00\x00\x00\x00\x00\x00\x00'
-        b'\x00\x00\x00\x00\x01\x00\x00\x00\x04\x00\x00\x00\x05\x00\x00\x00'
-        b'\x06\x00\x00\x00KP\x90\x0b\x03\x00\x00\x00\xc8\x00\x00\x00'
-        b'\x04\x00L\x00\xcc\x00\x00\x00\xd0\x00\x00\x00\xb0\xb7$0'
-        b'\x00\x00\x00\x00\xd0\x00\x00\x00\x06\x00L\x00\xd8\x00\x00\x00'
-        b'\xdc\x00\x00\x00f\xc30\xd1\x01\x00\x00\x00\xdc\x00\x00\x00'
-        b'\n\x00L\x00\xe8\x00\x00\x00\xec\x00\x00\x00\xd4\xb5\x02\x00'
-        b'\xff\xff\xff\xff\xec\x00\x00\x00\x01\x00L\x00\xf0\x00\x00\x00'
-        b'\xf4\x00\x00\x005H}\xe3\x02\x00\x00\x00\xf4\x00\x00\x00'
-        b'\x05\x00L\x00\xfc\x00\x00\x00\x00\x01\x00\x00\xa2^\xd6t'
-        b'\x04\x00\x00\x00\x00\x01\x00\x00\x04\x00v\x00\x08\x01\x00\x00'
-        b'\xa5\x01\x00\x00org/\x01\x00\x00\x00gnome/\x00\x00\x02\x00\x00\x00'
-        b'pygobject/\x00\x00\x04\x00\x00\x00/\x00\x00\x00\x00\x00\x00\x00'
-        b'test/\x00\x00\x00\x05\x00\x00\x00a.ui\x00\x00\x00\x00'
+        b"GVariant\x00\x00\x00\x00\x00\x00\x00\x00\x18\x00\x00\x00"
+        b"\xc8\x00\x00\x00\x00\x00\x00(\x06\x00\x00\x00\x00\x00\x00\x00"
+        b"\x00\x00\x00\x00\x01\x00\x00\x00\x04\x00\x00\x00\x05\x00\x00\x00"
+        b"\x06\x00\x00\x00KP\x90\x0b\x03\x00\x00\x00\xc8\x00\x00\x00"
+        b"\x04\x00L\x00\xcc\x00\x00\x00\xd0\x00\x00\x00\xb0\xb7$0"
+        b"\x00\x00\x00\x00\xd0\x00\x00\x00\x06\x00L\x00\xd8\x00\x00\x00"
+        b"\xdc\x00\x00\x00f\xc30\xd1\x01\x00\x00\x00\xdc\x00\x00\x00"
+        b"\n\x00L\x00\xe8\x00\x00\x00\xec\x00\x00\x00\xd4\xb5\x02\x00"
+        b"\xff\xff\xff\xff\xec\x00\x00\x00\x01\x00L\x00\xf0\x00\x00\x00"
+        b"\xf4\x00\x00\x005H}\xe3\x02\x00\x00\x00\xf4\x00\x00\x00"
+        b"\x05\x00L\x00\xfc\x00\x00\x00\x00\x01\x00\x00\xa2^\xd6t"
+        b"\x04\x00\x00\x00\x00\x01\x00\x00\x04\x00v\x00\x08\x01\x00\x00"
+        b"\xa5\x01\x00\x00org/\x01\x00\x00\x00gnome/\x00\x00\x02\x00\x00\x00"
+        b"pygobject/\x00\x00\x04\x00\x00\x00/\x00\x00\x00\x00\x00\x00\x00"
+        b"test/\x00\x00\x00\x05\x00\x00\x00a.ui\x00\x00\x00\x00"
         b'\x8d\x00\x00\x00\x00\x00\x00\x00<interface>\n  <template class="G'
         b'tkTemplateTestResource" parent="GtkBox">\n  <property name="spaci'
         b'ng">42</property>\n  </template>\n</interface>\n\x00\x00(uuay)'
@@ -58,22 +58,21 @@ def ensure_resource_registered():
 
 
 def test_allow_init_template_call():
-
     type_name = new_gtype_name()
 
-    xml = """\
+    xml = f"""\
 <interface>
-  <template class="{0}" parent="GtkBox">
+  <template class="{type_name}" parent="GtkBox">
   </template>
 </interface>
-""".format(type_name)
+"""
 
     @Gtk.Template.from_string(xml)
     class Foo(Gtk.Box):
         __gtype_name__ = type_name
 
         def __init__(self):
-            super(Foo, self).__init__()
+            super().__init__()
             self.init_template()
 
     # Stop current pygobject from handling the initialisation
@@ -85,16 +84,16 @@ def test_allow_init_template_call():
 def test_init_template_second_instance():
     type_name = new_gtype_name()
 
-    xml = """\
+    xml = f"""\
 <interface>
-  <template class="{0}" parent="GtkBox">
+  <template class="{type_name}" parent="GtkBox">
     <child>
       <object class="GtkLabel" id="label">
       </object>
     </child>
   </template>
 </interface>
-""".format(type_name)
+"""
 
     @Gtk.Template.from_string(xml)
     class Foo(Gtk.Box):
@@ -103,7 +102,7 @@ def test_init_template_second_instance():
         label = Gtk.Template.Child("label")
 
         def __init__(self):
-            super(Foo, self).__init__()
+            super().__init__()
             self.init_template()
 
     # Stop current pygobject from handling the initialisation
@@ -117,21 +116,20 @@ def test_init_template_second_instance():
 
 
 def test_main_example():
-
     type_name = new_gtype_name()
 
-    example_xml = """\
+    example_xml = f"""\
 <interface>
-  <template class="{0}" parent="GtkBox">
+  <template class="{type_name}" parent="GtkBox">
     <property name="orientation">GTK_ORIENTATION_HORIZONTAL</property>
     <property name="spacing">4</property>
     <child>
       <object class="GtkButton" id="hello_button">
         <property name="label">Hello World</property>
         <signal name="clicked" handler="hello_button_clicked"
-                object="{0}" swapped="no"/>
+                object="{type_name}" swapped="no"/>
         <signal name="clicked" handler="hello_button_clicked_after"
-                object="{0}" swapped="no" after="yes"/>
+                object="{type_name}" swapped="no" after="yes"/>
       </object>
     </child>
     <child>
@@ -144,14 +142,14 @@ def test_main_example():
     </child>
   </template>
 </interface>
-""".format(type_name)
+"""
 
     @Gtk.Template.from_string(example_xml)
     class Foo(Gtk.Box):
         __gtype_name__ = type_name
 
         def __init__(self):
-            super(Foo, self).__init__()
+            super().__init__()
             self.callback_hello = []
             self.callback_hello_after = []
             self.callback_goodbye = []
@@ -200,9 +198,9 @@ def test_main_example():
 def test_duplicate_handler():
     type_name = new_gtype_name()
 
-    xml = """\
+    xml = f"""\
 <interface>
-  <template class="{0}" parent="GtkBox">
+  <template class="{type_name}" parent="GtkBox">
     <child>
       <object class="GtkButton" id="hello_button">
         <signal name="clicked" handler="hello_button_clicked" />
@@ -210,7 +208,7 @@ def test_duplicate_handler():
     </child>
   </template>
 </interface>
-""".format(type_name)
+"""
 
     class Foo(Gtk.Box):
         __gtype_name__ = type_name
@@ -223,22 +221,22 @@ def test_duplicate_handler():
         def hello_button_clicked(self, *args):
             pass
 
-    with pytest.raises(RuntimeError, match=".*hello_button_clicked.*"):
+    with pytest.raises(RuntimeError, match=r".*hello_button_clicked.*"):
         Gtk.Template.from_string(xml)(Foo)
 
 
 def test_duplicate_child():
     type_name = new_gtype_name()
 
-    xml = """\
+    xml = f"""\
 <interface>
-  <template class="{0}" parent="GtkBox">
+  <template class="{type_name}" parent="GtkBox">
     <child>
       <object class="GtkButton" id="hello_button" />
     </child>
   </template>
 </interface>
-""".format(type_name)
+"""
 
     class Foo(Gtk.Box):
         __gtype_name__ = type_name
@@ -246,19 +244,19 @@ def test_duplicate_child():
         foo = Gtk.Template.Child("hello_button")
         hello_button = Gtk.Template.Child()
 
-    with pytest.raises(RuntimeError, match=".*hello_button.*"):
+    with pytest.raises(RuntimeError, match=r".*hello_button.*"):
         Gtk.Template.from_string(xml)(Foo)
 
 
 def test_nonexist_handler():
     type_name = new_gtype_name()
 
-    xml = """\
+    xml = f"""\
 <interface>
-  <template class="{0}" parent="GtkBox">
+  <template class="{type_name}" parent="GtkBox">
   </template>
 </interface>
-""".format(type_name)
+"""
 
     @Gtk.Template.from_string(xml)
     class Foo(Gtk.Box):
@@ -277,9 +275,9 @@ def test_nonexist_handler():
 def test_missing_handler_callback():
     type_name = new_gtype_name()
 
-    xml = """\
+    xml = f"""\
 <interface>
-  <template class="{0}" parent="GtkBox">
+  <template class="{type_name}" parent="GtkBox">
     <child>
       <object class="GtkButton" id="hello_button">
         <signal name="clicked" handler="i_am_not_used_in_python" />
@@ -287,7 +285,7 @@ def test_missing_handler_callback():
     </child>
   </template>
 </interface>
-""".format(type_name)
+"""
 
     class Foo(Gtk.Box):
         __gtype_name__ = type_name
@@ -298,18 +296,18 @@ def test_missing_handler_callback():
 def test_handler_swapped_not_supported():
     type_name = new_gtype_name()
 
-    xml = """\
+    xml = f"""\
 <interface>
-  <template class="{0}" parent="GtkBox">
+  <template class="{type_name}" parent="GtkBox">
     <child>
       <object class="GtkButton" id="hello_button">
         <signal name="clicked" handler="hello_button_clicked"
-                object="{0}" swapped="yes" />
+                object="{type_name}" swapped="yes" />
       </object>
     </child>
   </template>
 </interface>
-""".format(type_name)
+"""
 
     @Gtk.Template.from_string(xml)
     class Foo(Gtk.Box):
@@ -329,9 +327,9 @@ def test_handler_swapped_not_supported():
 def test_handler_class_staticmethod():
     type_name = new_gtype_name()
 
-    xml = """\
+    xml = f"""\
 <interface>
-  <template class="{0}" parent="GtkBox">
+  <template class="{type_name}" parent="GtkBox">
     <child>
       <object class="GtkButton" id="hello_button">
         <signal name="clicked" handler="clicked_class" />
@@ -340,7 +338,7 @@ def test_handler_class_staticmethod():
     </child>
   </template>
 </interface>
-""".format(type_name)
+"""
 
     signal_args_class = []
     signal_args_static = []
@@ -370,18 +368,18 @@ def test_handler_class_staticmethod():
 @pytest.mark.skipif(Gtk._version == "4.0", reason="errors out first with gtk4")
 def test_check_decorated_class():
     NonWidget = type("Foo", (object,), {})
-    with pytest.raises(TypeError, match=".*on Widgets.*"):
+    with pytest.raises(TypeError, match=r".*on Widgets.*"):
         Gtk.Template.from_string("")(NonWidget)
 
     Widget = type("Foo", (Gtk.Widget,), {"__gtype_name__": new_gtype_name()})
-    with pytest.raises(TypeError, match=".*Cannot nest.*"):
+    with pytest.raises(TypeError, match=r".*Cannot nest.*"):
         Gtk.Template.from_string("")(Gtk.Template.from_string("")(Widget))
 
     Widget = type("Foo", (Gtk.Widget,), {})
-    with pytest.raises(TypeError, match=".*__gtype_name__.*"):
+    with pytest.raises(TypeError, match=r".*__gtype_name__.*"):
         Gtk.Template.from_string("")(Widget)
 
-    with pytest.raises(TypeError, match=".*on Widgets.*"):
+    with pytest.raises(TypeError, match=r".*on Widgets.*"):
         Gtk.Template.from_string("")(object())
 
 
@@ -405,13 +403,15 @@ def test_from_file():
         type_name = new_gtype_name()
 
         with open(name, "wb") as h:
-            h.write(u"""\
+            h.write(
+                f"""\
     <interface>
-      <template class="{0}" parent="GtkBox">
+      <template class="{type_name}" parent="GtkBox">
       <property name="spacing">42</property>
       </template>
     </interface>
-    """.format(type_name).encode())
+    """.encode()
+            )
 
         @Gtk.Template.from_file(name)
         class Foo(Gtk.Box):
@@ -426,13 +426,13 @@ def test_from_file():
 def test_property_override():
     type_name = new_gtype_name()
 
-    xml = """\
+    xml = f"""\
     <interface>
-      <template class="{0}" parent="GtkBox">
+      <template class="{type_name}" parent="GtkBox">
       <property name="spacing">42</property>
       </template>
     </interface>
-""".format(type_name)
+"""
 
     @Gtk.Template.from_string(xml)
     class Foo(Gtk.Box):
@@ -450,9 +450,8 @@ def test_from_file_non_exist():
     try:
         path = os.path.join(dirname, "noexist")
 
-        Widget = type(
-            "Foo", (Gtk.Widget,), {"__gtype_name__": new_gtype_name()})
-        with pytest.raises(GLib.Error, match=".*No such file.*"):
+        Widget = type("Foo", (Gtk.Widget,), {"__gtype_name__": new_gtype_name()})
+        with pytest.raises(GLib.Error, match=r".*No such file.*"):
             Gtk.Template.from_file(path)(Widget)
     finally:
         os.rmdir(dirname)
@@ -461,13 +460,13 @@ def test_from_file_non_exist():
 def test_from_string_bytes():
     type_name = new_gtype_name()
 
-    xml = u"""\
+    xml = f"""\
     <interface>
-      <template class="{0}" parent="GtkBox">
+      <template class="{type_name}" parent="GtkBox">
       <property name="spacing">42</property>
       </template>
     </interface>
-    """.format(type_name).encode()
+    """.encode()
 
     @Gtk.Template.from_string(xml)
     class Foo(Gtk.Box):
@@ -490,7 +489,7 @@ def test_from_resource():
 
 def test_from_resource_non_exit():
     Widget = type("Foo", (Gtk.Widget,), {"__gtype_name__": new_gtype_name()})
-    with pytest.raises(GLib.Error, match=".*/or/gnome/pygobject/noexit.*"):
+    with pytest.raises(GLib.Error, match=r".*/or/gnome/pygobject/noexit.*"):
         Gtk.Template.from_resource("/or/gnome/pygobject/noexit")(Widget)
 
 
@@ -527,12 +526,11 @@ def test_child_construct():
 
 
 def test_internal_child():
-
     main_type_name = new_gtype_name()
 
-    xml = """\
+    xml = f"""\
     <interface>
-      <template class="{0}" parent="GtkBox">
+      <template class="{main_type_name}" parent="GtkBox">
         <child>
           <object class="GtkBox" id="somechild">
             <property name="margin-top">42</property>
@@ -540,7 +538,7 @@ def test_internal_child():
         </child>
       </template>
     </interface>
-    """.format(main_type_name)
+    """
 
     @Gtk.Template.from_string(xml)
     class MainThing(Gtk.Box):
@@ -553,11 +551,11 @@ def test_internal_child():
 
     other_type_name = new_gtype_name()
 
-    xml = """\
+    xml = f"""\
     <interface>
-      <template class="{0}" parent="GtkBox">
+      <template class="{other_type_name}" parent="GtkBox">
         <child>
-          <object class="{1}">
+          <object class="{main_type_name}">
             <child internal-child="somechild">
               <object class="GtkBox">
                 <property name="margin-top">24</property>
@@ -572,32 +570,23 @@ def test_internal_child():
         </child>
       </template>
     </interface>
-    """.format(other_type_name, main_type_name)
+    """
 
     @Gtk.Template.from_string(xml)
     class OtherThing(Gtk.Box):
         __gtype_name__ = other_type_name
 
     other = OtherThing()
-    if not GTK4:
-        child = other.get_children()[0]
-    else:
-        child = other.get_first_child()
+    child = other.get_children()[0] if not GTK4 else other.get_first_child()
 
     assert isinstance(child, MainThing)
 
-    if not GTK4:
-        child = child.get_children()[0]
-    else:
-        child = child.get_first_child()
+    child = child.get_children()[0] if not GTK4 else child.get_first_child()
 
     assert isinstance(child, Gtk.Box)
     assert child.props.margin_top == 24
 
-    if not GTK4:
-        child = child.get_children()[0]
-    else:
-        child = child.get_first_child()
+    child = child.get_children()[0] if not GTK4 else child.get_first_child()
 
     assert isinstance(child, Gtk.Label)
     assert child.props.label == "foo"
@@ -613,7 +602,6 @@ def test_template_hierarchy():
 
     @Gtk.Template(string=testlabel)
     class TestLabel(Gtk.Label):
-
         __gtype_name__ = "TestLabel"
 
         def __init__(self):
@@ -632,7 +620,6 @@ def test_template_hierarchy():
 
     @Gtk.Template(string=testbox)
     class TestBox(Gtk.Box):
-
         __gtype_name__ = "TestBox"
 
         _testlabel = Gtk.Template.Child()
@@ -659,7 +646,6 @@ def test_template_hierarchy():
 
     @Gtk.Template(string=window)
     class MyWindow(Gtk.Window):
-
         __gtype_name__ = "MyWindow"
 
         _testbox = Gtk.Template.Child()
@@ -670,10 +656,7 @@ def test_template_hierarchy():
 
             assert isinstance(self._testbox, TestBox)
             assert isinstance(self._testlabel, TestLabel)
-            if not GTK4:
-                children = self._testbox.get_children()
-            else:
-                children = list(self._testbox)
+            children = self._testbox.get_children() if not GTK4 else list(self._testbox)
 
             assert len(children) == 2
 
@@ -694,7 +677,6 @@ def test_multiple_init_template_calls():
 
     @Gtk.Template(string=xml)
     class MyBox(Gtk.Box):
-
         __gtype_name__ = "MyBox"
 
         _label = Gtk.Template.Child()
@@ -705,18 +687,12 @@ def test_multiple_init_template_calls():
 
     my_box = MyBox()
     assert isinstance(my_box, MyBox)
-    if not GTK4:
-        children = my_box.get_children()
-    else:
-        children = list(my_box)
+    children = my_box.get_children() if not GTK4 else list(my_box)
 
     assert len(children) == 1
     my_box.init_template()
     assert isinstance(my_box, MyBox)
-    if not GTK4:
-        children = my_box.get_children()
-    else:
-        children = list(my_box)
+    children = my_box.get_children() if not GTK4 else list(my_box)
 
     assert len(children) == 1
 
@@ -733,14 +709,14 @@ def test_python_class_hierarchy():
     """
 
     class ParentBox(Gtk.Box):
-        __gtype_name__ = 'ParentBox'
+        __gtype_name__ = "ParentBox"
 
         def __init__(self):
             super().__init__()
 
     @Gtk.Template(string=xml)
     class ChildBox(ParentBox):
-        __gtype_name__ = 'ChildBox'
+        __gtype_name__ = "ChildBox"
 
         _label = Gtk.Template.Child()
 
@@ -749,9 +725,6 @@ def test_python_class_hierarchy():
 
     childBox = ChildBox()
     assert isinstance(childBox, ChildBox)
-    if not GTK4:
-        children = childBox.get_children()
-    else:
-        children = list(childBox)
+    children = childBox.get_children() if not GTK4 else list(childBox)
 
     assert len(children) == 1

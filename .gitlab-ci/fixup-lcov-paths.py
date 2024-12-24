@@ -9,8 +9,8 @@ def main(argv):
     paths = argv[1:]
 
     for path in paths:
-        print("cov-fixup:", path)
-        with open(path, "r", encoding="utf-8") as h:
+        print(f"cov-fixup: {path}")
+        with open(path, encoding="utf-8") as h:
             text = h.read()
 
         text = text.replace("\\\\", "/").replace("\\", "/")
@@ -24,16 +24,16 @@ def main(argv):
                 p = os.path.join(new_root, p)
             return "SF:" + p
 
-        text = re.sub("SF:(.*?)$", make_abs, text, 0, re.MULTILINE)
+        text = re.sub(r"SF:(.*?)$", make_abs, text, 0, re.MULTILINE)
 
-        canidate = None
-        for old_root in set(re.findall(":(.*?)/gi/.*?$", text, re.MULTILINE)):
-            if canidate is None or len(old_root) < len(canidate):
-                canidate = old_root
+        candidate = None
+        for old_root in set(re.findall(r":(.*?)/gi/.*?$", text, re.MULTILINE)):
+            if candidate is None or len(old_root) < len(candidate):
+                candidate = old_root
 
-        if canidate:
-            print("replacing %r with %r" % (canidate, new_root))
-            text = text.replace(canidate, new_root)
+        if candidate:
+            print(f"replacing {candidate} with {new_root}")
+            text = text.replace(candidate, new_root)
 
         with open(path, "w", encoding="utf-8") as h:
             h.write(text)
