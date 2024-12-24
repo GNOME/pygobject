@@ -4,20 +4,20 @@ set -e
 
 python --version
 
-PYVER=$(python -c "import sys; sys.stdout.write('.'.join(map(str, sys.version_info[:2])))")
-PYIMPL=$(python -c "import sys, platform; sys.stdout.write(platform.python_implementation())")
 SOURCE_DIR="$(pwd)"
 COV_DIR="${SOURCE_DIR}/coverage"
 COV_KEY="${CI_JOB_NAME_SLUG}"
 JUNIT_XML="${SOURCE_DIR}/test-results.xml"
 
-export CFLAGS="-coverage -ftest-coverage -fprofile-arcs -Werror"
-export MALLOC_CHECK_=3
-export MALLOC_PERTURB_=$((${RANDOM} % 255 + 1))
-export G_SLICE="debug-blocks"
-export COVERAGE_FILE="${COV_DIR}/.coverage.${COV_KEY}"
-export CCACHE_BASEDIR="$(pwd)"
-export CCACHE_DIR="${CCACHE_BASEDIR}/_ccache"
+CFLAGS="-coverage -ftest-coverage -fprofile-arcs -Werror"
+MALLOC_CHECK_=3
+MALLOC_PERTURB_=$((RANDOM % 255 + 1))
+G_SLICE="debug-blocks"
+COVERAGE_FILE="${COV_DIR}/.coverage.${COV_KEY}"
+CCACHE_BASEDIR="$(pwd)"
+CCACHE_DIR="${CCACHE_BASEDIR}/_ccache"
+export CFLAGS MALLOC_CHECK_ MALLOC_PERTURB_ G_SLICE COVERAGE_FILE \
+       CCACHE_BASEDIR CCACHE_DIR
 
 # https://docs.python.org/3/using/cmdline.html#envvar-PYTHONDEVMODE
 export PYTHONDEVMODE=1
@@ -27,6 +27,7 @@ mkdir -p "${CCACHE_DIR}"
 mkdir -p "${COV_DIR}"
 
 python -m venv /tmp/venv
+# shellcheck disable=SC1091
 source /tmp/venv/bin/activate
 
 python -m pip install --upgrade pip

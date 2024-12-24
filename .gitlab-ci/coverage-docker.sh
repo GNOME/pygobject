@@ -23,4 +23,4 @@ genhtml --config-file .gitlab-ci/lcovrc \
 
 cd coverage
 rm -f .coverage*
-rm -f *.lcov
+rm -f ./*.lcov

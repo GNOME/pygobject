@@ -198,7 +198,7 @@ Meson-python, Meson, and Ninja should be installed in the virtual environment.
 
     python3 -m venv .venv
     source .venv/bin/activate
-    pip install meson-python meson ninja pycairo pytest
+    python3 -m pip install meson-python meson ninja pycairo pytest pre-commit
 
 .. note::
 
@@ -240,5 +240,29 @@ that Pytest is installed.
 
    meson setup _build  # Needed only once
    meson test -C _build
+
+
+Contributing Changes
+====================
+
+First off, thank you for considering contributing to PyGObject.
+We really appreciate it!
+
+* Create your own fork of the repository
+* Add tests for your changes
+* Do the changes in your fork
+* If you like the change and think the project could use it:
+
+  * Make sure you are following the
+    `GNOME Code of Conduct <https://conduct.gnome.org>`_
+  * Be sure you have the pre-commit hook installed with:
+
+    .. code:: console
+
+      pre-commit install
+
+    It will ensure that lint and code formatting tools are run automatically.
+  * Commit your changes
+  * Create a merge request
 
 .. _pyenv: https://github.com/pyenv/pyenv
