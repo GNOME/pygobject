@@ -551,16 +551,11 @@ class TestEverything(unittest.TestCase):
         attr_list = dir(Everything)
 
         # test that typelib attributes are listed
-        self.assertTrue('TestStructA' in attr_list)
-
-        # test that class attributes and methods are listed
-        self.assertTrue('__class__' in attr_list)
-        self.assertTrue('__dir__' in attr_list)
-        self.assertTrue('__repr__' in attr_list)
+        self.assertIn('TestStructA', attr_list)
 
         # test that instance members are listed
-        self.assertTrue('_namespace' in attr_list)
-        self.assertTrue('_version' in attr_list)
+        self.assertIn('_namespace', attr_list)
+        self.assertIn('_version', attr_list)
 
         # test that there are no duplicates returned
         self.assertEqual(len(attr_list), len(set(attr_list)))

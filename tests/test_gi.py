@@ -3176,55 +3176,55 @@ class TestGIWarning(unittest.TestCase):
 class TestDeprecation(unittest.TestCase):
     def test_method(self):
         d = GLib.Date.new()
-        with warnings.catch_warnings(record=True) as warn:
-            warnings.simplefilter('always')
+        with self.assertWarns(DeprecationWarning) as w:
             d.set_time(1)
-            self.assertTrue(issubclass(warn[0].category, DeprecationWarning))
-            self.assertEqual(str(warn[0].message), "GLib.Date.set_time is deprecated")
+        self.assertEqual(str(w.warning), "GLib.Date.set_time is deprecated")
+        self.assertIn("test_gi.py", w.filename)
 
     def test_function(self):
-        with warnings.catch_warnings(record=True) as warn:
-            warnings.simplefilter('always')
+        with self.assertWarns(DeprecationWarning) as w:
             GLib.strcasecmp("foo", "bar")
-            self.assertTrue(issubclass(warn[0].category, DeprecationWarning))
-            self.assertEqual(str(warn[0].message), "GLib.strcasecmp is deprecated")
+        self.assertEqual(str(w.warning), "GLib.strcasecmp is deprecated")
+        self.assertIn("test_gi.py", w.filename)
 
     def test_deprecated_attribute_compat(self):
-        # test if the deprecation descriptor behaves like an instance attribute
+        # test that deprecatied attributes behave like instance attributes
 
-        # save the descriptor
-        desc = type(GLib).__dict__["IO_STATUS_ERROR"]
+        # save the deprecation
+        deprecation = GLib._deprecations["IO_STATUS_ERROR"]
 
-        # the descriptor raises AttributeError for itself
-        self.assertFalse(hasattr(type(GLib), "IO_STATUS_ERROR"))
-
-        with warnings.catch_warnings():
-            warnings.simplefilter('ignore', PyGIDeprecationWarning)
+        with self.assertWarns(PyGIDeprecationWarning) as w:
             self.assertTrue(hasattr(GLib, "IO_STATUS_ERROR"))
+        self.assertEqual(str(w.warning), "GLib.IO_STATUS_ERROR is deprecated;"
+                         " use GLib.IOStatus.ERROR instead")
+        self.assertIn('test_gi.py', w.filename)
+
+        # deprecated attributes appear in dir()
+        self.assertIn("IO_STATUS_ERROR", dir(GLib))
 
         try:
             # check if replacing works
             GLib.IO_STATUS_ERROR = "foo"
             self.assertEqual(GLib.IO_STATUS_ERROR, "foo")
         finally:
-            # restore descriptor
+            # restore deprecation
             try:
                 del GLib.IO_STATUS_ERROR
             except AttributeError:
                 pass
-            setattr(type(GLib), "IO_STATUS_ERROR", desc)
+            GLib._deprecations["IO_STATUS_ERROR"] = deprecation
 
         try:
             # check if deleting works
             del GLib.IO_STATUS_ERROR
             self.assertFalse(hasattr(GLib, "IO_STATUS_ERROR"))
         finally:
-            # restore descriptor
+            # restore deprecation
             try:
                 del GLib.IO_STATUS_ERROR
             except AttributeError:
                 pass
-            setattr(type(GLib), "IO_STATUS_ERROR", desc)
+            GLib._deprecations["IO_STATUS_ERROR"] = deprecation
 
     def test_deprecated_attribute_warning(self):
         with warnings.catch_warnings(record=True) as warn:
@@ -3266,26 +3266,20 @@ class TestDeprecation(unittest.TestCase):
             self.assertDictEqual(kwargs, {'a': 1, 'b': 2, 'c': 3})
 
         fn = gi.overrides.deprecated_init(init, arg_names=('a', 'b', 'c'))
-        with warnings.catch_warnings(record=True) as warn:
-            warnings.simplefilter('always')
+        with self.assertWarns(PyGIDeprecationWarning) as w:
             fn(self, 1, 2, 3)
-            self.assertEqual(len(warn), 1)
-            self.assertTrue(issubclass(warn[0].category, PyGIDeprecationWarning))
-            self.assertRegex(str(warn[0].message),
-                             '.*keyword.*a, b, c.*')
+        self.assertRegex(str(w.warning), '.*keyword.*a, b, c.*')
+        self.assertIn("test_gi.py", w.filename)
 
     def test_deprecated_init_no_keywords_out_of_order(self):
         def init(self, **kwargs):
             self.assertDictEqual(kwargs, {'a': 1, 'b': 2, 'c': 3})
 
         fn = gi.overrides.deprecated_init(init, arg_names=('b', 'a', 'c'))
-        with warnings.catch_warnings(record=True) as warn:
-            warnings.simplefilter('always')
+        with self.assertWarns(PyGIDeprecationWarning) as w:
             fn(self, 2, 1, 3)
-            self.assertEqual(len(warn), 1)
-            self.assertTrue(issubclass(warn[0].category, PyGIDeprecationWarning))
-            self.assertRegex(str(warn[0].message),
-                             '.*keyword.*b, a, c.*')
+        self.assertRegex(str(w.warning), '.*keyword.*b, a, c.*')
+        self.assertIn("test_gi.py", w.filename)
 
     def test_deprecated_init_ignored_keyword(self):
         def init(self, **kwargs):
@@ -3294,13 +3288,10 @@ class TestDeprecation(unittest.TestCase):
         fn = gi.overrides.deprecated_init(init,
                                           arg_names=('a', 'b', 'c'),
                                           ignore=('b',))
-        with warnings.catch_warnings(record=True) as warn:
-            warnings.simplefilter('always')
+        with self.assertWarns(PyGIDeprecationWarning) as w:
             fn(self, 1, 2, 3)
-            self.assertEqual(len(warn), 1)
-            self.assertTrue(issubclass(warn[0].category, PyGIDeprecationWarning))
-            self.assertRegex(str(warn[0].message),
-                             '.*keyword.*a, b, c.*')
+        self.assertRegex(str(w.warning), '.*keyword.*a, b, c.*')
+        self.assertIn("test_gi.py", w.filename)
 
     def test_deprecated_init_with_aliases(self):
         def init(self, **kwargs):
@@ -3309,14 +3300,11 @@ class TestDeprecation(unittest.TestCase):
         fn = gi.overrides.deprecated_init(init,
                                           arg_names=('a', 'b', 'c'),
                                           deprecated_aliases={'b': 'bb', 'c': 'cc'})
-        with warnings.catch_warnings(record=True) as warn:
-            warnings.simplefilter('always')
-
+        with self.assertWarns(PyGIDeprecationWarning) as w:
             fn(self, a=1, bb=2, cc=3)
-            self.assertEqual(len(warn), 1)
-            self.assertTrue(issubclass(warn[0].category, PyGIDeprecationWarning))
-            self.assertRegex(str(warn[0].message),
-                             '.*keyword.*"bb, cc".*deprecated.*"b, c" respectively')
+        self.assertRegex(str(w.warning),
+                         '.*keyword.*"bb, cc".*deprecated.*"b, c" respectively')
+        self.assertIn("test_gi.py", w.filename)
 
     def test_deprecated_init_with_defaults(self):
         def init(self, **kwargs):
@@ -3325,11 +3313,9 @@ class TestDeprecation(unittest.TestCase):
         fn = gi.overrides.deprecated_init(init,
                                           arg_names=('a', 'b', 'c'),
                                           deprecated_defaults={'b': 2, 'c': 3})
-        with warnings.catch_warnings(record=True) as warn:
-            warnings.simplefilter('always')
+        with self.assertWarns(PyGIDeprecationWarning) as w:
             fn(self, a=1)
-            self.assertEqual(len(warn), 1)
-            self.assertTrue(issubclass(warn[0].category, PyGIDeprecationWarning))
-            self.assertRegex(str(warn[0].message),
-                             '.*relying on deprecated non-standard defaults.*'
-                             'explicitly use: b=2, c=3')
+        self.assertRegex(str(w.warning),
+                         '.*relying on deprecated non-standard defaults.*'
+                         'explicitly use: b=2, c=3')
+        self.assertIn("test_gi.py", w.filename)

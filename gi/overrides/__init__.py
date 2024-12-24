@@ -21,54 +21,44 @@ _deprecated_attrs = {}
 
 class OverridesProxyModule(types.ModuleType):
     """Wraps a introspection module and contains all overrides"""
+    __slots__ = ('_introspection_module', '_deprecations')
 
     def __init__(self, introspection_module):
         super(OverridesProxyModule, self).__init__(
             introspection_module.__name__)
         self._introspection_module = introspection_module
+        self._deprecations = {}
 
     def __getattr__(self, name):
+        if name in self._deprecations:
+            value, warning = self._deprecations[name]
+            warnings.warn(warning, stacklevel=2)
+            return value
         return getattr(self._introspection_module, name)
 
+    def __delattr__(self, name):
+        found = False
+        if name in self.__dict__:
+            del self.__dict__[name]
+            found = True
+        if name in self._deprecations:
+            del self._deprecations[name]
+            found = True
+        try:
+            delattr(self._introspection_module, name)
+        except AttributeError:
+            # Silence the exception if the attribute was previously found.
+            if not found:
+                raise
+
     def __dir__(self):
-        result = set(dir(self.__class__))
-        result.update(self.__dict__.keys())
+        result = set(super().__dir__())
+        result.update(self._deprecations.keys())
         result.update(dir(self._introspection_module))
         return sorted(result)
 
     def __repr__(self):
         return "<%s %r>" % (type(self).__name__, self._introspection_module)
-
-
-class _DeprecatedAttribute(object):
-    """A deprecation descriptor for OverridesProxyModule subclasses.
-
-    Emits a PyGIDeprecationWarning on every access and tries to act as a
-    normal instance attribute (can be replaced and deleted).
-    """
-
-    def __init__(self, namespace, attr, value, replacement):
-        self._attr = attr
-        self._value = value
-        self._warning = PyGIDeprecationWarning(
-            '%s.%s is deprecated; use %s instead' % (
-                namespace, attr, replacement))
-
-    def __get__(self, instance, owner):
-        if instance is None:
-            raise AttributeError(self._attr)
-        warnings.warn(self._warning, stacklevel=2)
-        return self._value
-
-    def __set__(self, instance, value):
-        attr = self._attr
-        # delete the descriptor, then set the instance value
-        delattr(type(instance), attr)
-        setattr(instance, attr, value)
-
-    def __delete__(self, instance):
-        # delete the descriptor
-        delattr(type(instance), self._attr)
 
 
 def load_overrides(introspection_module):
@@ -86,11 +76,7 @@ def load_overrides(introspection_module):
     has_old = module_key in sys.modules
     old_module = sys.modules.get(module_key)
 
-    # Create a new sub type, so we can separate descriptors like
-    # _DeprecatedAttribute for each namespace.
-    proxy_type = type(namespace + "ProxyModule", (OverridesProxyModule, ), {})
-
-    proxy = proxy_type(introspection_module)
+    proxy = OverridesProxyModule(introspection_module)
     sys.modules[module_key] = proxy
 
     # backwards compat:
@@ -145,9 +131,9 @@ def load_overrides(introspection_module):
             raise AssertionError(
                 "%s was set deprecated but wasn't added to __all__" % attr)
         delattr(proxy, attr)
-        deprecated_attr = _DeprecatedAttribute(
-            namespace, attr, value, replacement)
-        setattr(proxy_type, attr, deprecated_attr)
+        proxy._deprecations[attr] = (value, PyGIDeprecationWarning(
+            '%s.%s is deprecated; use %s instead' % (
+                namespace, attr, replacement)))
 
     return proxy
 
