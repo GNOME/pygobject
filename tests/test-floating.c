@@ -21,30 +21,31 @@
 
 /* TestFloating */
 
-G_DEFINE_TYPE(TestFloating, test_floating, G_TYPE_INITIALLY_UNOWNED)
+G_DEFINE_TYPE (TestFloating, test_floating, G_TYPE_INITIALLY_UNOWNED)
 
 static void
 test_floating_finalize (GObject *gobject)
 {
-  TestFloating *object = TEST_FLOATING (gobject);
+    TestFloating *object = TEST_FLOATING (gobject);
 
-  if (g_object_is_floating (object))
-    {
-      g_warning ("A floating object was finalized. This means that someone\n"
-		 "called g_object_unref() on an object that had only a floating\n"
-		 "reference; the initial floating reference is not owned by anyone\n"
-		 "and must be removed without g_object_ref_sink().");
+    if (g_object_is_floating (object)) {
+        g_warning (
+            "A floating object was finalized. This means that someone\n"
+            "called g_object_unref() on an object that had only a floating\n"
+            "reference; the initial floating reference is not owned by "
+            "anyone\n"
+            "and must be removed without g_object_ref_sink().");
     }
 
-  G_OBJECT_CLASS (test_floating_parent_class)->finalize (gobject);
+    G_OBJECT_CLASS (test_floating_parent_class)->finalize (gobject);
 }
 
 static void
 test_floating_class_init (TestFloatingClass *klass)
 {
-  GObjectClass *gobject_class = G_OBJECT_CLASS (klass);
+    GObjectClass *gobject_class = G_OBJECT_CLASS (klass);
 
-  gobject_class->finalize = test_floating_finalize;
+    gobject_class->finalize = test_floating_finalize;
 }
 
 static void
@@ -54,7 +55,7 @@ test_floating_init (TestFloating *self)
 
 /* TestOwnedByLibrary */
 
-G_DEFINE_TYPE(TestOwnedByLibrary, test_owned_by_library, G_TYPE_OBJECT)
+G_DEFINE_TYPE (TestOwnedByLibrary, test_owned_by_library, G_TYPE_OBJECT)
 
 static GSList *obl_instance_list = NULL;
 
@@ -90,7 +91,8 @@ test_owned_by_library_get_instance_list (void)
  * list.
  */
 
-G_DEFINE_TYPE(TestFloatingAndSunk, test_floating_and_sunk, G_TYPE_INITIALLY_UNOWNED)
+G_DEFINE_TYPE (TestFloatingAndSunk, test_floating_and_sunk,
+               G_TYPE_INITIALLY_UNOWNED)
 
 static GSList *fas_instance_list = NULL;
 

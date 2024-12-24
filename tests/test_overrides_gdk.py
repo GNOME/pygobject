@@ -1,6 +1,3 @@
-# -*- Mode: Python; py-indent-offset: 4 -*-
-# vim: tabstop=4 shiftwidth=4 expandtab
-
 import re
 import os
 import sys
@@ -13,6 +10,7 @@ from gi import PyGIDeprecationWarning
 
 try:
     from gi.repository import Gio, Gdk, GdkPixbuf, Gtk
+
     GDK4 = Gdk._version == "4.0"
 except ImportError:
     Gdk = None
@@ -23,13 +21,11 @@ except ImportError:
 def gtkver():
     if Gtk is None:
         return (0, 0, 0)
-    return (Gtk.get_major_version(),
-            Gtk.get_minor_version(),
-            Gtk.get_micro_version())
+    return (Gtk.get_major_version(), Gtk.get_minor_version(), Gtk.get_micro_version())
 
 
 try:
-    gi.require_foreign('cairo')
+    gi.require_foreign("cairo")
     has_cairo = True
 except ImportError:
     has_cairo = False
@@ -37,16 +33,14 @@ except ImportError:
 from .helper import capture_glib_deprecation_warnings
 
 
-@unittest.skipUnless(Gdk, 'Gdk not available')
+@unittest.skipUnless(Gdk, "Gdk not available")
 class TestGdk(unittest.TestCase):
-
     @unittest.skipIf(sys.platform == "darwin" or os.name == "nt", "crashes")
     @unittest.skipIf(GDK4, "not in gdk4")
     def test_constructor(self):
         attribute = Gdk.WindowAttr()
         attribute.window_type = Gdk.WindowType.CHILD
-        attributes_mask = Gdk.WindowAttributesType.X | \
-            Gdk.WindowAttributesType.Y
+        attributes_mask = Gdk.WindowAttributesType.X | Gdk.WindowAttributesType.Y
         window = Gdk.Window(None, attribute, attributes_mask)
         self.assertEqual(window.get_window_type(), Gdk.WindowType.CHILD)
 
@@ -66,17 +60,23 @@ class TestGdk(unittest.TestCase):
 
     @unittest.skipIf(GDK4, "not in gdk4")
     def test_color_floats(self):
-        self.assertEqual(Gdk.Color(13107, 21845, 65535),
-                         Gdk.Color.from_floats(0.2, 1.0 / 3.0, 1.0))
+        self.assertEqual(
+            Gdk.Color(13107, 21845, 65535), Gdk.Color.from_floats(0.2, 1.0 / 3.0, 1.0)
+        )
 
-        self.assertEqual(Gdk.Color(13107, 21845, 65535).to_floats(),
-                         (0.2, 1.0 / 3.0, 1.0))
+        self.assertEqual(
+            Gdk.Color(13107, 21845, 65535).to_floats(), (0.2, 1.0 / 3.0, 1.0)
+        )
 
-        self.assertEqual(Gdk.RGBA(0.2, 1.0 / 3.0, 1.0, 0.5).to_color(),
-                         Gdk.Color.from_floats(0.2, 1.0 / 3.0, 1.0))
+        self.assertEqual(
+            Gdk.RGBA(0.2, 1.0 / 3.0, 1.0, 0.5).to_color(),
+            Gdk.Color.from_floats(0.2, 1.0 / 3.0, 1.0),
+        )
 
-        self.assertEqual(Gdk.RGBA.from_color(Gdk.Color(13107, 21845, 65535)),
-                         Gdk.RGBA(0.2, 1.0 / 3.0, 1.0, 1.0))
+        self.assertEqual(
+            Gdk.RGBA.from_color(Gdk.Color(13107, 21845, 65535)),
+            Gdk.RGBA(0.2, 1.0 / 3.0, 1.0, 1.0),
+        )
 
     @unittest.skipIf(GDK4, "not in gdk4")
     def test_color_to_floats_attrs(self):
@@ -108,7 +108,9 @@ class TestGdk(unittest.TestCase):
         self.assertFalse(rgba == object())
 
         # Iterator/tuple convsersion
-        assert tuple(Gdk.RGBA(0.1, 0.2, 0.3, 0.4)) == pytest.approx((0.1, 0.2, 0.3, 0.4))
+        assert tuple(Gdk.RGBA(0.1, 0.2, 0.3, 0.4)) == pytest.approx(
+            (0.1, 0.2, 0.3, 0.4)
+        )
 
     @unittest.skipUnless(GDK4, "only in gdk4")
     def test_rgba_gtk4(self):
@@ -137,7 +139,7 @@ class TestGdk(unittest.TestCase):
 
         event = Gdk.Event()
         event.type = Gdk.EventType.SCROLL
-        self.assertRaises(AttributeError, lambda: getattr(event, 'foo_bar'))
+        self.assertRaises(AttributeError, lambda: getattr(event, "foo_bar"))
 
     @unittest.skipIf(GDK4, "not in gdk4")
     def test_scroll_event(self):
@@ -206,15 +208,18 @@ class TestGdk(unittest.TestCase):
 
         w = Gtk.Window()
         b = Gtk.Button()
-        b.connect('button-press-event', button_press_cb)
+        b.connect("button-press-event", button_press_cb)
         w.add(b)
         b.show()
         b.realize()
-        Gdk.test_simulate_button(b.get_window(),
-                                 2, 5,
-                                 0,
-                                 Gdk.ModifierType.CONTROL_MASK,
-                                 Gdk.EventType.BUTTON_PRESS)
+        Gdk.test_simulate_button(
+            b.get_window(),
+            2,
+            5,
+            0,
+            Gdk.ModifierType.CONTROL_MASK,
+            Gdk.EventType.BUTTON_PRESS,
+        )
 
     @unittest.skipIf(GDK4, "not in gdk4")
     def test_cursor(self):
@@ -229,22 +234,15 @@ class TestGdk(unittest.TestCase):
         display_manager = Gdk.DisplayManager.get()
         display = display_manager.get_default_display()
 
-        test_pixbuf = GdkPixbuf.Pixbuf.new(GdkPixbuf.Colorspace.RGB,
-                                           False,
-                                           8,
-                                           5,
-                                           10)
+        test_pixbuf = GdkPixbuf.Pixbuf.new(GdkPixbuf.Colorspace.RGB, False, 8, 5, 10)
 
         with capture_glib_deprecation_warnings() as warn:
-            c = Gdk.Cursor(display,
-                           test_pixbuf,
-                           y=0, x=0)
+            c = Gdk.Cursor(display, test_pixbuf, y=0, x=0)
             self.assertNotEqual(c, None)
 
             self.assertEqual(len(warn), 1)
             self.assertTrue(issubclass(warn[0].category, PyGIDeprecationWarning))
-            self.assertRegex(str(warn[0].message),
-                             '.*new_from_pixbuf.*')
+            self.assertRegex(str(warn[0].message), ".*new_from_pixbuf.*")
 
         self.assertRaises(ValueError, Gdk.Cursor, 1, 2, 3)
 
@@ -253,7 +251,9 @@ class TestGdk(unittest.TestCase):
         assert len(warn) == 1
         # on macOS the type is switched to PIXMAP behind the scenes
         assert c.props.cursor_type in (
-            Gdk.CursorType.WATCH, Gdk.CursorType.CURSOR_IS_PIXMAP)
+            Gdk.CursorType.WATCH,
+            Gdk.CursorType.CURSOR_IS_PIXMAP,
+        )
         assert c.props.display == display
 
     @unittest.skipUnless(GDK4, "only gdk4")
@@ -264,30 +264,39 @@ class TestGdk(unittest.TestCase):
 
     def test_flags(self):
         self.assertEqual(Gdk.ModifierType.META_MASK | 0, 0x10000000)
-        self.assertEqual(hex(Gdk.ModifierType.META_MASK), '0x10000000')
-        self.assertEqual(repr(Gdk.ModifierType.META_MASK),
-                         '<ModifierType.META_MASK: 268435456>')
+        self.assertEqual(hex(Gdk.ModifierType.META_MASK), "0x10000000")
+        self.assertEqual(
+            repr(Gdk.ModifierType.META_MASK), "<ModifierType.META_MASK: 268435456>"
+        )
 
         # RELEASE_MASK does not exist in gdk4
         if not GDK4:
             self.assertEqual(Gdk.ModifierType.RELEASE_MASK | 0, 0x40000000)
-            self.assertEqual(hex(Gdk.ModifierType.RELEASE_MASK), '0x40000000')
-            self.assertEqual(repr(Gdk.ModifierType.RELEASE_MASK),
-                             '<ModifierType.RELEASE_MASK: 1073741824>')
+            self.assertEqual(hex(Gdk.ModifierType.RELEASE_MASK), "0x40000000")
+            self.assertEqual(
+                repr(Gdk.ModifierType.RELEASE_MASK),
+                "<ModifierType.RELEASE_MASK: 1073741824>",
+            )
 
-            self.assertEqual(Gdk.ModifierType.RELEASE_MASK | Gdk.ModifierType.META_MASK, 0x50000000)
-            self.assertIn(repr(Gdk.ModifierType.RELEASE_MASK | Gdk.ModifierType.META_MASK),
-                          {'<ModifierType.META_MASK|RELEASE_MASK: 1342177280>',
-                           '<ModifierType.RELEASE_MASK|META_MASK: 1342177280>'})
+            self.assertEqual(
+                Gdk.ModifierType.RELEASE_MASK | Gdk.ModifierType.META_MASK, 0x50000000
+            )
+            self.assertIn(
+                repr(Gdk.ModifierType.RELEASE_MASK | Gdk.ModifierType.META_MASK),
+                {
+                    "<ModifierType.META_MASK|RELEASE_MASK: 1342177280>",
+                    "<ModifierType.RELEASE_MASK|META_MASK: 1342177280>",
+                },
+            )
 
     @unittest.skipIf(GDK4, "not in gdk4")
     def test_color_parse(self):
         with capture_glib_deprecation_warnings():
-            c = Gdk.color_parse('#00FF80')
+            c = Gdk.color_parse("#00FF80")
         self.assertEqual(c.red, 0)
         self.assertEqual(c.green, 65535)
         self.assertEqual(c.blue, 32896)
-        self.assertEqual(Gdk.color_parse('bogus'), None)
+        self.assertEqual(Gdk.color_parse("bogus"), None)
 
     @unittest.skipIf(GDK4, "not in gdk4")
     def test_color_representations(self):

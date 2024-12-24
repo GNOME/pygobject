@@ -30,14 +30,12 @@ typedef struct {
     GOptionGroup *group;
     gboolean other_owner, is_in_context;
     PyObject *callback;
-    GSList *strings; /* all strings added with the entries, are freed on 
+    GSList *strings; /* all strings added with the entries, are freed on
                         GOptionGroup.destroy() */
 } PyGOptionGroup;
 
-PyObject* pyg_option_group_new(GOptionGroup *group);
+PyObject *pyg_option_group_new (GOptionGroup *group);
 
-int pygi_option_group_register_types(PyObject *d);
+int pygi_option_group_register_types (PyObject *d);
 
 #endif /* __PYG_OPTIONGROUP_H__ */
-
-

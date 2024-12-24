@@ -28,22 +28,16 @@ extern GQuark pygflags_class_key;
 
 extern PyTypeObject *PyGFlags_Type;
 
-PyObject * pyg_flags_add       (PyObject *   module,
-                                const char * type_name,
-                                const char * strip_prefix,
-                                GType        gtype);
-PyObject *pyg_flags_add_full   (PyObject    *module,
-			        const char  *typename,
-			        GType        gtype,
-			        GIFlagsInfo *info);
-gboolean  pyg_flags_register   (PyTypeObject *flags_class,
-				char         *type_name);
-PyObject *pyg_flags_val_new    (PyObject *pyclass, guint value);
-PyObject *pyg_flags_from_gtype (GType        gtype,
-                                guint        value);
+PyObject *pyg_flags_add (PyObject *module, const char *type_name,
+                         const char *strip_prefix, GType gtype);
+PyObject *pyg_flags_add_full (PyObject *module, const char *typename,
+                              GType gtype, GIFlagsInfo *info);
+gboolean pyg_flags_register (PyTypeObject *flags_class, char *type_name);
+PyObject *pyg_flags_val_new (PyObject *pyclass, guint value);
+PyObject *pyg_flags_from_gtype (GType gtype, guint value);
 
 gint pyg_flags_get_value (GType flag_type, PyObject *obj, guint *val);
 
-int pygi_flags_register_types(PyObject *d);
+int pygi_flags_register_types (PyObject *d);
 
 #endif /* __PYGOBJECT_FLAGS_H__ */

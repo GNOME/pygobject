@@ -26,8 +26,7 @@ G_BEGIN_DECLS
 
 /* Private */
 /* TODO: change signature: length as arg, return boolean */
-typedef gssize (*PyGIArgArrayLengthPolicy) (gsize item_index,
-                                            void *user_data1,
+typedef gssize (*PyGIArgArrayLengthPolicy) (gsize item_index, void *user_data1,
                                             void *user_data2);
 
 gssize _pygi_argument_array_length_marshal (gsize length_arg_index,
@@ -35,33 +34,26 @@ gssize _pygi_argument_array_length_marshal (gsize length_arg_index,
                                             void *user_data2);
 
 gpointer _pygi_arg_to_hash_pointer (const GIArgument *arg,
-                                    GITypeInfo       *type_info);
+                                    GITypeInfo *type_info);
 
-void _pygi_hash_pointer_to_arg (GIArgument *arg,
-                                GITypeInfo *type_info);
+void _pygi_hash_pointer_to_arg (GIArgument *arg, GITypeInfo *type_info);
 
-GArray* _pygi_argument_to_array (GIArgument  *arg,
+GArray *_pygi_argument_to_array (GIArgument *arg,
                                  PyGIArgArrayLengthPolicy array_length_policy,
-                                 void        *user_data1,
-                                 void        *user_data2,
-                                 GITypeInfo  *type_info,
-                                 gboolean    *out_free_array);
+                                 void *user_data1, void *user_data2,
+                                 GITypeInfo *type_info,
+                                 gboolean *out_free_array);
 
-GIArgument _pygi_argument_from_object (PyObject   *object,
-                                      GITypeInfo *type_info,
-                                      GITransfer  transfer);
+GIArgument _pygi_argument_from_object (PyObject *object, GITypeInfo *type_info,
+                                       GITransfer transfer);
 
-PyObject* _pygi_argument_to_object (GIArgument  *arg,
-                                    GITypeInfo *type_info,
-                                    GITransfer  transfer);
+PyObject *_pygi_argument_to_object (GIArgument *arg, GITypeInfo *type_info,
+                                    GITransfer transfer);
 
-void _pygi_argument_release (GIArgument   *arg,
-                             GITypeInfo  *type_info,
-                             GITransfer   transfer,
-                             GIDirection  direction);
+void _pygi_argument_release (GIArgument *arg, GITypeInfo *type_info,
+                             GITransfer transfer, GIDirection direction);
 
-gboolean pygi_argument_to_gssize (GIArgument *arg_in,
-                                  GITypeTag  type_tag,
+gboolean pygi_argument_to_gssize (GIArgument *arg_in, GITypeTag type_tag,
                                   gssize *gssize_out);
 
 G_END_DECLS

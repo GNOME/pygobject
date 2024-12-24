@@ -1,6 +1,3 @@
-# -*- Mode: Python; py-indent-offset: 4 -*-
-# vim: tabstop=4 shiftwidth=4 expandtab
-#
 # Copyright (C) 2012 Martin Pitt <martinpitt@gnome.org>
 #
 # This library is free software; you can redistribute it and/or
@@ -21,7 +18,7 @@
 from ..importer import get_introspection_module
 from ..overrides import override
 
-Regress = get_introspection_module('Regress')
+Regress = get_introspection_module("Regress")
 
 REGRESS_OVERRIDE = 42
 
@@ -31,7 +28,7 @@ class Bitmask(Regress.Bitmask):
 
     def __init__(self, v):
         if not isinstance(v, int):
-            raise TypeError("%s is not an int." % (type(v)))
+            raise TypeError(f"{type(v)} is not an int.")
 
         self.v = int(v)
 
@@ -44,4 +41,4 @@ class Bitmask(Regress.Bitmask):
 
 Bitmask = override(Bitmask)
 
-__all__ = ['REGRESS_OVERRIDE', "Bitmask"]
+__all__ = ["REGRESS_OVERRIDE", "Bitmask"]

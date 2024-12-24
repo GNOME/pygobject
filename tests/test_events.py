@@ -3,8 +3,10 @@ import pytest
 import unittest
 
 try:
-    if sys.platform != 'win32':
-        from test.test_asyncio.test_events import UnixEventLoopTestsMixin as GLibEventLoopTestsMixin
+    if sys.platform != "win32":
+        from test.test_asyncio.test_events import (
+            UnixEventLoopTestsMixin as GLibEventLoopTestsMixin,
+        )
     else:
         from test.test_asyncio.test_events import EventLoopTestsMixin
 
@@ -27,18 +29,21 @@ try:
 
     from test.test_asyncio.test_subprocess import SubprocessMixin
     from test.test_asyncio.utils import TestCase
-except:
-    class GLibEventLoopTestsMixin():
+except ImportError:
+
+    class GLibEventLoopTestsMixin:
         def test_unix_event_loop_tests_missing(self):
             import warnings
-            warnings.warn('UnixEventLoopTestsMixin is unavailable, not running tests!')
-            self.skipTest('UnixEventLoopTestsMixin is unavailable, not running tests!')
 
-    class SubprocessMixin():
+            warnings.warn("UnixEventLoopTestsMixin is unavailable, not running tests!")
+            self.skipTest("UnixEventLoopTestsMixin is unavailable, not running tests!")
+
+    class SubprocessMixin:
         def test_subprocess_mixin_tests_missing(self):
             import warnings
-            warnings.warn('SubprocessMixin is unavailable, not running tests!')
-            self.skipTest('SubprocessMixin is unavailable, not running tests!')
+
+            warnings.warn("SubprocessMixin is unavailable, not running tests!")
+            self.skipTest("SubprocessMixin is unavailable, not running tests!")
 
     from unittest import TestCase
 
@@ -55,11 +60,10 @@ except ImportError:
     Gtk = None
 
 
-GTK4 = (Gtk and Gtk._version == "4.0")
+GTK4 = Gtk and Gtk._version == "4.0"
 
 
 class GLibEventLoopTests(GLibEventLoopTestsMixin, TestCase):
-
     def __init__(self, *args):
         super().__init__(*args)
         self.loop = None
@@ -69,7 +73,6 @@ class GLibEventLoopTests(GLibEventLoopTestsMixin, TestCase):
 
 
 class SubprocessWatcherTests(SubprocessMixin, TestCase):
-
     def setUp(self):
         super().setUp()
         policy = gi.events.GLibEventLoopPolicy()
@@ -83,7 +86,6 @@ class SubprocessWatcherTests(SubprocessMixin, TestCase):
 
 
 class GLibEventLoopPolicyTests(unittest.TestCase):
-
     def create_policy(self):
         return gi.events.GLibEventLoopPolicy()
 
@@ -140,11 +142,12 @@ class GLibEventLoopPolicyTests(unittest.TestCase):
 
         self.assertTrue(task_completed)
 
-        with pytest.warns(ResourceWarning, match='unclosed event loop'):
+        with pytest.warns(ResourceWarning, match="unclosed event loop"):
             del loop
 
             # For some reason, PyPy needs two collect() steps
             import gc
+
             gc.collect()
             gc.collect()
 
@@ -200,9 +203,9 @@ class GLibEventLoopPolicyTests(unittest.TestCase):
                     results.append((arg1, arg2))
                     loop.stop()
 
-                loop.call_soon(callback, 'hello', 'world')
+                loop.call_soon(callback, "hello", "world")
                 loop.run_forever()
-                self.assertEqual(results, [('hello', 'world')])
+                self.assertEqual(results, [("hello", "world")])
 
                 # We can detach it again
                 policy.set_event_loop(None)
@@ -210,7 +213,7 @@ class GLibEventLoopPolicyTests(unittest.TestCase):
                 # Which means we have none and get a runtime error
                 with self.assertRaises(RuntimeError):
                     policy.get_event_loop()
-            except:
+            except RuntimeError:
                 res += sys.exc_info()
 
         # Initially, the thread has no event loop
@@ -226,7 +229,8 @@ class GLibEventLoopPolicyTests(unittest.TestCase):
 
     def test_outside_context_iteration(self):
         """Iterating the main context from the outside, does not cause the
-        EventLoop to dispatch."""
+        EventLoop to dispatch.
+        """
         policy = self.create_policy()
         loop = policy.new_event_loop()
 
@@ -244,7 +248,8 @@ class GLibEventLoopPolicyTests(unittest.TestCase):
 
     def test_inside_context_iteration(self):
         """Iterating the main context from the inside, does not cause the
-        EventLoop to dispatch."""
+        EventLoop to dispatch.
+        """
         policy = self.create_policy()
         loop = policy.get_event_loop()
 
@@ -282,16 +287,18 @@ class GLibEventLoopPolicyTests(unittest.TestCase):
         loop.close()
         self.assertEqual(called, True)
 
-    @unittest.skipUnless(Gtk, 'no Gtk')
+    @unittest.skipUnless(Gtk, "no Gtk")
     def test_recursive_stop(self):
         """Calling stop() on the EventLoop will quit it, even if iteration
-        is done recursively."""
+        is done recursively.
+        """
         policy = self.create_policy()
         asyncio.set_event_loop_policy(policy)
         self.addCleanup(asyncio.set_event_loop_policy, None)
         loop = policy.get_event_loop()
 
         if not GTK4:
+
             def main_gtk():
                 GLib.idle_add(loop.stop)
                 Gtk.main()
@@ -341,6 +348,9 @@ class GLibEventLoopPolicyTests(unittest.TestCase):
         loop.close()
 
         # Check that the order was correct
-        self.assertEqual(order, [GLib.PRIORITY_HIGH] * 3 +
-                                [GLib.PRIORITY_DEFAULT] * 3 +
-                                [GLib.PRIORITY_DEFAULT_IDLE] * 3)
+        self.assertEqual(
+            order,
+            [GLib.PRIORITY_HIGH] * 3
+            + [GLib.PRIORITY_DEFAULT] * 3
+            + [GLib.PRIORITY_DEFAULT_IDLE] * 3,
+        )
