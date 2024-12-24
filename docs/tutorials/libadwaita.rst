@@ -1,7 +1,7 @@
 Adwaita
 =======
 
-`Adwaita <https://gnome.pages.gitlab.gnome.org/libadwaita/>`_ (``libadwaita``) 
+`Adwaita <https://gnome.pages.gitlab.gnome.org/libadwaita/>`_ (``libadwaita``)
 offers application developers many widgets and objects to build GNOME
 applications scaling from desktop workstations to mobile phones.
 

@@ -6,12 +6,11 @@ import sys
 
 from gi import PyGIDeprecationWarning
 from gi._gi import CallableInfo, pygobject_new_full
-from gi._constants import \
-    TYPE_NONE, \
-    TYPE_INVALID
+from gi._constants import TYPE_NONE, TYPE_INVALID
 
 # support overrides in different directories than our gi module
 from pkgutil import extend_path
+
 __path__ = extend_path(__path__, __name__)
 
 
@@ -21,11 +20,11 @@ _deprecated_attrs = {}
 
 class OverridesProxyModule(types.ModuleType):
     """Wraps a introspection module and contains all overrides"""
-    __slots__ = ('_introspection_module', '_deprecations')
+
+    __slots__ = ("_deprecations", "_introspection_module")
 
     def __init__(self, introspection_module):
-        super(OverridesProxyModule, self).__init__(
-            introspection_module.__name__)
+        super().__init__(introspection_module.__name__)
         self._introspection_module = introspection_module
         self._deprecations = {}
 
@@ -58,7 +57,38 @@ class OverridesProxyModule(types.ModuleType):
         return sorted(result)
 
     def __repr__(self):
-        return "<%s %r>" % (type(self).__name__, self._introspection_module)
+        return f"<{type(self).__name__} {self._introspection_module!r}>"
+
+
+class _DeprecatedAttribute:
+    """A deprecation descriptor for OverridesProxyModule subclasses.
+
+    Emits a PyGIDeprecationWarning on every access and tries to act as a
+    normal instance attribute (can be replaced and deleted).
+    """
+
+    def __init__(self, namespace, attr, value, replacement):
+        self._attr = attr
+        self._value = value
+        self._warning = PyGIDeprecationWarning(
+            f"{namespace}.{attr} is deprecated; use {replacement} instead"
+        )
+
+    def __get__(self, instance, owner):
+        if instance is None:
+            raise AttributeError(self._attr)
+        warnings.warn(self._warning, stacklevel=2)
+        return self._value
+
+    def __set__(self, instance, value):
+        attr = self._attr
+        # delete the descriptor, then set the instance value
+        delattr(type(instance), attr)
+        setattr(instance, attr, value)
+
+    def __delete__(self, instance):
+        # delete the descriptor
+        delattr(type(instance), self._attr)
 
 
 def load_overrides(introspection_module):
@@ -67,9 +97,8 @@ def load_overrides(introspection_module):
     Either returns the same module again in case there are no overrides or a
     proxy module including overrides. Doesn't cache the result.
     """
-
     namespace = introspection_module.__name__.rsplit(".", 1)[-1]
-    module_key = 'gi.repository.' + namespace
+    module_key = "gi.repository." + namespace
 
     # We use sys.modules so overrides can import from gi.repository
     # but restore everything at the end so this doesn't have any side effects
@@ -82,11 +111,12 @@ def load_overrides(introspection_module):
     # backwards compat:
     # gedit uses gi.importer.modules['Gedit']._introspection_module
     from ..importer import modules
+
     assert hasattr(proxy, "_introspection_module")
     modules[namespace] = proxy
 
     try:
-        override_package_name = 'gi.overrides.' + namespace
+        override_package_name = "gi.overrides." + namespace
         spec = importlib.util.find_spec(override_package_name)
         override_loader = spec.loader if spec is not None else None
 
@@ -129,11 +159,15 @@ def load_overrides(introspection_module):
             value = getattr(proxy, attr)
         except AttributeError:
             raise AssertionError(
-                "%s was set deprecated but wasn't added to __all__" % attr)
+                f"{attr} was set deprecated but wasn't added to __all__"
+            )
         delattr(proxy, attr)
-        proxy._deprecations[attr] = (value, PyGIDeprecationWarning(
-            '%s.%s is deprecated; use %s instead' % (
-                namespace, attr, replacement)))
+        proxy._deprecations[attr] = (
+            value,
+            PyGIDeprecationWarning(
+                f"{namespace}.{attr} is deprecated; use {replacement} instead"
+            ),
+        )
 
     return proxy
 
@@ -145,10 +179,9 @@ def override(type_):
     override module via the gi.repository module (get_parent_for_object() does
     for example), so they have to be added to the module immediately.
     """
-
     if isinstance(type_, CallableInfo):
         func = type_
-        namespace = func.__module__.rsplit('.', 1)[-1]
+        namespace = func.__module__.rsplit(".", 1)[-1]
         module = sys.modules["gi.repository." + namespace]
 
         def wrapper(func):
@@ -156,31 +189,32 @@ def override(type_):
             return func
 
         return wrapper
-    elif isinstance(type_, types.FunctionType):
-        raise TypeError("func must be a gi function, got %s" % type_)
-    else:
-        try:
-            info = getattr(type_, '__info__')
-        except AttributeError:
-            raise TypeError(
-                'Can not override a type %s, which is not in a gobject '
-                'introspection typelib' % type_.__name__)
+    if isinstance(type_, types.FunctionType):
+        raise TypeError(f"func must be a gi function, got {type_}")
+    try:
+        info = getattr(type_, "__info__")
+    except AttributeError:
+        raise TypeError(
+            f"Can not override a type {type_.__name__}, which is not in a gobject "
+            "introspection typelib"
+        )
 
-        if not type_.__module__.startswith('gi.overrides'):
-            raise KeyError(
-                'You have tried override outside of the overrides module. '
-                'This is not allowed (%s, %s)' % (type_, type_.__module__))
+    if not type_.__module__.startswith("gi.overrides"):
+        raise KeyError(
+            "You have tried override outside of the overrides module. "
+            f"This is not allowed ({type_}, {type_.__module__})"
+        )
 
-        g_type = info.get_g_type()
-        assert g_type != TYPE_NONE
-        if g_type != TYPE_INVALID:
-            g_type.pytype = type_
+    g_type = info.get_g_type()
+    assert g_type != TYPE_NONE
+    if g_type != TYPE_INVALID:
+        g_type.pytype = type_
 
-        namespace = type_.__module__.rsplit(".", 1)[-1]
-        module = sys.modules["gi.repository." + namespace]
-        setattr(module, type_.__name__, type_)
+    namespace = type_.__module__.rsplit(".", 1)[-1]
+    module = sys.modules["gi.repository." + namespace]
+    setattr(module, type_.__name__, type_)
 
-        return type_
+    return type_
 
 
 overridefunc = override
@@ -188,12 +222,17 @@ overridefunc = override
 
 
 def deprecated(fn, replacement):
-    """Decorator for marking methods and classes as deprecated"""
+    """Decorator for marking methods and classes as deprecated."""
+
     @functools.wraps(fn)
     def wrapped(*args, **kwargs):
-        warnings.warn('%s is deprecated; use %s instead' % (fn.__name__, replacement),
-                      PyGIDeprecationWarning, stacklevel=2)
+        warnings.warn(
+            f"{fn.__name__} is deprecated; use {replacement} instead",
+            PyGIDeprecationWarning,
+            stacklevel=2,
+        )
         return fn(*args, **kwargs)
+
     return wrapped
 
 
@@ -213,14 +252,18 @@ def deprecated_attr(namespace, attr, replacement):
     :param str replacement:
         The replacement text which will be included in the warning.
     """
-
     _deprecated_attrs.setdefault(namespace, []).append((attr, replacement))
 
 
-def deprecated_init(super_init_func, arg_names, ignore=tuple(),
-                    deprecated_aliases={}, deprecated_defaults={},
-                    category=PyGIDeprecationWarning,
-                    stacklevel=2):
+def deprecated_init(
+    super_init_func,
+    arg_names,
+    ignore=(),
+    deprecated_aliases={},
+    deprecated_defaults={},
+    category=PyGIDeprecationWarning,
+    stacklevel=2,
+):
     """Wrapper for deprecating GObject based __init__ methods which specify
     defaults already available or non-standard defaults.
 
@@ -244,6 +287,7 @@ def deprecated_init(super_init_func, arg_names, ignore=tuple(),
         warning when non-keyword args or aliases are used.
     :rtype: callable
     """
+
     # We use a list of argument names to maintain order of the arguments
     # being deprecated. This allows calls with positional arguments to
     # continue working but with a deprecation message.
@@ -253,11 +297,15 @@ def deprecated_init(super_init_func, arg_names, ignore=tuple(),
         """
         # Print warnings for calls with positional arguments.
         if args:
-            warnings.warn('Using positional arguments with the GObject constructor has been deprecated. '
-                          'Please specify keyword(s) for "%s" or use a class specific constructor. '
-                          'See: https://wiki.gnome.org/Projects/PyGObject/InitializerDeprecations' %
-                          ', '.join(arg_names[:len(args)]),
-                          category, stacklevel=stacklevel)
+            warnings.warn(
+                "Using positional arguments with the GObject constructor has been deprecated. "
+                'Please specify keyword(s) for "{}" or use a class specific constructor. '
+                "See: https://wiki.gnome.org/Projects/PyGObject/InitializerDeprecations".format(
+                    ", ".join(arg_names[: len(args)])
+                ),
+                category,
+                stacklevel=stacklevel,
+            )
             new_kwargs = dict(zip(arg_names, args))
         else:
             new_kwargs = {}
@@ -271,25 +319,35 @@ def deprecated_init(super_init_func, arg_names, ignore=tuple(),
                 aliases_used.append(key)
 
         if aliases_used:
-            warnings.warn('The keyword(s) "%s" have been deprecated in favor of "%s" respectively. '
-                          'See: https://wiki.gnome.org/Projects/PyGObject/InitializerDeprecations' %
-                          (', '.join(deprecated_aliases[k] for k in sorted(aliases_used)),
-                           ', '.join(sorted(aliases_used))),
-                          category, stacklevel=stacklevel)
+            warnings.warn(
+                'The keyword(s) "{}" have been deprecated in favor of "{}" respectively. '
+                "See: https://wiki.gnome.org/Projects/PyGObject/InitializerDeprecations".format(
+                    ", ".join(deprecated_aliases[k] for k in sorted(aliases_used)),
+                    ", ".join(sorted(aliases_used)),
+                ),
+                category,
+                stacklevel=stacklevel,
+            )
 
         # Print warnings for defaults different than what is already provided by the property
         defaults_used = []
-        for key, value in deprecated_defaults.items():
+        for key in deprecated_defaults:
             if key not in new_kwargs:
                 new_kwargs[key] = deprecated_defaults[key]
                 defaults_used.append(key)
 
         if defaults_used:
-            warnings.warn('Initializer is relying on deprecated non-standard '
-                          'defaults. Please update to explicitly use: %s '
-                          'See: https://wiki.gnome.org/Projects/PyGObject/InitializerDeprecations' %
-                          ', '.join('%s=%s' % (k, deprecated_defaults[k]) for k in sorted(defaults_used)),
-                          category, stacklevel=stacklevel)
+            warnings.warn(
+                "Initializer is relying on deprecated non-standard "
+                "defaults. Please update to explicitly use: {} "
+                "See: https://wiki.gnome.org/Projects/PyGObject/InitializerDeprecations".format(
+                    ", ".join(
+                        f"{k}={deprecated_defaults[k]}" for k in sorted(defaults_used)
+                    )
+                ),
+                category,
+                stacklevel=stacklevel,
+            )
 
         # Remove keywords that should be ignored.
         for key in ignore:
@@ -308,23 +366,22 @@ def strip_boolean_result(method, exc_type=None, exc_str=None, fail_ret=None):
     several out arguments. Translate such a method to return the out arguments
     on success and None on failure.
     """
+
     @functools.wraps(method)
     def wrapped(*args, **kwargs):
         ret = method(*args, **kwargs)
         if ret[0]:
             if len(ret) == 2:
                 return ret[1]
-            else:
-                return ret[1:]
-        else:
-            if exc_type:
-                raise exc_type(exc_str or 'call failed')
-            return fail_ret
+            return ret[1:]
+        if exc_type:
+            raise exc_type(exc_str or "call failed")
+        return fail_ret
+
     return wrapped
 
 
 def wrap_list_store_sort_func(func):
-
     def wrap(a, b, *user_data):
         a = pygobject_new_full(a, False)
         b = pygobject_new_full(b, False)
@@ -334,7 +391,6 @@ def wrap_list_store_sort_func(func):
 
 
 def wrap_list_store_equal_func(func):
-
     def wrap(a, b, *user_data):
         a = pygobject_new_full(a, False)
         b = pygobject_new_full(b, False)

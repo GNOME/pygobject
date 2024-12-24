@@ -28,17 +28,17 @@
 
 G_BEGIN_DECLS
 
-PyObject *pygi_invoke_c_callable    (PyGIFunctionCache *function_cache,
-                                     PyGIInvokeState *state,
-                                     PyObject *const *py_args, size_t py_nargsf,
-                                     PyObject *py_kwnames);
+PyObject *pygi_invoke_c_callable (PyGIFunctionCache *function_cache,
+                                  PyGIInvokeState *state,
+                                  PyObject *const *py_args, size_t py_nargsf,
+                                  PyObject *py_kwnames);
 PyObject *pygi_callable_info_invoke (PyGICallableInfo *self,
-                                     PyObject *const *py_args, size_t py_nargsf,
-                                     PyObject *kwnames);
+                                     PyObject *const *py_args,
+                                     size_t py_nargsf, PyObject *kwnames);
 
 gboolean _pygi_invoke_arg_state_init (PyGIInvokeState *state);
 
-void _pygi_invoke_arg_state_free     (PyGIInvokeState *state);
+void _pygi_invoke_arg_state_free (PyGIInvokeState *state);
 
 G_END_DECLS
 

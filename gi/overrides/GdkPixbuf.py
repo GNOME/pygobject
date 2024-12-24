@@ -24,19 +24,25 @@ from ..overrides import override
 from ..module import get_introspection_module
 
 
-GdkPixbuf = get_introspection_module('GdkPixbuf')
+GdkPixbuf = get_introspection_module("GdkPixbuf")
 __all__ = []
 
 
 @override
 class Pixbuf(GdkPixbuf.Pixbuf):
-
     @classmethod
     def new_from_data(
-            cls, data, colorspace, has_alpha, bits_per_sample,
-            width, height, rowstride,
-            destroy_fn=None, *destroy_fn_data):
-
+        cls,
+        data,
+        colorspace,
+        has_alpha,
+        bits_per_sample,
+        width,
+        height,
+        rowstride,
+        destroy_fn=None,
+        *destroy_fn_data,
+    ):
         if destroy_fn is not None:
             w = PyGIDeprecationWarning("destroy_fn argument deprecated")
             warnings.warn(w, stacklevel=2)
@@ -46,8 +52,8 @@ class Pixbuf(GdkPixbuf.Pixbuf):
 
         data = GLib.Bytes.new(data)
         return cls.new_from_bytes(
-            data, colorspace, has_alpha, bits_per_sample,
-            width, height, rowstride)
+            data, colorspace, has_alpha, bits_per_sample, width, height, rowstride
+        )
 
 
-__all__.append('Pixbuf')
+__all__.append("Pixbuf")

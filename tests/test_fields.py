@@ -1,5 +1,3 @@
-# -*- Mode: Python; py-indent-offset: 4 -*-
-
 import math
 import unittest
 
@@ -8,8 +6,7 @@ from gi.repository import Regress
 from gi.repository import GIMarshallingTests
 
 
-class Number(object):
-
+class Number:
     def __init__(self, value):
         self.value = value
 
@@ -21,7 +18,6 @@ class Number(object):
 
 
 class TestFields(unittest.TestCase):
-
     def test_int8(self):
         s = Regress.TestStructA()
         s.some_int8 = 21
@@ -48,10 +44,8 @@ class TestFields(unittest.TestCase):
 
         self.assertRaises(TypeError, setattr, s, "some_int", b"a")
         self.assertRaises(TypeError, setattr, s, "some_int", None)
-        self.assertRaises(
-            OverflowError, setattr, s, "some_int", GLib.MAXINT + 1)
-        self.assertRaises(
-            OverflowError, setattr, s, "some_int", GLib.MININT - 1)
+        self.assertRaises(OverflowError, setattr, s, "some_int", GLib.MAXINT + 1)
+        self.assertRaises(OverflowError, setattr, s, "some_int", GLib.MININT - 1)
 
         s.some_int = 3.6
         self.assertEqual(s.some_int, 3)
@@ -105,8 +99,8 @@ class TestFields(unittest.TestCase):
         s.string_ = "hello"
         self.assertEqual(s.string_, "hello")
 
-        s.string_ = u"hello"
-        self.assertEqual(s.string_, u"hello")
+        s.string_ = "hello"
+        self.assertEqual(s.string_, "hello")
 
         s.string_ = None
         self.assertEqual(s.string_, None)

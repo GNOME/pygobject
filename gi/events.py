@@ -18,8 +18,9 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library; if not, see <http://www.gnu.org/licenses/>.
 
-__all__ = ['GLibEventLoopPolicy', 'GLibEventLoop']
+__all__ = ["GLibEventLoop", "GLibEventLoopPolicy"]
 
+import contextlib
 import sys
 import asyncio
 from asyncio import coroutines
@@ -41,9 +42,11 @@ except AttributeError:
 
 
 class _IdleSource(GLib.Source):
-    """"Internal helper source for idle task handling
+    """Internal helper source for idle task handling
 
-    The only advantage is that we can keep the source around."""
+    The only advantage is that we can keep the source around.
+    """
+
     def __init__(self, loop):
         super().__init__()
 
@@ -69,8 +72,7 @@ class _IdleSource(GLib.Source):
 
 
 class GLibTask(asyncio.Task):
-    """
-    This is a simple asyncio.Task subclass that will be returned when using the
+    """This is a simple asyncio.Task subclass that will be returned when using the
     GLibEventLoop. It adds functionality to set the priority that is used to
     iterate the task's coroutine.
     """
@@ -96,8 +98,7 @@ class GLibTask(asyncio.Task):
 
 
 class _GLibEventLoopMixin:
-    """
-    Base functionally required for both proactor and selector.
+    """Base functionally required for both proactor and selector.
 
     The proactor/selector is always available through _selector, and we assume
     it has the following extra functionality that we provide:
@@ -125,8 +126,9 @@ class _GLibEventLoopMixin:
     def paused(self):
         """This context manager ensures the EventLoop is *not* being iterated.
 
-        It purely exist to handle the case where python code iterates the main
-        context more gracefully."""
+        It purely exists to handle the case where python code iterates the main
+        context more gracefully.
+        """
         # Nothing to do if we are not running or dispatched by ourselves
         if not self._may_iterate:
             yield
@@ -168,8 +170,10 @@ class _GLibEventLoopMixin:
         self._thread_id = threading.get_ident()
 
         old_agen_hooks = sys.get_asyncgen_hooks()
-        sys.set_asyncgen_hooks(firstiter=self._asyncgen_firstiter_hook,
-                               finalizer=self._asyncgen_finalizer_hook)
+        sys.set_asyncgen_hooks(
+            firstiter=self._asyncgen_firstiter_hook,
+            finalizer=self._asyncgen_finalizer_hook,
+        )
         try:
             asyncio._set_running_loop(self)
             assert not self._selector._source._dispatching
@@ -189,10 +193,8 @@ class _GLibEventLoopMixin:
             self._context.release()
             self._thread_id = None
             asyncio._set_running_loop(None)
-            try:
+            with contextlib.suppress(AttributeError):
                 self._set_coroutine_origin_tracking(False)
-            except AttributeError:
-                pass
             sys.set_asyncgen_hooks(*old_agen_hooks)
 
             self._quit_funcs.pop()
@@ -204,9 +206,15 @@ class _GLibEventLoopMixin:
 
     def _get_timeout_ms(self):
         if not self.is_running():
-            warnings.warn('GLibEventLoop is iterated without being marked as running. Missing override or invalid use of existing API!', RuntimeWarning)
+            warnings.warn(
+                "GLibEventLoop is iterated without being marked as running. Missing override or invalid use of existing API!",
+                RuntimeWarning,
+            )
         if self._stopping is True:
-            warnings.warn('GLibEventLoop is not stopping properly. Missing override or invalid use of existing API!', RuntimeWarning)
+            warnings.warn(
+                "GLibEventLoop is not stopping properly. Missing override or invalid use of existing API!",
+                RuntimeWarning,
+            )
         if self._ready:
             return 0
 
@@ -277,9 +285,9 @@ class _GLibEventLoopMixin:
 
     def __repr__(self):
         return (
-            f'<{self.__class__.__name__} running={self.is_running()} '
-            f'closed={self.is_closed()} debug={self.get_debug()} '
-            f'ctx=0x{hash(self._context):X} loop=0x{hash(self._main_loop):X}>'
+            f"<{self.__class__.__name__} running={self.is_running()} "
+            f"closed={self.is_closed()} debug={self.get_debug()} "
+            f"ctx=0x{hash(self._context):X} loop=0x{hash(self._main_loop):X}>"
         )
 
 
@@ -291,15 +299,18 @@ class _GLibEventLoopRunMixin:
     def run_forever(self):
         # NOTE: self._check_running was only added in 3.8 (with a typo in 3.7)
         if self.is_running():
-            raise RuntimeError('This event loop is already running')
+            raise RuntimeError("This event loop is already running")
 
-        with _ossighelper.register_sigint_fallback(self._main_loop.quit):
-            with self.running(self._main_loop.quit):
-                g_main_loop_run(self._main_loop)
+        with (
+            _ossighelper.register_sigint_fallback(self._main_loop.quit),
+            self.running(self._main_loop.quit),
+        ):
+            g_main_loop_run(self._main_loop)
 
 
 class _SourceBase(GLib.Source):
     """Common Source functionality for both unix and win32"""
+
     def __init__(self, selector):
         super().__init__()
 
@@ -309,7 +320,7 @@ class _SourceBase(GLib.Source):
         # This error must be caught further up in the chain, otherwise the
         # mainloop will be blocking without an obvious reason.
         self.set_can_recurse(False)
-        self.set_name('python asyncio integration')
+        self.set_name("python asyncio integration")
 
         # WARNING: We must not under *any* circumstance have a reference back
         # and creating a loop. The GLib.Source.__del__ handler sets the pointer
@@ -337,7 +348,9 @@ class _SourceBase(GLib.Source):
 
     def _get_ready(self):
         if not self._dispatching:
-            raise RuntimeError("gi.asyncio.Selector.select only works while it is dispatching!")
+            raise RuntimeError(
+                "gi.asyncio.Selector.select only works while it is dispatching!"
+            )
 
         ready = self._ready
         self._ready = []
@@ -369,13 +382,24 @@ class _SelectorMixin:
         return super().select(timeout)
 
 
-if sys.platform != 'win32':
-    class GLibEventLoop(_GLibEventLoopMixin, _GLibEventLoopRunMixin, asyncio.SelectorEventLoop):
+if sys.platform != "win32":
+
+    class GLibEventLoop(
+        _GLibEventLoopMixin, _GLibEventLoopRunMixin, asyncio.SelectorEventLoop
+    ):
         """An asyncio event loop that runs the python mainloop inside GLib.
 
-        Based on the asyncio.SelectorEventLoop"""
+        Based on the asyncio.SelectorEventLoop
+        """
 
-        _GLIB_SIGNALS = {signal.SIGHUP, signal.SIGINT, signal.SIGTERM, signal.SIGUSR1, signal.SIGUSR2, signal.SIGWINCH}
+        _GLIB_SIGNALS = {
+            signal.SIGHUP,
+            signal.SIGINT,
+            signal.SIGTERM,
+            signal.SIGUSR1,
+            signal.SIGUSR2,
+            signal.SIGWINCH,
+        }
 
         # This is based on the selector event loop, but never actually runs select()
         # in the strict sense.
@@ -408,11 +432,10 @@ if sys.platform != 'win32':
 
         def add_signal_handler(self, sig, callback, *args):
             """Add a handler for UNIX signal"""
-
-            if (coroutines.iscoroutine(callback) or
-                    coroutines.iscoroutinefunction(callback)):
-                raise TypeError("coroutines cannot be used "
-                                "with add_signal_handler()")
+            if coroutines.iscoroutine(callback) or coroutines.iscoroutinefunction(
+                callback
+            ):
+                raise TypeError("coroutines cannot be used with add_signal_handler()")
             self._check_closed()
 
             # Can be useful while testing failures
@@ -422,11 +445,11 @@ if sys.platform != 'win32':
                 return super().add_signal_handler(sig, callback, *args)
 
             # Pure python demands that there is only one signal handler
-            source, _, _ = self.__signal_handlers.get(sig, (None, None, None))
+            source = self.__signal_handlers.get(sig, (None, None, None))[0]
             if source:
                 source.destroy()
 
-            # Setup a new source with a higher priority than our main one
+            # Set up a new source with a higher priority than our main one
             source = GLib.unix_signal_source_new(sig)
             source.set_name(f"asyncio signal watch for {sig}")
             source.set_priority(GLib.PRIORITY_HIGH)
@@ -435,6 +458,7 @@ if sys.platform != 'win32':
 
             self.__signal_handlers[sig] = (source, callback, args)
             del source
+            return None
 
         def remove_signal_handler(self, sig):
             if sig not in self._GLIB_SIGNALS:
@@ -450,16 +474,21 @@ if sys.platform != 'win32':
                 # GLib does not restore the original signal handler.
                 # Try to restore the python handler for SIGINT, this makes
                 # Ctrl+C work after the mainloop has quit.
-                if sig == signal.SIGINT and _ossighelper.PyOS_getsig(signal.SIGINT) == 0:
-                    if _ossighelper.startup_sigint_ptr > 0:
-                        _ossighelper.PyOS_setsig(signal.SIGINT, _ossighelper.startup_sigint_ptr)
+                if (
+                    sig == signal.SIGINT
+                    and _ossighelper.PyOS_getsig(signal.SIGINT) == 0
+                    and _ossighelper.startup_sigint_ptr > 0
+                ):
+                    _ossighelper.PyOS_setsig(
+                        signal.SIGINT, _ossighelper.startup_sigint_ptr
+                    )
 
                 return True
             except KeyError:
                 return False
 
         def _signal_cb(self, sig):
-            source, cb, args = self.__signal_handlers.get(sig)
+            _source, cb, args = self.__signal_handlers.get(sig)
 
             # Pass over to python mainloop
             self.call_soon(cb, *args)
@@ -473,8 +502,7 @@ if sys.platform != 'win32':
         # Note: SelectorEventloop should only be passing FDs
         if isinstance(fileobj, int):
             return fileobj
-        else:
-            return fileobj.fileno()
+        return fileobj.fileno()
 
     class _Source(_SourceBase):
         def prepare(self):
@@ -523,7 +551,7 @@ if sys.platform != 'win32':
         def __getitem__(self, fileobj):
             value = self.get(fileobj)
             if value is None:
-                raise KeyError("{!r} is not registered".format(fileobj))
+                raise KeyError(f"{fileobj!r} is not registered")
             return value
 
         def __iter__(self):
@@ -555,13 +583,14 @@ if sys.platform != 'win32':
             key._tag = self._source.add_unix_fd(key.fd, condition)
 
         def register(self, fileobj, events, data=None):
-            if (not events) or (events & ~(selectors.EVENT_READ | selectors.EVENT_WRITE)):
-                raise ValueError("Invalid events: {!r}".format(events))
+            if (not events) or (
+                events & ~(selectors.EVENT_READ | selectors.EVENT_WRITE)
+            ):
+                raise ValueError(f"Invalid events: {events!r}")
 
             fd = _fileobj_to_fd(fileobj)
             if fd in self._fd_to_key:
-                raise KeyError("{!r} (FD {}) is already registered"
-                               .format(fileobj, fd))
+                raise KeyError(f"{fileobj!r} (FD {fd}) is already registered")
 
             key = _SelectorKey(fileobj, fd, events, data)
 
@@ -588,11 +617,13 @@ if sys.platform != 'win32':
 
         def get_map(self):
             """Return a mapping of file objects or file descriptors to
-            selector keys."""
+            selector keys.
+            """
             return self._map
 
 
 else:
+
     class _PushRunMixinBackMeta(type):
         # This metaclass changes the MRO so that when run_forever is called, it
         # first calls asyncio.ProactorEventLoop and then chains into
@@ -602,12 +633,18 @@ else:
             mro = type.mro(cls)
             idx = mro.index(_GLibEventLoopRunMixin)
 
-            return [*mro[:idx], mro[idx + 1], mro[idx], *mro[idx + 2:]]
+            return [*mro[:idx], mro[idx + 1], mro[idx], *mro[idx + 2 :]]
 
-    class GLibEventLoop(_GLibEventLoopMixin, _GLibEventLoopRunMixin, asyncio.ProactorEventLoop, metaclass=_PushRunMixinBackMeta):
+    class GLibEventLoop(
+        _GLibEventLoopMixin,
+        _GLibEventLoopRunMixin,
+        asyncio.ProactorEventLoop,
+        metaclass=_PushRunMixinBackMeta,
+    ):
         """An asyncio event loop that runs the python mainloop inside GLib.
 
-        Based on the asyncio.WindowsProactorEventLoopPolicy"""
+        Based on the asyncio.WindowsProactorEventLoopPolicy
+        """
 
         # This is based on the Windows ProactorEventLoop
         def __init__(self, main_context):
@@ -659,10 +696,7 @@ else:
             if self._ready:
                 return True
 
-            if self._loop()._get_timeout_ms() == 0:
-                return True
-
-            return False
+            return self._loop()._get_timeout_ms() == 0
 
     class _Proactor(_SelectorMixin, asyncio.IocpProactor):
         """A Proactor for gi.events.GLibEventLoop registering python IO with GLib."""
@@ -715,8 +749,8 @@ class GLibEventLoopPolicy(asyncio.AbstractEventLoopPolicy):
         main context and main loop which can subsequently attached to the thread
         by calling set_event_loop().
 
-        Returns a new GLibEventLoop or raises an exception."""
-
+        Returns a new GLibEventLoop or raises an exception.
+        """
         # Get the thread default main context
         ctx = GLib.MainContext.get_thread_default()
         # If there is none, and we are on the main thread, then use the default context
@@ -726,8 +760,9 @@ class GLibEventLoopPolicy(asyncio.AbstractEventLoopPolicy):
         # We do not create a main context implicitly;
         # we create a mainloop for an existing context though
         if ctx is None:
-            raise RuntimeError('There is no main context set for thread %r.'
-                               % threading.current_thread().name)
+            raise RuntimeError(
+                f"There is no main context set for thread {threading.current_thread().name!r}."
+            )
 
         return self.get_event_loop_for_context(ctx)
 
@@ -754,7 +789,6 @@ class GLibEventLoopPolicy(asyncio.AbstractEventLoopPolicy):
         This is only permitted if the thread has no thread default main context
         with the main thread using the default main context.
         """
-
         # Only accept glib event loops, otherwise things will just mess up
         assert loop is None or isinstance(loop, GLibEventLoop)
 
@@ -767,22 +801,27 @@ class GLibEventLoopPolicy(asyncio.AbstractEventLoopPolicy):
             old = self._loops.pop(hash(ctx), None)
             if old:
                 if hash(old._context) != hash(ctx):
-                    warnings.warn('GMainContext was changed unknowingly by asyncio integration!', RuntimeWarning)
+                    warnings.warn(
+                        "GMainContext was changed unknowingly by asyncio integration!",
+                        RuntimeWarning,
+                    )
                 if ctx_td:
                     GLib.MainContext.pop_thread_default(ctx_td)
         else:
             # Only allow attaching if the thread has no main context yet
             if ctx:
-                raise RuntimeError('Thread %r already has a main context, get_event_loop() will create a new loop if needed'
-                                   % threading.current_thread().name)
+                raise RuntimeError(
+                    f"Thread {threading.current_thread().name!r} already has a main context, "
+                    "get_event_loop() will create a new loop if needed"
+                )
 
             GLib.MainContext.push_thread_default(loop._context)
             self._loops[hash(loop._context)] = loop
 
     def new_event_loop(self):
         """Create and return a new event loop that iterates a new
-        GLib.MainContext."""
-
+        GLib.MainContext.
+        """
         return GLibEventLoop(GLib.MainContext())
 
     def __enter__(self):
@@ -812,7 +851,8 @@ class GLibEventLoopPolicy(asyncio.AbstractEventLoopPolicy):
     # from choosing one as e.g. MultiLoopChildWatcher is problematic.
     #
     # TODO: Use PidfdChildWatcher when available
-    if sys.platform != 'win32':
+    if sys.platform != "win32":
+
         def get_child_watcher(self):
             if self._child_watcher is None:
                 self._child_watcher = asyncio.ThreadedChildWatcher()

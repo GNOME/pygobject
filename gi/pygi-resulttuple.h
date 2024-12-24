@@ -22,13 +22,10 @@
 
 #include "Python.h"
 
-int
-pygi_resulttuple_register_types    (PyObject *d);
+int pygi_resulttuple_register_types (PyObject *d);
 
-PyTypeObject *
-pygi_resulttuple_new_type          (PyObject *tuple_names);
+PyTypeObject *pygi_resulttuple_new_type (PyObject *tuple_names);
 
-PyObject*
-pygi_resulttuple_new               (PyTypeObject *subclass, Py_ssize_t len);
+PyObject *pygi_resulttuple_new (PyTypeObject *subclass, Py_ssize_t len);
 
 #endif /* __PYGI_RESULTTUPLE_H__ */
