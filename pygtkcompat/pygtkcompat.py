@@ -1,6 +1,3 @@
-# -*- Mode: Python; py-indent-offset: 4 -*-
-# vim: tabstop=4 shiftwidth=4 expandtab
-#
 # Copyright (C) 2011-2012 Johan Dahlin <johan@gnome.org>
 #
 # This library is free software; you can redistribute it and/or
@@ -18,8 +15,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
 # USA
 
-"""
-PyGTK compatibility layer.
+"""PyGTK compatibility layer.
 
 DEPRECATED. DO NOT USE.
 
@@ -27,4 +23,6 @@ DEPRECATED. DO NOT USE.
 
 
 def enable():
-    raise RuntimeError("pygtkcompat is deprecated in 3.48 and has been removed in 3.51, see https://pygobject.gnome.org/guide/porting.html for migration instructions")
+    raise RuntimeError(
+        "pygtkcompat is deprecated in 3.48 and has been removed in 3.51, see https://pygobject.gnome.org/guide/porting.html for migration instructions"
+    )

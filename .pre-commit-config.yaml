@@ -1,0 +1,18 @@
+repos:
+- repo: https://github.com/astral-sh/ruff-pre-commit
+  rev: 'f0b5944bef86f50d875305821a0ab0d8c601e465'  # frozen: v0.8.4
+  hooks:
+  - id: ruff
+    args: [--fix, --preview]
+  - id: ruff-format
+    types_or: [python, spec]
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: cef0300fd0fc4d2a87a85fa2093c6b283ea36f4b  # frozen: v5.0.0
+  hooks:
+    - id: trailing-whitespace
+    - id: check-toml
+    - id: check-yaml
+- repo: https://github.com/pre-commit/mirrors-clang-format
+  rev: cb4e971b802ef21263cdbf210e7d411123452a72  # frozen: v19.1.5
+  hooks:
+  - id: clang-format

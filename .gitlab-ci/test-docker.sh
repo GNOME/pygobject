@@ -30,10 +30,11 @@ python -m venv /tmp/venv
 source /tmp/venv/bin/activate
 
 python -m pip install --upgrade pip
-python -m pip install flake8 meson meson-python pycairo pytest pytest-cov
+python -m pip install pre-commit meson meson-python pycairo pytest pytest-cov
 
 # CODE QUALITY
-python -m flake8
+git config --global --add safe.directory /builds/GNOME/pygobject
+pre-commit run --all-files --show-diff-on-failure
 
 # BUILD & TEST
 python -m pip install --config-settings=setup-args="-Dtests=true" --no-build-isolation --editable .

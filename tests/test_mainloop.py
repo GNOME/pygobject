@@ -12,7 +12,6 @@ from .helper import capture_exceptions
 
 
 class TestMainLoop(unittest.TestCase):
-
     @unittest.skipUnless(hasattr(os, "fork"), "no os.fork available")
     def test_exception_handling(self):
         pipe_r, pipe_w = os.pipe()
@@ -68,7 +67,7 @@ class TestMainLoop(unittest.TestCase):
         loop = GLib.MainLoop()
         try:
             loop.run()
-            self.fail('expected KeyboardInterrupt exception')
+            self.fail("expected KeyboardInterrupt exception")
         except KeyboardInterrupt:
             pass
         self.assertFalse(loop.is_running())

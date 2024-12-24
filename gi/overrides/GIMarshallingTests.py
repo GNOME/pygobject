@@ -1,6 +1,3 @@
-# -*- Mode: Python; py-indent-offset: 4 -*-
-# vim: tabstop=4 shiftwidth=4 expandtab
-#
 # Copyright (C) 2010 Simon van der Linden <svdlinden@src.gnome.org>
 #
 # This library is free software; you can redistribute it and/or
@@ -21,16 +18,15 @@
 from ..overrides import override
 from ..module import get_introspection_module
 
-GIMarshallingTests = get_introspection_module('GIMarshallingTests')
+GIMarshallingTests = get_introspection_module("GIMarshallingTests")
 
 __all__ = []
 
 OVERRIDES_CONSTANT = 7
-__all__.append('OVERRIDES_CONSTANT')
+__all__.append("OVERRIDES_CONSTANT")
 
 
 class OverridesStruct(GIMarshallingTests.OverridesStruct):
-
     def __new__(cls, long_):
         return GIMarshallingTests.OverridesStruct.__new__(cls)
 
@@ -43,11 +39,10 @@ class OverridesStruct(GIMarshallingTests.OverridesStruct):
 
 
 OverridesStruct = override(OverridesStruct)
-__all__.append('OverridesStruct')
+__all__.append("OverridesStruct")
 
 
 class OverridesObject(GIMarshallingTests.OverridesObject):
-
     def __new__(cls, long_):
         return GIMarshallingTests.OverridesObject.__new__(cls)
 
@@ -58,10 +53,10 @@ class OverridesObject(GIMarshallingTests.OverridesObject):
 
     @classmethod
     def new(cls, long_):
-        self = GIMarshallingTests.OverridesObject.new()
         # FIXME: doesn't work yet
         # self.long_ = long_
-        return self
+        # return self
+        return GIMarshallingTests.OverridesObject.new()
 
     def method(self):
         """Overridden doc string."""
@@ -69,4 +64,4 @@ class OverridesObject(GIMarshallingTests.OverridesObject):
 
 
 OverridesObject = override(OverridesObject)
-__all__.append('OverridesObject')
+__all__.append("OverridesObject")

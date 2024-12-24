@@ -1,7 +1,7 @@
 import sys
 import gi
 
-gi.require_version('Gtk', '4.0')
+gi.require_version("Gtk", "4.0")
 from gi.repository import GLib, Gio, Gtk
 
 # This would typically be its own file
@@ -65,24 +65,24 @@ class AppWindow(Gtk.ApplicationWindow):
 
         # This will be in the windows group and have the 'win' prefix
         max_action = Gio.SimpleAction.new_stateful(
-            'maximize', None, GLib.Variant.new_boolean(False)
+            "maximize", None, GLib.Variant.new_boolean(False)
         )
-        max_action.connect('change-state', self.on_maximize_toggle)
+        max_action.connect("change-state", self.on_maximize_toggle)
         self.add_action(max_action)
 
         # Keep it in sync with the actual state
         self.connect(
-            'notify::maximized',
+            "notify::maximized",
             lambda obj, _pspec: max_action.set_state(
                 GLib.Variant.new_boolean(obj.props.maximized)
             ),
         )
 
-        lbl_variant = GLib.Variant.new_string('String 1')
+        lbl_variant = GLib.Variant.new_string("String 1")
         lbl_action = Gio.SimpleAction.new_stateful(
-            'change_label', lbl_variant.get_type(), lbl_variant
+            "change_label", lbl_variant.get_type(), lbl_variant
         )
-        lbl_action.connect('change-state', self.on_change_label_state)
+        lbl_action.connect("change-state", self.on_change_label_state)
         self.add_action(lbl_action)
 
         self.label = Gtk.Label(label=lbl_variant.get_string())
@@ -104,41 +104,41 @@ class Application(Gtk.Application):
     def __init__(self, *args, **kwargs):
         super().__init__(
             *args,
-            application_id='org.example.App',
+            application_id="org.example.App",
             flags=Gio.ApplicationFlags.HANDLES_COMMAND_LINE,
-            **kwargs
+            **kwargs,
         )
         self.window = None
 
         self.add_main_option(
-            'test',
-            ord('t'),
+            "test",
+            ord("t"),
             GLib.OptionFlags.NONE,
             GLib.OptionArg.NONE,
-            'Command line test',
+            "Command line test",
             None,
         )
 
     def do_startup(self):
         Gtk.Application.do_startup(self)
 
-        action = Gio.SimpleAction.new('about', None)
-        action.connect('activate', self.on_about)
+        action = Gio.SimpleAction.new("about", None)
+        action.connect("activate", self.on_about)
         self.add_action(action)
 
-        action = Gio.SimpleAction.new('quit', None)
-        action.connect('activate', self.on_quit)
+        action = Gio.SimpleAction.new("quit", None)
+        action.connect("activate", self.on_quit)
         self.add_action(action)
 
         builder = Gtk.Builder.new_from_string(MENU_XML, -1)
-        self.set_menubar(builder.get_object('menubar'))
+        self.set_menubar(builder.get_object("menubar"))
 
     def do_activate(self):
         # We only allow a single window and raise any existing ones
         if not self.window:
             # Windows are associated with the application
             # when the last one is closed the application shuts down
-            self.window = AppWindow(application=self, title='Main Window')
+            self.window = AppWindow(application=self, title="Main Window")
 
         self.window.present()
 
@@ -147,9 +147,9 @@ class Application(Gtk.Application):
         # convert GVariantDict -> GVariant -> dict
         options = options.end().unpack()
 
-        if 'test' in options:
+        if "test" in options:
             # This is printed on the main instance
-            print('Test argument recieved: %s' % options['test'])
+            pass
 
         self.activate()
         return 0
@@ -162,6 +162,6 @@ class Application(Gtk.Application):
         self.quit()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app = Application()
     app.run(sys.argv)

@@ -17,12 +17,14 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __PYGOBJECT_ENUM_H__ 
+#ifndef __PYGOBJECT_ENUM_H__
 #define __PYGOBJECT_ENUM_H__
 
 extern GQuark pygenum_class_key;
 
-#define PyGEnum_Check(x) (PyObject_IsInstance((PyObject *)x, (PyObject *)&PyGEnum_Type) && g_type_is_a(((PyGFlags*)x)->gtype, G_TYPE_ENUM))
+#define PyGEnum_Check(x)                                                      \
+    (PyObject_IsInstance ((PyObject *)x, (PyObject *)&PyGEnum_Type)           \
+     && g_type_is_a (((PyGFlags *)x)->gtype, G_TYPE_ENUM))
 
 typedef struct {
     PyLongObject parent;
@@ -32,16 +34,13 @@ typedef struct {
 
 extern PyTypeObject PyGEnum_Type;
 
-PyObject * pyg_enum_add        (PyObject *   module,
-                                const char * type_name,
-                                const char * strip_prefix,
-                                GType        gtype);
+PyObject *pyg_enum_add (PyObject *module, const char *type_name,
+                        const char *strip_prefix, GType gtype);
 
-PyObject * pyg_enum_from_gtype (GType        gtype,
-                                int          value);
+PyObject *pyg_enum_from_gtype (GType gtype, int value);
 
-gint pyg_enum_get_value  (GType enum_type, PyObject *obj, gint *val);
+gint pyg_enum_get_value (GType enum_type, PyObject *obj, gint *val);
 
-int pygi_enum_register_types(PyObject *d);
+int pygi_enum_register_types (PyObject *d);
 
 #endif /* __PYGOBJECT_ENUM_H__ */

@@ -1,6 +1,3 @@
-# -*- Mode: Python; py-indent-offset: 4 -*-
-# vim: tabstop=4 shiftwidth=4 expandtab
-#
 # Copyright (C) 2007-2009 Johan Dahlin <johan@gnome.org>
 #
 #   module.py: dynamic module for introspected libraries.
@@ -26,36 +23,30 @@ from types import ModuleType
 
 import gi
 
-from ._gi import \
-    Repository, \
-    FunctionInfo, \
-    RegisteredTypeInfo, \
-    EnumInfo, \
-    ObjectInfo, \
-    InterfaceInfo, \
-    ConstantInfo, \
-    StructInfo, \
-    UnionInfo, \
-    CallbackInfo, \
-    Struct, \
-    Boxed, \
-    Fundamental, \
-    CCallback, \
-    enum_add, \
-    enum_register_new_gtype_and_add, \
-    flags_add, \
-    flags_register_new_gtype_and_add, \
-    GInterface
-from .types import \
-    GObjectMeta, \
-    StructMeta
+from ._gi import (
+    Repository,
+    FunctionInfo,
+    RegisteredTypeInfo,
+    EnumInfo,
+    ObjectInfo,
+    InterfaceInfo,
+    ConstantInfo,
+    StructInfo,
+    UnionInfo,
+    CallbackInfo,
+    Struct,
+    Boxed,
+    Fundamental,
+    CCallback,
+    enum_add,
+    enum_register_new_gtype_and_add,
+    flags_add,
+    flags_register_new_gtype_and_add,
+    GInterface,
+)
+from .types import GObjectMeta, StructMeta
 
-from ._constants import \
-    TYPE_NONE, \
-    TYPE_BOXED, \
-    TYPE_POINTER, \
-    TYPE_ENUM, \
-    TYPE_FLAGS
+from ._constants import TYPE_NONE, TYPE_BOXED, TYPE_POINTER, TYPE_ENUM, TYPE_FLAGS
 
 
 repository = Repository.get_default()
@@ -86,7 +77,7 @@ def get_parent_for_object(object_info):
     namespace = parent_object_info.get_namespace()
     name = parent_object_info.get_name()
 
-    module = importlib.import_module('gi.repository.' + namespace)
+    module = importlib.import_module("gi.repository." + namespace)
     return getattr(module, name)
 
 
@@ -96,7 +87,7 @@ def get_interfaces_for_object(object_info):
         namespace = interface_info.get_namespace()
         name = interface_info.get_name()
 
-        module = importlib.import_module('gi.repository.' + namespace)
+        module = importlib.import_module("gi.repository." + namespace)
         interfaces.append(getattr(module, name))
     return interfaces
 
@@ -109,11 +100,11 @@ class IntrospectionModule(ModuleType):
     will dynamically pull them in and create wrappers for the members.
     These members are then cached on this introspection module.
     """
-    def __init__(self, namespace, version=None):
-        """Might raise gi._gi.RepositoryError"""
 
+    def __init__(self, namespace, version=None):
+        """Might raise gi._gi.RepositoryError."""
         repository.require(namespace, version)
-        super().__init__(f'gi.repository.{namespace}')
+        super().__init__(f"gi.repository.{namespace}")
         self._namespace = namespace
         self._version = version
 
@@ -128,8 +119,7 @@ class IntrospectionModule(ModuleType):
     def __getattr__(self, name):
         info = repository.find_by_name(self._namespace, name)
         if not info:
-            raise AttributeError("%r object has no attribute %r" % (
-                                 self.__name__, name))
+            raise AttributeError(f"{self.__name__!r} object has no attribute {name!r}")
 
         if isinstance(info, EnumInfo):
             g_type = info.get_g_type()
@@ -157,11 +147,13 @@ class IntrospectionModule(ModuleType):
                     # Don't use upper() here to avoid locale specific
                     # identifier conversion (e. g. in Turkish 'i'.upper() == 'i')
                     # see https://bugzilla.gnome.org/show_bug.cgi?id=649165
-                    ascii_upper_trans = ''.maketrans(
-                        'abcdefgjhijklmnopqrstuvwxyz',
-                        'ABCDEFGJHIJKLMNOPQRSTUVWXYZ')
+                    ascii_upper_trans = "".maketrans(
+                        "abcdefgjhijklmnopqrstuvwxyz", "ABCDEFGJHIJKLMNOPQRSTUVWXYZ"
+                    )
                     for value_info in info.get_values():
-                        value_name = value_info.get_name_unescaped().translate(ascii_upper_trans)
+                        value_name = value_info.get_name_unescaped().translate(
+                            ascii_upper_trans
+                        )
                         setattr(wrapper, value_name, wrapper(value_info.get_value()))
                     for method_info in info.get_methods():
                         setattr(wrapper, method_info.__name__, method_info)
@@ -175,9 +167,12 @@ class IntrospectionModule(ModuleType):
             # Create a wrapper.
             if isinstance(info, ObjectInfo):
                 parent = get_parent_for_object(info)
-                interfaces = tuple(interface for interface in get_interfaces_for_object(info)
-                                   if not issubclass(parent, interface))
-                bases = (parent,) + interfaces
+                interfaces = tuple(
+                    interface
+                    for interface in get_interfaces_for_object(info)
+                    if not issubclass(parent, interface)
+                )
+                bases = (parent, *interfaces)
                 metaclass = GObjectMeta
             elif isinstance(info, CallbackInfo):
                 bases = (CCallback,)
@@ -188,12 +183,16 @@ class IntrospectionModule(ModuleType):
             elif isinstance(info, (StructInfo, UnionInfo)):
                 if g_type.is_a(TYPE_BOXED):
                     bases = (Boxed,)
-                elif (g_type.is_a(TYPE_POINTER) or
-                      g_type == TYPE_NONE or
-                      g_type.fundamental == g_type):
+                elif (
+                    g_type.is_a(TYPE_POINTER)
+                    or g_type == TYPE_NONE
+                    or g_type.fundamental == g_type
+                ):
                     bases = (Struct,)
                 else:
-                    raise TypeError("unable to create a wrapper for %s.%s" % (info.get_namespace(), info.get_name()))
+                    raise TypeError(
+                        f"unable to create a wrapper for {info.get_namespace()}.{info.get_name()}"
+                    )
                 metaclass = StructMeta
             else:
                 raise NotImplementedError(info)
@@ -211,9 +210,9 @@ class IntrospectionModule(ModuleType):
                         return type_
 
                 dict_ = {
-                    '__info__': info,
-                    '__module__': self.__name__,
-                    '__gtype__': g_type
+                    "__info__": info,
+                    "__module__": self.__name__,
+                    "__gtype__": g_type,
                 }
                 wrapper = metaclass(name, bases, dict_)
 
@@ -236,7 +235,7 @@ class IntrospectionModule(ModuleType):
 
     def __repr__(self):
         path = repository.get_typelib_path(self._namespace)
-        return "<IntrospectionModule %r from %r>" % (self._namespace, path)
+        return f"<IntrospectionModule {self._namespace!r} from {path!r}>"
 
     def __dir__(self):
         result = set(super().__dir__())
@@ -246,15 +245,17 @@ class IntrospectionModule(ModuleType):
         # Callback types, as these are not real objects which we can actually
         # get
         namespace_infos = repository.get_infos(self._namespace)
-        result.update(info.get_name() for info in namespace_infos if
-                      not isinstance(info, CallbackInfo))
+        result.update(
+            info.get_name()
+            for info in namespace_infos
+            if not isinstance(info, CallbackInfo)
+        )
 
         return list(result)
 
 
 def get_introspection_module(namespace):
-    """
-    :Returns:
+    """:Returns:
         An object directly wrapping the gi module without overrides.
 
     Might raise gi._gi.RepositoryError

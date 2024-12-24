@@ -1,6 +1,3 @@
-# -*- Mode: Python; py-indent-offset: 4 -*-
-# vim: tabstop=4 shiftwidth=4 expandtab
-#
 # Copyright (C) 2010 Paolo Borelli <pborelli@gnome.org>
 #
 # This library is free software; you can redistribute it and/or
@@ -21,38 +18,35 @@
 from ..overrides import override
 from ..module import get_introspection_module
 
-Pango = get_introspection_module('Pango')
+Pango = get_introspection_module("Pango")
 
 __all__ = []
 
 
 class FontDescription(Pango.FontDescription):
-
     def __new__(cls, string=None):
         if string is not None:
             return Pango.font_description_from_string(string)
-        else:
-            return Pango.FontDescription.__new__(cls)
+        return Pango.FontDescription.__new__(cls)
 
     def __init__(self, *args, **kwargs):
-        return super(FontDescription, self).__init__()
+        return super().__init__()
 
 
 FontDescription = override(FontDescription)
-__all__.append('FontDescription')
+__all__.append("FontDescription")
 
 
 class Layout(Pango.Layout):
-
     def __new__(cls, context):
         return Pango.Layout.new(context)
 
     def set_markup(self, text, length=-1):
-        super(Layout, self).set_markup(text, length)
+        super().set_markup(text, length)
 
     def set_text(self, text, length=-1):
-        super(Layout, self).set_text(text, length)
+        super().set_text(text, length)
 
 
 Layout = override(Layout)
-__all__.append('Layout')
+__all__.append("Layout")

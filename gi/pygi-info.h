@@ -68,11 +68,10 @@ extern PyTypeObject PyGIPropertyInfo_Type;
 extern PyTypeObject PyGIArgInfo_Type;
 extern PyTypeObject PyGITypeInfo_Type;
 
-PyObject* _pygi_info_new (GIBaseInfo *info);
-GIBaseInfo* _pygi_object_get_gi_info (PyObject     *object,
-                                      PyTypeObject *type);
+PyObject *_pygi_info_new (GIBaseInfo *info);
+GIBaseInfo *_pygi_object_get_gi_info (PyObject *object, PyTypeObject *type);
 
-gchar* _pygi_gi_base_info_get_fullname (GIBaseInfo *info);
+gchar *_pygi_gi_base_info_get_fullname (GIBaseInfo *info);
 
 gsize _pygi_g_type_tag_size (GITypeTag type_tag);
 gsize _pygi_gi_type_info_size (GITypeInfo *type_info);

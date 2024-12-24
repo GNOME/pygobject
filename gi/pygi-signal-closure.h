@@ -32,19 +32,14 @@
 G_BEGIN_DECLS
 
 /* Private */
-typedef struct _PyGISignalClosure
-{
+typedef struct _PyGISignalClosure {
     PyGClosure pyg_closure;
     GISignalInfo *signal_info;
 } PyGISignalClosure;
 
-GClosure *
-pygi_signal_closure_new (PyGObject *instance,
-                         GType g_type,
-                         const gchar *sig_name,
-                         PyObject *callback,
-                         PyObject *extra_args,
-                         PyObject *swap_data);
+GClosure *pygi_signal_closure_new (PyGObject *instance, GType g_type,
+                                   const gchar *sig_name, PyObject *callback,
+                                   PyObject *extra_args, PyObject *swap_data);
 
 G_END_DECLS
 

@@ -37,7 +37,7 @@ class Test(unittest.TestCase):
     def test_init_function(self):
         def expected(
             argv: typing.Optional[list[str]] = None,
-        ) -> typing.Tuple[bool, typing.Optional[list[str]]]:
+        ) -> tuple[bool, typing.Optional[list[str]]]:
             pass
 
         self.assertSignatureEqual(GIMarshallingTests.init_function, expected)
@@ -230,7 +230,7 @@ class Test(unittest.TestCase):
         self.assertSignatureEqual(GIMarshallingTests.int_return_max, expected)
 
     def test_return_multiple(self):
-        def expected() -> typing.Tuple[int, int]:
+        def expected() -> tuple[int, int]:
             pass
 
         self.assertSignatureEqual(GIMarshallingTests.int_out_out, expected)
