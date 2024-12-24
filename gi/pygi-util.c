@@ -35,55 +35,68 @@ pygi_guint_from_pyssize (Py_ssize_t pyval, guint *result)
 }
 
 PyObject *
-pyg_integer_richcompare(PyObject *v, PyObject *w, int op)
+pyg_integer_richcompare (PyObject *v, PyObject *w, int op)
 {
     PyObject *result;
     gboolean t;
 
     switch (op) {
-    case Py_EQ: t = PyLong_AS_LONG (v) == PyLong_AS_LONG (w); break;
-    case Py_NE: t = PyLong_AS_LONG (v) != PyLong_AS_LONG (w); break;
-    case Py_LE: t = PyLong_AS_LONG (v) <= PyLong_AS_LONG (w); break;
-    case Py_GE: t = PyLong_AS_LONG (v) >= PyLong_AS_LONG (w); break;
-    case Py_LT: t = PyLong_AS_LONG (v) <  PyLong_AS_LONG (w); break;
-    case Py_GT: t = PyLong_AS_LONG (v) >  PyLong_AS_LONG (w); break;
-    default: g_assert_not_reached();
+    case Py_EQ:
+        t = PyLong_AS_LONG (v) == PyLong_AS_LONG (w);
+        break;
+    case Py_NE:
+        t = PyLong_AS_LONG (v) != PyLong_AS_LONG (w);
+        break;
+    case Py_LE:
+        t = PyLong_AS_LONG (v) <= PyLong_AS_LONG (w);
+        break;
+    case Py_GE:
+        t = PyLong_AS_LONG (v) >= PyLong_AS_LONG (w);
+        break;
+    case Py_LT:
+        t = PyLong_AS_LONG (v) < PyLong_AS_LONG (w);
+        break;
+    case Py_GT:
+        t = PyLong_AS_LONG (v) > PyLong_AS_LONG (w);
+        break;
+    default:
+        g_assert_not_reached ();
     }
 
     result = t ? Py_True : Py_False;
-    return Py_NewRef(result);
+    return Py_NewRef (result);
 }
 
-PyObject*
-pyg_ptr_richcompare(void* a, void *b, int op)
+PyObject *
+pyg_ptr_richcompare (void *a, void *b, int op)
 {
     PyObject *res;
 
     switch (op) {
-      case Py_EQ:
+    case Py_EQ:
         res = (a == b) ? Py_True : Py_False;
         break;
-      case Py_NE:
+    case Py_NE:
         res = (a != b) ? Py_True : Py_False;
         break;
-      case Py_LT:
+    case Py_LT:
         res = (a < b) ? Py_True : Py_False;
         break;
-      case Py_LE:
+    case Py_LE:
         res = (a <= b) ? Py_True : Py_False;
         break;
-      case Py_GT:
+    case Py_GT:
         res = (a > b) ? Py_True : Py_False;
         break;
-      case Py_GE:
+    case Py_GE:
         res = (a >= b) ? Py_True : Py_False;
         break;
-      default:
+    default:
         res = Py_NotImplemented;
         break;
     }
 
-    return Py_NewRef(res);
+    return Py_NewRef (res);
 }
 
 /**
@@ -100,27 +113,27 @@ pyg_ptr_richcompare(void* a, void *b, int op)
  * Returns: the stripped constant name.
  */
 const gchar *
-pyg_constant_strip_prefix(const gchar *name, const gchar *strip_prefix)
+pyg_constant_strip_prefix (const gchar *name, const gchar *strip_prefix)
 {
     size_t prefix_len, i;
 
-    prefix_len = strlen(strip_prefix);
+    prefix_len = strlen (strip_prefix);
 
     /* Check so name starts with strip_prefix, if it doesn't:
      * return the rest of the part which doesn't match
      */
     for (i = 0; i < prefix_len; i++) {
-	if (name[i] != strip_prefix[i] && name[i] != '_') {
-	    return &name[i];
-	}
+        if (name[i] != strip_prefix[i] && name[i] != '_') {
+            return &name[i];
+        }
     }
 
     /* strip off prefix from value name, while keeping it a valid
      * identifier */
     for (i = prefix_len + 1; i > 0; i--) {
-	if (g_ascii_isalpha(name[i - 1]) || name[i - 1] == '_') {
-	    return &name[i - 1];
-	}
+        if (g_ascii_isalpha (name[i - 1]) || name[i - 1] == '_') {
+            return &name[i - 1];
+        }
     }
     return name;
 }

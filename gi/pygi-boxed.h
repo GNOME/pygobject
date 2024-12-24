@@ -31,14 +31,12 @@ typedef struct _PyGIBoxed PyGIBoxed;
 
 extern PyTypeObject PyGIBoxed_Type;
 
-PyObject * pygi_boxed_new (PyTypeObject *type,
-                           gpointer      boxed,
-                           gboolean      free_on_dealloc,
-                           gsize         allocated_slice);
+PyObject *pygi_boxed_new (PyTypeObject *type, gpointer boxed,
+                          gboolean free_on_dealloc, gsize allocated_slice);
 
-void * pygi_boxed_alloc (GIBaseInfo *info, gsize *size);
+void *pygi_boxed_alloc (GIBaseInfo *info, gsize *size);
 
-void pygi_boxed_copy_in_place  (PyGIBoxed *self);
+void pygi_boxed_copy_in_place (PyGIBoxed *self);
 
 int pygi_boxed_register_types (PyObject *m);
 

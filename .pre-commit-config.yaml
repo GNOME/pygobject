@@ -6,7 +6,20 @@ repos:
   rev: a23f6b85d0fdd5bb9d564e2579e678033debbdff  # frozen: v0.10.0.1
   hooks:
   - id: shellcheck
-- repo: https://github.com/PyCQA/flake8
-  rev: 7.1.1
+- repo: https://github.com/astral-sh/ruff-pre-commit
+  rev: '895ebb389825c29bd4e0addcf7579d6c69d199cc'  # frozen: v0.9.6
   hooks:
-  - id: flake8
+    - id: ruff
+      args: [--fix, --preview]
+    - id: ruff-format
+      types_or: [python, spec]
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: cef0300fd0fc4d2a87a85fa2093c6b283ea36f4b  # frozen: v5.0.0
+  hooks:
+    - id: trailing-whitespace
+    - id: check-toml
+    - id: check-yaml
+- repo: https://github.com/pre-commit/mirrors-clang-format
+  rev: f9a52e87b6cdcb01b0a62b8611d9ba9f2dad0067  # frozen: v19.1.7
+  hooks:
+    - id: clang-format

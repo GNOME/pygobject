@@ -1,21 +1,20 @@
 #!/usr/bin/env python3
-"""
-Based on cairo-demo/X11/cairo-demo.c
-"""
+"""Based on cairo-demo/X11/cairo-demo.c."""
 
 import cairo
 import gi
 
-gi.require_version('Gtk', '4.0')
+gi.require_version("Gtk", "4.0")
 from gi.repository import Gtk
 
 SIZE = 30
 
 
 class Application(Gtk.Application):
-
     def do_activate(self):
-        window = Gtk.ApplicationWindow(application=self, default_width=450, default_height=600)
+        window = Gtk.ApplicationWindow(
+            application=self, default_width=450, default_height=600
+        )
 
         drawing_area = Gtk.DrawingArea()
         drawing_area.set_draw_func(self.draw)
@@ -47,8 +46,8 @@ class Application(Gtk.Application):
         ctx.move_to(0, SIZE)
         ctx.rel_curve_to(0, SIZE, SIZE, SIZE, 2 * SIZE, 0)
         ctx.rel_curve_to(SIZE, -SIZE, 2 * SIZE, -SIZE, 2 * SIZE, 0)
-        ctx.rel_curve_to(0, SIZE, -SIZE, SIZE, - 2 * SIZE, 0)
-        ctx.rel_curve_to(-SIZE, -SIZE, - 2 * SIZE, -SIZE, - 2 * SIZE, 0)
+        ctx.rel_curve_to(0, SIZE, -SIZE, SIZE, -2 * SIZE, 0)
+        ctx.rel_curve_to(-SIZE, -SIZE, -2 * SIZE, -SIZE, -2 * SIZE, 0)
         ctx.close_path()
 
     def draw_shapes(self, ctx, x, y, fill):

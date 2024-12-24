@@ -1,6 +1,3 @@
-# -*- Mode: Python; py-indent-offset: 4 -*-
-# vim: tabstop=4 shiftwidth=4 expandtab
-#
 # test_error.py: Tests for GError wrapper implementation
 #
 # Copyright (C) 2012 Will Thompson
@@ -31,48 +28,45 @@ from gi.repository import GIMarshallingTests
 
 class TestType(unittest.TestCase):
     def test_attributes(self):
-        e = GLib.Error('test message', 'mydomain', 42)
-        self.assertEqual(e.message, 'test message')
-        self.assertEqual(e.domain, 'mydomain')
+        e = GLib.Error("test message", "mydomain", 42)
+        self.assertEqual(e.message, "test message")
+        self.assertEqual(e.domain, "mydomain")
         self.assertEqual(e.code, 42)
 
     def test_new_literal(self):
-        mydomain = GLib.quark_from_string('mydomain')
-        e = GLib.Error.new_literal(mydomain, 'test message', 42)
-        self.assertEqual(e.message, 'test message')
-        self.assertEqual(e.domain, 'mydomain')
+        mydomain = GLib.quark_from_string("mydomain")
+        e = GLib.Error.new_literal(mydomain, "test message", 42)
+        self.assertEqual(e.message, "test message")
+        self.assertEqual(e.domain, "mydomain")
         self.assertEqual(e.code, 42)
 
     def test_matches(self):
-        mydomain = GLib.quark_from_string('mydomain')
-        notmydomain = GLib.quark_from_string('notmydomain')
-        e = GLib.Error('test message', 'mydomain', 42)
+        mydomain = GLib.quark_from_string("mydomain")
+        notmydomain = GLib.quark_from_string("notmydomain")
+        e = GLib.Error("test message", "mydomain", 42)
         self.assertTrue(e.matches(mydomain, 42))
         self.assertFalse(e.matches(notmydomain, 42))
         self.assertFalse(e.matches(mydomain, 40))
 
     def test_str(self):
-        e = GLib.Error('test message', 'mydomain', 42)
-        self.assertEqual(str(e),
-                         'mydomain: test message (42)')
+        e = GLib.Error("test message", "mydomain", 42)
+        self.assertEqual(str(e), "mydomain: test message (42)")
 
     def test_repr(self):
-        e = GLib.Error('test message', 'mydomain', 42)
-        self.assertEqual(repr(e),
-                         "GLib.Error('test message', 'mydomain', 42)")
+        e = GLib.Error("test message", "mydomain", 42)
+        self.assertEqual(repr(e), "GLib.Error('test message', 'mydomain', 42)")
 
     def test_inheritance(self):
         self.assertTrue(issubclass(GLib.Error, RuntimeError))
 
     def test_pickle(self):
-
         def check_pickle(e):
             assert isinstance(e, GLib.Error)
             new_e = pickle.loads(pickle.dumps(e))
             assert type(new_e) is type(e)
             assert repr(e) == repr(new_e)
 
-        e = GLib.Error('test message', 'mydomain', 42)
+        e = GLib.Error("test message", "mydomain", 42)
         check_pickle(e)
 
         try:
@@ -86,7 +80,8 @@ class ObjectWithVFuncException(GIMarshallingTests.Object):
         if x == 42:
             return True
 
-        raise GLib.Error('unexpected value %d' % x, 'mydomain', 42)
+        msg = f"unexpected value {x:d}"
+        raise GLib.Error(msg, "mydomain", 42)
 
 
 class TestMarshalling(unittest.TestCase):
@@ -146,8 +141,8 @@ class TestMarshalling(unittest.TestCase):
             obj.vfunc_meth_with_error(-1)
 
         e = context.exception
-        self.assertEqual(e.message, 'unexpected value -1')
-        self.assertEqual(e.domain, 'mydomain')
+        self.assertEqual(e.message, "unexpected value -1")
+        self.assertEqual(e.domain, "mydomain")
         self.assertEqual(e.code, 42)
 
     def tests_compare_two_gerrors_in_gvalue(self):

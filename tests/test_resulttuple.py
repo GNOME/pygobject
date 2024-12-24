@@ -1,6 +1,3 @@
-# -*- Mode: Python; py-indent-offset: 4 -*-
-# vim: tabstop=4 shiftwidth=4 expandtab
-#
 # Copyright (C) 2015 Christoph Reiter <reiter.christoph@gmail.com>
 #
 # This library is free software; you can redistribute it and/or
@@ -30,7 +27,6 @@ ResultTuple = gi._gi.ResultTuple
 
 
 class TestResultTuple(unittest.TestCase):
-
     def test_base(self):
         self.assertTrue(issubclass(ResultTuple, tuple))
 
@@ -80,7 +76,9 @@ class TestResultTuple(unittest.TestCase):
         res = GIMarshallingTests.array_out_etc(-5, 9)
         self.assertEqual(repr(res), "(ints=[-5, 0, 1, 9], sum=4)")
 
-        cb = lambda: (1, 2)
+        def cb():
+            return 1, 2
+
         res = GIMarshallingTests.callback_multiple_out_parameters(cb)
         self.assertEqual(repr(res), "(a=1.0, b=2.0)")
 

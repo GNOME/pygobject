@@ -32,17 +32,17 @@ def _extract_handler_and_args(obj_or_map, handler_name):
         handler = getattr(obj_or_map, handler_name, None)
 
     if handler is None:
-        raise AttributeError('Handler %s not found' % handler_name)
+        raise AttributeError(f"Handler {handler_name} not found")
 
     args = ()
     if isinstance(handler, abc.Sequence):
         if len(handler) == 0:
-            raise TypeError("Handler %s tuple can not be empty" % handler)
+            raise TypeError(f"Handler {handler} tuple can not be empty")
         args = handler[1:]
         handler = handler[0]
 
     elif not callable(handler):
-        raise TypeError('Handler %s is not a method, function or tuple' % handler)
+        raise TypeError(f"Handler {handler} is not a method, function or tuple")
 
     return handler, args
 
@@ -51,7 +51,6 @@ def define_builder_scope():
     from gi.repository import Gtk
 
     class BuilderScope(GObject.GObject, Gtk.BuilderScope):
-
         def __init__(self, scope_object=None):
             super().__init__()
             self._scope_object = scope_object
@@ -72,8 +71,7 @@ def define_builder_scope():
 
             swapped = int(flags & Gtk.BuilderClosureFlags.SWAPPED)
             if swapped:
-                raise RuntimeError(
-                    "%r not supported" % GObject.ConnectFlags.SWAPPED)
+                raise RuntimeError(f"{GObject.ConnectFlags.SWAPPED!r} not supported")
                 return None
 
             handler, args = _extract_handler_and_args(current_object, handler_name)
@@ -89,9 +87,7 @@ def define_builder_scope():
     return BuilderScope
 
 
-def connect_func(builder, obj, signal_name, handler_name,
-                 connect_object, flags, cls):
-
+def connect_func(builder, obj, signal_name, handler_name, connect_object, flags, cls):
     if handler_name not in cls.__gtktemplate_methods__:
         return
 
@@ -103,20 +99,13 @@ def connect_func(builder, obj, signal_name, handler_name,
     after = int(flags & GObject.ConnectFlags.AFTER)
     swapped = int(flags & GObject.ConnectFlags.SWAPPED)
     if swapped:
-        raise RuntimeError(
-            "%r not supported" % GObject.ConnectFlags.SWAPPED)
+        raise RuntimeError(f"{GObject.ConnectFlags.SWAPPED!r} not supported")
 
     if connect_object is not None:
-        if after:
-            func = obj.connect_object_after
-        else:
-            func = obj.connect_object
+        func = obj.connect_object_after if after else obj.connect_object
         func(signal_name, handler, connect_object)
     else:
-        if after:
-            func = obj.connect_after
-        else:
-            func = obj.connect
+        func = obj.connect_after if after else obj.connect
         func(signal_name, handler)
 
 
@@ -136,11 +125,10 @@ def register_template(cls):
             if handler_name in bound_methods:
                 old_attr_name = bound_methods[handler_name]
                 raise RuntimeError(
-                    "Error while exposing handler %r as %r, "
-                    "already available as %r" % (
-                        handler_name, attr_name, old_attr_name))
-            else:
-                bound_methods[handler_name] = attr_name
+                    f"Error while exposing handler {handler_name!r} as {attr_name!r}, "
+                    f"already available as {old_attr_name!r}"
+                )
+            bound_methods[handler_name] = attr_name
         elif isinstance(obj, Child):
             widget_name = obj._name
             if widget_name is None:
@@ -149,12 +137,11 @@ def register_template(cls):
             if widget_name in bound_widgets:
                 old_attr_name = bound_widgets[widget_name]
                 raise RuntimeError(
-                    "Error while exposing child %r as %r, "
-                    "already available as %r" % (
-                        widget_name, attr_name, old_attr_name))
-            else:
-                bound_widgets[widget_name] = attr_name
-                cls.bind_template_child_full(widget_name, obj._internal, 0)
+                    f"Error while exposing child {widget_name!r} as {attr_name!r}, "
+                    f"already available as {old_attr_name!r}"
+                )
+            bound_widgets[widget_name] = attr_name
+            cls.bind_template_child_full(widget_name, obj._internal, 0)
 
     cls.__gtktemplate_methods__ = bound_methods
     cls.__gtktemplate_widgets__ = bound_widgets
@@ -166,8 +153,7 @@ def register_template(cls):
         cls.set_connect_func(connect_func, cls)
 
     base_init_template = cls.init_template
-    cls.__dontuse_ginstance_init__ = \
-        lambda s: init_template(s, cls, base_init_template)
+    cls.__dontuse_ginstance_init__ = lambda s: init_template(s, cls, base_init_template)
     # To make this file work with older PyGObject we expose our init code
     # as init_template() but make it a noop when we call it ourselves first
     cls.init_template = cls.__dontuse_ginstance_init__
@@ -179,7 +165,8 @@ def init_template(self, cls, base_init_template):
     if self.__class__ is not cls:
         raise TypeError(
             "Inheritance from classes with @Gtk.Template decorators "
-            "is not allowed at this time")
+            "is not allowed at this time"
+        )
 
     self.__gtktemplate_handlers__ = set()
 
@@ -191,28 +178,26 @@ def init_template(self, cls, base_init_template):
     for handler_name, attr_name in self.__gtktemplate_methods__.items():
         if handler_name not in self.__gtktemplate_handlers__:
             raise RuntimeError(
-                "Handler '%s' was declared with @Gtk.Template.Callback "
-                "but was not present in template" % handler_name)
+                f"Handler '{handler_name}' was declared with @Gtk.Template.Callback "
+                "but was not present in template"
+            )
 
 
-class Child(object):
-
+class Child:
     def __init__(self, name=None, **kwargs):
         self._name = name
         self._internal = kwargs.pop("internal", False)
         if kwargs:
-            raise TypeError("Unhandled arguments: %r" % kwargs)
+            raise TypeError(f"Unhandled arguments: {kwargs!r}")
 
 
-class CallThing(object):
-
+class CallThing:
     def __init__(self, name, func):
         self._name = name
         self._func = func
 
 
-class Callback(object):
-
+class Callback:
     def __init__(self, name=None):
         self._name = name
 
@@ -221,8 +206,7 @@ class Callback(object):
 
 
 def validate_resource_path(path):
-    """Raises GLib.Error in case the resource doesn't exist"""
-
+    """Raises GLib.Error in case the resource doesn't exist."""
     try:
         Gio.resources_get_info(path, Gio.ResourceLookupFlags.NONE)
     except GLib.Error:
@@ -232,8 +216,7 @@ def validate_resource_path(path):
         Gio.resources_lookup_data(path, Gio.ResourceLookupFlags.NONE)
 
 
-class Template(object):
-
+class Template:
     def __init__(self, **kwargs):
         self.string = None
         self.filename = None
@@ -247,10 +230,11 @@ class Template(object):
         else:
             raise TypeError(
                 "Requires one of the following arguments: "
-                "string, filename, resource_path")
+                "string, filename, resource_path"
+            )
 
         if kwargs:
-            raise TypeError("Unhandled keyword arguments %r" % kwargs)
+            raise TypeError(f"Unhandled keyword arguments {kwargs!r}")
 
     @classmethod
     def from_file(cls, filename):
@@ -276,8 +260,9 @@ class Template(object):
 
         if "__gtype_name__" not in cls.__dict__:
             raise TypeError(
-                "%r does not have a __gtype_name__. Set it to the name "
-                "of the class in your template" % cls.__name__)
+                f"{cls.__name__!r} does not have a __gtype_name__. Set it to the name "
+                "of the class in your template"
+            )
 
         if hasattr(cls, "__gtktemplate_methods__"):
             raise TypeError("Cannot nest template classes")
@@ -290,18 +275,17 @@ class Template(object):
             cls.set_template(bytes_)
             register_template(cls)
             return cls
-        elif self.resource_path is not None:
+        if self.resource_path is not None:
             validate_resource_path(self.resource_path)
             cls.set_template_from_resource(self.resource_path)
             register_template(cls)
             return cls
-        else:
-            assert self.filename is not None
-            file_ = Gio.File.new_for_path(os.fspath(self.filename))
-            bytes_ = GLib.Bytes.new(file_.load_contents()[1])
-            cls.set_template(bytes_)
-            register_template(cls)
-            return cls
+        assert self.filename is not None
+        file_ = Gio.File.new_for_path(os.fspath(self.filename))
+        bytes_ = GLib.Bytes.new(file_.load_contents()[1])
+        cls.set_template(bytes_)
+        register_template(cls)
+        return cls
 
 
 __all__ = ["Template"]

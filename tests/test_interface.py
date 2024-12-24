@@ -1,5 +1,3 @@
-# -*- Mode: Python -*-
-
 import unittest
 
 from gi.repository import GObject
@@ -40,7 +38,6 @@ GObject.type_register(MyObject)
 
 
 class TestIfaceImpl(unittest.TestCase):
-
     def test_reimplement_interface(self):
         m = MyUnknown()
         m.iface_method()
