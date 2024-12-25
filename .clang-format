@@ -120,6 +120,9 @@ Macros:
         (size)
     },
   - PyMODINIT_FUNC=PyObject *
+  - _PyGI_ENUM_BEGIN(name)={
+  - _PyGI_ENUM_ADD_VALUE(prefix, name)=(prefix##_##name);
+  - _PyGI_ENUM_END=}
 MainIncludeChar: Quote
 MaxEmptyLinesToKeep: 2
 NamespaceIndentation: None

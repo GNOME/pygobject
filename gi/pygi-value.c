@@ -429,8 +429,8 @@ pyg_value_from_pyobject_with_error(GValue *value, PyObject *obj)
             return -1;
         }
         g_value_set_enum(value, val);
+        break;
     }
-    break;
     case G_TYPE_FLAGS:
     {
         guint val = 0;
@@ -440,7 +440,6 @@ pyg_value_from_pyobject_with_error(GValue *value, PyObject *obj)
         g_value_set_flags(value, val);
         return 0;
     }
-    break;
     case G_TYPE_FLOAT:
     {
         gfloat temp;

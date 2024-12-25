@@ -226,7 +226,7 @@ pygi_boxed_copy_in_place (PyGIBoxed *self)
 
 static PyMethodDef boxed_methods[] = {
     { "_clear_boxed", (PyCFunction)boxed_clear_wrapper, METH_NOARGS },
-    { NULL, NULL, 0 }
+    { NULL, NULL, 0 },
 };
 
 /**

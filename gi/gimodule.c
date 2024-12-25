@@ -201,8 +201,8 @@ create_property (const gchar  *prop_name,
 		return NULL;
 	    pspec = g_param_spec_char (prop_name, nick, blurb, minimum,
 				       maximum, default_value, flags);
+	    break;
 	}
-	break;
     case G_TYPE_UCHAR:
 	{
 	    gchar minimum, maximum, default_value;
@@ -212,8 +212,8 @@ create_property (const gchar  *prop_name,
 		return NULL;
 	    pspec = g_param_spec_uchar (prop_name, nick, blurb, minimum,
 					maximum, default_value, flags);
+	    break;
 	}
-	break;
     case G_TYPE_BOOLEAN:
 	{
 	    gboolean default_value;
@@ -222,8 +222,8 @@ create_property (const gchar  *prop_name,
 		return NULL;
 	    pspec = g_param_spec_boolean (prop_name, nick, blurb,
 					  default_value, flags);
+	    break;
 	}
-	break;
     case G_TYPE_INT:
 	{
 	    gint minimum, maximum, default_value;
@@ -233,8 +233,8 @@ create_property (const gchar  *prop_name,
 		return NULL;
 	    pspec = g_param_spec_int (prop_name, nick, blurb, minimum,
 				      maximum, default_value, flags);
+	    break;
 	}
-	break;
     case G_TYPE_UINT:
 	{
 	    guint minimum, maximum, default_value;
@@ -244,8 +244,8 @@ create_property (const gchar  *prop_name,
 		return NULL;
 	    pspec = g_param_spec_uint (prop_name, nick, blurb, minimum,
 				       maximum, default_value, flags);
+	    break;
 	}
-	break;
     case G_TYPE_LONG:
 	{
 	    glong minimum, maximum, default_value;
@@ -255,8 +255,8 @@ create_property (const gchar  *prop_name,
 		return NULL;
 	    pspec = g_param_spec_long (prop_name, nick, blurb, minimum,
 				       maximum, default_value, flags);
+	    break;
 	}
-	break;
     case G_TYPE_ULONG:
 	{
 	    gulong minimum, maximum, default_value;
@@ -266,8 +266,8 @@ create_property (const gchar  *prop_name,
 		return NULL;
 	    pspec = g_param_spec_ulong (prop_name, nick, blurb, minimum,
 					maximum, default_value, flags);
+	    break;
 	}
-	break;
     case G_TYPE_INT64:
 	{
 	    gint64 minimum, maximum, default_value;
@@ -277,8 +277,8 @@ create_property (const gchar  *prop_name,
 		return NULL;
 	    pspec = g_param_spec_int64 (prop_name, nick, blurb, minimum,
 					maximum, default_value, flags);
+	    break;
 	}
-	break;
     case G_TYPE_UINT64:
 	{
 	    guint64 minimum, maximum, default_value;
@@ -288,8 +288,8 @@ create_property (const gchar  *prop_name,
 		return NULL;
 	    pspec = g_param_spec_uint64 (prop_name, nick, blurb, minimum,
 					 maximum, default_value, flags);
+	    break;
 	}
-	break;
     case G_TYPE_ENUM:
 	{
 	    gint default_value;
@@ -304,8 +304,8 @@ create_property (const gchar  *prop_name,
 
 	    pspec = g_param_spec_enum (prop_name, nick, blurb,
 				       prop_type, default_value, flags);
+	    break;
 	}
-	break;
     case G_TYPE_FLAGS:
 	{
 	    guint default_value;
@@ -320,8 +320,8 @@ create_property (const gchar  *prop_name,
 
 	    pspec = g_param_spec_flags (prop_name, nick, blurb,
 					prop_type, default_value, flags);
+	    break;
 	}
-	break;
     case G_TYPE_FLOAT:
 	{
 	    gfloat minimum, maximum, default_value;
@@ -331,8 +331,8 @@ create_property (const gchar  *prop_name,
 		return NULL;
 	    pspec = g_param_spec_float (prop_name, nick, blurb, minimum,
 					maximum, default_value, flags);
+	    break;
 	}
-	break;
     case G_TYPE_DOUBLE:
 	{
 	    gdouble minimum, maximum, default_value;
@@ -342,8 +342,8 @@ create_property (const gchar  *prop_name,
 		return NULL;
 	    pspec = g_param_spec_double (prop_name, nick, blurb, minimum,
 					 maximum, default_value, flags);
+	    break;
 	}
-	break;
     case G_TYPE_STRING:
 	{
 	    const gchar *default_value;
@@ -352,8 +352,8 @@ create_property (const gchar  *prop_name,
 		return NULL;
 	    pspec = g_param_spec_string (prop_name, nick, blurb,
 					 default_value, flags);
+	    break;
 	}
-	break;
     case G_TYPE_PARAM:
 	if (!PyArg_ParseTuple(args, ""))
 	    return NULL;
@@ -388,8 +388,8 @@ create_property (const gchar  *prop_name,
             if (!Py_IsNone(pydefault))
                 default_value = pyg_boxed_get (pydefault, GVariant);
 	    pspec = g_param_spec_variant (prop_name, nick, blurb, G_VARIANT_TYPE_ANY, default_value, flags);
+	    break;
 	}
-	break;
     default:
 	/* unhandled pspec type ... */
 	break;
@@ -1241,7 +1241,7 @@ pyg_type_register(PyTypeObject *class, const char *type_name)
 
 	0,    /* instance_size */
 	0,    /* n_preallocs */
-	(GInstanceInitFunc) NULL
+	(GInstanceInitFunc) NULL,
     };
     gchar *new_type_name;
 
@@ -2319,7 +2319,7 @@ static PyMethodDef _gi_functions[] = {
       (PyCFunction)pyg__gvalue_get_type, METH_O },
     { "_gvalue_set",
       (PyCFunction)pyg__gvalue_set, METH_VARARGS },
-    { NULL, NULL, 0 }
+    { NULL, NULL, 0 },
 };
 
 static struct PyGI_API CAPI = {
@@ -2482,7 +2482,7 @@ pygi_register_version_tuples(PyObject *d)
 
 static PyModuleDef_Slot _gi_slots[] = {
     {Py_mod_exec, _gi_exec},
-    {0, NULL}
+    {0, NULL},
 };
 
 static struct PyModuleDef __gimodule = {
@@ -2494,7 +2494,7 @@ static struct PyModuleDef __gimodule = {
     _gi_slots,
     NULL,
     NULL,
-    NULL
+    NULL,
 };
 
 #ifdef __GNUC__

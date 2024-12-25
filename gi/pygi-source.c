@@ -157,7 +157,7 @@ static GSourceFuncs pyg_source_funcs =
     source_prepare,
     source_check,
     source_dispatch,
-    NULL
+    NULL,
 };
 
 /**

@@ -471,7 +471,7 @@ static PyGetSetDef pyg_flags_getsets[] = {
     { "first_value_nick", (getter)pyg_flags_get_first_value_nick, (setter)0 },
     { "value_names", (getter)pyg_flags_get_value_names, (setter)0 },
     { "value_nicks", (getter)pyg_flags_get_value_nicks, (setter)0 },
-    { NULL, 0, 0 }
+    { NULL, 0, 0 },
 };
 
 static PyNumberMethods pyg_flags_as_number = {

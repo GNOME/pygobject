@@ -322,7 +322,7 @@ static PyGetSetDef _PyGTypeWrapper_getsets[] = {
     { "children",  (getter)_wrap_g_type_wrapper__get_children, (setter)0 },
     { "interfaces",  (getter)_wrap_g_type_wrapper__get_interfaces, (setter)0 },
     { "depth",  (getter)_wrap_g_type_wrapper__get_depth, (setter)0 },
-    { NULL, (getter)0, (setter)0 }
+    { NULL, (getter)0, (setter)0 },
 };
 
 static PyObject*
@@ -423,7 +423,7 @@ static PyMethodDef _PyGTypeWrapper_methods[] = {
     { "has_value_table", (PyCFunction)_wrap_g_type_has_value_table, METH_NOARGS },
     { "from_name", (PyCFunction)_wrap_g_type_from_name, METH_VARARGS | METH_STATIC },
     { "is_a", (PyCFunction)_wrap_g_type_is_a, METH_VARARGS },
-    { NULL,  0, 0 }
+    { NULL,  0, 0 },
 };
 
 static int

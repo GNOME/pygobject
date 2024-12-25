@@ -445,7 +445,7 @@ pygobject_props_dir(PyGProps *self)
 
 static PyMethodDef pygobject_props_methods[] = {
     { "__dir__", (PyCFunction)pygobject_props_dir, METH_NOARGS},
-    { NULL, NULL, 0}
+    { NULL, NULL, 0},
 };
 
 
@@ -471,7 +471,7 @@ static PySequenceMethods _PyGProps_as_sequence = {
     0,
     0,
     0,
-    0
+    0,
 };
 
 PYGI_DEFINE_TYPE("gi._gi.GPropsDescr", PyGPropsDescr_Type, PyObject);
@@ -2196,7 +2196,7 @@ static PyMethodDef pygobject_methods[] = {
     { "weak_ref", (PyCFunction)pygobject_weak_ref, METH_VARARGS },
     { "__copy__", (PyCFunction)pygobject_copy, METH_NOARGS },
     { "__deepcopy__", (PyCFunction)pygobject_deepcopy, METH_VARARGS },
-    { NULL, NULL, 0 }
+    { NULL, NULL, 0 },
 };
 
 #ifdef PYGI_OBJECT_USE_CUSTOM_DICT
@@ -2242,7 +2242,7 @@ static PyGetSetDef pygobject_getsets[] = {
 #endif
     { "__grefcount__", (getter)pygobject_get_refcount, (setter)0, },
     { "__gpointer__", (getter)pygobject_get_pointer, (setter)0, },
-    { NULL, 0, 0 }
+    { NULL, 0, 0 },
 };
 
 /* ------------------------------------ */
@@ -2356,7 +2356,7 @@ pygobject_weak_ref_unref(PyGObjectWeakRef *self, PyObject *args)
 
 static PyMethodDef pygobject_weak_ref_methods[] = {
     { "unref", (PyCFunction)pygobject_weak_ref_unref, METH_NOARGS},
-    { NULL, NULL, 0}
+    { NULL, NULL, 0},
 };
 
 static PyObject *

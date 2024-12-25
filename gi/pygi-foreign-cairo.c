@@ -613,11 +613,11 @@ cairo_matrix_from_gvalue (const GValue *value)
 #define PYGI_MODINIT_FUNC PyMODINIT_FUNC
 #endif
 
-static PyMethodDef _gi_cairo_functions[] = { {0,} };
+static PyMethodDef _gi_cairo_functions[] = { {0,}, };
 
 static PyModuleDef_Slot _gi_cairo_slots[] = {
     {Py_mod_exec, _gi_cairo_exec},
-    {0, NULL}
+    {0, NULL},
 };
 
 static struct PyModuleDef __gi_cairomodule = {
@@ -629,7 +629,7 @@ static struct PyModuleDef __gi_cairomodule = {
     _gi_cairo_slots,
     NULL,
     NULL,
-    NULL
+    NULL,
 };
 
 PYGI_MODINIT_FUNC PyInit__gi_cairo (void);

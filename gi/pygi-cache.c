@@ -378,8 +378,8 @@ pygi_arg_cache_new (GITypeInfo *type_info,
                                               direction,
                                               c_arg_index,
                                               &py_arg_index);
+               break;
            }
-           break;
 
        case GI_TYPE_TAG_GLIST:
            arg_cache = pygi_arg_glist_new_from_info (type_info,
@@ -415,8 +415,8 @@ pygi_arg_cache_new (GITypeInfo *type_info,
                                                          direction,
                                                          callable_cache);
                gi_base_info_unref (interface_info);
+               break;
            }
-           break;
 
        case GI_TYPE_TAG_ERROR:
            arg_cache = pygi_arg_gerror_new_from_info (type_info,

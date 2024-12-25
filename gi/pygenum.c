@@ -372,13 +372,13 @@ pyg_enum_get_value_nick(PyGEnum *self, void *closure)
 
 static PyMethodDef pyg_enum_methods[] = {
     { "__reduce__", (PyCFunction)pyg_enum_reduce, METH_VARARGS },
-    { NULL, NULL, 0 }
+    { NULL, NULL, 0 },
 };
 
 static PyGetSetDef pyg_enum_getsets[] = {
     { "value_name", (getter)pyg_enum_get_value_name, (setter)0 },
     { "value_nick", (getter)pyg_enum_get_value_nick, (setter)0 },
-    { NULL, 0, 0 }
+    { NULL, 0, 0 },
 };
 
 /**

@@ -418,7 +418,7 @@ static PyMethodDef _PyGIRepository_methods[] = {
     { "is_registered", (PyCFunction) _wrap_gi_repository_is_registered, METH_VARARGS | METH_KEYWORDS  },
     { "prepend_library_path", (PyCFunction) _wrap_gi_repository_prepend_library_path, METH_VARARGS | METH_KEYWORDS },
     { "prepend_search_path", (PyCFunction) _wrap_gi_repository_prepend_search_path, METH_VARARGS | METH_KEYWORDS },
-    { NULL, NULL, 0 }
+    { NULL, NULL, 0 },
 };
 
 /**

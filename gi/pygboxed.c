@@ -125,7 +125,7 @@ gboxed_copy(PyGBoxed *self)
 
 static PyMethodDef pygboxed_methods[] = {
     { "copy", (PyCFunction) gboxed_copy, METH_NOARGS },
-    { NULL, NULL, 0 }
+    { NULL, NULL, 0 },
 };
 
 

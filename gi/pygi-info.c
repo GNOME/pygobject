@@ -374,7 +374,7 @@ static PyMethodDef _PyGIBaseInfo_methods[] = {
     { "get_attribute", (PyCFunction) _wrap_gi_base_info_get_attribute, METH_O },
     { "get_container", (PyCFunction) _wrap_gi_base_info_get_container, METH_NOARGS },
     { "equal", (PyCFunction) _wrap_gi_base_info_equal, METH_O },
-    { NULL, NULL, 0 }
+    { NULL, NULL, 0 },
 };
 
 /* _base_info_getattro:
@@ -423,7 +423,7 @@ _base_info_attr_module(PyGIBaseInfo *self, void *closure)
 static PyGetSetDef _base_info_getsets[] = {
         { "__name__", (getter)_base_info_attr_name, (setter)0, "Name", NULL},
         { "__module__", (getter)_base_info_attr_module, (setter)0, "Module name", NULL},
-    { NULL, 0, 0 }
+    { NULL, 0, 0 },
 };
 
 static PyObject *_callable_info_vectorcall (PyGICallableInfo *self, PyObject *const *args, size_t nargsf, PyObject *kwnames);
@@ -708,7 +708,7 @@ static PyMethodDef _PyGICallableInfo_methods[] = {
     { "skip_return", (PyCFunction) _wrap_gi_callable_info_skip_return, METH_NOARGS },
     { "get_return_attribute", (PyCFunction) _wrap_gi_callable_info_get_return_attribute, METH_O },
     { "can_throw_gerror", (PyCFunction) _wrap_gi_callable_info_can_throw_gerror, METH_NOARGS },
-    { NULL, NULL, 0 }
+    { NULL, NULL, 0 },
 };
 
 static PyObject *
@@ -719,21 +719,21 @@ _callable_info_signature (PyGICallableInfo *self)
 
 static PyGetSetDef _PyGICallableInfo_getsets[] = {
     { "__signature__", (getter)_callable_info_signature, (setter)NULL },
-    { NULL, NULL, NULL }
+    { NULL, NULL, NULL },
 };
 
 /* CallbackInfo */
 PYGI_DEFINE_TYPE ("gi.CallbackInfo", PyGICallbackInfo_Type, PyGICallableInfo);
 
 static PyMethodDef _PyGICallbackInfo_methods[] = {
-    { NULL, NULL, 0 }
+    { NULL, NULL, 0 },
 };
 
 /* ErrorDomainInfo */
 PYGI_DEFINE_TYPE ("gi.ErrorDomainInfo", PyGIErrorDomainInfo_Type, PyGIBaseInfo);
 
 static PyMethodDef _PyGIErrorDomainInfo_methods[] = {
-    { NULL, NULL, 0 }
+    { NULL, NULL, 0 },
 };
 
 /* SignalInfo */
@@ -763,7 +763,7 @@ static PyMethodDef _PyGISignalInfo_methods[] = {
     { "get_flags", (PyCFunction) _wrap_gi_signal_info_get_flags, METH_NOARGS },
     { "get_class_closure", (PyCFunction) _wrap_gi_signal_info_get_class_closure, METH_NOARGS },
     { "true_stops_emit", (PyCFunction) _wrap_gi_signal_info_true_stops_emit, METH_NOARGS },
-    { NULL, NULL, 0 }
+    { NULL, NULL, 0 },
 };
 
 /* PropertyInfo */
@@ -793,7 +793,7 @@ static PyMethodDef _PyGIPropertyInfo_methods[] = {
     { "get_flags", (PyCFunction) _wrap_gi_property_info_get_flags, METH_NOARGS },
     { "get_type_info", (PyCFunction) _wrap_gi_property_info_get_type_info, METH_NOARGS },
     { "get_ownership_transfer", (PyCFunction) _wrap_gi_property_info_get_ownership_transfer, METH_NOARGS },
-    { NULL, NULL, 0 }
+    { NULL, NULL, 0 },
 };
 
 
@@ -887,7 +887,7 @@ static PyMethodDef _PyGIArgInfo_methods[] = {
     { "get_closure_index", (PyCFunction) _wrap_gi_arg_info_get_closure_index, METH_NOARGS },
     { "get_destroy_index", (PyCFunction) _wrap_gi_arg_info_get_destroy_index, METH_NOARGS },
     { "get_type_info", (PyCFunction) _wrap_gi_arg_info_get_type_info, METH_NOARGS },
-    { NULL, NULL, 0 }
+    { NULL, NULL, 0 },
 };
 
 
@@ -982,7 +982,7 @@ static PyMethodDef _PyGITypeInfo_methods[] = {
     { "get_array_fixed_size", (PyCFunction) _wrap_gi_type_info_get_array_fixed_size, METH_NOARGS },
     { "is_zero_terminated", (PyCFunction) _wrap_gi_type_info_is_zero_terminated, METH_NOARGS },
     { "get_array_type", (PyCFunction) _wrap_gi_type_info_get_array_type, METH_NOARGS },
-    { NULL, NULL, 0 }
+    { NULL, NULL, 0 },
 };
 
 
@@ -1181,7 +1181,7 @@ static PyMethodDef _PyGIFunctionInfo_methods[] = {
     { "get_flags", (PyCFunction) _wrap_gi_function_info_get_flags, METH_NOARGS },
     { "get_property", (PyCFunction) _wrap_gi_function_info_get_property, METH_NOARGS },
     { "get_vfunc", (PyCFunction) _wrap_gi_function_info_get_vfunc, METH_NOARGS },
-    { NULL, NULL, 0 }
+    { NULL, NULL, 0 },
 };
 
 /* RegisteredTypeInfo */
@@ -1213,7 +1213,7 @@ static PyMethodDef _PyGIRegisteredTypeInfo_methods[] = {
     { "get_type_name", (PyCFunction) _wrap_gi_registered_type_info_get_type_name, METH_NOARGS },
     { "get_type_init", (PyCFunction) _wrap_gi_registered_type_info_get_type_init, METH_NOARGS },
     { "get_g_type", (PyCFunction) _wrap_gi_registered_type_info_get_g_type, METH_NOARGS },
-    { NULL, NULL, 0 }
+    { NULL, NULL, 0 },
 };
 
 
@@ -1277,7 +1277,7 @@ static PyMethodDef _PyGIStructInfo_methods[] = {
     { "get_alignment", (PyCFunction) _wrap_gi_struct_info_get_alignment, METH_NOARGS },
     { "is_gtype_struct", (PyCFunction) _wrap_gi_struct_info_is_gtype_struct, METH_NOARGS },
     { "is_foreign", (PyCFunction) _wrap_gi_struct_info_is_foreign, METH_NOARGS },
-    { NULL, NULL, 0 }
+    { NULL, NULL, 0 },
 };
 
 gboolean
@@ -1412,7 +1412,7 @@ static PyMethodDef _PyGIEnumInfo_methods[] = {
     { "is_flags", (PyCFunction) _wrap_gi_enum_info_is_flags, METH_NOARGS },
     { "get_methods", (PyCFunction) _wrap_gi_enum_info_get_methods, METH_NOARGS },
     { "get_storage_type", (PyCFunction) _wrap_gi_enum_info_get_storage_type, METH_NOARGS },
-    { NULL, NULL, 0 }
+    { NULL, NULL, 0 },
 };
 
 
@@ -1554,7 +1554,7 @@ static PyMethodDef _PyGIObjectInfo_methods[] = {
     { "get_ref_function", (PyCFunction) _wrap_gi_object_info_get_ref_function, METH_NOARGS },
     { "get_set_value_function", (PyCFunction) _wrap_gi_object_info_get_set_value_function, METH_NOARGS },
     { "get_get_value_function", (PyCFunction) _wrap_gi_object_info_get_get_value_function, METH_NOARGS },
-    { NULL, NULL, 0 }
+    { NULL, NULL, 0 },
 };
 
 
@@ -1632,7 +1632,7 @@ static PyMethodDef _PyGIInterfaceInfo_methods[] = {
     { "get_constants", (PyCFunction) _wrap_gi_interface_info_get_constants, METH_NOARGS },
     { "get_iface_struct", (PyCFunction) _wrap_gi_interface_info_get_iface_struct, METH_NOARGS },
     { "find_vfunc", (PyCFunction) _wrap_gi_interface_info_find_vfunc, METH_O },
-    { NULL, NULL, 0 }
+    { NULL, NULL, 0 },
 };
 
 /* GIConstantInfo */
@@ -1672,7 +1672,7 @@ _wrap_gi_constant_info_get_value (PyGIBaseInfo *self)
 
 static PyMethodDef _PyGIConstantInfo_methods[] = {
     { "get_value", (PyCFunction) _wrap_gi_constant_info_get_value, METH_NOARGS },
-    { NULL, NULL, 0 }
+    { NULL, NULL, 0 },
 };
 
 /* GIValueInfo */
@@ -1691,7 +1691,7 @@ _wrap_gi_value_info_get_value (PyGIBaseInfo *self)
 
 static PyMethodDef _PyGIValueInfo_methods[] = {
     { "get_value", (PyCFunction) _wrap_gi_value_info_get_value, METH_NOARGS },
-    { NULL, NULL, 0 }
+    { NULL, NULL, 0 },
 };
 
 
@@ -2078,7 +2078,7 @@ static PyMethodDef _PyGIFieldInfo_methods[] = {
     { "get_size", (PyCFunction) _wrap_gi_field_info_get_size, METH_VARARGS },
     { "get_offset", (PyCFunction) _wrap_gi_field_info_get_offset, METH_VARARGS },
     { "get_type_info", (PyCFunction) _wrap_gi_field_info_get_type_info, METH_VARARGS },
-    { NULL, NULL, 0 }
+    { NULL, NULL, 0 },
 };
 
 
@@ -2086,7 +2086,7 @@ static PyMethodDef _PyGIFieldInfo_methods[] = {
 PYGI_DEFINE_TYPE ("gi.UnresolvedInfo", PyGIUnresolvedInfo_Type, PyGIBaseInfo);
 
 static PyMethodDef _PyGIUnresolvedInfo_methods[] = {
-    { NULL, NULL, 0 }
+    { NULL, NULL, 0 },
 };
 
 /* GIVFuncInfo */
@@ -2121,7 +2121,7 @@ static PyMethodDef _PyGIVFuncInfo_methods[] = {
     { "get_offset", (PyCFunction) _wrap_gi_vfunc_info_get_offset, METH_NOARGS },
     { "get_signal", (PyCFunction) _wrap_gi_vfunc_info_get_signal, METH_NOARGS },
     { "get_invoker", (PyCFunction) _wrap_gi_vfunc_info_get_invoker, METH_NOARGS },
-    { NULL, NULL, 0 }
+    { NULL, NULL, 0 },
 };
 
 
@@ -2157,7 +2157,7 @@ static PyMethodDef _PyGIUnionInfo_methods[] = {
     { "get_methods", (PyCFunction) _wrap_gi_union_info_get_methods, METH_NOARGS },
     { "get_size", (PyCFunction) _wrap_gi_union_info_get_size, METH_NOARGS },
     { "get_alignment", (PyCFunction) _wrap_gi_union_info_get_alignment, METH_NOARGS },
-    { NULL, NULL, 0 }
+    { NULL, NULL, 0 },
 };
 
 /* Private */

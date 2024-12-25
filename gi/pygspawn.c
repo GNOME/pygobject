@@ -62,7 +62,7 @@ pyg_pid_close(PyObject *self, PyObject *args, PyObject *kwargs)
 
 static PyMethodDef pyg_pid_methods[] = {
     { "close", (PyCFunction)pyg_pid_close, METH_NOARGS },
-    { NULL, NULL, 0 }
+    { NULL, NULL, 0 },
 };
 
 static void
