@@ -93,7 +93,7 @@ which can be used similarly to the builtin Python :any:`property` decorator:
         Python type which maps to a default GType
     :param object default: A default value
     :param str nick: Property nickname
-    :param str block: Short description
+    :param str blurb: Short description
     :param GObject.ParamFlags flags: Property configuration flags
     :param object minimum: Minimum value, depends on the type
     :param object maximum: Maximum value, depends on the type
