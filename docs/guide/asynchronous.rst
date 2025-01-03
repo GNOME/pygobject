@@ -97,7 +97,7 @@ Here is a full example illustrating asynchronous programming with
 :mod:`asyncio` for a download window with async feedback.
 
 .. literalinclude:: download_asyncio.py
-:language: python
+   :language: python
 
 Key Considerations
 ~~~~~~~~~~~~~~~~~~
