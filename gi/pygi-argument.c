@@ -731,16 +731,12 @@ _pygi_argument_to_object (GIArgument  *arg,
             array = arg->v_pointer;
             item_size = g_array_get_element_size (array);
 
-            if (G_UNLIKELY (item_size > sizeof(GIArgument))) {
-                g_critical ("Stack overflow protection. "
-                            "Can't copy array element into GIArgument.");
-                return PyList_New (0);
-            }
-
             if (item_type_tag == GI_TYPE_TAG_UINT8) {
                 /* Return as a byte array */
                 object = PyBytes_FromStringAndSize (array->data, array->len);
             } else {
+                GIArgument *item;
+
                 object = PyList_New (array->len);
                 if (object == NULL) {
                     g_critical ("Failure to allocate array for %u items", array->len);
@@ -748,13 +744,15 @@ _pygi_argument_to_object (GIArgument  *arg,
                     break;
                 }
 
+                item = g_malloc0(item_size);
+
                 for (i = 0; i < array->len; i++) {
-                    GIArgument item = { 0 };
                     PyObject *py_item;
 
-                    memcpy (&item, array->data + i * item_size, item_size);
+                    /* Memcpy should fix potential alignment issues */
+                    memcpy (item, array->data + i * item_size, item_size);
 
-                    py_item = _pygi_argument_to_object (&item, item_type_info, item_transfer);
+                    py_item = _pygi_argument_to_object (item, item_type_info, item_transfer);
                     if (py_item == NULL) {
                         Py_CLEAR (object);
                         _PyGI_ERROR_PREFIX ("Item %zu: ", i);
@@ -763,8 +761,8 @@ _pygi_argument_to_object (GIArgument  *arg,
 
                     PyList_SET_ITEM (object, i, py_item);
                 }
+                g_free (item);
             }
-
             gi_base_info_unref ( (GIBaseInfo *) item_type_info);
             break;
         }
