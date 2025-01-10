@@ -2471,6 +2471,7 @@ pyi_object_register_types(PyObject *d)
     PyGPropsIter_Type.tp_dealloc = (destructor)pyg_props_iter_dealloc;
     PyGPropsIter_Type.tp_flags = Py_TPFLAGS_DEFAULT;
     PyGPropsIter_Type.tp_doc = "GObject properties iterator";
+    PyGPropsIter_Type.tp_iter = PyObject_SelfIter;
     PyGPropsIter_Type.tp_iternext = (iternextfunc)pygobject_props_iter_next;
     if (PyType_Ready(&PyGPropsIter_Type) < 0)
         return -1;

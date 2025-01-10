@@ -149,6 +149,12 @@ class TestPropertyObject(unittest.TestCase):
                                      'variant',
                                      'variant-def'])
 
+    def test_iterator_protocol_for_properties(self):
+        action = Gio.SimpleAction()
+
+        i = iter(action.props)
+        assert i is iter(i)
+
     def test_normal(self):
         obj = new(PropertyObject, normal="123")
         self.assertEqual(obj.props.normal, "123")
