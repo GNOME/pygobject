@@ -590,6 +590,7 @@ int pygi_async_register_types(PyObject *module) {
     PyGIAsync_Type.tp_methods = async_methods;
     PyGIAsync_Type.tp_members = async_members;
     PyGIAsync_Type.tp_as_async = &async_async_methods;
+    PyGIAsync_Type.tp_iter = PyObject_SelfIter;
     PyGIAsync_Type.tp_iternext = (iternextfunc) &async_iternext;
     PyGIAsync_Type.tp_init = (initproc)async_init;
     PyGIAsync_Type.tp_new = PyType_GenericNew;
