@@ -597,11 +597,7 @@ pyg_enum_get_value(GType enum_type, PyObject *obj, gint *val)
 	else
 	    res = 0;
 
-	if (enum_type != G_TYPE_NONE && PyObject_TypeCheck(obj, &PyGEnum_Type) && ((PyGEnum *) obj)->gtype != enum_type) {
-	    g_warning("expected enumeration type %s, but got %s instead",
-		      g_type_name(enum_type),
-		      g_type_name(((PyGEnum *) obj)->gtype));
-	}
+	res = pyg_enum_check_type (obj, enum_type);
     } else if (PyUnicode_Check (obj)) {
 	GEnumValue *info;
 	char *str = PyUnicode_AsUTF8 (obj);

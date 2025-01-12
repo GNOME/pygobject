@@ -1828,8 +1828,7 @@ class TestEnum(unittest.TestCase):
 
     def test_repr(self):
         self.assertEqual(repr(GIMarshallingTests.Enum.VALUE3),
-                         "<enum GI_MARSHALLING_TESTS_ENUM_VALUE3 of type "
-                         "GIMarshallingTests.Enum>")
+                         "<Enum.VALUE3: 42>")
 
     def test_enum_field_set(self):
         option = GLib.OptionEntry()
@@ -1914,8 +1913,7 @@ class TestGEnum(unittest.TestCase):
 
     def test_repr(self):
         self.assertEqual(repr(GIMarshallingTests.GEnum.VALUE3),
-                         "<enum GI_MARSHALLING_TESTS_GENUM_VALUE3 of type "
-                         "GIMarshallingTests.GEnum>")
+                         "<GEnum.VALUE3: 42>")
 
 
 class TestGFlags(unittest.TestCase):

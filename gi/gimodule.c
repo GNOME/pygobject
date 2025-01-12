@@ -2376,7 +2376,7 @@ struct _PyGObject_Functions pygobject_api_functions = {
   pyg_param_gvalue_as_pyobject,
   pyg_param_gvalue_from_pyobject,
 
-  &PyGEnum_Type,
+  NULL /* PyGEnum_Type */,
   pyg_enum_add,
   pyg_enum_from_gtype,
 
@@ -2418,6 +2418,7 @@ pygi_register_api(PyObject *d)
 {
     PyObject *api;
 
+    pygobject_api_functions.enum_type = PyGEnum_Type;
     api = PyCapsule_New (&pygobject_api_functions, "gobject._PyGObject_API", NULL);
     if (api == NULL)
         return -1;
@@ -2564,8 +2565,6 @@ _gi_exec (PyObject *module)
     if ((ret = pygi_option_group_register_types (module_dict)) < 0)
         return ret;
 
-    if ((ret = pygi_register_api (module_dict)) < 0)
-        return ret;
     if ((ret = pygi_register_constants (module)) < 0)
         return ret;
     if ((ret = pygi_register_version_tuples (module_dict)) < 0)
@@ -2576,9 +2575,11 @@ _gi_exec (PyObject *module)
         return ret;
     if ((ret = pygi_interface_register_types (module_dict)) < 0)
         return ret;
-    if ((ret = pygi_enum_register_types (module_dict)) < 0)
+    if ((ret = pygi_enum_register_types (module)) < 0)
         return ret;
     if ((ret = pygi_flags_register_types (module_dict)) < 0)
+        return ret;
+    if ((ret = pygi_register_api (module_dict)) < 0)
         return ret;
 
     PyGIWarning = PyErr_NewException ("gi.PyGIWarning", PyExc_Warning, NULL);

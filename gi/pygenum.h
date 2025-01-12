@@ -24,13 +24,7 @@ extern GQuark pygenum_class_key;
 
 #define PyGEnum_Check(x) (PyObject_IsInstance((PyObject *)x, (PyObject *)&PyGEnum_Type) && g_type_is_a(((PyGFlags*)x)->gtype, G_TYPE_ENUM))
 
-typedef struct {
-    PyLongObject parent;
-    int zero_pad; /* must always be 0 */
-    GType gtype;
-} PyGEnum;
-
-extern PyTypeObject PyGEnum_Type;
+extern PyTypeObject *PyGEnum_Type;
 
 PyObject * pyg_enum_add        (PyObject *   module,
                                 const char * type_name,
@@ -40,8 +34,10 @@ PyObject * pyg_enum_add        (PyObject *   module,
 PyObject * pyg_enum_from_gtype (GType        gtype,
                                 int          value);
 
+int pyg_enum_check_type (PyObject *obj, GType expected_type);
+
 gint pyg_enum_get_value  (GType enum_type, PyObject *obj, gint *val);
 
-int pygi_enum_register_types(PyObject *d);
+int pygi_enum_register_types(PyObject *mod);
 
 #endif /* __PYGOBJECT_ENUM_H__ */
