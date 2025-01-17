@@ -753,8 +753,8 @@ class TestGValue(unittest.TestCase):
                     self.assertEqual(value.get_value(), x)
 
     def test_enum(self):
-        value = GObject.Value(GLib.FileError, GLib.FileError.FAILED)
-        self.assertEqual(value.get_value(), GLib.FileError.FAILED)
+        value = GObject.Value(Gio.FileType, Gio.FileType.DIRECTORY)
+        self.assertEqual(value.get_value(), Gio.FileType.DIRECTORY)
 
     def test_flags(self):
         value = GObject.Value(GLib.IOFlags, GLib.IOFlags.IS_READABLE)

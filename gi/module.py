@@ -145,11 +145,7 @@ class IntrospectionModule(ModuleType):
                             assert g_type == TYPE_NONE
                             wrapper = flags_register_new_gtype_and_add(info)
                     else:
-                        if g_type.is_a(TYPE_ENUM):
-                            wrapper = enum_add(g_type)
-                        else:
-                            assert g_type == TYPE_NONE
-                            wrapper = enum_register_new_gtype_and_add(info)
+                        wrapper = enum_add(self, name, g_type, info)
 
                     wrapper.__info__ = info
                     wrapper.__module__ = self.__name__

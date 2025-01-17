@@ -20,9 +20,11 @@
 #ifndef __PYGOBJECT_ENUM_H__ 
 #define __PYGOBJECT_ENUM_H__
 
-extern GQuark pygenum_class_key;
+#include <glib-object.h>
+#include <girepository/girepository.h>
+#include <pythoncapi_compat.h>
 
-#define PyGEnum_Check(x) (PyObject_IsInstance((PyObject *)x, (PyObject *)&PyGEnum_Type) && g_type_is_a(((PyGFlags*)x)->gtype, G_TYPE_ENUM))
+extern GQuark pygenum_class_key;
 
 extern PyTypeObject *PyGEnum_Type;
 
@@ -30,6 +32,11 @@ PyObject * pyg_enum_add        (PyObject *   module,
                                 const char * type_name,
                                 const char * strip_prefix,
                                 GType        gtype);
+
+PyObject *pyg_enum_add_full (PyObject   *module,
+			     const char *typename,
+			     GType       gtype,
+			     GIEnumInfo *info);
 
 PyObject * pyg_enum_from_gtype (GType        gtype,
                                 int          value);

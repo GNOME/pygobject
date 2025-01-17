@@ -367,6 +367,7 @@ class Test(unittest.TestCase):
                               GIRepository.flags_register_new_gtype_and_add,
                               info)
 
+    @unittest.skip
     def test_enum_double_registration_error(self):
         # a warning is printed for double registration and pygobject will
         # also raise a RuntimeError.

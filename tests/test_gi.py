@@ -1543,7 +1543,10 @@ class TestGValue(unittest.TestCase):
         GIMarshallingTests.gvalue_in_with_type(value, GObject.TYPE_FLAGS)
 
     def test_gvalue_in_enum(self):
-        value = GObject.Value(GIMarshallingTests.Enum.__gtype__,
+        # It is unclear what GIMarshallingTests expects here, since
+        # GIMarshallingTests.Enum is an unregistered type.
+        # https://gitlab.gnome.org/GNOME/gobject-introspection-tests/-/issues/8
+        value = GObject.Value(GObject.GEnum.__gtype__,
                               GIMarshallingTests.Enum.VALUE3)
         GIMarshallingTests.gvalue_in_enum(value)
 
@@ -1767,15 +1770,6 @@ class TestEnum(unittest.TestCase):
         self.assertTrue(isinstance(GIMarshallingTests.Enum.VALUE3, GIMarshallingTests.Enum))
         self.assertEqual(42, GIMarshallingTests.Enum.VALUE3)
 
-    def test_value_nick_and_name(self):
-        self.assertEqual(GIMarshallingTests.Enum.VALUE1.value_nick, 'value1')
-        self.assertEqual(GIMarshallingTests.Enum.VALUE2.value_nick, 'value2')
-        self.assertEqual(GIMarshallingTests.Enum.VALUE3.value_nick, 'value3')
-
-        self.assertEqual(GIMarshallingTests.Enum.VALUE1.value_name, 'GI_MARSHALLING_TESTS_ENUM_VALUE1')
-        self.assertEqual(GIMarshallingTests.Enum.VALUE2.value_name, 'GI_MARSHALLING_TESTS_ENUM_VALUE2')
-        self.assertEqual(GIMarshallingTests.Enum.VALUE3.value_name, 'GI_MARSHALLING_TESTS_ENUM_VALUE3')
-
     def test_enum_in(self):
         GIMarshallingTests.enum_in(GIMarshallingTests.Enum.VALUE3)
         GIMarshallingTests.enum_in(42)
@@ -1808,9 +1802,10 @@ class TestEnum(unittest.TestCase):
         self.assertTrue(hasattr(GIMarshallingTests.Enum, "VALUE1"))
         self.assertRaises(AttributeError, getattr, GIMarshallingTests.SecondEnum, "VALUE1")
 
-    def test_enum_gtype_name_is_namespaced(self):
-        self.assertEqual(GIMarshallingTests.Enum.__gtype__.name,
-                         'PyGIMarshallingTestsEnum')
+    def test_enum_has_no_gtype(self):
+        # GIMarshallingTests.Enum is not registered with the GType system
+        self.assertFalse(hasattr(GIMarshallingTests.Enum, "__gtype__"))
+        self.assertFalse(isinstance(GIMarshallingTests.Enum, GObject.GEnum))
 
     def test_enum_add_type_error(self):
         self.assertRaises(TypeError,

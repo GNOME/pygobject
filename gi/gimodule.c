@@ -1457,13 +1457,18 @@ _wrap_pyg_enum_add (PyObject *self,
                     PyObject *args,
                     PyObject *kwargs)
 {
-    static char *kwlist[] = { "g_type", NULL };
-    PyObject *py_g_type;
+    static char *kwlist[] = { "module", "name", "g_type", "enum_info", NULL };
+    PyObject *module, *py_g_type;
+    PyGIBaseInfo *py_info;
+    const char *name;
     GType g_type;
+    GIEnumInfo *info;
 
     if (!PyArg_ParseTupleAndKeywords (args, kwargs,
-                                      "O!:enum_add",
-                                      kwlist, &PyGTypeWrapper_Type, &py_g_type)) {
+                                      "O!sO!O!:enum_add", kwlist,
+                                      &PyModule_Type, &module, &name,
+				      &PyGTypeWrapper_Type, &py_g_type,
+				      &PyGIEnumInfo_Type, &py_info)) {
         return NULL;
     }
 
@@ -1471,8 +1476,9 @@ _wrap_pyg_enum_add (PyObject *self,
     if (g_type == G_TYPE_INVALID) {
         return NULL;
     }
+    info = GI_ENUM_INFO (py_info->info);
 
-    return flags_enum_from_gtype (g_type, pyg_enum_add);
+    return pyg_enum_add_full (module, name, g_type, info);
 }
 
 static PyObject *

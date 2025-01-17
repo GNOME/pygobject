@@ -32,6 +32,7 @@
 GQuark pygenum_class_key;
 
 PyTypeObject *PyGEnum_Type;
+static PyObject *IntEnum_Type;
 
 PyObject*
 pyg_enum_from_gtype (GType gtype, int value)
@@ -67,17 +68,114 @@ pyg_enum_from_gtype (GType gtype, int value)
     return retval;
 }
 
-static PyObject *
-make_value(GEnumValue *value)
+static void
+add_value (PyObject *dict, const char *value_nick, int value)
 {
-    g_autofree char *upper = g_ascii_strup(value->value_nick, -1);
+    g_autofree char *upper = g_ascii_strup(value_nick, -1);
     char *c;
 
     for (c = upper; *c != '\0'; c++) {
 	if (*c == '-') *c = '_';
     }
 
-    return Py_BuildValue("(si)", upper, value->value);
+    /* skip if the name already exists in the dictionary */
+    if (PyDict_GetItemString (dict, upper) != NULL) return;
+
+    PyDict_SetItemString (dict, upper, PyLong_FromLong (value));
+}
+
+PyObject *
+pyg_enum_add_full (PyObject   *module,
+		   const char *typename,
+		   GType       gtype,
+		   GIEnumInfo *info)
+{
+    PyObject *stub, *o;
+    PyObject *base_class, *enum_name, *values, *module_name, *kwnames;
+    PyObject *args[4] = { NULL };
+
+    if (gtype == G_TYPE_NONE && info == NULL) {
+	PyErr_SetString (PyExc_ValueError, "cannot create enum without a GType or EnumInfo");
+	return NULL;
+    }
+    if (gtype != G_TYPE_NONE && !g_type_is_a (gtype, G_TYPE_ENUM)) {
+        PyErr_Format (PyExc_TypeError, "Trying to register gtype '%s' as enum when in fact it is of type '%s'",
+                      g_type_name (gtype), g_type_name (G_TYPE_FUNDAMENTAL (gtype)));
+        return NULL;
+    }
+    if (info != NULL) {
+	GType info_gtype = gi_registered_type_info_get_g_type (GI_REGISTERED_TYPE_INFO (info));
+
+	if (info_gtype != gtype) {
+	    PyErr_Format (PyExc_ValueError, "gtype '%s' does not match EnumInfo '%s'", g_type_name (gtype), gi_base_info_get_name (GI_BASE_INFO (info)));
+	    return NULL;
+	}
+    }
+
+    values = PyDict_New ();
+    /* Collect values from registered GType */
+    if (gtype != G_TYPE_NONE) {
+	GEnumClass *eclass;
+	unsigned int i;
+
+	eclass = G_ENUM_CLASS (g_type_class_ref(gtype));
+	for (i = 0; i < eclass->n_values; i++) {
+	    add_value (values, eclass->values[i].value_nick, eclass->values[i].value);
+	}
+	g_type_class_unref (eclass);
+    }
+
+    /* Collect values from GIEnumInfo (which may include additional aliases) */
+    if (info != NULL) {
+	unsigned int i, length;
+
+	length = gi_enum_info_get_n_values (info);
+	for (i = 0; i < length; i++) {
+	    GIValueInfo *v = gi_enum_info_get_value (info, i);
+
+	    add_value (values, gi_base_info_get_name (GI_BASE_INFO (v)),
+		       gi_value_info_get_value (v));
+	}
+    }
+
+    enum_name = PyUnicode_FromString (typename);
+    if (module) {
+	module_name = PyModule_GetNameObject (module);
+    } else {
+	Py_INCREF (Py_None);
+	module_name = Py_None;
+    }
+    kwnames = Py_BuildValue("(s)", "module");
+
+    if (gtype == G_TYPE_NONE)
+	base_class = IntEnum_Type;
+    else
+	base_class = (PyObject *)PyGEnum_Type;
+    args[0] = NULL;
+    args[1] = enum_name;
+    args[2] = values;
+    args[3] = module_name;
+
+    stub = PyObject_Vectorcall (base_class,
+				&args[1], 2 + PY_VECTORCALL_ARGUMENTS_OFFSET,
+				kwnames);
+    Py_DECREF (kwnames);
+    Py_DECREF (module_name);
+    Py_DECREF (values);
+    Py_DECREF (enum_name);
+
+    if (!stub) return NULL;
+
+    ((PyTypeObject *)stub)->tp_flags &= ~Py_TPFLAGS_BASETYPE;
+    if (gtype != G_TYPE_NONE) {
+	g_type_set_qdata(gtype, pygenum_class_key, stub);
+
+	o = pyg_type_wrapper_new(gtype);
+	PyDict_SetItemString(((PyTypeObject *)stub)->tp_dict, "__gtype__", o);
+	Py_DECREF (o);
+    }
+
+    return stub;
 }
 
 /*
@@ -91,11 +189,7 @@ pyg_enum_add (PyObject *   module,
 	      GType        gtype)
 {
     PyGILState_STATE state;
-    PyObject *stub, *o;
-    PyObject *enum_name, *values, *module_name, *kwnames;
-    PyObject *args[4] = { NULL };
-    GEnumClass *eclass;
-    guint i;
+    PyObject *stub;
 
     g_return_val_if_fail(typename != NULL, NULL);
     if (!g_type_is_a (gtype, G_TYPE_ENUM)) {
@@ -106,65 +200,26 @@ pyg_enum_add (PyObject *   module,
 
     state = PyGILState_Ensure();
 
-    /* Register enum values */
-    eclass = G_ENUM_CLASS(g_type_class_ref(gtype));
-
-    values = PyList_New(0);
-    for (i = 0; i < eclass->n_values; i++) {
-	PyObject *item;
-
-	item = make_value (&eclass->values[i]);
-	PyList_Append(values, item);
-	Py_DECREF (item);
-    }
-
-    enum_name = PyUnicode_FromString (typename);
-    if (module) {
-	module_name = PyModule_GetNameObject (module);
-    } else {
-	Py_INCREF (Py_None);
-	module_name = Py_None;
-    }
-    kwnames = Py_BuildValue("(s)", "module");
-
-    args[0] = NULL;
-    args[1] = enum_name;
-    args[2] = values;
-    args[3] = module_name;
-
-    stub = PyObject_Vectorcall ((PyObject *)PyGEnum_Type,
-				&args[1], 2 + PY_VECTORCALL_ARGUMENTS_OFFSET,
-				kwnames);
-    Py_DECREF (kwnames);
-    Py_DECREF (module_name);
-    Py_DECREF (values);
-    Py_DECREF (enum_name);
-    g_type_class_unref(eclass);
-
+    stub = pyg_enum_add_full (module, typename, gtype, NULL);
     if (!stub) {
 	//PyErr_SetString(PyExc_RuntimeError, "can't create const");
 	PyGILState_Release(state);
 	return NULL;
     }
 
-    ((PyTypeObject *)stub)->tp_flags &= ~Py_TPFLAGS_BASETYPE;
-
-    g_type_set_qdata(gtype, pygenum_class_key, stub);
-
-    o = pyg_type_wrapper_new(gtype);
-    PyDict_SetItemString(((PyTypeObject *)stub)->tp_dict, "__gtype__", o);
-    Py_DECREF(o);
-
     if (module) {
+	GEnumClass *eclass;
+	guint i;
+
 	/* Add it to the module name space */
 	PyModule_AddObject(module, (char*)typename, stub);
 	Py_INCREF(stub);
 
 	/* Register enum values */
 	eclass = G_ENUM_CLASS(g_type_class_ref(gtype));
-
 	for (i = 0; i < eclass->n_values; i++) {
 	    PyObject *item, *intval;
+	    PyObject *args[2] = { NULL };
 	    char *prefix;
 
 	    intval = PyLong_FromLong(eclass->values[i].value);
@@ -177,7 +232,6 @@ pyg_enum_add (PyObject *   module,
 	    PyModule_AddObject(module, prefix, item);
 	    g_free(prefix);
 	}
-
 	g_type_class_unref(eclass);
     }
 
@@ -302,7 +356,7 @@ static PyGetSetDef pyg_enum_getsets[] = {
 int
 pygi_enum_register_types(PyObject *mod)
 {
-    PyObject *enum_module, *base_class, *item;
+    PyObject *enum_module, *item;
     int i;
 
     pygenum_class_key        = g_quark_from_static_string("PyGEnum::class");
@@ -311,13 +365,12 @@ pygi_enum_register_types(PyObject *mod)
     if (!enum_module)
 	return -1;
 
-    base_class = PyObject_GetAttrString(enum_module, "IntEnum");
+    IntEnum_Type = PyObject_GetAttrString(enum_module, "IntEnum");
     Py_DECREF (enum_module);
-    if (!base_class)
+    if (!IntEnum_Type)
 	return -1;
 
-    PyGEnum_Type = (PyTypeObject *)PyObject_CallFunction(base_class, "s()", "GEnum", base_class);
-    Py_DECREF (base_class);
+    PyGEnum_Type = (PyTypeObject *)PyObject_CallFunction(IntEnum_Type, "s()", "GEnum", IntEnum_Type);
     if (!PyGEnum_Type)
 	return -1;
 
