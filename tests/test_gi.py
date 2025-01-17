@@ -13,6 +13,7 @@ import weakref
 import warnings
 import pickle
 import platform
+import enum
 
 import gi
 import gi.overrides
@@ -1808,9 +1809,8 @@ class TestEnum(unittest.TestCase):
         self.assertFalse(isinstance(GIMarshallingTests.Enum, GObject.GEnum))
 
     def test_enum_add_type_error(self):
-        self.assertRaises(TypeError,
-                          gi._gi.enum_add,
-                          GIMarshallingTests.NoTypeFlags.__gtype__)
+        with self.assertRaises(TypeError):
+            gi._gi.enum_add(self, "Flags", GIMarshallingTests.Flags.__gtype__, GIMarshallingTests.Flags.__info__)
 
     def test_type_module_name(self):
         self.assertEqual(GIMarshallingTests.Enum.__name__, "Enum")
@@ -1970,8 +1970,11 @@ class TestGFlags(unittest.TestCase):
 
     def test_repr(self):
         self.assertEqual(repr(GIMarshallingTests.Flags.VALUE2),
-                         "<flags GI_MARSHALLING_TESTS_FLAGS_VALUE2 of type "
-                         "GIMarshallingTests.Flags>")
+                         "<Flags.VALUE2: 2>")
+        self.assertIn(
+            repr(GIMarshallingTests.Flags.VALUE2 |
+                 GIMarshallingTests.Flags.VALUE3),
+            {"<Flags.VALUE2|VALUE3: 6>", "<Flags.VALUE3|VALUE2: 6>"})
 
     def test_hash(self):
         assert (hash(GIMarshallingTests.Flags.VALUE2) ==
@@ -1985,7 +1988,7 @@ class TestGFlags(unittest.TestCase):
 class TestNoTypeFlags(unittest.TestCase):
 
     def test_flags(self):
-        self.assertTrue(issubclass(GIMarshallingTests.NoTypeFlags, GObject.GFlags))
+        self.assertTrue(issubclass(GIMarshallingTests.NoTypeFlags, enum.IntFlag))
         self.assertTrue(isinstance(GIMarshallingTests.NoTypeFlags.VALUE1, GIMarshallingTests.NoTypeFlags))
         self.assertTrue(isinstance(GIMarshallingTests.NoTypeFlags.VALUE2, GIMarshallingTests.NoTypeFlags))
         self.assertTrue(isinstance(GIMarshallingTests.NoTypeFlags.VALUE3, GIMarshallingTests.NoTypeFlags))
@@ -1993,15 +1996,6 @@ class TestNoTypeFlags(unittest.TestCase):
         self.assertTrue(isinstance(GIMarshallingTests.NoTypeFlags.VALUE1 | GIMarshallingTests.NoTypeFlags.VALUE2,
                                    GIMarshallingTests.NoTypeFlags))
         self.assertEqual(1 << 1, GIMarshallingTests.NoTypeFlags.VALUE2)
-
-    def test_value_nick_and_name(self):
-        self.assertEqual(GIMarshallingTests.NoTypeFlags.VALUE1.first_value_nick, 'value1')
-        self.assertEqual(GIMarshallingTests.NoTypeFlags.VALUE2.first_value_nick, 'value2')
-        self.assertEqual(GIMarshallingTests.NoTypeFlags.VALUE3.first_value_nick, 'value3')
-
-        self.assertEqual(GIMarshallingTests.NoTypeFlags.VALUE1.first_value_name, 'GI_MARSHALLING_TESTS_NO_TYPE_FLAGS_VALUE1')
-        self.assertEqual(GIMarshallingTests.NoTypeFlags.VALUE2.first_value_name, 'GI_MARSHALLING_TESTS_NO_TYPE_FLAGS_VALUE2')
-        self.assertEqual(GIMarshallingTests.NoTypeFlags.VALUE3.first_value_name, 'GI_MARSHALLING_TESTS_NO_TYPE_FLAGS_VALUE3')
 
     def test_flags_in(self):
         GIMarshallingTests.no_type_flags_in(GIMarshallingTests.NoTypeFlags.VALUE2)
@@ -2026,9 +2020,9 @@ class TestNoTypeFlags(unittest.TestCase):
         self.assertTrue(isinstance(flags, GIMarshallingTests.NoTypeFlags))
         self.assertEqual(flags, GIMarshallingTests.NoTypeFlags.VALUE1)
 
-    def test_flags_gtype_name_is_namespaced(self):
-        self.assertEqual(GIMarshallingTests.NoTypeFlags.__gtype__.name,
-                         'PyGIMarshallingTestsNoTypeFlags')
+    def test_flags_has_no_gtype(self):
+        self.assertFalse(hasattr(GIMarshallingTests.NoTypeFlags, "__gtype__"))
+        self.assertFalse(issubclass(GIMarshallingTests.NoTypeFlags, GObject.GFlags))
 
     def test_type_module_name(self):
         self.assertEqual(GIMarshallingTests.NoTypeFlags.__name__,
@@ -2038,8 +2032,7 @@ class TestNoTypeFlags(unittest.TestCase):
 
     def test_repr(self):
         self.assertEqual(repr(GIMarshallingTests.NoTypeFlags.VALUE2),
-                         "<flags GI_MARSHALLING_TESTS_NO_TYPE_FLAGS_VALUE2 of "
-                         "type GIMarshallingTests.NoTypeFlags>")
+                         "<NoTypeFlags.VALUE2: 2>")
 
 
 class TestStructure(unittest.TestCase):

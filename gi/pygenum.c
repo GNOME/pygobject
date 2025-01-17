@@ -370,7 +370,7 @@ pygi_enum_register_types(PyObject *mod)
     if (!IntEnum_Type)
 	return -1;
 
-    PyGEnum_Type = (PyTypeObject *)PyObject_CallFunction(IntEnum_Type, "s()", "GEnum", IntEnum_Type);
+    PyGEnum_Type = (PyTypeObject *)PyObject_CallFunction(IntEnum_Type, "s()", "GEnum");
     if (!PyGEnum_Type)
 	return -1;
 

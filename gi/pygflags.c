@@ -25,192 +25,19 @@
 
 #include "pygi-type.h"
 
-#include "pygboxed.h"
 #include "pygflags.h"
 #include "pygi-util.h"
 
 GQuark pygflags_class_key;
 
-PYGI_DEFINE_TYPE("gobject.GFlags", PyGFlags_Type, PyGFlags);
-
-static PyObject *
-pyg_flags_val_new(PyObject* subclass, GType gtype, PyObject *intval)
-{
-    PyObject *args, *item;
-    args = Py_BuildValue("(O)", intval);
-    g_assert(PyObject_IsSubclass(subclass, (PyObject*) &PyGFlags_Type));
-    item = PyLong_Type.tp_new((PyTypeObject*)subclass, args, NULL);
-    Py_DECREF(args);
-    if (!item)
-	return NULL;
-    ((PyGFlags*)item)->gtype = gtype;
-
-    return item;
-}
-
-static PyObject *
-pyg_flags_richcompare(PyGFlags *self, PyObject *other, int op)
-{
-    static char warning[256];
-
-    if (!PyLong_Check (other)) {
-        Py_RETURN_NOTIMPLEMENTED;
-    }
-
-    if (PyObject_TypeCheck(other, &PyGFlags_Type) && ((PyGFlags*)other)->gtype != self->gtype) {
-	g_snprintf(warning, sizeof(warning), "comparing different flags types: %s and %s",
-		   g_type_name(self->gtype), g_type_name(((PyGFlags*)other)->gtype));
- 	if (PyErr_Warn(PyExc_Warning, warning))
- 	    return NULL;
-    }
-
-    return pyg_integer_richcompare((PyObject *)self, other, op);
-}
-
-static char *
-generate_repr(GType gtype, guint value)
-{
-    GFlagsClass *flags_class;
-    char *retval = NULL, *tmp;
-    guint i;
-
-    flags_class = g_type_class_ref(gtype);
-    g_assert(G_IS_FLAGS_CLASS(flags_class));
-
-    for (i = 0; i < flags_class->n_values; i++) {
-	/* Some types (eg GstElementState in GStreamer 0.8) has flags with 0 values,
-         * we're just ignore them for now otherwise they'll always show up
-         */
-        if (flags_class->values[i].value == 0)
-            continue;
-
-        if ((value & flags_class->values[i].value) == flags_class->values[i].value) {
-	    if (retval) {
-		tmp = g_strdup_printf("%s | %s", retval, flags_class->values[i].value_name);
-		g_free(retval);
-		retval = tmp;
-	    } else {
-		retval = g_strdup_printf("%s", flags_class->values[i].value_name);
-	    }
-	}
-    }
-
-    g_type_class_unref(flags_class);
-
-    return retval;
-}
-
-static PyObject *
-pyg_flags_repr(PyGFlags *self)
-{
-    char *tmp, *retval, *module_str, *namespace;
-    PyObject *pyretval, *module;
-
-    tmp = generate_repr(self->gtype, (guint)PyLong_AsUnsignedLongMask ((PyObject*)self));
-
-    module = PyObject_GetAttrString ((PyObject *)self, "__module__");
-    if (module == NULL) {
-        g_free (tmp);
-        return NULL;
-    }
-
-    if (!PyUnicode_Check (module)) {
-        g_free (tmp);
-        Py_DECREF (module);
-        return NULL;
-    }
-
-    module_str = PyUnicode_AsUTF8 (module);
-    namespace = g_strrstr (module_str, ".");
-    if (namespace == NULL) {
-        namespace = module_str;
-    } else {
-        namespace += 1;
-    }
-
-    if (tmp)
-        retval = g_strdup_printf("<flags %s of type %s.%s>", tmp,
-                                 namespace, Py_TYPE (self)->tp_name);
-    else
-        retval = g_strdup_printf("<flags %ld of type %s.%s>",
-                                 PyLong_AsUnsignedLongMask ((PyObject*)self),
-                                 namespace, Py_TYPE (self)->tp_name);
-    g_free(tmp);
-    Py_DECREF (module);
-
-    pyretval = PyUnicode_FromString (retval);
-    g_free(retval);
-
-    return pyretval;
-}
-
-static PyObject *
-pyg_flags_new(PyTypeObject *type, PyObject *args, PyObject *kwargs)
-{
-    static char *kwlist[] = { "value", NULL };
-    gulong value;
-    PyObject *pytc, *values, *ret, *pyint;
-    GType gtype;
-    GFlagsClass *eclass;
-
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "k", kwlist, &value))
-	return NULL;
-
-    pytc = PyObject_GetAttrString((PyObject *)type, "__gtype__");
-    if (!pytc)
-	return NULL;
-
-    if (!PyObject_TypeCheck(pytc, &PyGTypeWrapper_Type)) {
-	Py_DECREF(pytc);
-	PyErr_SetString(PyExc_TypeError,
-			"__gtype__ attribute not a typecode");
-	return NULL;
-    }
-
-    gtype = pyg_type_from_object(pytc);
-    Py_DECREF(pytc);
-
-    eclass = G_FLAGS_CLASS(g_type_class_ref(gtype));
-
-    values = PyObject_GetAttrString((PyObject *)type, "__flags_values__");
-    if (!values) {
-	g_type_class_unref(eclass);
-	return NULL;
-    }
-
-    if (!PyDict_Check(values)) {
-	PyErr_SetString(PyExc_TypeError, "__flags_values__ badly formed");
-	Py_DECREF(values);
-	g_type_class_unref(eclass);
-	return NULL;
-    }
-
-    g_type_class_unref(eclass);
-
-    pyint = PyLong_FromUnsignedLong (value);
-    ret = PyDict_GetItem(values, pyint);
-    if (!ret) {
-        PyErr_Clear();
-
-        ret = pyg_flags_val_new((PyObject *)type, gtype, pyint);
-        g_assert(ret != NULL);
-    } else {
-        Py_INCREF(ret);
-    }
-
-    Py_DECREF(pyint);
-    Py_DECREF(values);
-
-    return ret;
-}
+PyTypeObject *PyGFlags_Type;
+static PyObject *IntFlag_Type;
 
 PyObject*
 pyg_flags_from_gtype (GType gtype, guint value)
 {
-    PyObject *pyclass, *values, *retval, *pyint;
-
-    if (PyErr_Occurred())
-        return PyLong_FromUnsignedLong (0);
+    PyObject *pyclass, *retval, *intvalue;
+    PyObject *args[2];
 
     g_return_val_if_fail(gtype != G_TYPE_INVALID, NULL);
 
@@ -227,22 +54,129 @@ pyg_flags_from_gtype (GType gtype, guint value)
     if (!pyclass)
 	return PyLong_FromUnsignedLong (value);
 
-    values = PyDict_GetItemString(((PyTypeObject *)pyclass)->tp_dict,
-				  "__flags_values__");
-    pyint = PyLong_FromUnsignedLong (value);
-    retval = PyDict_GetItem(values, pyint);
+    intvalue = PyLong_FromUnsignedLong (value);
+    args[1] = intvalue;
+    retval = PyObject_Vectorcall (
+	pyclass, &args[1], 1 + PY_VECTORCALL_ARGUMENTS_OFFSET, NULL);
     if (!retval) {
 	PyErr_Clear();
-
-	retval = pyg_flags_val_new(pyclass, gtype, pyint);
-	g_assert(retval != NULL);
-    } else {
-	Py_INCREF(retval);
+	return intvalue;
     }
-    Py_DECREF(pyint);
-    
+    Py_DECREF (intvalue);
+
     return retval;
 }
+
+static void
+add_value (PyObject *dict, const char *value_nick, unsigned int value)
+{
+    g_autofree char *upper = g_ascii_strup(value_nick, -1);
+    char *c;
+
+    for (c = upper; *c != '\0'; c++) {
+        if (*c == '-') *c = '_';
+    }
+
+    /* skip if the name already exists in the dictionary */
+    if (PyDict_GetItemString (dict, upper) != NULL) return;
+
+    PyDict_SetItemString (dict, upper, PyLong_FromUnsignedLong (value));
+}
+
+PyObject *
+pyg_flags_add_full (PyObject    *module,
+		    const char  *typename,
+		    GType        gtype,
+		    GIFlagsInfo *info)
+{
+    PyObject *stub, *o;
+    PyObject *base_class, *flags_name, *values, *module_name, *kwnames;
+    PyObject *args[4] = { NULL };
+
+    if (gtype == G_TYPE_NONE && info == NULL) {
+	PyErr_SetString (PyExc_ValueError, "cannot create enum without a GType or EnumInfo");
+	return NULL;
+    }
+    if (gtype != G_TYPE_NONE && !g_type_is_a (gtype, G_TYPE_FLAGS)) {
+        PyErr_Format (PyExc_TypeError, "Trying to register gtype '%s' as flags when in fact it is of type '%s'",
+                      g_type_name (gtype), g_type_name (G_TYPE_FUNDAMENTAL (gtype)));
+        return NULL;
+    }
+    if (info != NULL) {
+	GType info_gtype = gi_registered_type_info_get_g_type (GI_REGISTERED_TYPE_INFO (info));
+
+	if (info_gtype != gtype) {
+	    PyErr_Format (PyExc_ValueError, "gtype '%s' does not match FlagsInfo '%s'", g_type_name (gtype), gi_base_info_get_name (GI_BASE_INFO (info)));
+	    return NULL;
+	}
+    }
+
+    values = PyDict_New ();
+    /* Collect values from registered GType */
+    if (gtype != G_TYPE_NONE) {
+	GFlagsClass *fclass;
+	unsigned int i;
+
+	fclass = G_FLAGS_CLASS (g_type_class_ref (gtype));
+	for (i = 0; i < fclass->n_values; i++) {
+	    add_value (values, fclass->values[i].value_nick, fclass->values[i].value);
+	}
+	g_type_class_unref (fclass);
+    }
+
+    /* Collect values from GIFlagsInfo (which may include additional aliases) */
+    if (info != NULL) {
+	unsigned int i, length;
+
+	length = gi_enum_info_get_n_values (GI_ENUM_INFO (info));
+	for (i = 0; i < length; i++) {
+	    GIValueInfo *v = gi_enum_info_get_value (GI_ENUM_INFO (info), i);
+
+	    add_value (values, gi_base_info_get_name (GI_BASE_INFO (v)),
+		       gi_value_info_get_value (v));
+	}
+    }
+
+    flags_name = PyUnicode_FromString (typename);
+    if (module) {
+	module_name = PyModule_GetNameObject (module);
+    } else {
+	Py_INCREF (Py_None);
+	module_name = Py_None;
+    }
+    kwnames = Py_BuildValue("(s)", "module");
+
+    if (gtype == G_TYPE_NONE)
+	base_class = IntFlag_Type;
+    else
+	base_class = (PyObject *)PyGFlags_Type;
+    args[0] = NULL;
+    args[1] = flags_name;
+    args[2] = values;
+    args[3] = module_name;
+
+    stub = PyObject_Vectorcall (base_class,
+				&args[1], 2 + PY_VECTORCALL_ARGUMENTS_OFFSET,
+				kwnames);
+    Py_DECREF (kwnames);
+    Py_DECREF (module_name);
+    Py_DECREF (values);
+    Py_DECREF (flags_name);
+
+    if (!stub) return NULL;
+
+    ((PyTypeObject *)stub)->tp_flags &= ~Py_TPFLAGS_BASETYPE;
+    if (gtype != G_TYPE_NONE) {
+	g_type_set_qdata(gtype, pygflags_class_key, stub);
+
+	o = pyg_type_wrapper_new(gtype);
+	PyDict_SetItemString(((PyTypeObject *)stub)->tp_dict, "__gtype__", o);
+	Py_DECREF (o);
+    }
+
+    return stub;
+}
+
 
 /*
  * pyg_flags_add
@@ -255,9 +189,7 @@ pyg_flags_add (PyObject *   module,
 	       GType        gtype)
 {
     PyGILState_STATE state;
-    PyObject *instance_dict, *stub, *values, *o;
-    GFlagsClass *eclass;
-    guint i;
+    PyObject *stub;
 
     g_return_val_if_fail(typename != NULL, NULL);
     if (!g_type_is_a(gtype, G_TYPE_FLAGS)) {
@@ -268,122 +200,85 @@ pyg_flags_add (PyObject *   module,
 
     state = PyGILState_Ensure();
 
-    /* Create a new type derived from GFlags. This is the same as:
-     * >>> stub = type(typename, (GFlags,), {})
-     */
-    instance_dict = PyDict_New();
-    stub = PyObject_CallFunction((PyObject *)&PyType_Type, "s(O)O",
-                                 typename, (PyObject *)&PyGFlags_Type,
-                                 instance_dict);
-    Py_DECREF(instance_dict);
+    stub = pyg_flags_add_full (module, typename, gtype, NULL);
     if (!stub) {
-	PyErr_SetString(PyExc_RuntimeError, "can't create GFlags subtype");
 	PyGILState_Release(state);
-        return NULL;
+	return NULL;
     }
 
-    ((PyTypeObject *)stub)->tp_flags &= ~Py_TPFLAGS_BASETYPE;
-
     if (module) {
-        PyDict_SetItemString(((PyTypeObject *)stub)->tp_dict,
-                             "__module__",
-                             PyUnicode_FromString (PyModule_GetName(module)));
+	GFlagsClass *fclass;
+	guint i;
 
           /* Add it to the module name space */
         PyModule_AddObject(module, (char*)typename, stub);
         Py_INCREF(stub);
+
+	/* Register flags values */
+	fclass = G_FLAGS_CLASS (g_type_class_ref (gtype));
+	for (i = 0; i < fclass->n_values; i++) {
+	    PyObject *item, *intval;
+	    PyObject *args[2] = { NULL };
+	    char *prefix;
+
+	    intval = PyLong_FromUnsignedLong (fclass->values[i].value);
+	    args[1] = intval;
+	    item = PyObject_Vectorcall (
+                stub, &args[1], 1 + PY_VECTORCALL_ARGUMENTS_OFFSET, NULL);
+            Py_DECREF (intval);
+
+	    prefix = g_strdup(pyg_constant_strip_prefix(fclass->values[i].value_name, strip_prefix));
+	    PyModule_AddObject(module, prefix, item);
+	    g_free(prefix);
+	}
+	g_type_class_unref (fclass);
     }
-    g_type_set_qdata(gtype, pygflags_class_key, stub);
-
-    o = pyg_type_wrapper_new(gtype);
-    PyDict_SetItemString(((PyTypeObject *)stub)->tp_dict, "__gtype__", o);
-    Py_DECREF(o);
-
-    /* Register flag values */
-    eclass = G_FLAGS_CLASS(g_type_class_ref(gtype));
-
-    values = PyDict_New();
-    for (i = 0; i < eclass->n_values; i++) {
-      PyObject *item, *intval;
-      
-      intval = PyLong_FromUnsignedLong (eclass->values[i].value);
-      g_assert(PyErr_Occurred() == NULL);
-      item = pyg_flags_val_new(stub, gtype, intval);
-      PyDict_SetItem(values, intval, item);
-      Py_DECREF(intval);
-
-      if (module) {
-	  char *prefix;
-
-	  prefix = g_strdup(pyg_constant_strip_prefix(eclass->values[i].value_name, strip_prefix));
-	  Py_INCREF(item);
-	  PyModule_AddObject(module, prefix, item);
-	  g_free(prefix);
-      }
-      Py_DECREF(item);
-    }
-
-    PyDict_SetItemString(((PyTypeObject *)stub)->tp_dict,
-			 "__flags_values__", values);
-    Py_DECREF(values);
-
-    g_type_class_unref(eclass);
 
     PyGILState_Release(state);
-
     return stub;
 }
 
-static PyObject *
-pyg_flags_and(PyGFlags *a, PyGFlags *b)
+static GType
+get_flags_gtype (PyTypeObject *type)
 {
-	if (!PyGFlags_Check(a) || !PyGFlags_Check(b))
-		return PyLong_Type.tp_as_number->nb_and((PyObject*)a,
-						       (PyObject*)b);
+    PyObject *pytc;
+    GType gtype;
 
-	return pyg_flags_from_gtype(a->gtype,
-				    (guint)(PyLong_AsUnsignedLongMask ((PyObject*)a) & PyLong_AsUnsignedLongMask ((PyObject*)b)));
+    pytc = PyObject_GetAttrString((PyObject *)type, "__gtype__");
+    if (!pytc)
+	return G_TYPE_INVALID;
+
+    if (!PyObject_TypeCheck(pytc, &PyGTypeWrapper_Type)) {
+	Py_DECREF(pytc);
+	PyErr_SetString(PyExc_TypeError,
+			"__gtype__ attribute not a typecode");
+	return G_TYPE_INVALID;
+    }
+
+    gtype = pyg_type_from_object(pytc);
+    Py_DECREF(pytc);
+
+    if (!G_TYPE_IS_FLAGS (gtype)) {
+	PyErr_SetString(PyExc_TypeError,
+			"__gtype__ attribute not a flags typecode");
+	return G_TYPE_INVALID;
+    }
+
+    return gtype;
 }
 
 static PyObject *
-pyg_flags_or(PyGFlags *a, PyGFlags *b)
+pyg_flags_get_first_value_name(PyObject *self, void *closure)
 {
-	if (!PyGFlags_Check(a) || !PyGFlags_Check(b))
-		return PyLong_Type.tp_as_number->nb_or((PyObject*)a,
-						      (PyObject*)b);
-
-	return pyg_flags_from_gtype(a->gtype, (guint)(PyLong_AsUnsignedLongMask ((PyObject*)a) | PyLong_AsUnsignedLongMask ((PyObject*)b)));
-}
-
-static PyObject *
-pyg_flags_xor(PyGFlags *a, PyGFlags *b)
-{
-	if (!PyGFlags_Check(a) || !PyGFlags_Check(b))
-		return PyLong_Type.tp_as_number->nb_xor((PyObject*)a,
-						       (PyObject*)b);
-
-	return pyg_flags_from_gtype(a->gtype,
-				    (guint)(PyLong_AsUnsignedLongMask ((PyObject*)a) ^ PyLong_AsUnsignedLongMask ((PyObject*)b)));
-
-}
-
-static PyObject *
-pyg_flags_warn (PyObject *self, PyObject *args)
-{
-    if (PyErr_Warn(PyExc_Warning, "unsupported arithmetic operation for flags type"))
-	return NULL;
-
-    Py_RETURN_NONE;
-}
-
-static PyObject *
-pyg_flags_get_first_value_name(PyGFlags *self, void *closure)
-{
+  GType gtype;
   GFlagsClass *flags_class;
   GFlagsValue *flags_value;
   PyObject *retval;
 
-  flags_class = g_type_class_ref(self->gtype);
+  gtype = get_flags_gtype (Py_TYPE (self));
+  if (gtype == G_TYPE_INVALID)
+    return NULL;
+  flags_class = g_type_class_ref(gtype);
   g_assert(G_IS_FLAGS_CLASS(flags_class));
   flags_value = g_flags_get_first_value(flags_class, (guint)PyLong_AsUnsignedLongMask ((PyObject*)self));
   if (flags_value)
@@ -397,13 +292,17 @@ pyg_flags_get_first_value_name(PyGFlags *self, void *closure)
 }
 
 static PyObject *
-pyg_flags_get_first_value_nick(PyGFlags *self, void *closure)
+pyg_flags_get_first_value_nick(PyObject *self, void *closure)
 {
+  GType gtype;
   GFlagsClass *flags_class;
   GFlagsValue *flags_value;
   PyObject *retval;
 
-  flags_class = g_type_class_ref(self->gtype);
+  gtype = get_flags_gtype (Py_TYPE (self));
+  if (gtype == G_TYPE_INVALID)
+    return NULL;
+  flags_class = g_type_class_ref(gtype);
   g_assert(G_IS_FLAGS_CLASS(flags_class));
 
   flags_value = g_flags_get_first_value(flags_class, (guint)PyLong_AsUnsignedLongMask ((PyObject*)self));
@@ -418,13 +317,17 @@ pyg_flags_get_first_value_nick(PyGFlags *self, void *closure)
 }
 
 static PyObject *
-pyg_flags_get_value_names(PyGFlags *self, void *closure)
+pyg_flags_get_value_names(PyObject *self, void *closure)
 {
+  GType gtype;
   GFlagsClass *flags_class;
   PyObject *retval;
   guint i;
 
-  flags_class = g_type_class_ref(self->gtype);
+  gtype = get_flags_gtype (Py_TYPE (self));
+  if (gtype == G_TYPE_INVALID)
+    return NULL;
+  flags_class = g_type_class_ref(gtype);
   g_assert(G_IS_FLAGS_CLASS(flags_class));
 
   retval = PyList_New(0);
@@ -444,13 +347,17 @@ pyg_flags_get_value_names(PyGFlags *self, void *closure)
 }
 
 static PyObject *
-pyg_flags_get_value_nicks(PyGFlags *self, void *closure)
+pyg_flags_get_value_nicks(PyObject *self, void *closure)
 {
+  GType gtype;
   GFlagsClass *flags_class;
   PyObject *retval;
   guint i;
 
-  flags_class = g_type_class_ref(self->gtype);
+  gtype = get_flags_gtype (Py_TYPE (self));
+  if (gtype == G_TYPE_INVALID)
+    return NULL;
+  flags_class = g_type_class_ref(gtype);
   g_assert(G_IS_FLAGS_CLASS(flags_class));
 
   retval = PyList_New(0);
@@ -474,53 +381,45 @@ static PyGetSetDef pyg_flags_getsets[] = {
     { NULL, 0, 0 },
 };
 
-static PyNumberMethods pyg_flags_as_number = {
-	(binaryfunc)pyg_flags_warn,		/* nb_add */
-	(binaryfunc)pyg_flags_warn,		/* nb_subtract */
-	(binaryfunc)pyg_flags_warn,		/* nb_multiply */
-	(binaryfunc)pyg_flags_warn,		/* nb_divide */
-	(binaryfunc)pyg_flags_warn,		/* nb_remainder */
-	(ternaryfunc)pyg_flags_warn,		/* nb_power */
-	0,					/* nb_negative */
-	0,					/* nb_positive */
-	0,					/* nb_absolute */
-	0,					/* nb_nonzero */
-	0,					/* nb_invert */
-	0,					/* nb_lshift */
-	0,					/* nb_rshift */
-	(binaryfunc)pyg_flags_and,		/* nb_and */
-	(binaryfunc)pyg_flags_xor,		/* nb_xor */
-	(binaryfunc)pyg_flags_or,		/* nb_or */
-};
-
 /**
  * Returns 0 on success, or -1 and sets an exception.
  */
 int
-pygi_flags_register_types(PyObject *d)
+pygi_flags_register_types(PyObject *mod)
 {
-    PyObject *pygtype;
+    PyObject *enum_module, *item;
+    int i;
 
     pygflags_class_key = g_quark_from_static_string("PyGFlags::class");
 
-    PyGFlags_Type.tp_base = &PyLong_Type;
-    PyGFlags_Type.tp_new = pyg_flags_new;
-    PyGFlags_Type.tp_hash = PyLong_Type.tp_hash;
-    PyGFlags_Type.tp_repr = (reprfunc)pyg_flags_repr;
-    PyGFlags_Type.tp_as_number = &pyg_flags_as_number;
-    PyGFlags_Type.tp_str = (reprfunc)pyg_flags_repr;
-    PyGFlags_Type.tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE;
-    PyGFlags_Type.tp_richcompare = (richcmpfunc)pyg_flags_richcompare;
-    PyGFlags_Type.tp_getset = pyg_flags_getsets;
-    PyGFlags_Type.tp_alloc = PyType_GenericAlloc;
-    if (PyType_Ready(&PyGFlags_Type))
-        return -1;
+    enum_module = PyImport_ImportModule("enum");
+    if (!enum_module)
+	return -1;
 
-    pygtype = pyg_type_wrapper_new (G_TYPE_FLAGS);
-    PyDict_SetItemString (PyGFlags_Type.tp_dict, "__gtype__", pygtype);
-    Py_DECREF (pygtype);
+    IntFlag_Type = PyObject_GetAttrString(enum_module, "IntFlag");
+    Py_DECREF (enum_module);
+    if (!IntFlag_Type)
+	return -1;
 
-    PyDict_SetItemString(d, "GFlags", (PyObject *)&PyGFlags_Type);
+    PyGFlags_Type = (PyTypeObject *)PyObject_CallFunction(IntFlag_Type, "s()", "GFlags");
+    if (!PyGFlags_Type)
+	return -1;
+
+    item = PyModule_GetNameObject (mod);
+    PyObject_SetAttrString ((PyObject *)PyGFlags_Type, "__module__", item);
+
+    item = pyg_type_wrapper_new (G_TYPE_FLAGS);
+    PyObject_SetAttrString ((PyObject *)PyGFlags_Type, "__gtype__", item);
+    Py_DECREF (item);
+
+    for (i = 0; pyg_flags_getsets[i].name != NULL; i++) {
+	item = PyDescr_NewGetSet(PyGFlags_Type, &pyg_flags_getsets[i]);
+	PyObject_SetAttrString ((PyObject *)PyGFlags_Type, pyg_flags_getsets[i].name, item);
+	Py_DECREF (item);
+    }
+
+    Py_INCREF (PyGFlags_Type);
+    PyModule_AddObject (mod, "GFlags", (PyObject *)PyGFlags_Type);
 
     return 0;
 }

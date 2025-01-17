@@ -42,9 +42,7 @@ from ._gi import \
     Fundamental, \
     CCallback, \
     enum_add, \
-    enum_register_new_gtype_and_add, \
     flags_add, \
-    flags_register_new_gtype_and_add, \
     GInterface
 from .types import \
     GObjectMeta, \
@@ -53,9 +51,7 @@ from .types import \
 from ._constants import \
     TYPE_NONE, \
     TYPE_BOXED, \
-    TYPE_POINTER, \
-    TYPE_ENUM, \
-    TYPE_FLAGS
+    TYPE_POINTER
 
 
 repository = Repository.get_default()
@@ -139,27 +135,11 @@ class IntrospectionModule(ModuleType):
 
                 if wrapper is None:
                     if info.is_flags():
-                        if g_type.is_a(TYPE_FLAGS):
-                            wrapper = flags_add(g_type)
-                        else:
-                            assert g_type == TYPE_NONE
-                            wrapper = flags_register_new_gtype_and_add(info)
+                        wrapper = flags_add(self, name, g_type, info)
                     else:
                         wrapper = enum_add(self, name, g_type, info)
 
                     wrapper.__info__ = info
-                    wrapper.__module__ = self.__name__
-
-                    # Don't use upper() here to avoid locale specific
-                    # identifier conversion (e. g. in Turkish 'i'.upper() == 'i')
-                    # see https://bugzilla.gnome.org/show_bug.cgi?id=649165
-                    ascii_upper_trans = ''.maketrans(
-                        'abcdefgjhijklmnopqrstuvwxyz',
-                        'ABCDEFGJHIJKLMNOPQRSTUVWXYZ')
-                    for value_info in info.get_values():
-                        value_name = value_info.get_name_unescaped().translate(ascii_upper_trans)
-                        if not hasattr(wrapper, value_name):
-                            setattr(wrapper, value_name, wrapper(value_info.get_value()))
                     for method_info in info.get_methods():
                         setattr(wrapper, method_info.__name__, method_info)
 

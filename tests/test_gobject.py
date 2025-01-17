@@ -757,8 +757,8 @@ class TestGValue(unittest.TestCase):
         self.assertEqual(value.get_value(), Gio.FileType.DIRECTORY)
 
     def test_flags(self):
-        value = GObject.Value(GLib.IOFlags, GLib.IOFlags.IS_READABLE)
-        self.assertEqual(value.get_value(), GLib.IOFlags.IS_READABLE)
+        value = GObject.Value(Gio.FileCopyFlags, Gio.FileCopyFlags.OVERWRITE)
+        self.assertEqual(value.get_value(), Gio.FileCopyFlags.OVERWRITE)
 
     def test_object(self):
         class TestObject(GObject.Object):

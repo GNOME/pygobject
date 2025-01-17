@@ -60,31 +60,6 @@ PyObject *_PyGIDefaultArgPlaceholder;
 
 static int _gi_exec (PyObject *module);
 
-/* Returns a new flag/enum type or %NULL */
-static PyObject *
-flags_enum_from_gtype (GType g_type,
-                       PyObject * (add_func) (PyObject *, const char *,
-                                              const char *, GType))
-{
-    PyObject *new_type;
-    GIRepository *repository;
-    GIBaseInfo *info;
-    const gchar *type_name;
-
-    repository = pygi_repository_get_default ();
-    info = gi_repository_find_by_gtype (repository, g_type);
-    if (info != NULL) {
-        type_name = gi_base_info_get_name (info);
-        new_type = add_func (NULL, type_name, NULL, g_type);
-        gi_base_info_unref (info);
-    } else {
-        type_name = g_type_name (g_type);
-        new_type = add_func (NULL, type_name, NULL, g_type);
-    }
-
-    return new_type;
-}
-
 static void pyg_flags_add_constants(PyObject *module, GType flags_type,
 				    const gchar *strip_prefix);
 
@@ -1482,112 +1457,22 @@ _wrap_pyg_enum_add (PyObject *self,
 }
 
 static PyObject *
-_wrap_pyg_enum_register_new_gtype_and_add (PyObject *self,
-                                           PyObject *args,
-                                           PyObject *kwargs)
-{
-    static char *kwlist[] = { "info", NULL };
-    PyGIBaseInfo *py_info;
-    GIEnumInfo *info;
-    gint n_values;
-    GEnumValue *g_enum_values;
-    int i;
-    const gchar *namespace;
-    const gchar *type_name;
-    gchar *full_name;
-    GType g_type;
-
-    if (!PyArg_ParseTupleAndKeywords (args, kwargs,
-                                      "O:enum_add_make_new_gtype",
-                                      kwlist, (PyObject *)&py_info)) {
-        return NULL;
-    }
-
-    if (!GI_IS_ENUM_INFO (py_info->info) || GI_IS_FLAGS_INFO (py_info->info)) {
-        PyErr_SetString (PyExc_TypeError, "info must be an EnumInfo");
-        return NULL;
-    }
-
-    info = (GIEnumInfo *)py_info->info;
-    n_values = gi_enum_info_get_n_values (info);
-
-    /* The new memory is zero filled which fulfills the registration
-     * function requirement that the last item is zeroed out as a terminator.
-     */
-    g_enum_values = g_new0 (GEnumValue, n_values + 1);
-
-    for (i = 0; i < n_values; i++) {
-        GIValueInfo *value_info;
-        GEnumValue *enum_value;
-        const gchar *name;
-        const gchar *c_identifier;
-
-        value_info = gi_enum_info_get_value (info, i);
-        name = gi_base_info_get_name ((GIBaseInfo *) value_info);
-        c_identifier = gi_base_info_get_attribute ((GIBaseInfo *) value_info,
-                                                  "c:identifier");
-
-        enum_value = &g_enum_values[i];
-        enum_value->value_nick = g_strdup (name);
-        enum_value->value = (gint)gi_value_info_get_value (value_info);
-
-        if (c_identifier == NULL) {
-            enum_value->value_name = enum_value->value_nick;
-        } else {
-            enum_value->value_name = g_strdup (c_identifier);
-        }
-
-        gi_base_info_unref ((GIBaseInfo *) value_info);
-    }
-
-    /* Obfuscate the full_name by prefixing it with "Py" to avoid conflicts
-     * with real GTypes. See: https://bugzilla.gnome.org/show_bug.cgi?id=692515
-     */
-    namespace = gi_base_info_get_namespace ((GIBaseInfo *) info);
-    type_name = gi_base_info_get_name ((GIBaseInfo *) info);
-    full_name = g_strconcat ("Py", namespace, type_name, NULL);
-
-    /* If enum registration fails, free all the memory allocated
-     * for the values array. This needs to leak when successful
-     * as GObject keeps a reference to the data as specified in the docs.
-     */
-    g_type = g_enum_register_static (full_name, g_enum_values);
-    if (g_type == G_TYPE_INVALID) {
-        for (i = 0; i < n_values; i++) {
-            GEnumValue *enum_value = &g_enum_values[i];
-
-            /* Only free value_name if it is different from value_nick to avoid
-             * a double free. The pointer might have been is re-used in the case
-             * c_identifier was NULL in the above loop.
-             */
-            if (enum_value->value_name != enum_value->value_nick)
-                g_free ((gchar *) enum_value->value_name);
-            g_free ((gchar *) enum_value->value_nick);
-        }
-
-        PyErr_Format (PyExc_RuntimeError, "Unable to register enum '%s'", full_name);
-
-        g_free (g_enum_values);
-        g_free (full_name);
-        return NULL;
-    }
-
-    g_free (full_name);
-    return pyg_enum_add (NULL, type_name, NULL, g_type);
-}
-
-static PyObject *
 _wrap_pyg_flags_add (PyObject *self,
                      PyObject *args,
                      PyObject *kwargs)
 {
-    static char *kwlist[] = { "g_type", NULL };
-    PyObject *py_g_type;
+    static char *kwlist[] = { "module", "name", "g_type", "flags_info", NULL };
+    PyObject *module, *py_g_type;
+    PyGIBaseInfo *py_info;
+    const char *name;
     GType g_type;
+    GIFlagsInfo *info;
 
     if (!PyArg_ParseTupleAndKeywords (args, kwargs,
-                                      "O!:flags_add",
-                                      kwlist, &PyGTypeWrapper_Type, &py_g_type)) {
+                                      "O!sO!O!:flags_add", kwlist,
+                                      &PyModule_Type, &module, &name,
+				      &PyGTypeWrapper_Type, &py_g_type,
+				      &PyGIEnumInfo_Type, &py_info)) {
         return NULL;
     }
 
@@ -1595,103 +1480,9 @@ _wrap_pyg_flags_add (PyObject *self,
     if (g_type == G_TYPE_INVALID) {
         return NULL;
     }
+    info = GI_FLAGS_INFO (py_info->info);
 
-    return flags_enum_from_gtype (g_type, pyg_flags_add);
-}
-
-static PyObject *
-_wrap_pyg_flags_register_new_gtype_and_add (PyObject *self,
-                                            PyObject *args,
-                                            PyObject *kwargs)
-{
-    static char *kwlist[] = { "info", NULL };
-    PyGIBaseInfo *py_info;
-    GIEnumInfo *info;
-    gint n_values;
-    GFlagsValue *g_flags_values;
-    int i;
-    const gchar *namespace;
-    const gchar *type_name;
-    gchar *full_name;
-    GType g_type;
-
-    if (!PyArg_ParseTupleAndKeywords (args, kwargs,
-                                      "O:flags_add_make_new_gtype",
-                                      kwlist, (PyObject *)&py_info)) {
-        return NULL;
-    }
-
-    if (!GI_IS_FLAGS_INFO (py_info->info)) {
-        PyErr_SetString (PyExc_TypeError, "info must be a FlagsInfo");
-        return NULL;
-    }
-
-    info = (GIEnumInfo *)py_info->info;
-    n_values = gi_enum_info_get_n_values (info);
-
-    /* The new memory is zero filled which fulfills the registration
-     * function requirement that the last item is zeroed out as a terminator.
-     */
-    g_flags_values = g_new0 (GFlagsValue, n_values + 1);
-
-    for (i = 0; i < n_values; i++) {
-        GIValueInfo *value_info;
-        GFlagsValue *flags_value;
-        const gchar *name;
-        const gchar *c_identifier;
-
-        value_info = gi_enum_info_get_value (info, i);
-        name = gi_base_info_get_name ((GIBaseInfo *) value_info);
-        c_identifier = gi_base_info_get_attribute ((GIBaseInfo *) value_info,
-                                                  "c:identifier");
-
-        flags_value = &g_flags_values[i];
-        flags_value->value_nick = g_strdup (name);
-        flags_value->value = (guint)gi_value_info_get_value (value_info);
-
-        if (c_identifier == NULL) {
-            flags_value->value_name = flags_value->value_nick;
-        } else {
-            flags_value->value_name = g_strdup (c_identifier);
-        }
-
-        gi_base_info_unref ((GIBaseInfo *) value_info);
-    }
-
-    /* Obfuscate the full_name by prefixing it with "Py" to avoid conflicts
-     * with real GTypes. See: https://bugzilla.gnome.org/show_bug.cgi?id=692515
-     */
-    namespace = gi_base_info_get_namespace ((GIBaseInfo *) info);
-    type_name = gi_base_info_get_name ((GIBaseInfo *) info);
-    full_name = g_strconcat ("Py", namespace, type_name, NULL);
-
-    /* If enum registration fails, free all the memory allocated
-     * for the values array. This needs to leak when successful
-     * as GObject keeps a reference to the data as specified in the docs.
-     */
-    g_type = g_flags_register_static (full_name, g_flags_values);
-    if (g_type == G_TYPE_INVALID) {
-        for (i = 0; i < n_values; i++) {
-            GFlagsValue *flags_value = &g_flags_values[i];
-
-            /* Only free value_name if it is different from value_nick to avoid
-             * a double free. The pointer might have been is re-used in the case
-             * c_identifier was NULL in the above loop.
-             */
-            if (flags_value->value_name != flags_value->value_nick)
-                g_free ((gchar *) flags_value->value_name);
-            g_free ((gchar *) flags_value->value_nick);
-        }
-
-        PyErr_Format (PyExc_RuntimeError, "Unable to register flags '%s'", full_name);
-
-        g_free (g_flags_values);
-        g_free (full_name);
-        return NULL;
-    }
-
-    g_free (full_name);
-    return pyg_flags_add (NULL, type_name, NULL, g_type);
+    return pyg_flags_add_full (module, name, g_type, info);
 }
 
 static void
@@ -2286,9 +2077,7 @@ _wrap_pygobject_new_full (PyObject *self, PyObject *args)
 static PyMethodDef _gi_functions[] = {
     { "pygobject_new_full", (PyCFunction) _wrap_pygobject_new_full, METH_VARARGS },
     { "enum_add", (PyCFunction) _wrap_pyg_enum_add, METH_VARARGS | METH_KEYWORDS },
-    { "enum_register_new_gtype_and_add", (PyCFunction) _wrap_pyg_enum_register_new_gtype_and_add, METH_VARARGS | METH_KEYWORDS },
     { "flags_add", (PyCFunction) _wrap_pyg_flags_add, METH_VARARGS | METH_KEYWORDS },
-    { "flags_register_new_gtype_and_add", (PyCFunction) _wrap_pyg_flags_register_new_gtype_and_add, METH_VARARGS | METH_KEYWORDS },
 
     { "register_interface_info", (PyCFunction) _wrap_pyg_register_interface_info, METH_VARARGS },
     { "hook_up_vfunc_implementation", (PyCFunction) _wrap_pyg_hook_up_vfunc_implementation, METH_VARARGS },
@@ -2386,7 +2175,7 @@ struct _PyGObject_Functions pygobject_api_functions = {
   pyg_enum_add,
   pyg_enum_from_gtype,
 
-  &PyGFlags_Type,
+  NULL /* PyGFlags_Type */,
   pyg_flags_add,
   pyg_flags_from_gtype,
 
@@ -2425,6 +2214,7 @@ pygi_register_api(PyObject *d)
     PyObject *api;
 
     pygobject_api_functions.enum_type = PyGEnum_Type;
+    pygobject_api_functions.flags_type = PyGFlags_Type;
     api = PyCapsule_New (&pygobject_api_functions, "gobject._PyGObject_API", NULL);
     if (api == NULL)
         return -1;
@@ -2583,7 +2373,7 @@ _gi_exec (PyObject *module)
         return ret;
     if ((ret = pygi_enum_register_types (module)) < 0)
         return ret;
-    if ((ret = pygi_flags_register_types (module_dict)) < 0)
+    if ((ret = pygi_flags_register_types (module)) < 0)
         return ret;
     if ((ret = pygi_register_api (module_dict)) < 0)
         return ret;

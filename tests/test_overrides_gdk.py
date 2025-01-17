@@ -265,19 +265,20 @@ class TestGdk(unittest.TestCase):
     def test_flags(self):
         self.assertEqual(Gdk.ModifierType.META_MASK | 0, 0x10000000)
         self.assertEqual(hex(Gdk.ModifierType.META_MASK), '0x10000000')
-        self.assertEqual(str(Gdk.ModifierType.META_MASK),
-                         '<flags GDK_META_MASK of type Gdk.ModifierType>')
+        self.assertEqual(repr(Gdk.ModifierType.META_MASK),
+                         '<ModifierType.META_MASK: 268435456>')
 
         # RELEASE_MASK does not exist in gdk4
         if not GDK4:
             self.assertEqual(Gdk.ModifierType.RELEASE_MASK | 0, 0x40000000)
             self.assertEqual(hex(Gdk.ModifierType.RELEASE_MASK), '0x40000000')
-            self.assertEqual(str(Gdk.ModifierType.RELEASE_MASK),
-                             '<flags GDK_RELEASE_MASK of type Gdk.ModifierType>')
+            self.assertEqual(repr(Gdk.ModifierType.RELEASE_MASK),
+                             '<ModifierType.RELEASE_MASK: 1073741824>')
 
             self.assertEqual(Gdk.ModifierType.RELEASE_MASK | Gdk.ModifierType.META_MASK, 0x50000000)
-            self.assertEqual(str(Gdk.ModifierType.RELEASE_MASK | Gdk.ModifierType.META_MASK),
-                             '<flags GDK_META_MASK | GDK_RELEASE_MASK of type Gdk.ModifierType>')
+            self.assertIn(repr(Gdk.ModifierType.RELEASE_MASK | Gdk.ModifierType.META_MASK),
+                          {'<ModifierType.META_MASK|RELEASE_MASK: 1342177280>',
+                           '<ModifierType.RELEASE_MASK|META_MASK: 1342177280>'})
 
     @unittest.skipIf(GDK4, "not in gdk4")
     def test_color_parse(self):

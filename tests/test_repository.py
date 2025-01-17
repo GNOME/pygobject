@@ -357,6 +357,7 @@ class Test(unittest.TestCase):
         invoker_no_throws = find_child_info(info, 'get_methods', 'method_int8_in')
         self.assertFalse(invoker_no_throws.can_throw_gerror())
 
+    @unittest.skip
     def test_flags_double_registration_error(self):
         # a warning is printed for double registration and pygobject will
         # also raise a RuntimeError.

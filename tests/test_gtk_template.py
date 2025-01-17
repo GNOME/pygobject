@@ -323,7 +323,7 @@ def test_handler_swapped_not_supported():
 
     with capture_exceptions() as exc_info:
         Foo()
-    assert "G_CONNECT_SWAPPED" in str(exc_info[0].value)
+    assert "ConnectFlags.SWAPPED" in str(exc_info[0].value)
 
 
 def test_handler_class_staticmethod():
