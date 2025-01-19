@@ -1547,8 +1547,8 @@ class TestGValue(unittest.TestCase):
         # It is unclear what GIMarshallingTests expects here, since
         # GIMarshallingTests.Enum is an unregistered type.
         # https://gitlab.gnome.org/GNOME/gobject-introspection-tests/-/issues/8
-        value = GObject.Value(GObject.GEnum.__gtype__,
-                              GIMarshallingTests.Enum.VALUE3)
+        value = GObject.Value(GIMarshallingTests.GEnum.__gtype__,
+                              GIMarshallingTests.GEnum.VALUE3)
         GIMarshallingTests.gvalue_in_enum(value)
 
     def test_gvalue_out(self):

@@ -240,7 +240,6 @@ _pygi_marshal_to_py_interface_enum (PyGIInvokeState   *state,
                                     GIArgument        *arg,
                                     gpointer          *cleanup_data)
 {
-    PyObject *py_obj = NULL;
     PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)arg_cache;
     GIBaseInfo *interface;
     long c_long;
@@ -252,14 +251,9 @@ _pygi_marshal_to_py_interface_enum (PyGIInvokeState   *state,
                                gi_enum_info_get_storage_type ((GIEnumInfo *)interface))) {
         return NULL;
     }
-
-    if (iface_cache->g_type == G_TYPE_NONE) {
-        py_obj = PyObject_CallFunction (iface_cache->py_type, "l", c_long);
-    } else {
-        py_obj = pyg_enum_from_gtype (iface_cache->g_type, (gint)c_long);
-    }
     gi_base_info_unref (interface);
-    return py_obj;
+
+    return  pyg_enum_val_new (iface_cache->py_type, c_long);
 }
 
 static PyObject *
@@ -269,7 +263,6 @@ _pygi_marshal_to_py_interface_flags (PyGIInvokeState   *state,
                                      GIArgument        *arg,
                                      gpointer          *cleanup_data)
 {
-    PyObject *py_obj = NULL;
     PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)arg_cache;
     GIBaseInfo *interface;
     long c_long;
@@ -282,33 +275,9 @@ _pygi_marshal_to_py_interface_flags (PyGIInvokeState   *state,
         gi_base_info_unref (interface);
         return NULL;
     }
-
     gi_base_info_unref (interface);
-    if (iface_cache->g_type == G_TYPE_NONE) {
-        /* An enum with a GType of None is an enum without GType */
 
-        PyObject *py_type = pygi_type_import_by_gi_info (GI_BASE_INFO (iface_cache->interface_info));
-        PyObject *py_args = NULL;
-
-        if (!py_type)
-            return NULL;
-
-        py_args = PyTuple_New (1);
-        if (PyTuple_SetItem (py_args, 0, PyLong_FromLong (c_long)) != 0) {
-            Py_DECREF (py_args);
-            Py_DECREF (py_type);
-            return NULL;
-        }
-
-        py_obj = PyObject_CallFunction (py_type, "l", c_long);
-
-        Py_DECREF (py_args);
-        Py_DECREF (py_type);
-    } else {
-        py_obj = pyg_flags_from_gtype (iface_cache->g_type, (guint)c_long);
-    }
-
-    return py_obj;
+    return  pyg_flags_val_new (iface_cache->py_type, (guint)c_long);
 }
 
 static gboolean

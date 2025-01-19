@@ -799,34 +799,16 @@ _pygi_argument_to_object (GIArgument  *arg,
 
                 Py_XDECREF (py_type);
             } else if (GI_IS_ENUM_INFO (info)) {
-                GType type;
+		PyObject *py_type;
 
-                type = gi_registered_type_info_get_g_type ( (GIRegisteredTypeInfo *) info);
+		py_type = pygi_type_import_by_gi_info (info);
+		if (!py_type)
+		    return NULL;
 
-                if (type == G_TYPE_NONE) {
-                    /* An enum with a GType of None is an enum without GType */
-                    PyObject *py_type = pygi_type_import_by_gi_info (info);
-                    PyObject *py_args = NULL;
-
-                    if (!py_type)
-                        return NULL;
-
-                    py_args = PyTuple_New (1);
-                    if (PyTuple_SetItem (py_args, 0, pygi_gint_to_py (arg->v_int)) != 0) {
-                        Py_DECREF (py_args);
-                        Py_DECREF (py_type);
-                        return NULL;
-                    }
-
-                    object = PyObject_CallFunction (py_type, "i", arg->v_int);
-
-                    Py_DECREF (py_args);
-                    Py_DECREF (py_type);
-
-                } else if (GI_IS_FLAGS_INFO (info)) {
-                    object = pyg_flags_from_gtype (type, arg->v_uint);
+                if (GI_IS_FLAGS_INFO (info)) {
+                    object = pyg_flags_val_new (py_type, arg->v_uint);
                 } else {
-                    object = pyg_enum_from_gtype (type, arg->v_int);
+                    object = pyg_enum_val_new (py_type, arg->v_int);
                 }
             } else if (GI_IS_INTERFACE_INFO (info) || GI_IS_OBJECT_INFO (info)) {
                 object = pygi_arg_object_to_py_called_from_c (arg, transfer);

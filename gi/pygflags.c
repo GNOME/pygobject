@@ -33,11 +33,31 @@ GQuark pygflags_class_key;
 PyTypeObject *PyGFlags_Type;
 static PyObject *IntFlag_Type;
 
+PyObject *
+pyg_flags_val_new (PyObject *pyclass, guint value)
+{
+    PyObject *retval, *intvalue;
+    PyObject *args[2] = { NULL };
+
+    intvalue = PyLong_FromUnsignedLong (value);
+    if (!intvalue) return NULL;
+
+    args[1] = intvalue;
+    retval = PyObject_Vectorcall (
+	pyclass, &args[1], 1 + PY_VECTORCALL_ARGUMENTS_OFFSET, NULL);
+    if (!retval && PyErr_ExceptionMatches (PyExc_ValueError)) {
+	PyErr_Clear();
+	return intvalue;
+    }
+    Py_DECREF(intvalue);
+
+    return retval;
+}
+
 PyObject*
 pyg_flags_from_gtype (GType gtype, guint value)
 {
-    PyObject *pyclass, *retval, *intvalue;
-    PyObject *args[2];
+    PyObject *pyclass;
 
     g_return_val_if_fail(gtype != G_TYPE_INVALID, NULL);
 
@@ -54,17 +74,7 @@ pyg_flags_from_gtype (GType gtype, guint value)
     if (!pyclass)
 	return PyLong_FromUnsignedLong (value);
 
-    intvalue = PyLong_FromUnsignedLong (value);
-    args[1] = intvalue;
-    retval = PyObject_Vectorcall (
-	pyclass, &args[1], 1 + PY_VECTORCALL_ARGUMENTS_OFFSET, NULL);
-    if (!retval) {
-	PyErr_Clear();
-	return intvalue;
-    }
-    Py_DECREF (intvalue);
-
-    return retval;
+    return pyg_flags_val_new (pyclass, value);
 }
 
 static void

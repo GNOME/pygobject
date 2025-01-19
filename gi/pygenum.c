@@ -34,11 +34,31 @@ GQuark pygenum_class_key;
 PyTypeObject *PyGEnum_Type;
 static PyObject *IntEnum_Type;
 
+PyObject *
+pyg_enum_val_new (PyObject *pyclass, int value)
+{
+    PyObject *retval, *intvalue;
+    PyObject *args[2] = { NULL };
+
+    intvalue = PyLong_FromLong (value);
+    if (!intvalue) return NULL;
+
+    args[1] = intvalue;
+    retval = PyObject_Vectorcall (
+	pyclass, &args[1], 1 + PY_VECTORCALL_ARGUMENTS_OFFSET, NULL);
+    if (!retval && PyErr_ExceptionMatches (PyExc_ValueError)) {
+	PyErr_Clear();
+	return intvalue;
+    }
+    Py_DECREF(intvalue);
+
+    return retval;
+}
+
 PyObject*
 pyg_enum_from_gtype (GType gtype, int value)
 {
-    PyObject *pyclass, *retval, *intvalue;
-    PyObject *args[2];
+    PyObject *pyclass;
 
     g_return_val_if_fail(gtype != G_TYPE_INVALID, NULL);
 
@@ -55,17 +75,7 @@ pyg_enum_from_gtype (GType gtype, int value)
     if (!pyclass)
 	return PyLong_FromLong(value);
 
-    intvalue = PyLong_FromLong(value);
-    args[1] = intvalue;
-    retval = PyObject_Vectorcall (
-	pyclass, &args[1], 1 + PY_VECTORCALL_ARGUMENTS_OFFSET, NULL);
-    if (!retval) {
-	PyErr_Clear();
-	return intvalue;
-    }
-    Py_DECREF(intvalue);
-
-    return retval;
+    return pyg_enum_val_new (pyclass, value);
 }
 
 static void
