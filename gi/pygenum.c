@@ -212,7 +212,6 @@ pyg_enum_add (PyObject *   module,
 
     stub = pyg_enum_add_full (module, typename, gtype, NULL);
     if (!stub) {
-	//PyErr_SetString(PyExc_RuntimeError, "can't create const");
 	PyGILState_Release(state);
 	return NULL;
     }

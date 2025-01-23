@@ -27,10 +27,7 @@ from collections import abc
 import gi._gi as GIRepository
 from gi.module import repository as repo
 from gi.repository import GObject
-from gi.repository import GIMarshallingTests
 from gi.repository import GIRepository as IntrospectedRepository
-
-from .helper import capture_glib_warnings
 
 
 def find_child_info(info, getter_name, name):
@@ -356,28 +353,6 @@ class Test(unittest.TestCase):
         # Sanity check method that does not throw.
         invoker_no_throws = find_child_info(info, 'get_methods', 'method_int8_in')
         self.assertFalse(invoker_no_throws.can_throw_gerror())
-
-    @unittest.skip
-    def test_flags_double_registration_error(self):
-        # a warning is printed for double registration and pygobject will
-        # also raise a RuntimeError.
-        GIMarshallingTests.NoTypeFlags  # cause flags registration
-        info = repo.find_by_name('GIMarshallingTests', 'NoTypeFlags')
-        with capture_glib_warnings(allow_warnings=True, allow_criticals=True):
-            self.assertRaises(RuntimeError,
-                              GIRepository.flags_register_new_gtype_and_add,
-                              info)
-
-    @unittest.skip
-    def test_enum_double_registration_error(self):
-        # a warning is printed for double registration and pygobject will
-        # also raise a RuntimeError.
-        GIMarshallingTests.Enum  # cause enum registration
-        info = repo.find_by_name('GIMarshallingTests', 'Enum')
-        with capture_glib_warnings(allow_warnings=True, allow_criticals=True):
-            self.assertRaises(RuntimeError,
-                              GIRepository.enum_register_new_gtype_and_add,
-                              info)
 
     def test_enums(self):
         self.assertTrue(hasattr(GIRepository, 'Direction'))
