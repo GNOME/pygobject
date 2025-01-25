@@ -17,14 +17,10 @@ if the list of options is long. To enable the search entry, use
 :attr:`Gtk.DropDown.props.enable_search`.
 
 .. attention::
-    Currently :class:`Gtk.DropDown` search only works fine in Python if you are
-    using a :class:`Gtk.StringList`.
     If you use custom list models with custom gobjects you must provide a
     :class:`Gtk.Expression` through :attr:`Gtk.DropDown.props.expression` so
     :class:`Gtk.DropDown` can know how to filter the gobjects.
-    The problem is :class:`Gtk.Expression` is broken in PyGObject for now
-    (`see bug report <https://gitlab.gnome.org/GNOME/pygobject/-/issues/457>`_).
-    So search won´t work for at all.
+    :class:`Gtk.Expression` has been supported in PyGObject since release 3.48.
 
 :class:`Gtk.DropDown` stores the selected item from the list model in
 :attr:`Gtk.DropDown.props.selected_item`, and the position of that item on
