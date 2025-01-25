@@ -173,3 +173,10 @@ Installing from PyPI with pip:
 
 For more details on how to use a virtualenv with PyGObject, see the
 ":ref:`devenv`" page.
+
+.. toctree::
+    :hidden:
+    :maxdepth: 1
+
+    changelog
+    bugs_repo

@@ -49,9 +49,8 @@ test = [
 ]
 docs = [
     "sphinx",
-    "sphinx-rtd-theme",
+    "pydata-sphinx-theme",
     "sphinx-copybutton>=0.5.2",
-    "furo",
 ]
 
 [tool.pdm.options]

@@ -10,3 +10,6 @@ Development Guide
     dev_environ
     style_guide
     override_guidelines
+
+    maintguide
+    packagingguide

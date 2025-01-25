@@ -9,13 +9,8 @@
 
     getting_started
     tutorials/index
-    changelog
-    bugs_repo
     guide/index
     devguide/index
-    packagingguide
-    maintguide
-    further
     contact
 
 .. image:: images/pygobject.svg
@@ -134,3 +129,13 @@ such as plugins or as optional backends:
 * `gedit <https://wiki.gnome.org/Apps/Gedit>`_- a GNOME text editor
 * `matplotlib <https://matplotlib.org/>`__ - a python 2D plotting library
 * `Totem <https://wiki.gnome.org/Apps/Videos>`__ - a video player for GNOME
+
+Further Resources
+-----------------
+
+`GNOME Developer Documentation <https://developer.gnome.org/documentation/tutorials/beginners.html>`__
+    Tutorials for creating a GNOME application using PyGObject, GTK 4, and Libadwaita.
+
+`GNOME Python API documentation <https://amolenaar.pages.gitlab.gnome.org/pygobject-docs/>`__
+    Auto generated API documentation for many libraries accessible through
+    PyGObject.

@@ -19,14 +19,11 @@ master_doc = 'index'
 exclude_patterns = ['_build', 'README.rst']
 
 pygments_style = 'tango'
-html_theme = 'furo'
+html_theme = "pydata_sphinx_theme"
 html_show_copyright = False
 html_favicon = "images/favicon.ico"
 project = "PyGObject"
 html_title = project
-html_theme_options = {
-    'source_edit_link': 'https://gitlab.gnome.org/GNOME/pygobject/-/blob/main/docs/{filename}',
-}
 
 html_context = {
     'extra_css_files': [

@@ -1,7 +1,7 @@
 .. currentmodule:: gi.repository
 
-Asynchronous Programming with GLib and PyGObject
-================================================
+Asynchronous Programming
+========================
 
 Asynchronous programming is an essential paradigm for handling tasks like I/O
 operations, ensuring that your application remains responsive. GLib supports
