@@ -4,7 +4,7 @@
 
 #include <glib.h>
 #include <glib-object.h>
-#include <pythoncapi_compat.h>
+#include <Python.h>
 
 G_BEGIN_DECLS
 
