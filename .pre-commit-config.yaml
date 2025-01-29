@@ -1,3 +1,6 @@
+# This is a configuration file for the pre-commit tool.
+# Documentation is available at https://pre-commit.com/#plugins
+
 repos:
 - repo: https://github.com/shellcheck-py/shellcheck-py
   rev: a23f6b85d0fdd5bb9d564e2579e678033debbdff  # frozen: v0.10.0.1
