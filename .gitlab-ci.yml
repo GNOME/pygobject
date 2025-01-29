@@ -5,6 +5,7 @@ include:
       tarball-artifact-path: "${TARBALL_ARTIFACT_PATH}"
       
 stages:
+  - pre-commit
   - build_and_test
   - coverage
   - deploy
@@ -17,6 +18,20 @@ default:
   cache:
     paths:
       - _ccache/
+
+pre-commit:
+  stage: pre-commit
+  variables:
+    PYTHON_VERSION: "3.13"
+    XDG_CACHE_HOME: "$CI_PROJECT_DIR/.cache"
+  script:
+    - git config --global --add safe.directory "$CI_PROJECT_DIR"
+    - python -m pip install -q pre-commit
+    - python -m pre_commit run --all-files
+  artifacts:
+    when: on_failure
+    paths:
+      - .cache/pre-commit/pre-commit.log
 
 linux:
   stage: build_and_test
