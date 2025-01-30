@@ -23,9 +23,18 @@ if host_machine.system() == 'windows'
     envdata.prepend('PATH', join_paths(get_option('prefix'), get_option('bindir')))
 endif
 
+test_deps = [
+    giext,
+    helperext,
+    schemas,
+    gi_tests.get_variable('gimarshallingtests_typelib'),
+    gi_tests.get_variable('regress_typelib'),
+    gi_tests.get_variable('utility_typelib')]
+
 python_paths = [join_paths(meson.current_build_dir(), '..')]
 if pycairo_dep.found() and pycairo_dep.type_name() == 'internal'
   python_paths += [join_paths(meson.project_build_root(), 'subprojects', 'pycairo')]
+  test_deps += [gicairoext]
 endif
 envdata.append('PYTHONPATH', python_paths)
 
@@ -34,4 +43,5 @@ test('pygobject-test-suite',
   args: ['-m', 'pytest'],
   workdir: meson.project_source_root(),
   env: envdata,
-  timeout: 90)
+  timeout: 90,
+  depends: test_deps)

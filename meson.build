@@ -221,7 +221,7 @@ if with_tests
   if glib_dep.type_name() != 'internal'
     dependency('gobject-introspection-1.0', version : gi_version_req, fallback: ['gobject-introspection', 'girepo_dep'])
   endif
-  subproject('gobject-introspection-tests', default_options : ['cairo=' + cairo_dep.found().to_string()])
+  gi_tests = subproject('gobject-introspection-tests', default_options : ['cairo=' + cairo_dep.found().to_string()])
   subdir('tests')
 endif
 
