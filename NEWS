@@ -9,9 +9,14 @@ This means that you'll need GLib >= 2.80.
 * Improved API for asyncio :mr:`352` :mr:`353`
 * Deprecation: The pygtkcompat module now throws an exception when imported :mr:`261`
 * Method signatures are exposed from PyGObject now! :mr:`341`
-* Various code improvements :mr:`346` :mr:`348` :mr:`358`
 * Use [gobject-introspection-tests](https://gitlab.gnome.org/GNOME/gobject-introspection-tests) for testing :mr:`349`
 * Convenience API for Gdk.RGBA got GDK 4, similar to GDK 3 :mr:`351`
+* Added a [pre-commit](https://pre-commit.com/) configuration :mr:`383`
+* Use standard `enum` module for enums and flags in PyGObject :mr:`394`
+* Added an option to skip [automatic initialization of GTK and GDK](https://pygobject.gnome.org/guide/imports.html) :mr:`368` 
+* PyGObject is no longer automatically tested on i386 architecture :mr:`362`
+* Fixed iterator protocol implementation for properties :mr:`392`
+* Various code and documentation improvements :mr:`346` :mr:`348` :mr:`358`, a.o.
 
 Note: the pygtkcompat module will be removed during the 3.53 development cycle.
 
