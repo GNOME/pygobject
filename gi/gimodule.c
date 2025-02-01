@@ -1375,6 +1375,60 @@ _wrap_pyg_type_register(PyObject *self, PyObject *args)
     return Py_NewRef(class);
 }
 
+static PyObject *
+_wrap_pyg_enum_register (PyObject *self, PyObject *args)
+{
+    PyTypeObject *class;
+    const char *type_name = NULL;
+    char *new_type_name;
+
+    if (!PyArg_ParseTuple (args, "O!z:enum_register",
+			   &PyType_Type, &class, &type_name))
+	return NULL;
+
+    if (!PyObject_IsSubclass ((PyObject *)class, (PyObject *)PyGEnum_Type)) {
+	PyErr_SetString(PyExc_TypeError, "class is not a GEnum");
+	return NULL;
+    }
+
+    if (type_name)
+        new_type_name = g_strdup (type_name);
+    else
+	new_type_name = get_type_name_for_class (class);
+
+    if (!pyg_enum_register (class, new_type_name))
+	return NULL;
+
+    Py_RETURN_NONE;
+}
+
+static PyObject *
+_wrap_pyg_flags_register (PyObject *self, PyObject *args)
+{
+    PyTypeObject *class;
+    const char *type_name = NULL;
+    char *new_type_name;
+
+    if (!PyArg_ParseTuple (args, "O!z:flags_register",
+			   &PyType_Type, &class, &type_name))
+	return NULL;
+
+    if (!PyObject_IsSubclass ((PyObject *)class, (PyObject *)PyGFlags_Type)) {
+	PyErr_SetString(PyExc_TypeError, "class is not a GFlags");
+	return NULL;
+    }
+
+    if (type_name)
+        new_type_name = g_strdup (type_name);
+    else
+	new_type_name = get_type_name_for_class (class);
+
+    if (!pyg_flags_register (class, new_type_name))
+	return NULL;
+
+    Py_RETURN_NONE;
+}
+
 static GHashTable *log_handlers = NULL;
 static gboolean log_handlers_disabled = FALSE;
 
@@ -2132,6 +2186,8 @@ static PyMethodDef _gi_functions[] = {
       "Execute a child program asynchronously within a glib.MainLoop()\n"
       "See the reference manual for a complete reference.\n" },
     { "type_register", _wrap_pyg_type_register, METH_VARARGS },
+    { "enum_register", _wrap_pyg_enum_register, METH_VARARGS },
+    { "flags_register", _wrap_pyg_flags_register, METH_VARARGS },
     { "signal_new", pyg_signal_new, METH_VARARGS },
     { "list_properties",
       pyg_object_class_list_properties, METH_VARARGS },

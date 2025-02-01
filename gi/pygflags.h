@@ -36,6 +36,8 @@ PyObject *pyg_flags_add_full   (PyObject    *module,
 			        const char  *typename,
 			        GType        gtype,
 			        GIFlagsInfo *info);
+gboolean  pyg_flags_register   (PyTypeObject *flags_class,
+				char         *type_name);
 PyObject *pyg_flags_val_new    (PyObject *pyclass, guint value);
 PyObject *pyg_flags_from_gtype (GType        gtype,
                                 guint        value);

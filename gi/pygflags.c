@@ -140,7 +140,11 @@ pyg_flags_add_full (PyObject    *module,
     values = PyObject_VectorcallMethod (
 	method_name, args, 3 + PY_VECTORCALL_ARGUMENTS_OFFSET, NULL);
     Py_DECREF (method_name);
-    if (!values) return NULL;
+    if (!values) {
+	Py_DECREF (flags_name);
+	Py_DECREF (bases);
+	return NULL;
+    }
 
     /* Collect values from registered GType */
     if (gtype != G_TYPE_NONE) {
@@ -258,6 +262,76 @@ pyg_flags_add (PyObject *   module,
 
     PyGILState_Release(state);
     return stub;
+}
+
+gboolean
+pyg_flags_register (PyTypeObject *flags_class, char *type_name)
+{
+    gboolean result = FALSE;
+    GType gtype = G_TYPE_INVALID;
+    GFlagsValue *flags_values = NULL;
+    PyObject *values = NULL, *pygtype = NULL;
+    Py_ssize_t length, i;
+
+    values = PySequence_List ((PyObject *)flags_class);
+    if (!values) goto out;
+
+    length = PyList_Size (values);
+    flags_values = g_new0 (GFlagsValue, length + 1);
+    for (i = 0; i < length; i++) {
+	PyObject *value = PyList_GetItem (values, i);
+	PyObject *name = PyObject_GetAttrString (value, "name");
+	char *c;
+
+	if (!name) {
+	    goto out;
+	}
+	if (!PyUnicode_Check (name)) {
+	    PyErr_SetString(PyExc_TypeError, "flags value names should be strings");
+	    Py_DECREF (name);
+	    goto out;
+	}
+
+	flags_values[i].value = PyLong_AsLong (value);
+	flags_values[i].value_name = g_strdup (PyUnicode_AsUTF8AndSize (name, NULL));
+	c = g_ascii_strdown (flags_values[i].value_name, -1);
+	flags_values[i].value_nick = c;
+	while (*c != '\0') {
+	    if (*c == '_') *c = '-';
+	    c++;
+	}
+	Py_DECREF (name);
+    }
+
+    gtype = g_flags_register_static (type_name, flags_values);
+    if (gtype == G_TYPE_INVALID) {
+	PyErr_Format (PyExc_RuntimeError, "Unable to register flags '%s'", type_name);
+	goto out;
+    }
+    g_type_set_qdata(gtype, pygflags_class_key, flags_class);
+
+    pygtype = pyg_type_wrapper_new (gtype);
+    if (!pygtype) goto out;
+    PyObject_SetAttrString ((PyObject *)flags_class, "__gtype__", pygtype);
+
+    result = TRUE;
+
+out:
+    Py_XDECREF (values);
+    Py_XDECREF (pygtype);
+    /* If type registration succeeded, this data should not be freed */
+    if (gtype == G_TYPE_INVALID) {
+	g_free (type_name);
+	if (flags_values != NULL) {
+	    GFlagsValue *v;
+	    for (v = flags_values; v->value_name != NULL; v++) {
+		g_free ((char *)v->value_name);
+		g_free ((char *)v->value_nick);
+	    }
+	    g_free (flags_values);
+	}
+    }
+    return result;
 }
 
 static GType
@@ -423,12 +497,14 @@ pygi_flags_register_types(PyObject *mod)
     if (!IntFlag_Type)
 	return -1;
 
-    PyGFlags_Type = (PyTypeObject *)PyObject_CallFunction(IntFlag_Type, "s()", "GFlags");
-    if (!PyGFlags_Type)
+    enum_module = PyImport_ImportModule("gi._enum");
+    if (!enum_module)
 	return -1;
 
-    item = PyModule_GetNameObject (mod);
-    PyObject_SetAttrString ((PyObject *)PyGFlags_Type, "__module__", item);
+    PyGFlags_Type = (PyTypeObject *)PyObject_GetAttrString(enum_module, "GFlags");
+    Py_DECREF (enum_module);
+    if (!PyGFlags_Type)
+	return -1;
 
     item = pyg_type_wrapper_new (G_TYPE_FLAGS);
     PyObject_SetAttrString ((PyObject *)PyGFlags_Type, "__gtype__", item);
@@ -440,8 +516,7 @@ pygi_flags_register_types(PyObject *mod)
 	Py_DECREF (item);
     }
 
-    Py_INCREF (PyGFlags_Type);
-    PyModule_AddObject (mod, "GFlags", (PyObject *)PyGFlags_Type);
+    PyModule_AddObject (mod, "GFlags", Py_NewRef ((PyObject *)PyGFlags_Type));
 
     return 0;
 }

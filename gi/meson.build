@@ -48,6 +48,7 @@ python_sources = [
   'events.py',
   '_constants.py',
   'docstring.py',
+  '_enum.py',
   '_error.py',
   '_gtktemplate.py',
   'importer.py',

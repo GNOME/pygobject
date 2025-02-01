@@ -38,6 +38,9 @@ PyObject *pyg_enum_add_full (PyObject   *module,
 			     GType       gtype,
 			     GIEnumInfo *info);
 
+gboolean  pyg_enum_register (PyTypeObject *enum_class,
+			     char         *type_name);
+
 PyObject *pyg_enum_val_new (PyObject *pyclass, int value);
 
 PyObject * pyg_enum_from_gtype (GType        gtype,
