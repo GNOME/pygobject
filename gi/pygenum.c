@@ -83,15 +83,18 @@ add_value (PyObject *dict, const char *value_nick, int value)
 {
     g_autofree char *upper = g_ascii_strup(value_nick, -1);
     char *c;
+    PyObject *v;
 
     for (c = upper; *c != '\0'; c++) {
 	if (*c == '-') *c = '_';
     }
 
     /* skip if the name already exists in the dictionary */
-    if (PyDict_GetItemString (dict, upper) != NULL) return;
+    if (PyMapping_HasKeyString (dict, upper)) return;
 
-    PyDict_SetItemString (dict, upper, PyLong_FromLong (value));
+    v = PyLong_FromLong (value);
+    PyMapping_SetItemString (dict, upper, v);
+    Py_DECREF (v);
 }
 
 PyObject *
@@ -100,8 +103,8 @@ pyg_enum_add_full (PyObject   *module,
 		   GType       gtype,
 		   GIEnumInfo *info)
 {
-    PyObject *stub, *o;
-    PyObject *base_class, *enum_name, *values, *module_name, *kwnames;
+    PyObject *stub;
+    PyObject *base_class, *method_name, *enum_name, *bases, *values;
     PyObject *args[4] = { NULL };
 
     if (gtype == G_TYPE_NONE && info == NULL) {
@@ -122,7 +125,24 @@ pyg_enum_add_full (PyObject   *module,
 	}
     }
 
-    values = PyDict_New ();
+    if (gtype == G_TYPE_NONE)
+	base_class = IntEnum_Type;
+    else
+	base_class = (PyObject *)PyGEnum_Type;
+    enum_name = PyUnicode_FromString (typename);
+    bases = PyTuple_New (1);
+    PyTuple_SET_ITEM (bases, 0, Py_NewRef (base_class));
+
+    args[0] = (PyObject *)Py_TYPE (base_class);
+    args[1] = enum_name;
+    args[2] = bases;
+
+    method_name = PyUnicode_FromString ("__prepare__");
+    values = PyObject_VectorcallMethod (
+	method_name, args, 3 + PY_VECTORCALL_ARGUMENTS_OFFSET, NULL);
+    Py_DECREF (method_name);
+    if (!values) return NULL;
+
     /* Collect values from registered GType */
     if (gtype != G_TYPE_NONE) {
 	GEnumClass *eclass;
@@ -148,30 +168,25 @@ pyg_enum_add_full (PyObject   *module,
 	}
     }
 
-    enum_name = PyUnicode_FromString (typename);
     if (module) {
-	module_name = PyModule_GetNameObject (module);
-    } else {
-	Py_INCREF (Py_None);
-	module_name = Py_None;
+	PyObject *module_name = PyModule_GetNameObject (module);
+
+	PyMapping_SetItemString (values, "__module__", module_name);
+	Py_DECREF (module_name);
     }
-    kwnames = Py_BuildValue("(s)", "module");
+    if (gtype != G_TYPE_NONE) {
+	PyObject *o = pyg_type_wrapper_new (gtype);
 
-    if (gtype == G_TYPE_NONE)
-	base_class = IntEnum_Type;
-    else
-	base_class = (PyObject *)PyGEnum_Type;
-    args[0] = NULL;
-    args[1] = enum_name;
-    args[2] = values;
-    args[3] = module_name;
+	PyMapping_SetItemString(values, "__gtype__", o);
+	Py_DECREF (o);
+    }
 
-    stub = PyObject_Vectorcall (base_class,
-				&args[1], 2 + PY_VECTORCALL_ARGUMENTS_OFFSET,
-				kwnames);
-    Py_DECREF (kwnames);
-    Py_DECREF (module_name);
+    args[3] = values;
+    stub = PyObject_Vectorcall ((PyObject *)Py_TYPE (base_class),
+				&args[1], 3 + PY_VECTORCALL_ARGUMENTS_OFFSET,
+				NULL);
     Py_DECREF (values);
+    Py_DECREF (bases);
     Py_DECREF (enum_name);
 
     if (!stub) return NULL;
@@ -179,10 +194,6 @@ pyg_enum_add_full (PyObject   *module,
     ((PyTypeObject *)stub)->tp_flags &= ~Py_TPFLAGS_BASETYPE;
     if (gtype != G_TYPE_NONE) {
 	g_type_set_qdata(gtype, pygenum_class_key, stub);
-
-	o = pyg_type_wrapper_new(gtype);
-	PyDict_SetItemString(((PyTypeObject *)stub)->tp_dict, "__gtype__", o);
-	Py_DECREF (o);
     }
 
     return stub;
