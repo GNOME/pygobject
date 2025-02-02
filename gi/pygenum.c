@@ -381,6 +381,11 @@ pyg_enum_get_value_name(PyObject *self, void *closure)
   g_assert(G_IS_ENUM_CLASS(enum_class));
 
   enum_value = g_enum_get_value(enum_class, intvalue);
+  if (enum_value == NULL) {
+      PyErr_Format (PyExc_ValueError, "no GEnumValue found for %d", intvalue);
+      g_type_class_unref (enum_class);
+      return NULL;
+  }
 
   retval = pygi_utf8_to_py (enum_value->value_name);
   g_type_class_unref(enum_class);
@@ -407,6 +412,11 @@ pyg_enum_get_value_nick(PyObject *self, void *closure)
   g_assert(G_IS_ENUM_CLASS(enum_class));
 
   enum_value = g_enum_get_value(enum_class, intvalue);
+  if (enum_value == NULL) {
+      PyErr_Format (PyExc_ValueError, "no GEnumValue found for %d", intvalue);
+      g_type_class_unref (enum_class);
+      return NULL;
+  }
 
   retval = pygi_utf8_to_py (enum_value->value_nick);
 
