@@ -67,6 +67,7 @@ build = ["--no-wheel"]
 
 [tool.meson-python.args]
 setup = ["-Dtests=false", "-Dwheel=true", "--wrap-mode=nofallback"]
+dist = ["--include-subprojects"]
 
 [tool.pytest.ini_options]
 testpaths = [
