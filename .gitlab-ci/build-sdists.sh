@@ -21,15 +21,11 @@ VERSION=$(meson introspect --projectinfo --indent _sdist_build | python -c 'impo
 
 rm -Rf _sdist_build
 
-# Now the sdist for pypi
-# Mark odd versions as PEP440 development versions (e.g. 0.1.0 -> 0.1.0.dev0)
-if [[ "$VERSION" =~ ^[0-9]\.[0-9]*[13579]\. ]]
-then
-    meson rewrite kwargs set project / version "${VERSION}".dev0
+[[ "$VERSION" =~ ^[0-9]\.[0-9]*[13579]\. ]] && cat << EOF
 
-    git add meson.build
-    GIT_AUTHOR_NAME="build-sdist" GIT_AUTHOR_EMAIL=noreply@gnome.org GIT_COMMITTER_NAME="build-sdist" GIT_COMMITTER_EMAIL=noreply@gnome.org git commit -m "Python .dev build commit"
-fi
+****************** ATTENTION ******************
+          This is an UNstable release.
+       Do NOT upload this release to PyPI.
+****************** ATTENTION ******************
 
-python -m pip install --upgrade build
-python -m build --sdist
+EOF
