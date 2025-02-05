@@ -14,9 +14,6 @@ Making a Release
 #. In case of a stable release, upload to PyPI:
    ``twine upload dist/pygobject-3.X.Y.tar.gz``
 #. Commit post-release version bump to pyproject.toml
-#. Upload tarball: ``scp dist/pygobject-3.X.Y.tar.gz user@master.gnome.org:``
-#. Install tarball:
-   ``ssh user@master.gnome.org 'ftpadmin install pygobject-3.X.Y.tar.xz'``
 #. In case the release happens on a stable branch copy the NEWS changes to
    the main branch
 

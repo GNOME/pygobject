@@ -11,7 +11,7 @@ stages:
   - deploy
 
 variables:
-  TARBALL_ARTIFACT_PATH: "dist/${CI_PROJECT_NAME}-${CI_COMMIT_TAG}.tar.xz"
+  TARBALL_ARTIFACT_PATH: "dist/${CI_PROJECT_NAME}-${CI_COMMIT_TAG}.tar.gz"
 
 default:
   image: registry.gitlab.gnome.org/gnome/pygobject/main:v26
