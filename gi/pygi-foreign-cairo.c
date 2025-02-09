@@ -280,7 +280,7 @@ cairo_path_release (GIBaseInfo *base_info,
 
 static PyObject *
 cairo_font_face_to_arg (PyObject        *value,
-                        GIInterfaceInfo *interface_info,
+                        GIRegisteredTypeInfo *interface_info,
                         GITransfer       transfer,
                         GIArgument      *arg)
 {
@@ -305,7 +305,7 @@ cairo_font_face_to_arg (PyObject        *value,
 }
 
 static PyObject *
-cairo_font_face_from_arg (GIInterfaceInfo *interface_info,
+cairo_font_face_from_arg (GIRegisteredTypeInfo *interface_info,
                           GITransfer       transfer,
                           gpointer         data)
 {
@@ -414,7 +414,7 @@ cairo_font_options_release (GIBaseInfo *base_info,
 
 static PyObject *
 cairo_scaled_font_to_arg (PyObject        *value,
-                          GIInterfaceInfo *interface_info,
+                          GIRegisteredTypeInfo *interface_info,
                           GITransfer       transfer,
                           GIArgument      *arg)
 {
@@ -439,7 +439,7 @@ cairo_scaled_font_to_arg (PyObject        *value,
 }
 
 static PyObject *
-cairo_scaled_font_from_arg (GIInterfaceInfo *interface_info,
+cairo_scaled_font_from_arg (GIRegisteredTypeInfo *interface_info,
                             GITransfer       transfer,
                             gpointer         data)
 {
@@ -453,7 +453,7 @@ cairo_scaled_font_from_arg (GIInterfaceInfo *interface_info,
 
 static PyObject *
 cairo_scaled_font_release (GIBaseInfo *base_info,
-                       gpointer    struct_)
+                           gpointer    struct_)
 {
     cairo_scaled_font_destroy ( (cairo_scaled_font_t*) struct_);
     Py_RETURN_NONE;

@@ -114,6 +114,20 @@ class Test(unittest.TestCase):
         options = cairo.FontOptions()
         Regress.test_cairo_font_options_none_in(options)
 
+    def test_cairo_font_face_full_return(self):
+        surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, 10, 10)
+        context = cairo.Context(surface)
+        font_face = Regress.test_cairo_font_face_full_return(context)
+
+        assert font_face
+
+    def test_cairo_scaled_font_full_return(self):
+        surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, 10, 10)
+        context = cairo.Context(surface)
+        scaled_font = Regress.test_cairo_scaled_font_full_return(context)
+
+        assert scaled_font
+
     def test_cairo_pattern_full_in(self):
         pattern = cairo.SolidPattern(1, 1, 1, 1)
         Regress.test_cairo_pattern_full_in(pattern)
