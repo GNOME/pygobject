@@ -2,7 +2,7 @@
 
 set -e
 
-python -m pip install --upgrade build meson
+python -m pip install --upgrade build
 python -m build --sdist
 
 VERSION=$(grep version meson.build | head -1 | sed "s/^.*'\([0-9\.]*\)'.*$/\1/")
