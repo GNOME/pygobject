@@ -47,6 +47,9 @@ pythoncapi_compat = subproject('pythoncapi-compat')
 pythoncapi_compat_dep = declare_dependency(
     include_directories: pythoncapi_compat.get_variable('incdir')
 )
+meson.add_dist_script(
+    python,
+    join_paths(meson.current_source_dir(), 'subprojects', 'packagefiles', 'pythoncapi-compat-dist.py'))
 
 if not with_pycairo.disabled()
   cairo_dep = dependency('cairo', required: with_pycairo.enabled() and cc.get_id() != 'msvc')
