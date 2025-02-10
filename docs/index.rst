@@ -29,7 +29,7 @@ If you want to write a Python application for `GNOME
 PyGObject is the way to go. To get started, check out the "`GNOME Developer Documentation
 <https://developer.gnome.org/documentation/tutorials/beginners.html>`__". For more
 information on specific libraries, check out the
-`GNOME Python API documentation <https://amolenaar.pages.gitlab.gnome.org/pygobject-docs/>`__.
+`GNOME Python API documentation <https://api.pygobject.gnome.org/>`__.
 
 .. code:: python
 
@@ -136,6 +136,6 @@ Further Resources
 `GNOME Developer Documentation <https://developer.gnome.org/documentation/tutorials/beginners.html>`__
     Tutorials for creating a GNOME application using PyGObject, GTK 4, and Libadwaita.
 
-`GNOME Python API documentation <https://amolenaar.pages.gitlab.gnome.org/pygobject-docs/>`__
+`GNOME Python API documentation <https://api.pygobject.gnome.org/>`__
     Auto generated API documentation for many libraries accessible through
     PyGObject.

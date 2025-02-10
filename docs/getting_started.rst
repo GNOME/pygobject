@@ -44,7 +44,7 @@ and their dependencies. Follow the instructions for your platform below.
 ======================================================= ==================================================== ==========================================================
 
 After running the example application have a look at the :doc:`/tutorials/index` for an overview of how to create GTK apps and the `GNOME Python API docs
-<https://amolenaar.pages.gitlab.gnome.org/pygobject-docs>`__ for API documentation for all supported
+<https://api.pygobject.gnome.org/>`__ for API documentation for all supported
 libraries. 
 
 For full IDE support (incl. autocomplete) you will also need typing stubs available here `PyGObject-stubs <https://pypi.org/project/PyGObject-stubs/>`_.

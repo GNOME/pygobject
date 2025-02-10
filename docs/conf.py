@@ -9,7 +9,7 @@ intersphinx_mapping = {
     'python': ('https://docs.python.org/3', None),
     'cairo': ('https://pycairo.readthedocs.io/en/latest', None),
     'apidocs': (
-        'https://amolenaar.pages.gitlab.gnome.org/pygobject-docs',
+        'https://api.pygobject.gnome.org/',
         None,
     ),
 }

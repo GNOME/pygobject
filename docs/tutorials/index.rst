@@ -16,7 +16,7 @@ Although here we try to describe the most important classes and methods from
 GObject based libraries like GTK, it is not supposed to serve as an API
 reference. Please refer to the :ref:`api-references` list where you will
 find a detailed description of the API for each library. Also there's a
-`Python-specific reference <https://amolenaar.pages.gitlab.gnome.org/pygobject-docs/>`_
+`Python-specific reference <https://api.pygobject.gnome.org/>`_
 available.
 
 .. note::
@@ -38,7 +38,7 @@ API References
 * `Gio <https://docs.gtk.org/gio/>`_
 * `GLib <https://docs.gtk.org/glib/>`_
 * `Adwaita <https://gnome.pages.gitlab.gnome.org/libadwaita/doc/main/>`_
-* `Python-specific references <https://amolenaar.pages.gitlab.gnome.org/pygobject-docs/>`_
+* `Python-specific references <https://api.pygobject.gnome.org/>`_
 
 Other Resources
 ---------------
