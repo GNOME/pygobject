@@ -128,37 +128,6 @@ __all__.append('DBusArgInfo')
 
 
 @override
-class DBusConnection(Gio.DBusConnection):
-    __init__ = _warn_init(Gio.DBusConnection)
-
-    def register_object(self,
-                        object_path,
-                        interface_info,
-                        method_call_closure=None,
-                        get_property_closure=None,
-                        set_property_closure=None):
-        if method_call_closure is not None:
-            def wrapped_method_call_closure(connection, sender, object_path,
-                                            interface_name, method_name, parameters,
-                                            invocation):
-                method_call_closure(connection, sender, object_path,
-                                    interface_name, method_name, parameters,
-                                    invocation)
-                invocation._unref()
-        else:
-            wrapped_method_call_closure = None
-
-        return super().register_object(object_path,
-                                       interface_info,
-                                       wrapped_method_call_closure,
-                                       get_property_closure,
-                                       set_property_closure)
-
-
-__all__.append('DBusConnection')
-
-
-@override
 class DBusMethodInfo(Gio.DBusMethodInfo):
     __init__ = _warn_init(Gio.DBusMethodInfo)
 
