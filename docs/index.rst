@@ -17,6 +17,13 @@
    :align: center
    :width: 400px
    :height: 98px
+   :class: only-light
+
+.. image:: images/pygobject-dark.svg
+   :align: center
+   :width: 400px
+   :height: 98px
+   :class: only-dark
 
 |
 
