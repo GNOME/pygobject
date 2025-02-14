@@ -80,7 +80,7 @@ pyg_flags_from_gtype (GType gtype, guint value)
 static void
 add_value (PyObject *dict, const char *value_nick, unsigned int value)
 {
-    g_autofree char *upper = g_ascii_strup(value_nick, -1);
+    char *upper = g_ascii_strup(value_nick, -1);
     char *c;
     PyObject *v;
 
@@ -89,11 +89,15 @@ add_value (PyObject *dict, const char *value_nick, unsigned int value)
     }
 
     /* skip if the name already exists in the dictionary */
-    if (PyMapping_HasKeyString (dict, upper)) return;
+    if (PyMapping_HasKeyString (dict, upper)) {
+        g_free (upper);
+        return;
+    }
 
     v = PyLong_FromUnsignedLong (value);
     PyMapping_SetItemString (dict, upper, v);
     Py_DECREF (v);
+    g_free (upper);
 }
 
 PyObject *
