@@ -110,7 +110,6 @@ def generate_signature(info: CallableInfo) -> Signature:
         elif info.is_method():
             params.append(Parameter("self", Parameter.POSITIONAL_OR_KEYWORD))
     elif isinstance(info, VFuncInfo):
-        params.append(Parameter("type", Parameter.POSITIONAL_OR_KEYWORD))
         params.append(Parameter("self", Parameter.POSITIONAL_OR_KEYWORD))
 
     args = info.get_arguments()

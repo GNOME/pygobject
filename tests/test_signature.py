@@ -278,13 +278,16 @@ class Test(unittest.TestCase):
         )
 
     def test_object_virtual_method(self):
+
+        def expected_unbound(object: GObject.GObject) -> None:
+            pass
+
         class A:
-            @classmethod
-            def expected(cls, self, object: GObject.GObject) -> None:
+            def expected(self, object: GObject.GObject) -> None:
                 pass
 
         self.assertSignatureEqual(
-            GIMarshallingTests.Object.do_vfunc_in_object_transfer_none, A.expected
+            GIMarshallingTests.Object.do_vfunc_in_object_transfer_none, expected_unbound
         )
         self.assertSignatureEqual(
             GIMarshallingTests.Object().do_vfunc_in_object_transfer_none, A().expected
