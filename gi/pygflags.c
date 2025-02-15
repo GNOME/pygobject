@@ -296,7 +296,7 @@ pyg_flags_register (PyTypeObject *flags_class, char *type_name)
 	    goto out;
 	}
 
-	flags_values[i].value = PyLong_AsLong (value);
+	flags_values[i].value = PyLong_AsUnsignedLongMask (value);
 	flags_values[i].value_name = g_strdup (PyUnicode_AsUTF8AndSize (name, NULL));
 	c = g_ascii_strdown (flags_values[i].value_name, -1);
 	flags_values[i].value_nick = c;
