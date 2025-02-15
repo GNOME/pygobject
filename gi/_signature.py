@@ -103,17 +103,24 @@ def get_pytype(gi_type: TypeInfo) -> object:
 
 
 def generate_signature(info: CallableInfo) -> Signature:
+    args = info.get_arguments()
+    arg_names = {arg.get_name() for arg in args}
+
+    def unique(name):
+        while name in arg_names:
+            name += '_'
+        arg_names.add(name)
+        return name
+
     params = []
     if isinstance(info, FunctionInfo):
         if info.is_constructor():
-            params.append(Parameter("cls", Parameter.POSITIONAL_OR_KEYWORD))
+            params.append(Parameter(unique("cls"), Parameter.POSITIONAL_OR_KEYWORD))
         elif info.is_method():
-            params.append(Parameter("self", Parameter.POSITIONAL_OR_KEYWORD))
+            params.append(Parameter(unique("self"), Parameter.POSITIONAL_OR_KEYWORD))
     elif isinstance(info, VFuncInfo):
-        params.append(Parameter("type", Parameter.POSITIONAL_OR_KEYWORD))
-        params.append(Parameter("self", Parameter.POSITIONAL_OR_KEYWORD))
-
-    args = info.get_arguments()
+        params.append(Parameter(unique("type"), Parameter.POSITIONAL_OR_KEYWORD))
+        params.append(Parameter(unique("self"), Parameter.POSITIONAL_OR_KEYWORD))
 
     # Build lists of indices prior to adding the docs because it is possible
     # the index retrieved comes before input arguments being used.

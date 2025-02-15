@@ -2,7 +2,7 @@ import inspect
 import typing
 import unittest
 
-from gi.repository import GIMarshallingTests, Gio, GObject
+from gi.repository import GIMarshallingTests, GLib, Gio, GObject
 
 
 class Test(unittest.TestCase):
@@ -289,3 +289,13 @@ class Test(unittest.TestCase):
         self.assertSignatureEqual(
             GIMarshallingTests.Object().do_vfunc_in_object_transfer_none, A().expected
         )
+
+    def test_arg_conflict(self):
+        class A:
+            @classmethod
+            def expected(type_, self, offset: int, type: GLib.SeekType,
+                         cancellable: typing.Optional[Gio.Cancellable] = None
+                         ) -> bool:
+                pass
+
+        self.assertSignatureEqual(Gio.FileIOStream.do_seek, A.expected)
