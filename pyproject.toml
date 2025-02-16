@@ -63,7 +63,10 @@ install = [
     "--config-setting=setup-args=-Dbuildtype=debug",
     "--config-setting=editable-verbose=true",
 ]
-build = ["--no-wheel"]
+build = [
+    "--no-wheel",
+    "--config-setting=setup-args=-Dtests=true",
+]
 
 [tool.meson-python.args]
 setup = ["-Dtests=false", "-Dwheel=true", "--wrap-mode=nofallback"]

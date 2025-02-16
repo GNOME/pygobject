@@ -2,8 +2,8 @@
 
 set -e
 
-python -m pip install --upgrade build
-python -m build --sdist
+python -m pip install --upgrade pdm
+python -m pdm build
 
 VERSION=$(grep version meson.build | head -1 | sed "s/^.*'\([0-9\.]*\)'.*$/\1/")
 
