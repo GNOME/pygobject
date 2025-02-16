@@ -218,10 +218,10 @@ pygobject_dep = declare_dependency(
 subdir('gi')
 subdir('pygtkcompat')
 
-gi_tests = subproject('gobject-introspection-tests', default_options : ['cairo=' + cairo_dep.found().to_string()])
-
 with_tests = get_option('tests')
 if with_tests
+  gi_tests = subproject('gobject-introspection-tests', default_options : ['cairo=' + cairo_dep.found().to_string()])
+
   # We cannot depend on gobject-introspection-1.0 fallback if we also need GLib to build.
   # All we need is the g-ir-scanner and friends
   if glib_dep.type_name() != 'internal'
