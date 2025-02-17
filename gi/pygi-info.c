@@ -289,7 +289,7 @@ _pygi_is_python_keyword (const gchar *name)
         return TRUE;
 
     pyname = PyUnicode_FromString (name);
-    pyresult = PyObject_CallFunctionObjArgs (iskeyword, pyname, NULL);
+    pyresult = PyObject_CallOneArg (iskeyword, pyname);
     if (pyresult) {
         result = PyObject_IsTrue (pyresult);
         Py_DECREF (pyresult);
