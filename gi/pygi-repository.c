@@ -200,10 +200,17 @@ _wrap_gi_repository_find_by_name (PyGIRepository *self,
      */
     len = strlen (name);
     if (len > 0 && name[len-1] == '_') {
+        PyObject *is_keyword;
+
         trimmed_name = g_strndup (name, len-1);
-        if (_pygi_is_python_keyword (trimmed_name)) {
+        is_keyword = _pygi_is_python_keyword (trimmed_name);
+        if (!is_keyword)
+            return NULL;
+
+        if (PyObject_IsTrue (is_keyword))
             name = trimmed_name;
-        }
+
+        Py_DECREF (is_keyword);
     }
 
     info = gi_repository_find_by_name (self->repository, namespace_, name);

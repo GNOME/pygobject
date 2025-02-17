@@ -263,39 +263,35 @@ _base_info_richcompare (PyGIBaseInfo *self, PyObject *other, int op)
 
 PYGI_DEFINE_TYPE("gi.BaseInfo", PyGIBaseInfo_Type, PyGIBaseInfo);
 
-gboolean
+PyObject*
 _pygi_is_python_keyword (const gchar *name)
 {
     static PyObject *iskeyword = NULL;
-    PyObject *pyname, *pyresult;
-    gboolean result = FALSE;
+    PyObject *pyname, *result;
 
     if (!iskeyword) {
         PyObject *keyword_module = PyImport_ImportModule ("keyword");
-        if (!keyword_module) {
-	    return FALSE;
-        }
+        if (!keyword_module)
+	    return NULL;
 
         iskeyword = PyObject_GetAttrString (keyword_module, "iskeyword");
         Py_DECREF (keyword_module);
-        if (iskeyword == NULL) {
-            return FALSE;
-        }
+        if (!iskeyword)
+            return NULL;
     }
 
     /* Python 3.x; note that we explicitly keep "print"; it is not a keyword
      * any more, but we do not want to break API between Python versions */
     if (strcmp (name, "print") == 0)
-        return TRUE;
+        Py_RETURN_TRUE;
 
     pyname = PyUnicode_FromString (name);
-    pyresult = PyObject_CallOneArg (iskeyword, pyname);
-    if (pyresult) {
-        result = PyObject_IsTrue (pyresult);
-        Py_DECREF (pyresult);
-    }
+    if (!pyname)
+        return NULL;
+
+    result = PyObject_CallOneArg (iskeyword, pyname);
     Py_DECREF (pyname);
-    
+
     return result;
 }
 
@@ -303,18 +299,24 @@ static PyObject *
 _wrap_gi_base_info_get_name (PyGIBaseInfo *self)
 {
     const gchar *name;
+    PyObject *is_keyword, *obj;
 
     name = _safe_base_info_get_name (self->info);
+    is_keyword = _pygi_is_python_keyword (name);
+    if (!is_keyword)
+        return NULL;
 
     /* escape keywords */
-    if (_pygi_is_python_keyword (name)) {
+    if (PyObject_IsTrue(is_keyword)) {
         gchar *escaped = g_strconcat (name, "_", NULL);
-        PyObject *obj = pygi_utf8_to_py (escaped);
+        obj = pygi_utf8_to_py (escaped);
         g_free (escaped);
-        return obj;
+    } else {
+        obj = pygi_utf8_to_py (name);
     }
-
-    return pygi_utf8_to_py (name);
+    Py_DECREF (is_keyword);
+    
+    return obj;
 }
 
 static PyObject *
