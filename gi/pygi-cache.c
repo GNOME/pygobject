@@ -33,6 +33,7 @@
 #include "pygi-list.h"
 #include "pygi-marshal-cleanup.h"
 #include "pygi-object.h"
+#include "pygi-repository.h"
 #include "pygi-resulttuple.h"
 #include "pygi-struct-marshal.h"
 #include "pygi-type.h"
@@ -875,7 +876,10 @@ _function_cache_init (PyGIFunctionCache *function_cache,
             } else if (container && GI_IS_INTERFACE_INFO (container)) {
                 async_finish = GI_BASE_INFO (gi_interface_info_find_method ((GIInterfaceInfo *) container, finish_name));
             } else if (!container) {
-                async_finish = gi_repository_find_by_name (NULL,
+                GIRepository *repository;
+
+                repository = pygi_repository_get_default ();
+                async_finish = gi_repository_find_by_name (repository,
                                                            callable_cache->namespace,
                                                            finish_name);
             } else {
