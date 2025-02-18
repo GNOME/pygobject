@@ -1,9 +1,11 @@
 # -*- Mode: Python; py-indent-offset: 4 -*-
 # vim: tabstop=4 shiftwidth=4 expandtab
 
+import asyncio
 import unittest
 
 import pytest
+from gi.events import GLibEventLoopPolicy
 from gi.repository import GLib
 from gi.repository import Gio
 
@@ -359,3 +361,26 @@ class TestDBusConnection:
                  flags=Gio.DBusCallFlags.NONE,
                  timeout_msec=5000,
                  callback=call_done)
+
+
+@unittest.skipUnless(has_dbus, "no dbus running")
+class AsyncDBusTests(unittest.TestCase):
+
+    def setUp(self):
+        policy = GLibEventLoopPolicy()
+        asyncio.set_event_loop_policy(policy)
+        self.addCleanup(asyncio.set_event_loop_policy, None)
+        self.loop = policy.get_event_loop()
+        self.addCleanup(self.loop.close)
+
+    def test_async_proxy(self):
+        async def run():
+            proxy = await Gio.DBusProxy.new_for_bus(
+                Gio.BusType.SESSION,
+                Gio.DBusProxyFlags.DO_NOT_LOAD_PROPERTIES,
+                None,
+                "org.freedesktop.DBus",
+                "/org/freedesktop/DBus",
+                "org.freedesktop.DBus")
+            self.assertIsInstance(proxy, Gio.DBusProxy)
+        self.loop.run_until_complete(run())
