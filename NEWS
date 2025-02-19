@@ -1,3 +1,19 @@
+3.52.0 - yyyy-mm-dd
+-------------------
+
+From this version onwards girepository-2.0 is used for introspection.
+This means that you'll need GLib >= 2.80.
+
+* Fix invocation of async constructors :mr:`414`
+* Use keyword module to find out if function or parameter is a keyword :mr:`412`
+* Revert change that should prevent a memory leak in DBus invocation; this is now solved in GLib :mr:`404`
+* Make sure function/method signature parameters have unique names :mr:`410`
+* Support registering new enum and flags types from Python :mr:`400`
+* Only release a python-compatible tarball :mr:`401` :mr:`411`
+* GObject-based classes can now override the (`do`)`dispose` method :mr:`197`
+* Add mappings to Cairo foreign types `cairo_font_face_t` / `cairo_scaled_font_t` :mr:`236` :mr:`403`
+
+
 3.51.0 - 2025-02-01 (pre-release)
 ---------------------------------
 
