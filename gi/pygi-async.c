@@ -424,7 +424,9 @@ void
 pygi_async_finish_cb (GObject *source_object, gpointer res, PyGIAsync *self)
 {
     PyGILState_STATE py_state;
-    PyObject *source_pyobj, *res_pyobj, *args;
+    PyObject *source_pyobj, *res_pyobj;
+    PyObject *args[2];
+    size_t nargs;
     PyObject *ret;
     guint i;
 
@@ -441,15 +443,25 @@ pygi_async_finish_cb (GObject *source_object, gpointer res, PyGIAsync *self)
     res_pyobj = pygobject_new_full (res, FALSE, NULL);
     if (source_object) {
         source_pyobj = pygobject_new_full (source_object, FALSE, NULL);
-        args = Py_BuildValue ("(OO)", source_pyobj, res_pyobj);
+        args[0] = source_pyobj;
+        args[1] = res_pyobj;
+        nargs = 2;
     } else {
         source_pyobj = NULL;
-        args = Py_BuildValue ("(O)", res_pyobj);
+        args[0] = res_pyobj;
+ 	nargs = 1;
     }
-    ret = PyObject_Call((PyObject *) self->finish_func, args, NULL);
+    /* We are calling pygi_callable_info_invoke directly here to avoid
+     * the constructor type checks in _function_info_vectorcall.
+     *
+     * Note that the first argument does not match what is expected
+     * when invoking a constructor function (it expects a class), but
+     * things work out because the argument is discarded. We should
+     * instead check the signature of finish_func to see whether it
+     * expects source_object. */
+    ret = pygi_callable_info_invoke (self->finish_func, args, nargs, NULL);
     Py_XDECREF (res_pyobj);
     Py_XDECREF (source_pyobj);
-    Py_XDECREF (args);
 
     if (PyErr_Occurred ()) {
         PyObject *exc = NULL, *value = NULL, *traceback = NULL;
