@@ -2421,6 +2421,23 @@ class TestGObject(unittest.TestCase):
             r"<__gi__.GLocalFile object at 0x[^\s]+ "
             r"\(GLocalFile at 0x[^\s]+\)>")
 
+    def test_constructor_bad_cls_arg(self):
+        # Get the unbound version of a constructor
+        newv = GObject.GObject.newv.__func__
+
+        class Foo():
+            pass
+
+        with self.assertRaisesRegex(AttributeError,
+                                    r"has no attribute '__name__'"):
+            foo = Foo()
+            newv(foo)
+
+        with self.assertRaisesRegex(TypeError, r"attribute is not a string"):
+            foo = Foo()
+            foo.__name__ = 42
+            newv(foo)
+
 # FIXME: Doesn't actually return the same object.
 #    def test_object_inout_same(self):
 #        object_ = GIMarshallingTests.Object()

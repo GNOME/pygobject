@@ -591,13 +591,14 @@ _function_info_vectorcall (PyGICallableInfo *self, PyObject *const *args, size_t
 	if (py_str_name == NULL)
 	    return NULL;
 
-	if (PyUnicode_Check (py_str_name) ) {
-	    PyObject *tmp = PyUnicode_AsUTF8String (py_str_name);
-	    Py_DECREF (py_str_name);
-	    py_str_name = tmp;
+	if (!PyUnicode_Check (py_str_name) ) {
+            PyErr_SetString(PyExc_TypeError,
+                            "cls.__name__ attribute is not a string");
+            Py_DECREF (py_str_name);
+            return NULL;
 	}
 
-	str_name = PyBytes_AsString (py_str_name);
+        str_name = PyUnicode_AsUTF8 (py_str_name);
 	if (strcmp (str_name, _safe_base_info_get_name (container_info))) {
 	    PyErr_Format (PyExc_TypeError,
 			  "%s constructor cannot be used to create instances of "
