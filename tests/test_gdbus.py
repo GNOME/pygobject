@@ -373,6 +373,12 @@ class AsyncDBusTests(unittest.TestCase):
         self.loop = policy.get_event_loop()
         self.addCleanup(self.loop.close)
 
+    def test_async_bus_get(self):
+        async def run():
+            bus = await Gio.bus_get(Gio.BusType.SESSION)
+            self.assertIsInstance(bus, Gio.DBusConnection)
+        self.loop.run_until_complete(run())
+
     def test_async_proxy(self):
         async def run():
             proxy = await Gio.DBusProxy.new_for_bus(
