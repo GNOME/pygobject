@@ -7,7 +7,9 @@ python -m pdm build
 
 VERSION=$(grep version meson.build | head -1 | sed "s/^.*'\([0-9\.]*\)'.*$/\1/")
 
-[[ "$VERSION" =~ ^[0-9]\.[0-9]*[13579]\. ]] && cat << EOF
+if [[ "$VERSION" =~ ^[0-9]\.[0-9]*[13579]\. ]]
+then
+cat << EOF
 
 ****************** ATTENTION ******************
           This is an UNstable release.
@@ -15,3 +17,4 @@ VERSION=$(grep version meson.build | head -1 | sed "s/^.*'\([0-9\.]*\)'.*$/\1/")
 ****************** ATTENTION ******************
 
 EOF
+fi
