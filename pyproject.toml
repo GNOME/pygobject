@@ -1,8 +1,8 @@
 [project]
 name = "PyGObject"
 description = "Python bindings for GObject Introspection"
-readme = 'README.rst'
-license = { text = 'LGPL-2.1-or-later' }
+readme = "README.rst"
+license = { file = "COPYING" }
 authors = [
     { name="James Henstridge", email="james@daa.com.au" }
 ]
@@ -15,6 +15,7 @@ maintainers = [
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
+    "License :: OSI Approved :: GNU Lesser General Public License v2 or later (LGPLv2+)",
     "Operating System :: POSIX",
     "Operating System :: Microsoft :: Windows",
     "Programming Language :: C",
