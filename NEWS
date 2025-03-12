@@ -1,3 +1,8 @@
+3.52.2 - 2025-03-12
+-------------------
+
+* Use legacy license definition in pyproject.toml :mr:`416`
+
 3.52.1 - 2025-03-09
 -------------------
 
@@ -24,6 +29,9 @@ This means that you'll need GLib >= 2.80.
 
 From this version onwards girepository-2.0 is used for introspection.
 This means that you'll need GLib >= 2.80.
+
+Note: Only enumerations and flags that have a GType associated will have the GEnum
+extra properties, such as `value_nicks` and `value_names`.
 
 * Use `girepository` 2.0 for GIR mappings :mr:`320`
 * Use Python's vectorcall protocol internally :mr:`346` :mr:`356`
