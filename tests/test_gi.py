@@ -1902,6 +1902,16 @@ class TestGEnum(unittest.TestCase):
         self.assertEqual(GIMarshallingTests.GEnum.__module__,
                          "gi.repository.GIMarshallingTests")
 
+    def test_enum_values_property(self):
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', PyGIDeprecationWarning)
+
+            assert GIMarshallingTests.GEnum.__enum_values__ == {
+                0: GIMarshallingTests.GEnum.VALUE1,
+                1: GIMarshallingTests.GEnum.VALUE2,
+                42: GIMarshallingTests.GEnum.VALUE3,
+            }
+
     def test_hash(self):
         assert (hash(GIMarshallingTests.GEnum.VALUE3) ==
                 hash(GIMarshallingTests.GEnum(GIMarshallingTests.GEnum.VALUE3)))
@@ -1967,6 +1977,23 @@ class TestGFlags(unittest.TestCase):
         self.assertEqual(GIMarshallingTests.Flags.__name__, "Flags")
         self.assertEqual(GIMarshallingTests.Flags.__module__,
                          "gi.repository.GIMarshallingTests")
+
+    def test_flags_values_property(self):
+        flags_values = {
+            1: GIMarshallingTests.Flags.VALUE1,
+            2: GIMarshallingTests.Flags.VALUE2,
+            4: GIMarshallingTests.Flags.VALUE3,
+        }
+
+        # Since Python 3.11 only primary values are considered.
+        # See https://docs.python.org/3/whatsnew/3.11.html#enum
+        if sys.version_info[:2] < (3, 11):
+            flags_values[3] = GIMarshallingTests.Flags.MASK
+
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', PyGIDeprecationWarning)
+
+            assert GIMarshallingTests.Flags.__flags_values__ == flags_values
 
     def test_repr(self):
         self.assertEqual(repr(GIMarshallingTests.Flags.VALUE2),
