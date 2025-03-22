@@ -127,7 +127,6 @@ else
     '-Wmissing-include-dirs',
     '-Wmissing-noreturn',
     '-Wmissing-prototypes',
-    '-Wnested-externs',
     '-Wnull-dereference',
     '-Wold-style-definition',
     '-Wpacked',
