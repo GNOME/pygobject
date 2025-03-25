@@ -45,6 +45,7 @@ import sys
 import gi
 import gi.events
 import asyncio
+import socket
 import threading
 from gi.repository import GLib
 
@@ -261,4 +262,64 @@ class GLibEventLoopPolicyTests(unittest.TestCase):
         GLib.idle_add(main_glib)
         GLib.MainLoop().run()
 
+        loop.close()
+
+    @unittest.skipIf(sys.platform == 'win32', 'add reader/writer not implemented')
+    def test_source_fileobj_fd(self):
+        """Regression test for
+        https://gitlab.gnome.org/GNOME/pygobject/-/issues/689
+        """
+        class Echo:
+            def __init__(self, sock, expect_bytes):
+                self.sock = sock
+                self.sent_bytes = 0
+                self.expect_bytes = expect_bytes
+                self.done = asyncio.Future()
+                self.data = bytes()
+
+            def send(self):
+                if self.done.done():
+                    return
+                if self.sent_bytes < len(self.data):
+                    self.sent_bytes += self.sock.send(
+                        self.data[self.sent_bytes:])
+                    print('sent', self.data)
+                if self.sent_bytes >= self.expect_bytes:
+                    self.done.set_result(None)
+                    self.sock.shutdown(socket.SHUT_WR)
+
+            def recv(self):
+                if self.done.done():
+                    return
+                self.data += self.sock.recv(self.expect_bytes)
+                print('received', self.data)
+                if len(self.data) >= self.expect_bytes:
+                    self.sock.shutdown(socket.SHUT_RD)
+
+        async def run():
+            loop = asyncio.get_running_loop()
+            s1, s2 = socket.socketpair()
+            sample = b'Hello!'
+            e = Echo(s1, len(sample))
+            # register using file object and file descriptor
+            loop.add_reader(s1, e.recv)
+            loop.add_writer(s1.fileno(), e.send)
+            s2.sendall(sample)
+            await asyncio.wait_for(e.done, timeout=2.0)
+            echo = bytes()
+            for _ in range(len(sample)):
+                echo += s2.recv(len(sample))
+                if len(echo) == len(sample):
+                    break
+            # remove using file object and file descriptor
+            loop.remove_reader(s1)
+            loop.remove_writer(s1.fileno())
+            s1.close()
+            s2.close()
+            # check if the data was echoed correctly
+            self.assertEqual(sample, echo)
+
+        policy = self.create_policy()
+        loop = policy.get_event_loop()
+        loop.run_until_complete(run())
         loop.close()
