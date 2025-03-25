@@ -534,7 +534,9 @@ if sys.platform != 'win32':
                 raise ValueError("Invalid events: {!r}".format(events))
 
             fd = _fileobj_to_fd(fileobj)
-            assert fd not in self._fd_to_key
+            if fd in self._fd_to_key:
+                raise KeyError("{!r} (FD {}) is already registered"
+                               .format(fileobj, fd))
 
             key = _SelectorKey(fileobj, fd, events, data)
 
