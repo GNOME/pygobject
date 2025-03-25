@@ -28,6 +28,7 @@ import threading
 import selectors
 import weakref
 import warnings
+from collections.abc import Mapping
 from contextlib import contextmanager
 from . import _ossighelper
 
@@ -508,8 +509,32 @@ if sys.platform != 'win32':
         # Subclass to attach _tag
         pass
 
+    class _FileObjectMapping(Mapping):
+        def __init__(self, fd_dict):
+            self.fd_dict = fd_dict
+
+        def __len__(self):
+            return len(self.fd_dict)
+
+        def get(self, fileobj, default=None):
+            fd = _fileobj_to_fd(fileobj)
+            return self.fd_dict.get(fd, default)
+
+        def __getitem__(self, fileobj):
+            value = self.get(fileobj)
+            if value is None:
+                raise KeyError("{!r} is not registered".format(fileobj))
+            return value
+
+        def __iter__(self):
+            return iter(self.fd_dict)
+
     class _Selector(_SelectorMixin, selectors.BaseSelector):
         """A Selector for gi.events.GLibEventLoop registering python IO with GLib."""
+
+        def __init__(self, context, loop):
+            super().__init__(context, loop)
+            self._map = _FileObjectMapping(self._fd_to_key)
 
         def attach(self):
             self._source.attach(self._loop._context)
@@ -559,15 +584,12 @@ if sys.platform != 'win32':
         # We could override modify, but it is only slightly when the "events" change.
 
         def get_key(self, fileobj):
-            fd = _fileobj_to_fd(fileobj)
-            return self._fd_to_key[fd]
+            return self._map[fileobj]
 
         def get_map(self):
-            """Return a mapping of file objects to selector keys."""
-            # Horribly inefficient
-            # It should never be called and exists just to prevent issues if e.g.
-            # python decides to use it for debug purposes.
-            return {k.fileobj: k for k in self._fd_to_key.values()}
+            """Return a mapping of file objects or file descriptors to
+            selector keys."""
+            return self._map
 
 
 else:
