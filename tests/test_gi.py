@@ -970,6 +970,7 @@ class TestArray(unittest.TestCase):
     def test_array_uint8_in(self):
         GIMarshallingTests.array_uint8_in(Sequence([97, 98, 99, 100]))
         GIMarshallingTests.array_uint8_in(b"abcd")
+        self.assertRaises(TypeError, GIMarshallingTests.array_uint8_in, "abcd")
 
     def test_array_string_in(self):
         GIMarshallingTests.array_string_in(['foo', 'bar'])
