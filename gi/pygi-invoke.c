@@ -329,7 +329,21 @@ _caller_alloc (PyGIArgCache *arg_cache, GIArgument *arg)
     } else if (arg_cache->type_tag == GI_TYPE_TAG_ARRAY) {
         PyGIArgGArray *array_cache = (PyGIArgGArray *)arg_cache;
 
-        arg->v_pointer = g_array_new (TRUE, TRUE, (guint)array_cache->item_size);
+        switch (array_cache->array_type) {
+            case GI_ARRAY_TYPE_C:
+                return FALSE;
+            case GI_ARRAY_TYPE_ARRAY:
+                arg->v_pointer = g_array_new (TRUE, TRUE, (guint)array_cache->item_size);
+                break;
+            case GI_ARRAY_TYPE_PTR_ARRAY:
+                arg->v_pointer = g_ptr_array_new ();
+                break;
+            case GI_ARRAY_TYPE_BYTE_ARRAY:
+                arg->v_pointer = g_byte_array_new ();
+                break;
+            default:
+                return FALSE;
+        }
     } else {
         return FALSE;
     }
