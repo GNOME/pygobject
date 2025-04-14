@@ -684,6 +684,14 @@ class TestUtf8(unittest.TestCase):
             data = data.encode("utf-8")
         GIMarshallingTests.utf8_as_uint8array_in(data)
 
+    def test_utf8_as_string_array_in(self):
+        data = CONSTANT_UTF8
+        with pytest.raises(
+            TypeError,
+            match=r"Unable to marshal str as an array, use \.encode\(\) to convert to bytes",
+        ):
+            GIMarshallingTests.utf8_as_uint8array_in(data)
+
     def test_utf8_none_return(self):
         self.assertEqual(CONSTANT_UTF8, GIMarshallingTests.utf8_none_return())
 

@@ -205,6 +205,13 @@ _pygi_marshal_from_py_array (PyGIInvokeState *state,
         PyErr_Format (PyExc_TypeError, "Must be sequence, not %s",
                       Py_TYPE (py_arg)->tp_name);
         return FALSE;
+    } else if (PyUnicode_Check (py_arg)
+               && sequence_cache->item_cache->type_tag
+                      != GI_TYPE_TAG_UNICHAR) {
+        PyErr_SetString (PyExc_TypeError,
+                         "Unable to marshal str as an array, use .encode() to "
+                         "convert to bytes");
+        return FALSE;
     }
 
     py_length = PySequence_Length (py_arg);
