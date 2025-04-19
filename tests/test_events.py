@@ -81,6 +81,74 @@ class SubprocessWatcherTests(SubprocessMixin, TestCase):
         self.loop.close()
         super().tearDown()
 
+    # Fix broken test for Python 3.12
+    @unittest.skipUnless(sys.version_info >= (3, 12), "test is added in Python 3.12")
+    def test_subprocess_consistent_callbacks(self):
+        # gh-108973: Test that all subprocess protocol methods are called.
+        # The protocol methods are not called in a determistic order.
+        # The order depends on the event loop and the operating system.
+        events = []
+        fds = [1, 2]
+        expected = [
+            ('pipe_data_received', 1, b'stdout'),
+            ('pipe_data_received', 2, b'stderr'),
+            ('pipe_connection_lost', 1),
+            ('pipe_connection_lost', 2),
+            'process_exited',
+        ]
+        per_fd_expected = [
+            'pipe_data_received',
+            'pipe_connection_lost',
+        ]
+
+        class MyProtocol(asyncio.SubprocessProtocol):
+            def __init__(self, exit_future: asyncio.Future) -> None:
+                self.exit_future = exit_future
+
+            def pipe_data_received(self, fd, data) -> None:
+                events.append(('pipe_data_received', fd, data))
+                self.exit_maybe()
+
+            def pipe_connection_lost(self, fd, exc) -> None:
+                events.append(('pipe_connection_lost', fd))
+                self.exit_maybe()
+
+            def process_exited(self) -> None:
+                events.append('process_exited')
+                self.exit_maybe()
+
+            def exit_maybe(self):
+                # Only exit when we got all expected events
+                if len(events) >= len(expected):
+                    self.exit_future.set_result(True)
+
+        async def main() -> None:
+            loop = asyncio.get_running_loop()
+            exit_future = asyncio.Future()
+            code = 'import sys; sys.stdout.write("stdout"); sys.stderr.write("stderr")'
+            transport, _ = await loop.subprocess_exec(lambda: MyProtocol(exit_future),
+                                                      sys.executable, '-c', code, stdin=None)
+            await exit_future
+            transport.close()
+
+            return events
+
+        events = self.loop.run_until_complete(main())
+
+        # First, make sure that we received all events
+        self.assertSetEqual(set(events), set(expected))
+
+        # Second, check order of pipe events per file descriptor
+        per_fd_events = {fd: [] for fd in fds}
+        for event in events:
+            if event == 'process_exited':
+                continue
+            name, fd = event[:2]
+            per_fd_events[fd].append(name)
+
+        for fd in fds:
+            self.assertEqual(per_fd_events[fd], per_fd_expected, (fd, events))
+
 
 class GLibEventLoopPolicyTests(unittest.TestCase):
 
