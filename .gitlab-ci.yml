@@ -36,7 +36,8 @@ build-image:
     - echo "$CI_REGISTRY_PASSWORD" | buildah login $CI_REGISTRY -u $CI_REGISTRY_USER --password-stdin
     - buildah --root .containers build -t $REGISTRY/ci:$CI_PIPELINE_ID --layers --cache-from=$CACHE --cache-to=$CACHE -f Dockerfile .gitlab-ci
     - buildah --root .containers push $REGISTRY/ci:$CI_PIPELINE_ID
-    # if branch is main -> also push main:latest
+    # if branch is main -> also push ci:latest
+    # - gitlab-ci/docker-tag.sh $REGISTRY/ci:$CI_PIPELINE_ID $REGISTRY/ci:latest
   cache:
     paths:
       - .containers/overlay-images
@@ -50,7 +51,7 @@ build-image:
 #       when: never
 #     - when: on_success
 #   script:
-#     - gitlab-ci/docker-tag.sh main:latest main:$CI_PIPELINE_ID
+#     - gitlab-ci/docker-tag.sh $REGISTRY/ci:latest $REGISTRY/ci:$CI_PIPELINE_ID
 
 default:
   image: $REGISTRY/ci:$CI_PIPELINE_ID
