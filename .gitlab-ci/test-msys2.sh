@@ -49,6 +49,7 @@ lcov \
     --directory "$(pwd)" --capture --initial --output-file \
     "${COV_DIR}/${COV_KEY}-baseline.lcov"
 
+MSYSTEM='' meson compile -C _build -v
 MSYSTEM='' PYTEST_ADDOPTS="--cov -sv --junit-xml=${JUNIT_XML}" meson test --suite pygobject --timeout-multiplier 4 -C _build -v
 MSYSTEM='' python -m coverage lcov -o "${COV_DIR}/${COV_KEY}.py.lcov"
 
