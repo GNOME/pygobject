@@ -28,30 +28,31 @@ build-image:
     STORAGE_DRIVER: vfs
     BUILDAH_ISOLATION: chroot
     CACHE: registry.gitlab.gnome.org/gnome/pygobject/cache
-  # rules:
-  #   - changes:
-  #     - ".gitlab-ci/Dockerfile"
-  #     - ".gitlab-ci/set_env.sh"
+  rules:
+    - changes:
+      - ".gitlab-ci/Dockerfile"
+      - ".gitlab-ci/set_env.sh"
   script:
     - echo "$CI_REGISTRY_PASSWORD" | buildah login $CI_REGISTRY -u $CI_REGISTRY_USER --password-stdin
     - buildah --root .containers build -t $REGISTRY/ci:$CI_PIPELINE_ID --layers --cache-from=$CACHE --cache-to=$CACHE -f Dockerfile .gitlab-ci
     - buildah --root .containers push $REGISTRY/ci:$CI_PIPELINE_ID
-    # if branch is main -> also push ci:latest
-    # - gitlab-ci/docker-tag.sh $REGISTRY/ci:$CI_PIPELINE_ID $REGISTRY/ci:latest
+    - if [ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]; then ./.gitlab-ci/docker-tag.sh $REGISTRY/ci:$CI_PIPELINE_ID $REGISTRY/ci:latest; fi
   cache:
     paths:
       - .containers/overlay-images
 
-# tag-image:
-#   rules:
-#     - if: true
-#       changes:
-#         - ".gitlab-ci/Dockerfile"
-#         - ".gitlab-ci/set_env.sh"
-#       when: never
-#     - when: on_success
-#   script:
-#     - gitlab-ci/docker-tag.sh $REGISTRY/ci:latest $REGISTRY/ci:$CI_PIPELINE_ID
+tag-image:
+  stage: pre_build
+  image: quay.io/buildah/stable:latest
+  rules:
+    - if:
+      changes:
+        - ".gitlab-ci/Dockerfile"
+        - ".gitlab-ci/set_env.sh"
+      when: never
+    - when: on_success
+  script:
+    - ./.gitlab-ci/docker-tag.sh $REGISTRY/ci:latest $REGISTRY/ci:$CI_PIPELINE_ID
 
 default:
   image: $REGISTRY/ci:$CI_PIPELINE_ID
