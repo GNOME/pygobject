@@ -59,7 +59,7 @@ RUN curl -L https://raw.githubusercontent.com/pyenv/pyenv-installer/master/bin/p
 
 # Register the pypy3 system installation
 RUN mkdir -p "${PYENV_ROOT}/versions/pypy3-system/bin/" \
-    && sudo ln -s /usr/bin/pypy3 "${PYENV_ROOT}/versions/pypy3-system/bin/python" \
+    && ln -s /usr/bin/pypy3 "${PYENV_ROOT}/versions/pypy3-system/bin/python" \
     && pyenv rehash
 
 RUN pyenv install --debug 3.9
