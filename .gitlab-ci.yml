@@ -30,8 +30,9 @@ build-image:
     CACHE: registry.gitlab.gnome.org/gnome/pygobject/cache
   rules:
     - changes:
-      - ".gitlab-ci/Dockerfile"
-      - ".gitlab-ci/set_env.sh"
+        - ".gitlab-ci/Dockerfile"
+        - ".gitlab-ci/set_env.sh"
+      when: on_success
   script:
     - echo "$CI_REGISTRY_PASSWORD" | buildah login $CI_REGISTRY -u $CI_REGISTRY_USER --password-stdin
     - buildah --root .containers build -t $REGISTRY/ci:$CI_PIPELINE_ID --layers --cache-from=$CACHE --cache-to=$CACHE -f Dockerfile .gitlab-ci
@@ -45,8 +46,7 @@ tag-image:
   stage: pre_build
   image: quay.io/buildah/stable:latest
   rules:
-    - if:
-      changes:
+    - changes:
         - ".gitlab-ci/Dockerfile"
         - ".gitlab-ci/set_env.sh"
       when: never
