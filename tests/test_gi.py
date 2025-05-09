@@ -1693,6 +1693,9 @@ class TestGValue(unittest.TestCase):
         self.assertEqual([42, '42', True],
                          GIMarshallingTests.gvalue_flat_array_round_trip(42, '42', True))
 
+    def test_gvalue_float(self):
+        GIMarshallingTests.gvalue_float(GObject.Float(3.14), 3.14)
+
 
 class TestGClosure(unittest.TestCase):
 

@@ -678,3 +678,14 @@ class ParamSpec(GObjectModule.ParamSpec):
 GParamSpec = ParamSpec
 deprecated_attr("GObject", "GParamSpec", "GObject.ParamSpec")
 __all__ += ["ParamSpec", "GParamSpec"]
+
+
+class Float(float):
+    '''
+    A wrapper to force conversion to G_TYPE_FLOAT instead of G_TYPE_DOUBLE when
+    used in GValue APIs.
+    '''
+    __gtype__ = TYPE_FLOAT
+
+
+__all__.append('Float')
