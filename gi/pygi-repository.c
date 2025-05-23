@@ -33,9 +33,9 @@ GIRepository*
 pygi_repository_get_default (void)
 {
     static GIRepository *default_repository = NULL;
-    
+
     if (default_repository == NULL)
-        default_repository = gi_repository_new ();
+        default_repository = gi_repository_dup_default ();
 
     return default_repository;
 }
