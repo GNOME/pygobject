@@ -33,9 +33,13 @@ GIRepository*
 pygi_repository_get_default (void)
 {
     static GIRepository *default_repository = NULL;
-    
+
     if (default_repository == NULL)
+#if GLIB_CHECK_VERSION(2, 85, 0)
+        default_repository = gi_repository_dup_default ();
+#else
         default_repository = gi_repository_new ();
+#endif
 
     return default_repository;
 }
