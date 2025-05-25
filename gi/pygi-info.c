@@ -1184,6 +1184,22 @@ _wrap_gi_function_info_get_vfunc (PyGIBaseInfo *self)
     return _get_child_info (self, (GetChildInfoCallback) gi_function_info_get_vfunc);
 }
 
+static PyObject *
+_wrap_gi_function_info_get_finish_func (PyGICallableInfo *self)
+{
+    PyGIFunctionCache *cache = pygi_callable_info_get_cache (self);
+
+    if (cache == NULL)
+        Py_RETURN_NONE;
+
+    if (cache->async_finish) {
+        Py_INCREF (cache->async_finish);
+        return cache->async_finish;
+    }
+
+    Py_RETURN_NONE;
+}
+
 static PyMethodDef _PyGIFunctionInfo_methods[] = {
     { "is_constructor", (PyCFunction) _wrap_gi_function_info_is_constructor, METH_NOARGS },
     { "is_method", (PyCFunction) _wrap_gi_function_info_is_method, METH_NOARGS },
@@ -1191,6 +1207,7 @@ static PyMethodDef _PyGIFunctionInfo_methods[] = {
     { "get_flags", (PyCFunction) _wrap_gi_function_info_get_flags, METH_NOARGS },
     { "get_property", (PyCFunction) _wrap_gi_function_info_get_property, METH_NOARGS },
     { "get_vfunc", (PyCFunction) _wrap_gi_function_info_get_vfunc, METH_NOARGS },
+    { "get_finish_func", (PyCFunction) _wrap_gi_function_info_get_finish_func, METH_NOARGS },
     { NULL, NULL, 0 },
 };
 
