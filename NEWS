@@ -1,7 +1,7 @@
-3.50.1 - yyyy-mm-dd
+3.50.1 - 2025-05-25
 -------------------
 
-* Backport Fix event loop selector with Python 3.13 :mr:`423`
+* Backport: Fix event loop selector with Python 3.13 :mr:`423`
 
 3.50.0 - 2024-09-12
 -------------------
