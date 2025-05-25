@@ -1224,6 +1224,9 @@ _wrap_gi_function_info_get_finish_func (PyGICallableInfo *self)
 {
     PyGIFunctionCache *cache = pygi_callable_info_get_cache (self);
 
+    if (PyErr_Occurred ())
+        return NULL;
+
     if (cache == NULL)
         return NULL;
 
