@@ -40,6 +40,8 @@ typedef struct {
 } PyGICallableInfo;
 
 
+PyGIFunctionCache *pygi_callable_info_get_cache (PyGICallableInfo *self);
+
 gboolean pygi_gi_struct_info_is_simple (GIStructInfo *struct_info);
 
 

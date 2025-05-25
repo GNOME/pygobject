@@ -28,8 +28,6 @@
 
 G_BEGIN_DECLS
 
-PyGIFunctionCache *pygi_callable_info_get_cache (PyGICallableInfo *self);
-
 PyObject *pygi_invoke_c_callable    (PyGIFunctionCache *function_cache,
                                      PyGIInvokeState *state,
                                      PyObject *const *py_args, size_t py_nargsf,

@@ -732,6 +732,41 @@ static PyGetSetDef _PyGICallableInfo_getsets[] = {
     { NULL, NULL, NULL },
 };
 
+
+PyGIFunctionCache *
+pygi_callable_info_get_cache (PyGICallableInfo *self)
+{
+    PyGIFunctionCache *function_cache;
+    GIBaseInfo *info = self->base.info;
+
+    if (self->cache != NULL)
+        return self->cache;
+
+    if (GI_IS_FUNCTION_INFO (info)) {
+        GIFunctionInfoFlags flags;
+
+        flags = gi_function_info_get_flags (GI_FUNCTION_INFO (info));
+
+        if (flags & GI_FUNCTION_IS_CONSTRUCTOR) {
+            function_cache = pygi_constructor_cache_new (GI_CALLABLE_INFO (info));
+        } else if (flags & GI_FUNCTION_IS_METHOD) {
+            function_cache = pygi_method_cache_new (GI_CALLABLE_INFO (info));
+        } else {
+            function_cache = pygi_function_cache_new (GI_CALLABLE_INFO (info));
+        }
+    } else if (GI_IS_VFUNC_INFO (info)) {
+        function_cache = pygi_vfunc_cache_new (GI_CALLABLE_INFO (info));
+    } else if (GI_IS_CALLBACK_INFO (info)) {
+        g_error ("Cannot invoke callback types");
+    } else {
+        function_cache = pygi_method_cache_new (GI_CALLABLE_INFO (info));
+    }
+
+    self->cache = function_cache;
+    
+    return function_cache;
+}
+
 /* CallbackInfo */
 PYGI_DEFINE_TYPE ("gi.CallbackInfo", PyGICallbackInfo_Type, PyGICallableInfo);
 
@@ -1190,7 +1225,7 @@ _wrap_gi_function_info_get_finish_func (PyGICallableInfo *self)
     PyGIFunctionCache *cache = pygi_callable_info_get_cache (self);
 
     if (cache == NULL)
-        Py_RETURN_NONE;
+        return NULL;
 
     if (cache->async_finish) {
         Py_INCREF (cache->async_finish);
