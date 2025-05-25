@@ -324,6 +324,19 @@ class Test(unittest.TestCase):
         self.assertFalse(flags & GIRepository.FunctionInfoFlags.IS_SETTER)
         self.assertFalse(flags & GIRepository.FunctionInfoFlags.WRAPS_VFUNC)
 
+    def test_method_finish_func(self):
+        repo.require('Regress')
+        info = repo.find_by_name('Regress', 'TestObj')
+        method = find_child_info(info, 'get_methods', 'function_finish')
+        assert method.get_finish_func() is None
+
+    def test_async_method_finish_func(self):
+        repo.require('Regress')
+        info = repo.find_by_name('Regress', 'TestObj')
+        method = find_child_info(info, 'get_methods', 'function_async')
+        finish_func = method.get_finish_func()
+        assert finish_func.get_name() == "function_finish"
+
     def test_vfunc_info(self):
         info = repo.find_by_name('GIMarshallingTests', 'Object')
         invoker = find_child_info(info, 'get_methods', 'vfunc_return_value_only')
