@@ -15,7 +15,7 @@ if [[ "$1" == "inflatpak" ]]; then
 
     pip install pycairo meson meson-python pytest pytest-cov
     pip install --config-settings=setup-args="-Dtests=true" --no-build-isolation --editable .
-    python -m pytest -v --cov
+    python -m pytest -vs --cov
     python3 -m coverage lcov -o "${COV_DIR}/${COV_KEY}.py.lcov"
     chmod -R 777 "${COV_DIR}"
 else
