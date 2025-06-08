@@ -10,4 +10,5 @@ Continuous Testing
 ------------------
 
 The test suite gets regularly run on all supported platforms.
-You can find the build pipelines in the [source code repository](https://gitlab.gnome.org/GNOME/pygobject).
+You can find the build pipelines in the 
+`source code repository <https://gitlab.gnome.org/GNOME/pygobject>`_.
