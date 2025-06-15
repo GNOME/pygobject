@@ -38,6 +38,8 @@ the following content and save it somewhere:
 Before we can run the example application we need to install PyGObject, GTK
 and their dependencies. Follow the instructions for your platform below.
 
+For full IDE support (incl. autocomplete) you will also need typing stubs available here `PyGObject-stubs <https://pypi.org/project/PyGObject-stubs/>`_.
+
 ======================================================= ==================================================== ==========================================================
 |ubuntu-logo| :ref:`Ubuntu <ubuntu-getting-started>`    |fedora-logo| :ref:`Fedora <fedora-getting-started>` |arch-logo| :ref:`Arch Linux <arch-getting-started>`
 |windows-logo| :ref:`Windows <windows-getting-started>` |macosx-logo| :ref:`macOS <macosx-getting-started>`  |opensuse-logo| :ref:`openSUSE <opensuse-getting-started>`
@@ -47,7 +49,6 @@ After running the example application have a look at the :doc:`/tutorials/index`
 <https://api.pygobject.gnome.org/>`__ for API documentation for all supported
 libraries. 
 
-For full IDE support (incl. autocomplete) you will also need typing stubs available here `PyGObject-stubs <https://pypi.org/project/PyGObject-stubs/>`_.
 
 .. _windows-getting-started:
 
@@ -84,7 +85,6 @@ Installing from PyPI with pip:
      to install the build dependencies and GTK
   #) Execute ``pip3 install pycairo`` to build and install Pycairo
   #) Execute ``pip3 install PyGObject`` to build and install PyGObject
-  #) Execute ``pip3 install pygobject-stubs`` to install the typing stubs
   #) Change the working directory to where your ``hello.py`` script can be found
   #) Run ``python3 hello.py``
 
@@ -109,7 +109,6 @@ Installing from PyPI with pip:
      to install the build dependencies and GTK
   #) Execute ``pip3 install pycairo`` to build and install Pycairo
   #) Execute ``pip3 install PyGObject`` to build and install PyGObject
-  #) Execute ``pip3 install pygobject-stubs`` to install the typing stubs
   #) Change the working directory to where your ``hello.py`` script can be found
   #) Run ``python3 hello.py``
 
@@ -131,7 +130,6 @@ Installing from PyPI with pip:
      to install the build dependencies and GTK
   #) Execute ``pip3 install pycairo`` to build and install Pycairo
   #) Execute ``pip3 install PyGObject`` to build and install PyGObject
-  #) Execute ``pip3 install pygobject-stubs`` to install the typing stubs
   #) Change the working directory to where your ``hello.py`` script can be found
   #) Run ``python3 hello.py``
 
@@ -153,7 +151,6 @@ Installing from PyPI with pip:
      to install the build dependencies and GTK
   #) Execute ``pip3 install pycairo`` to build and install Pycairo
   #) Execute ``pip3 install PyGObject`` to build and install PyGObject
-  #) Execute ``pip3 install pygobject-stubs`` to install the typing stubs
   #) Change the working directory to where your ``hello.py`` script can be found
   #) Run ``python3 hello.py``
 
