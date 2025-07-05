@@ -26,9 +26,8 @@ project = "PyGObject"
 html_title = project
 
 html_context = {
-    'extra_css_files': [
-        'https://quodlibet.github.io/fonts/font-mfizz.css',
-        '_static/extra.css',
+    "extra_css_files": [
+        "_static/extra.css",
     ],
     "display_gitlab": True,
     "gitlab_user": "GNOME",
@@ -41,6 +40,8 @@ html_context = {
 html_static_path = [
     "extra.css",
     "images/pygobject-small.svg",
+    "images/arch.svg",
+    "images/arch-dark.svg",
 ]
 
 extlinks = {
