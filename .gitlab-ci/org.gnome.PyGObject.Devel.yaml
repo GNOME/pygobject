@@ -1,0 +1,36 @@
+app-id: org.gnome.PyGObject.Devel
+runtime: org.gnome.Sdk
+runtime-version: master
+sdk: org.gnome.Sdk
+build-options:
+  build-args:
+    - '--share=network'
+  test-args:
+    - '--socket=x11'
+    - '--share=network'
+  env:
+    PYTEST_ADDOPTS: '-vs --cov'
+    TEST_GTK_VERSION: '3.0'
+modules:
+  - name: dependencies
+    buildsystem: simple
+    build-commands:
+      - python3 --version
+      - echo "GTK VERSION ${TEST_GTK_VERSION}"
+      - pip3 install --prefix=${FLATPAK_DEST} pycairo pytest pytest-cov
+  - name: pygobject
+    buildsystem: meson
+    builddir: true
+    config-opts:
+      - '-Dtests=true'
+    sources:
+      - type: dir
+        path: ..
+    run-tests: true
+    test-rule: ''
+    test-commands:
+      # Remove vala-nightly, since it contains an incompatible version of libdbus
+      - >-
+        LD_LIBRARY_PATH=$(echo $LD_LIBRARY_PATH | sed s/vala-nightly/foobar/)
+        meson test -v
+      - cd .. && python3 -m coverage lcov -o "coverage/flatpak-${TEST_GTK_VERSION}.py.lcov"
