@@ -1,5 +1,5 @@
-Flatpaking
-==========
+Flatpak
+=======
 
 `Flatpak <https://flatpak.org/>`_ is perfect for packaging applications for Linux.
 

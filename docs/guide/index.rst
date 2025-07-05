@@ -18,5 +18,5 @@ User Guide
     testing
     porting
     sysdeps
-    flatpaking
+    flatpak
     faq
