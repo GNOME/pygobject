@@ -1,52 +1,52 @@
 .. |python-logo| raw:: html
 
-    <i class="icon-python"></i>
-
+    <i class="fab fa-python"></i>
 
 .. |ubuntu-logo| raw:: html
 
-    <i class="icon-ubuntu"></i>
+    <i class="fab fa-ubuntu"></i>
 
 .. |debian-logo| raw:: html
 
-    <i class="icon-debian"></i>
+    <i class="fab fa-debian"></i>
 
 .. |fedora-logo| raw:: html
 
-    <i class="icon-fedora"></i>
+    <i class="fab fa-fedora"></i>
 
 .. |opensuse-logo| raw:: html
 
-    <i class="icon-suse"></i>
+    <i class="fab fa-suse"></i>
 
 .. |windows-logo| raw:: html
 
-    <i class="fa fa-windows"></i>
+    <i class="fab fa-windows"></i>
 
 .. |source-logo| raw:: html
 
-    <i class="fa fa-file"></i>
+    <i class="fas fa-file"></i>
 
 .. |arch-logo| raw:: html
 
-    <i class="icon-archlinux"></i>
+    <img src="_static/arch.svg" alt="Arch Linux" class="only-light" style="width: 1em; height: 1em; vertical-align: middle;">
+    <img src="_static/arch-dark.svg" alt="Arch Linux" class="only-dark" style="width: 1em; height: 1em; vertical-align: middle;">
 
 .. |macosx-logo| raw:: html
 
-    <i class="fa fa-apple"></i>
+    <i class="fab fa-apple"></i>
 
 .. |github-logo| raw:: html
 
-    <i class="fa fa-github"></i>
+    <i class="fab fa-github"></i>
 
 .. |git-logo| raw:: html
 
-    <i class="fa fa-git-square"></i>
+    <i class="fab fa-git-alt"></i>
 
 .. |bug-logo| raw:: html
 
-    <i class="fa fa-bug"></i>
+    <i class="fas fa-bug"></i>
 
 .. |linux-logo| raw:: html
 
-    <i class="fa fa-linux"></i>
+    <i class="fab fa-linux"></i>
