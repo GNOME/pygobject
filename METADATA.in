@@ -16,5 +16,5 @@ Classifier: Topic :: Software Development :: Libraries :: Python Modules
 Project-URL: Homepage, https://pygobject.gnome.org
 Project-URL: Repository, https://gitlab.gnome.org/GNOME/pygobject.git
 Project-URL: Changelog, https://gitlab.gnome.org/GNOME/pygobject/-/blob/main/NEWS
-Requires-Python: <4.0,>=3.9
+Requires-Python: >=3.9
 
