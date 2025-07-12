@@ -984,10 +984,6 @@ class CPropertiesTestBase(object):
         self.assertEqual(self.get_prop(obj, 'some-flags'),
                          GIMarshallingTests.Flags.VALUE3)
 
-    # https://bugzilla.gnome.org/show_bug.cgi?id=780652
-    @unittest.skipUnless(
-        "some_enum" in dir(GIMarshallingTests.PropertiesObject.props),
-        "tool old gi")
     def test_enum(self):
         self.assertEqual(
             self.get_prop(self.obj, 'some-enum'),
@@ -1000,6 +996,14 @@ class CPropertiesTestBase(object):
             some_enum=GIMarshallingTests.GEnum.VALUE3)
         self.assertEqual(self.get_prop(obj, 'some-enum'),
                          GIMarshallingTests.GEnum.VALUE3)
+
+    def test_enum_values(self):
+        prop = self.obj.find_property('some-enum')
+        enum_class = prop.enum_class
+
+        assert GIMarshallingTests.GEnum.VALUE1 in enum_class
+        assert GIMarshallingTests.GEnum.VALUE2 in enum_class
+        assert GIMarshallingTests.GEnum.VALUE3 in enum_class
 
     def test_boolean(self):
         self.assertEqual(self.get_prop(self.obj, 'some-boolean'), False)

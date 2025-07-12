@@ -1815,6 +1815,10 @@ class TestEnum(unittest.TestCase):
         with self.assertRaises(TypeError):
             gi._gi.enum_add(self, "Flags", GIMarshallingTests.Flags.__gtype__, GIMarshallingTests.Flags.__info__)
 
+    def test_enum_add_module_type_error(self):
+        with self.assertRaises(TypeError):
+            gi._gi.flags_add("self", "GEnum", GIMarshallingTests.GEnum.__gtype__, GIMarshallingTests.GEnum.__info__)
+
     def test_type_module_name(self):
         self.assertEqual(GIMarshallingTests.Enum.__name__, "Enum")
         self.assertEqual(GIMarshallingTests.Enum.__module__,

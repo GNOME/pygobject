@@ -680,6 +680,17 @@ deprecated_attr("GObject", "GParamSpec", "GObject.ParamSpec")
 __all__ += ["ParamSpec", "GParamSpec"]
 
 
+@override
+class ParamSpecEnum(GObjectModule.ParamSpecEnum):
+
+    @property
+    def enum_class(self):
+        return super().enum_class.g_type_class.g_type.pytype
+
+
+__all__.append('ParamSpecEnum')
+
+
 class Float(float):
     '''
     A wrapper to force conversion to G_TYPE_FLOAT instead of G_TYPE_DOUBLE when
