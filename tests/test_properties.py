@@ -967,10 +967,6 @@ class CPropertiesTestBase(object):
     def set_prop(self, obj, name, value):
         raise NotImplementedError
 
-    # https://bugzilla.gnome.org/show_bug.cgi?id=780652
-    @unittest.skipUnless(
-        "some_flags" in dir(GIMarshallingTests.PropertiesObject.props),
-        "tool old gi")
     def test_flags(self):
         self.assertEqual(
             self.get_prop(self.obj, 'some-flags'),
@@ -983,6 +979,14 @@ class CPropertiesTestBase(object):
             some_flags=GIMarshallingTests.Flags.VALUE3)
         self.assertEqual(self.get_prop(obj, 'some-flags'),
                          GIMarshallingTests.Flags.VALUE3)
+
+    def test_flags_values(self):
+        prop = self.obj.find_property('some-flags')
+        flags_class = prop.flags_class
+
+        assert GIMarshallingTests.Flags.VALUE1 in flags_class
+        assert GIMarshallingTests.Flags.VALUE2 in flags_class
+        assert GIMarshallingTests.Flags.VALUE3 in flags_class
 
     def test_enum(self):
         self.assertEqual(

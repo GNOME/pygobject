@@ -691,6 +691,17 @@ class ParamSpecEnum(GObjectModule.ParamSpecEnum):
 __all__.append('ParamSpecEnum')
 
 
+@override
+class ParamSpecFlags(GObjectModule.ParamSpecFlags):
+
+    @property
+    def flags_class(self):
+        return super().flags_class.g_type_class.g_type.pytype
+
+
+__all__.append('ParamSpecFlags')
+
+
 class Float(float):
     '''
     A wrapper to force conversion to G_TYPE_FLOAT instead of G_TYPE_DOUBLE when

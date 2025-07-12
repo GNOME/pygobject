@@ -175,7 +175,7 @@ pyg_flags_add_full (PyObject    *module,
 	}
     }
 
-    if (module) {
+    if (module && !Py_IsNone (module)) {
 	PyObject *module_name = PyModule_GetNameObject (module);
 
 	PyMapping_SetItemString (values, "__module__", module_name);

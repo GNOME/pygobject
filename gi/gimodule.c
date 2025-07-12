@@ -1569,6 +1569,11 @@ _wrap_pyg_flags_add (PyObject *self,
         return NULL;
     }
 
+    if (!Py_IsNone (module) && !PyModule_Check (module)) {
+	PyErr_SetString (PyExc_TypeError, "first argument must be module or None");
+	return NULL;
+    }
+
     g_type = pyg_type_from_object (py_g_type);
     if (g_type == G_TYPE_INVALID) {
         return NULL;

@@ -2068,6 +2068,10 @@ class TestNoTypeFlags(unittest.TestCase):
         self.assertEqual(repr(GIMarshallingTests.NoTypeFlags.VALUE2),
                          "<NoTypeFlags.VALUE2: 2>")
 
+    def test_flags_add_module_type_error(self):
+        with self.assertRaises(TypeError):
+            gi._gi.flags_add("self", "Flags", GIMarshallingTests.Flags.__gtype__, GIMarshallingTests.Flags.__info__)
+
 
 class TestStructure(unittest.TestCase):
 
