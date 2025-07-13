@@ -1415,18 +1415,18 @@ class _RefCountTestBase(object):
             return value // 2
 
         callback_ref = weakref.ref(callback)
-        self.assertEqual(sys.getrefcount(callback), 2)
+        self.assertEqual(sys.getrefcount(callback), 2 if sys.version_info < (3, 14) else 1)
 
         obj = self.Object()
         obj.connect('sig-with-int64-prop', callback)
-        self.assertEqual(sys.getrefcount(callback), 3)
+        self.assertEqual(sys.getrefcount(callback), 3 if sys.version_info < (3, 14) else 2)
 
         del callback
         self.assertEqual(sys.getrefcount(callback_ref()), 2)
 
         res = obj.emit('sig-with-int64-prop', 42)
         self.assertEqual(res, 21)
-        self.assertEqual(sys.getrefcount(callback_ref), 2)
+        self.assertEqual(sys.getrefcount(callback_ref), 2 if sys.version_info < (3, 14) else 1)
 
         del obj
         self.assertIsNone(callback_ref())
@@ -1437,18 +1437,18 @@ class _RefCountTestBase(object):
             return value // 2
 
         callback_ref = weakref.ref(callback)
-        self.assertEqual(sys.getrefcount(callback), 2)
+        self.assertEqual(sys.getrefcount(callback), 2 if sys.version_info < (3, 14) else 1)
 
         obj = self.Object()
         handler_id = obj.connect('sig-with-int64-prop', callback)
-        self.assertEqual(sys.getrefcount(callback), 3)
+        self.assertEqual(sys.getrefcount(callback), 3 if sys.version_info < (3, 14) else 2)
 
         del callback
         self.assertEqual(sys.getrefcount(callback_ref()), 2)
 
         res = obj.emit('sig-with-int64-prop', 42)
         self.assertEqual(res, 21)
-        self.assertEqual(sys.getrefcount(callback_ref), 2)
+        self.assertEqual(sys.getrefcount(callback_ref), 2 if sys.version_info < (3, 14) else 1)
 
         obj.disconnect(handler_id)
         self.assertIsNone(callback_ref())
@@ -1459,18 +1459,18 @@ class _RefCountTestBase(object):
             return value // 2
 
         callback_ref = weakref.ref(callback)
-        self.assertEqual(sys.getrefcount(callback), 2)
+        self.assertEqual(sys.getrefcount(callback), 2 if sys.version_info < (3, 14) else 1)
 
         obj = self.Object()
         obj.connect('sig-with-int64-prop', callback)
-        self.assertEqual(sys.getrefcount(callback), 3)
+        self.assertEqual(sys.getrefcount(callback), 3 if sys.version_info < (3, 14) else 2)
 
         del callback
         self.assertEqual(sys.getrefcount(callback_ref()), 2)
 
         res = obj.emit('sig-with-int64-prop', 42)
         self.assertEqual(res, 21)
-        self.assertEqual(sys.getrefcount(callback_ref), 2)
+        self.assertEqual(sys.getrefcount(callback_ref), 2 if sys.version_info < (3, 14) else 1)
 
         obj.disconnect_by_func(callback_ref())
         self.assertIsNone(callback_ref())
@@ -1482,11 +1482,11 @@ class _RefCountTestBase(object):
 
         data = self.PyData()
         data_ref = weakref.ref(data)
-        self.assertEqual(sys.getrefcount(data), 2)
+        self.assertEqual(sys.getrefcount(data), 2 if sys.version_info < (3, 14) else 1)
 
         obj = self.Object()
         obj.connect('sig-with-int64-prop', callback, data)
-        self.assertEqual(sys.getrefcount(data), 3)
+        self.assertEqual(sys.getrefcount(data), 3 if sys.version_info < (3, 14) else 2)
 
         del data
         self.assertEqual(sys.getrefcount(data_ref()), 2)

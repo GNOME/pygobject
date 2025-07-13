@@ -109,7 +109,7 @@ class TestVFuncsWithObjectArg(unittest.TestCase):
 
         gc.collect()
         if hasattr(sys, "getrefcount"):
-            self.assertEqual(sys.getrefcount(vfuncs), 2)
+            self.assertEqual(sys.getrefcount(vfuncs), 2 if sys.version_info < (3, 14) else 1)
         self.assertEqual(vfuncs.__grefcount__, 1)
 
         del vfuncs
