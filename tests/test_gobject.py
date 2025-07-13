@@ -314,22 +314,30 @@ class TestPythonReferenceCounting(unittest.TestCase):
     def test_new_instance_has_two_refs(self):
         obj = GObject.GObject()
         if hasattr(sys, "getrefcount"):
-            self.assertEqual(sys.getrefcount(obj), 2)
+            self.assertEqual(
+                sys.getrefcount(obj), 2 if sys.version_info < (3, 14) else 1
+            )
 
     def test_new_instance_has_two_refs_using_gobject_new(self):
         obj = GObject.new(GObject.GObject)
         if hasattr(sys, "getrefcount"):
-            self.assertEqual(sys.getrefcount(obj), 2)
+            self.assertEqual(
+                sys.getrefcount(obj), 2 if sys.version_info < (3, 14) else 1
+            )
 
     def test_new_subclass_instance_has_two_refs(self):
         obj = A()
         if hasattr(sys, "getrefcount"):
-            self.assertEqual(sys.getrefcount(obj), 2)
+            self.assertEqual(
+                sys.getrefcount(obj), 2 if sys.version_info < (3, 14) else 1
+            )
 
     def test_new_subclass_instance_has_two_refs_using_gobject_new(self):
         obj = GObject.new(A)
         if hasattr(sys, "getrefcount"):
-            self.assertEqual(sys.getrefcount(obj), 2)
+            self.assertEqual(
+                sys.getrefcount(obj), 2 if sys.version_info < (3, 14) else 1
+            )
 
 
 class TestContextManagers(unittest.TestCase):
