@@ -106,6 +106,7 @@ pygi_arg_gobject_out_arg_from_py (PyObject *py_arg, /*in*/
      * https://bugzilla.gnome.org/show_bug.cgi?id=693393
      */
     gobj = arg->v_pointer;
+    // In Python 3.13 the py_arg refcount is 3, in 3.14 only 1
     if (Py_REFCNT (py_arg) == 1 && gobj->ref_count == 1) {
         /* If both object ref counts are only 1 at this point (the reference held
          * in a return tuple), we assume the GObject will be free'd before reaching
@@ -124,6 +125,7 @@ pygi_arg_gobject_out_arg_from_py (PyObject *py_arg, /*in*/
             g_object_force_floating (gobj);
 
         } else {
+            // This may no longer be true, due to differences in refcounting
             PyObject *repr = PyObject_Repr (py_arg);
             gchar *msg = g_strdup_printf (
                 "Expecting to marshal a borrowed reference for %s, "
