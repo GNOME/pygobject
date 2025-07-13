@@ -1528,10 +1528,8 @@ _wrap_pyg_enum_add (PyObject *self,
     GIEnumInfo *info;
 
     if (!PyArg_ParseTupleAndKeywords (args, kwargs,
-                                      "O!sO!O!:enum_add", kwlist,
-                                      &PyModule_Type, &module, &name,
-				      &PyGTypeWrapper_Type, &py_g_type,
-				      &PyGIEnumInfo_Type, &py_info)) {
+                                      "OsOO:enum_add", kwlist,
+                                      &module, &name, &py_g_type, &py_info)) {
         return NULL;
     }
 
@@ -1544,7 +1542,12 @@ _wrap_pyg_enum_add (PyObject *self,
     if (g_type == G_TYPE_INVALID) {
         return NULL;
     }
-    info = GI_ENUM_INFO (py_info->info);
+
+    if (Py_TYPE (py_info) == &PyGIEnumInfo_Type) {
+        info = GI_ENUM_INFO (py_info->info);
+    } else {
+        info = NULL;
+    }
 
     return pyg_enum_add_full (module, name, g_type, info);
 }
@@ -1562,10 +1565,8 @@ _wrap_pyg_flags_add (PyObject *self,
     GIFlagsInfo *info;
 
     if (!PyArg_ParseTupleAndKeywords (args, kwargs,
-                                      "O!sO!O!:flags_add", kwlist,
-                                      &PyModule_Type, &module, &name,
-				      &PyGTypeWrapper_Type, &py_g_type,
-				      &PyGIEnumInfo_Type, &py_info)) {
+                                      "OsOO:flags_add", kwlist,
+                                      &module, &name, &py_g_type, &py_info)) {
         return NULL;
     }
 
@@ -1578,7 +1579,12 @@ _wrap_pyg_flags_add (PyObject *self,
     if (g_type == G_TYPE_INVALID) {
         return NULL;
     }
-    info = GI_FLAGS_INFO (py_info->info);
+
+    if (Py_TYPE (py_info) == &PyGIEnumInfo_Type && GI_IS_FLAGS_INFO (py_info->info)) {
+        info = GI_FLAGS_INFO (py_info->info);
+    } else {
+        info = NULL;
+    }
 
     return pyg_flags_add_full (module, name, g_type, info);
 }

@@ -685,7 +685,11 @@ class ParamSpecEnum(GObjectModule.ParamSpecEnum):
 
     @property
     def enum_class(self):
-        return super().enum_class.g_type_class.g_type.pytype
+        gtype = super().enum_class.g_type_class.g_type
+        if pytype := gtype.pytype:
+            return pytype
+        else:
+            return _gi.enum_add(None, gtype.name, gtype, None)
 
 
 __all__.append('ParamSpecEnum')
@@ -696,7 +700,11 @@ class ParamSpecFlags(GObjectModule.ParamSpecFlags):
 
     @property
     def flags_class(self):
-        return super().flags_class.g_type_class.g_type.pytype
+        gtype = super().flags_class.g_type_class.g_type
+        if pytype := gtype.pytype:
+            return pytype
+        else:
+            return _gi.flags_add(None, gtype.name, gtype, None)
 
 
 __all__.append('ParamSpecFlags')
