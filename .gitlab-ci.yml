@@ -3,11 +3,12 @@ include:
     inputs:
       dist-job-name: "sdist"
       tarball-artifact-path: "${TARBALL_ARTIFACT_PATH}"
-      
+
 stages:
   - pre-commit
-  - build_and_test
-  - coverage
+  - build
+  - documentation
+  - build-release
   - deploy
 
 variables:
@@ -34,7 +35,7 @@ pre-commit:
       - .cache/pre-commit/pre-commit.log
 
 linux:
-  stage: build_and_test
+  stage: build
   parallel:
     matrix:
       - PYTHON_VERSION:
@@ -58,7 +59,7 @@ linux:
    - bash -x ./.gitlab-ci/test-docker.sh
 
 windows:
-  stage: build_and_test
+  stage: build
   tags:
     - win32-ps
   parallel:
@@ -79,8 +80,46 @@ windows:
     - C:\msys64\usr\bin\pacman --noconfirm -Syyuu
     - C:\msys64\usr\bin\bash -lc "bash -x ./.gitlab-ci/test-msys2.sh"
 
+gnome-master:
+  stage: build
+  image: quay.io/gnome_infrastructure/gnome-runtime-images:gnome-master
+  tags:
+    - flatpak
+  parallel:
+    matrix:
+      - TEST_GTK_VERSION:
+          - "3.0"
+          - "4.0"
+  artifacts:
+    paths:
+      - coverage/
+  script:
+    - bash -x ./.gitlab-ci/test-flatpak.sh
+
+python3.12-pdm:
+  stage: build
+  variables:
+    PYTHON_VERSION: "3.12"
+    TEST_GTK_VERSION: "3.0"
+  before_script:
+    - python -m pip install "pdm!=2.17.3"
+    - python -m pdm install -v
+  script:
+    - xvfb-run -a python -m pdm run pytest
+
+minimal-meson:
+  allow_failure: true
+  stage: build
+  image: quay.io/fedora/fedora:40
+  before_script:
+    - dnf install --assumeyes gcc meson git flex bison diffutils python3-devel python3-pytest gobject-introspection-devel
+  script:
+    - meson setup _build
+    - meson compile -C _build
+    - PYTEST_ADDOPTS="-sv -k 'not test_cairo'" meson test -C _build --suite pygobject --verbose
+
 coverage:
-  stage: coverage
+  stage: documentation
   artifacts:
     paths:
       - coverage/
@@ -91,7 +130,7 @@ coverage:
   coverage: '/^\s+lines\.+:\s+([\d.]+\%)\s+/'
 
 pages:
-  stage: deploy
+  stage: documentation
   dependencies:
     - coverage
   before_script:
@@ -109,48 +148,10 @@ pages:
     - if: $CI_COMMIT_TAG
 
 sdist:
-  stage: build_and_test
+  stage: build-release
   artifacts:
     paths:
       - dist/
   script:
     - git config --global --add safe.directory "$CI_PROJECT_DIR"
     - bash -x ./.gitlab-ci/build-sdists.sh
-
-gnome-master:
-  stage: build_and_test
-  image: quay.io/gnome_infrastructure/gnome-runtime-images:gnome-master
-  tags:
-    - flatpak
-  parallel:
-    matrix:
-      - TEST_GTK_VERSION:
-          - "3.0"
-          - "4.0"
-  artifacts:
-    paths:
-      - coverage/
-  script:
-    - bash -x ./.gitlab-ci/test-flatpak.sh
-
-python3.12-pdm:
-  stage: build_and_test
-  variables:
-    PYTHON_VERSION: "3.12"
-    TEST_GTK_VERSION: "3.0"
-  before_script:
-    - python -m pip install "pdm!=2.17.3"
-    - python -m pdm install -v
-  script:
-    - xvfb-run -a python -m pdm run pytest
-
-minimal-meson:
-  allow_failure: true
-  stage: build_and_test
-  image: quay.io/fedora/fedora:40
-  before_script:
-    - dnf install --assumeyes gcc meson git flex bison diffutils python3-devel python3-pytest gobject-introspection-devel
-  script:
-    - meson setup _build
-    - meson compile -C _build
-    - PYTEST_ADDOPTS="-sv -k 'not test_cairo'" meson test -C _build --suite pygobject --verbose
