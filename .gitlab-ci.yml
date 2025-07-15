@@ -7,6 +7,7 @@ include:
 stages:
   - pre-commit
   - build
+  - coverage
   - documentation
   - build-release
   - deploy
@@ -119,7 +120,7 @@ minimal-meson:
     - PYTEST_ADDOPTS="-sv -k 'not test_cairo'" meson test -C _build --suite pygobject --verbose
 
 coverage:
-  stage: documentation
+  stage: coverage
   artifacts:
     paths:
       - coverage/
