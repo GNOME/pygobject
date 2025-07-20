@@ -340,3 +340,13 @@ class TestGApplication(unittest.TestCase):
         self.assertTrue(options.contains('string'))
         self.assertEqual(options.lookup_value('string').unpack(),
                          'test string')
+
+    def test_add_action_entries_override(self):
+        app = Gio.Application()
+
+        app.add_action_entries([
+            ("app.new", print),
+            ("app.quit", print),
+        ])
+
+        assert app.lookup_action("app.new").get_name() == "app.new"
