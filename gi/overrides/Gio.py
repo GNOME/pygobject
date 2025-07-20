@@ -38,35 +38,36 @@ __all__ = []
 class ActionMap(Gio.ActionMap):
     def add_action_entries(self, entries, user_data=None):
         """
-        The add_action_entries() method is a convenience function for creating
-        multiple Gio.SimpleAction instances and adding them to a Gio.ActionMap.
+        The ``add_action_entries()`` method is a convenience function for creating
+        multiple :class:`~gi.repository.Gio.SimpleAction` instances and adding them
+        to a :class:`~gi.repository.Gio.ActionMap`.
         Each action is constructed as per one entry.
 
         :param list entries:
-            List of entry tuples for add_action() method. The entry tuple can
+            List of entry tuples for :meth:`add_action` method. The entry tuple can
             vary in size with the following information:
 
-                * The name of the action. Must be specified.
-                * The callback to connect to the "activate" signal of the
-                  action. Since GLib 2.40, this can be None for stateful
-                  actions, in which case the default handler is used. For
-                  boolean-stated actions with no parameter, this is a toggle.
-                  For other state types (and parameter type equal to the state
-                  type) this will be a function that just calls change_state
-                  (which you should provide).
-                * The type of the parameter that must be passed to the activate
-                  function for this action, given as a single GLib.Variant type
-                  string (or None for no parameter)
-                * The initial state for this action, given in GLib.Variant text
-                  format. The state is parsed with no extra type information, so
-                  type tags must be added to the string if they are necessary.
-                  Stateless actions should give None here.
-                * The callback to connect to the "change-state" signal of the
-                  action. All stateful actions should provide a handler here;
-                  stateless actions should not.
+            * The name of the action. Must be specified.
+            * The callback to connect to the "activate" signal of the
+              action. Since GLib 2.40, this can be ``None`` for stateful
+              actions, in which case the default handler is used. For
+              boolean-stated actions with no parameter, this is a toggle.
+              For other state types (and parameter type equal to the state
+              type) this will be a function that just calls change_state
+              (which you should provide).
+            * The type of the parameter that must be passed to the activate
+              function for this action, given as a single :class:`~gi.repository.GLib.Variant` type
+              string (or ``None`` for no parameter)
+            * The initial state for this action, given in GLib.Variant text
+              format. The state is parsed with no extra type information, so
+              type tags must be added to the string if they are necessary.
+              Stateless actions should give ``None`` here.
+            * The callback to connect to the "change-state" signal of the
+              action. All stateful actions should provide a handler here;
+              stateless actions should not.
 
         :param user_data:
-            The user data for signal connections, or None
+            The user data for signal connections, or ``None``
         """
         try:
             iter(entries)
