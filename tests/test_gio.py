@@ -286,7 +286,7 @@ class TestGApplication(unittest.TestCase):
         self.assertEqual(res, 42)
         self.assertSequenceEqual(app.local_args, ['spam', 'eggs'])
 
-    def xtest_local_and_remote_command_line(self):
+    def test_local_and_remote_command_line(self):
         class App(Gio.Application):
             args = None
             local_args = None
