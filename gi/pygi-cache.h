@@ -218,10 +218,6 @@ struct _PyGICallableCache
     /* Number of Python arguments expected for invoking the gi function. */
     gssize n_py_args;
 
-    /* Minimum number of args required to call the callable from Python.
-     * This count does not include args with defaults. */
-    gssize n_py_required_args;
-
     void     (*deinit)              (PyGICallableCache *callable_cache);
 
     gboolean (*generate_args_cache) (PyGICallableCache *callable_cache,

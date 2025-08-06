@@ -577,7 +577,6 @@ _callable_cache_generate_args_cache_real (PyGICallableCache *callable_cache,
     } else {
         g_hash_table_remove_all (callable_cache->arg_name_hash);
     }
-    callable_cache->n_py_required_args = 0;
     callable_cache->user_data_varargs_arg = NULL;
 
     last_explicit_arg_index = -1;
@@ -596,16 +595,6 @@ _callable_cache_generate_args_cache_real (PyGICallableCache *callable_cache,
             if (arg_name != NULL) {
                 g_hash_table_insert (callable_cache->arg_name_hash,
                                     arg_name, arg_cache);
-            }
-
-            /* The first tail argument without a default will force all the preceding
-            * argument defaults off. This limits support of default args to the
-            * tail of an args list.
-            */
-            if (callable_cache->n_py_required_args > 0) {
-                callable_cache->n_py_required_args += 1;
-            } else if (!arg_cache->allow_none) {
-                callable_cache->n_py_required_args += 1;
             }
 
             if (last_explicit_arg_index == -1) {
