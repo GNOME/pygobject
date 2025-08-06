@@ -550,7 +550,6 @@ _callable_cache_generate_args_cache_real (PyGICallableCache *callable_cache,
                     return FALSE;
                 }
 
-
                 if (direction & PYGI_DIRECTION_TO_PYTHON) {
                     callable_cache->n_to_py_args++;
 
@@ -566,6 +565,8 @@ _callable_cache_generate_args_cache_real (PyGICallableCache *callable_cache,
 
         /* Ensure arguments always have a name when available */
         arg_cache->arg_name = gi_base_info_get_name ((GIBaseInfo *) arg_info);
+        /* Some property (notably booleans), can allow None */
+        arg_cache->allow_none = arg_cache->allow_none || gi_arg_info_may_be_null (arg_info);
 
         gi_base_info_unref ( (GIBaseInfo *)arg_info);
 
