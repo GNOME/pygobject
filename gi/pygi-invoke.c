@@ -162,11 +162,12 @@ _py_args_combine_and_check_length (PyGICallableCache *cache,
         if (arg_item != NULL) continue;
 
         arg_cache = g_ptr_array_index (cache->py_args, i);
+
         if (arg_cache == cache->user_data_varargs_arg) {
             /* For varargs user_data, pass an empty tuple when nothing
              * is given. */
             PyTuple_SET_ITEM(combined_py_args, i, PyTuple_New(0));
-        } else if (arg_cache->has_default) {
+        } else if (arg_cache->allow_none) {
             /* If the argument supports a default, use a place holder in the
              * argument tuple, this will be checked later during marshaling.
              */
@@ -518,7 +519,7 @@ _invoke_marshal_in_args (PyGIInvokeState *state, PyGIFunctionCache *function_cac
             } else if (state->py_async && arg_cache->async_context == PYGI_ASYNC_CONTEXT_CALLBACK) {
                 marshal = TRUE;
             } else {
-                *c_arg = arg_cache->default_value;
+                c_arg->v_pointer = NULL;
             }
         }
 

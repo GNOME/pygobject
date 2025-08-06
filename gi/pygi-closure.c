@@ -910,7 +910,7 @@ pygi_arg_callback_setup_from_info (PyGICallbackCache  *arg_cache,
         PyGIArgCache *user_data_arg_cache = pygi_arg_cache_alloc ();
         user_data_arg_cache->meta_type = PYGI_META_ARG_TYPE_CHILD_WITH_PYARG;
         user_data_arg_cache->direction = direction;
-        user_data_arg_cache->has_default = TRUE; /* always allow user data with a NULL default. */
+        user_data_arg_cache->allow_none = TRUE; /* always allow user data with a NULL default. */
         _pygi_callable_cache_set_arg (callable_cache, arg_cache->user_data_index,
                                       user_data_arg_cache);
     }

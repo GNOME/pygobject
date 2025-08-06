@@ -82,7 +82,7 @@ typedef void (*PyGIMarshalToPyCleanupFunc) (PyGIInvokeState *state,
  *    ignored by the marshallers and handled directly by their parents
  *    marshaller.
  *  - Children with pyargs (PYGI_META_ARG_TYPE_CHILD_WITH_PYARG) are processed
- *    the same as other child args but also have an index into the 
+ *    the same as other child args but also have an index into the
  *    python parameters passed to the invoker
  */
 typedef enum {
@@ -128,7 +128,6 @@ struct _PyGIArgCache
     gboolean is_caller_allocates;
     gboolean is_skipped;
     gboolean allow_none;
-    gboolean has_default;
 
     PyGIDirection direction;
     GITransfer transfer;
@@ -145,9 +144,6 @@ struct _PyGIArgCache
 
     gssize c_arg_index;
     gssize py_arg_index;
-
-    /* Set when has_default is true. */
-    GIArgument default_value;
 };
 
 typedef struct _PyGISequenceCache

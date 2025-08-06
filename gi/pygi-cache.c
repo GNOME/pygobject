@@ -38,26 +38,6 @@
 #include "pygi-struct-marshal.h"
 #include "pygi-type.h"
 
-/* _arg_info_default_value
- * info:
- * arg: (out): GIArgument to fill in with default value.
- *
- * This is currently a place holder API which only supports "allow-none" pointer args.
- * Once defaults are part of the GI API, we can replace this with: gi_arg_info_default_value
- * https://bugzilla.gnome.org/show_bug.cgi?id=558620
- *
- * Returns: TRUE if the given argument supports a default value and was filled in.
- */
-static gboolean
-_arg_info_default_value (GIArgInfo *info, GIArgument *arg)
-{
-    if (gi_arg_info_may_be_null (info)) {
-        arg->v_pointer = NULL;
-        return TRUE;
-    }
-    return FALSE;
-}
-
 /* pygi_arg_base_setup:
  * arg_cache: argument cache to initialize
  * type_info: source for type related attributes to cache
@@ -89,11 +69,6 @@ pygi_arg_base_setup (PyGIArgCache *arg_cache,
     }
 
     if (arg_info != NULL) {
-        if (!arg_cache->has_default) {
-            /* It is possible has_default was set somewhere else */
-            arg_cache->has_default = _arg_info_default_value (arg_info,
-                                                              &arg_cache->default_value);
-        }
         arg_cache->arg_name = gi_base_info_get_name ((GIBaseInfo *) arg_info);
         arg_cache->allow_none = gi_arg_info_may_be_null (arg_info);
 
@@ -627,9 +602,8 @@ _callable_cache_generate_args_cache_real (PyGICallableCache *callable_cache,
             * tail of an args list.
             */
             if (callable_cache->n_py_required_args > 0) {
-                arg_cache->has_default = FALSE;
                 callable_cache->n_py_required_args += 1;
-            } else if (!arg_cache->has_default) {
+            } else if (!arg_cache->allow_none) {
                 callable_cache->n_py_required_args += 1;
             }
 

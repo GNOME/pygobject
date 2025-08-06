@@ -3119,12 +3119,11 @@ class TestKeywordArgs(unittest.TestCase):
         GIMarshallingTests.array_in_utf8_two_in([-1, 0, 1, 2], b='2')
 
         GIMarshallingTests.int_one_in_utf8_two_in_one_allows_none(1, '2', '3')
+        GIMarshallingTests.int_one_in_utf8_two_in_one_allows_none(1, c='3')
+
         self.assertRaises(TypeError,
                           GIMarshallingTests.int_one_in_utf8_two_in_one_allows_none,
                           1, '3')
-        self.assertRaises(TypeError,
-                          GIMarshallingTests.int_one_in_utf8_two_in_one_allows_none,
-                          1, c='3')
 
 
 class TestKeywords(unittest.TestCase):
