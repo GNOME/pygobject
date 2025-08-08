@@ -141,7 +141,7 @@ gboolean
 regress_test_array_of_fundamental_objects_in (RegressTestFundamentalObject **list, gsize len)
 {
     gsize i;
-  
+
     for (i = 0; i < len; i++) {
         if (!REGRESS_TEST_IS_FUNDAMENTAL_OBJECT (list[i])) {
             return FALSE;
@@ -162,7 +162,7 @@ regress_test_array_of_fundamental_objects_out (gsize *len)
     int i;
 
     objs = g_new (RegressTestFundamentalObject *, 2);
-    
+
     for (i = 0; i < 2; i++) {
         objs[i] = (RegressTestFundamentalObject *) regress_test_fundamental_sub_object_new("foo");
     }
@@ -551,3 +551,99 @@ regress_bitmask_get_type (void)
 
   return regress_bitmask_type;
 }
+
+static GSList *async_method_tasks;
+
+/**
+ * regress_test_obj_function2:
+ * @self: a #RegressTestObj
+ * @io_priority: a number
+ * @cancellable: (nullable): a #GCancellable, or %NULL
+ * @test_cb: (nullable) (scope notified) (closure test_data): match reporting callback
+ * @test_data: user data for @test_cb
+ * @test_destroy: (destroy test_data): Destroy notify for @match_data
+ * @callback: the function to call on completion
+ * @user_data: the data to pass to @callback
+ *
+ * This is an example taken from FPrint: `fp_device_verify`.
+ */
+void
+regress_test_obj_function2 (RegressTestObj *self,
+                                  int io_priority,
+                                  GCancellable *cancellable,
+                                  RegressTestCallbackUserData test_cb,
+                                  gpointer test_data,
+                                  GDestroyNotify test_destroy,
+                                  GAsyncReadyCallback callback,
+                                  gpointer user_data)
+{
+  GTask *task = g_task_new (self, cancellable, callback, user_data);
+
+  async_method_tasks = g_slist_prepend (async_method_tasks, task);
+}
+
+/**
+ * regress_test_obj_function2_finish:
+ * @device: A #TestObj
+ * @result: A #GAsyncResult
+ * @match: (out): An extra parameter, similar to `fp_device_verify_finish()`
+ * @some_obj: (out) (transfer full) (nullable): An output object, or %NULL to ignore
+ * @error: Return location for errors, or %NULL to ignore
+ *
+ * Finish function for `regress_test_obj_function2_async()`.
+ *
+ * Returns: (type void): %FALSE on error, %TRUE otherwise
+ */
+gboolean
+regress_test_obj_function2_finish (RegressTestObj *self,
+                                         GAsyncResult *result,
+                                         gboolean *match,
+                                         GObject **some_obj,
+                                         GError **error)
+{
+  gboolean res = g_task_propagate_boolean (G_TASK (result), error);
+
+  *match = res;
+  if (some_obj)
+    *some_obj = NULL;
+
+  return res;
+}
+
+/**
+ * regress_test_obj_function2_sync:
+ *
+ */
+gboolean
+regress_test_obj_function2_sync (RegressTestObj *self G_GNUC_UNUSED, int io_priority G_GNUC_UNUSED)
+{
+  return TRUE;
+}
+
+
+
+/**
+ * regress_test_obj_function_thaw_async:
+ * @self:
+ *
+ * Returns: the number of callbacks that were thawed.
+ */
+int
+regress_test_obj_function2_thaw_async (RegressTestObj *self G_GNUC_UNUSED)
+{
+  int retval = 0;
+  GSList *node;
+
+  for (node = async_method_tasks; node != NULL; node = node->next)
+    {
+      GTask *task = node->data;
+      g_task_return_boolean (task, TRUE);
+      g_object_unref (task);
+      retval++;
+    }
+
+  g_slist_free (async_method_tasks);
+  async_method_tasks = NULL;
+  return retval;
+}
+
