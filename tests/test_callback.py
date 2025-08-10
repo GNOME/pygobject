@@ -78,3 +78,29 @@ def test_async_callback_with_extra_callbacks_as_kwarg():
     iteration()
 
     assert result == [None, (True, None)]
+
+
+def test_async_callback_with_extra_callbacks_as_kwarg_and_user_data():
+    result = []
+    cancel = Gio.Cancellable()
+
+    def test_cb(data):
+        result.append(data)
+        return 0
+
+    def callback(obj, res, data):
+        result.append(obj.function2_finish(res))
+
+    obj = Regress.TestObj()
+    obj.function2(
+        GLib.PRIORITY_DEFAULT,
+        cancellable=cancel,
+        test_cb=test_cb,
+        callback=callback,
+        user_data=None,
+    )
+    obj.function_thaw_async()
+
+    iteration()
+
+    assert result == [None, (True, None)]

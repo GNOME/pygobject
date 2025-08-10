@@ -186,7 +186,7 @@ _py_args_combine_and_check_length (PyGICallableCache *cache,
             /* For varargs user_data, pass an empty tuple when nothing
              * is given. */
             PyTuple_SET_ITEM (combined_py_args, i, PyTuple_New (0));
-        } else if (arg_cache->allow_none) {
+        } else if (pygi_arg_cache_allow_none (arg_cache)) {
             /* If the argument supports a default, use a place holder in the
              * argument tuple, this will be checked later during marshaling.
              */
@@ -550,7 +550,7 @@ _invoke_marshal_in_args (PyGIInvokeState *state,
             gboolean success;
             gpointer cleanup_data = NULL;
 
-            if (!arg_cache->allow_none && Py_IsNone (py_arg)) {
+            if (!pygi_arg_cache_allow_none (arg_cache) && Py_IsNone (py_arg)) {
                 PyErr_Format (PyExc_TypeError,
                               "Argument %zd does not allow None as a value",
                               i);
