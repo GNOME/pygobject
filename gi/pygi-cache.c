@@ -68,7 +68,6 @@ pygi_arg_base_setup (
     }
 
     if (arg_info != NULL) {
-        arg_cache->arg_name = gi_base_info_get_name ((GIBaseInfo *)arg_info);
         arg_cache->allow_none = gi_arg_info_may_be_null (arg_info);
 
         if (arg_cache->type_tag == GI_TYPE_TAG_INTERFACE
@@ -97,6 +96,14 @@ pygi_arg_cache_free (PyGIArgCache *cache)
         cache->destroy_notify (cache);
     else
         g_slice_free (PyGIArgCache, cache);
+}
+
+const char *
+pygi_arg_cache_get_name (PyGIArgCache *cache)
+{
+    if (cache->arg_info == NULL) return NULL;
+
+    return gi_base_info_get_name ((GIBaseInfo *)cache->arg_info);
 }
 
 /* PyGIInterfaceCache */
@@ -506,8 +513,13 @@ _callable_cache_generate_args_cache_real (PyGICallableCache *callable_cache,
             gi_base_info_unref (type_info);
         }
 
-        /* Ensure arguments always have a name when available */
-        arg_cache->arg_name = gi_base_info_get_name ((GIBaseInfo *)arg_info);
+        /* Ensure arguments always arg info available */
+        g_assert (arg_cache->arg_info == NULL
+                  || arg_cache->arg_info == arg_info);
+        if (arg_cache->arg_info == NULL)
+            arg_cache->arg_info =
+                (GIArgInfo *)gi_base_info_ref ((GIBaseInfo *)arg_info);
+
         /* Some property (notably booleans), can allow None */
         arg_cache->allow_none = arg_cache->allow_none
                                 || gi_arg_info_may_be_null (arg_info);
@@ -536,7 +548,7 @@ _callable_cache_generate_args_cache_real (PyGICallableCache *callable_cache,
             && arg_cache->meta_type != PYGI_META_ARG_TYPE_CLOSURE
             && arg_cache->direction & PYGI_DIRECTION_FROM_PYTHON) {
             /* Setup arg_name_hash */
-            gpointer arg_name = (gpointer)arg_cache->arg_name;
+            gpointer arg_name = (gpointer)pygi_arg_cache_get_name (arg_cache);
             if (arg_name != NULL) {
                 g_hash_table_insert (callable_cache->arg_name_hash, arg_name,
                                      arg_cache);
@@ -569,7 +581,7 @@ _callable_cache_generate_args_cache_real (PyGICallableCache *callable_cache,
     arg_cache_item = callable_cache->to_py_args;
     while (arg_cache_item) {
         const gchar *arg_name =
-            ((PyGIArgCache *)arg_cache_item->data)->arg_name;
+            pygi_arg_cache_get_name ((PyGIArgCache *)arg_cache_item->data);
         PyObject *arg_string = PyUnicode_FromString (arg_name);
         PyList_Append (tuple_names, arg_string);
         Py_DECREF (arg_string);
