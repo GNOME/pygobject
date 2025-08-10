@@ -348,7 +348,7 @@ arg_struct_from_py_marshal_adapter (PyGIInvokeState *state,
     PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)arg_cache;
 
     gboolean res = pygi_arg_struct_from_py_marshal (
-        py_arg, arg, arg_cache->arg_name,
+        py_arg, arg, pygi_arg_cache_get_name (arg_cache),
         GI_REGISTERED_TYPE_INFO (iface_cache->interface_info),
         iface_cache->g_type, iface_cache->py_type, arg_cache->transfer,
         TRUE, /*copy_reference*/

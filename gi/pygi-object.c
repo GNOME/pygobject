@@ -170,10 +170,10 @@ _pygi_marshal_from_py_interface_object (PyGIInvokeState *state,
 
     } else {
         PyObject *module = PyObject_GetAttrString (py_arg, "__module__");
-
+        const char *arg_name = pygi_arg_cache_get_name (arg_cache);
         PyErr_Format (PyExc_TypeError,
                       "argument %s: Expected %s, but got %s%s%s",
-                      arg_cache->arg_name ? arg_cache->arg_name : "self",
+                      arg_name ? arg_name : "self",
                       ((PyGIInterfaceCache *)arg_cache)->type_name,
                       module ? PyUnicode_AsUTF8 (module) : "",
                       module ? "." : "", Py_TYPE (py_arg)->tp_name);

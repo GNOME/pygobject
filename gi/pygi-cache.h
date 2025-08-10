@@ -121,14 +121,12 @@ struct _PyGIArgCache {
     GITypeInfo *type_info;
     GIArgInfo *arg_info;
 
-    const gchar *arg_name;
-
     PyGIMetaArgType meta_type;
     PyGIAsyncContext async_context;
     gboolean is_pointer;
-    gboolean is_caller_allocates;
-    gboolean is_skipped;
-    gboolean allow_none;
+    gboolean is_caller_allocates;  // candidate
+    gboolean is_skipped;           // candidate
+    gboolean allow_none;           // candidate
 
     PyGIDirection direction;
     GITransfer transfer;
@@ -263,6 +261,8 @@ PyGIArgCache *pygi_arg_cache_new (GITypeInfo *type_info, GIArgInfo *arg_info,
                                   gssize c_arg_index, gssize py_arg_index);
 
 void pygi_arg_cache_free (PyGIArgCache *cache);
+
+const char *pygi_arg_cache_get_name (PyGIArgCache *cache);
 
 void pygi_callable_cache_free (PyGICallableCache *cache);
 
