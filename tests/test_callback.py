@@ -35,7 +35,7 @@ def test_async_callback_with_extra_callbacks():
 
     iteration()
 
-    assert result == [(True, True, None)]
+    assert result == [(True, None)]
 
 
 def test_async_callback_with_extra_callbacks_filled_in():
