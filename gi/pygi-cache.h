@@ -118,6 +118,9 @@ typedef enum {
 } PyGIAsyncContext;
 
 struct _PyGIArgCache {
+    GITypeInfo *type_info;
+    GIArgInfo *arg_info;
+
     const gchar *arg_name;
 
     PyGIMetaArgType meta_type;
@@ -130,7 +133,6 @@ struct _PyGIArgCache {
     PyGIDirection direction;
     GITransfer transfer;
     GITypeTag type_tag;
-    GITypeInfo *type_info;
 
     PyGIMarshalFromPyFunc from_py_marshaller;
     PyGIMarshalToPyFunc to_py_marshaller;

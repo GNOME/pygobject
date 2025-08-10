@@ -79,6 +79,9 @@ pygi_arg_base_setup (
                 gi_arg_info_is_caller_allocates (arg_info);
         else
             arg_cache->is_caller_allocates = FALSE;
+
+        gi_base_info_ref ((GIBaseInfo *)arg_info);
+        arg_cache->arg_info = arg_info;
     }
     return TRUE;
 }
@@ -90,6 +93,8 @@ pygi_arg_cache_free (PyGIArgCache *cache)
 
     if (cache->type_info != NULL)
         gi_base_info_unref ((GIBaseInfo *)cache->type_info);
+    if (cache->arg_info != NULL)
+        gi_base_info_unref ((GIBaseInfo *)cache->arg_info);
     if (cache->destroy_notify)
         cache->destroy_notify (cache);
     else
