@@ -69,8 +69,6 @@ pygi_arg_base_setup (PyGIArgCache *arg_cache,
     }
 
     if (arg_info != NULL) {
-        arg_cache->allow_none = gi_arg_info_may_be_null (arg_info);
-
         if (arg_cache->type_tag == GI_TYPE_TAG_INTERFACE || arg_cache->type_tag == GI_TYPE_TAG_ARRAY)
             arg_cache->is_caller_allocates = gi_arg_info_is_caller_allocates (arg_info);
         else
@@ -106,6 +104,14 @@ pygi_arg_cache_get_name (PyGIArgCache *cache)
 
     return gi_base_info_get_name ((GIBaseInfo *) cache->arg_info);
 }
+
+gboolean
+pygi_arg_cache_allow_none (PyGIArgCache *cache)
+{
+    return (cache->arg_info && gi_arg_info_may_be_null (cache->arg_info))
+            || cache->type_tag == GI_TYPE_TAG_BOOLEAN;
+}
+
 
 /* PyGIInterfaceCache */
 
@@ -580,9 +586,6 @@ _callable_cache_generate_args_cache_real (PyGICallableCache *callable_cache,
         g_assert (arg_cache->arg_info == NULL || arg_cache->arg_info == arg_info);
         if (arg_cache->arg_info == NULL)
             arg_cache->arg_info = (GIArgInfo *) gi_base_info_ref ((GIBaseInfo *) arg_info);
-
-        /* Some property (notably booleans), can allow None */
-        arg_cache->allow_none = arg_cache->allow_none || gi_arg_info_may_be_null (arg_info);
 
         gi_base_info_unref ( (GIBaseInfo *)arg_info);
 

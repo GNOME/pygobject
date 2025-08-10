@@ -128,7 +128,6 @@ struct _PyGIArgCache
     gboolean is_pointer;
     gboolean is_caller_allocates; // candidate
     gboolean is_skipped; // candidate
-    gboolean allow_none; // candidate
 
     PyGIDirection direction;
     GITransfer transfer;
@@ -294,6 +293,8 @@ void
 pygi_arg_cache_free      (PyGIArgCache *cache);
 
 const char* pygi_arg_cache_get_name (PyGIArgCache *cache);
+
+gboolean pygi_arg_cache_allow_none (PyGIArgCache *cache);
 
 void
 pygi_callable_cache_free    (PyGICallableCache *cache);

@@ -1247,7 +1247,7 @@ marshal_cleanup_to_py_utf8 (PyGIInvokeState *state,
                             gboolean         was_processed)
 {
     /* Python copies the string so we need to free it
-       if the interface is transfering ownership, 
+       if the interface is transfering ownership,
        whether or not it has been processed yet */
     if (arg_cache->transfer == GI_TRANSFER_EVERYTHING)
         g_free (data);
@@ -1275,8 +1275,6 @@ arg_basic_type_setup_from_info (PyGIArgCache  *arg_cache,
 
            break;
        case GI_TYPE_TAG_BOOLEAN:
-            arg_cache->allow_none = TRUE;
-            /* fall through */
        case GI_TYPE_TAG_INT8:
        case GI_TYPE_TAG_UINT8:
        case GI_TYPE_TAG_INT16:
