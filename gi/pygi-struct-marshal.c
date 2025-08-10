@@ -465,7 +465,8 @@ arg_struct_to_py_marshal_adapter (PyGIInvokeState *state,
     ret = pygi_arg_struct_to_py_marshaller (
         arg, iface_cache->interface_info, iface_cache->g_type,
         iface_cache->py_type, arg_cache->transfer,
-        arg_cache->is_caller_allocates, iface_cache->is_foreign);
+        pygi_arg_cache_is_caller_allocates (arg_cache),
+        iface_cache->is_foreign);
 
     *cleanup_data = ret;
 

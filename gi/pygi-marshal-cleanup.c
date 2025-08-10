@@ -152,7 +152,8 @@ pygi_marshal_cleanup_args_to_py_marshal_success (PyGIInvokeState *state,
                 state, arg_cache,
                 state->args[arg_cache->c_arg_index].to_py_arg_cleanup_data,
                 data, TRUE);
-        else if (arg_cache->is_caller_allocates && data != NULL) {
+        else if (pygi_arg_cache_is_caller_allocates (arg_cache)
+                 && data != NULL) {
             _cleanup_caller_allocates (
                 state, arg_cache,
                 state->args[arg_cache->c_arg_index].to_py_arg_cleanup_data,
@@ -196,7 +197,8 @@ pygi_marshal_cleanup_args_from_py_parameter_fail (PyGIInvokeState *state,
             cleanup_func (state, arg_cache, py_arg, cleanup_data,
                           i < (guint)failed_arg_index);
 
-        } else if (arg_cache->is_caller_allocates && cleanup_data != NULL) {
+        } else if (pygi_arg_cache_is_caller_allocates (arg_cache)
+                   && cleanup_data != NULL) {
             _cleanup_caller_allocates (state, arg_cache, py_arg, cleanup_data,
                                        FALSE);
         }
