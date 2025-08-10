@@ -492,7 +492,7 @@ _invoke_marshal_in_args (PyGIInvokeState *state,
                  */
             state->args[i].arg_pointer.v_pointer = c_arg;
 
-            if (arg_cache->is_caller_allocates) {
+            if (pygi_arg_cache_is_caller_allocates (arg_cache)) {
                 /* In the case of caller allocated out args, we don't use
                      * an extra level of indirection and state->args will point
                      * directly at the data to be marshaled. However, as noted

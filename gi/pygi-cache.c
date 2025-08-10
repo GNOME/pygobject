@@ -68,13 +68,6 @@ pygi_arg_base_setup (
     }
 
     if (arg_info != NULL) {
-        if (arg_cache->type_tag == GI_TYPE_TAG_INTERFACE
-            || arg_cache->type_tag == GI_TYPE_TAG_ARRAY)
-            arg_cache->is_caller_allocates =
-                gi_arg_info_is_caller_allocates (arg_info);
-        else
-            arg_cache->is_caller_allocates = FALSE;
-
         gi_base_info_ref ((GIBaseInfo *)arg_info);
         arg_cache->arg_info = arg_info;
     }
@@ -114,6 +107,15 @@ pygi_arg_cache_allow_none (PyGIArgCache *cache)
            || cache->type_tag == GI_TYPE_TAG_BOOLEAN;
 }
 
+gboolean
+pygi_arg_cache_is_caller_allocates (PyGIArgCache *cache)
+{
+    if (cache->arg_info
+        && (cache->type_tag == GI_TYPE_TAG_INTERFACE
+            || cache->type_tag == GI_TYPE_TAG_ARRAY))
+        return gi_arg_info_is_caller_allocates (cache->arg_info);
+    return FALSE;
+}
 
 /* PyGIInterfaceCache */
 
