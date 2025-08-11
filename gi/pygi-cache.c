@@ -121,7 +121,7 @@ _interface_cache_free_func (PyGIInterfaceCache *cache)
  *
  * Returns: TRUE on success and FALSE on failure
  */
-gboolean
+static gboolean
 pygi_arg_interface_setup (PyGIInterfaceCache *iface_cache,
                           GITypeInfo         *type_info,
                           GIArgInfo          *arg_info,    /* may be NULL for return arguments */
@@ -208,7 +208,7 @@ _sequence_cache_free_func (PyGISequenceCache *cache)
  * Returns: TRUE on success and FALSE on failure
  */
 gboolean
-pygi_arg_sequence_setup (PyGISequenceCache  *sc,
+pygi_arg_sequence_setup (PyGISequenceCache  *seq_cache,
                          GITypeInfo         *type_info,
                          GIArgInfo          *arg_info,    /* may be NULL for return arguments */
                          GITransfer          transfer,
@@ -218,7 +218,7 @@ pygi_arg_sequence_setup (PyGISequenceCache  *sc,
     GITypeInfo *item_type_info;
     GITransfer item_transfer;
 
-    if (!pygi_arg_base_setup ((PyGIArgCache *)sc,
+    if (!pygi_arg_base_setup ((PyGIArgCache *)seq_cache,
                               type_info,
                               arg_info,
                               transfer,
@@ -226,21 +226,21 @@ pygi_arg_sequence_setup (PyGISequenceCache  *sc,
         return FALSE;
     }
 
-    sc->arg_cache.destroy_notify = (GDestroyNotify)_sequence_cache_free_func;
+    seq_cache->arg_cache.destroy_notify = (GDestroyNotify)_sequence_cache_free_func;
     item_type_info = gi_type_info_get_param_type (type_info, 0);
     item_transfer =
         transfer == GI_TRANSFER_CONTAINER ? GI_TRANSFER_NOTHING : transfer;
 
-    sc->item_cache = pygi_arg_cache_new (item_type_info,
-                                         NULL,
-                                         item_transfer,
-                                         direction,
-                                         callable_cache,
-                                         0, 0);
+    seq_cache->item_cache = pygi_arg_cache_new (item_type_info,
+                                                NULL,
+                                                item_transfer,
+                                                direction,
+                                                callable_cache,
+                                                0, 0);
 
     gi_base_info_unref ( (GIBaseInfo *)item_type_info);
 
-    if (sc->item_cache == NULL) {
+    if (seq_cache->item_cache == NULL) {
         return FALSE;
     }
 
@@ -339,23 +339,14 @@ pygi_arg_cache_new (GITypeInfo *type_info,
            break;
 
        case GI_TYPE_TAG_ARRAY:
-           {
-               arg_cache = pygi_arg_garray_new_from_info (type_info,
-                                                          arg_info,
-                                                          transfer,
-                                                          direction,
-                                                          callable_cache);
-               if (arg_cache == NULL)
-                   return NULL;
-
-               pygi_arg_garray_len_arg_setup (arg_cache,
-                                              type_info,
-                                              callable_cache,
-                                              direction,
-                                              c_arg_index,
-                                              &py_arg_index);
-               break;
-           }
+           arg_cache = pygi_arg_garray_new_from_info (type_info,
+                                                      arg_info,
+                                                      transfer,
+                                                      direction,
+                                                      callable_cache,
+                                                      c_arg_index,
+                                                      &py_arg_index);
+            break;
 
        case GI_TYPE_TAG_GLIST:
            arg_cache = pygi_arg_glist_new_from_info (type_info,
