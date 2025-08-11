@@ -795,14 +795,12 @@ _array_cache_free_func (PyGIArgGArray *cache)
     }
 }
 
-PyGIArgCache *
-pygi_arg_garray_len_arg_setup (PyGIArgCache *arg_cache, GITypeInfo *type_info,
+static void
+pygi_arg_garray_len_arg_setup (PyGIArgGArray *seq_cache, GITypeInfo *type_info,
                                PyGICallableCache *callable_cache,
                                PyGIDirection direction, gssize arg_index,
                                gssize *py_arg_index)
 {
-    PyGIArgGArray *seq_cache = (PyGIArgGArray *)arg_cache;
-
     /* attempt len_arg_index setup for the first time */
     if (!seq_cache->has_len_arg) {
         seq_cache->has_len_arg = gi_type_info_get_array_length_index (
@@ -836,8 +834,7 @@ pygi_arg_garray_len_arg_setup (PyGIArgCache *arg_cache, GITypeInfo *type_info,
              * setup by another array argument sharing the same length argument.
              * See: gi_marshalling_tests_multi_array_key_value_in
              */
-            if (child_cache->meta_type == PYGI_META_ARG_TYPE_CHILD)
-                return child_cache;
+            if (child_cache->meta_type == PYGI_META_ARG_TYPE_CHILD) return;
         }
 
         /* There is a length argument for this array, so increment the number
@@ -878,10 +875,10 @@ pygi_arg_garray_len_arg_setup (PyGIArgCache *arg_cache, GITypeInfo *type_info,
 
         _pygi_callable_cache_set_arg (callable_cache, seq_cache->len_arg_index,
                                       child_cache);
-        return child_cache;
+        return;
     }
 
-    return NULL;
+    return;
 }
 
 static gboolean
@@ -927,7 +924,8 @@ pygi_arg_garray_setup (
 PyGIArgCache *
 pygi_arg_garray_new_from_info (GITypeInfo *type_info, GIArgInfo *arg_info,
                                GITransfer transfer, PyGIDirection direction,
-                               PyGICallableCache *callable_cache)
+                               PyGICallableCache *callable_cache,
+                               gssize arg_index, gssize *py_arg_index)
 {
     PyGIArgGArray *array_cache = g_slice_new0 (PyGIArgGArray);
     if (array_cache == NULL) return NULL;
@@ -937,6 +935,9 @@ pygi_arg_garray_new_from_info (GITypeInfo *type_info, GIArgInfo *arg_info,
         pygi_arg_cache_free ((PyGIArgCache *)array_cache);
         return NULL;
     }
+
+    pygi_arg_garray_len_arg_setup (array_cache, type_info, callable_cache,
+                                   direction, arg_index, py_arg_index);
 
     return (PyGIArgCache *)array_cache;
 }
