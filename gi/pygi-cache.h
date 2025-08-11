@@ -172,6 +172,8 @@ struct _PyGICallableCache {
     const gchar *container_name;
     const gchar *namespace;
 
+    GIBaseInfo *info;
+
     PyGICallingContext calling_context;
 
     PyGIArgCache *return_cache;
@@ -233,8 +235,6 @@ struct _PyGIFunctionCache {
 
 struct _PyGIVFuncCache {
     PyGIFunctionWithInstanceCache fwi_cache;
-
-    GIBaseInfo *info;
 };
 
 
