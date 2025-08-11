@@ -610,6 +610,7 @@ _callable_cache_generate_args_cache_real (PyGICallableCache *callable_cache,
 static void
 _callable_cache_deinit_real (PyGICallableCache *cache)
 {
+    g_clear_pointer (&cache->info, gi_base_info_unref);
     g_clear_pointer (&cache->to_py_args, g_slist_free);
     g_clear_pointer (&cache->arg_name_hash, g_hash_table_unref);
     g_clear_pointer (&cache->args_cache, g_ptr_array_unref);
@@ -623,6 +624,8 @@ _callable_cache_init (PyGICallableCache *cache, GICallableInfo *callable_info)
 {
     gint n_args;
     GIBaseInfo *container;
+
+    cache->info = gi_base_info_ref (GI_BASE_INFO (callable_info));
 
     if (cache->deinit == NULL) cache->deinit = _callable_cache_deinit_real;
 
@@ -1033,7 +1036,6 @@ _vfunc_cache_invoke_real (PyGIFunctionCache *function_cache,
                           PyGIInvokeState *state, PyObject *const *py_args,
                           size_t py_nargsf, PyObject *py_kwnames)
 {
-    PyGIVFuncCache *vfunc_cache = (PyGIVFuncCache *)function_cache;
     Py_ssize_t nargs = PyVectorcall_NARGS (py_nargsf);
     PyObject *py_gtype;
     GType implementor_gtype;
@@ -1056,7 +1058,7 @@ _vfunc_cache_invoke_real (PyGIFunctionCache *function_cache,
      * retrieve a different vfunc address but GI gives us the same vfunc info.
      */
     state->function_ptr = gi_vfunc_info_get_address (
-        (GIVFuncInfo *)vfunc_cache->info, implementor_gtype, &error);
+        function_cache->callable_cache.info, implementor_gtype, &error);
     if (pygi_error_check (&error)) {
         return FALSE;
     }
@@ -1070,8 +1072,6 @@ _vfunc_cache_invoke_real (PyGIFunctionCache *function_cache,
 static void
 _vfunc_cache_deinit_real (PyGICallableCache *callable_cache)
 {
-    gi_base_info_unref (((PyGIVFuncCache *)callable_cache)->info);
-
     _function_cache_deinit_real (callable_cache);
 }
 
@@ -1099,9 +1099,6 @@ pygi_vfunc_cache_new (GICallableInfo *info)
         g_free (vfunc_cache);
         return NULL;
     }
-
-    /* Required by _vfunc_cache_invoke_real() */
-    vfunc_cache->info = gi_base_info_ref ((GIBaseInfo *)info);
 
     return function_cache;
 }
