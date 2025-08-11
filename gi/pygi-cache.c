@@ -424,7 +424,6 @@ _callable_cache_generate_args_cache_real (PyGICallableCache *callable_cache,
                                        -1);
     if (return_cache == NULL) return FALSE;
 
-    return_cache->is_skipped = gi_callable_info_skip_return (callable_info);
     callable_cache->return_cache = return_cache;
     gi_base_info_unref (return_info);
 
@@ -572,7 +571,7 @@ _callable_cache_generate_args_cache_real (PyGICallableCache *callable_cache,
         }
     }
 
-    if (!return_cache->is_skipped
+    if (!pygi_callable_cache_skip_return (callable_cache)
         && return_cache->type_tag != GI_TYPE_TAG_VOID) {
         callable_cache->has_return = TRUE;
     }
@@ -684,6 +683,12 @@ pygi_callable_cache_get_full_name (PyGICallableCache *cache)
     } else {
         return g_strjoin (".", cache->namespace, cache->name, NULL);
     }
+}
+
+gboolean
+pygi_callable_cache_skip_return (PyGICallableCache *cache)
+{
+    return gi_callable_info_skip_return (GI_CALLABLE_INFO (cache->info));
 }
 
 void
@@ -930,7 +935,7 @@ _constructor_cache_invoke_real (PyGIFunctionCache *function_cache,
     ret = _function_cache_invoke_real (function_cache, state, py_args + 1,
                                        nargs - 1, py_kwnames);
 
-    if (ret == NULL || cache->return_cache->is_skipped) return ret;
+    if (ret == NULL || pygi_callable_cache_skip_return (cache)) return ret;
 
     if (!Py_IsNone (ret)) {
         if (!PyTuple_Check (ret)) return ret;
@@ -1058,7 +1063,8 @@ _vfunc_cache_invoke_real (PyGIFunctionCache *function_cache,
      * retrieve a different vfunc address but GI gives us the same vfunc info.
      */
     state->function_ptr = gi_vfunc_info_get_address (
-        function_cache->callable_cache.info, implementor_gtype, &error);
+        GI_VFUNC_INFO (function_cache->callable_cache.info), implementor_gtype,
+        &error);
     if (pygi_error_check (&error)) {
         return FALSE;
     }

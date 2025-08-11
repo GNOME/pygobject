@@ -584,7 +584,7 @@ _invoke_marshal_out_args (PyGIInvokeState *state,
     gssize n_out_args = cache->n_to_py_args - cache->n_to_py_child_args;
 
     if (cache->return_cache) {
-        if (!cache->return_cache->is_skipped) {
+        if (!pygi_callable_cache_skip_return (cache)) {
             gpointer cleanup_data = NULL;
             py_return = cache->return_cache->to_py_marshaller (
                 state, cache, cache->return_cache, &state->return_arg,
@@ -610,7 +610,7 @@ _invoke_marshal_out_args (PyGIInvokeState *state,
     if (state->py_async) {
         /* We must have no return value */
         g_assert (n_out_args == 0);
-        g_assert (cache->return_cache->is_skipped
+        g_assert (pygi_callable_cache_skip_return (cache)
                   || cache->return_cache->type_tag == GI_TYPE_TAG_VOID);
 
         Py_DECREF (py_return);
@@ -618,7 +618,7 @@ _invoke_marshal_out_args (PyGIInvokeState *state,
     }
 
     if (n_out_args == 0) {
-        if (cache->return_cache->is_skipped && state->error == NULL) {
+        if (pygi_callable_cache_skip_return (cache) && state->error == NULL) {
             /* we skip the return value and have no (out) arguments to return,
              * so py_return should be NULL. But we must not return NULL,
              * otherwise Python will expect an exception.
