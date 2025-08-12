@@ -162,11 +162,8 @@ typedef struct _PyGIInterfaceCache {
     gchar *type_name;
 } PyGIInterfaceCache;
 
-struct _PyGICallableCache {
-    const gchar *name;
-    const gchar *container_name;
-    const gchar *namespace;
-
+struct _PyGICallableCache
+{
     GIBaseInfo *info;
 
     PyGICallingContext calling_context;
