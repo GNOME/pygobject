@@ -158,7 +158,6 @@ typedef struct _PyGIArgGArray
     unsigned int len_arg_index;
     gboolean has_len_arg;
     gsize item_size;
-    GIArrayType array_type;
 } PyGIArgGArray;
 
 typedef struct _PyGIInterfaceCache

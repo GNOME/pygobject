@@ -207,6 +207,7 @@ _pygi_marshal_from_py_array (PyGIInvokeState   *state,
     PyGIArgGArray *array_cache = (PyGIArgGArray *)arg_cache;
     GITransfer cleanup_transfer = arg_cache->transfer;
     gboolean is_zero_terminated = gi_type_info_is_zero_terminated (arg_cache->type_info);
+    GIArrayType array_type;
 
     if (Py_IsNone(py_arg)) {
         arg->v_pointer = NULL;
@@ -234,7 +235,7 @@ _pygi_marshal_from_py_array (PyGIInvokeState   *state,
     }
 
     item_size = (guint)array_cache->item_size;
-    is_ptr_array = (array_cache->array_type == GI_ARRAY_TYPE_PTR_ARRAY);
+    is_ptr_array = (gi_type_info_get_array_type (arg_cache->type_info) == GI_ARRAY_TYPE_PTR_ARRAY);
     if (is_ptr_array) {
         array_ = (GArray *)g_ptr_array_sized_new (length);
     } else {
@@ -249,6 +250,8 @@ _pygi_marshal_from_py_array (PyGIInvokeState   *state,
         return FALSE;
     }
 
+    array_type = gi_type_info_get_array_type (arg_cache->type_info);
+
     if (sequence_cache->item_cache->type_tag == GI_TYPE_TAG_UINT8 &&
         PyBytes_Check (py_arg)) {
         gchar *data = PyBytes_AsString (py_arg);
@@ -257,7 +260,7 @@ _pygi_marshal_from_py_array (PyGIInvokeState   *state,
          * is not transferred to the C function
          * and cannot not be modified by it.
          */
-        if (array_cache->array_type == GI_ARRAY_TYPE_C &&
+        if (array_type == GI_ARRAY_TYPE_C &&
             arg_cache->transfer == GI_TRANSFER_NOTHING &&
             !is_zero_terminated) {
             g_free (array_->data);
@@ -403,7 +406,7 @@ array_success:
         }
     }
 
-    if (array_cache->array_type == GI_ARRAY_TYPE_C) {
+    if (array_type == GI_ARRAY_TYPE_C) {
         /* In the case of GI_ARRAY_C, we give the data directly as the argument
          * but keep the array_ wrapper as cleanup data so we don't have to find
          * it's length again.
@@ -449,8 +452,9 @@ _pygi_marshal_cleanup_from_py_array (PyGIInvokeState *state,
         GPtrArray *ptr_array_ = NULL;
         PyGISequenceCache *sequence_cache = (PyGISequenceCache *)arg_cache;
         PyGIArgGArray *array_cache = (PyGIArgGArray *)arg_cache;
+        GIArrayType array_type = gi_type_info_get_array_type (arg_cache->type_info);
 
-        if (array_cache->array_type == GI_ARRAY_TYPE_PTR_ARRAY) {
+        if (array_type == GI_ARRAY_TYPE_PTR_ARRAY) {
             ptr_array_ = (GPtrArray *) data;
         } else {
             array_ = (GArray *) data;
@@ -496,7 +500,7 @@ _pygi_marshal_cleanup_from_py_array (PyGIInvokeState *state,
         }
 
         /* Only free the array when we didn't transfer ownership */
-        if (array_cache->array_type == GI_ARRAY_TYPE_C) {
+        if (array_type == GI_ARRAY_TYPE_C) {
             /* always free the GArray wrapper created in from_py marshaling and
              * passed back as cleanup_data
              */
@@ -525,12 +529,13 @@ _pygi_marshal_to_py_array (PyGIInvokeState   *state,
     PyGISequenceCache *seq_cache = (PyGISequenceCache *)arg_cache;
     PyGIArgGArray *array_cache = (PyGIArgGArray *)arg_cache;
     guint processed_items = 0;
+    GIArrayType array_type = gi_type_info_get_array_type (arg_cache->type_info);
 
      /* GArrays make it easier to iterate over arrays
       * with different element sizes but requires that
       * we allocate a GArray if the argument was a C array
       */
-    if (array_cache->array_type == GI_ARRAY_TYPE_C) {
+    if (array_type == GI_ARRAY_TYPE_C) {
         gsize len = 0;
         if (gi_type_info_get_array_fixed_size (arg_cache->type_info, &len)) {
             g_assert(arg->v_pointer != NULL);
@@ -616,7 +621,7 @@ _pygi_marshal_to_py_array (PyGIInvokeState   *state,
                  * and move on, letting the per-item marshaler deal with the
                  * various transfer modes and ref counts (e.g. g_variant_ref_sink).
                  */
-                if (array_cache->array_type == GI_ARRAY_TYPE_PTR_ARRAY) {
+                if (array_type == GI_ARRAY_TYPE_PTR_ARRAY) {
                     item_arg.v_pointer = g_ptr_array_index ( ( GPtrArray *)array_, i);
 
                 } else if (item_arg_cache->is_pointer) {
@@ -668,13 +673,13 @@ _pygi_marshal_to_py_array (PyGIInvokeState   *state,
         }
     }
 
-    if (array_cache->array_type == GI_ARRAY_TYPE_C)
+    if (array_type == GI_ARRAY_TYPE_C)
         g_array_free (array_, FALSE);
 
     return py_obj;
 
 err:
-    if (array_cache->array_type == GI_ARRAY_TYPE_C) {
+    if (array_type == GI_ARRAY_TYPE_C) {
         g_array_free (array_, arg_cache->transfer == GI_TRANSFER_EVERYTHING);
     } else {
         /* clean up unprocessed items */
@@ -750,6 +755,7 @@ _pygi_marshal_cleanup_to_py_array (PyGIInvokeState *state,
     PyGIArgGArray *array_cache = (PyGIArgGArray *)arg_cache;
     gboolean free_array = FALSE;
     gboolean free_array_full = TRUE;
+    GIArrayType array_type = gi_type_info_get_array_type (arg_cache->type_info);
 
     if (arg_cache->transfer == GI_TRANSFER_EVERYTHING ||
         arg_cache->transfer == GI_TRANSFER_CONTAINER) {
@@ -758,7 +764,7 @@ _pygi_marshal_cleanup_to_py_array (PyGIInvokeState *state,
 
     /* If this isn't a garray create one to help process variable sized
        array elements */
-    if (array_cache->array_type == GI_ARRAY_TYPE_C) {
+    if (array_type == GI_ARRAY_TYPE_C) {
         array_ = _wrap_c_array (state, array_cache, data);
 
         if (array_ == NULL)
@@ -766,7 +772,7 @@ _pygi_marshal_cleanup_to_py_array (PyGIInvokeState *state,
 
         free_array = TRUE;
         free_array_full = arg_cache->transfer != GI_TRANSFER_NOTHING;
-    } else if (array_cache->array_type == GI_ARRAY_TYPE_PTR_ARRAY) {
+    } else if (array_type == GI_ARRAY_TYPE_PTR_ARRAY) {
         ptr_array_ = (GPtrArray *) data;
     } else {
         array_ = (GArray *) data;
@@ -910,7 +916,6 @@ pygi_arg_garray_setup (PyGIArgGArray     *sc,
     }
 
     ((PyGIArgCache *)sc)->destroy_notify = (GDestroyNotify)_array_cache_free_func;
-    sc->array_type = gi_type_info_get_array_type (type_info);
     sc->has_len_arg = FALSE;  /* setup by pygi_arg_garray_len_arg_setup */
 
     item_type_info = gi_type_info_get_param_type (type_info, 0);
