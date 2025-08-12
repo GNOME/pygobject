@@ -195,7 +195,7 @@ _pygi_marshal_from_py_array (PyGIInvokeState *state,
     PyGISequenceCache *sequence_cache = (PyGISequenceCache *)arg_cache;
     PyGIArgGArray *array_cache = (PyGIArgGArray *)arg_cache;
     GITransfer cleanup_transfer = arg_cache->transfer;
-
+    gboolean is_zero_terminated = gi_type_info_is_zero_terminated (arg_cache->type_info);
 
     if (Py_IsNone (py_arg)) {
         arg->v_pointer = NULL;
@@ -226,8 +226,10 @@ _pygi_marshal_from_py_array (PyGIInvokeState *state,
     if (is_ptr_array) {
         array_ = (GArray *)g_ptr_array_sized_new (length);
     } else {
-        array_ = g_array_sized_new (array_cache->is_zero_terminated, TRUE,
-                                    item_size, length);
+        array_ = g_array_sized_new (is_zero_terminated,
+                                    TRUE,
+                                    item_size,
+                                    length);
     }
 
     if (array_ == NULL) {
@@ -243,9 +245,9 @@ _pygi_marshal_from_py_array (PyGIInvokeState *state,
          * is not transferred to the C function
          * and cannot not be modified by it.
          */
-        if (array_cache->array_type == GI_ARRAY_TYPE_C
-            && arg_cache->transfer == GI_TRANSFER_NOTHING
-            && !array_cache->is_zero_terminated) {
+        if (array_cache->array_type == GI_ARRAY_TYPE_C &&
+            arg_cache->transfer == GI_TRANSFER_NOTHING &&
+            !is_zero_terminated) {
             g_free (array_->data);
             array_->data = data;
             cleanup_transfer = GI_TRANSFER_EVERYTHING;
@@ -253,7 +255,7 @@ _pygi_marshal_from_py_array (PyGIInvokeState *state,
             memcpy (array_->data, data, length);
         }
         array_->len = length;
-        if (array_cache->is_zero_terminated) {
+        if (is_zero_terminated) {
             /* If array_ has been created with zero_termination, space for the
              * terminator is properly allocated, so we're not off-by-one here. */
             array_->data[length] = '\0';
@@ -522,8 +524,8 @@ _pygi_marshal_to_py_array (PyGIInvokeState *state,
     if (array_cache->array_type == GI_ARRAY_TYPE_C) {
         gsize len = 0;
         if (gi_type_info_get_array_fixed_size (arg_cache->type_info, &len)) {
-            g_assert (arg->v_pointer != NULL);
-        } else if (array_cache->is_zero_terminated) {
+            g_assert(arg->v_pointer != NULL);
+        } else if (gi_type_info_is_zero_terminated (arg_cache->type_info)) {
             if (arg->v_pointer == NULL) {
                 len = 0;
             } else if (array_cache->item_size == 1) {
@@ -696,8 +698,8 @@ _wrap_c_array (PyGIInvokeState *state, PyGIArgGArray *array_cache,
     if (gi_type_info_get_array_fixed_size (
             ((PyGIArgCache *)array_cache)->type_info, &len)) {
         /* len is set. */
-    } else if (array_cache->is_zero_terminated) {
-        if (array_cache->item_size == sizeof (gpointer))
+    } else if (gi_type_info_is_zero_terminated (((PyGIArgCache *) array_cache)->type_info)) {
+        if (array_cache->item_size == sizeof(gpointer))
             len = g_strv_length ((gchar **)data);
         else if (array_cache->item_size == 1)
             len = strlen ((gchar *)data);
@@ -896,8 +898,7 @@ pygi_arg_garray_setup (
     ((PyGIArgCache *)sc)->destroy_notify =
         (GDestroyNotify)_array_cache_free_func;
     sc->array_type = gi_type_info_get_array_type (type_info);
-    sc->is_zero_terminated = gi_type_info_is_zero_terminated (type_info);
-    sc->has_len_arg = FALSE; /* setup by pygi_arg_garray_len_arg_setup */
+    sc->has_len_arg = FALSE;  /* setup by pygi_arg_garray_len_arg_setup */
 
     item_type_info = gi_type_info_get_param_type (type_info, 0);
     sc->item_size = _pygi_gi_type_info_size (item_type_info);
