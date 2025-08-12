@@ -707,8 +707,7 @@ _wrap_c_array (PyGIInvokeState   *state,
                PyGIArgGArray     *array_cache,
                gpointer           data)
 {
-    GArray *array_;
-    size_t   len = 0;
+    size_t len = 0;
 
     if (gi_type_info_get_array_fixed_size (((PyGIArgCache *) array_cache)->type_info, &len)) {
         /* len is set. */
@@ -728,18 +727,7 @@ _wrap_c_array (PyGIInvokeState   *state,
         len = len_arg->v_long;
     }
 
-    array_ = g_array_new (FALSE,
-                          FALSE,
-                          (guint)array_cache->item_size);
-
-    if (array_ == NULL)
-        return NULL;
-
-    g_free (array_->data);
-    array_->data = data;
-    array_->len = (guint)len;
-
-    return array_;
+    return g_array_new_take (data, (guint) len, FALSE, (guint)array_cache->item_size);
 }
 
 static void
