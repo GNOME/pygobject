@@ -32,6 +32,20 @@
 
 extern PyObject *_PyGIDefaultArgPlaceholder;
 
+static PyGIArgCache*
+next_python_argument(PyGICallableCache *cache, Py_ssize_t i, Py_ssize_t *skipped_args)
+{
+    PyGIArgCache *arg_cache = g_ptr_array_index (cache->py_args, i + *skipped_args);
+
+    /* Skip over automatically filled in arguments (e.g. GDestroyNotify) */
+    while (i != arg_cache->py_arg_index) {
+        *skipped_args += 1;
+        g_assert (i + *skipped_args < (Py_ssize_t) cache->py_args->len);
+        arg_cache = g_ptr_array_index (cache->py_args, i + *skipped_args);
+    }
+    return arg_cache;
+}
+
 /**
  * _py_args_combine_and_check_length:
  * @cache: PyGICallableCache
@@ -48,7 +62,7 @@ _py_args_combine_and_check_length (PyGICallableCache *cache,
                                    PyObject    *py_kwnames)
 {
     PyObject *combined_py_args = NULL;
-    Py_ssize_t n_py_args, n_py_kwargs, i, offset = 0;
+    Py_ssize_t n_py_args, n_py_kwargs, i, skipped_args = 0;
     gssize n_expected_args = cache->n_py_args;
 
     n_py_args = PyVectorcall_NARGS (py_nargsf);
@@ -85,14 +99,7 @@ _py_args_combine_and_check_length (PyGICallableCache *cache,
 
     /* Add the positional arguments */
     for (i = 0; i < n_py_args && i < n_expected_args; i++) {
-        PyGIArgCache *arg_cache = g_ptr_array_index (cache->py_args, i + offset);
-
-        /* Skip over automatically filled in arguments (e.g. GDestroyNotify) */
-        while (i != arg_cache->py_arg_index) {
-            offset += 1;
-            g_assert (i + offset < (Py_ssize_t) cache->py_args->len);
-            arg_cache = g_ptr_array_index (cache->py_args, i + offset);
-        }
+        PyGIArgCache *arg_cache = next_python_argument (cache, i, &skipped_args);
 
         if (arg_cache == cache->user_data_varargs_arg) {
             PyObject *user_data = PyTuple_New (n_py_args - i);
@@ -168,13 +175,7 @@ _py_args_combine_and_check_length (PyGICallableCache *cache,
 
         if (arg_item != NULL) continue;
 
-        arg_cache = g_ptr_array_index (cache->py_args, i + offset);
-
-        while (i != arg_cache->py_arg_index) {
-            offset += 1;
-            g_assert (i + offset < (Py_ssize_t) cache->py_args->len);
-            arg_cache = g_ptr_array_index (cache->py_args, i + offset);
-        }
+        arg_cache = next_python_argument (cache, i, &skipped_args);
 
         if (arg_cache == cache->user_data_varargs_arg) {
             /* For varargs user_data, pass an empty tuple when nothing
