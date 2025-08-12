@@ -35,13 +35,13 @@ extern PyObject *_PyGIDefaultArgPlaceholder;
 static PyGIArgCache*
 next_python_argument(PyGICallableCache *cache, Py_ssize_t i, Py_ssize_t *skipped_args)
 {
-    PyGIArgCache *arg_cache = g_ptr_array_index (cache->py_args, i + *skipped_args);
+    PyGIArgCache *arg_cache = g_ptr_array_index (cache->args_cache, i + *skipped_args);
 
     /* Skip over automatically filled in arguments (e.g. GDestroyNotify) */
-    while (i != arg_cache->py_arg_index) {
+    while (arg_cache->py_arg_index < 0 || i != arg_cache->py_arg_index) {
         *skipped_args += 1;
-        g_assert (i + *skipped_args < (Py_ssize_t) cache->py_args->len);
-        arg_cache = g_ptr_array_index (cache->py_args, i + *skipped_args);
+        g_assert (i + *skipped_args < (Py_ssize_t) cache->args_cache->len);
+        arg_cache = g_ptr_array_index (cache->args_cache, i + *skipped_args);
     }
     return arg_cache;
 }
