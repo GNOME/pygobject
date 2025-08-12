@@ -820,6 +820,8 @@ pygi_arg_garray_len_arg_setup (PyGIArgGArray *seq_cache, GITypeInfo *type_info,
                                                     seq_cache->len_arg_index);
         if (child_cache == NULL) {
             child_cache = pygi_arg_cache_alloc ();
+            _pygi_callable_cache_set_arg (
+                callable_cache, seq_cache->len_arg_index, child_cache);
         } else {
             /* If the "length" arg cache already exists (the length comes before
              * the array in the argument list), remove it from the to_py_args list
@@ -873,13 +875,7 @@ pygi_arg_garray_len_arg_setup (PyGIArgGArray *seq_cache, GITypeInfo *type_info,
                 update_cache->py_arg_index -= 1;
             }
         }
-
-        _pygi_callable_cache_set_arg (callable_cache, seq_cache->len_arg_index,
-                                      child_cache);
-        return;
     }
-
-    return;
 }
 
 static gboolean
