@@ -184,7 +184,6 @@ struct _PyGICallableCache
 
     PyGIArgCache *return_cache;
     GPtrArray *args_cache;
-    GPtrArray *py_args;
     GSList *to_py_args;
     GHashTable *arg_name_hash;
     gboolean throws;
@@ -288,7 +287,6 @@ pygi_arg_cache_new       (GITypeInfo *type_info,
                           GITransfer transfer,
                           PyGIDirection direction,
                           PyGICallableCache *callable_cache,
-                          /* will be removed */
                           gssize c_arg_index,
                           gssize py_arg_index);
 

@@ -610,19 +610,6 @@ _callable_cache_generate_args_cache_real (PyGICallableCache *callable_cache,
         }
     }
 
-    /* Build an ordered list of the Python args */
-    if (callable_cache->py_args == NULL) {
-	callable_cache->py_args = g_ptr_array_sized_new (callable_cache->n_py_args);
-    }
-    g_ptr_array_set_size (callable_cache->py_args, 0);
-    for (arg_index = 0; arg_index < _pygi_callable_cache_args_len (callable_cache); arg_index++) {
-        PyGIArgCache *arg_cache = _pygi_callable_cache_get_arg (callable_cache, arg_index);
-
-	if (arg_cache->py_arg_index >= 0) {
-	    g_ptr_array_add (callable_cache->py_args, arg_cache);
-	}
-    }
-
     if (!return_cache->is_skipped && return_cache->type_tag != GI_TYPE_TAG_VOID) {
         callable_cache->has_return = TRUE;
     }
@@ -660,7 +647,6 @@ static void
 _callable_cache_deinit_real (PyGICallableCache *cache)
 {
     g_clear_pointer (&cache->to_py_args, g_slist_free);
-    g_clear_pointer (&cache->py_args, g_ptr_array_unref);
     g_clear_pointer (&cache->arg_name_hash, g_hash_table_unref);
     g_clear_pointer (&cache->args_cache, g_ptr_array_unref);
     Py_CLEAR (cache->resulttuple_type);
