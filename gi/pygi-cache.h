@@ -151,9 +151,7 @@ typedef struct _PyGISequenceCache {
 
 typedef struct _PyGIArgGArray {
     PyGISequenceCache seq_cache;
-    size_t fixed_size;
     unsigned int len_arg_index;
-    gboolean has_fixed_size;
     gboolean has_len_arg;
     gboolean is_zero_terminated;
     gsize item_size;
