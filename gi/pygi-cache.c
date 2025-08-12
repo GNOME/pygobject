@@ -688,8 +688,6 @@ _callable_cache_init (PyGICallableCache *cache,
     if (cache->generate_args_cache == NULL)
         cache->generate_args_cache = _callable_cache_generate_args_cache_real;
 
-    cache->throws = gi_callable_info_can_throw_gerror (callable_info);
-
     if (gi_base_info_is_deprecated (GI_BASE_INFO (callable_info))) {
         const gchar *deprecated = gi_base_info_get_attribute (GI_BASE_INFO (callable_info), "deprecated");
         gchar *warning;
@@ -750,6 +748,12 @@ gboolean
 pygi_callable_cache_skip_return (PyGICallableCache *cache)
 {
     return gi_callable_info_skip_return (GI_CALLABLE_INFO (cache->info));
+}
+
+gboolean
+pygi_callable_cache_can_throw_gerror (PyGICallableCache *cache)
+{
+    return gi_callable_info_can_throw_gerror (GI_CALLABLE_INFO (cache->info));
 }
 
 void
