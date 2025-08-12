@@ -162,8 +162,7 @@ typedef struct _PyGIInterfaceCache {
     gchar *type_name;
 } PyGIInterfaceCache;
 
-struct _PyGICallableCache
-{
+struct _PyGICallableCache {
     GIBaseInfo *info;
 
     PyGICallingContext calling_context;
@@ -172,7 +171,6 @@ struct _PyGICallableCache
     GPtrArray *args_cache;
     GSList *to_py_args;
     GHashTable *arg_name_hash;
-    gboolean throws;
 
     /* Index of user_data arg passed to a callable. */
     unsigned int user_data_index;
@@ -267,6 +265,8 @@ void pygi_callable_cache_free (PyGICallableCache *cache);
 gchar *pygi_callable_cache_get_full_name (PyGICallableCache *cache);
 
 gboolean pygi_callable_cache_skip_return (PyGICallableCache *cache);
+
+gboolean pygi_callable_cache_can_throw_gerror (PyGICallableCache *cache);
 
 PyGIFunctionCache *pygi_function_cache_new (GICallableInfo *info);
 

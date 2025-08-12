@@ -278,7 +278,7 @@ _invoke_state_init_from_cache (PyGIInvokeState *state,
 
     state->n_args = _pygi_callable_cache_args_len (cache);
 
-    if (cache->throws) {
+    if (pygi_callable_cache_can_throw_gerror (cache)) {
         state->n_args++;
     }
 
@@ -302,7 +302,7 @@ _invoke_state_init_from_cache (PyGIInvokeState *state,
 
     state->error = NULL;
 
-    if (cache->throws) {
+    if (pygi_callable_cache_can_throw_gerror (cache)) {
         gssize error_index = state->n_args - 1;
         /* The ffi argument for GError needs to be a triple pointer. */
         state->args[error_index].arg_pointer.v_pointer = &state->error;

@@ -630,8 +630,6 @@ _callable_cache_init (PyGICallableCache *cache, GICallableInfo *callable_info)
     if (cache->generate_args_cache == NULL)
         cache->generate_args_cache = _callable_cache_generate_args_cache_real;
 
-    cache->throws = gi_callable_info_can_throw_gerror (callable_info);
-
     if (gi_base_info_is_deprecated (GI_BASE_INFO (callable_info))) {
         const gchar *deprecated = gi_base_info_get_attribute (
             GI_BASE_INFO (callable_info), "deprecated");
@@ -668,7 +666,7 @@ gchar *
 pygi_callable_cache_get_full_name (PyGICallableCache *cache)
 {
     GIBaseInfo *container = gi_base_info_get_container (cache->info);
-    const char * container_name = NULL;
+    const char *container_name = NULL;
 
     /* https://bugzilla.gnome.org/show_bug.cgi?id=709456 */
     if (container != NULL && !GI_IS_TYPE_INFO (container)) {
@@ -676,16 +674,12 @@ pygi_callable_cache_get_full_name (PyGICallableCache *cache)
     }
 
     if (container_name != NULL) {
-        return g_strjoin (".",
-                          gi_base_info_get_namespace (cache->info),
-                          container_name,
-                          gi_base_info_get_name (cache->info),
+        return g_strjoin (".", gi_base_info_get_namespace (cache->info),
+                          container_name, gi_base_info_get_name (cache->info),
                           NULL);
     } else {
-        return g_strjoin (".",
-                          gi_base_info_get_namespace (cache->info),
-                          gi_base_info_get_name (cache->info),
-                          NULL);
+        return g_strjoin (".", gi_base_info_get_namespace (cache->info),
+                          gi_base_info_get_name (cache->info), NULL);
     }
 }
 
@@ -693,6 +687,12 @@ gboolean
 pygi_callable_cache_skip_return (PyGICallableCache *cache)
 {
     return gi_callable_info_skip_return (GI_CALLABLE_INFO (cache->info));
+}
+
+gboolean
+pygi_callable_cache_can_throw_gerror (PyGICallableCache *cache)
+{
+    return gi_callable_info_can_throw_gerror (GI_CALLABLE_INFO (cache->info));
 }
 
 void
@@ -772,7 +772,8 @@ _function_cache_init (PyGIFunctionCache *function_cache,
         }
 
         if (cancellable && async_callback) {
-            GIBaseInfo *container = gi_base_info_get_container ((GIBaseInfo*) callable_info);
+            GIBaseInfo *container =
+                gi_base_info_get_container ((GIBaseInfo *)callable_info);
             const char *name = gi_base_info_get_name (callable_cache->info);
             GIBaseInfo *async_finish = NULL;
             gint name_len;
@@ -783,8 +784,7 @@ _function_cache_init (PyGIFunctionCache *function_cache,
              * up that information.
              */
             name_len = strlen (name);
-            if (g_str_has_suffix (name, "_async"))
-                name_len -= 6;
+            if (g_str_has_suffix (name, "_async")) name_len -= 6;
 
             /* Original name without _async if it is there, _finish + NUL byte */
             finish_name = g_malloc0 (name_len + 7 + 1);
@@ -801,9 +801,10 @@ _function_cache_init (PyGIFunctionCache *function_cache,
                 GIRepository *repository;
 
                 repository = pygi_repository_get_default ();
-                async_finish = gi_repository_find_by_name (repository,
-                                                           gi_base_info_get_namespace (callable_cache->info),
-                                                           finish_name);
+                async_finish = gi_repository_find_by_name (
+                    repository,
+                    gi_base_info_get_namespace (callable_cache->info),
+                    finish_name);
             } else {
                 g_debug (
                     "Awaitable async functions only work on GObjects and as "

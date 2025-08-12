@@ -283,7 +283,7 @@ _pygi_closure_convert_ffi_arguments (PyGIInvokeArgState *state,
         }
     }
 
-    if (cache->throws) {
+    if (pygi_callable_cache_can_throw_gerror (cache)) {
         gssize error_index = _pygi_callable_cache_args_len (cache);
 
         state[error_index].arg_value.v_pointer =
@@ -301,7 +301,7 @@ _invoke_state_init_from_cache (PyGIInvokeState *state,
     state->n_py_in_args = state->n_args;
 
     /* Increment after setting the number of Python input args */
-    if (cache->throws) {
+    if (pygi_callable_cache_can_throw_gerror (cache)) {
         state->n_args++;
     }
 
@@ -501,7 +501,7 @@ _pygi_closure_clear_retvals (PyGIInvokeState *state, PyGICallableCache *cache,
         }
     }
 
-    if (cache->throws) {
+    if (pygi_callable_cache_can_throw_gerror (cache)) {
         gssize error_index = state->n_args - 1;
         GError **error =
             (GError **)state->args[error_index].arg_value.v_pointer;
