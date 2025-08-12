@@ -187,6 +187,7 @@ _pygi_marshal_from_py_array (PyGIInvokeState *state,
     guint i = 0;
     gsize success_count = 0;
     Py_ssize_t py_length;
+    size_t fixed_size;
     guint length;
     guint item_size;
     gboolean is_ptr_array;
@@ -212,10 +213,10 @@ _pygi_marshal_from_py_array (PyGIInvokeState *state,
 
     if (!pygi_guint_from_pyssize (py_length, &length)) return FALSE;
 
-    if (array_cache->has_fixed_size
-        && (guint)array_cache->fixed_size != length) {
+    if (gi_type_info_get_array_fixed_size (arg_cache->type_info, &fixed_size)
+        && (guint)fixed_size != length) {
         PyErr_Format (PyExc_ValueError, "Must contain %zd items, not %u",
-                      array_cache->fixed_size, length);
+                      fixed_size, length);
 
         return FALSE;
     }
@@ -520,9 +521,8 @@ _pygi_marshal_to_py_array (PyGIInvokeState *state,
       */
     if (array_cache->array_type == GI_ARRAY_TYPE_C) {
         gsize len = 0;
-        if (array_cache->has_fixed_size) {
+        if (gi_type_info_get_array_fixed_size (arg_cache->type_info, &len)) {
             g_assert (arg->v_pointer != NULL);
-            len = array_cache->fixed_size;
         } else if (array_cache->is_zero_terminated) {
             if (arg->v_pointer == NULL) {
                 len = 0;
@@ -691,10 +691,11 @@ _wrap_c_array (PyGIInvokeState *state, PyGIArgGArray *array_cache,
                gpointer data)
 {
     GArray *array_;
-    gsize len = 0;
+    size_t len = 0;
 
-    if (array_cache->has_fixed_size) {
-        len = array_cache->fixed_size;
+    if (gi_type_info_get_array_fixed_size (
+            ((PyGIArgCache *)array_cache)->type_info, &len)) {
+        /* len is set. */
     } else if (array_cache->is_zero_terminated) {
         if (array_cache->item_size == sizeof (gpointer))
             len = g_strv_length ((gchar **)data);
@@ -900,8 +901,6 @@ pygi_arg_garray_setup (
         (GDestroyNotify)_array_cache_free_func;
     sc->array_type = gi_type_info_get_array_type (type_info);
     sc->is_zero_terminated = gi_type_info_is_zero_terminated (type_info);
-    sc->has_fixed_size =
-        gi_type_info_get_array_fixed_size (type_info, &sc->fixed_size);
     sc->has_len_arg = FALSE; /* setup by pygi_arg_garray_len_arg_setup */
 
     item_type_info = gi_type_info_get_param_type (type_info, 0);
