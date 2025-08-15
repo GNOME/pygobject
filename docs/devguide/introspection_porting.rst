@@ -69,7 +69,7 @@ the following technique:
 .. note::
 
    Porting the application from 2 to 3 is best covered in
-   http://developer.gnome.org/gtk3/3.2/gtk-migrating-2-to-3.html. That usually includes things
+   https://docs.gtk.org/gtk3/migrating-2to3.html. That usually includes things
    such as change expose-event to draw and do drawing with cairo.
 
 How does PyGI work?
@@ -326,7 +326,7 @@ Note that this is really two migrations in one step, but is recommended as GTK2 
 breakage with PyGI. It is recommended to port applications to PyGI/GTK+ 3 first, then port to
 Python 3 as an additional step if Python 3 support is desired. Otherwise you can end up with a
 conflated and hard to track set of changes. See the `GTK2 → GTK3 migration documentation
-<http://developer.gnome.org/gtk3/stable/gtk-migrating-2-to-3.html>`_.
+<https://docs.gtk.org/gtk3/migrating-2to3.html>`_.
 
 If we compare the PyGTK vs. PyGI code for a "Hello" message box, we see that it's actually very
 similar in structure:

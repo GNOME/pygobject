@@ -12,7 +12,7 @@ To get started, we can inspect a GI function which takes a GBytes argument inter
 to determine what the argument is in terms of GI (ipython is very helpful here):
 
 PyGI exposes GI functions as custom callable objects which also implement the
-`GIFunctionInfo API <https://developer.gnome.org/gi/stable/gi-GIFunctionInfo.html>`_ and its base classes.
+`GIFunctionInfo API <https://docs.gtk.org/girepository/class.FunctionInfo.html>`_ and its base classes.
 
 .. code-block:: python
 
@@ -41,9 +41,9 @@ Determine argument type using:
     'interface'
 
 At this point we know the argument type tag is an "interface" or
-`GI_TYPE_TAG_INTERFACE <https://developer.gnome.org/gi/stable/gi-common-types.html#GITypeTag>`_
-so `g_type_info_get_interface <https://developer.gnome.org/gi/stable/gi-GITypeInfo.html#g-type-info-get-interface>`_
-should be valid for the `GITypeInfo <https://developer.gnome.org/gi/stable/gi-GITypeInfo.html>`_.
+`GI_TYPE_TAG_INTERFACE <https://docs.gtk.org/girepository/enum.TypeTag.html>`_
+so `g_type_info_get_interface <https://docs.gtk.org/girepository/method.TypeInfo.get_interface.html>`_
+should be valid for the `GITypeInfo <https://docs.gtk.org/girepository/class.TypeInfo.html>`_.
 
 .. code-block:: python
 
@@ -51,8 +51,8 @@ should be valid for the `GITypeInfo <https://developer.gnome.org/gi/stable/gi-GI
     StructInfo(Bytes)
 
 In this case get_interface() is giving us a
-`GIStructInfo <https://developer.gnome.org/gi/stable/gi-GIStructInfo.html>`_.
-We can then verify a valid GType is available using `g_registered_type_info_get_g_type() <https://developer.gnome.org/gi/stable/gi-GIRegisteredTypeInfo.html#g-registered-type-info-get-g-type>`_
+`GIStructInfo <https://docs.gtk.org/girepository/class.StructInfo.html>`_.
+We can then verify a valid GType is available using `gi_registered_type_info_get_g_type() <https://docs.gtk.org/girepository/method.RegisteredTypeInfo.get_g_type.html>`_
 (GIRegisteredTypeInfo is a base class of GIStructInfo):
 
 .. code-block:: python
