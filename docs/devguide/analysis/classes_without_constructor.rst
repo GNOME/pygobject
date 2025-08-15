@@ -2,8 +2,6 @@
 Analysis of Classes without Constructors
 ========================================
 
-(bug 675581)
-
 There are a number of classes in the GNOME APIs that are not intended for direct creation. The
 issue is there is not an accurate way to generically determine this. GI bindings are general and
 expose everything they can, this makes a number of classes available which crash when an attempt
