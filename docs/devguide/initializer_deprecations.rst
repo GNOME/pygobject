@@ -4,7 +4,7 @@ Initializer Deprecations
 
 Starting with PyGObject 3.11, overridden object creation and initialization (``__new__`` and
 ``__init__`` respectively) that contain side effects or dispatching beyond standard object creation
-with `g_object_newv <https://developer.gnome.org/gobject/stable/gobject-The-Base-Object-Type.html#g-object-newv>`_
+with `g_object_newv <https://docs.gtk.org/gobject/ctor.Object.newv.html>`_
 will issue deprecation warnings. Additionally, positional arguments and non-standard keyword
 argument names will also show deprecation warnings.
 
@@ -32,7 +32,7 @@ Rational
 3. Ensure consistency across all GObject creation. In essence, we would like to guarantee all
    objects can be created with the same technique: taking a variable number of keyword arguments
    mapped exactly to the classes property names as defined by using `g_object_newv
-   <https://developer.gnome.org/gobject/stable/gobject-The-Base-Object-Type.html#g-object-newv>`_.
+   <https://docs.gtk.org/gobject/ctor.Object.newv.html>`_.
    This will greatly help consistency, documentation, and discoverability/expectation once the
    API user understands property names are valid keyword arguments for object construction.
 
