@@ -32,3 +32,5 @@
 .coverage
 pdm.lock
 .pdm-python
+public/
+

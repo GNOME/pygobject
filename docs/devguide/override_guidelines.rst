@@ -36,7 +36,7 @@ bindable API becomes a reality (:bzbug:`707280`).
 * Avoid overriding ``__init__``
   *Reason*: Sub-classing the overridden class then becomes challenging and
   has the potential to cause bugs (see :bzbug:`711487` and reasoning
-  listed in https://wiki.gnome.org/Projects/PyGObject/InitializerDeprecations).
+  listed in :doc:`initializer_deprecations`).
 
 * Unbindable functions which take variadic arguments are generally ok to add
   Python implementations, but keep in mind the prior noted guidelines. A lot

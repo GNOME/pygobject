@@ -327,7 +327,7 @@ if GDK3:
                 warnings.warn(
                     'Calling "Gdk.Cursor(display, cursor_type)" has been deprecated. '
                     "Please use Gdk.Cursor.new_for_display(display, cursor_type). "
-                    "See: https://wiki.gnome.org/Projects/PyGObject/InitializerDeprecations",
+                    "See: https://pygobject.gnome.org/devguide/initializer_deprecations.html",
                     PyGIDeprecationWarning,
                 )
                 return cls.new_for_display(*args, **kwds)
@@ -336,7 +336,7 @@ if GDK3:
                 warnings.warn(
                     'Calling "Gdk.Cursor(display, pixbuf, x, y)" has been deprecated. '
                     "Please use Gdk.Cursor.new_from_pixbuf(display, pixbuf, x, y). "
-                    "See: https://wiki.gnome.org/Projects/PyGObject/InitializerDeprecations",
+                    "See: https://pygobject.gnome.org/devguide/initializer_deprecations.html",
                     PyGIDeprecationWarning,
                 )
                 return cls.new_from_pixbuf(*args, **kwds)
