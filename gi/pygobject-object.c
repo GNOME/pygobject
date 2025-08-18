@@ -941,7 +941,6 @@ pygobject_new_full (GObject *obj, gboolean steal, gpointer g_class)
         /* If steal is true, we also want to decref the incoming GObjects which
          * already have a Python wrapper because the wrapper is already holding a
          * strong reference.
-         * We drop our reference.
          */
         if (steal) g_object_unref (obj);
 
@@ -2490,8 +2489,11 @@ cleanup:
         if (G_IS_INITIALLY_UNOWNED (obj)) {
             g_object_ref_sink (obj);
         }
-	self = (PyGObject *) pygobject_new((GObject *)obj);
-        g_object_unref(obj);
+        self = g_object_get_qdata(obj, pygobject_wrapper_key);
+        if (self == NULL) {
+	    self = (PyGObject *) pygobject_new((GObject *)obj);
+            g_object_unref(obj);
+        }
     } else
         self = NULL;
 
