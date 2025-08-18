@@ -2472,8 +2472,7 @@ pyg_object_new (PyGObject *self, PyObject *args, PyObject *kwargs)
                                                  &names, &values))
         goto cleanup;
 
-    obj = pygobject_object_new_with_properties (type, n_properties, names,
-                                                values);
+    obj = g_object_new_with_properties(type, n_properties, names, values);
 
     if (!obj) PyErr_SetString (PyExc_RuntimeError, "could not create object");
 
