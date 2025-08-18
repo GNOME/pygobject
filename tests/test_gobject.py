@@ -308,7 +308,7 @@ class A(GObject.GObject):
 
 
 class TestPythonReferenceCounting(unittest.TestCase):
-    # Newly created instances should alwayshave two references: one for
+    # Newly created instances should always have two references: one for
     # the GC, and one for the bound variable in the local scope.
 
     def test_new_instance_has_two_refs(self):

@@ -989,11 +989,11 @@ pygobject_constructv (PyGObject *self, guint n_properties, const char *names[],
     obj = pygobject_object_new_with_properties (
         pyg_type_from_object ((PyObject *)self), n_properties, names, values);
 
-    if (g_object_is_floating (obj))
-        self->private_flags.flags |= PYGOBJECT_GOBJECT_WAS_FLOATING;
-    pygobject_sink (obj);
-
-    pygobject_init_wrapper_set (NULL);
+    if (G_IS_INITIALLY_UNOWNED(obj)) {
+        g_object_ref_sink (obj);
+    }
+    
+    pygobject_init_wrapper_set(NULL);
     self->obj = obj;
     pygobject_register_wrapper ((PyObject *)self);
 
@@ -1038,11 +1038,6 @@ pygobject__g_instance_init (GTypeInstance *instance, gpointer g_class)
             wrapper = pygobject_new_full (object,
                                           /*steal=*/FALSE, g_class);
         }
-
-        /* float the wrapper ref here because we are going to orphan it
-         * so we don't destroy the wrapper. The next call to pygobject_new_full
-         * will take the ref */
-        pygobject_ref_float ((PyGObject *)wrapper);
 
         needs_init = TRUE;
     }

@@ -114,31 +114,6 @@ pygi_arg_gobject_out_arg_from_py (PyObject *py_arg, /* in */
          * we add a new GObject ref.
          */
         g_object_ref (gobj);
-
-        if (((PyGObject *)py_arg)->private_flags.flags
-            & PYGOBJECT_GOBJECT_WAS_FLOATING) {
-            /*
-             * We want to re-float instances that were floating and the Python
-             * wrapper assumed ownership. With the additional caveat that there
-             * are not any strong references beyond the return tuple.
-             */
-            g_object_force_floating (gobj);
-
-        } else {
-            // This may no longer be true, due to differences in refcounting
-            PyObject *repr = PyObject_Repr (py_arg);
-            gchar *msg = g_strdup_printf (
-                "Expecting to marshal a borrowed reference for %s, "
-                "but nothing in Python is holding a reference to this object. "
-                "See: https://bugzilla.gnome.org/show_bug.cgi?id=687522",
-                PyUnicode_AsUTF8 (repr));
-            Py_DECREF (repr);
-            if (PyErr_WarnEx (PyExc_RuntimeWarning, msg, 2)) {
-                g_free (msg);
-                return FALSE;
-            }
-            g_free (msg);
-        }
     }
 
     return TRUE;
