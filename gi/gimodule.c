@@ -961,7 +961,7 @@ pygobject_constructv (PyGObject *self,
     type = pyg_type_from_object((PyObject *) self);
     obj = g_object_new_with_properties(type, n_properties, names, values);
 
-    if (G_IS_INITIALLY_UNOWNED(obj)) {
+    if (G_IS_INITIALLY_UNOWNED (obj)) {
         g_object_ref_sink (obj);
     }
 
