@@ -946,53 +946,25 @@ pygobject_init_wrapper_get (void)
     return (PyObject *)g_private_get (&pygobject_construction_wrapper);
 }
 
-/**
- * Like g_object_new_with_properties() but also works with older glib versions.
- */
-GObject *
-pygobject_object_new_with_properties (GType object_type, guint n_properties,
-                                      const char *names[],
-                                      const GValue values[])
-{
-    GObject *obj;
-
-#if GLIB_CHECK_VERSION(2, 54, 0)
-    obj = g_object_new_with_properties (object_type, n_properties, names,
-                                        values);
-#else
-    {
-        GParameter *parameters;
-        uint i;
-
-        parameters = g_new (GParameter, n_properties);
-        for (i = 0; i < n_properties; i++) {
-            parameters[i].name = names[i];
-            parameters[i].value = values[i];
-        }
-        obj = g_object_newv (object_type, n_properties, parameters);
-        g_free (parameters);
-    }
-#endif
-
-    return obj;
-}
-
 int
-pygobject_constructv (PyGObject *self, guint n_properties, const char *names[],
+pygobject_constructv (PyGObject *self,
+                      guint n_properties,
+                      const char *names[],
                       const GValue values[])
 {
     GObject *obj;
+    GType type;
 
     g_assert (self->obj == NULL);
     pygobject_init_wrapper_set ((PyObject *)self);
 
-    obj = pygobject_object_new_with_properties (
-        pyg_type_from_object ((PyObject *)self), n_properties, names, values);
+    type = pyg_type_from_object((PyObject *) self);
+    obj = g_object_new_with_properties(type, n_properties, names, values);
 
     if (G_IS_INITIALLY_UNOWNED(obj)) {
         g_object_ref_sink (obj);
     }
-    
+
     pygobject_init_wrapper_set(NULL);
     self->obj = obj;
     pygobject_register_wrapper ((PyObject *)self);
