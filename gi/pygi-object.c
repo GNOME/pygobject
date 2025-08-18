@@ -223,8 +223,6 @@ pygi_arg_object_to_py (GIArgument *arg, GITransfer transfer)
 PyObject *
 pygi_arg_object_to_py_called_from_c (GIArgument *arg, GITransfer transfer)
 {
-    PyObject *object;
-
     /* HACK:
      * The following hack is to work around GTK sending signals which
      * contain floating widgets in them. This assumes control of how
@@ -233,18 +231,19 @@ pygi_arg_object_to_py_called_from_c (GIArgument *arg, GITransfer transfer)
      * mode and then re-forcing the object as floating afterwards.
      *
      * See: https://bugzilla.gnome.org/show_bug.cgi?id=693400
+     *
+     * (a GtkCellRendererText issue that has since been fixed)
+     * In modern bindings this should no longer be needed. We sink the object
+     * as soon as it's created and that's that.
      */
-    if (arg->v_pointer != NULL && transfer == GI_TRANSFER_NOTHING
-        && G_IS_OBJECT (arg->v_pointer)
-        && g_object_is_floating (arg->v_pointer)) {
-        g_object_ref (arg->v_pointer);
-        object = pygi_arg_object_to_py (arg, GI_TRANSFER_EVERYTHING);
-        g_object_force_floating (arg->v_pointer);
-    } else {
-        object = pygi_arg_object_to_py (arg, transfer);
+    if (arg->v_pointer != NULL &&
+        transfer == GI_TRANSFER_NOTHING &&
+        G_IS_OBJECT (arg->v_pointer) &&
+        g_object_is_floating (arg->v_pointer)) {
+        g_object_ref_sink (arg->v_pointer);
     }
 
-    return object;
+    return pygi_arg_object_to_py (arg, transfer);
 }
 
 static PyObject *
