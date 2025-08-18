@@ -2467,15 +2467,10 @@ pyg_object_new (PyGObject *self, PyObject *args, PyObject *kwargs)
         return NULL;
     }
 
-    if (!pygobject_prepare_construct_properties (class, kwargs, &n_properties,
-                                                 &names, &values))
-        goto cleanup;
+    if (pygobject_prepare_construct_properties (class, kwargs, &n_properties, &names, &values)) {
+        obj = g_object_new_with_properties(type, n_properties, names, values);
+    }
 
-    obj = g_object_new_with_properties(type, n_properties, names, values);
-
-    if (!obj) PyErr_SetString (PyExc_RuntimeError, "could not create object");
-
-cleanup:
     for (i = 0; i < n_properties; i++) {
         g_free (names[i]);
         g_value_unset (&values[i]);
@@ -2494,8 +2489,10 @@ cleanup:
 	    self = (PyGObject *) pygobject_new((GObject *)obj);
             g_object_unref(obj);
         }
-    } else
+    } else {
+        PyErr_SetString (PyExc_RuntimeError, "could not create object");
         self = NULL;
+    }
 
     return (PyObject *)self;
 }
