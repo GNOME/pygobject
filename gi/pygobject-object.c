@@ -176,29 +176,6 @@ pygobject_get_inst_data (PyGObject *self)
 
 PyTypeObject *PyGObject_MetaType = NULL;
 
-/**
- * pygobject_sink:
- * @obj: a GObject
- *
- * As Python handles reference counting for us, the "floating
- * reference" code in GTK is not all that useful.  In fact, it can
- * cause leaks.  This function should be called to remove the floating
- * references on objects on construction.
- **/
-void
-pygobject_sink (GObject *obj)
-{
-    /* The default behaviour for GInitiallyUnowned subclasses is to call ref_sink().
-     * - if the object is new and owned by someone else, its ref has been sunk and
-     *   we need to keep the one from that someone and add our own "fresh ref"
-     * - if the object is not and owned by nobody, its ref is floating and we need
-     *   to transform it into a regular ref.
-     */
-    if (G_IS_INITIALLY_UNOWNED (obj)) {
-        g_object_ref_sink (obj);
-    }
-}
-
 typedef struct {
     PyObject_HEAD
     GParamSpec **props;
@@ -652,36 +629,11 @@ pygobject_toggle_ref_ensure (PyGObject *self)
 
     g_assert (self->obj->ref_count >= 1);
     self->private_flags.flags |= PYGOBJECT_USING_TOGGLE_REF;
-    /* Note that add_toggle_ref will never immediately call back into
+      /* Note that add_toggle_ref will never immediately call back into
          pyg_toggle_notify */
     Py_INCREF ((PyObject *)self);
     g_object_add_toggle_ref (self->obj, pyg_toggle_notify, NULL);
     g_object_unref (self->obj);
-}
-
-/* Called when an custom gobject is initalized via g_object_new instead of
-   its constructor.  The next time the wrapper is access via
-   pygobject_new_full it will sink the floating reference instead of
-   adding a new reference and causing a leak */
-
-void
-pygobject_ref_float (PyGObject *self)
-{
-    /* should only be floated once */
-    g_assert (!(self->private_flags.flags & PYGOBJECT_IS_FLOATING_REF));
-
-    self->private_flags.flags |= PYGOBJECT_IS_FLOATING_REF;
-}
-
-/* Called by gobject_new_full, if the floating flag is set remove it, otherwise
-   ref the pyobject */
-void
-pygobject_ref_sink (PyGObject *self)
-{
-    if (self->private_flags.flags & PYGOBJECT_IS_FLOATING_REF)
-        self->private_flags.flags &= ~PYGOBJECT_IS_FLOATING_REF;
-    else
-        Py_INCREF ((PyObject *)self);
 }
 
 /**
@@ -984,14 +936,12 @@ pygobject_new_full (GObject *obj, gboolean steal, gpointer g_class)
      */
     self = (PyGObject *)g_object_get_qdata (obj, pygobject_wrapper_key);
     if (self != NULL) {
-        /* Note the use of "pygobject_ref_sink" here only deals with PyObject
-         * wrapper ref counts and has nothing to do with GObject.
-         */
-        pygobject_ref_sink (self);
+        Py_INCREF ( (PyObject *) self);
 
         /* If steal is true, we also want to decref the incoming GObjects which
          * already have a Python wrapper because the wrapper is already holding a
          * strong reference.
+         * We drop our reference.
          */
         if (steal) g_object_unref (obj);
 
@@ -1021,10 +971,7 @@ pygobject_new_full (GObject *obj, gboolean steal, gpointer g_class)
 
         /* If we are not stealing a ref or the object is floating,
          * add a regular ref or sink the object. */
-        if (g_object_is_floating (obj))
-            self->private_flags.flags |= PYGOBJECT_GOBJECT_WAS_FLOATING;
-        if (!steal
-            || self->private_flags.flags & PYGOBJECT_GOBJECT_WAS_FLOATING)
+        if (!steal || g_object_is_floating (obj))
             g_object_ref_sink (obj);
 
         pygobject_register_wrapper ((PyObject *)self);
@@ -1928,8 +1875,9 @@ pygobject_emit (PyGObject *self, PyObject *args)
                 was_floating = g_object_is_floating (obj);
             }
         }
-        py_ret = pyg_value_as_pyobject (&ret, TRUE);
-        if (!was_floating) g_value_unset (&ret);
+        py_ret = pyg_value_as_pyobject(&ret, TRUE);
+        if (!was_floating)
+	      g_value_unset(&ret);
     } else {
         py_ret = Py_NewRef (Py_None);
     }
@@ -2540,9 +2488,11 @@ cleanup:
     g_type_class_unref (class);
 
     if (obj) {
-        pygobject_sink (obj);
-        self = (PyGObject *)pygobject_new ((GObject *)obj);
-        g_object_unref (obj);
+        if (G_IS_INITIALLY_UNOWNED (obj)) {
+            g_object_ref_sink (obj);
+        }
+	self = (PyGObject *) pygobject_new((GObject *)obj);
+        g_object_unref(obj);
     } else
         self = NULL;
 
