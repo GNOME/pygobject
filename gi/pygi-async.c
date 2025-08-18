@@ -443,9 +443,9 @@ pygi_async_finish_cb (GObject *source_object, gpointer res, PyGIAsync *self)
         return;
     }
 
-    res_pyobj = pygobject_new_full (res, FALSE, NULL);
+    res_pyobj = pygobject_new (res);
     if (source_object) {
-        source_pyobj = pygobject_new_full (source_object, FALSE, NULL);
+        source_pyobj = pygobject_new (source_object);
         args[0] = source_pyobj;
         args[1] = res_pyobj;
         nargs = 2;
