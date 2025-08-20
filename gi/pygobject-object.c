@@ -629,7 +629,7 @@ pygobject_toggle_ref_ensure (PyGObject *self)
 
     g_assert (self->obj->ref_count >= 1);
     self->private_flags.flags |= PYGOBJECT_USING_TOGGLE_REF;
-      /* Note that add_toggle_ref will never immediately call back into
+    /* Note that add_toggle_ref will never immediately call back into
          pyg_toggle_notify */
     Py_INCREF ((PyObject *)self);
     g_object_add_toggle_ref (self->obj, pyg_toggle_notify, NULL);
@@ -936,7 +936,7 @@ pygobject_new_full (GObject *obj, gboolean steal, gpointer g_class)
      */
     self = (PyGObject *)g_object_get_qdata (obj, pygobject_wrapper_key);
     if (self != NULL) {
-        Py_INCREF ( (PyObject *) self);
+        Py_INCREF ((PyObject *)self);
 
         /* If steal is true, we also want to decref the incoming GObjects which
          * already have a Python wrapper because the wrapper is already holding a
@@ -970,8 +970,7 @@ pygobject_new_full (GObject *obj, gboolean steal, gpointer g_class)
 
         /* If we are not stealing a ref or the object is floating,
          * add a regular ref or sink the object. */
-        if (!steal || g_object_is_floating (obj))
-            g_object_ref_sink (obj);
+        if (!steal || g_object_is_floating (obj)) g_object_ref_sink (obj);
 
         pygobject_register_wrapper ((PyObject *)self);
         PyObject_GC_Track ((PyObject *)self);
@@ -1874,9 +1873,8 @@ pygobject_emit (PyGObject *self, PyObject *args)
                 was_floating = g_object_is_floating (obj);
             }
         }
-        py_ret = pyg_value_as_pyobject(&ret, TRUE);
-        if (!was_floating)
-	      g_value_unset(&ret);
+        py_ret = pyg_value_as_pyobject (&ret, TRUE);
+        if (!was_floating) g_value_unset (&ret);
     } else {
         py_ret = Py_NewRef (Py_None);
     }
@@ -2467,8 +2465,9 @@ pyg_object_new (PyGObject *self, PyObject *args, PyObject *kwargs)
         return NULL;
     }
 
-    if (pygobject_prepare_construct_properties (class, kwargs, &n_properties, &names, &values)) {
-        obj = g_object_new_with_properties(type, n_properties, names, values);
+    if (pygobject_prepare_construct_properties (class, kwargs, &n_properties,
+                                                &names, &values)) {
+        obj = g_object_new_with_properties (type, n_properties, names, values);
     }
 
     for (i = 0; i < n_properties; i++) {
@@ -2484,10 +2483,10 @@ pyg_object_new (PyGObject *self, PyObject *args, PyObject *kwargs)
         if (G_IS_INITIALLY_UNOWNED (obj)) {
             g_object_ref_sink (obj);
         }
-        self = g_object_get_qdata(obj, pygobject_wrapper_key);
+        self = g_object_get_qdata (obj, pygobject_wrapper_key);
         if (self == NULL) {
-	    self = (PyGObject *) pygobject_new((GObject *)obj);
-            g_object_unref(obj);
+            self = (PyGObject *)pygobject_new ((GObject *)obj);
+            g_object_unref (obj);
         }
     } else {
         PyErr_SetString (PyExc_RuntimeError, "could not create object");

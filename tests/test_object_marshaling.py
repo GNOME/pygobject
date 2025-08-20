@@ -123,7 +123,9 @@ class TestVFuncsWithObjectArg(unittest.TestCase):
         # of a potential leak. If this occures it is really a bug in the underlying library
         # but pygobject tries to react to this in a reasonable way.
         vfuncs = self.VFuncs()
-        ref_count, is_floating = vfuncs.get_ref_info_for_vfunc_out_object_transfer_none()
+        ref_count, is_floating = (
+            vfuncs.get_ref_info_for_vfunc_out_object_transfer_none()
+        )
 
         # The ref count of the GObject returned to the caller (get_ref_info_for_vfunc_return_object_transfer_none)
         # should be a single floating ref
@@ -137,7 +139,9 @@ class TestVFuncsWithObjectArg(unittest.TestCase):
     def test_vfunc_out_object_transfer_none(self):
         # Same as above except uses out arg instead of return
         vfuncs = self.VFuncs()
-        ref_count, is_floating = vfuncs.get_ref_info_for_vfunc_out_object_transfer_none()
+        ref_count, is_floating = (
+            vfuncs.get_ref_info_for_vfunc_out_object_transfer_none()
+        )
 
         if hasattr(sys, "getrefcount"):
             self.assertEqual(ref_count, 1)
@@ -586,7 +590,9 @@ class TestVFuncsWithHeldFloatingArg(unittest.TestCase):
 
         # Ref count inside vfunc from the perspective of Python
         self.assertFalse(vfuncs.in_object_is_floating)
-        self.assertEqual(vfuncs.in_object_grefcount, 2)  # python wrapper sinks and owns the gobject
+        self.assertEqual(
+            vfuncs.in_object_grefcount, 2
+        )  # python wrapper sinks and owns the gobject
 
         # Ref count from the perspective of C after the vfunc is called
         self.assertFalse(is_floating)

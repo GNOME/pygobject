@@ -236,10 +236,9 @@ pygi_arg_object_to_py_called_from_c (GIArgument *arg, GITransfer transfer)
      * In modern bindings this should no longer be needed. We sink the object
      * as soon as it's created and that's that.
      */
-    if (arg->v_pointer != NULL &&
-        transfer == GI_TRANSFER_NOTHING &&
-        G_IS_OBJECT (arg->v_pointer) &&
-        g_object_is_floating (arg->v_pointer)) {
+    if (arg->v_pointer != NULL && transfer == GI_TRANSFER_NOTHING
+        && G_IS_OBJECT (arg->v_pointer)
+        && g_object_is_floating (arg->v_pointer)) {
         g_object_ref_sink (arg->v_pointer);
     }
 

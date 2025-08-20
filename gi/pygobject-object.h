@@ -33,17 +33,16 @@ pyg_object_peek_inst_data (GObject *obj)
                                                  pygobject_instance_data_key));
 }
 
-void          pygobject_register_class   (PyObject *dict,
-                                          const gchar *type_name,
-                                          GType gtype, PyTypeObject *type,
-                                          PyObject *bases);
-void          pygobject_register_wrapper (PyObject *self);
-PyObject *    pygobject_new              (GObject *obj);
-PyObject *    pygobject_new_full         (GObject *obj, gboolean steal, gpointer g_class);
-PyTypeObject *pygobject_lookup_class     (GType gtype);
-void          pygobject_watch_closure    (PyObject *self, GClosure *closure);
-int           pyi_object_register_types  (PyObject *d);
-PyObject *    pyg_object_new             (PyGObject *self, PyObject *args, PyObject *kwargs);
+void pygobject_register_class (PyObject *dict, const gchar *type_name,
+                               GType gtype, PyTypeObject *type,
+                               PyObject *bases);
+void pygobject_register_wrapper (PyObject *self);
+PyObject *pygobject_new (GObject *obj);
+PyObject *pygobject_new_full (GObject *obj, gboolean steal, gpointer g_class);
+PyTypeObject *pygobject_lookup_class (GType gtype);
+void pygobject_watch_closure (PyObject *self, GClosure *closure);
+int pyi_object_register_types (PyObject *d);
+PyObject *pyg_object_new (PyGObject *self, PyObject *args, PyObject *kwargs);
 
 GClosure *gclosure_from_pyfunc (PyGObject *object, PyObject *func);
 
