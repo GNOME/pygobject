@@ -27,14 +27,13 @@ from . import _gi
 
 
 class GEnumMeta(enum.EnumMeta):
-
     def __new__(metacls, name, bases, classdict, /, **kwargs):
         enum_class = super().__new__(metacls, name, bases, classdict, **kwargs)
 
         # If __gtype__ is not set, this is a new enum or flags defined
         # from Python. Register a new GType for it.
-        if '__gtype__' not in enum_class.__dict__:
-            type_name = enum_class.__dict__.get('__gtype_name__')
+        if "__gtype__" not in enum_class.__dict__:
+            type_name = enum_class.__dict__.get("__gtype_name__")
             _gi.enum_register(enum_class, type_name)
 
         return enum_class
@@ -42,8 +41,10 @@ class GEnumMeta(enum.EnumMeta):
     @property
     def __enum_values__(self):
         from gi import PyGIDeprecationWarning
-        warnings.warn('Calling "__enum_values__" on enums is deprecated.',
-                      PyGIDeprecationWarning)
+
+        warnings.warn(
+            'Calling "__enum_values__" on enums is deprecated.', PyGIDeprecationWarning
+        )
         return {m.value: m for m in self}
 
 
@@ -53,14 +54,13 @@ class GEnum(enum.IntEnum, metaclass=GEnumMeta):
 
 
 class GFlagsMeta(enum.EnumMeta):
-
     def __new__(metacls, name, bases, classdict, /, **kwargs):
         flags_class = super().__new__(metacls, name, bases, classdict, **kwargs)
 
         # If __gtype__ is not set, this is a new enum or flags defined
         # from Python. Register a new GType for it.
-        if '__gtype__' not in flags_class.__dict__:
-            type_name = flags_class.__dict__.get('__gtype_name__')
+        if "__gtype__" not in flags_class.__dict__:
+            type_name = flags_class.__dict__.get("__gtype_name__")
             _gi.flags_register(flags_class, type_name)
 
         return flags_class
@@ -68,8 +68,11 @@ class GFlagsMeta(enum.EnumMeta):
     @property
     def __flags_values__(self):
         from gi import PyGIDeprecationWarning
-        warnings.warn('Calling "__flags_values__" on flags is deprecated. ',
-                      PyGIDeprecationWarning)
+
+        warnings.warn(
+            'Calling "__flags_values__" on flags is deprecated. ',
+            PyGIDeprecationWarning,
+        )
         return {m.value: m for m in self}
 
 

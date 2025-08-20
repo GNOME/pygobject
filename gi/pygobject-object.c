@@ -127,13 +127,13 @@ pygobject_data_free(PyGObjectData *data)
 #endif
     while (tmp) {
  	GClosure *closure = tmp->data;
- 
+
           /* we get next item first, because the current link gets
            * invalidated by pygobject_unwatch_closure */
  	tmp = tmp->next;
  	g_closure_invalidate(closure);
     }
- 
+
     if (data->closures != NULL)
  	g_warning("invalidated all closures, but data->closures != NULL !");
 
@@ -180,7 +180,7 @@ PyTypeObject *PyGObject_MetaType = NULL;
 /**
  * pygobject_sink:
  * @obj: a GObject
- * 
+ *
  * As Python handles reference counting for us, the "floating
  * reference" code in GTK is not all that useful.  In fact, it can
  * cause leaks.  This function should be called to remove the floating
@@ -260,14 +260,14 @@ build_parameter_list(GObjectClass *class)
 	/* hyphens cannot belong in identifiers */
 	g_strdelimit(name, "-", '_');
 	prop_str = PyUnicode_FromString (name);
-	
+
 	PyList_SetItem(props_list, i, prop_str);
 	g_free(name);
     }
 
     if (props)
         g_free(props);
-    
+
     return props_list;
 }
 
@@ -319,13 +319,13 @@ set_property_from_pspec(GObject *obj,
 		     "property '%s' can only be set in constructor",
 		     pspec->name);
 	return FALSE;
-    }	
+    }
 
     if (!(pspec->flags & G_PARAM_WRITABLE)) {
 	PyErr_Format(PyExc_TypeError,
 		     "property '%s' is not writable", pspec->name);
 	return FALSE;
-    }	
+    }
 
     g_value_init(&value, G_PARAM_SPEC_VALUE_TYPE(pspec));
     if (pyg_param_gvalue_from_pyobject(&value, pvalue, pspec) < 0) {
@@ -404,7 +404,7 @@ PyGProps_setattro(PyGProps *self, PyObject *attr, PyObject *pvalue)
      * do a straightforward set. */
     if (!set_property_from_pspec(obj, pspec, pvalue))
 	return -1;
-				  
+
     return 0;
 }
 
@@ -455,7 +455,7 @@ PyGProps_length(PyGProps *self)
     GObjectClass *class;
     GParamSpec **props;
     guint n_props;
-    
+
     class = g_type_class_ref(self->gtype);
     props = g_object_class_list_properties(class, &n_props);
     g_type_class_unref(class);
@@ -521,7 +521,7 @@ pygobject_register_class(PyObject *dict, const gchar *type_name,
     PyObject *runtime_bases;
     PyObject *bases_list, *bases, *mod_name;
     int i;
-    
+
     class_name = type->tp_name;
     s = strrchr(class_name, '.');
     if (s != NULL)
@@ -578,7 +578,7 @@ pygobject_register_class(PyObject *dict, const gchar *type_name,
 	PyDict_SetItemString(type->tp_dict, "__module__", mod_name);
 	Py_DECREF(mod_name);
     }
-    
+
     if (gtype) {
 	o = pyg_type_wrapper_new(gtype);
 	PyDict_SetItemString(type->tp_dict, "__gtype__", o);
@@ -644,7 +644,7 @@ pygobject_toggle_ref_is_active (PyGObject *self)
     return self->private_flags.flags & PYGOBJECT_USING_TOGGLE_REF;
 }
 
-  /* Called when the inst_dict is first created; switches the 
+  /* Called when the inst_dict is first created; switches the
      reference counting strategy to start using toggle ref to keep the
      wrapper alive while the GObject lives.  In contrast, while
      inst_dict was NULL the python wrapper is allowed to die at
@@ -663,7 +663,7 @@ pygobject_toggle_ref_ensure (PyGObject *self)
 
     g_assert(self->obj->ref_count >= 1);
     self->private_flags.flags |= PYGOBJECT_USING_TOGGLE_REF;
-      /* Note that add_toggle_ref will never immediately call back into 
+      /* Note that add_toggle_ref will never immediately call back into
          pyg_toggle_notify */
     Py_INCREF((PyObject *) self);
     g_object_add_toggle_ref(self->obj, pyg_toggle_notify, NULL);
@@ -671,16 +671,16 @@ pygobject_toggle_ref_ensure (PyGObject *self)
 }
 
 /* Called when an custom gobject is initalized via g_object_new instead of
-   its constructor.  The next time the wrapper is access via 
+   its constructor.  The next time the wrapper is access via
    pygobject_new_full it will sink the floating reference instead of
    adding a new reference and causing a leak */
- 
+
 void
 pygobject_ref_float(PyGObject *self)
 {
     /* should only be floated once */
     g_assert(!(self->private_flags.flags & PYGOBJECT_IS_FLOATING_REF));
-    
+
     self->private_flags.flags |= PYGOBJECT_IS_FLOATING_REF;
 }
 
@@ -729,7 +729,7 @@ pyg_type_get_bases(GType gtype)
     PyTypeObject *py_parent_type, *py_interface_type;
     PyObject *bases;
     guint i;
-    
+
     if (G_UNLIKELY(gtype == G_TYPE_OBJECT))
         return NULL;
 
@@ -780,7 +780,7 @@ pygobject_new_with_interfaces(GType gtype)
     py_parent_type = (PyTypeObject *) PyTuple_GetItem(bases, 0);
 
     dict = PyDict_New();
-    
+
     o = pyg_type_wrapper_new(gtype);
     PyDict_SetItemString(dict, "__gtype__", o);
     Py_DECREF(o);
@@ -949,7 +949,7 @@ pygobject_lookup_class(GType gtype)
 
     if (gtype == G_TYPE_INTERFACE)
         return &PyGInterface_Type;
-    
+
     py_type = g_type_get_qdata(gtype, pygobject_class_key);
     if (py_type == NULL) {
         py_type = g_type_get_qdata(gtype, pyginterface_type_key);
@@ -965,7 +965,7 @@ pygobject_lookup_class(GType gtype)
             g_type_set_qdata(gtype, pyginterface_type_key, py_type);
         }
     }
-    
+
     return py_type;
 }
 
@@ -1020,7 +1020,7 @@ pygobject_new_full(GObject *obj, gboolean steal, gpointer g_class)
                 tp = pygobject_lookup_class(G_OBJECT_TYPE(obj));
         }
         g_assert(tp != NULL);
-        
+
         /* need to bump type refcount if created with
            pygobject_new_with_interfaces(). fixes bug #141042 */
         if (tp->tp_flags & Py_TPFLAGS_HEAPTYPE)
@@ -1345,7 +1345,7 @@ pygobject_init(PyGObject *self, PyObject *args, PyObject *kwargs)
     g_free(values);
 
     g_type_class_unref(class);
-    
+
     return (self->obj) ? 0 : -1;
 }
 
@@ -1417,9 +1417,9 @@ pygobject_set_property(PyGObject *self, PyObject *args)
     if (!PyArg_ParseTuple(args, "sO:GObject.set_property", &param_name,
 			  &pvalue))
 	return NULL;
-    
+
     CHECK_GOBJECT(self);
-    
+
     pspec = g_object_class_find_property(G_OBJECT_GET_CLASS(self->obj),
 					 param_name);
     if (!pspec) {
@@ -1428,7 +1428,7 @@ pygobject_set_property(PyGObject *self, PyObject *args)
 		     g_type_name(G_OBJECT_TYPE(self->obj)), param_name);
 	return NULL;
     }
-    
+
     ret = pygi_set_property_value (self, pspec, pvalue);
     if (ret == 0)
 	goto done;
@@ -1445,7 +1445,7 @@ done:
 
 static PyObject *
 pygobject_set_properties(PyGObject *self, PyObject *args, PyObject *kwargs)
-{    
+{
     GObjectClass    *class;
     Py_ssize_t      pos;
     PyObject        *value;
@@ -1455,7 +1455,7 @@ pygobject_set_properties(PyGObject *self, PyObject *args, PyObject *kwargs)
     CHECK_GOBJECT(self);
 
     class = G_OBJECT_GET_CLASS(self->obj);
-    
+
     g_object_freeze_notify (G_OBJECT(self->obj));
     pos = 0;
 
@@ -1610,9 +1610,9 @@ pygobject_bind_property(PyGObject *self, PyObject *args, PyObject *kwargs)
 		NULL
 	};
 
-	if (!PyArg_ParseTupleAndKeywords(args, kwargs, "sOs|iOOO:GObject.bind_property", kwlist, 
+	if (!PyArg_ParseTupleAndKeywords(args, kwargs, "sOs|iOOO:GObject.bind_property", kwlist,
 					 &source_name, &target, &target_name, &flags,
-					 &transform_to, &transform_from, &user_data)) 
+					 &transform_to, &transform_from, &user_data))
 		return NULL;
 
 	CHECK_GOBJECT(self);
@@ -1736,9 +1736,9 @@ pygobject_connect(PyGObject *self, PyObject *args)
 	PyErr_SetString(PyExc_TypeError, "second argument must be callable");
 	return NULL;
     }
-    
+
     CHECK_GOBJECT(self);
-    
+
     extra_args = PySequence_GetSlice(args, 2, len);
     if (extra_args == NULL)
 	return NULL;
@@ -1772,9 +1772,9 @@ pygobject_connect_after(PyGObject *self, PyObject *args)
 	PyErr_SetString(PyExc_TypeError, "second argument must be callable");
 	return NULL;
     }
-    
+
     CHECK_GOBJECT(self);
-    
+
     extra_args = PySequence_GetSlice(args, 2, len);
     if (extra_args == NULL)
 	return NULL;
@@ -1808,9 +1808,9 @@ pygobject_connect_object(PyGObject *self, PyObject *args)
 	PyErr_SetString(PyExc_TypeError, "second argument must be callable");
 	return NULL;
     }
-    
+
     CHECK_GOBJECT(self);
-    
+
     extra_args = PySequence_GetSlice(args, 3, len);
     if (extra_args == NULL)
 	return NULL;
@@ -1844,9 +1844,9 @@ pygobject_connect_object_after(PyGObject *self, PyObject *args)
 	PyErr_SetString(PyExc_TypeError, "second argument must be callable");
 	return NULL;
     }
-    
+
     CHECK_GOBJECT(self);
-    
+
     extra_args = PySequence_GetSlice(args, 3, len);
     if (extra_args == NULL)
 	return NULL;
@@ -1866,7 +1866,7 @@ pygobject_emit(PyGObject *self, PyObject *args)
     gchar *name;
     GSignalQuery query;
     GValue *params, ret = { 0, };
-    
+
     len = PyTuple_Size(args);
     if (len < 1) {
 	PyErr_SetString(PyExc_TypeError,"GObject.emit needs at least one arg");
@@ -1878,9 +1878,9 @@ pygobject_emit(PyGObject *self, PyObject *args)
 	return NULL;
     }
     Py_DECREF(first);
-    
+
     CHECK_GOBJECT(self);
-    
+
     if (!g_signal_parse_name(name, G_OBJECT_TYPE(self->obj),
 			     &signal_id, &detail, TRUE)) {
 	repr = PyObject_Repr((PyObject*)self);
@@ -1925,18 +1925,18 @@ pygobject_emit(PyGObject *self, PyObject *args)
 	    g_free(params);
 	    return NULL;
 	}
-    }    
+    }
 
     if (query.return_type != G_TYPE_NONE)
 	g_value_init(&ret, query.return_type & ~G_SIGNAL_TYPE_STATIC_SCOPE);
-    
+
     Py_BEGIN_ALLOW_THREADS;
     g_signal_emitv(params, signal_id, detail, &ret);
     Py_END_ALLOW_THREADS;
 
     for (i = 0; i < query.n_params + 1; i++)
 	g_value_unset(&params[i]);
-    
+
     g_free(params);
     if ((query.return_type & ~G_SIGNAL_TYPE_STATIC_SCOPE) != G_TYPE_NONE) {
       gboolean was_floating = FALSE;
@@ -1967,9 +1967,9 @@ pygobject_chain_from_overridden(PyGObject *self, PyObject *args)
     const gchar *name;
     GSignalQuery query;
     GValue *params, ret = { 0, };
-    
+
     CHECK_GOBJECT(self);
-    
+
     ihint = g_signal_get_invocation_hint(self->obj);
     if (!ihint) {
 	PyErr_SetString(PyExc_TypeError, "could not find signal invocation "
@@ -2087,7 +2087,7 @@ pygobject_disconnect_by_func(PyGObject *self, PyObject *args)
     PyObject *pyfunc = NULL, *repr = NULL;
     GClosure *closure = NULL;
     guint retval;
-    
+
     CHECK_GOBJECT(self);
 
     if (!PyArg_ParseTuple(args, "O:GObject.disconnect_by_func", &pyfunc))
@@ -2106,7 +2106,7 @@ pygobject_disconnect_by_func(PyGObject *self, PyObject *args)
 	Py_DECREF(repr);
 	return NULL;
     }
-    
+
     retval = g_signal_handlers_disconnect_matched(self->obj,
 						  G_SIGNAL_MATCH_CLOSURE,
 						  0, 0,
@@ -2121,7 +2121,7 @@ pygobject_handler_block_by_func(PyGObject *self, PyObject *args)
     PyObject *pyfunc = NULL, *repr = NULL;
     GClosure *closure = NULL;
     guint retval;
-    
+
     CHECK_GOBJECT(self);
 
     if (!PyArg_ParseTuple(args, "O:GObject.handler_block_by_func", &pyfunc))
@@ -2140,7 +2140,7 @@ pygobject_handler_block_by_func(PyGObject *self, PyObject *args)
 	Py_DECREF(repr);
 	return NULL;
     }
-    
+
     retval = g_signal_handlers_block_matched(self->obj,
 					     G_SIGNAL_MATCH_CLOSURE,
 					     0, 0,
@@ -2155,7 +2155,7 @@ pygobject_handler_unblock_by_func(PyGObject *self, PyObject *args)
     PyObject *pyfunc = NULL, *repr = NULL;
     GClosure *closure = NULL;
     guint retval;
-    
+
     CHECK_GOBJECT(self);
 
     if (!PyArg_ParseTuple(args, "O:GObject.handler_unblock_by_func", &pyfunc))
@@ -2174,7 +2174,7 @@ pygobject_handler_unblock_by_func(PyGObject *self, PyObject *args)
 	Py_DECREF(repr);
 	return NULL;
     }
-    
+
     retval = g_signal_handlers_unblock_matched(self->obj,
 					       G_SIGNAL_MATCH_CLOSURE,
 					       0, 0,

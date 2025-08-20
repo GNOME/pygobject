@@ -38,5 +38,5 @@ matching stylesheets depending on the system appearance settings exposed by
 
 * ``style-hc.css`` contains styles used when :attr:`Adw.StyleManager.props.high_contrast` is ``True``.
 
-* ``style-hc-dark.css`` contains styles used when :attr:`Adw.StyleManager.props.high_contrast` 
+* ``style-hc-dark.css`` contains styles used when :attr:`Adw.StyleManager.props.high_contrast`
   and :attr:`Adw.StyleManager.props.dark` are both ``True``.

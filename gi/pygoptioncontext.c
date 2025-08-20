@@ -49,7 +49,7 @@ pyglib_option_group_transfer_group(PyObject *obj)
 	return NULL;
 
     self->is_in_context = TRUE;
-    
+
     /* Here we increase the reference count of the PyGOptionGroup, because now
      * the GOptionContext holds an reference to us (it is the userdata passed
      * to g_option_group_new().
@@ -229,7 +229,7 @@ pyg_option_context_set_ignore_unknown_options(PyGOptionContext *self,
 
     g_option_context_set_ignore_unknown_options(self->context,
 						PyObject_IsTrue(ignore_unknown_options));
-    
+
 
     Py_RETURN_NONE;
 }

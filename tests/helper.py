@@ -21,7 +21,6 @@ def capture_exceptions():
     """Installs a temporary sys.excepthook which records all exceptions
     instead of printing them.
     """
-
     exceptions = []
 
     def custom_excepthook(*args):
@@ -39,7 +38,6 @@ def ignore_gi_deprecation_warnings(func_or_class):
     """A unittest class and function decorator which makes them ignore
     PyGIDeprecationWarning.
     """
-
     if inspect.isclass(func_or_class):
         assert issubclass(func_or_class, unittest.TestCase)
         cls = func_or_class
@@ -48,23 +46,21 @@ def ignore_gi_deprecation_warnings(func_or_class):
                 new_value = ignore_gi_deprecation_warnings(value)
                 setattr(cls, name, new_value)
         return cls
-    else:
-        func = func_or_class
+    func = func_or_class
 
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            with capture_gi_deprecation_warnings():
-                return func(*args, **kwargs)
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        with capture_gi_deprecation_warnings():
+            return func(*args, **kwargs)
 
-        return wrapper
+    return wrapper
 
 
 @contextlib.contextmanager
 def capture_gi_deprecation_warnings():
-    """Temporarily suppress PyGIDeprecationWarning output and record them"""
-
+    """Temporarily suppress PyGIDeprecationWarning output and record them."""
     with warnings.catch_warnings(record=True) as warn:
-        warnings.simplefilter('always', category=PyGIDeprecationWarning)
+        warnings.simplefilter("always", category=PyGIDeprecationWarning)
         yield warn
 
 
@@ -76,7 +72,6 @@ def capture_glib_warnings(allow_warnings=False, allow_criticals=False):
     by default. Setting allow_warnings and allow_criticals will temporarily
     allow warnings or criticals without terminating the test run.
     """
-
     old_mask = GLib.log_set_always_fatal(GLib.LogLevelFlags(0))
 
     new_mask = old_mask
@@ -90,7 +85,7 @@ def capture_glib_warnings(allow_warnings=False, allow_criticals=False):
     GLibWarning = gi._gi.Warning
     try:
         with warnings.catch_warnings(record=True) as warn:
-            warnings.filterwarnings('always', category=GLibWarning)
+            warnings.filterwarnings("always", category=GLibWarning)
             yield warn
     finally:
         GLib.log_set_always_fatal(old_mask)
@@ -98,25 +93,24 @@ def capture_glib_warnings(allow_warnings=False, allow_criticals=False):
 
 @contextlib.contextmanager
 def capture_glib_deprecation_warnings():
-    """Temporarily suppress glib deprecation warning output and record them"""
-
+    """Temporarily suppress glib deprecation warning output and record them."""
     GLibWarning = gi._gi.Warning
     with warnings.catch_warnings(record=True) as warn:
         warnings.filterwarnings(
-            'always', category=GLibWarning,
+            "always",
+            category=GLibWarning,
             message=".+ is deprecated and shouldn't be used anymore\\. "
-                    "It will be removed in a future version\\.")
+            "It will be removed in a future version\\.",
+        )
         yield warn
 
 
 @contextlib.contextmanager
 def capture_output():
-    """
-    with capture_output() as (stdout, stderr):
+    """With capture_output() as (stdout, stderr):
         some_action()
-    print(stdout.getvalue(), stderr.getvalue())
+    print(stdout.getvalue(), stderr.getvalue()).
     """
-
     err = StringIO()
     out = StringIO()
     old_err = sys.stderr

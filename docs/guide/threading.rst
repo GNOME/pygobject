@@ -2,10 +2,10 @@
 Multi Threading
 ===============
 
-Operations which could potentially block should not be executed in the main 
-loop. The main loop is in charge of input processing and drawing and 
-blocking it results in the user interface freezing. For the user this means 
-not getting any feedback and not being able to pause or abort the operation 
+Operations which could potentially block should not be executed in the main
+loop. The main loop is in charge of input processing and drawing and
+blocking it results in the user interface freezing. For the user this means
+not getting any feedback and not being able to pause or abort the operation
 which causes the problem.
 
 Such an operation might be:
@@ -22,7 +22,7 @@ The following examples show
 
 This page will discuss multi-threading. A separate page discusses :doc:asynchronous.
 
-This example uses a Python thread to execute code in the background 
+This example uses a Python thread to execute code in the background
 while still showing feedback on the progress in a window.
 
 .. code:: python
@@ -90,10 +90,10 @@ Threads: FAQ
   :func:`Gdk.threads_enter` and :func:`Gdk.threads_leave`.
   ``gobject.threads_init()`` can be removed.
 
-* I'm using :func:`Gdk.threads_init` and want to get rid of it. What do I 
+* I'm using :func:`Gdk.threads_init` and want to get rid of it. What do I
   need to do?
 
-  * Remove any :func:`Gdk.threads_init()`, :func:`Gdk.threads_enter` and  
+  * Remove any :func:`Gdk.threads_init()`, :func:`Gdk.threads_enter` and
     :func:`Gdk.threads_leave` calls. In case they get executed in a thread,
     move the GTK code into its own function and schedule it using
     :func:`GLib.idle_add`. Be aware that the newly created function will be
@@ -144,6 +144,6 @@ Threads: FAQ
 * What about the Python `GIL
   <https://en.wikipedia.org/wiki/Global_Interpreter_Lock>`__ ?
 
-  Similar to I/O operations in Python, all PyGObject calls release the 
-  GIL during their execution and other Python threads can be executed 
+  Similar to I/O operations in Python, all PyGObject calls release the
+  GIL during their execution and other Python threads can be executed
   during that time.

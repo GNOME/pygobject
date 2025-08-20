@@ -1,5 +1,3 @@
-# -*- Mode: Python -*-
-
 import sys
 import gc
 import unittest
@@ -137,7 +135,6 @@ class TestSource(unittest.TestCase):
 
         # Removing sources not found cause critical
         with capture_glib_warnings(allow_criticals=True):
-
             # s is now removed, should fail now
             self.assertEqual(GLib.source_remove(s), False)
 
@@ -171,7 +168,7 @@ class TestSource(unittest.TestCase):
         # Note, deprecated API
         s = GLib.Idle()
         with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter('always')
+            warnings.simplefilter("always")
             time = s.get_current_time()
             self.assertTrue(issubclass(w[0].category, PyGIDeprecationWarning))
 
@@ -264,7 +261,9 @@ class TestSource(unittest.TestCase):
         assert not self.dispatched
         assert context.find_source_by_id(id_) is None
 
-    @unittest.skipIf(sys.implementation.name == "pypy", "PyPy doesn't __del__ immediately")
+    @unittest.skipIf(
+        sys.implementation.name == "pypy", "PyPy doesn't __del__ immediately"
+    )
     def test_python_unref_during_dispatch(self):
         # Tests a Python derived Source which is free'd in the context of
         # Python, while being dispatched
@@ -305,7 +304,7 @@ class TestSource(unittest.TestCase):
     def test_extra_init_args(self):
         class SourceWithInitArgs(GLib.Source):
             def __init__(self, arg, kwarg=None):
-                super(SourceWithInitArgs, self).__init__()
+                super().__init__()
                 self.arg = arg
                 self.kwarg = kwarg
 
@@ -321,9 +320,11 @@ class TestUserData(unittest.TestCase):
 
         def cb():
             ml.quit()
+
         id = GLib.idle_add(cb)
-        self.assertEqual(ml.get_context().find_source_by_id(id).priority,
-                         GLib.PRIORITY_DEFAULT_IDLE)
+        self.assertEqual(
+            ml.get_context().find_source_by_id(id).priority, GLib.PRIORITY_DEFAULT_IDLE
+        )
         ml.run()
 
     def test_timeout_no_data(self):
@@ -331,75 +332,87 @@ class TestUserData(unittest.TestCase):
 
         def cb():
             ml.quit()
+
         id = GLib.timeout_add(1, cb)
-        self.assertEqual(ml.get_context().find_source_by_id(id).priority,
-                         GLib.PRIORITY_DEFAULT)
+        self.assertEqual(
+            ml.get_context().find_source_by_id(id).priority, GLib.PRIORITY_DEFAULT
+        )
         ml.run()
 
     def test_idle_data(self):
         ml = GLib.MainLoop()
 
         def cb(data):
-            data['called'] = True
+            data["called"] = True
             ml.quit()
+
         data = {}
         id = GLib.idle_add(cb, data)
-        self.assertEqual(ml.get_context().find_source_by_id(id).priority,
-                         GLib.PRIORITY_DEFAULT_IDLE)
+        self.assertEqual(
+            ml.get_context().find_source_by_id(id).priority, GLib.PRIORITY_DEFAULT_IDLE
+        )
         ml.run()
-        self.assertTrue(data['called'])
+        self.assertTrue(data["called"])
 
     def test_idle_multidata(self):
         ml = GLib.MainLoop()
 
         def cb(data, data2):
-            data['called'] = True
-            data['data2'] = data2
+            data["called"] = True
+            data["data2"] = data2
             ml.quit()
+
         data = {}
-        id = GLib.idle_add(cb, data, 'hello')
-        self.assertEqual(ml.get_context().find_source_by_id(id).priority,
-                         GLib.PRIORITY_DEFAULT_IDLE)
+        id = GLib.idle_add(cb, data, "hello")
+        self.assertEqual(
+            ml.get_context().find_source_by_id(id).priority, GLib.PRIORITY_DEFAULT_IDLE
+        )
         ml.run()
-        self.assertTrue(data['called'])
-        self.assertEqual(data['data2'], 'hello')
+        self.assertTrue(data["called"])
+        self.assertEqual(data["data2"], "hello")
 
     def test_timeout_data(self):
         ml = GLib.MainLoop()
 
         def cb(data):
-            data['called'] = True
+            data["called"] = True
             ml.quit()
+
         data = {}
         id = GLib.timeout_add(1, cb, data)
-        self.assertEqual(ml.get_context().find_source_by_id(id).priority,
-                         GLib.PRIORITY_DEFAULT)
+        self.assertEqual(
+            ml.get_context().find_source_by_id(id).priority, GLib.PRIORITY_DEFAULT
+        )
         ml.run()
-        self.assertTrue(data['called'])
+        self.assertTrue(data["called"])
 
     def test_timeout_multidata(self):
         ml = GLib.MainLoop()
 
         def cb(data, data2):
-            data['called'] = True
-            data['data2'] = data2
+            data["called"] = True
+            data["data2"] = data2
             ml.quit()
+
         data = {}
-        id = GLib.timeout_add(1, cb, data, 'hello')
-        self.assertEqual(ml.get_context().find_source_by_id(id).priority,
-                         GLib.PRIORITY_DEFAULT)
+        id = GLib.timeout_add(1, cb, data, "hello")
+        self.assertEqual(
+            ml.get_context().find_source_by_id(id).priority, GLib.PRIORITY_DEFAULT
+        )
         ml.run()
-        self.assertTrue(data['called'])
-        self.assertEqual(data['data2'], 'hello')
+        self.assertTrue(data["called"])
+        self.assertEqual(data["data2"], "hello")
 
     def test_idle_no_data_priority(self):
         ml = GLib.MainLoop()
 
         def cb():
             ml.quit()
+
         id = GLib.idle_add(cb, priority=GLib.PRIORITY_HIGH)
-        self.assertEqual(ml.get_context().find_source_by_id(id).priority,
-                         GLib.PRIORITY_HIGH)
+        self.assertEqual(
+            ml.get_context().find_source_by_id(id).priority, GLib.PRIORITY_HIGH
+        )
         ml.run()
 
     def test_timeout_no_data_priority(self):
@@ -407,36 +420,42 @@ class TestUserData(unittest.TestCase):
 
         def cb():
             ml.quit()
+
         id = GLib.timeout_add(1, cb, priority=GLib.PRIORITY_HIGH)
-        self.assertEqual(ml.get_context().find_source_by_id(id).priority,
-                         GLib.PRIORITY_HIGH)
+        self.assertEqual(
+            ml.get_context().find_source_by_id(id).priority, GLib.PRIORITY_HIGH
+        )
         ml.run()
 
     def test_idle_data_priority(self):
         ml = GLib.MainLoop()
 
         def cb(data):
-            data['called'] = True
+            data["called"] = True
             ml.quit()
+
         data = {}
         id = GLib.idle_add(cb, data, priority=GLib.PRIORITY_HIGH)
-        self.assertEqual(ml.get_context().find_source_by_id(id).priority,
-                         GLib.PRIORITY_HIGH)
+        self.assertEqual(
+            ml.get_context().find_source_by_id(id).priority, GLib.PRIORITY_HIGH
+        )
         ml.run()
-        self.assertTrue(data['called'])
+        self.assertTrue(data["called"])
 
     def test_timeout_data_priority(self):
         ml = GLib.MainLoop()
 
         def cb(data):
-            data['called'] = True
+            data["called"] = True
             ml.quit()
+
         data = {}
         id = GLib.timeout_add(1, cb, data, priority=GLib.PRIORITY_HIGH)
-        self.assertEqual(ml.get_context().find_source_by_id(id).priority,
-                         GLib.PRIORITY_HIGH)
+        self.assertEqual(
+            ml.get_context().find_source_by_id(id).priority, GLib.PRIORITY_HIGH
+        )
         ml.run()
-        self.assertTrue(data['called'])
+        self.assertTrue(data["called"])
 
     def cb_no_data(self):
         self.loop.quit()
@@ -447,7 +466,7 @@ class TestUserData(unittest.TestCase):
         self.loop.run()
 
     def cb_with_data(self, data):
-        data['called'] = True
+        data["called"] = True
         self.loop.quit()
 
     def test_idle_method_callback_with_data(self):
@@ -455,4 +474,4 @@ class TestUserData(unittest.TestCase):
         data = {}
         GLib.idle_add(self.cb_with_data, data)
         self.loop.run()
-        self.assertTrue(data['called'])
+        self.assertTrue(data["called"])

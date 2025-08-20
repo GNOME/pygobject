@@ -232,7 +232,7 @@ pygi_gboxed_new (GType boxed_type, gpointer boxed, gboolean copy_boxed,
     self->free_on_dealloc = own_ref;
 
     PyGILState_Release(state);
-    
+
     return (PyObject *)self;
 }
 

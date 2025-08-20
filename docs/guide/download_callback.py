@@ -6,7 +6,6 @@ from gi.repository import Gio, GLib, Gtk
 
 
 class DownloadWindow(Gtk.ApplicationWindow):
-
     def __init__(self, *args, **kwargs):
         super().__init__(
             *args,
@@ -62,7 +61,7 @@ class DownloadWindow(Gtk.ApplicationWindow):
 
     def on_ready_callback(self, source_object, result, user_data):
         try:
-            succes, content, etag = source_object.load_contents_finish(result)
+            _success, content, _etag = source_object.load_contents_finish(result)
         except GLib.GError as e:
             self.append_text(f"Error: {e.message}")
         else:
@@ -75,7 +74,6 @@ class DownloadWindow(Gtk.ApplicationWindow):
 
 
 class Application(Gtk.Application):
-
     def do_activate(self):
         window = DownloadWindow(application=self)
         window.present()

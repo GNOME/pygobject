@@ -18,7 +18,7 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __PYGI_TYPE_H__ 
+#ifndef __PYGI_TYPE_H__
 #define __PYGI_TYPE_H__
 
 #include <girepository/girepository.h>

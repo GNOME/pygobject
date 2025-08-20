@@ -361,7 +361,7 @@ _pygi_argument_from_object (PyObject   *object,
             }
 
             /* Note, strings are sequences, but we cannot accept them here */
-            if (!PySequence_Check (object) || 
+            if (!PySequence_Check (object) ||
                 PyUnicode_Check (object)) {
                 PyErr_SetString (PyExc_TypeError, "expected sequence");
                 break;

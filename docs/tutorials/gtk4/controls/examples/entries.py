@@ -1,12 +1,12 @@
 import gi
 
-gi.require_version('Gtk', '4.0')
+gi.require_version("Gtk", "4.0")
 from gi.repository import Gtk, GLib
 
 
 class EntryWindow(Gtk.ApplicationWindow):
     def __init__(self, **kargs):
-        super().__init__(**kargs, title='Entry Demo')
+        super().__init__(**kargs, title="Entry Demo")
 
         self.set_size_request(200, 100)
 
@@ -24,40 +24,40 @@ class EntryWindow(Gtk.ApplicationWindow):
 
         # Gtk.SearchEntry
         search = Gtk.SearchEntry()
-        search.props.placeholder_text = 'Search Entry'
+        search.props.placeholder_text = "Search Entry"
         search.set_key_capture_widget(self)
         header.set_title_widget(search)
         self.set_focus(search)
 
         # Gtk.Entry
         self.entry = Gtk.Entry()
-        self.entry.set_text('Hello World')
+        self.entry.set_text("Hello World")
         vbox.append(self.entry)
 
         hbox = Gtk.Box(spacing=6)
         vbox.append(hbox)
 
-        self.check_editable = Gtk.CheckButton(label='Editable')
-        self.check_editable.connect('toggled', self.on_editable_toggled)
+        self.check_editable = Gtk.CheckButton(label="Editable")
+        self.check_editable.connect("toggled", self.on_editable_toggled)
         self.check_editable.props.active = True
         hbox.append(self.check_editable)
 
-        self.check_visible = Gtk.CheckButton(label='Visible')
-        self.check_visible.connect('toggled', self.on_visible_toggled)
+        self.check_visible = Gtk.CheckButton(label="Visible")
+        self.check_visible.connect("toggled", self.on_visible_toggled)
         self.check_visible.props.active = True
         hbox.append(self.check_visible)
 
-        self.pulse = Gtk.CheckButton(label='Pulse')
-        self.pulse.connect('toggled', self.on_pulse_toggled)
+        self.pulse = Gtk.CheckButton(label="Pulse")
+        self.pulse.connect("toggled", self.on_pulse_toggled)
         hbox.append(self.pulse)
 
-        self.icon = Gtk.CheckButton(label='Icon')
-        self.icon.connect('toggled', self.on_icon_toggled)
+        self.icon = Gtk.CheckButton(label="Icon")
+        self.icon.connect("toggled", self.on_icon_toggled)
         hbox.append(self.icon)
 
         # Gtk.PasswordEntry
         pass_entry = Gtk.PasswordEntry()
-        pass_entry.props.placeholder_text = 'Password Entry'
+        pass_entry.props.placeholder_text = "Password Entry"
         pass_entry.props.show_peek_icon = True
         pass_entry.props.margin_top = 24
         vbox.append(pass_entry)
@@ -85,13 +85,8 @@ class EntryWindow(Gtk.ApplicationWindow):
         return True
 
     def on_icon_toggled(self, button):
-        if button.props.active:
-            icon_name = 'system-search-symbolic'
-        else:
-            icon_name = None
-        self.entry.set_icon_from_icon_name(
-            Gtk.EntryIconPosition.PRIMARY, icon_name
-        )
+        icon_name = "system-search-symbolic" if button.props.active else None
+        self.entry.set_icon_from_icon_name(Gtk.EntryIconPosition.PRIMARY, icon_name)
 
 
 def on_activate(app):
@@ -99,7 +94,7 @@ def on_activate(app):
     win.present()
 
 
-app = Gtk.Application(application_id='com.example.App')
-app.connect('activate', on_activate)
+app = Gtk.Application(application_id="com.example.App")
+app.connect("activate", on_activate)
 
 app.run(None)

@@ -9,7 +9,7 @@ static void
 test_interface_base_init (gpointer g_iface)
 {
   static gboolean initialized = FALSE;
-  
+
   if (!initialized)
     {
       g_object_interface_install_property (g_iface,

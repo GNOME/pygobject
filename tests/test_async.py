@@ -1,6 +1,3 @@
-# -*- Mode: Python; py-indent-offset: 4 -*-
-# vim: tabstop=4 shiftwidth=4 expandtab
-
 import pytest
 import platform
 import unittest
@@ -11,7 +8,6 @@ from gi.events import GLibEventLoopPolicy
 
 
 class TestAsync(unittest.TestCase):
-
     def setUp(self):
         policy = GLibEventLoopPolicy()
         asyncio.set_event_loop_policy(policy)
@@ -33,9 +29,12 @@ class TestAsync(unittest.TestCase):
 
             self.loop.call_soon(cb)
 
-            iter_info = []
-            for info in await f.enumerate_children_async("standard::*", 0, GLib.PRIORITY_DEFAULT):
-                iter_info.append(info.get_name())
+            iter_info = [
+                info.get_name()
+                for info in await f.enumerate_children_async(
+                    "standard::*", 0, GLib.PRIORITY_DEFAULT
+                )
+            ]
 
             # The await runs the mainloop and cb is called.
             self.assertEqual(called, True)
@@ -53,8 +52,7 @@ class TestAsync(unittest.TestCase):
         self.loop.run_until_complete(run())
 
     def test_async_cancellation(self):
-        """Cancellation raises G_IO_ERROR_CANCELLED"""
-
+        """Cancellation raises G_IO_ERROR_CANCELLED."""
         f = Gio.file_new_for_path("./")
 
         async def run():
@@ -68,7 +66,9 @@ class TestAsync(unittest.TestCase):
 
             # cancellable passed explicitly
             cancel = Gio.Cancellable()
-            res = f.enumerate_children_async("standard::*", 0, GLib.PRIORITY_DEFAULT, cancel)
+            res = f.enumerate_children_async(
+                "standard::*", 0, GLib.PRIORITY_DEFAULT, cancel
+            )
             self.assertEqual(res.cancellable, cancel)
             cancel.cancel()
             with self.assertRaisesRegex(GLib.GError, "Operation was cancelled"):
@@ -77,8 +77,7 @@ class TestAsync(unittest.TestCase):
         self.loop.run_until_complete(run())
 
     def test_not_completed(self):
-        """Querying an uncompleted task raises exceptions"""
-
+        """Querying an uncompleted task raises exceptions."""
         f = Gio.file_new_for_path("./")
 
         async def run():
@@ -98,8 +97,7 @@ class TestAsync(unittest.TestCase):
         self.loop.run_until_complete(run())
 
     def test_async_cancel_completed(self):
-        """Cancelling a completed task just cancels the cancellable"""
-
+        """Cancelling a completed task just cancels the cancellable."""
         f = Gio.file_new_for_path("./")
 
         async def run():
@@ -114,8 +112,7 @@ class TestAsync(unittest.TestCase):
         self.loop.run_until_complete(run())
 
     def test_async_completed_add_cb(self):
-        """Adding a done cb to a completed future queues it with call_soon"""
-
+        """Adding a done cb to a completed future queues it with call_soon."""
         f = Gio.file_new_for_path("./")
 
         called = False
@@ -148,7 +145,10 @@ class TestAsync(unittest.TestCase):
 
         self.loop.run_until_complete(run())
 
-    @pytest.mark.xfail(platform.python_implementation() == "PyPy", reason="Exception reporting does not work in pypy")
+    @pytest.mark.xfail(
+        platform.python_implementation() == "PyPy",
+        reason="Exception reporting does not work in pypy",
+    )
     def test_deleting_failed_logs(self):
         f = Gio.file_new_for_path("./")
 
@@ -165,8 +165,8 @@ class TestAsync(unittest.TestCase):
 
         def handler(loop, context):
             nonlocal exc, msg
-            msg = context['message']
-            exc = context['exception']
+            msg = context["message"]
+            exc = context["exception"]
 
         self.loop.set_exception_handler(handler)
         self.loop.run_until_complete(run())
@@ -184,7 +184,7 @@ class TestAsync(unittest.TestCase):
     def test_wrong_default_context(self):
         f = Gio.file_new_for_path("./")
 
-        async def run():
+        async def run():  # noqa: RUF029
             nonlocal self
 
             ctx = GLib.MainContext.new()

@@ -14,16 +14,16 @@ class CustomChild(CustomBase, GIMarshallingTests.Interface):
 
 class TestTypeModuleLevelFunctions(unittest.TestCase):
     def test_type_name(self):
-        self.assertEqual(GObject.type_name(GObject.TYPE_NONE), 'void')
-        self.assertEqual(GObject.type_name(GObject.TYPE_OBJECT), 'GObject')
-        self.assertEqual(GObject.type_name(GObject.TYPE_PYOBJECT), 'PyObject')
+        self.assertEqual(GObject.type_name(GObject.TYPE_NONE), "void")
+        self.assertEqual(GObject.type_name(GObject.TYPE_OBJECT), "GObject")
+        self.assertEqual(GObject.type_name(GObject.TYPE_PYOBJECT), "PyObject")
 
     def test_type_from_name(self):
         # A complete test is not needed here since the TYPE_* defines are created
         # using this method.
-        self.assertRaises(RuntimeError, GObject.type_from_name, '!NOT_A_REAL_TYPE!')
-        self.assertEqual(GObject.type_from_name('GObject'), GObject.TYPE_OBJECT)
-        self.assertEqual(GObject.type_from_name('GObject'), GObject.GObject.__gtype__)
+        self.assertRaises(RuntimeError, GObject.type_from_name, "!NOT_A_REAL_TYPE!")
+        self.assertEqual(GObject.type_from_name("GObject"), GObject.TYPE_OBJECT)
+        self.assertEqual(GObject.type_from_name("GObject"), GObject.GObject.__gtype__)
 
     def test_type_is_a(self):
         self.assertTrue(GObject.type_is_a(CustomBase, GObject.TYPE_OBJECT))
@@ -43,7 +43,10 @@ class TestTypeModuleLevelFunctions(unittest.TestCase):
     def test_type_interfaces(self):
         self.assertEqual(len(GObject.type_interfaces(CustomBase)), 0)
         self.assertEqual(len(GObject.type_interfaces(CustomChild)), 1)
-        self.assertEqual(GObject.type_interfaces(CustomChild), [GIMarshallingTests.Interface.__gtype__])
+        self.assertEqual(
+            GObject.type_interfaces(CustomChild),
+            [GIMarshallingTests.Interface.__gtype__],
+        )
 
     def test_type_parent(self):
         self.assertEqual(GObject.type_parent(CustomChild), CustomBase.__gtype__)
@@ -108,5 +111,4 @@ def test_gtype_depth():
 def test_gtype_interfaces():
     assert CustomBase.__gtype__.interfaces == []
     assert GIMarshallingTests.Interface.__gtype__.interfaces == []
-    assert CustomChild.__gtype__.interfaces == \
-        [GIMarshallingTests.Interface.__gtype__]
+    assert CustomChild.__gtype__.interfaces == [GIMarshallingTests.Interface.__gtype__]

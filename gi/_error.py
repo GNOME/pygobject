@@ -1,6 +1,3 @@
-# -*- Mode: Python; py-indent-offset: 4 -*-
-# vim: tabstop=4 shiftwidth=4 expandtab
-#
 # Copyright (C) 2014 Simon Feltman <sfeltman@gnome.org>
 #
 #   _error.py: GError Python implementation
@@ -28,19 +25,17 @@
 
 
 class GError(RuntimeError):
-    def __init__(self, message='unknown error', domain='pygi-error', code=0):
-        super(GError, self).__init__(message)
+    def __init__(self, message="unknown error", domain="pygi-error", code=0):
+        super().__init__(message)
         self.message = message
         self.domain = domain
         self.code = code
 
     def __str__(self):
-        return "%s: %s (%d)" % (self.domain, self.message, self.code)
+        return f"{self.domain:s}: {self.message:s} ({self.code:d})"
 
     def __repr__(self):
-        return "%s.%s('%s', '%s', %d)" % (
-            GError.__module__.rsplit(".", 1)[-1], GError.__name__,
-            self.message, self.domain, self.code)
+        return f"{GError.__module__.rsplit('.', 1)[-1]:s}.{GError.__name__:s}('{self.message:s}', '{self.domain:s}', {self.code:d})"
 
     def copy(self):
         return GError(self.message, self.domain, self.code)

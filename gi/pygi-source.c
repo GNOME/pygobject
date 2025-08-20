@@ -199,7 +199,7 @@ handler_marshal(gpointer user_data)
 	res = PyObject_IsTrue(ret);
 	Py_DECREF(ret);
     }
-    
+
     PyGILState_Release(state);
 
     return res;
@@ -224,7 +224,7 @@ pygi_source_set_callback (PyGObject *self_module, PyObject *args)
 	return NULL;
     }
     Py_DECREF(first);
-    
+
     if (!pyg_boxed_check (self, G_TYPE_SOURCE)) {
 	PyErr_SetString(PyExc_TypeError, "first argument is not a GLib.Source");
 	return NULL;

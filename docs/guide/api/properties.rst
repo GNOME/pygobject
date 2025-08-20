@@ -25,7 +25,7 @@ To find all the registered properties of a class you can use the
     <GType GApplication (94881584893168)>
     >>> param.value_type
     <GType gchararray (64)>
-    >>> 
+    >>>
 
 The :obj:`GObject.Object` contructor takes multiple properties as keyword
 arguments. Property names usually contain "-" for seperating words. In Python
@@ -49,7 +49,7 @@ To get and set the property value see :meth:`GObject.Object.get_property` and
     >>> app.set_property("application_id", "a.b")
     >>> app.get_property("application-id")
     'a.b'
-    >>> 
+    >>>
 
 
 Each instance also has a ``props`` attribute which exposes all properties
@@ -64,7 +64,7 @@ as instance attributes:
     >>> button.props.label = "bar"
     >>> button.get_label()
     'bar'
-    >>> 
+    >>>
 
 
 To track changes of properties, :obj:`GObject.Object` has a special ``notify``
@@ -76,12 +76,12 @@ have to give the real property name and replacing "-" with "_" wont work.
     >>> app = Gio.Application(application_id="foo.bar")
     >>> def my_func(instance, param):
     ...     print("New value %r" % instance.get_property(param.name))
-    ... 
+    ...
     >>> app.connect("notify::application-id", my_func)
     11L
     >>> app.set_property("application-id", "something.different")
     New value 'something.different'
-    >>> 
+    >>>
 
 You can define your own properties using the :obj:`GObject.Property` decorator,
 which can be used similarly to the builtin Python :any:`property` decorator:

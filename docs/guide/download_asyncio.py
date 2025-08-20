@@ -8,7 +8,6 @@ from gi.events import GLibEventLoopPolicy
 
 
 class DownloadWindow(Gtk.ApplicationWindow):
-
     def __init__(self, *args, **kwargs):
         super().__init__(
             *args,
@@ -65,7 +64,7 @@ class DownloadWindow(Gtk.ApplicationWindow):
         file_ = Gio.File.new_for_uri("https://pygobject.gnome.org/")
 
         try:
-            succes, content, etag = await file_.load_contents_async()
+            _success, content, _etag = await file_.load_contents_async()
         except GLib.GError as e:
             self.append_text(f"Error: {e.message}")
         else:
@@ -77,7 +76,6 @@ class DownloadWindow(Gtk.ApplicationWindow):
 
 
 class Application(Gtk.Application):
-
     def do_activate(self):
         window = DownloadWindow(application=self)
         window.present()

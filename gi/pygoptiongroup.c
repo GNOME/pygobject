@@ -266,7 +266,7 @@ pyg_option_group_set_translation_domain(PyGOptionGroup *self,
 static PyObject*
 pyg_option_group_richcompare(PyObject *self, PyObject *other, int op)
 {
-    if (Py_TYPE(self) == Py_TYPE(other) && 
+    if (Py_TYPE(self) == Py_TYPE(other) &&
           Py_TYPE(self) == &PyGOptionGroup_Type) {
         return pyg_ptr_richcompare(((PyGOptionGroup*)self)->group,
                                    ((PyGOptionGroup*)other)->group,

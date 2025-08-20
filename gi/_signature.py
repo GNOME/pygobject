@@ -1,6 +1,3 @@
-# -*- Mode: Python; py-indent-offset: 4 -*-
-# vim: tabstop=4 shiftwidth=4 expandtab
-#
 # Copyright (C) 2024 James Henstridge <james@jamesh.id.au>
 #
 #   _signature.py: callable signature generator for gi.
@@ -22,7 +19,7 @@
 
 from importlib import import_module
 from inspect import Parameter, Signature
-from typing import Any, Callable, Optional, Tuple
+from typing import Any, Callable, Optional
 
 from ._error import GError
 from ._gi import (
@@ -68,20 +65,19 @@ def get_pytype(gi_type: TypeInfo) -> object:
     if tag == TypeTag.VOID:
         if gi_type.is_pointer():
             return Any
-        else:
-            return None
-    elif tag in list_tag_types:
+        return None
+    if tag in list_tag_types:
         value_type = get_pytype(gi_type.get_param_type(0))
         if value_type is Parameter.empty:
             return list
         return list[value_type]
-    elif tag == TypeTag.GHASH:
+    if tag == TypeTag.GHASH:
         key_type = get_pytype(gi_type.get_param_type(0))
         value_type = get_pytype(gi_type.get_param_type(1))
         if key_type is Parameter.empty or value_type is Parameter.empty:
             return dict
         return dict[key_type, value_type]
-    elif tag == TypeTag.INTERFACE:
+    if tag == TypeTag.INTERFACE:
         info = gi_type.get_interface()
         if isinstance(info, CallbackInfo):
             sig = generate_signature(info)
@@ -108,7 +104,7 @@ def generate_signature(info: CallableInfo) -> Signature:
 
     def unique(name):
         while name in arg_names:
-            name += '_'
+            name += "_"
         arg_names.add(name)
         return name
 
@@ -186,7 +182,7 @@ def generate_signature(info: CallableInfo) -> Signature:
     if return_annotation is not None:
         out_args.insert(0, return_annotation)
     if len(out_args) > 1:
-        return_annotation = Tuple[tuple(out_args)]
+        return_annotation = tuple[tuple(out_args)]
     elif len(out_args) == 1:
         return_annotation = out_args[0]
 

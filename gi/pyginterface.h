@@ -18,7 +18,7 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __PYGOBJECT_INTERFACE_H__ 
+#ifndef __PYGOBJECT_INTERFACE_H__
 #define __PYGOBJECT_INTERFACE_H__
 
 extern GQuark pyginterface_type_key;

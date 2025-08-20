@@ -191,7 +191,7 @@ Pip
 
 It's always a good idea to work from within a Python virtual environment.
 PyGObject is built with `Meson <https://mesonbuild.com/>`_.
-In order to support 
+In order to support
 `editable installs <https://meson-python.readthedocs.io/en/latest/how-to-guides/editable-installs.html>`_,
 Meson-python, Meson, and Ninja should be installed in the virtual environment.
 
@@ -217,7 +217,7 @@ To compile the C libraries with debug symbols, run
 .. code:: console
 
    pip install --no-build-isolation --config-settings=setup-args="-Dbuildtype=debug" --config-settings=setup-args="-Dtests=true" -e '.[dev]'
-   
+
 Open a Python console:
 
 .. code:: python

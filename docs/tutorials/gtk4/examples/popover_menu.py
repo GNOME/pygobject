@@ -1,6 +1,6 @@
 import gi
 
-gi.require_version('Gtk', '4.0')
+gi.require_version("Gtk", "4.0")
 from gi.repository import Gio, Gtk
 
 # This would typically be its own file
@@ -33,7 +33,7 @@ class AppWindow(Gtk.ApplicationWindow):
         self.set_titlebar(headerbar)
 
         builder = Gtk.Builder.new_from_string(MENU_XML, -1)
-        menu_model = builder.get_object('app-menu')
+        menu_model = builder.get_object("app-menu")
 
         button = Gtk.MenuButton(menu_model=menu_model)
         headerbar.pack_end(button)
@@ -41,18 +41,18 @@ class AppWindow(Gtk.ApplicationWindow):
 
 class Application(Gtk.Application):
     def __init__(self, **kwargs):
-        super().__init__(application_id='com.example.App', **kwargs)
+        super().__init__(application_id="com.example.App", **kwargs)
         self.window = None
 
     def do_startup(self):
         Gtk.Application.do_startup(self)
 
-        action = Gio.SimpleAction(name='about')
-        action.connect('activate', self.on_about)
+        action = Gio.SimpleAction(name="about")
+        action.connect("activate", self.on_about)
         self.add_action(action)
 
-        action = Gio.SimpleAction(name='quit')
-        action.connect('activate', self.on_quit)
+        action = Gio.SimpleAction(name="quit")
+        action.connect("activate", self.on_quit)
         self.add_action(action)
 
     def do_activate(self):
@@ -60,7 +60,7 @@ class Application(Gtk.Application):
         if not self.window:
             # Windows are associated with the application
             # when the last one is closed the application shuts down
-            self.window = AppWindow(application=self, title='Main Window')
+            self.window = AppWindow(application=self, title="Main Window")
 
         self.window.present()
 
