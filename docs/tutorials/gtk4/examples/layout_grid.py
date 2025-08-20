@@ -1,19 +1,19 @@
 import gi
 
-gi.require_version('Gtk', '4.0')
+gi.require_version("Gtk", "4.0")
 from gi.repository import Gtk
 
 
 class GridWindow(Gtk.ApplicationWindow):
     def __init__(self, **kargs):
-        super().__init__(**kargs, title='Grid Example')
+        super().__init__(**kargs, title="Grid Example")
 
-        button1 = Gtk.Button(label='Button 1')
-        button2 = Gtk.Button(label='Button 2')
-        button3 = Gtk.Button(label='Button 3')
-        button4 = Gtk.Button(label='Button 4')
-        button5 = Gtk.Button(label='Button 5')
-        button6 = Gtk.Button(label='Button 6')
+        button1 = Gtk.Button(label="Button 1")
+        button2 = Gtk.Button(label="Button 2")
+        button3 = Gtk.Button(label="Button 3")
+        button4 = Gtk.Button(label="Button 4")
+        button5 = Gtk.Button(label="Button 5")
+        button6 = Gtk.Button(label="Button 6")
 
         grid = Gtk.Grid()
         grid.attach(button1, 0, 0, 1, 1)
@@ -32,7 +32,7 @@ def on_activate(app):
     win.present()
 
 
-app = Gtk.Application(application_id='com.example.App')
-app.connect('activate', on_activate)
+app = Gtk.Application(application_id="com.example.App")
+app.connect("activate", on_activate)
 
 app.run(None)

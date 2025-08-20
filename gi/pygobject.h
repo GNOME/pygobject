@@ -34,7 +34,7 @@ typedef struct {
     GObject *obj;
     PyObject *inst_dict; /* the instance dictionary -- must be last */
     PyObject *weakreflist; /* list of weak references */
-    
+
       /*< private >*/
       /* using union to preserve ABI compatibility (structure size
        * must not change) */
@@ -79,7 +79,7 @@ typedef PyTypeObject * (*PyGTypeRegistrationFunction) (const gchar *name,
 						       gpointer data);
 
 struct _PyGObject_Functions {
-    /* 
+    /*
      * All field names in here are considered private,
      * use the macros below instead, which provides stability
      */
@@ -148,11 +148,11 @@ G_GNUC_BEGIN_IGNORE_DEPRECATIONS
                                        guint       *nparams,
                                        PyObject   **py_args);
 G_GNUC_END_IGNORE_DEPRECATIONS
-    PyObject *(* param_gvalue_as_pyobject) (const GValue* gvalue, 
+    PyObject *(* param_gvalue_as_pyobject) (const GValue* gvalue,
                                             gboolean copy_boxed,
 					    const GParamSpec* pspec);
-    int (* gvalue_from_param_pyobject) (GValue* value, 
-                                        PyObject* py_obj, 
+    int (* gvalue_from_param_pyobject) (GValue* value,
+                                        PyObject* py_obj,
 					const GParamSpec* pspec);
     PyTypeObject *enum_type;
     PyObject *(*enum_add)(PyObject *module,
@@ -160,7 +160,7 @@ G_GNUC_END_IGNORE_DEPRECATIONS
 			  const char *strip_prefix,
 			  GType gtype);
     PyObject* (*enum_from_gtype)(GType gtype, int value);
-    
+
     PyTypeObject *flags_type;
     PyObject *(*flags_add)(PyObject *module,
 			   const char *type_name_,
@@ -173,7 +173,7 @@ G_GNUC_END_IGNORE_DEPRECATIONS
 
     int       (*gil_state_ensure) (void);
     void      (*gil_state_release) (int flag);
-    
+
     void      (*register_class_init) (GType gtype, PyGClassInitFunc class_init);
     void      (*register_interface_info) (GType gtype, const GInterfaceInfo *info);
     void      (*closure_set_exception_handler) (GClosure *closure, PyClosureExceptionHandler handler);
@@ -272,11 +272,11 @@ struct _PyGObject_Functions *_PyGObject_API;
  * @req_major: minimum version major number, or -1
  * @req_minor: minimum version minor number, or -1
  * @req_micro: minimum version micro number, or -1
- * 
+ *
  * Imports and initializes the 'gobject' python module.  Can
  * optionally check for a required minimum version if @req_major,
  * @req_minor, and @req_micro are all different from -1.
- * 
+ *
  * Returns: a new reference to the gobject module on success, NULL in
  * case of failure (and raises ImportError).
  **/
@@ -284,7 +284,7 @@ static inline PyObject *
 pygobject_init(int req_major, int req_minor, int req_micro)
 {
     PyObject *gobject, *cobject;
-    
+
     gobject = PyImport_ImportModule("gi._gobject");
     if (!gobject) {
         if (PyErr_Occurred())

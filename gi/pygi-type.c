@@ -475,7 +475,7 @@ pyg_type_wrapper_new(GType type)
  * strict: if set to TRUE, raises an exception if it can't perform the
  *         conversion
  *
- * converts a python object to a GType.  If strict is set, raises an 
+ * converts a python object to a GType.  If strict is set, raises an
  * exception if it can't perform the conversion, otherwise returns
  * PY_TYPE_OBJECT.
  *
@@ -541,7 +541,7 @@ pyg_type_from_object_strict(PyObject *obj, gboolean strict)
     PyErr_Clear();
 
     /* Some API like those that take GValues can hold a python object as
-     * a pointer.  This is potentially dangerous becuase everything is 
+     * a pointer.  This is potentially dangerous becuase everything is
      * passed in as a PyObject so we can't actually type check it.  Only
      * fallback to PY_TYPE_OBJECT if strict checking is disabled
      */

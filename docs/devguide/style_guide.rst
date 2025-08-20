@@ -5,8 +5,19 @@ Style Guidelines
 Python Code
 -----------
 
-* Generally follow Python's :pep:`8` style guidelines. We run the
-  pep8 command to verify this during unittest runs.
+* Generally follow Python's :pep:`8` style guidelines. We run Ruff to format
+  our code which should help ensure consistent style. Make sure to run the
+  following prior to committing changes:
+
+  .. code-block:: python
+
+     pre-commit install
+
+  You can also check all files prior to a commit by running:
+
+  .. code-block:: python
+
+     pre-commit run --all-files
 
 * Break up logical blocks of related code with a newline. Specifically add a
   blank newline after conditional or looping blocks.

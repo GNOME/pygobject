@@ -89,7 +89,7 @@ property can be created using :func:`GObject.Property`.
             super().__init__()
 
 Properties can also be read-only, if you want some properties to be readable but
-not writable. To do so, you can add some flags to the property definition, to 
+not writable. To do so, you can add some flags to the property definition, to
 control read/write access.
 Flags are :attr:`GObject.ParamFlags.READABLE` (only read access for external
 code),
@@ -236,15 +236,15 @@ New signals can be created by using the :func:`GObject.Signal` decorator.
 The decorated methods are the object method handlers, these will be called when
 the signal is emitted.
 
-The time at which the method handlers are invoked depends on the signal flags. 
-:attr:`GObject.SignalFlags.RUN_FIRST` indicates that this signal will invoke the 
+The time at which the method handlers are invoked depends on the signal flags.
+:attr:`GObject.SignalFlags.RUN_FIRST` indicates that this signal will invoke the
 object method handler in the first emission stage.
 Alternatives are :attr:`GObject.SignalFlags.RUN_LAST` (the method handler will be
 invoked in the third emission stage) and :attr:`GObject.SignalFlags.RUN_CLEANUP`
 (invoke the method handler in the last emission stage).
 
 Signals can also have arguments, the number and type of each argument is defined
-as a tuple of types. 
+as a tuple of types.
 
 Signals can be emitted using :meth:`GObject.Object.emit`.
 
@@ -267,7 +267,7 @@ Signals can be emitted using :meth:`GObject.Object.emit`.
             """Called every time the signal is emitted"""
             print('noarg_signal')
 
-    
+
     my_object = MyObject()
 
     def signal_callback(object_, number):
@@ -277,7 +277,7 @@ Signals can be emitted using :meth:`GObject.Object.emit`.
     my_object.connect('arg_signal', signal_callback)
     my_object.emit('arg_signal', 100)  # emit the signal "arg_signal", with the
                                        # argument 100
-    
+
     my_object.emit('noarg_signal')
 
 

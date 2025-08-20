@@ -17,7 +17,6 @@ def get_id():
 
 
 class EnumTests(unittest.TestCase):
-
     def test_gtype(self):
         class MyEnum(GObject.GEnum):
             ONE = 1
@@ -64,19 +63,23 @@ class EnumTests(unittest.TestCase):
         self.assertEqual(MyEnum.__gtype__.name, type_name)
 
         # Trying to register a type with the same name fails:
-        with (self.assertRaises(RuntimeError) as ex,
-              capture_glib_warnings(allow_criticals=True) as w):
+        with (
+            self.assertRaises(RuntimeError) as ex,
+            capture_glib_warnings(allow_criticals=True) as w,
+        ):
+
             class MyEnum2(GObject.GEnum):
                 __gtype_name__ = type_name
                 ONE = 1
 
         self.assertEqual(str(ex.exception), f"Unable to register enum '{type_name}'")
         self.assertEqual(len(w), 1)
-        self.assertEqual(str(w[0].message), f"cannot register existing type '{type_name}'")
+        self.assertEqual(
+            str(w[0].message), f"cannot register existing type '{type_name}'"
+        )
 
 
 class FlagsTests(unittest.TestCase):
-
     def test_gtype(self):
         class MyFlags(GObject.GFlags):
             ONE = 1
@@ -129,12 +132,17 @@ class FlagsTests(unittest.TestCase):
         self.assertEqual(MyFlags.__gtype__.name, type_name)
 
         # Trying to register a type with the same name fails:
-        with (self.assertRaises(RuntimeError) as ex,
-              capture_glib_warnings(allow_criticals=True) as w):
+        with (
+            self.assertRaises(RuntimeError) as ex,
+            capture_glib_warnings(allow_criticals=True) as w,
+        ):
+
             class MyFlags2(GObject.GFlags):
                 __gtype_name__ = type_name
                 ONE = 1
 
         self.assertEqual(str(ex.exception), f"Unable to register flags '{type_name}'")
         self.assertEqual(len(w), 1)
-        self.assertEqual(str(w[0].message), f"cannot register existing type '{type_name}'")
+        self.assertEqual(
+            str(w[0].message), f"cannot register existing type '{type_name}'"
+        )

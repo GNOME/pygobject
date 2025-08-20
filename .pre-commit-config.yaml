@@ -3,10 +3,19 @@
 
 repos:
 - repo: https://github.com/shellcheck-py/shellcheck-py
-  rev: a23f6b85d0fdd5bb9d564e2579e678033debbdff  # frozen: v0.10.0.1
+  rev: v0.10.0.1
   hooks:
   - id: shellcheck
-- repo: https://github.com/PyCQA/flake8
-  rev: 7.1.1
+- repo: https://github.com/astral-sh/ruff-pre-commit
+  rev: 'v0.12.4'
   hooks:
-  - id: flake8
+    - id: ruff
+      args: [--fix, --preview]
+    - id: ruff-format
+      types_or: [python, spec]
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v5.0.0
+  hooks:
+    - id: trailing-whitespace
+    - id: check-toml
+    - id: check-yaml

@@ -56,6 +56,6 @@ use a try block.
         sys.exit(1)
 
 
-.. seealso:: 
+.. seealso::
     For more detailed information of the methods provided by the ``gi`` module
     checkout :ref:`guide-api`.

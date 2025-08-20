@@ -70,7 +70,9 @@ def test_async_callback_with_extra_callbacks_as_kwarg():
         result.append(obj.function2_finish(res))
 
     obj = Regress.TestObj()
-    obj.function2(GLib.PRIORITY_DEFAULT, cancellable=cancel, test_cb=test_cb, callback=callback)
+    obj.function2(
+        GLib.PRIORITY_DEFAULT, cancellable=cancel, test_cb=test_cb, callback=callback
+    )
     obj.function_thaw_async()
 
     iteration()

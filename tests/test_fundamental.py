@@ -6,7 +6,8 @@ from gi.repository import GObject, Regress
 
 try:
     from gi.repository import Gtk
-    GTK4 = (Gtk._version == "4.0")
+
+    GTK4 = Gtk._version == "4.0"
 except ImportError:
     Gtk = None
     GTK4 = False
@@ -23,32 +24,38 @@ def test_constructor_no_data():
 
 def test_constructor_with_data():
     with pytest.raises(TypeError):
-        Regress.TestFundamentalSubObject(data='foo')
+        Regress.TestFundamentalSubObject(data="foo")
 
 
 def test_create_fundamental_new_with_data():
-    obj = Regress.TestFundamentalSubObject.new('foo')
+    obj = Regress.TestFundamentalSubObject.new("foo")
 
     assert isinstance(obj, Regress.TestFundamentalSubObject)
     assert isinstance(obj, Regress.TestFundamentalObject)
     assert obj.refcount == 1
-    assert obj.data == 'foo'
+    assert obj.data == "foo"
 
 
-@pytest.mark.skipif(not hasattr(Regress, "TestFundamentalObjectNoGetSetFunc"), reason="Old versions do not have this type")
+@pytest.mark.skipif(
+    not hasattr(Regress, "TestFundamentalObjectNoGetSetFunc"),
+    reason="Old versions do not have this type",
+)
 def test_change_field():
-    obj = Regress.TestFundamentalObjectNoGetSetFunc.new('foo')
+    obj = Regress.TestFundamentalObjectNoGetSetFunc.new("foo")
 
-    obj.data = 'bar'
+    obj.data = "bar"
 
-    assert obj.get_data() == 'bar'
+    assert obj.get_data() == "bar"
 
 
-@pytest.mark.skipif(not hasattr(Regress, "TestFundamentalObjectNoGetSetFunc"), reason="Old versions do not have this type")
+@pytest.mark.skipif(
+    not hasattr(Regress, "TestFundamentalObjectNoGetSetFunc"),
+    reason="Old versions do not have this type",
+)
 def test_call_method():
-    obj = Regress.TestFundamentalObjectNoGetSetFunc.new('foo')
+    obj = Regress.TestFundamentalObjectNoGetSetFunc.new("foo")
 
-    assert obj.get_data() == 'foo'
+    assert obj.get_data() == "foo"
 
 
 def test_create_fundamental_hidden_class_instance():
@@ -58,13 +65,13 @@ def test_create_fundamental_hidden_class_instance():
 
 
 def test_create_fundamental_refcount():
-    obj = Regress.TestFundamentalSubObject.new('foo')
+    obj = Regress.TestFundamentalSubObject.new("foo")
 
     assert obj.refcount == 1
 
 
 def test_delete_fundamental_refcount():
-    obj = Regress.TestFundamentalSubObject.new('foo')
+    obj = Regress.TestFundamentalSubObject.new("foo")
     del obj
 
     gc.collect()
@@ -94,7 +101,9 @@ def test_value_set_wrong_fundamental():
 
 
 def test_array_of_fundamental_objects_in():
-    assert Regress.test_array_of_fundamental_objects_in([Regress.TestFundamentalSubObject()])
+    assert Regress.test_array_of_fundamental_objects_in(
+        [Regress.TestFundamentalSubObject()]
+    )
 
 
 def test_array_of_fundamental_objects_out():
@@ -179,10 +188,9 @@ def test_gtk_string_filter_fundamental_property():
 
 
 class MyCustomFundamentalObject(Regress.TestFundamentalObject):
-
     def __init__(self):
-        print("MyCustomFundamentalObject.__init__")
+        print("MyCustomFundamentalObject.__init__")  # noqa T20
         super().__init__()
 
     def do_finalize(self):
-        print("MyCustomFundamentalObject.do_finalize")
+        print("MyCustomFundamentalObject.do_finalize")  # noqa T20

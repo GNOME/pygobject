@@ -315,7 +315,7 @@ _wrap_gi_base_info_get_name (PyGIBaseInfo *self)
         obj = pygi_utf8_to_py (name);
     }
     Py_DECREF (is_keyword);
-    
+
     return obj;
 }
 
@@ -763,7 +763,7 @@ pygi_callable_info_get_cache (PyGICallableInfo *self)
     }
 
     self->cache = function_cache;
-    
+
     return function_cache;
 }
 
@@ -1721,7 +1721,7 @@ _wrap_gi_constant_info_get_value (PyGIBaseInfo *self)
     }
 
     py_value = _pygi_argument_to_object (&value, type_info, GI_TRANSFER_NOTHING);
-    
+
     if (free_array) {
         g_array_free (value.v_pointer, FALSE);
     }

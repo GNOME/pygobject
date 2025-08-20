@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 import unittest
 
 from gi import PyGIDeprecationWarning
@@ -9,18 +7,27 @@ from .helper import capture_exceptions
 
 
 class TestOption(unittest.TestCase):
-
     def setUp(self):
         with self.assertWarns(PyGIDeprecationWarning):
             self.parser = GLib.option.OptionParser(
-                "NAMES...", description="Option unit test")
-            self.parser.add_option("-t", "--test", help="Unit test option",
-                                   action="store_false", dest="test",
-                                   default=True)
-            self.parser.add_option("--g-fatal-warnings",
-                                   action="store_true",
-                                   dest="fatal_warnings",
-                                   help="dummy"),
+                "NAMES...", description="Option unit test"
+            )
+            self.parser.add_option(
+                "-t",
+                "--test",
+                help="Unit test option",
+                action="store_false",
+                dest="test",
+                default=True,
+            )
+            (
+                self.parser.add_option(
+                    "--g-fatal-warnings",
+                    action="store_true",
+                    dest="fatal_warnings",
+                    help="dummy",
+                ),
+            )
 
     def _create_group(self):
         def option_callback(option, opt, value, parser):
@@ -28,42 +35,55 @@ class TestOption(unittest.TestCase):
 
         with self.assertWarns(PyGIDeprecationWarning):
             group = GLib.option.OptionGroup(
-                "unittest", "Unit test options", "Show all unittest options",
+                "unittest",
+                "Unit test options",
+                "Show all unittest options",
                 option_list=[
-                    GLib.option.make_option("-f", "-u", "--file", "--unit-file",
-                                            type="filename",
-                                            dest="unit_file",
-                                            help="Unit test option"),
-                    GLib.option.make_option("--test-integer",
-                                            type="int",
-                                            dest="test_integer",
-                                            help="Unit integer option"),
-                    GLib.option.make_option("--callback-failure-test",
-                                            action="callback",
-                                            callback=option_callback,
-                                            dest="test_integer",
-                                            help="Unit integer option"),
-                ])
-            group.add_option("-t", "--test",
-                             action="store_false",
-                             dest="test",
-                             default=True,
-                             help="Unit test option")
+                    GLib.option.make_option(
+                        "-f",
+                        "-u",
+                        "--file",
+                        "--unit-file",
+                        type="filename",
+                        dest="unit_file",
+                        help="Unit test option",
+                    ),
+                    GLib.option.make_option(
+                        "--test-integer",
+                        type="int",
+                        dest="test_integer",
+                        help="Unit integer option",
+                    ),
+                    GLib.option.make_option(
+                        "--callback-failure-test",
+                        action="callback",
+                        callback=option_callback,
+                        dest="test_integer",
+                        help="Unit integer option",
+                    ),
+                ],
+            )
+            group.add_option(
+                "-t",
+                "--test",
+                action="store_false",
+                dest="test",
+                default=True,
+                help="Unit test option",
+            )
         self.parser.add_option_group(group)
         return group
 
     def test_integer(self):
         self._create_group()
-        options, args = self.parser.parse_args(
-            ["--test-integer", "42", "bla"])
+        options, args = self.parser.parse_args(["--test-integer", "42", "bla"])
         assert options.test_integer == 42
         assert args == ["bla"]
 
     def test_file(self):
         self._create_group()
 
-        options, args = self.parser.parse_args(
-            ["--file", "fn", "bla"])
+        options, args = self.parser.parse_args(["--file", "fn", "bla"])
         assert options.unit_file == "fn"
         assert args == ["bla"]
 
@@ -71,8 +91,16 @@ class TestOption(unittest.TestCase):
         self._create_group()
 
         options, args = self.parser.parse_args(
-            ["--file", "fn", "--test-integer", "12", "--test",
-             "--g-fatal-warnings", "nope"])
+            [
+                "--file",
+                "fn",
+                "--test-integer",
+                "12",
+                "--test",
+                "--g-fatal-warnings",
+                "nope",
+            ]
+        )
 
         assert options.unit_file == "fn"
         assert options.test_integer == 12
@@ -81,24 +109,23 @@ class TestOption(unittest.TestCase):
         assert args == ["nope"]
 
     def test_parse_args(self):
-        options, args = self.parser.parse_args([])
+        _options, args = self.parser.parse_args([])
         self.assertFalse(args)
 
-        options, args = self.parser.parse_args(["foo"])
+        _options, args = self.parser.parse_args(["foo"])
         self.assertEqual(args, ["foo"])
 
-        options, args = self.parser.parse_args(["foo", "bar"])
+        _options, args = self.parser.parse_args(["foo", "bar"])
         self.assertEqual(args, ["foo", "bar"])
 
     def test_parse_args_double_dash(self):
-        options, args = self.parser.parse_args(["--", "-xxx"])
+        _options, args = self.parser.parse_args(["--", "-xxx"])
         self.assertEqual(args, ["--", "-xxx"])
 
     def test_parse_args_group(self):
         group = self._create_group()
 
-        options, args = self.parser.parse_args(
-            ["--test", "-f", "test"])
+        options, args = self.parser.parse_args(["--test", "-f", "test"])
 
         self.assertFalse(options.test)
         self.assertEqual(options.unit_file, "test")
@@ -110,13 +137,16 @@ class TestOption(unittest.TestCase):
 
     def test_option_value_error(self):
         self._create_group()
-        self.assertRaises(GLib.option.OptionValueError, self.parser.parse_args,
-                          ["--test-integer=text"])
+        self.assertRaises(
+            GLib.option.OptionValueError,
+            self.parser.parse_args,
+            ["--test-integer=text"],
+        )
 
     def test_bad_option_error(self):
-        self.assertRaises(GLib.option.BadOptionError,
-                          self.parser.parse_args,
-                          ["--unknwon-option"])
+        self.assertRaises(
+            GLib.option.BadOptionError, self.parser.parse_args, ["--unknwon-option"]
+        )
 
     def test_option_group_constructor(self):
         self.assertRaises(TypeError, GLib.option.OptionGroup)

@@ -1,5 +1,3 @@
-# -*- Mode: Python -*-
-
 import os
 import sys
 import unittest
@@ -13,7 +11,6 @@ from gi import PyGIDeprecationWarning
 
 
 class TestGLib(unittest.TestCase):
-
     @pytest.mark.xfail()
     def test_pytest_capture_error_in_closure(self):
         # this test is supposed to fail
@@ -28,26 +25,26 @@ class TestGLib(unittest.TestCase):
 
     @unittest.skipIf(os.name == "nt", "no bash on Windows")
     def test_find_program_in_path(self):
-        bash_path = GLib.find_program_in_path('bash')
-        self.assertTrue(bash_path.endswith(os.path.sep + 'bash'))
+        bash_path = GLib.find_program_in_path("bash")
+        self.assertTrue(bash_path.endswith(os.path.sep + "bash"))
         self.assertTrue(os.path.exists(bash_path))
 
-        self.assertEqual(GLib.find_program_in_path('non existing'), None)
+        self.assertEqual(GLib.find_program_in_path("non existing"), None)
 
     def test_markup_escape_text(self):
-        self.assertEqual(GLib.markup_escape_text(u'a&bä'), 'a&amp;bä')
-        self.assertEqual(GLib.markup_escape_text(b'a&b\x05'), 'a&amp;b&#x5;')
+        self.assertEqual(GLib.markup_escape_text("a&bä"), "a&amp;bä")
+        self.assertEqual(GLib.markup_escape_text(b"a&b\x05"), "a&amp;b&#x5;")
 
         # with explicit length argument
-        self.assertEqual(GLib.markup_escape_text(b'a\x05\x01\x02', 2), 'a&#x5;')
+        self.assertEqual(GLib.markup_escape_text(b"a\x05\x01\x02", 2), "a&#x5;")
 
     def test_progname(self):
-        GLib.set_prgname('moo')
-        self.assertEqual(GLib.get_prgname(), 'moo')
+        GLib.set_prgname("moo")
+        self.assertEqual(GLib.get_prgname(), "moo")
 
     def test_appname(self):
-        GLib.set_application_name('moo')
-        self.assertEqual(GLib.get_application_name(), 'moo')
+        GLib.set_application_name("moo")
+        self.assertEqual(GLib.get_application_name(), "moo")
 
     def test_xdg_dirs(self):
         d = GLib.get_user_data_dir()
@@ -55,11 +52,13 @@ class TestGLib(unittest.TestCase):
         d = GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_DESKTOP)
         self.assertTrue(os.path.sep in d, d)
         with warnings.catch_warnings():
-            warnings.simplefilter('ignore', PyGIDeprecationWarning)
+            warnings.simplefilter("ignore", PyGIDeprecationWarning)
 
             # also works with backwards compatible enum names
-            self.assertEqual(GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_MUSIC),
-                             GLib.get_user_special_dir(GLib.USER_DIRECTORY_MUSIC))
+            self.assertEqual(
+                GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_MUSIC),
+                GLib.get_user_special_dir(GLib.USER_DIRECTORY_MUSIC),
+            )
 
         for d in GLib.get_system_config_dirs():
             self.assertTrue(os.path.sep in d, d)
@@ -70,8 +69,8 @@ class TestGLib(unittest.TestCase):
         self.assertEqual(GLib.main_depth(), 0)
 
     def test_filenames(self):
-        self.assertEqual(GLib.filename_display_name('foo'), 'foo')
-        self.assertEqual(GLib.filename_display_basename('bar/foo'), 'foo')
+        self.assertEqual(GLib.filename_display_name("foo"), "foo")
+        self.assertEqual(GLib.filename_display_basename("bar/foo"), "foo")
 
         def glibfsencode(f):
             # the annotations of filename_from_utf8() was changed in
@@ -80,32 +79,32 @@ class TestGLib(unittest.TestCase):
                 return f
             if os.name == "nt":
                 return f.encode("utf-8", "surrogatepass")
-            else:
-                return os.fsencode(f)
+            return os.fsencode(f)
 
         # this is locale dependent, so we cannot completely verify the result
-        res = GLib.filename_from_utf8(u'aäb')
+        res = GLib.filename_from_utf8("aäb")
         res = glibfsencode(res)
         self.assertTrue(isinstance(res, bytes))
         self.assertGreaterEqual(len(res), 3)
 
         # with explicit length argument
-        res = GLib.filename_from_utf8(u'aäb', 1)
+        res = GLib.filename_from_utf8("aäb", 1)
         res = glibfsencode(res)
-        self.assertEqual(res, b'a')
+        self.assertEqual(res, b"a")
 
     def test_uri_extract(self):
-        res = GLib.uri_list_extract_uris('''# some comment
+        res = GLib.uri_list_extract_uris("""# some comment
 http://example.com
 https://my.org/q?x=1&y=2
-            http://gnome.org/new''')
-        self.assertEqual(res, ['http://example.com',
-                               'https://my.org/q?x=1&y=2',
-                               'http://gnome.org/new'])
+            http://gnome.org/new""")
+        self.assertEqual(
+            res,
+            ["http://example.com", "https://my.org/q?x=1&y=2", "http://gnome.org/new"],
+        )
 
     def test_current_time(self):
         with warnings.catch_warnings(record=True) as warn:
-            warnings.simplefilter('always')
+            warnings.simplefilter("always")
             tm = GLib.get_current_time()
             self.assertTrue(issubclass(warn[0].category, PyGIDeprecationWarning))
 
@@ -163,22 +162,22 @@ https://my.org/q?x=1&y=2
 
         # io_add_watch() takes an IOChannel, calling with an fd is deprecated
         with warnings.catch_warnings(record=True) as warn:
-            warnings.simplefilter('always')
-            GLib.io_add_watch(r, GLib.IOCondition.IN, cb,
-                              priority=GLib.PRIORITY_HIGH)
+            warnings.simplefilter("always")
+            GLib.io_add_watch(r, GLib.IOCondition.IN, cb, priority=GLib.PRIORITY_HIGH)
             self.assertTrue(issubclass(warn[0].category, PyGIDeprecationWarning))
 
         def write():
-            os.write(w, b'a')
-            GLib.idle_add(lambda: os.write(w, b'b') and False)
+            os.write(w, b"a")
+            GLib.idle_add(lambda: os.write(w, b"b") and False)
 
         ml = GLib.MainLoop()
         GLib.idle_add(write)
         GLib.timeout_add(2000, ml.quit)
         ml.run()
 
-        self.assertEqual(call_data, [(r, GLib.IOCondition.IN, b'a'),
-                                     (r, GLib.IOCondition.IN, b'b')])
+        self.assertEqual(
+            call_data, [(r, GLib.IOCondition.IN, b"a"), (r, GLib.IOCondition.IN, b"b")]
+        )
 
     @unittest.skipIf(os.name == "nt", "hangs")
     def test_io_add_watch_with_data(self):
@@ -193,22 +192,28 @@ https://my.org/q?x=1&y=2
 
         # io_add_watch() takes an IOChannel, calling with an fd is deprecated
         with warnings.catch_warnings(record=True) as warn:
-            warnings.simplefilter('always')
-            GLib.io_add_watch(r, GLib.IOCondition.IN, cb, 'moo',
-                              priority=GLib.PRIORITY_HIGH)
+            warnings.simplefilter("always")
+            GLib.io_add_watch(
+                r, GLib.IOCondition.IN, cb, "moo", priority=GLib.PRIORITY_HIGH
+            )
             self.assertTrue(issubclass(warn[0].category, PyGIDeprecationWarning))
 
         def write():
-            os.write(w, b'a')
-            GLib.idle_add(lambda: os.write(w, b'b') and False)
+            os.write(w, b"a")
+            GLib.idle_add(lambda: os.write(w, b"b") and False)
 
         ml = GLib.MainLoop()
         GLib.idle_add(write)
         GLib.timeout_add(2000, ml.quit)
         ml.run()
 
-        self.assertEqual(call_data, [(r, GLib.IOCondition.IN, b'a', 'moo'),
-                                     (r, GLib.IOCondition.IN, b'b', 'moo')])
+        self.assertEqual(
+            call_data,
+            [
+                (r, GLib.IOCondition.IN, b"a", "moo"),
+                (r, GLib.IOCondition.IN, b"b", "moo"),
+            ],
+        )
 
     @unittest.skipIf(os.name == "nt", "hangs")
     def test_io_add_watch_with_multiple_data(self):
@@ -222,24 +227,25 @@ https://my.org/q?x=1&y=2
 
         # io_add_watch() takes an IOChannel, calling with an fd is deprecated
         with warnings.catch_warnings(record=True) as warn:
-            warnings.simplefilter('always')
-            GLib.io_add_watch(r, GLib.IOCondition.IN, cb, 'moo', 'foo')
+            warnings.simplefilter("always")
+            GLib.io_add_watch(r, GLib.IOCondition.IN, cb, "moo", "foo")
             self.assertTrue(issubclass(warn[0].category, PyGIDeprecationWarning))
 
         ml = GLib.MainLoop()
-        GLib.idle_add(lambda: os.write(w, b'a') and False)
+        GLib.idle_add(lambda: os.write(w, b"a") and False)
         GLib.timeout_add(2000, ml.quit)
         ml.run()
 
-        self.assertEqual(call_data, [(r, GLib.IOCondition.IN, b'a', ('moo', 'foo'))])
+        self.assertEqual(call_data, [(r, GLib.IOCondition.IN, b"a", ("moo", "foo"))])
 
     @unittest.skipIf(sys.platform == "darwin", "fails")
     @unittest.skipIf(os.name == "nt", "no shell on Windows")
     def test_io_add_watch_pyfile(self):
         call_data = []
 
-        cmd = subprocess.Popen('echo hello; echo world',
-                               shell=True, bufsize=0, stdout=subprocess.PIPE)
+        cmd = subprocess.Popen(
+            "echo hello; echo world", shell=True, bufsize=0, stdout=subprocess.PIPE
+        )
 
         def cb(file, condition):
             call_data.append((file, condition, file.readline()))
@@ -250,7 +256,7 @@ https://my.org/q?x=1&y=2
 
         # io_add_watch() takes an IOChannel, calling with a Python file is deprecated
         with warnings.catch_warnings(record=True) as warn:
-            warnings.simplefilter('always')
+            warnings.simplefilter("always")
             GLib.io_add_watch(cmd.stdout, GLib.IOCondition.IN, cb)
             self.assertTrue(issubclass(warn[0].category, PyGIDeprecationWarning))
 
@@ -260,12 +266,17 @@ https://my.org/q?x=1&y=2
 
         cmd.wait()
 
-        self.assertEqual(call_data, [(cmd.stdout, GLib.IOCondition.IN, b'hello\n'),
-                                     (cmd.stdout, GLib.IOCondition.IN, b'world\n')])
+        self.assertEqual(
+            call_data,
+            [
+                (cmd.stdout, GLib.IOCondition.IN, b"hello\n"),
+                (cmd.stdout, GLib.IOCondition.IN, b"world\n"),
+            ],
+        )
 
     def test_glib_version(self):
         with warnings.catch_warnings():
-            warnings.simplefilter('ignore', PyGIDeprecationWarning)
+            warnings.simplefilter("ignore", PyGIDeprecationWarning)
 
             (major, minor, micro) = GLib.glib_version
             self.assertGreaterEqual(major, 2)
@@ -274,7 +285,7 @@ https://my.org/q?x=1&y=2
 
     def test_pyglib_version(self):
         with warnings.catch_warnings():
-            warnings.simplefilter('ignore', PyGIDeprecationWarning)
+            warnings.simplefilter("ignore", PyGIDeprecationWarning)
 
             (major, minor, micro) = GLib.pyglib_version
             self.assertGreaterEqual(major, 3)
@@ -283,7 +294,7 @@ https://my.org/q?x=1&y=2
 
     def test_timezone_constructor(self):
         with warnings.catch_warnings():
-            warnings.simplefilter('ignore', DeprecationWarning)
+            warnings.simplefilter("ignore", DeprecationWarning)
             timezone = GLib.TimeZone("+05:21")
             self.assertEqual(timezone.get_offset(0), ((5 * 60) + 21) * 60)
 

@@ -1,5 +1,3 @@
-# -*- Mode: Python -*-
-
 import unittest
 import pytest
 
@@ -9,19 +7,21 @@ import testhelper
 
 
 class PyGObject(GObject.GObject):
-    __gtype_name__ = 'PyGObject'
+    __gtype_name__ = "PyGObject"
     __gproperties__ = {
-        'label': (GObject.TYPE_STRING,
-                  'label property',
-                  'the label of the object',
-                  'default',
-                  GObject.ParamFlags.READABLE | GObject.ParamFlags.WRITABLE),
-        }
+        "label": (
+            GObject.TYPE_STRING,
+            "label property",
+            "the label of the object",
+            "default",
+            GObject.ParamFlags.READABLE | GObject.ParamFlags.WRITABLE,
+        ),
+    }
 
     def __init__(self):
         self._props = {}
         GObject.GObject.__init__(self)
-        self.set_property('label', 'hello')
+        self.set_property("label", "hello")
 
     def do_set_property(self, name, value):
         self._props[name] = value
@@ -41,20 +41,20 @@ class TestObject(unittest.TestCase):
         self.assertTrue(isinstance(o, PyGObject))
 
         # has expected property
-        self.assertEqual(o.props.label, 'hello')
-        o.props.label = 'goodbye'
-        self.assertEqual(o.props.label, 'goodbye')
-        self.assertRaises(AttributeError, getattr, o.props, 'nosuchprop')
+        self.assertEqual(o.props.label, "hello")
+        o.props.label = "goodbye"
+        self.assertEqual(o.props.label, "goodbye")
+        self.assertRaises(AttributeError, getattr, o.props, "nosuchprop")
 
     def test_pyobject_new_test_type(self):
         o = testhelper.create_test_type()
         self.assertTrue(isinstance(o, PyGObject))
 
         # has expected property
-        self.assertEqual(o.props.label, 'hello')
-        o.props.label = 'goodbye'
-        self.assertEqual(o.props.label, 'goodbye')
-        self.assertRaises(AttributeError, getattr, o.props, 'nosuchprop')
+        self.assertEqual(o.props.label, "hello")
+        o.props.label = "goodbye"
+        self.assertEqual(o.props.label, "goodbye")
+        self.assertRaises(AttributeError, getattr, o.props, "nosuchprop")
 
     def test_new_refcount(self):
         # TODO: justify why this should be 2
@@ -70,7 +70,7 @@ class TestGValueConversion(unittest.TestCase):
         self.assertEqual(testhelper.test_value(GLib.MININT32), GLib.MININT32)
 
     def test_str(self):
-        self.assertEqual(testhelper.test_value('hello'), 'hello')
+        self.assertEqual(testhelper.test_value("hello"), "hello")
 
     def test_int_array(self):
         self.assertEqual(testhelper.test_value_array([]), [])
@@ -80,24 +80,28 @@ class TestGValueConversion(unittest.TestCase):
 
     def test_str_array(self):
         self.assertEqual(testhelper.test_value_array([]), [])
-        self.assertEqual(testhelper.test_value_array(['a']), ['a'])
-        ar = ('aa ' * 1000).split()
+        self.assertEqual(testhelper.test_value_array(["a"]), ["a"])
+        ar = ("aa " * 1000).split()
         self.assertEqual(testhelper.test_value_array(ar), ar)
 
 
 class TestErrors(unittest.TestCase):
     def test_gerror(self):
-        callable_ = lambda: GLib.file_get_contents('/nonexisting ')
+        def callable_():
+            return GLib.file_get_contents("/nonexisting ")
+
         self.assertRaises(GLib.GError, testhelper.test_gerror_exception, callable_)
 
     def test_no_gerror(self):
-        callable_ = lambda: GLib.file_get_contents(__file__)
+        def callable_():
+            return GLib.file_get_contents(__file__)
+
         self.assertEqual(testhelper.test_gerror_exception(callable_), None)
 
 
 def test_to_unichar_conv():
-    assert testhelper.test_to_unichar_conv(u"A") == 65
-    assert testhelper.test_to_unichar_conv(u"Ä") == 196
+    assert testhelper.test_to_unichar_conv("A") == 65
+    assert testhelper.test_to_unichar_conv("Ä") == 196
 
     with pytest.raises(TypeError):
         assert testhelper.test_to_unichar_conv(b"\x65")
@@ -106,7 +110,7 @@ def test_to_unichar_conv():
         testhelper.test_to_unichar_conv(object())
 
     with pytest.raises(TypeError):
-        testhelper.test_to_unichar_conv(u"AA")
+        testhelper.test_to_unichar_conv("AA")
 
 
 def test_constant_strip_prefix():

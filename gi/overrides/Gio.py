@@ -1,6 +1,3 @@
-# -*- Mode: Python; py-indent-offset: 4 -*-
-# vim: tabstop=4 shiftwidth=4 expandtab
-#
 # Copyright (C) 2010 Ignacio Casal Quinteiro <icq@gnome.org>
 #
 # This library is free software; you can redistribute it and/or
@@ -22,7 +19,12 @@ import asyncio
 import warnings
 
 from .._ossighelper import register_sigint_fallback, get_event_loop
-from ..overrides import override, deprecated_init, wrap_list_store_equal_func, wrap_list_store_sort_func
+from ..overrides import (
+    override,
+    deprecated_init,
+    wrap_list_store_equal_func,
+    wrap_list_store_sort_func,
+)
 from ..module import get_introspection_module
 from gi import PyGIWarning
 
@@ -30,15 +32,14 @@ from gi.repository import GLib
 
 import sys
 
-Gio = get_introspection_module('Gio')
+Gio = get_introspection_module("Gio")
 
 __all__ = []
 
 
 class ActionMap(Gio.ActionMap):
     def add_action_entries(self, entries, user_data=None):
-        """
-        The ``add_action_entries()`` method is a convenience function for creating
+        """The ``add_action_entries()`` method is a convenience function for creating
         multiple :class:`~gi.repository.Gio.SimpleAction` instances and adding them
         to a :class:`~gi.repository.Gio.ActionMap`.
         Each action is constructed as per one entry.
@@ -71,17 +72,16 @@ class ActionMap(Gio.ActionMap):
         """
         try:
             iter(entries)
-        except (TypeError):
-            raise TypeError('entries must be iterable')
+        except TypeError:
+            raise TypeError("entries must be iterable")
 
-        def _process_action(name, activate=None, parameter_type=None,
-                            state=None, change_state=None):
+        def _process_action(
+            name, activate=None, parameter_type=None, state=None, change_state=None
+        ):
             if parameter_type:
                 if not GLib.VariantType.string_is_valid(parameter_type):
-                    raise TypeError("The type string '%s' given as the "
-                                    "parameter type for action '%s' is "
-                                    "not a valid GVariant type string. " %
-                                    (parameter_type, name))
+                    msg = f"The type string '{parameter_type}' given as the parameter type for action '{name}' is not a valid GVariant type string. "
+                    raise TypeError(msg)
                 variant_parameter = GLib.VariantType.new(parameter_type)
             else:
                 variant_parameter = None
@@ -89,20 +89,20 @@ class ActionMap(Gio.ActionMap):
             if state is not None:
                 # stateful action
                 variant_state = GLib.Variant.parse(None, state, None, None)
-                action = Gio.SimpleAction.new_stateful(name, variant_parameter,
-                                                       variant_state)
+                action = Gio.SimpleAction.new_stateful(
+                    name, variant_parameter, variant_state
+                )
                 if change_state is not None:
-                    action.connect('change-state', change_state, user_data)
+                    action.connect("change-state", change_state, user_data)
             else:
                 # stateless action
                 if change_state is not None:
-                    raise ValueError("Stateless action '%s' should give "
-                                     "None for 'change_state', not '%s'." %
-                                     (name, change_state))
+                    msg = f"Stateless action '{name}' should give None for 'change_state', not '{change_state}'."
+                    raise ValueError(msg)
                 action = Gio.SimpleAction(name=name, parameter_type=variant_parameter)
 
             if activate is not None:
-                action.connect('activate', activate, user_data)
+                action.connect("activate", activate, user_data)
             self.add_action(action)
 
         for entry in entries:
@@ -111,24 +111,24 @@ class ActionMap(Gio.ActionMap):
 
 
 ActionMap = override(ActionMap)
-__all__.append('ActionMap')
+__all__.append("ActionMap")
 
 
 class Application(Gio.Application):
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self._asyncio_tasks = set()
 
     def run(self, *args, **kwargs):
-        with register_sigint_fallback(self.quit):
-            with get_event_loop(GLib.MainContext.default()).running(self.quit):
-                return Gio.Application.run(self, *args, **kwargs)
+        with (
+            register_sigint_fallback(self.quit),
+            get_event_loop(GLib.MainContext.default()).running(self.quit),
+        ):
+            return Gio.Application.run(self, *args, **kwargs)
 
     def create_asyncio_task(self, coro):
-        """
-        Safely create an asyncio task. The application will not quit until the
+        """Safely create an asyncio task. The application will not quit until the
         task completes. For potentially longer running tasks, you should add
         cancellation logic to abort a task when it is not needed anymore (e.g.
         cancelling it from the Gtk.Window.do_unmap event).
@@ -160,23 +160,25 @@ class Application(Gio.Application):
 
 
 Application = override(Application)
-__all__.append('Application')
+__all__.append("Application")
 
 
 def _warn_init(cls, instead=None):
-
     def new_init(self, *args, **kwargs):
         super(cls, self).__init__(*args, **kwargs)
         name = cls.__module__.rsplit(".", 1)[-1] + "." + cls.__name__
         if instead:
             warnings.warn(
-                ("%s shouldn't be instantiated directly, "
-                 "use %s instead." % (name, instead)),
-                PyGIWarning, stacklevel=2)
+                (f"{name} shouldn't be instantiated directly, use {instead} instead."),
+                PyGIWarning,
+                stacklevel=2,
+            )
         else:
             warnings.warn(
-                "%s shouldn't be instantiated directly." % (name,),
-                PyGIWarning, stacklevel=2)
+                f"{name} shouldn't be instantiated directly.",
+                PyGIWarning,
+                stacklevel=2,
+            )
 
     return new_init
 
@@ -187,7 +189,7 @@ class VolumeMonitor(Gio.VolumeMonitor):
     __init__ = _warn_init(Gio.VolumeMonitor, "Gio.VolumeMonitor.get()")
 
 
-__all__.append('VolumeMonitor')
+__all__.append("VolumeMonitor")
 
 
 @override
@@ -195,7 +197,7 @@ class DBusAnnotationInfo(Gio.DBusAnnotationInfo):
     __init__ = _warn_init(Gio.DBusAnnotationInfo)
 
 
-__all__.append('DBusAnnotationInfo')
+__all__.append("DBusAnnotationInfo")
 
 
 @override
@@ -203,7 +205,7 @@ class DBusArgInfo(Gio.DBusArgInfo):
     __init__ = _warn_init(Gio.DBusArgInfo)
 
 
-__all__.append('DBusArgInfo')
+__all__.append("DBusArgInfo")
 
 
 @override
@@ -211,7 +213,7 @@ class DBusMethodInfo(Gio.DBusMethodInfo):
     __init__ = _warn_init(Gio.DBusMethodInfo)
 
 
-__all__.append('DBusMethodInfo')
+__all__.append("DBusMethodInfo")
 
 
 @override
@@ -219,7 +221,7 @@ class DBusSignalInfo(Gio.DBusSignalInfo):
     __init__ = _warn_init(Gio.DBusSignalInfo)
 
 
-__all__.append('DBusSignalInfo')
+__all__.append("DBusSignalInfo")
 
 
 @override
@@ -227,7 +229,7 @@ class DBusInterfaceInfo(Gio.DBusInterfaceInfo):
     __init__ = _warn_init(Gio.DBusInterfaceInfo)
 
 
-__all__.append('DBusInterfaceInfo')
+__all__.append("DBusInterfaceInfo")
 
 
 @override
@@ -235,7 +237,7 @@ class DBusNodeInfo(Gio.DBusNodeInfo):
     __init__ = _warn_init(Gio.DBusNodeInfo)
 
 
-__all__.append('DBusNodeInfo')
+__all__.append("DBusNodeInfo")
 
 
 class FileEnumerator(Gio.FileEnumerator):
@@ -247,29 +249,29 @@ class FileEnumerator(Gio.FileEnumerator):
 
         if file_info is not None:
             return file_info
-        else:
-            raise StopIteration
+        raise StopIteration
 
 
 FileEnumerator = override(FileEnumerator)
-__all__.append('FileEnumerator')
+__all__.append("FileEnumerator")
 
 
 class MenuItem(Gio.MenuItem):
     def set_attribute(self, attributes):
-        for (name, format_string, value) in attributes:
+        for name, format_string, value in attributes:
             self.set_attribute_value(name, GLib.Variant(format_string, value))
 
 
 MenuItem = override(MenuItem)
-__all__.append('MenuItem')
+__all__.append("MenuItem")
 
 
 class Settings(Gio.Settings):
-    '''Provide dictionary-like access to GLib.Settings.'''
+    """Provide dictionary-like access to GLib.Settings."""
 
-    __init__ = deprecated_init(Gio.Settings.__init__,
-                               arg_names=('schema', 'path', 'backend'))
+    __init__ = deprecated_init(
+        Gio.Settings.__init__, arg_names=("schema", "path", "backend")
+    )
 
     def __contains__(self, key):
         return key in self.list_keys()
@@ -278,8 +280,7 @@ class Settings(Gio.Settings):
         return len(self.list_keys())
 
     def __iter__(self):
-        for key in self.list_keys():
-            yield key
+        yield from self.list_keys()
 
     def __bool__(self):
         # for "if mysettings" we don't want a dictionary-like test here, just
@@ -289,40 +290,41 @@ class Settings(Gio.Settings):
     def __getitem__(self, key):
         # get_value() aborts the program on an unknown key
         if key not in self:
-            raise KeyError('unknown key: %r' % (key,))
+            raise KeyError(f"unknown key: {key!r}")
 
         return self.get_value(key).unpack()
 
     def __setitem__(self, key, value):
         # set_value() aborts the program on an unknown key
         if key not in self:
-            raise KeyError('unknown key: %r' % (key,))
+            raise KeyError(f"unknown key: {key!r}")
 
         # determine type string of this key
         range = self.get_range(key)
         type_ = range.get_child_value(0).get_string()
         v = range.get_child_value(1)
-        if type_ == 'type':
+        if type_ == "type":
             # v is boxed empty array, type of its elements is the allowed value type
             type_str = v.get_child_value(0).get_type_string()
-            assert type_str.startswith('a')
+            assert type_str.startswith("a")
             type_str = type_str[1:]
-        elif type_ == 'enum':
+        elif type_ == "enum":
             # v is an array with the allowed values
-            assert v.get_child_value(0).get_type_string().startswith('a')
+            assert v.get_child_value(0).get_type_string().startswith("a")
             type_str = v.get_child_value(0).get_child_value(0).get_type_string()
             allowed = v.unpack()
             if value not in allowed:
-                raise ValueError('value %s is not an allowed enum (%s)' % (value, allowed))
-        elif type_ == 'range':
+                raise ValueError(f"value {value} is not an allowed enum ({allowed})")
+        elif type_ == "range":
             tuple_ = v.get_child_value(0)
             type_str = tuple_.get_child_value(0).get_type_string()
             min_, max_ = tuple_.unpack()
             if value < min_ or value > max_:
-                raise ValueError(
-                    'value %s not in range (%s - %s)' % (value, min_, max_))
+                raise ValueError(f"value {value} not in range ({min_} - {max_})")
         else:
-            raise NotImplementedError('Cannot handle allowed type range class ' + str(type_))
+            raise NotImplementedError(
+                "Cannot handle allowed type range class " + str(type_)
+            )
 
         self.set_value(key, GLib.Variant(type_str, value))
 
@@ -331,11 +333,11 @@ class Settings(Gio.Settings):
 
 
 Settings = override(Settings)
-__all__.append('Settings')
+__all__.append("Settings")
 
 
 class _DBusProxyMethodCall:
-    '''Helper class to implement DBusProxy method calls.'''
+    """Helper class to implement DBusProxy method calls."""
 
     def __init__(self, dbus_proxy, method_name):
         self.dbus_proxy = dbus_proxy
@@ -346,7 +348,7 @@ class _DBusProxyMethodCall:
         try:
             ret = obj.call_finish(result)
         except Exception:
-            etype, e = sys.exc_info()[:2]
+            _etype, e = sys.exc_info()[:2]
             # return exception as value
             if error_callback:
                 error_callback(obj, e, real_user_data)
@@ -356,36 +358,52 @@ class _DBusProxyMethodCall:
 
         result_callback(obj, self._unpack_result(ret), real_user_data)
 
-    def __call__(self, *args, result_handler=None, error_handler=None,
-                 user_data=None, flags=0, timeout=-1):
+    def __call__(
+        self,
+        *args,
+        result_handler=None,
+        error_handler=None,
+        user_data=None,
+        flags=0,
+        timeout=-1,
+    ):
         # the first positional argument is the signature, unless we are calling
         # a method without arguments; then signature is implied to be '()'.
         if args:
             signature = args[0]
             args = args[1:]
             if not isinstance(signature, str):
-                raise TypeError('first argument must be the method signature string: %r' % signature)
+                raise TypeError(
+                    f"first argument must be the method signature string: {signature!r}"
+                )
         else:
-            signature = '()'
+            signature = "()"
 
         arg_variant = GLib.Variant(signature, tuple(args))
 
         if result_handler is not None:
             # asynchronous call
             user_data = (result_handler, error_handler, user_data)
-            self.dbus_proxy.call(self.method_name, arg_variant,
-                                 flags, timeout, None,
-                                 self.__async_result_handler, user_data)
+            self.dbus_proxy.call(
+                self.method_name,
+                arg_variant,
+                flags,
+                timeout,
+                None,
+                self.__async_result_handler,
+                user_data,
+            )
         else:
             # synchronous call
-            result = self.dbus_proxy.call_sync(self.method_name, arg_variant,
-                                               flags, timeout, None)
+            result = self.dbus_proxy.call_sync(
+                self.method_name, arg_variant, flags, timeout, None
+            )
             return self._unpack_result(result)
+        return None
 
     @classmethod
     def _unpack_result(klass, result):
-        '''Convert a D-BUS return variant into an appropriate return value'''
-
+        """Convert a D-BUS return variant into an appropriate return value."""
         result = result.unpack()
 
         # to be compatible with standard Python behaviour, unbox
@@ -399,7 +417,7 @@ class _DBusProxyMethodCall:
 
 
 class DBusProxy(Gio.DBusProxy):
-    '''Provide comfortable and pythonic method calls.
+    """Provide comfortable and pythonic method calls.
 
     This marshalls the method arguments into a GVariant, invokes the
     call_sync() method on the DBusProxy object, and unmarshalls the result
@@ -442,24 +460,23 @@ class DBusProxy(Gio.DBusProxy):
 
       proxy.MyMethod('(is)', 42, 'hello',
           result_handler=mymethod_done, user_data='data')
-    '''
+    """
+
     def __getattr__(self, name):
         if name.startswith("do_"):
             return self[name]
-        else:
-            return _DBusProxyMethodCall(self, name)
+        return _DBusProxyMethodCall(self, name)
 
 
 DBusProxy = override(DBusProxy)
-__all__.append('DBusProxy')
+__all__.append("DBusProxy")
 
 
 class ListModel(Gio.ListModel):
-
     def __getitem__(self, key):
         if isinstance(key, slice):
             return [self.get_item(i) for i in range(*key.indices(len(self)))]
-        elif isinstance(key, int):
+        if isinstance(key, int):
             if key < 0:
                 key += len(self)
             if key < 0:
@@ -468,18 +485,13 @@ class ListModel(Gio.ListModel):
             if ret is None:
                 raise IndexError
             return ret
-        else:
-            raise TypeError
+        raise TypeError
 
     def __contains__(self, item):
         pytype = self.get_item_type().pytype
         if not isinstance(item, pytype):
-            raise TypeError(
-                "Expected type %s.%s" % (pytype.__module__, pytype.__name__))
-        for i in self:
-            if i == item:
-                return True
-        return False
+            raise TypeError(f"Expected type {pytype.__module__}.{pytype.__name__}")
+        return any(i == item for i in self)
 
     def __len__(self):
         return self.get_n_items()
@@ -490,19 +502,17 @@ class ListModel(Gio.ListModel):
 
 
 ListModel = override(ListModel)
-__all__.append('ListModel')
+__all__.append("ListModel")
 
 
 class ListStore(Gio.ListStore):
-
     def sort(self, compare_func, *user_data):
         compare_func = wrap_list_store_sort_func(compare_func)
-        return super(ListStore, self).sort(compare_func, *user_data)
+        return super().sort(compare_func, *user_data)
 
     def insert_sorted(self, item, compare_func, *user_data):
         compare_func = wrap_list_store_sort_func(compare_func)
-        return super(ListStore, self).insert_sorted(
-            item, compare_func, *user_data)
+        return super().insert_sorted(item, compare_func, *user_data)
 
     def __delitem__(self, key):
         if isinstance(key, slice):
@@ -530,8 +540,8 @@ class ListStore(Gio.ListStore):
             for v in value:
                 if not isinstance(v, pytype):
                     raise TypeError(
-                        "Expected type %s.%s" % (
-                            pytype.__module__, pytype.__name__))
+                        f"Expected type {pytype.__module__}.{pytype.__name__}"
+                    )
                 valuelist.append(v)
 
             start, stop, step = key.indices(len(self))
@@ -555,9 +565,7 @@ class ListStore(Gio.ListStore):
 
             pytype = self.get_item_type().pytype
             if not isinstance(value, pytype):
-                raise TypeError(
-                    "Expected type %s.%s" % (
-                        pytype.__module__, pytype.__name__))
+                raise TypeError(f"Expected type {pytype.__module__}.{pytype.__name__}")
 
             self.splice(key, 1, [value])
         else:
@@ -572,11 +580,10 @@ class ListStore(Gio.ListStore):
 
 
 ListStore = override(ListStore)
-__all__.append('ListStore')
+__all__.append("ListStore")
 
 
 class DataInputStream(Gio.DataInputStream):
-
     def __iter__(self):
         return self
 
@@ -585,24 +592,22 @@ class DataInputStream(Gio.DataInputStream):
 
         if line is not None:
             return line
-        else:
-            raise StopIteration
+        raise StopIteration
 
 
 DataInputStream = override(DataInputStream)
-__all__.append('DataInputStream')
+__all__.append("DataInputStream")
 
 
 class File(Gio.File):
-
     def __fspath__(self):
         path = self.peek_path()
         # A file isn't guaranteed to have a path associated and returning
         # `None` here will result in a `TypeError` trying to subscribe to it.
-        if path is None or path == '':
-            raise TypeError('File has no associated path.')
+        if path is None or path == "":
+            raise TypeError("File has no associated path.")
         return path
 
 
 File = override(File)
-__all__.append('File')
+__all__.append("File")

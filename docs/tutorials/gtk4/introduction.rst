@@ -38,7 +38,7 @@ Now we create an application. The ``application_id`` argument is needed as
 method of identifying your application to the system, if you do not know what
 to set please :devdocs:`check this tutorial <tutorials/application-id>`.
 
-We are also connecting to the application's ``activate`` event, where we will 
+We are also connecting to the application's ``activate`` event, where we will
 create the window.
 
 .. literalinclude:: examples/simple_example.py

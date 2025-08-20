@@ -62,13 +62,13 @@ Search Entry
 ------------
 
 :class:`Gtk.SearchEntry` is an entry specially designed for use as a search
-entry. 
+entry.
 :class:`Gtk.SearchEntry` allows you to implement the popular "type to search"
 feature.
 You can use :meth:`Gtk.SearchEntry.set_key_capture_widget` to set the parent
 widget that will redirect its key events to the entry.
 
-:class:`Gtk.SearchEntry` has the 
+:class:`Gtk.SearchEntry` has the
 :func:`search-changed <Gtk.SearchEntry.signals.search_changed>` signal, it
 differs from :class:`Gtk.Editable`'s :func:`changed <Gtk.Editable.signals.changed>`
 in the sense that it gets emitted after a short delay that you can configure

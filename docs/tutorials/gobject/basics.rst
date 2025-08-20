@@ -4,7 +4,7 @@ Basics
 ======
 
 .. hint::
-    In this example, we will use GTK widgets to demonstrate GObject 
+    In this example, we will use GTK widgets to demonstrate GObject
     capabilities.
 
 GObject Initialization
@@ -114,7 +114,7 @@ Property Bindings with Transformations
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Sometimes you may want to bind two properties that are incompatible, or you
-simply need to apply some transformation between these values. 
+simply need to apply some transformation between these values.
 For these scenarios :meth:`GObject.Object.bind_property` also accepts custom
 transformation functions that serve to this purpose.
 
@@ -178,7 +178,7 @@ has been connected to:
 .. code:: python
 
     gobject.disconnect(handler_id)
-    
+
 When creating the callback function for a signal, the arguments it accepts will
 depend on the specific signal, but for a signal with no arguments it will look
 like this:

@@ -22,7 +22,7 @@ int/long can fail with :class:`OverflowError`:
     Traceback (most recent call last):
       File "<stdin>", line 1, in <module>
     OverflowError: 2147483648 not in range -2147483648 to 2147483647
-    >>> 
+    >>>
 
 
 Text Types

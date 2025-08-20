@@ -1,6 +1,3 @@
-# -*- Mode: Python; py-indent-offset: 4 -*-
-# vim: tabstop=4 shiftwidth=4 expandtab
-#
 # Copyright (C) 2009 Johan Dahlin <johan@gnome.org>
 #
 # This library is free software; you can redistribute it and/or
@@ -22,7 +19,7 @@ import sys
 
 from ..importer import DynamicImporter
 
-sys.meta_path.append(DynamicImporter('gi.repository'))
+sys.meta_path.append(DynamicImporter("gi.repository"))
 
 del DynamicImporter
 del sys

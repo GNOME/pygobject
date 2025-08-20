@@ -30,7 +30,7 @@ typedef struct {
     GOptionGroup *group;
     gboolean other_owner, is_in_context;
     PyObject *callback;
-    GSList *strings; /* all strings added with the entries, are freed on 
+    GSList *strings; /* all strings added with the entries, are freed on
                         GOptionGroup.destroy() */
 } PyGOptionGroup;
 

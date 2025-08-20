@@ -13,7 +13,7 @@ class Item(GObject.Object):
     _id = 0
 
     def __init__(self, **kwargs):
-        super(Item, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         Item._id += 1
         self._id = self._id
 
@@ -22,8 +22,7 @@ class Item(GObject.Object):
 
 
 class NamedItem(Item):
-
-    name = GObject.Property(type=str, default='')
+    name = GObject.Property(type=str, default="")
 
     def __repr__(self):
         return self.props.name
@@ -40,7 +39,10 @@ def test_list_store_sort():
         assert list(args) == user_data
         assert isinstance(a, NamedItem)
         assert isinstance(b, NamedItem)
-        cmp = lambda a, b: (a > b) - (a < b)
+
+        def cmp(a, b):
+            return (a > b) - (a < b)
+
         return cmp(a.props.name, b.props.name)
 
     store[:] = items
@@ -60,7 +62,10 @@ def test_list_store_insert_sorted():
         assert list(args) == user_data
         assert isinstance(a, NamedItem)
         assert isinstance(b, NamedItem)
-        cmp = lambda a, b: (a > b) - (a < b)
+
+        def cmp(a, b):
+            return (a > b) - (a < b)
+
         return cmp(a.props.name, b.props.name)
 
     for item in items:
@@ -164,9 +169,7 @@ def test_list_store_delitem_simple():
 
 
 def test_list_store_delitem_slice():
-
     def do_del(count, key):
-
         events = []
 
         def on_changed(m, *args):
@@ -212,7 +215,6 @@ def test_list_store_delitem_slice():
 
 
 def test_list_store_setitem_simple():
-
     store = Gio.ListStore.new(Item)
     first = Item()
     store.append(first)
@@ -253,10 +255,12 @@ def test_list_store_setitem_simple():
 
 
 def test_list_store_setitem_slice():
-
     def do_set(count, key, new_count):
-        if count == 0 and key.step is not None \
-                and platform.python_implementation() == "PyPy":
+        if (
+            count == 0
+            and key.step is not None
+            and platform.python_implementation() == "PyPy"
+        ):
             # https://foss.heptapod.net/pypy/pypy/-/issues/2804
             return
         store = Gio.ListStore.new(Item)
@@ -320,50 +324,52 @@ def test_action_map_add_action_entries():
     test_data = []
 
     def f(action, parameter, data):
-        test_data.append('test back')
+        test_data.append("test back")
 
-    actionmap.add_action_entries((
-        ("simple", f),
-        ("with_type", f, "i"),
-        ("with_state", f, "s", "'left'", f),
-    ))
+    actionmap.add_action_entries(
+        (
+            ("simple", f),
+            ("with_type", f, "i"),
+            ("with_state", f, "s", "'left'", f),
+        )
+    )
     assert actionmap.has_action("simple")
     assert actionmap.has_action("with_type")
     assert actionmap.has_action("with_state")
-    actionmap.add_action_entries((
-        ("with_user_data", f),
-    ), "user_data")
+    actionmap.add_action_entries((("with_user_data", f),), "user_data")
     assert actionmap.has_action("with_user_data")
 
     with pytest.raises(TypeError):
-        actionmap.add_action_entries((
-            ("invaild_type_string", f, 'asdf'),
-        ))
+        actionmap.add_action_entries((("invaild_type_string", f, "asdf"),))
     with pytest.raises(ValueError):
-        actionmap.add_action_entries((
-            ("stateless_with_change_state", f, None, None, f),
-        ))
+        actionmap.add_action_entries(
+            (("stateless_with_change_state", f, None, None, f),)
+        )
 
     actionmap.activate_action("simple")
-    assert test_data[0] == 'test back'
+    assert test_data[0] == "test back"
 
 
 def test_types_init_warn():
     types = [
-        Gio.DBusAnnotationInfo, Gio.DBusArgInfo, Gio.DBusMethodInfo,
-        Gio.DBusSignalInfo, Gio.DBusInterfaceInfo, Gio.DBusNodeInfo,
+        Gio.DBusAnnotationInfo,
+        Gio.DBusArgInfo,
+        Gio.DBusMethodInfo,
+        Gio.DBusSignalInfo,
+        Gio.DBusInterfaceInfo,
+        Gio.DBusNodeInfo,
     ]
 
     for t in types:
         with warnings.catch_warnings(record=True) as warn:
-            warnings.simplefilter('always')
+            warnings.simplefilter("always")
             t()
             assert issubclass(warn[0].category, PyGIWarning)
 
 
 def test_file_fspath():
-    file, stream = Gio.File.new_tmp('TestGFile.XXXXXX')
-    content = b'hello\0world\x7F!'
+    file, stream = Gio.File.new_tmp("TestGFile.XXXXXX")
+    content = b"hello\0world\x7f!"
     stream.get_output_stream().write_bytes(GLib.Bytes(content))
     stream.close()
     path = file.peek_path()
@@ -372,12 +378,12 @@ def test_file_fspath():
     assert isinstance(fspath, str)
     assert fspath == path
 
-    with open(file, 'rb') as file_like:
+    with open(file, "rb") as file_like:
         assert file_like.read() == content
 
 
 def test_file_fspath_with_no_path():
-    file = Gio.File.new_for_path('')
+    file = Gio.File.new_for_path("")
     path = file.peek_path()
     # In older versions of GLib, creating a GFile for an empty path will result
     # in one representing the current pwd instead of a GDummyFile with no path.
@@ -391,10 +397,9 @@ def test_file_fspath_with_no_path():
 
 @pytest.mark.skipif(
     not hasattr(Gio.ListStore, "find_with_equal_func_full"),
-    reason="ListStore.find_with_equal_func_full() is available in Gio 2.74"
+    reason="ListStore.find_with_equal_func_full() is available in Gio 2.74",
 )
 def test_list_store_find_with_equal_func():
-
     def test(*user_data):
         class TestObject(GObject.Object):
             def __init__(self, val):
@@ -412,16 +417,16 @@ def test_list_store_find_with_equal_func():
             return a.val == b.val
 
         for i in range(NUM):
-            res, position = (list_store.find_with_equal_func(
+            res, position = list_store.find_with_equal_func(
                 data[i], equal_func, *user_data
-            ))
+            )
             assert res
             assert position == i
 
         not_in_list_store = TestObject(NUM + 1)
-        res, position = (list_store.find_with_equal_func(
+        res, position = list_store.find_with_equal_func(
             not_in_list_store, equal_func, *user_data
-        ))
+        )
         assert not res
 
     test()

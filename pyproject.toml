@@ -48,7 +48,6 @@ build = [
 test = [
     "pytest",
     "pytest-cov",
-    "flake8",
 ]
 docs = [
     "sphinx",
@@ -80,6 +79,47 @@ python_files = "test_*.py"
 addopts = [
     "--import-mode=importlib",
 ]
+
+[tool.ruff]
+extend-include = ["docs/**/*.rst"]
+extend-exclude = ["subprojects", "COPYING"]
+
+[tool.ruff.lint]
+extend-select = [
+    "UP",    # pyupgrade
+    "E",     # pycodestyle error
+    "W",     # pycodestyle warning
+    "D",     # pydocstyle
+    "R",     # refactor
+    "C4",    # flake8-comprehensions
+    "ASYNC", # flake8-async
+    "EXE",   # flake8-executable
+    "T20",   # flake8-print
+    "SIM",   # flake8-simplify
+    "RUF",   # extra ruff rules
+    "PERF",  # perflint
+]
+ignore = [
+    "D1",
+    "D211",
+    "D203",
+    "D213",
+    "D4",
+    "D205",
+    "E402",
+    "E501",
+    "E731",
+    "E722",
+    "RUF012",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"docs/tutorials/**/*py" = ["T20", "SIM905"]
+"fixup-lcov-paths.py" = ["T20"]
+
+
+[tool.ruff.format]
+docstring-code-format = true
 
 [build-system]
 build-backend = "mesonpy"

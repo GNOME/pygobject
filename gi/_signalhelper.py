@@ -1,4 +1,3 @@
-# -*- Mode: Python; py-indent-offset: 4 -*-
 # pygobject - Python bindings for the GObject library
 # Copyright (C) 2012 Simon Feltman
 #
@@ -70,11 +69,12 @@ class Signal(str):
         spam.pushed.connect(on_pushed)
         spam.pushed.emit()
     """
+
     class BoundSignal(str):
-        """
-        Temporary binding object which can be used for connecting signals
+        """Temporary binding object which can be used for connecting signals
         without specifying the signal name string to connect.
         """
+
         def __new__(cls, name, *args, **kargs):
             return str.__new__(cls, name)
 
@@ -84,7 +84,7 @@ class Signal(str):
             self.gobj = gobj
 
         def __repr__(self):
-            return 'BoundSignal("%s")' % self
+            return f'BoundSignal("{self}")'
 
         def __call__(self, *args, **kargs):
             """Call the signals closure."""
@@ -92,7 +92,8 @@ class Signal(str):
 
         def connect(self, callback, *args, **kargs):
             """Same as GObject.Object.connect except there is no need to specify
-            the signal name."""
+            the signal name.
+            """
             return self.gobj.connect(self, callback, *args, **kargs)
 
         def connect_detailed(self, callback, detail, *args, **kargs):
@@ -101,7 +102,7 @@ class Signal(str):
             when connecting; for use with notifications like "notify" when a property
             changes.
             """
-            return self.gobj.connect(self + '::' + detail, callback, *args, **kargs)
+            return self.gobj.connect(self + "::" + detail, callback, *args, **kargs)
 
         def disconnect(self, handler_id):
             """Same as GObject.Object.disconnect."""
@@ -109,16 +110,26 @@ class Signal(str):
 
         def emit(self, *args, **kargs):
             """Same as GObject.Object.emit except there is no need to specify
-            the signal name."""
+            the signal name.
+            """
             return self.gobj.emit(str(self), *args, **kargs)
 
-    def __new__(cls, name='', *args, **kargs):
+    def __new__(cls, name="", *args, **kargs):
         if callable(name):
             name = name.__name__
         return str.__new__(cls, name)
 
-    def __init__(self, name='', func=None, flags=_gi.SIGNAL_RUN_FIRST,
-                 return_type=None, arg_types=None, doc='', accumulator=None, accu_data=None):
+    def __init__(
+        self,
+        name="",
+        func=None,
+        flags=_gi.SIGNAL_RUN_FIRST,
+        return_type=None,
+        arg_types=None,
+        doc="",
+        accumulator=None,
+        accu_data=None,
+    ):
         if func is None and callable(name):
             func = name
 
@@ -130,7 +141,7 @@ class Signal(str):
         if func and not (return_type or arg_types):
             return_type, arg_types = get_signal_annotations(func)
         if arg_types is None:
-            arg_types = tuple()
+            arg_types = ()
 
         self.func = func
         self.flags = flags
@@ -148,8 +159,8 @@ class Signal(str):
 
     def __call__(self, obj, *args, **kargs):
         """Allows for instantiated Signals to be used as a decorator or calling
-        of the underlying signal method."""
-
+        of the underlying signal method.
+        """
         # If obj is a GObject, than we call this signal as a closure otherwise
         # it is used as a re-application of a decorator.
         if isinstance(obj, _gi.GObject):
@@ -157,25 +168,42 @@ class Signal(str):
         else:
             # If self is already an allocated name, use it otherwise create a new named
             # signal using the closure name as the name.
-            if str(self):
-                name = str(self)
-            else:
-                name = obj.__name__
+            name = str(self) if str(self) else obj.__name__
             # Return a new value of this type since it is based on an immutable string.
-            return type(self)(name=name, func=obj, flags=self.flags,
-                              return_type=self.return_type, arg_types=self.arg_types,
-                              doc=self.__doc__, accumulator=self.accumulator, accu_data=self.accu_data)
+            return type(self)(
+                name=name,
+                func=obj,
+                flags=self.flags,
+                return_type=self.return_type,
+                arg_types=self.arg_types,
+                doc=self.__doc__,
+                accumulator=self.accumulator,
+                accu_data=self.accu_data,
+            )
+        return None
 
     def copy(self, newName=None):
         """Returns a renamed copy of the Signal."""
-
-        return type(self)(name=newName, func=self.func, flags=self.flags,
-                          return_type=self.return_type, arg_types=self.arg_types,
-                          doc=self.__doc__, accumulator=self.accumulator, accu_data=self.accu_data)
+        return type(self)(
+            name=newName,
+            func=self.func,
+            flags=self.flags,
+            return_type=self.return_type,
+            arg_types=self.arg_types,
+            doc=self.__doc__,
+            accumulator=self.accumulator,
+            accu_data=self.accu_data,
+        )
 
     def get_signal_args(self):
-        """Returns a tuple of: (flags, return_type, arg_types, accumulator, accu_data)"""
-        return (self.flags, self.return_type, self.arg_types, self.accumulator, self.accu_data)
+        """Returns a tuple of: (flags, return_type, arg_types, accumulator, accu_data)."""
+        return (
+            self.flags,
+            self.return_type,
+            self.arg_types,
+            self.accumulator,
+            self.accu_data,
+        )
 
 
 class SignalOverride(Signal):
@@ -191,9 +219,10 @@ class SignalOverride(Signal):
             def configure_event(self):
                 pass
     """
+
     def get_signal_args(self):
         """Returns the string 'override'."""
-        return 'override'
+        return "override"
 
 
 def get_signal_annotations(func):
@@ -202,17 +231,19 @@ def get_signal_annotations(func):
     of (return_type, (arg_type1, arg_type2, ...)). If the given function
     does not have annotations then (None, tuple()) is returned.
     """
-    arg_types = tuple()
+    arg_types = ()
     return_type = None
 
-    if hasattr(func, '__annotations__'):
+    if hasattr(func, "__annotations__"):
         # import inspect only when needed because it takes ~10 msec to load
         import inspect
+
         spec = inspect.getfullargspec(func)
-        arg_types = tuple(spec.annotations[arg] for arg in spec.args
-                          if arg in spec.annotations)
-        if 'return' in spec.annotations:
-            return_type = spec.annotations['return']
+        arg_types = tuple(
+            spec.annotations[arg] for arg in spec.args if arg in spec.annotations
+        )
+        if "return" in spec.annotations:
+            return_type = spec.annotations["return"]
 
     return return_type, arg_types
 
@@ -221,7 +252,7 @@ def install_signals(cls):
     """Adds Signal instances on a GObject derived class into the '__gsignals__'
     dictionary to be picked up and registered as real GObject signals.
     """
-    gsignals = cls.__dict__.get('__gsignals__', {})
+    gsignals = cls.__dict__.get("__gsignals__", {})
     newsignals = {}
     for name, signal in cls.__dict__.items():
         if isinstance(signal, Signal):
@@ -234,7 +265,7 @@ def install_signals(cls):
                 signal = signal.copy(name)
                 setattr(cls, name, signal)
             if signalName in gsignals:
-                raise ValueError('Signal "%s" has already been registered.' % name)
+                raise ValueError(f'Signal "{name}" has already been registered.')
             newsignals[signalName] = signal
             gsignals[signalName] = signal.get_signal_args()
 
@@ -244,6 +275,6 @@ def install_signals(cls):
     # method to the class in the form of "do_<signal_name>".
     for name, signal in newsignals.items():
         if signal.func is not None:
-            funcName = 'do_' + name.replace('-', '_')
+            funcName = "do_" + name.replace("-", "_")
             if not hasattr(cls, funcName):
                 setattr(cls, funcName, signal.func)

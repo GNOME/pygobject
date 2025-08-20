@@ -284,7 +284,7 @@ pygi_fundamental_set_value (GValue *value, GTypeInstance *instance)
     GIBaseInfo *info;
     gboolean result = FALSE;
 
-    if (instance == NULL) 
+    if (instance == NULL)
         return result;
 
     repository = pygi_repository_get_default ();
