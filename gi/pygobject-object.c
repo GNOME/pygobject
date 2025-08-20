@@ -2005,7 +2005,7 @@ pygobject_chain_from_overridden(PyGObject *self, PyObject *args)
     for (i = 0; i < query.n_params; i++) {
 	PyObject *item = PyTuple_GetItem(args, i);
 
-	if (pyg_boxed_check(item, (query.param_types[i] & ~G_SIGNAL_TYPE_STATIC_SCOPE))) {
+	if (pyg_boxed_check(item, query.param_types[i] & ~G_SIGNAL_TYPE_STATIC_SCOPE)) {
 	    g_value_set_static_boxed(&params[i+1], pyg_boxed_get(item, void));
 	}
 	else if (pyg_value_from_pyobject(&params[i+1], item) < 0) {
