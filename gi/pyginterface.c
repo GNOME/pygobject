@@ -30,26 +30,25 @@
 GQuark pyginterface_type_key;
 GQuark pyginterface_info_key;
 
-PYGI_DEFINE_TYPE("gobject.GInterface", PyGInterface_Type, PyObject)
+PYGI_DEFINE_TYPE ("gobject.GInterface", PyGInterface_Type, PyObject)
 
 static int
-pyg_interface_init(PyObject *self, PyObject *args, PyObject *kwargs)
+pyg_interface_init (PyObject *self, PyObject *args, PyObject *kwargs)
 {
     gchar buf[512];
 
-    if (!PyArg_ParseTuple(args, ":GInterface.__init__"))
-	return -1;
+    if (!PyArg_ParseTuple (args, ":GInterface.__init__")) return -1;
 
-    g_snprintf(buf, sizeof(buf), "%s can not be constructed",
-	       Py_TYPE(self)->tp_name);
-    PyErr_SetString(PyExc_NotImplementedError, buf);
+    g_snprintf (buf, sizeof (buf), "%s can not be constructed",
+                Py_TYPE (self)->tp_name);
+    PyErr_SetString (PyExc_NotImplementedError, buf);
     return -1;
 }
 
 static void
-pyg_interface_free(PyObject *op)
+pyg_interface_free (PyObject *op)
 {
-    PyObject_Free(op);
+    PyObject_Free (op);
 }
 
 /**
@@ -64,34 +63,33 @@ pyg_interface_free(PyObject *op)
  * the provided module dictionary.
  */
 void
-pyg_register_interface(PyObject *dict, const gchar *class_name,
-                       GType gtype, PyTypeObject *type)
+pyg_register_interface (PyObject *dict, const gchar *class_name, GType gtype,
+                        PyTypeObject *type)
 {
     PyObject *o;
 
-    Py_SET_TYPE(type, &PyType_Type);
+    Py_SET_TYPE (type, &PyType_Type);
     g_assert (Py_TYPE (&PyGInterface_Type) != NULL);
     type->tp_base = &PyGInterface_Type;
 
-    if (PyType_Ready(type) < 0) {
-        g_warning("could not ready `%s'", type->tp_name);
+    if (PyType_Ready (type) < 0) {
+        g_warning ("could not ready `%s'", type->tp_name);
         return;
     }
 
     if (gtype) {
-        o = pyg_type_wrapper_new(gtype);
-        PyDict_SetItemString(type->tp_dict, "__gtype__", o);
-        Py_DECREF(o);
+        o = pyg_type_wrapper_new (gtype);
+        PyDict_SetItemString (type->tp_dict, "__gtype__", o);
+        Py_DECREF (o);
     }
 
-    g_type_set_qdata(gtype, pyginterface_type_key, type);
+    g_type_set_qdata (gtype, pyginterface_type_key, type);
 
-    PyDict_SetItemString(dict, (char *)class_name, (PyObject *)type);
-
+    PyDict_SetItemString (dict, (char *)class_name, (PyObject *)type);
 }
 
 void
-pyg_register_interface_info(GType gtype, const GInterfaceInfo *info)
+pyg_register_interface_info (GType gtype, const GInterfaceInfo *info)
 {
     GInterfaceInfo *prev_info = pyg_lookup_interface_info (gtype);
 
@@ -99,44 +97,44 @@ pyg_register_interface_info(GType gtype, const GInterfaceInfo *info)
         g_free (prev_info);
     }
 
-    g_type_set_qdata(gtype, pyginterface_info_key, g_memdup2 (info, sizeof(GInterfaceInfo)));
+    g_type_set_qdata (gtype, pyginterface_info_key,
+                      g_memdup2 (info, sizeof (GInterfaceInfo)));
 }
 
 const GInterfaceInfo *
-pyg_lookup_interface_info(GType gtype)
+pyg_lookup_interface_info (GType gtype)
 {
-    return g_type_get_qdata(gtype, pyginterface_info_key);
+    return g_type_get_qdata (gtype, pyginterface_info_key);
 }
 
 /**
  * Returns 0 on success, or -1 and sets an exception.
  */
 int
-pygi_interface_register_types(PyObject *d)
+pygi_interface_register_types (PyObject *d)
 {
     PyObject *pygtype;
 
-    pyginterface_type_key = g_quark_from_static_string("PyGInterface::type");
-    pyginterface_info_key = g_quark_from_static_string("PyGInterface::info");
+    pyginterface_type_key = g_quark_from_static_string ("PyGInterface::type");
+    pyginterface_info_key = g_quark_from_static_string ("PyGInterface::info");
 
     PyGInterface_Type.tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE;
     PyGInterface_Type.tp_init = (initproc)pyg_interface_init;
     PyGInterface_Type.tp_free = (freefunc)pyg_interface_free;
     PyGInterface_Type.tp_alloc = PyType_GenericAlloc;
     PyGInterface_Type.tp_new = PyType_GenericNew;
-    if (PyType_Ready(&PyGInterface_Type))
-        return -1;
+    if (PyType_Ready (&PyGInterface_Type)) return -1;
 
     pygtype = pyg_type_wrapper_new (G_TYPE_INTERFACE);
     PyDict_SetItemString (PyGInterface_Type.tp_dict, "__gtype__", pygtype);
     Py_DECREF (pygtype);
 
-    PyDict_SetItemString(PyGInterface_Type.tp_dict, "__doc__",
-                pyg_object_descr_doc_get());
-    PyDict_SetItemString(PyGInterface_Type.tp_dict, "__gdoc__",
-                pyg_object_descr_doc_get());
+    PyDict_SetItemString (PyGInterface_Type.tp_dict, "__doc__",
+                          pyg_object_descr_doc_get ());
+    PyDict_SetItemString (PyGInterface_Type.tp_dict, "__gdoc__",
+                          pyg_object_descr_doc_get ());
 
-    PyDict_SetItemString(d, "GInterface", (PyObject *)&PyGInterface_Type);
+    PyDict_SetItemString (d, "GInterface", (PyObject *)&PyGInterface_Type);
 
     return 0;
 }

@@ -32,15 +32,19 @@
 
 
 /* glib 2.62 has started to print warnings for these which can't be disabled selectively, so just copy them here */
-#define PYGI_TYPE_VALUE_ARRAY (g_value_array_get_type())
-#define PYGI_IS_PARAM_SPEC_VALUE_ARRAY(pspec) (G_TYPE_CHECK_INSTANCE_TYPE ((pspec), PYGI_TYPE_VALUE_ARRAY))
-#define PYGI_PARAM_SPEC_VALUE_ARRAY(pspec)    (G_TYPE_CHECK_INSTANCE_CAST ((pspec), g_param_spec_types[18], GParamSpecValueArray))
+#define PYGI_TYPE_VALUE_ARRAY (g_value_array_get_type ())
+#define PYGI_IS_PARAM_SPEC_VALUE_ARRAY(pspec)                                 \
+    (G_TYPE_CHECK_INSTANCE_TYPE ((pspec), PYGI_TYPE_VALUE_ARRAY))
+#define PYGI_PARAM_SPEC_VALUE_ARRAY(pspec)                                    \
+    (G_TYPE_CHECK_INSTANCE_CAST ((pspec), g_param_spec_types[18],             \
+                                 GParamSpecValueArray))
 
 GIArgument
-_pygi_argument_from_g_value(const GValue *value,
-                            GITypeInfo *type_info)
+_pygi_argument_from_g_value (const GValue *value, GITypeInfo *type_info)
 {
-    GIArgument arg = { 0, };
+    GIArgument arg = {
+        0,
+    };
 
     GITypeTag type_tag = gi_type_info_get_tag (type_info);
 
@@ -49,117 +53,118 @@ _pygi_argument_from_g_value(const GValue *value,
        gi doesn't tell us (and same for ulong)
     */
     switch (type_tag) {
-        case GI_TYPE_TAG_BOOLEAN:
-            arg.v_boolean = g_value_get_boolean (value);
-            break;
-        case GI_TYPE_TAG_INT8:
-            arg.v_int8 = g_value_get_schar (value);
-            break;
-        case GI_TYPE_TAG_INT16:
-        case GI_TYPE_TAG_INT32:
-	    if (g_type_is_a (G_VALUE_TYPE (value), G_TYPE_LONG))
-		arg.v_int32 = (gint32)g_value_get_long (value);
-	    else
-		arg.v_int32 = (gint32)g_value_get_int (value);
-            break;
-        case GI_TYPE_TAG_INT64:
-	    if (g_type_is_a (G_VALUE_TYPE (value), G_TYPE_LONG))
-		arg.v_int64 = g_value_get_long (value);
-	    else
-		arg.v_int64 = g_value_get_int64 (value);
-            break;
-        case GI_TYPE_TAG_UINT8:
-            arg.v_uint8 = g_value_get_uchar (value);
-            break;
-        case GI_TYPE_TAG_UINT16:
-        case GI_TYPE_TAG_UINT32:
-	    if (g_type_is_a (G_VALUE_TYPE (value), G_TYPE_ULONG))
-		arg.v_uint32 = (guint32)g_value_get_ulong (value);
-	    else
-		arg.v_uint32 = (guint32)g_value_get_uint (value);
-            break;
-        case GI_TYPE_TAG_UINT64:
-	    if (g_type_is_a (G_VALUE_TYPE (value), G_TYPE_ULONG))
-		arg.v_uint64 = g_value_get_ulong (value);
-	    else
-		arg.v_uint64 = g_value_get_uint64 (value);
-            break;
-        case GI_TYPE_TAG_UNICHAR:
-            arg.v_uint32 = g_value_get_schar (value);
-            break;
-        case GI_TYPE_TAG_FLOAT:
-            arg.v_float = g_value_get_float (value);
-            break;
-        case GI_TYPE_TAG_DOUBLE:
-            arg.v_double = g_value_get_double (value);
-            break;
-        case GI_TYPE_TAG_GTYPE:
-            arg.v_size = g_value_get_gtype (value);
-            break;
-        case GI_TYPE_TAG_UTF8:
-        case GI_TYPE_TAG_FILENAME:
-            /* Callers are responsible for ensuring the GValue stays alive
+    case GI_TYPE_TAG_BOOLEAN:
+        arg.v_boolean = g_value_get_boolean (value);
+        break;
+    case GI_TYPE_TAG_INT8:
+        arg.v_int8 = g_value_get_schar (value);
+        break;
+    case GI_TYPE_TAG_INT16:
+    case GI_TYPE_TAG_INT32:
+        if (g_type_is_a (G_VALUE_TYPE (value), G_TYPE_LONG))
+            arg.v_int32 = (gint32)g_value_get_long (value);
+        else
+            arg.v_int32 = (gint32)g_value_get_int (value);
+        break;
+    case GI_TYPE_TAG_INT64:
+        if (g_type_is_a (G_VALUE_TYPE (value), G_TYPE_LONG))
+            arg.v_int64 = g_value_get_long (value);
+        else
+            arg.v_int64 = g_value_get_int64 (value);
+        break;
+    case GI_TYPE_TAG_UINT8:
+        arg.v_uint8 = g_value_get_uchar (value);
+        break;
+    case GI_TYPE_TAG_UINT16:
+    case GI_TYPE_TAG_UINT32:
+        if (g_type_is_a (G_VALUE_TYPE (value), G_TYPE_ULONG))
+            arg.v_uint32 = (guint32)g_value_get_ulong (value);
+        else
+            arg.v_uint32 = (guint32)g_value_get_uint (value);
+        break;
+    case GI_TYPE_TAG_UINT64:
+        if (g_type_is_a (G_VALUE_TYPE (value), G_TYPE_ULONG))
+            arg.v_uint64 = g_value_get_ulong (value);
+        else
+            arg.v_uint64 = g_value_get_uint64 (value);
+        break;
+    case GI_TYPE_TAG_UNICHAR:
+        arg.v_uint32 = g_value_get_schar (value);
+        break;
+    case GI_TYPE_TAG_FLOAT:
+        arg.v_float = g_value_get_float (value);
+        break;
+    case GI_TYPE_TAG_DOUBLE:
+        arg.v_double = g_value_get_double (value);
+        break;
+    case GI_TYPE_TAG_GTYPE:
+        arg.v_size = g_value_get_gtype (value);
+        break;
+    case GI_TYPE_TAG_UTF8:
+    case GI_TYPE_TAG_FILENAME:
+        /* Callers are responsible for ensuring the GValue stays alive
              * long enough for the string to be copied. */
-            arg.v_string = (char *)g_value_get_string (value);
-            break;
-        case GI_TYPE_TAG_GLIST:
-        case GI_TYPE_TAG_GSLIST:
-        case GI_TYPE_TAG_ARRAY:
-        case GI_TYPE_TAG_GHASH:
-            if (G_VALUE_HOLDS_BOXED (value))
-                arg.v_pointer = g_value_get_boxed (value);
-            else
-                /* e. g. GSettings::change-event */
-                arg.v_pointer = g_value_get_pointer (value);
-            break;
-        case GI_TYPE_TAG_INTERFACE:
-        {
-            GIBaseInfo *info;
-
-            info = gi_type_info_get_interface (type_info);
-
-            if (GI_IS_FLAGS_INFO (info)) {
-                /* Check flags before enums: flags are a subtype of enum. */
-                arg.v_uint = g_value_get_flags (value);
-            } else if (GI_IS_ENUM_INFO (info)) {
-                arg.v_int = g_value_get_enum (value);
-            } else if (GI_IS_INTERFACE_INFO (info) || GI_IS_OBJECT_INFO (info)) {
-                if (G_VALUE_HOLDS_PARAM (value))
-                  arg.v_pointer = g_value_get_param (value);
-                else if (G_VALUE_HOLDS_OBJECT (value))
-                  arg.v_pointer = g_value_get_object (value);
-                else
-                  arg.v_pointer = pygi_fundamental_from_value (value);
-            } else if (GI_IS_STRUCT_INFO (info) || GI_IS_UNION_INFO (info)) {
-                if (G_VALUE_HOLDS (value, G_TYPE_BOXED)) {
-                    arg.v_pointer = g_value_get_boxed (value);
-                } else if (G_VALUE_HOLDS (value, G_TYPE_VARIANT)) {
-                    arg.v_pointer = g_value_get_variant (value);
-                } else if (G_VALUE_HOLDS (value, G_TYPE_POINTER)) {
-                    arg.v_pointer = g_value_get_pointer (value);
-                } else {
-                    PyErr_Format (PyExc_NotImplementedError,
-                                  "Converting GValue's of type '%s' is not implemented.",
-                                  g_type_name (G_VALUE_TYPE (value)));
-                }
-            } else {
-                PyErr_Format (PyExc_NotImplementedError,
-                              "Converting GValue's of type '%s' is not implemented.",
-                              g_type_name (G_TYPE_FROM_INSTANCE (info)));
-            }
-
-            gi_base_info_unref (info);
-
-            break;
-        }
-        case GI_TYPE_TAG_ERROR:
+        arg.v_string = (char *)g_value_get_string (value);
+        break;
+    case GI_TYPE_TAG_GLIST:
+    case GI_TYPE_TAG_GSLIST:
+    case GI_TYPE_TAG_ARRAY:
+    case GI_TYPE_TAG_GHASH:
+        if (G_VALUE_HOLDS_BOXED (value))
             arg.v_pointer = g_value_get_boxed (value);
-            break;
-        case GI_TYPE_TAG_VOID:
+        else
+            /* e. g. GSettings::change-event */
             arg.v_pointer = g_value_get_pointer (value);
-            break;
-        default:
-            break;
+        break;
+    case GI_TYPE_TAG_INTERFACE: {
+        GIBaseInfo *info;
+
+        info = gi_type_info_get_interface (type_info);
+
+        if (GI_IS_FLAGS_INFO (info)) {
+            /* Check flags before enums: flags are a subtype of enum. */
+            arg.v_uint = g_value_get_flags (value);
+        } else if (GI_IS_ENUM_INFO (info)) {
+            arg.v_int = g_value_get_enum (value);
+        } else if (GI_IS_INTERFACE_INFO (info) || GI_IS_OBJECT_INFO (info)) {
+            if (G_VALUE_HOLDS_PARAM (value))
+                arg.v_pointer = g_value_get_param (value);
+            else if (G_VALUE_HOLDS_OBJECT (value))
+                arg.v_pointer = g_value_get_object (value);
+            else
+                arg.v_pointer = pygi_fundamental_from_value (value);
+        } else if (GI_IS_STRUCT_INFO (info) || GI_IS_UNION_INFO (info)) {
+            if (G_VALUE_HOLDS (value, G_TYPE_BOXED)) {
+                arg.v_pointer = g_value_get_boxed (value);
+            } else if (G_VALUE_HOLDS (value, G_TYPE_VARIANT)) {
+                arg.v_pointer = g_value_get_variant (value);
+            } else if (G_VALUE_HOLDS (value, G_TYPE_POINTER)) {
+                arg.v_pointer = g_value_get_pointer (value);
+            } else {
+                PyErr_Format (
+                    PyExc_NotImplementedError,
+                    "Converting GValue's of type '%s' is not implemented.",
+                    g_type_name (G_VALUE_TYPE (value)));
+            }
+        } else {
+            PyErr_Format (
+                PyExc_NotImplementedError,
+                "Converting GValue's of type '%s' is not implemented.",
+                g_type_name (G_TYPE_FROM_INSTANCE (info)));
+        }
+
+        gi_base_info_unref (info);
+
+        break;
+    }
+    case GI_TYPE_TAG_ERROR:
+        arg.v_pointer = g_value_get_boxed (value);
+        break;
+    case GI_TYPE_TAG_VOID:
+        arg.v_pointer = g_value_get_pointer (value);
+        break;
+    default:
+        break;
     }
 
     return arg;
@@ -172,17 +177,16 @@ _pygi_argument_from_g_value(const GValue *value,
 G_GNUC_BEGIN_IGNORE_DEPRECATIONS
 
 static int
-pyg_value_array_from_pyobject(GValue *value,
-                              PyObject *obj,
-                              const GParamSpecValueArray *pspec)
+pyg_value_array_from_pyobject (GValue *value, PyObject *obj,
+                               const GParamSpecValueArray *pspec)
 {
     Py_ssize_t seq_len;
     GValueArray *value_array;
     guint len, i;
 
-    seq_len = PySequence_Length(obj);
+    seq_len = PySequence_Length (obj);
     if (seq_len == -1) {
-        PyErr_Clear();
+        PyErr_Clear ();
         return -1;
     }
     len = (guint)seq_len;
@@ -190,114 +194,118 @@ pyg_value_array_from_pyobject(GValue *value,
     if (pspec && pspec->fixed_n_elements > 0 && len != pspec->fixed_n_elements)
         return -1;
 
-    value_array = g_value_array_new(len);
+    value_array = g_value_array_new (len);
 
     for (i = 0; i < len; ++i) {
-        PyObject *item = PySequence_GetItem(obj, i);
+        PyObject *item = PySequence_GetItem (obj, i);
         GType type;
 
-        if (! item) {
-            PyErr_Clear();
-            g_value_array_free(value_array);
+        if (!item) {
+            PyErr_Clear ();
+            g_value_array_free (value_array);
             return -1;
         }
 
         if (pspec && pspec->element_spec)
-            type = G_PARAM_SPEC_VALUE_TYPE(pspec->element_spec);
-        else if (Py_IsNone(item))
+            type = G_PARAM_SPEC_VALUE_TYPE (pspec->element_spec);
+        else if (Py_IsNone (item))
             type = G_TYPE_POINTER; /* store None as NULL */
         else {
-            type = pyg_type_from_object((PyObject*)Py_TYPE(item));
-            if (! type) {
-                PyErr_Clear();
-                g_value_array_free(value_array);
-                Py_DECREF(item);
+            type = pyg_type_from_object ((PyObject *)Py_TYPE (item));
+            if (!type) {
+                PyErr_Clear ();
+                g_value_array_free (value_array);
+                Py_DECREF (item);
                 return -1;
             }
         }
 
         if (type == G_TYPE_VALUE) {
-            const GValue * item_value = pyg_boxed_get(item, GValue);
-            g_value_array_append(value_array, item_value);
+            const GValue *item_value = pyg_boxed_get (item, GValue);
+            g_value_array_append (value_array, item_value);
         } else {
-            GValue item_value = { 0, };
+            GValue item_value = {
+                0,
+            };
             int status;
 
-            g_value_init(&item_value, type);
+            g_value_init (&item_value, type);
             status = (pspec && pspec->element_spec)
-                ? pyg_param_gvalue_from_pyobject(&item_value, item, pspec->element_spec)
-                : pyg_value_from_pyobject(&item_value, item);
-            Py_DECREF(item);
+                         ? pyg_param_gvalue_from_pyobject (&item_value, item,
+                                                           pspec->element_spec)
+                         : pyg_value_from_pyobject (&item_value, item);
+            Py_DECREF (item);
 
             if (status == -1) {
-                g_value_array_free(value_array);
-                g_value_unset(&item_value);
+                g_value_array_free (value_array);
+                g_value_unset (&item_value);
                 return -1;
             }
-            g_value_array_append(value_array, &item_value);
-            g_value_unset(&item_value);
+            g_value_array_append (value_array, &item_value);
+            g_value_unset (&item_value);
         }
     }
 
-    g_value_take_boxed(value, value_array);
+    g_value_take_boxed (value, value_array);
     return 0;
 }
 
 G_GNUC_END_IGNORE_DEPRECATIONS
 
 static int
-pyg_array_from_pyobject(GValue *value,
-                        PyObject *obj)
+pyg_array_from_pyobject (GValue *value, PyObject *obj)
 {
     Py_ssize_t len, i;
     GArray *array;
 
-    len = PySequence_Length(obj);
+    len = PySequence_Length (obj);
     if (len == -1) {
-        PyErr_Clear();
+        PyErr_Clear ();
         return -1;
     }
 
-    array = g_array_new(FALSE, TRUE, sizeof(GValue));
+    array = g_array_new (FALSE, TRUE, sizeof (GValue));
 
     for (i = 0; i < len; ++i) {
-        PyObject *item = PySequence_GetItem(obj, i);
+        PyObject *item = PySequence_GetItem (obj, i);
         GType type;
-        GValue item_value = { 0, };
+        GValue item_value = {
+            0,
+        };
         int status;
 
-        if (! item) {
-            PyErr_Clear();
-            g_array_free(array, FALSE);
+        if (!item) {
+            PyErr_Clear ();
+            g_array_free (array, FALSE);
             return -1;
         }
 
-        if (Py_IsNone(item))
+        if (Py_IsNone (item))
             type = G_TYPE_POINTER; /* store None as NULL */
         else {
-            type = pyg_type_from_object((PyObject*)Py_TYPE(item));
-            if (! type) {
-                PyErr_Clear();
-                g_array_free(array, FALSE);
-                Py_DECREF(item);
+            type = pyg_type_from_object ((PyObject *)Py_TYPE (item));
+            if (!type) {
+                PyErr_Clear ();
+                g_array_free (array, FALSE);
+                Py_DECREF (item);
                 return -1;
             }
         }
 
-        g_value_init(&item_value, type);
-        status = pyg_value_from_pyobject(&item_value, item);
-        Py_DECREF(item);
+        g_value_init (&item_value, type);
+        status = pyg_value_from_pyobject (&item_value, item);
+        Py_DECREF (item);
 
         if (status == -1) {
-            g_array_free(array, FALSE);
-            g_value_unset(&item_value);
+            g_array_free (array, FALSE);
+            g_value_unset (&item_value);
             return -1;
         }
 
-        g_array_append_val(array, item_value);
+        g_array_append_val (array, item_value);
     }
 
-    g_value_take_boxed(value, array);
+    g_value_take_boxed (value, array);
     return 0;
 }
 
@@ -314,35 +322,35 @@ pyg_array_from_pyobject(GValue *value,
  * Returns: 0 on success, -1 on error.
  */
 int
-pyg_value_from_pyobject_with_error(GValue *value, PyObject *obj)
+pyg_value_from_pyobject_with_error (GValue *value, PyObject *obj)
 {
-    GType value_type = G_VALUE_TYPE(value);
+    GType value_type = G_VALUE_TYPE (value);
 
-    switch (G_TYPE_FUNDAMENTAL(value_type)) {
+    switch (G_TYPE_FUNDAMENTAL (value_type)) {
     case G_TYPE_INTERFACE:
         /* we only handle interface types that have a GObject prereq */
-        if (g_type_is_a(value_type, G_TYPE_OBJECT)) {
-            if (Py_IsNone(obj))
-                g_value_set_object(value, NULL);
+        if (g_type_is_a (value_type, G_TYPE_OBJECT)) {
+            if (Py_IsNone (obj))
+                g_value_set_object (value, NULL);
             else {
-                if (!PyObject_TypeCheck(obj, &PyGObject_Type)) {
-                    PyErr_SetString(PyExc_TypeError, "GObject is required");
+                if (!PyObject_TypeCheck (obj, &PyGObject_Type)) {
+                    PyErr_SetString (PyExc_TypeError, "GObject is required");
                     return -1;
                 }
-                if (!G_TYPE_CHECK_INSTANCE_TYPE(pygobject_get(obj),
-                        value_type)) {
-                    PyErr_SetString(PyExc_TypeError, "Invalid GObject type for assignment");
+                if (!G_TYPE_CHECK_INSTANCE_TYPE (pygobject_get (obj),
+                                                 value_type)) {
+                    PyErr_SetString (PyExc_TypeError,
+                                     "Invalid GObject type for assignment");
                     return -1;
                 }
-                g_value_set_object(value, pygobject_get(obj));
+                g_value_set_object (value, pygobject_get (obj));
             }
         } else {
-            PyErr_SetString(PyExc_TypeError, "Unsupported conversion");
+            PyErr_SetString (PyExc_TypeError, "Unsupported conversion");
             return -1;
         }
         break;
-    case G_TYPE_CHAR:
-    {
+    case G_TYPE_CHAR: {
         gint8 temp;
         if (pygi_gschar_from_py (obj, &temp)) {
             g_value_set_schar (value, temp);
@@ -350,8 +358,7 @@ pyg_value_from_pyobject_with_error(GValue *value, PyObject *obj)
         } else
             return -1;
     }
-    case G_TYPE_UCHAR:
-    {
+    case G_TYPE_UCHAR: {
         guchar temp;
         if (pygi_guchar_from_py (obj, &temp)) {
             g_value_set_uchar (value, temp);
@@ -359,8 +366,7 @@ pyg_value_from_pyobject_with_error(GValue *value, PyObject *obj)
         } else
             return -1;
     }
-    case G_TYPE_BOOLEAN:
-    {
+    case G_TYPE_BOOLEAN: {
         gboolean temp;
         if (pygi_gboolean_from_py (obj, &temp)) {
             g_value_set_boolean (value, temp);
@@ -368,8 +374,7 @@ pyg_value_from_pyobject_with_error(GValue *value, PyObject *obj)
         } else
             return -1;
     }
-    case G_TYPE_INT:
-    {
+    case G_TYPE_INT: {
         gint temp;
         if (pygi_gint_from_py (obj, &temp)) {
             g_value_set_int (value, temp);
@@ -377,8 +382,7 @@ pyg_value_from_pyobject_with_error(GValue *value, PyObject *obj)
         } else
             return -1;
     }
-    case G_TYPE_UINT:
-    {
+    case G_TYPE_UINT: {
         guint temp;
         if (pygi_guint_from_py (obj, &temp)) {
             g_value_set_uint (value, temp);
@@ -386,8 +390,7 @@ pyg_value_from_pyobject_with_error(GValue *value, PyObject *obj)
         } else
             return -1;
     }
-    case G_TYPE_LONG:
-    {
+    case G_TYPE_LONG: {
         glong temp;
         if (pygi_glong_from_py (obj, &temp)) {
             g_value_set_long (value, temp);
@@ -395,8 +398,7 @@ pyg_value_from_pyobject_with_error(GValue *value, PyObject *obj)
         } else
             return -1;
     }
-    case G_TYPE_ULONG:
-    {
+    case G_TYPE_ULONG: {
         gulong temp;
         if (pygi_gulong_from_py (obj, &temp)) {
             g_value_set_ulong (value, temp);
@@ -404,8 +406,7 @@ pyg_value_from_pyobject_with_error(GValue *value, PyObject *obj)
         } else
             return -1;
     }
-    case G_TYPE_INT64:
-    {
+    case G_TYPE_INT64: {
         gint64 temp;
         if (pygi_gint64_from_py (obj, &temp)) {
             g_value_set_int64 (value, temp);
@@ -413,8 +414,7 @@ pyg_value_from_pyobject_with_error(GValue *value, PyObject *obj)
         } else
             return -1;
     }
-    case G_TYPE_UINT64:
-    {
+    case G_TYPE_UINT64: {
         guint64 temp;
         if (pygi_guint64_from_py (obj, &temp)) {
             g_value_set_uint64 (value, temp);
@@ -422,26 +422,23 @@ pyg_value_from_pyobject_with_error(GValue *value, PyObject *obj)
         } else
             return -1;
     }
-    case G_TYPE_ENUM:
-    {
+    case G_TYPE_ENUM: {
         gint val = 0;
-        if (pyg_enum_get_value(G_VALUE_TYPE(value), obj, &val) < 0) {
+        if (pyg_enum_get_value (G_VALUE_TYPE (value), obj, &val) < 0) {
             return -1;
         }
-        g_value_set_enum(value, val);
+        g_value_set_enum (value, val);
         break;
     }
-    case G_TYPE_FLAGS:
-    {
+    case G_TYPE_FLAGS: {
         guint val = 0;
-        if (pyg_flags_get_value(G_VALUE_TYPE(value), obj, &val) < 0) {
+        if (pyg_flags_get_value (G_VALUE_TYPE (value), obj, &val) < 0) {
             return -1;
         }
-        g_value_set_flags(value, val);
+        g_value_set_flags (value, val);
         return 0;
     }
-    case G_TYPE_FLOAT:
-    {
+    case G_TYPE_FLOAT: {
         gfloat temp;
         if (pygi_gfloat_from_py (obj, &temp)) {
             g_value_set_float (value, temp);
@@ -449,8 +446,7 @@ pyg_value_from_pyobject_with_error(GValue *value, PyObject *obj)
         } else
             return -1;
     }
-    case G_TYPE_DOUBLE:
-    {
+    case G_TYPE_DOUBLE: {
         gdouble temp;
         if (pygi_gdouble_from_py (obj, &temp)) {
             g_value_set_double (value, temp);
@@ -458,19 +454,17 @@ pyg_value_from_pyobject_with_error(GValue *value, PyObject *obj)
         } else
             return -1;
     }
-    case G_TYPE_STRING:
-    {
+    case G_TYPE_STRING: {
         gchar *temp;
         if (pygi_utf8_from_py (obj, &temp)) {
             g_value_take_string (value, temp);
             return 0;
         } else {
             /* also allows setting anything implementing __str__ */
-            PyObject* str;
+            PyObject *str;
             PyErr_Clear ();
             str = PyObject_Str (obj);
-            if (str == NULL)
-                return -1;
+            if (str == NULL) return -1;
             if (pygi_utf8_from_py (str, &temp)) {
                 Py_DECREF (str);
                 g_value_take_string (value, temp);
@@ -481,17 +475,17 @@ pyg_value_from_pyobject_with_error(GValue *value, PyObject *obj)
         }
     }
     case G_TYPE_POINTER:
-        if (Py_IsNone(obj))
-            g_value_set_pointer(value, NULL);
-        else if (PyObject_TypeCheck(obj, &PyGPointer_Type) &&
-                G_VALUE_HOLDS(value, ((PyGPointer *)obj)->gtype))
-            g_value_set_pointer(value, pyg_pointer_get(obj, gpointer));
+        if (Py_IsNone (obj))
+            g_value_set_pointer (value, NULL);
+        else if (PyObject_TypeCheck (obj, &PyGPointer_Type)
+                 && G_VALUE_HOLDS (value, ((PyGPointer *)obj)->gtype))
+            g_value_set_pointer (value, pyg_pointer_get (obj, gpointer));
         else if (PyCapsule_CheckExact (obj))
-            g_value_set_pointer(value, PyCapsule_GetPointer (obj, NULL));
+            g_value_set_pointer (value, PyCapsule_GetPointer (obj, NULL));
         else if (G_VALUE_HOLDS_GTYPE (value))
             g_value_set_gtype (value, pyg_type_from_object (obj));
         else {
-            PyErr_SetString(PyExc_TypeError, "Expected pointer");
+            PyErr_SetString (PyExc_TypeError, "Expected pointer");
             return -1;
         }
         break;
@@ -500,98 +494,95 @@ pyg_value_from_pyobject_with_error(GValue *value, PyObject *obj)
         gboolean holds_value_array;
 
         G_GNUC_BEGIN_IGNORE_DEPRECATIONS
-        holds_value_array = G_VALUE_HOLDS(value, PYGI_TYPE_VALUE_ARRAY);
+        holds_value_array = G_VALUE_HOLDS (value, PYGI_TYPE_VALUE_ARRAY);
         G_GNUC_END_IGNORE_DEPRECATIONS
 
-        if (Py_IsNone(obj))
-            g_value_set_boxed(value, NULL);
-        else if (G_VALUE_HOLDS(value, PY_TYPE_OBJECT))
-            g_value_set_boxed(value, obj);
-        else if (PyObject_TypeCheck(obj, &PyGBoxed_Type) &&
-                G_VALUE_HOLDS(value, ((PyGBoxed *)obj)->gtype))
-            g_value_set_boxed(value, pyg_boxed_get(obj, gpointer));
-        else if (G_VALUE_HOLDS(value, G_TYPE_VALUE)) {
+        if (Py_IsNone (obj))
+            g_value_set_boxed (value, NULL);
+        else if (G_VALUE_HOLDS (value, PY_TYPE_OBJECT))
+            g_value_set_boxed (value, obj);
+        else if (PyObject_TypeCheck (obj, &PyGBoxed_Type)
+                 && G_VALUE_HOLDS (value, ((PyGBoxed *)obj)->gtype))
+            g_value_set_boxed (value, pyg_boxed_get (obj, gpointer));
+        else if (G_VALUE_HOLDS (value, G_TYPE_VALUE)) {
             GType type;
             GValue *n_value;
 
-            type = pyg_type_from_object((PyObject*)Py_TYPE(obj));
-            if (G_UNLIKELY (! type)) {
+            type = pyg_type_from_object ((PyObject *)Py_TYPE (obj));
+            if (G_UNLIKELY (!type)) {
                 return -1;
             }
             n_value = g_new0 (GValue, 1);
             g_value_init (n_value, type);
             g_value_take_boxed (value, n_value);
             return pyg_value_from_pyobject_with_error (n_value, obj);
-        }
-        else if (PySequence_Check(obj) && holds_value_array)
-            return pyg_value_array_from_pyobject(value, obj, NULL);
+        } else if (PySequence_Check (obj) && holds_value_array)
+            return pyg_value_array_from_pyobject (value, obj, NULL);
 
-        else if (PySequence_Check(obj) &&
-                G_VALUE_HOLDS(value, G_TYPE_ARRAY))
-            return pyg_array_from_pyobject(value, obj);
-        else if (PyUnicode_Check (obj) &&
-                G_VALUE_HOLDS(value, G_TYPE_GSTRING)) {
+        else if (PySequence_Check (obj) && G_VALUE_HOLDS (value, G_TYPE_ARRAY))
+            return pyg_array_from_pyobject (value, obj);
+        else if (PyUnicode_Check (obj)
+                 && G_VALUE_HOLDS (value, G_TYPE_GSTRING)) {
             GString *string;
             char *buffer;
             Py_ssize_t len;
             buffer = PyUnicode_AsUTF8AndSize (obj, &len);
-            if (buffer == NULL)
-                return -1;
-            string = g_string_new_len(buffer, len);
-            g_value_set_boxed(value, string);
+            if (buffer == NULL) return -1;
+            string = g_string_new_len (buffer, len);
+            g_value_set_boxed (value, string);
             g_string_free (string, TRUE);
             break;
-        }
-        else if ((bm = pyg_type_lookup(G_VALUE_TYPE(value))) != NULL)
-            return bm->tovalue(value, obj);
+        } else if ((bm = pyg_type_lookup (G_VALUE_TYPE (value))) != NULL)
+            return bm->tovalue (value, obj);
         else if (PyCapsule_CheckExact (obj))
-            g_value_set_boxed(value, PyCapsule_GetPointer (obj, NULL));
+            g_value_set_boxed (value, PyCapsule_GetPointer (obj, NULL));
         else {
-            PyErr_SetString(PyExc_TypeError, "Expected Boxed");
+            PyErr_SetString (PyExc_TypeError, "Expected Boxed");
             return -1;
         }
         break;
     }
     case G_TYPE_OBJECT:
-        if (Py_IsNone(obj)) {
-            g_value_set_object(value, NULL);
-        } else if (PyObject_TypeCheck(obj, &PyGObject_Type) &&
-                G_TYPE_CHECK_INSTANCE_TYPE(pygobject_get(obj),
-                        G_VALUE_TYPE(value))) {
-            g_value_set_object(value, pygobject_get(obj));
+        if (Py_IsNone (obj)) {
+            g_value_set_object (value, NULL);
+        } else if (PyObject_TypeCheck (obj, &PyGObject_Type)
+                   && G_TYPE_CHECK_INSTANCE_TYPE (pygobject_get (obj),
+                                                  G_VALUE_TYPE (value))) {
+            g_value_set_object (value, pygobject_get (obj));
         } else {
-            PyErr_SetString(PyExc_TypeError, "Expected GObject");
+            PyErr_SetString (PyExc_TypeError, "Expected GObject");
             return -1;
         }
         break;
-    case G_TYPE_VARIANT:
-    {
-        if (Py_IsNone(obj))
-            g_value_set_variant(value, NULL);
-        else if (pyg_type_from_object_strict(obj, FALSE) == G_TYPE_VARIANT)
-            g_value_set_variant(value, pyg_boxed_get(obj, GVariant));
+    case G_TYPE_VARIANT: {
+        if (Py_IsNone (obj))
+            g_value_set_variant (value, NULL);
+        else if (pyg_type_from_object_strict (obj, FALSE) == G_TYPE_VARIANT)
+            g_value_set_variant (value, pyg_boxed_get (obj, GVariant));
         else {
-            PyErr_SetString(PyExc_TypeError, "Expected Variant");
+            PyErr_SetString (PyExc_TypeError, "Expected Variant");
             return -1;
         }
         break;
     }
-    default:
-    {
+    default: {
         PyGTypeMarshal *bm;
-        if ((bm = pyg_type_lookup(G_VALUE_TYPE(value))) != NULL) {
-            return bm->tovalue(value, obj);
+        if ((bm = pyg_type_lookup (G_VALUE_TYPE (value))) != NULL) {
+            return bm->tovalue (value, obj);
         } else {
             GIRepository *repository;
             GIBaseInfo *info;
             GIObjectInfoSetValueFunction set_value_func = NULL;
 
             if (!PyObject_TypeCheck (obj, &PyGIFundamental_Type)) {
-                PyErr_SetString (PyExc_TypeError, "Fundamental type is required");
+                PyErr_SetString (PyExc_TypeError,
+                                 "Fundamental type is required");
                 return -1;
             }
-            if (!G_TYPE_CHECK_INSTANCE_TYPE (pygi_fundamental_get (obj), value_type)) {
-                PyErr_SetString (PyExc_TypeError, "Invalid fundamental type for assignment");
+            if (!G_TYPE_CHECK_INSTANCE_TYPE (pygi_fundamental_get (obj),
+                                             value_type)) {
+                PyErr_SetString (PyExc_TypeError,
+                                 "Invalid fundamental type for assignment");
                 return -1;
             }
 
@@ -599,26 +590,29 @@ pyg_value_from_pyobject_with_error(GValue *value, PyObject *obj)
             info = gi_repository_find_by_gtype (repository, value_type);
 
             if (info && GI_IS_OBJECT_INFO (info)) {
-                set_value_func = gi_object_info_get_set_value_function_pointer ((GIObjectInfo *) info);
+                set_value_func =
+                    gi_object_info_get_set_value_function_pointer (
+                        (GIObjectInfo *)info);
                 if (set_value_func) {
                     set_value_func (value, pygi_fundamental_get (obj));
                 } else {
-                    PyErr_SetString (PyExc_TypeError, "No set-value function for fundamental type");
+                    PyErr_SetString (
+                        PyExc_TypeError,
+                        "No set-value function for fundamental type");
                 }
             } else {
                 PyErr_SetString (PyExc_TypeError, "Unknown value type");
             }
 
-            if (info)
-                gi_base_info_unref (info);
+            if (info) gi_base_info_unref (info);
         }
         break;
     }
     }
 
     /* If an error occurred, unset the GValue but don't clear the Python error. */
-    if (PyErr_Occurred()) {
-        g_value_unset(value);
+    if (PyErr_Occurred ()) {
+        g_value_unset (value);
         return -1;
     }
 
@@ -636,12 +630,12 @@ pyg_value_from_pyobject_with_error(GValue *value, PyObject *obj)
  * Returns: 0 on success, -1 on error.
  */
 int
-pyg_value_from_pyobject(GValue *value, PyObject *obj)
+pyg_value_from_pyobject (GValue *value, PyObject *obj)
 {
     int res = pyg_value_from_pyobject_with_error (value, obj);
 
-    if (PyErr_Occurred()) {
-        PyErr_Clear();
+    if (PyErr_Occurred ()) {
+        PyErr_Clear ();
         return -1;
     }
     return res;
@@ -659,43 +653,44 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
  * Returns: a PyObject representing the value.
  */
 PyObject *
-pygi_value_to_py_basic_type (const GValue *value, GType fundamental, gboolean *handled)
+pygi_value_to_py_basic_type (const GValue *value, GType fundamental,
+                             gboolean *handled)
 {
     *handled = TRUE;
     switch (fundamental) {
-        case G_TYPE_CHAR:
-            return PyLong_FromLong (g_value_get_schar (value));
-        case G_TYPE_UCHAR:
-            return PyLong_FromLong (g_value_get_uchar (value));
-        case G_TYPE_BOOLEAN:
-            return pygi_gboolean_to_py (g_value_get_boolean (value));
-        case G_TYPE_INT:
-            return pygi_gint_to_py (g_value_get_int (value));
-        case G_TYPE_UINT:
-            return pygi_guint_to_py (g_value_get_uint (value));
-        case G_TYPE_LONG:
-            return pygi_glong_to_py (g_value_get_long(value));
-        case G_TYPE_ULONG:
-            return pygi_gulong_to_py (g_value_get_ulong (value));
-        case G_TYPE_INT64:
-            return pygi_gint64_to_py (g_value_get_int64 (value));
-        case G_TYPE_UINT64:
-            return pygi_guint64_to_py (g_value_get_uint64 (value));
-        case G_TYPE_ENUM:
-            return pyg_enum_from_gtype (G_VALUE_TYPE (value),
-                                        g_value_get_enum (value));
-        case G_TYPE_FLAGS:
-            return pyg_flags_from_gtype (G_VALUE_TYPE (value),
-                                         g_value_get_flags (value));
-        case G_TYPE_FLOAT:
-            return pygi_gfloat_to_py (g_value_get_float (value));
-        case G_TYPE_DOUBLE:
-            return pygi_gdouble_to_py (g_value_get_double (value));
-        case G_TYPE_STRING:
-            return pygi_utf8_to_py (g_value_get_string (value));
-        default:
-            *handled = FALSE;
-            return NULL;
+    case G_TYPE_CHAR:
+        return PyLong_FromLong (g_value_get_schar (value));
+    case G_TYPE_UCHAR:
+        return PyLong_FromLong (g_value_get_uchar (value));
+    case G_TYPE_BOOLEAN:
+        return pygi_gboolean_to_py (g_value_get_boolean (value));
+    case G_TYPE_INT:
+        return pygi_gint_to_py (g_value_get_int (value));
+    case G_TYPE_UINT:
+        return pygi_guint_to_py (g_value_get_uint (value));
+    case G_TYPE_LONG:
+        return pygi_glong_to_py (g_value_get_long (value));
+    case G_TYPE_ULONG:
+        return pygi_gulong_to_py (g_value_get_ulong (value));
+    case G_TYPE_INT64:
+        return pygi_gint64_to_py (g_value_get_int64 (value));
+    case G_TYPE_UINT64:
+        return pygi_guint64_to_py (g_value_get_uint64 (value));
+    case G_TYPE_ENUM:
+        return pyg_enum_from_gtype (G_VALUE_TYPE (value),
+                                    g_value_get_enum (value));
+    case G_TYPE_FLAGS:
+        return pyg_flags_from_gtype (G_VALUE_TYPE (value),
+                                     g_value_get_flags (value));
+    case G_TYPE_FLOAT:
+        return pygi_gfloat_to_py (g_value_get_float (value));
+    case G_TYPE_DOUBLE:
+        return pygi_gdouble_to_py (g_value_get_double (value));
+    case G_TYPE_STRING:
+        return pygi_utf8_to_py (g_value_get_string (value));
+    default:
+        *handled = FALSE;
+        return NULL;
     }
 }
 
@@ -710,14 +705,15 @@ pygi_value_to_py_basic_type (const GValue *value, GType fundamental, gboolean *h
  * Returns: a PyObject representing the value or NULL and sets an error;
  */
 static PyObject *
-value_to_py_structured_type (const GValue *value, GType fundamental, gboolean copy_boxed)
+value_to_py_structured_type (const GValue *value, GType fundamental,
+                             gboolean copy_boxed)
 {
     const gchar *type_name;
 
     switch (fundamental) {
     case G_TYPE_INTERFACE:
-        if (g_type_is_a(G_VALUE_TYPE(value), G_TYPE_OBJECT))
-            return pygobject_new(g_value_get_object(value));
+        if (g_type_is_a (G_VALUE_TYPE (value), G_TYPE_OBJECT))
+            return pygobject_new (g_value_get_object (value));
         else
             break;
 
@@ -725,82 +721,84 @@ value_to_py_structured_type (const GValue *value, GType fundamental, gboolean co
         if (G_VALUE_HOLDS_GTYPE (value))
             return pyg_type_wrapper_new (g_value_get_gtype (value));
         else
-            return pyg_pointer_new(G_VALUE_TYPE(value),
-                    g_value_get_pointer(value));
+            return pyg_pointer_new (G_VALUE_TYPE (value),
+                                    g_value_get_pointer (value));
     case G_TYPE_BOXED: {
         PyGTypeMarshal *bm;
         gboolean holds_value_array;
 
         G_GNUC_BEGIN_IGNORE_DEPRECATIONS
-        holds_value_array = G_VALUE_HOLDS(value, PYGI_TYPE_VALUE_ARRAY);
+        holds_value_array = G_VALUE_HOLDS (value, PYGI_TYPE_VALUE_ARRAY);
         G_GNUC_END_IGNORE_DEPRECATIONS
 
-        if (G_VALUE_HOLDS(value, PY_TYPE_OBJECT)) {
-            PyObject *ret = (PyObject *)g_value_dup_boxed(value);
+        if (G_VALUE_HOLDS (value, PY_TYPE_OBJECT)) {
+            PyObject *ret = (PyObject *)g_value_dup_boxed (value);
             if (ret == NULL) {
                 Py_RETURN_NONE;
             }
             return ret;
-        } else if (G_VALUE_HOLDS(value, G_TYPE_VALUE)) {
+        } else if (G_VALUE_HOLDS (value, G_TYPE_VALUE)) {
             GValue *n_value = g_value_get_boxed (value);
-            return pyg_value_as_pyobject(n_value, copy_boxed);
+            return pyg_value_as_pyobject (n_value, copy_boxed);
         } else if (holds_value_array) {
-            GValueArray *array = (GValueArray *) g_value_get_boxed(value);
+            GValueArray *array = (GValueArray *)g_value_get_boxed (value);
             Py_ssize_t n_values = array ? array->n_values : 0;
-            PyObject *ret = PyList_New(n_values);
+            PyObject *ret = PyList_New (n_values);
             int i;
             for (i = 0; i < n_values; ++i)
-                PyList_SET_ITEM(ret, i, pyg_value_as_pyobject
-                        (array->values + i, copy_boxed));
+                PyList_SET_ITEM (
+                    ret, i,
+                    pyg_value_as_pyobject (array->values + i, copy_boxed));
             return ret;
-        } else if (G_VALUE_HOLDS(value, G_TYPE_GSTRING)) {
-            GString *string = (GString *) g_value_get_boxed(value);
-            PyObject *ret = PyUnicode_FromStringAndSize (string->str, string->len);
+        } else if (G_VALUE_HOLDS (value, G_TYPE_GSTRING)) {
+            GString *string = (GString *)g_value_get_boxed (value);
+            PyObject *ret =
+                PyUnicode_FromStringAndSize (string->str, string->len);
             return ret;
         }
-        bm = pyg_type_lookup(G_VALUE_TYPE(value));
+        bm = pyg_type_lookup (G_VALUE_TYPE (value));
         if (bm) {
-            return bm->fromvalue(value);
+            return bm->fromvalue (value);
         } else {
             if (copy_boxed)
-                return pygi_gboxed_new(G_VALUE_TYPE(value),
-                        g_value_get_boxed(value), TRUE, TRUE);
+                return pygi_gboxed_new (G_VALUE_TYPE (value),
+                                        g_value_get_boxed (value), TRUE, TRUE);
             else
-                return pygi_gboxed_new(G_VALUE_TYPE(value),
-                        g_value_get_boxed(value),FALSE,FALSE);
+                return pygi_gboxed_new (G_VALUE_TYPE (value),
+                                        g_value_get_boxed (value), FALSE,
+                                        FALSE);
         }
     }
     case G_TYPE_OBJECT:
-        return pygobject_new(g_value_get_object(value));
-    case G_TYPE_VARIANT:
-    {
-        GVariant *v = g_value_get_variant(value);
+        return pygobject_new (g_value_get_object (value));
+    case G_TYPE_VARIANT: {
+        GVariant *v = g_value_get_variant (value);
         if (v == NULL) {
             Py_RETURN_NONE;
         }
-        return pygi_struct_new_from_g_type (G_TYPE_VARIANT, g_variant_ref(v), FALSE);
+        return pygi_struct_new_from_g_type (G_TYPE_VARIANT, g_variant_ref (v),
+                                            FALSE);
     }
     case G_TYPE_INVALID:
         PyErr_SetString (PyExc_TypeError, "Invalid type");
         return NULL;
-    default:
-    {
+    default: {
         PyGTypeMarshal *bm;
         GIRepository *repository;
         GIBaseInfo *info;
         GIObjectInfoGetValueFunction get_value_func = NULL;
 
-        if ((bm = pyg_type_lookup(G_VALUE_TYPE(value))))
-            return bm->fromvalue(value);
+        if ((bm = pyg_type_lookup (G_VALUE_TYPE (value))))
+            return bm->fromvalue (value);
 
         repository = pygi_repository_get_default ();
         info = gi_repository_find_by_gtype (repository, fundamental);
 
-        if (info == NULL)
-            break;
+        if (info == NULL) break;
 
         if (GI_IS_OBJECT_INFO (info))
-            get_value_func = gi_object_info_get_get_value_function_pointer ((GIObjectInfo *) info);
+            get_value_func = gi_object_info_get_get_value_function_pointer (
+                (GIObjectInfo *)info);
 
         gi_base_info_unref (info);
 
@@ -842,16 +840,15 @@ pyg_value_as_pyobject (const GValue *value, gboolean copy_boxed)
      * pygi_value_to_py_basic_type() directly.
      * See: https://bugzilla.gnome.org/show_bug.cgi?id=733893 */
     if (fundamental == G_TYPE_CHAR) {
-        gint8 val = g_value_get_schar(value);
+        gint8 val = g_value_get_schar (value);
         return PyUnicode_FromStringAndSize ((char *)&val, 1);
     } else if (fundamental == G_TYPE_UCHAR) {
-        guint8 val = g_value_get_uchar(value);
+        guint8 val = g_value_get_uchar (value);
         return PyBytes_FromStringAndSize ((char *)&val, 1);
     }
 
     pyobj = pygi_value_to_py_basic_type (value, fundamental, &handled);
-    if (handled)
-        return pyobj;
+    if (handled) return pyobj;
 
     pyobj = value_to_py_structured_type (value, fundamental, copy_boxed);
     return pyobj;
@@ -860,36 +857,33 @@ pyg_value_as_pyobject (const GValue *value, gboolean copy_boxed)
 
 G_GNUC_BEGIN_IGNORE_DEPRECATIONS
 int
-pyg_param_gvalue_from_pyobject(GValue* value,
-                               PyObject* py_obj,
-			       const GParamSpec* pspec)
+pyg_param_gvalue_from_pyobject (GValue *value, PyObject *py_obj,
+                                const GParamSpec *pspec)
 {
-    if (G_IS_PARAM_SPEC_UNICHAR(pspec)) {
-	gunichar u;
+    if (G_IS_PARAM_SPEC_UNICHAR (pspec)) {
+        gunichar u;
 
-	if (!pyg_pyobj_to_unichar_conv(py_obj, &u)) {
-	    PyErr_Clear();
-	    return -1;
-	}
-        g_value_set_uint(value, u);
-	return 0;
-    }
-    else if (PYGI_IS_PARAM_SPEC_VALUE_ARRAY(pspec))
-	return pyg_value_array_from_pyobject(value, py_obj,
-					     PYGI_PARAM_SPEC_VALUE_ARRAY(pspec));
+        if (!pyg_pyobj_to_unichar_conv (py_obj, &u)) {
+            PyErr_Clear ();
+            return -1;
+        }
+        g_value_set_uint (value, u);
+        return 0;
+    } else if (PYGI_IS_PARAM_SPEC_VALUE_ARRAY (pspec))
+        return pyg_value_array_from_pyobject (
+            value, py_obj, PYGI_PARAM_SPEC_VALUE_ARRAY (pspec));
     else {
-	return pyg_value_from_pyobject(value, py_obj);
+        return pyg_value_from_pyobject (value, py_obj);
     }
 }
 
 G_GNUC_END_IGNORE_DEPRECATIONS
 
-PyObject*
-pyg_param_gvalue_as_pyobject(const GValue* gvalue,
-                             gboolean copy_boxed,
-                             const GParamSpec* pspec)
+PyObject *
+pyg_param_gvalue_as_pyobject (const GValue *gvalue, gboolean copy_boxed,
+                              const GParamSpec *pspec)
 {
-    if (G_IS_PARAM_SPEC_UNICHAR(pspec)) {
+    if (G_IS_PARAM_SPEC_UNICHAR (pspec)) {
         gunichar u;
         gchar *encoded;
         PyObject *retval;
@@ -903,26 +897,25 @@ pyg_param_gvalue_as_pyobject(const GValue* gvalue,
         retval = PyUnicode_FromString (encoded);
         g_free (encoded);
         return retval;
-    }
-    else {
-        return pyg_value_as_pyobject(gvalue, copy_boxed);
+    } else {
+        return pyg_value_as_pyobject (gvalue, copy_boxed);
     }
 }
 
 PyObject *
-pyg__gvalue_get(PyObject *module, PyObject *pygvalue)
+pyg__gvalue_get (PyObject *module, PyObject *pygvalue)
 {
     if (!pyg_boxed_check (pygvalue, G_TYPE_VALUE)) {
         PyErr_SetString (PyExc_TypeError, "Expected GValue argument.");
         return NULL;
     }
 
-    return pyg_value_as_pyobject (pyg_boxed_get(pygvalue, GValue),
-                                  /*copy_boxed=*/ TRUE);
+    return pyg_value_as_pyobject (pyg_boxed_get (pygvalue, GValue),
+                                  /*copy_boxed=*/TRUE);
 }
 
 PyObject *
-pyg__gvalue_get_type(PyObject *module, PyObject *pygvalue)
+pyg__gvalue_get_type (PyObject *module, PyObject *pygvalue)
 {
     GValue *value;
     GType type;
@@ -938,13 +931,12 @@ pyg__gvalue_get_type(PyObject *module, PyObject *pygvalue)
 }
 
 PyObject *
-pyg__gvalue_set(PyObject *module, PyObject *args)
+pyg__gvalue_set (PyObject *module, PyObject *args)
 {
     PyObject *pygvalue;
     PyObject *pyobject;
 
-    if (!PyArg_ParseTuple (args, "OO:_gi._gvalue_set",
-                           &pygvalue, &pyobject))
+    if (!PyArg_ParseTuple (args, "OO:_gi._gvalue_set", &pygvalue, &pyobject))
         return NULL;
 
     if (!pyg_boxed_check (pygvalue, G_TYPE_VALUE)) {
@@ -953,7 +945,8 @@ pyg__gvalue_set(PyObject *module, PyObject *args)
     }
 
     if (pyg_value_from_pyobject_with_error (pyg_boxed_get (pygvalue, GValue),
-                                            pyobject) == -1)
+                                            pyobject)
+        == -1)
         return NULL;
 
     Py_RETURN_NONE;

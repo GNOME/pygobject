@@ -27,7 +27,8 @@
 #include "pygi-util.h"
 #include "pygoptioncontext.h"
 
-PYGI_DEFINE_TYPE("gi._gi.OptionContext", PyGOptionContext_Type, PyGOptionContext)
+PYGI_DEFINE_TYPE ("gi._gi.OptionContext", PyGOptionContext_Type,
+                  PyGOptionContext)
 
 /**
  * pyg_option_group_transfer_group:
@@ -41,12 +42,11 @@ PYGI_DEFINE_TYPE("gi._gi.OptionContext", PyGOptionContext_Type, PyGOptionContext
  * Returns: Either #NULL or the wrapped GOptionGroup.
  */
 static GOptionGroup *
-pyglib_option_group_transfer_group(PyObject *obj)
+pyglib_option_group_transfer_group (PyObject *obj)
 {
-    PyGOptionGroup *self = (PyGOptionGroup*)obj;
+    PyGOptionGroup *self = (PyGOptionGroup *)obj;
 
-    if (self->is_in_context)
-	return NULL;
+    if (self->is_in_context) return NULL;
 
     self->is_in_context = TRUE;
 
@@ -59,7 +59,7 @@ pyglib_option_group_transfer_group(PyObject *obj)
      * We set it here because if we would do this in the init method we would
      * hold two references and the PyGOptionGroup would never be freed.
      */
-    Py_INCREF(self);
+    Py_INCREF (self);
 
     return self->group;
 }
@@ -75,9 +75,9 @@ pyg_option_context_new (GOptionContext *context)
 {
     PyGOptionContext *self;
 
-    self = (PyGOptionContext *)PyObject_New(PyGOptionContext, &PyGOptionContext_Type);
-    if (self == NULL)
-        return NULL;
+    self = (PyGOptionContext *)PyObject_New (PyGOptionContext,
+                                             &PyGOptionContext_Type);
+    if (self == NULL) return NULL;
 
     self->context = context;
     self->main_group = NULL;
@@ -86,39 +86,36 @@ pyg_option_context_new (GOptionContext *context)
 }
 
 static int
-pyg_option_context_init(PyGOptionContext *self,
-                        PyObject *args,
-                        PyObject *kwargs)
+pyg_option_context_init (PyGOptionContext *self, PyObject *args,
+                         PyObject *kwargs)
 {
     char *parameter_string;
 
-    if (!PyArg_ParseTuple(args, "s:gi._gi.GOptionContext.__init__",
-                          &parameter_string))
+    if (!PyArg_ParseTuple (args, "s:gi._gi.GOptionContext.__init__",
+                           &parameter_string))
         return -1;
 
-    self->context = g_option_context_new(parameter_string);
+    self->context = g_option_context_new (parameter_string);
     return 0;
 }
 
 static void
-pyg_option_context_dealloc(PyGOptionContext *self)
+pyg_option_context_dealloc (PyGOptionContext *self)
 {
-    Py_CLEAR(self->main_group);
+    Py_CLEAR (self->main_group);
 
-    if (self->context != NULL)
-    {
+    if (self->context != NULL) {
         GOptionContext *tmp = self->context;
         self->context = NULL;
-        g_option_context_free(tmp);
+        g_option_context_free (tmp);
     }
 
-    PyObject_Free(self);
+    PyObject_Free (self);
 }
 
 static PyObject *
-pyg_option_context_parse(PyGOptionContext *self,
-                         PyObject *args,
-                         PyObject *kwargs)
+pyg_option_context_parse (PyGOptionContext *self, PyObject *args,
+                          PyObject *kwargs)
 {
     static char *kwlist[] = { "argv", NULL };
     PyObject *arg;
@@ -129,224 +126,223 @@ pyg_option_context_parse(PyGOptionContext *self,
     GError *error = NULL;
     gboolean result;
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O:GOptionContext.parse",
-                                     kwlist, &argv))
+    if (!PyArg_ParseTupleAndKeywords (args, kwargs, "O:GOptionContext.parse",
+                                      kwlist, &argv))
         return NULL;
 
-    if (!PyList_Check(argv))
-    {
-        PyErr_SetString(PyExc_TypeError,
-                        "GOptionContext.parse expects a list of strings.");
-        return NULL;
-    }
-
-    argv_length = PyList_Size(argv);
-    if (argv_length == -1)
-    {
-        PyErr_SetString(PyExc_TypeError,
-                        "GOptionContext.parse expects a list of strings.");
+    if (!PyList_Check (argv)) {
+        PyErr_SetString (PyExc_TypeError,
+                         "GOptionContext.parse expects a list of strings.");
         return NULL;
     }
 
-    argv_content = g_new(char*, argv_length + 1);
+    argv_length = PyList_Size (argv);
+    if (argv_length == -1) {
+        PyErr_SetString (PyExc_TypeError,
+                         "GOptionContext.parse expects a list of strings.");
+        return NULL;
+    }
+
+    argv_content = g_new (char *, argv_length + 1);
     argv_content[argv_length] = NULL;
-    for (pos = 0; pos < argv_length; pos++)
-    {
-        arg = PyList_GetItem(argv, pos);
-        argv_content[pos] = g_strdup(PyUnicode_AsUTF8 (arg));
-        if (argv_content[pos] == NULL)
-        {
-            g_strfreev(argv_content);
+    for (pos = 0; pos < argv_length; pos++) {
+        arg = PyList_GetItem (argv, pos);
+        argv_content[pos] = g_strdup (PyUnicode_AsUTF8 (arg));
+        if (argv_content[pos] == NULL) {
+            g_strfreev (argv_content);
             return NULL;
         }
     }
-    original = g_strdupv(argv_content);
+    original = g_strdupv (argv_content);
 
-    g_assert(argv_length <= G_MAXINT);
+    g_assert (argv_length <= G_MAXINT);
     argv_length_int = (gint)argv_length;
     Py_BEGIN_ALLOW_THREADS;
-    result = g_option_context_parse(self->context, &argv_length_int, &argv_content,
-                                    &error);
+    result = g_option_context_parse (self->context, &argv_length_int,
+                                     &argv_content, &error);
     Py_END_ALLOW_THREADS;
     argv_length = argv_length_int;
 
-    if (!result)
-    {
-        g_strfreev(argv_content);
-        g_strfreev(original);
-        pygi_error_check(&error);
+    if (!result) {
+        g_strfreev (argv_content);
+        g_strfreev (original);
+        pygi_error_check (&error);
         return NULL;
     }
 
-    new_argv = PyList_New(g_strv_length(argv_content));
-    for (pos = 0; pos < argv_length; pos++)
-    {
+    new_argv = PyList_New (g_strv_length (argv_content));
+    for (pos = 0; pos < argv_length; pos++) {
         arg = PyUnicode_FromString (argv_content[pos]);
-        PyList_SetItem(new_argv, pos, arg);
+        PyList_SetItem (new_argv, pos, arg);
     }
 
-    g_strfreev(original);
-    g_strfreev(argv_content);
+    g_strfreev (original);
+    g_strfreev (argv_content);
     return new_argv;
 }
 
 static PyObject *
-pyg_option_context_set_help_enabled(PyGOptionContext *self,
-                                    PyObject *args,
-                                    PyObject *kwargs)
+pyg_option_context_set_help_enabled (PyGOptionContext *self, PyObject *args,
+                                     PyObject *kwargs)
 {
     static char *kwlist[] = { "help_enable", NULL };
 
     PyObject *help_enabled;
-    if (! PyArg_ParseTupleAndKeywords(args, kwargs,
+    if (!PyArg_ParseTupleAndKeywords (args, kwargs,
                                       "O:GOptionContext.set_help_enabled",
                                       kwlist, &help_enabled))
         return NULL;
 
-    g_option_context_set_help_enabled(self->context, PyObject_IsTrue(help_enabled));
+    g_option_context_set_help_enabled (self->context,
+                                       PyObject_IsTrue (help_enabled));
 
     Py_RETURN_NONE;
 }
 
 static PyObject *
-pyg_option_context_get_help_enabled(PyGOptionContext *self)
+pyg_option_context_get_help_enabled (PyGOptionContext *self)
 {
-    return pygi_gboolean_to_py (g_option_context_get_help_enabled(self->context));
+    return pygi_gboolean_to_py (
+        g_option_context_get_help_enabled (self->context));
 }
 
 static PyObject *
-pyg_option_context_set_ignore_unknown_options(PyGOptionContext *self,
-                                              PyObject *args,
-                                              PyObject *kwargs)
+pyg_option_context_set_ignore_unknown_options (PyGOptionContext *self,
+                                               PyObject *args,
+                                               PyObject *kwargs)
 {
     static char *kwlist[] = { "ignore_unknown_options", NULL };
     PyObject *ignore_unknown_options;
 
-    if (! PyArg_ParseTupleAndKeywords(args, kwargs,
-                                "O:GOptionContext.set_ignore_unknown_options",
-                                kwlist, &ignore_unknown_options))
+    if (!PyArg_ParseTupleAndKeywords (
+            args, kwargs, "O:GOptionContext.set_ignore_unknown_options",
+            kwlist, &ignore_unknown_options))
         return NULL;
 
-    g_option_context_set_ignore_unknown_options(self->context,
-						PyObject_IsTrue(ignore_unknown_options));
+    g_option_context_set_ignore_unknown_options (
+        self->context, PyObject_IsTrue (ignore_unknown_options));
 
 
     Py_RETURN_NONE;
 }
 
 static PyObject *
-pyg_option_context_get_ignore_unknown_options(PyGOptionContext *self)
+pyg_option_context_get_ignore_unknown_options (PyGOptionContext *self)
 {
     return pygi_gboolean_to_py (
-        g_option_context_get_ignore_unknown_options(self->context));
+        g_option_context_get_ignore_unknown_options (self->context));
 }
 
 static PyObject *
-pyg_option_context_set_main_group(PyGOptionContext *self,
-                                  PyObject *args,
-                                  PyObject *kwargs)
+pyg_option_context_set_main_group (PyGOptionContext *self, PyObject *args,
+                                   PyObject *kwargs)
 {
     static char *kwlist[] = { "group", NULL };
     GOptionGroup *g_group;
     PyObject *group;
 
-    if (! PyArg_ParseTupleAndKeywords(args, kwargs,
-                                      "O:GOptionContext.set_main_group",
-                                      kwlist, &group))
+    if (!PyArg_ParseTupleAndKeywords (
+            args, kwargs, "O:GOptionContext.set_main_group", kwlist, &group))
         return NULL;
 
-    if (PyObject_IsInstance(group, (PyObject*) &PyGOptionGroup_Type) != 1) {
-        PyErr_SetString(PyExc_TypeError,
-                        "GOptionContext.set_main_group expects a GOptionGroup.");
-        return NULL;
-    }
-
-    g_group = pyglib_option_group_transfer_group(group);
-    if (g_group == NULL)
-    {
-        PyErr_SetString(PyExc_RuntimeError,
-			"Group is already in a OptionContext.");
+    if (PyObject_IsInstance (group, (PyObject *)&PyGOptionGroup_Type) != 1) {
+        PyErr_SetString (
+            PyExc_TypeError,
+            "GOptionContext.set_main_group expects a GOptionGroup.");
         return NULL;
     }
 
-    g_option_context_set_main_group(self->context, g_group);
+    g_group = pyglib_option_group_transfer_group (group);
+    if (g_group == NULL) {
+        PyErr_SetString (PyExc_RuntimeError,
+                         "Group is already in a OptionContext.");
+        return NULL;
+    }
 
-    self->main_group = (PyGOptionGroup *) Py_NewRef(group);
+    g_option_context_set_main_group (self->context, g_group);
+
+    self->main_group = (PyGOptionGroup *)Py_NewRef (group);
 
     Py_RETURN_NONE;
 }
 
 static PyObject *
-pyg_option_context_get_main_group(PyGOptionContext *self)
+pyg_option_context_get_main_group (PyGOptionContext *self)
 {
-    if (self->main_group == NULL)
-    {
+    if (self->main_group == NULL) {
         Py_RETURN_NONE;
     }
-    return Py_NewRef(self->main_group);
+    return Py_NewRef (self->main_group);
 }
 
 static PyObject *
-pyg_option_context_add_group(PyGOptionContext *self,
-                             PyObject *args,
-                             PyObject *kwargs)
+pyg_option_context_add_group (PyGOptionContext *self, PyObject *args,
+                              PyObject *kwargs)
 {
     static char *kwlist[] = { "group", NULL };
     GOptionGroup *g_group;
     PyObject *group;
 
-    if (! PyArg_ParseTupleAndKeywords(args, kwargs,
-                                      "O:GOptionContext.add_group",
-                                      kwlist, &group))
+    if (!PyArg_ParseTupleAndKeywords (
+            args, kwargs, "O:GOptionContext.add_group", kwlist, &group))
         return NULL;
 
-    if (PyObject_IsInstance(group, (PyObject*) &PyGOptionGroup_Type) != 1) {
-        PyErr_SetString(PyExc_TypeError,
-                        "GOptionContext.add_group expects a GOptionGroup.");
-        return NULL;
-    }
-
-    g_group = pyglib_option_group_transfer_group(group);
-    if (g_group == NULL)
-    {
-        PyErr_SetString(PyExc_RuntimeError,
-                        "Group is already in a OptionContext.");
+    if (PyObject_IsInstance (group, (PyObject *)&PyGOptionGroup_Type) != 1) {
+        PyErr_SetString (PyExc_TypeError,
+                         "GOptionContext.add_group expects a GOptionGroup.");
         return NULL;
     }
-    Py_INCREF(group);
 
-    g_option_context_add_group(self->context, g_group);
+    g_group = pyglib_option_group_transfer_group (group);
+    if (g_group == NULL) {
+        PyErr_SetString (PyExc_RuntimeError,
+                         "Group is already in a OptionContext.");
+        return NULL;
+    }
+    Py_INCREF (group);
+
+    g_option_context_add_group (self->context, g_group);
 
     Py_RETURN_NONE;
 }
 
-static PyObject*
-pyg_option_context_richcompare(PyObject *self, PyObject *other, int op)
+static PyObject *
+pyg_option_context_richcompare (PyObject *self, PyObject *other, int op)
 {
-    if (Py_TYPE(self) == Py_TYPE(other) && Py_TYPE(self) == &PyGOptionContext_Type)
-        return pyg_ptr_richcompare(((PyGOptionContext*)self)->context,
-                                   ((PyGOptionContext*)other)->context,
-                                   op);
+    if (Py_TYPE (self) == Py_TYPE (other)
+        && Py_TYPE (self) == &PyGOptionContext_Type)
+        return pyg_ptr_richcompare (((PyGOptionContext *)self)->context,
+                                    ((PyGOptionContext *)other)->context, op);
     else {
-       Py_RETURN_NOTIMPLEMENTED;
+        Py_RETURN_NOTIMPLEMENTED;
     }
 }
 
 static PyObject *
-pyg_option_get_context(PyGOptionContext *self)
+pyg_option_get_context (PyGOptionContext *self)
 {
     return PyCapsule_New (self->context, "goption.context", NULL);
 }
 
 static PyMethodDef pyg_option_context_methods[] = {
-    { "parse", (PyCFunction)pyg_option_context_parse, METH_VARARGS | METH_KEYWORDS },
-    { "set_help_enabled", (PyCFunction)pyg_option_context_set_help_enabled, METH_VARARGS | METH_KEYWORDS },
-    { "get_help_enabled", (PyCFunction)pyg_option_context_get_help_enabled, METH_NOARGS },
-    { "set_ignore_unknown_options", (PyCFunction)pyg_option_context_set_ignore_unknown_options, METH_VARARGS | METH_KEYWORDS },
-    { "get_ignore_unknown_options", (PyCFunction)pyg_option_context_get_ignore_unknown_options, METH_NOARGS },
-    { "set_main_group", (PyCFunction)pyg_option_context_set_main_group, METH_VARARGS | METH_KEYWORDS },
-    { "get_main_group", (PyCFunction)pyg_option_context_get_main_group, METH_NOARGS },
-    { "add_group", (PyCFunction)pyg_option_context_add_group, METH_VARARGS | METH_KEYWORDS },
+    { "parse", (PyCFunction)pyg_option_context_parse,
+      METH_VARARGS | METH_KEYWORDS },
+    { "set_help_enabled", (PyCFunction)pyg_option_context_set_help_enabled,
+      METH_VARARGS | METH_KEYWORDS },
+    { "get_help_enabled", (PyCFunction)pyg_option_context_get_help_enabled,
+      METH_NOARGS },
+    { "set_ignore_unknown_options",
+      (PyCFunction)pyg_option_context_set_ignore_unknown_options,
+      METH_VARARGS | METH_KEYWORDS },
+    { "get_ignore_unknown_options",
+      (PyCFunction)pyg_option_context_get_ignore_unknown_options,
+      METH_NOARGS },
+    { "set_main_group", (PyCFunction)pyg_option_context_set_main_group,
+      METH_VARARGS | METH_KEYWORDS },
+    { "get_main_group", (PyCFunction)pyg_option_context_get_main_group,
+      METH_NOARGS },
+    { "add_group", (PyCFunction)pyg_option_context_add_group,
+      METH_VARARGS | METH_KEYWORDS },
     { "_get_context", (PyCFunction)pyg_option_get_context, METH_NOARGS },
     { NULL, NULL, 0 },
 };
@@ -355,7 +351,7 @@ static PyMethodDef pyg_option_context_methods[] = {
  * Returns 0 on success, or -1 and sets an exception.
  */
 int
-pygi_option_context_register_types(PyObject *d)
+pygi_option_context_register_types (PyObject *d)
 {
     PyGOptionContext_Type.tp_dealloc = (destructor)pyg_option_context_dealloc;
     PyGOptionContext_Type.tp_richcompare = pyg_option_context_richcompare;
@@ -364,10 +360,10 @@ pygi_option_context_register_types(PyObject *d)
     PyGOptionContext_Type.tp_init = (initproc)pyg_option_context_init;
     PyGOptionContext_Type.tp_alloc = PyType_GenericAlloc;
     PyGOptionContext_Type.tp_new = PyType_GenericNew;
-    if (PyType_Ready(&PyGOptionContext_Type))
-        return -1;
+    if (PyType_Ready (&PyGOptionContext_Type)) return -1;
 
-    PyDict_SetItemString(d, "OptionContext", (PyObject *)&PyGOptionContext_Type);
+    PyDict_SetItemString (d, "OptionContext",
+                          (PyObject *)&PyGOptionContext_Type);
 
     return 0;
 }

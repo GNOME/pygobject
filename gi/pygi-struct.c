@@ -40,16 +40,16 @@ struct_get_info (PyTypeObject *type)
     if (py_info == NULL) {
         return NULL;
     }
-    if (!PyObject_TypeCheck (py_info, &PyGIStructInfo_Type) &&
-            !PyObject_TypeCheck (py_info, &PyGIUnionInfo_Type)) {
-        PyErr_Format (PyExc_TypeError, "attribute '__info__' must be %s or %s, not %s",
-                      PyGIStructInfo_Type.tp_name,
-                      PyGIUnionInfo_Type.tp_name,
-                      Py_TYPE(py_info)->tp_name);
+    if (!PyObject_TypeCheck (py_info, &PyGIStructInfo_Type)
+        && !PyObject_TypeCheck (py_info, &PyGIUnionInfo_Type)) {
+        PyErr_Format (PyExc_TypeError,
+                      "attribute '__info__' must be %s or %s, not %s",
+                      PyGIStructInfo_Type.tp_name, PyGIUnionInfo_Type.tp_name,
+                      Py_TYPE (py_info)->tp_name);
         goto out;
     }
 
-    info = ( (PyGIBaseInfo *) py_info)->info;
+    info = ((PyGIBaseInfo *)py_info)->info;
     gi_base_info_ref (info);
 
 out:
@@ -65,12 +65,11 @@ struct_dealloc (PyGIStruct *self)
     PyObject *error_type, *error_value, *error_traceback;
     gboolean have_error = !!PyErr_Occurred ();
 
-    if (have_error)
-        PyErr_Fetch (&error_type, &error_value, &error_traceback);
+    if (have_error) PyErr_Fetch (&error_type, &error_value, &error_traceback);
 
     info = struct_get_info (Py_TYPE (self));
 
-    if (info != NULL && gi_struct_info_is_foreign ( (GIStructInfo *) info)) {
+    if (info != NULL && gi_struct_info_is_foreign ((GIStructInfo *)info)) {
         pygi_struct_foreign_release (info, pyg_pointer_get_ptr (self));
     } else if (self->free_on_dealloc) {
         g_free (pyg_pointer_get_ptr (self));
@@ -80,16 +79,13 @@ struct_dealloc (PyGIStruct *self)
         gi_base_info_unref (info);
     }
 
-    if (have_error)
-        PyErr_Restore (error_type, error_value, error_traceback);
+    if (have_error) PyErr_Restore (error_type, error_value, error_traceback);
 
     Py_TYPE (self)->tp_free ((PyObject *)self);
 }
 
 static PyObject *
-struct_new (PyTypeObject *type,
-            PyObject     *args,
-            PyObject     *kwargs)
+struct_new (PyTypeObject *type, PyObject *args, PyObject *kwargs)
 {
     static char *kwlist[] = { NULL };
 
@@ -102,25 +98,27 @@ struct_new (PyTypeObject *type,
         return NULL;
     }
 
-    info = struct_get_info ( type );
+    info = struct_get_info (type);
     if (info == NULL) {
         if (PyErr_ExceptionMatches (PyExc_AttributeError)) {
-            PyErr_Format (PyExc_TypeError, "missing introspection information");
+            PyErr_Format (PyExc_TypeError,
+                          "missing introspection information");
         }
         return NULL;
     }
 
-    size = gi_struct_info_get_size ( (GIStructInfo *) info);
+    size = gi_struct_info_get_size ((GIStructInfo *)info);
     if (size == 0) {
         PyErr_Format (PyExc_TypeError,
-            "struct cannot be created directly; try using a constructor, see: help(%s.%s)",
-            gi_base_info_get_namespace (info),
-            gi_base_info_get_name (info));
+                      "struct cannot be created directly; try using a "
+                      "constructor, see: help(%s.%s)",
+                      gi_base_info_get_namespace (info),
+                      gi_base_info_get_name (info));
         goto out;
     }
     pointer = g_try_malloc0 (size);
     if (pointer == NULL) {
-        PyErr_NoMemory();
+        PyErr_NoMemory ();
         goto out;
     }
 
@@ -132,56 +130,51 @@ struct_new (PyTypeObject *type,
 out:
     gi_base_info_unref (info);
 
-    return (PyObject *) self;
+    return (PyObject *)self;
 }
 
 static int
-struct_init (PyObject *self,
-              PyObject *args,
-              PyObject *kwargs)
+struct_init (PyObject *self, PyObject *args, PyObject *kwargs)
 {
     /* Don't call PyGPointer's init, which raises an exception. */
     return 0;
 }
 
-PYGI_DEFINE_TYPE("gi.Struct", PyGIStruct_Type, PyGIStruct);
+PYGI_DEFINE_TYPE ("gi.Struct", PyGIStruct_Type, PyGIStruct);
 
 
 PyObject *
-pygi_struct_new_from_g_type (GType g_type,
-                             gpointer      pointer,
-                             gboolean      free_on_dealloc)
+pygi_struct_new_from_g_type (GType g_type, gpointer pointer,
+                             gboolean free_on_dealloc)
 {
     PyGIStruct *self;
     PyTypeObject *type;
 
     type = (PyTypeObject *)pygi_type_import_by_g_type (g_type);
 
-    if (!type)
-        type = (PyTypeObject *)&PyGIStruct_Type; /* fallback */
+    if (!type) type = (PyTypeObject *)&PyGIStruct_Type; /* fallback */
 
     if (!PyType_IsSubtype (type, &PyGIStruct_Type)) {
         PyErr_SetString (PyExc_TypeError, "must be a subtype of gi.Struct");
         return NULL;
     }
 
-    self = (PyGIStruct *) type->tp_alloc (type, 0);
+    self = (PyGIStruct *)type->tp_alloc (type, 0);
     if (self == NULL) {
         return NULL;
     }
 
     pyg_pointer_set_ptr (self, pointer);
-    ( (PyGPointer *) self)->gtype = g_type;
+    ((PyGPointer *)self)->gtype = g_type;
     self->free_on_dealloc = free_on_dealloc;
 
-    return (PyObject *) self;
+    return (PyObject *)self;
 }
 
 
 PyObject *
-pygi_struct_new (PyTypeObject *type,
-                 gpointer      pointer,
-                 gboolean      free_on_dealloc)
+pygi_struct_new (PyTypeObject *type, gpointer pointer,
+                 gboolean free_on_dealloc)
 {
     PyGIStruct *self;
     GType g_type;
@@ -191,36 +184,34 @@ pygi_struct_new (PyTypeObject *type,
         return NULL;
     }
 
-    self = (PyGIStruct *) type->tp_alloc (type, 0);
+    self = (PyGIStruct *)type->tp_alloc (type, 0);
     if (self == NULL) {
         return NULL;
     }
 
-    g_type = pyg_type_from_object ( (PyObject *) type);
+    g_type = pyg_type_from_object ((PyObject *)type);
 
     pyg_pointer_set_ptr (self, pointer);
-    ( (PyGPointer *) self)->gtype = g_type;
+    ((PyGPointer *)self)->gtype = g_type;
     self->free_on_dealloc = free_on_dealloc;
 
-    return (PyObject *) self;
+    return (PyObject *)self;
 }
 
 static PyObject *
-struct_repr(PyGIStruct *self)
+struct_repr (PyGIStruct *self)
 {
-    PyObject* repr;
+    PyObject *repr;
     GIBaseInfo *info;
     PyGPointer *pointer = (PyGPointer *)self;
 
     info = struct_get_info (Py_TYPE (self));
-    if (info == NULL)
-        return NULL;
+    if (info == NULL) return NULL;
 
-    repr = PyUnicode_FromFormat ("<%s.%s object at %p (%s at %p)>",
-                                 gi_base_info_get_namespace (info),
-                                 gi_base_info_get_name (info),
-                                 self, g_type_name (pointer->gtype),
-                                 pointer->pointer);
+    repr = PyUnicode_FromFormat (
+        "<%s.%s object at %p (%s at %p)>", gi_base_info_get_namespace (info),
+        gi_base_info_get_name (info), self, g_type_name (pointer->gtype),
+        pointer->pointer);
 
     gi_base_info_unref (info);
 
@@ -233,20 +224,19 @@ struct_repr(PyGIStruct *self)
 int
 pygi_struct_register_types (PyObject *m)
 {
-    Py_SET_TYPE(&PyGIStruct_Type, &PyType_Type);
+    Py_SET_TYPE (&PyGIStruct_Type, &PyType_Type);
     g_assert (Py_TYPE (&PyGPointer_Type) != NULL);
     PyGIStruct_Type.tp_base = &PyGPointer_Type;
-    PyGIStruct_Type.tp_new = (newfunc) struct_new;
-    PyGIStruct_Type.tp_init = (initproc) struct_init;
-    PyGIStruct_Type.tp_dealloc = (destructor) struct_dealloc;
+    PyGIStruct_Type.tp_new = (newfunc)struct_new;
+    PyGIStruct_Type.tp_init = (initproc)struct_init;
+    PyGIStruct_Type.tp_dealloc = (destructor)struct_dealloc;
     PyGIStruct_Type.tp_flags = (Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE);
     PyGIStruct_Type.tp_repr = (reprfunc)struct_repr;
 
-    if (PyType_Ready (&PyGIStruct_Type) < 0)
-        return -1;
-    Py_INCREF ((PyObject *) &PyGIStruct_Type);
-    if (PyModule_AddObject (m, "Struct", (PyObject *) &PyGIStruct_Type) < 0) {
-        Py_DECREF ((PyObject *) &PyGIStruct_Type);
+    if (PyType_Ready (&PyGIStruct_Type) < 0) return -1;
+    Py_INCREF ((PyObject *)&PyGIStruct_Type);
+    if (PyModule_AddObject (m, "Struct", (PyObject *)&PyGIStruct_Type) < 0) {
+        Py_DECREF ((PyObject *)&PyGIStruct_Type);
         return -1;
     }
 

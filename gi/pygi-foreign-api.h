@@ -23,23 +23,21 @@
 #include <girepository/girepository.h>
 #include <pygobject.h>
 
-typedef PyObject * (*PyGIArgOverrideToGIArgumentFunc)   (PyObject        *value,
-                                                         GIRegisteredTypeInfo *interface_info,
-                                                         GITransfer       transfer,
-                                                         GIArgument      *arg);
-typedef PyObject * (*PyGIArgOverrideFromGIArgumentFunc) (GIRegisteredTypeInfo *interface_info,
-                                                         GITransfer       transfer,
-                                                         gpointer         data);
-typedef PyObject * (*PyGIArgOverrideReleaseFunc)        (GIBaseInfo *base_info,
-                                                         gpointer  struct_);
+typedef PyObject *(*PyGIArgOverrideToGIArgumentFunc) (
+    PyObject *value, GIRegisteredTypeInfo *interface_info, GITransfer transfer,
+    GIArgument *arg);
+typedef PyObject *(*PyGIArgOverrideFromGIArgumentFunc) (
+    GIRegisteredTypeInfo *interface_info, GITransfer transfer, gpointer data);
+typedef PyObject *(*PyGIArgOverrideReleaseFunc) (GIBaseInfo *base_info,
+                                                 gpointer struct_);
 
 
 struct PyGI_API {
-    void (*register_foreign_struct) (const char* namespace_,
-                                     const char* name,
-                                     PyGIArgOverrideToGIArgumentFunc to_func,
-                                     PyGIArgOverrideFromGIArgumentFunc from_func,
-                                     PyGIArgOverrideReleaseFunc release_func);
+    void (*register_foreign_struct) (
+        const char *namespace_, const char *name,
+        PyGIArgOverrideToGIArgumentFunc to_func,
+        PyGIArgOverrideFromGIArgumentFunc from_func,
+        PyGIArgOverrideReleaseFunc release_func);
 };
 
 
@@ -53,7 +51,7 @@ _pygi_import (void)
     if (PyGI_API != NULL) {
         return 1;
     }
-    PyGI_API = (struct PyGI_API*) PyCapsule_Import("gi._API", FALSE);
+    PyGI_API = (struct PyGI_API *)PyCapsule_Import ("gi._API", FALSE);
     if (PyGI_API == NULL) {
         return -1;
     }
@@ -63,20 +61,16 @@ _pygi_import (void)
 
 
 static inline PyObject *
-pygi_register_foreign_struct (const char* namespace_,
-                              const char* name,
+pygi_register_foreign_struct (const char *namespace_, const char *name,
                               PyGIArgOverrideToGIArgumentFunc to_func,
                               PyGIArgOverrideFromGIArgumentFunc from_func,
                               PyGIArgOverrideReleaseFunc release_func)
 {
-    if (_pygi_import() < 0) {
+    if (_pygi_import () < 0) {
         return NULL;
     }
-    PyGI_API->register_foreign_struct(namespace_,
-                                      name,
-                                      to_func,
-                                      from_func,
-                                      release_func);
+    PyGI_API->register_foreign_struct (namespace_, name, to_func, from_func,
+                                       release_func);
     Py_RETURN_NONE;
 }
 

@@ -51,15 +51,15 @@ PYGI_DEFINE_TYPE ("gi._gi.ResultTuple", PyGIResultTuple_Type, PyTupleObject)
  * Takes the _ResultTuple.__repr_format format string and applies the tuple
  * values to it.
  */
-static PyObject*
-resulttuple_repr(PyObject *self) {
-    PyObject *format,  *repr, *format_attr;
+static PyObject *
+resulttuple_repr (PyObject *self)
+{
+    PyObject *format, *repr, *format_attr;
 
     format_attr = PyUnicode_FromString (repr_format_key);
     format = PyTuple_Type.tp_getattro (self, format_attr);
     Py_DECREF (format_attr);
-    if (format == NULL)
-        return NULL;
+    if (format == NULL) return NULL;
     repr = PyUnicode_Format (format, self);
     Py_DECREF (format);
     return repr;
@@ -70,15 +70,15 @@ resulttuple_repr(PyObject *self) {
  * Looks up the tuple index in _ResultTuple.__tuple_indices and returns the
  * tuple item.
  */
-static PyObject*
-resulttuple_getattro(PyObject *self, PyObject *name) {
+static PyObject *
+resulttuple_getattro (PyObject *self, PyObject *name)
+{
     PyObject *mapping, *index, *mapping_attr, *item;
 
     mapping_attr = PyUnicode_FromString (tuple_indices_key);
     mapping = PyTuple_Type.tp_getattro (self, mapping_attr);
     Py_DECREF (mapping_attr);
-    if (mapping == NULL)
-        return NULL;
+    if (mapping == NULL) return NULL;
     g_assert (PyDict_Check (mapping));
     index = PyDict_GetItem (mapping, name);
 
@@ -100,11 +100,10 @@ resulttuple_getattro(PyObject *self, PyObject *name) {
  * works without it. As a result unpickle will give back in a normal tuple.
  */
 static PyObject *
-resulttuple_reduce(PyObject *self)
+resulttuple_reduce (PyObject *self)
 {
     PyObject *tuple = PySequence_Tuple (self);
-    if (tuple == NULL)
-        return NULL;
+    if (tuple == NULL) return NULL;
     return Py_BuildValue ("(O, (N))", &PyTuple_Type, tuple);
 }
 
@@ -113,7 +112,7 @@ resulttuple_reduce(PyObject *self)
  * resulttuple_getattro()
  */
 static PyObject *
-resulttuple_dir(PyObject *self)
+resulttuple_dir (PyObject *self)
 {
     PyObject *mapping_attr;
     PyObject *items = NULL;
@@ -124,14 +123,11 @@ resulttuple_dir(PyObject *self)
     mapping_attr = PyUnicode_FromString (tuple_indices_key);
     mapping = PyTuple_Type.tp_getattro (self, mapping_attr);
     Py_DECREF (mapping_attr);
-    if (mapping == NULL)
-        goto error;
-    items = PyObject_Dir ((PyObject*)Py_TYPE (self));
-    if (items == NULL)
-        goto error;
+    if (mapping == NULL) goto error;
+    items = PyObject_Dir ((PyObject *)Py_TYPE (self));
+    if (items == NULL) goto error;
     mapping_values = PyDict_Keys (mapping);
-    if (mapping_values == NULL)
-        goto error;
+    if (mapping_values == NULL) goto error;
     result = PySequence_InPlaceConcat (items, mapping_values);
 
 error:
@@ -153,7 +149,8 @@ error:
  *    or %NULL in case of an error.
  */
 static PyObject *
-resulttuple_new_type(PyObject *self, PyObject *args) {
+resulttuple_new_type (PyObject *self, PyObject *args)
+{
     PyObject *tuple_names, *new_type;
 
     if (!PyArg_ParseTuple (args, "O:ResultTuple._new_type", &tuple_names))
@@ -169,11 +166,11 @@ resulttuple_new_type(PyObject *self, PyObject *args) {
 }
 
 static PyMethodDef resulttuple_methods[] = {
-    {"__reduce__", (PyCFunction)resulttuple_reduce, METH_NOARGS},
-    {"__dir__", (PyCFunction)resulttuple_dir, METH_NOARGS},
-    {"_new_type", (PyCFunction)resulttuple_new_type,
-     METH_VARARGS | METH_STATIC},
-    {NULL, NULL, 0},
+    { "__reduce__", (PyCFunction)resulttuple_reduce, METH_NOARGS },
+    { "__dir__", (PyCFunction)resulttuple_dir, METH_NOARGS },
+    { "_new_type", (PyCFunction)resulttuple_new_type,
+      METH_VARARGS | METH_STATIC },
+    { NULL, NULL, 0 },
 };
 
 /**
@@ -189,8 +186,9 @@ static PyMethodDef resulttuple_methods[] = {
  * Returns: A new PyTypeObject which is a subclass of PyGIResultTuple_Type
  *    or %NULL in case of an error.
  */
-PyTypeObject*
-pygi_resulttuple_new_type(PyObject *tuple_names) {
+PyTypeObject *
+pygi_resulttuple_new_type (PyObject *tuple_names)
+{
     PyTypeObject *new_type;
     PyObject *class_dict, *format_string, *empty_format, *named_format,
         *format_list, *sep, *index_dict, *slots, *paren_format, *new_type_args,
@@ -215,7 +213,7 @@ pygi_resulttuple_new_type(PyObject *tuple_names) {
     for (i = 0; i < len; i++) {
         PyObject *item, *named_args, *named_build, *index;
         item = PyList_GET_ITEM (tuple_names, i);
-        if (Py_IsNone(item)) {
+        if (Py_IsNone (item)) {
             PyList_Append (format_list, empty_format);
         } else {
             named_args = Py_BuildValue ("(O)", item);
@@ -248,8 +246,8 @@ pygi_resulttuple_new_type(PyObject *tuple_names) {
 
     new_type_args = Py_BuildValue ("s(O)O", "_ResultTuple",
                                    &PyGIResultTuple_Type, class_dict);
-    new_type = (PyTypeObject *)PyType_Type.tp_new (&PyType_Type,
-                                                   new_type_args, NULL);
+    new_type =
+        (PyTypeObject *)PyType_Type.tp_new (&PyType_Type, new_type_args, NULL);
     Py_DECREF (new_type_args);
     Py_DECREF (class_dict);
 
@@ -274,7 +272,8 @@ pygi_resulttuple_new_type(PyObject *tuple_names) {
  * Returns: An instance of @subclass or %NULL on error.
  */
 PyObject *
-pygi_resulttuple_new(PyTypeObject *subclass, Py_ssize_t len) {
+pygi_resulttuple_new (PyTypeObject *subclass, Py_ssize_t len)
+{
 #ifdef PYGI_USE_FREELIST
     PyObject *self;
     Py_ssize_t i;
@@ -287,7 +286,7 @@ pygi_resulttuple_new(PyTypeObject *subclass, Py_ssize_t len) {
         if (self != NULL) {
             free_list[len] = PyTuple_GET_ITEM (self, 0);
             numfree[len]--;
-            for (i=0; i < len; i++) {
+            for (i = 0; i < len; i++) {
                 PyTuple_SET_ITEM (self, i, NULL);
             }
             Py_SET_TYPE (self, subclass);
@@ -306,22 +305,25 @@ pygi_resulttuple_new(PyTypeObject *subclass, Py_ssize_t len) {
 }
 
 #ifdef PYGI_USE_FREELIST
-static void resulttuple_dealloc(PyObject *self) {
+static void
+resulttuple_dealloc (PyObject *self)
+{
     Py_ssize_t i, len;
 
     PyObject_GC_UnTrack (self);
     CPy_TRASHCAN_BEGIN (self, resulttuple_dealloc)
 
-    /* Free the tuple items and, if there is space, save the tuple object
+        /* Free the tuple items and, if there is space, save the tuple object
      * pointer to the front of the free list for its size. Otherwise free it.
      */
-    len = Py_SIZE (self);
+        len = Py_SIZE (self);
     if (len > 0) {
-        for (i=0; i < len; i++) {
+        for (i = 0; i < len; i++) {
             Py_XDECREF (PyTuple_GET_ITEM (self, i));
         }
 
-        if (len < PyGIResultTuple_MAXSAVESIZE && numfree[len] < PyGIResultTuple_MAXFREELIST) {
+        if (len < PyGIResultTuple_MAXSAVESIZE
+            && numfree[len] < PyGIResultTuple_MAXFREELIST) {
             PyTuple_SET_ITEM (self, 0, free_list[len]);
             numfree[len]++;
             free_list[len] = self;
@@ -344,8 +346,9 @@ done:
  *
  * Returns: -1 on error, 0 on success.
  */
-int pygi_resulttuple_register_types(PyObject *module) {
-
+int
+pygi_resulttuple_register_types (PyObject *module)
+{
     PyGIResultTuple_Type.tp_base = &PyTuple_Type;
     PyGIResultTuple_Type.tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE;
     PyGIResultTuple_Type.tp_repr = (reprfunc)resulttuple_repr;
@@ -355,12 +358,12 @@ int pygi_resulttuple_register_types(PyObject *module) {
     PyGIResultTuple_Type.tp_dealloc = (destructor)resulttuple_dealloc;
 #endif
 
-    if (PyType_Ready (&PyGIResultTuple_Type) < 0)
-        return -1;
+    if (PyType_Ready (&PyGIResultTuple_Type) < 0) return -1;
 
     Py_INCREF (&PyGIResultTuple_Type);
     if (PyModule_AddObject (module, "ResultTuple",
-                            (PyObject *)&PyGIResultTuple_Type) < 0) {
+                            (PyObject *)&PyGIResultTuple_Type)
+        < 0) {
         Py_DECREF (&PyGIResultTuple_Type);
         return -1;
     }

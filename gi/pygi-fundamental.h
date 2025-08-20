@@ -37,7 +37,7 @@ extern PyTypeObject PyGIFundamental_Type;
 
 typedef struct {
     PyObject_HEAD
-    PyObject* weaklist;
+    PyObject *weaklist;
     gpointer instance;
     GType gtype;
     GIObjectInfoRefFunction ref_func;
@@ -45,21 +45,21 @@ typedef struct {
 } PyGIFundamental;
 
 
-PyObject* pygi_fundamental_new   (gpointer      instance);
+PyObject *pygi_fundamental_new (gpointer instance);
 
-void      pygi_fundamental_ref   (PyGIFundamental *self);
-void      pygi_fundamental_unref (PyGIFundamental *self);
+void pygi_fundamental_ref (PyGIFundamental *self);
+void pygi_fundamental_unref (PyGIFundamental *self);
 
-GTypeInstance* pygi_fundamental_get (PyObject *self);
+GTypeInstance *pygi_fundamental_get (PyObject *self);
 
 int pygi_fundamental_register_types (PyObject *m);
 
-#define pygi_check_fundamental(info) \
-  (GI_IS_OBJECT_INFO (info) && \
-   gi_object_info_get_fundamental ((GIObjectInfo *)(info)))
+#define pygi_check_fundamental(info)                                          \
+    (GI_IS_OBJECT_INFO (info)                                                 \
+     && gi_object_info_get_fundamental ((GIObjectInfo *)(info)))
 
-GTypeInstance* pygi_fundamental_from_value (const GValue *value);
+GTypeInstance *pygi_fundamental_from_value (const GValue *value);
 
-gboolean  pygi_fundamental_set_value (GValue *value, GTypeInstance *instance);
+gboolean pygi_fundamental_set_value (GValue *value, GTypeInstance *instance);
 
 #endif /* __PYGI_FUNDAMENTAL_H__ */

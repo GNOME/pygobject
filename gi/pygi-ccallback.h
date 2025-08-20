@@ -39,11 +39,9 @@ typedef struct {
 
 extern PyTypeObject PyGICCallback_Type;
 
-PyObject * _pygi_ccallback_new (GCallback       callback,
-                                gpointer        user_data,
-                                GIScopeType     scope,
-                                GICallableInfo *info,
-                                GDestroyNotify  destroy_notify);
+PyObject *_pygi_ccallback_new (GCallback callback, gpointer user_data,
+                               GIScopeType scope, GICallableInfo *info,
+                               GDestroyNotify destroy_notify);
 
 int pygi_ccallback_register_types (PyObject *m);
 

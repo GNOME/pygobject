@@ -33,14 +33,13 @@
 #include "pygi-info.h"
 #include "pygi-source.h"
 
-typedef struct
-{
+typedef struct {
     GSource source;
     PyObject *obj;
 } PyGRealSource;
 
 static gboolean
-source_prepare(GSource *source, gint *timeout)
+source_prepare (GSource *source, gint *timeout)
 {
     PyGRealSource *pysource = (PyGRealSource *)source;
     PyObject *t;
@@ -48,33 +47,34 @@ source_prepare(GSource *source, gint *timeout)
     gboolean got_err = TRUE;
     PyGILState_STATE state;
 
-    state = PyGILState_Ensure();
+    state = PyGILState_Ensure ();
 
-    t = PyObject_CallMethod(pysource->obj, "prepare", NULL);
+    t = PyObject_CallMethod (pysource->obj, "prepare", NULL);
 
     if (t == NULL) {
-	goto bail;
-    } else if (!PyObject_IsTrue(t)) {
-	got_err = FALSE;
-	goto bail;
-    } else if (!PyTuple_Check(t)) {
-	PyErr_SetString(PyExc_TypeError,
-			"source prepare function must return a tuple or False");
-	goto bail;
-    } else if (PyTuple_Size(t) != 2) {
-	PyErr_SetString(PyExc_TypeError,
-			"source prepare function return tuple must be exactly "
-			"2 elements long");
-	goto bail;
+        goto bail;
+    } else if (!PyObject_IsTrue (t)) {
+        got_err = FALSE;
+        goto bail;
+    } else if (!PyTuple_Check (t)) {
+        PyErr_SetString (
+            PyExc_TypeError,
+            "source prepare function must return a tuple or False");
+        goto bail;
+    } else if (PyTuple_Size (t) != 2) {
+        PyErr_SetString (
+            PyExc_TypeError,
+            "source prepare function return tuple must be exactly "
+            "2 elements long");
+        goto bail;
     }
 
-    if (!pygi_gboolean_from_py (PyTuple_GET_ITEM(t, 0), &ret)) {
+    if (!pygi_gboolean_from_py (PyTuple_GET_ITEM (t, 0), &ret)) {
         ret = FALSE;
         goto bail;
     }
 
-    if (!pygi_gint_from_py (PyTuple_GET_ITEM(t, 1), timeout))
-    {
+    if (!pygi_gint_from_py (PyTuple_GET_ITEM (t, 1), timeout)) {
         ret = FALSE;
         goto bail;
     }
@@ -82,78 +82,76 @@ source_prepare(GSource *source, gint *timeout)
     got_err = FALSE;
 
 bail:
-    if (got_err)
-	PyErr_Print();
+    if (got_err) PyErr_Print ();
 
-    Py_XDECREF(t);
+    Py_XDECREF (t);
 
-    PyGILState_Release(state);
+    PyGILState_Release (state);
 
     return ret;
 }
 
 static gboolean
-source_check(GSource *source)
+source_check (GSource *source)
 {
     PyGRealSource *pysource = (PyGRealSource *)source;
     PyObject *t;
     gboolean ret;
     PyGILState_STATE state;
 
-    state = PyGILState_Ensure();
+    state = PyGILState_Ensure ();
 
-    t = PyObject_CallMethod(pysource->obj, "check", NULL);
+    t = PyObject_CallMethod (pysource->obj, "check", NULL);
 
     if (t == NULL) {
-	PyErr_Print();
-	ret = FALSE;
+        PyErr_Print ();
+        ret = FALSE;
     } else {
-	ret = PyObject_IsTrue(t);
-	Py_DECREF(t);
+        ret = PyObject_IsTrue (t);
+        Py_DECREF (t);
     }
 
-    PyGILState_Release(state);
+    PyGILState_Release (state);
 
     return ret;
 }
 
 static gboolean
-source_dispatch(GSource *source, GSourceFunc callback, gpointer user_data)
+source_dispatch (GSource *source, GSourceFunc callback, gpointer user_data)
 {
     PyGRealSource *pysource = (PyGRealSource *)source;
     PyObject *func, *args, *tuple, *t;
     gboolean ret;
     PyGILState_STATE state;
 
-    state = PyGILState_Ensure();
+    state = PyGILState_Ensure ();
 
     if (callback) {
-	tuple = user_data;
+        tuple = user_data;
 
-	func = PyTuple_GetItem(tuple, 0);
-        args = PyTuple_GetItem(tuple, 1);
+        func = PyTuple_GetItem (tuple, 0);
+        args = PyTuple_GetItem (tuple, 1);
     } else {
-	func = Py_None;
-	args = Py_None;
+        func = Py_None;
+        args = Py_None;
     }
 
-    t = PyObject_CallMethod(pysource->obj, "dispatch", "OO", func, args);
+    t = PyObject_CallMethod (pysource->obj, "dispatch", "OO", func, args);
 
     if (t == NULL) {
-	PyErr_Print();
-	ret = FALSE;
+        PyErr_Print ();
+        ret = FALSE;
     } else {
-	ret = PyObject_IsTrue(t);
-	Py_DECREF(t);
+        ret = PyObject_IsTrue (t);
+        Py_DECREF (t);
     }
 
-    PyGILState_Release(state);
+    PyGILState_Release (state);
 
     return ret;
 }
 
-static GSourceFuncs pyg_source_funcs =
-{
+static GSourceFuncs pyg_source_funcs = {
     source_prepare,
     source_check,
     source_dispatch,
@@ -168,39 +166,39 @@ static GSourceFuncs pyg_source_funcs =
  * call Py_DECREF on the data.
  */
 static void
-destroy_notify(gpointer user_data)
+destroy_notify (gpointer user_data)
 {
     PyObject *obj = (PyObject *)user_data;
     PyGILState_STATE state;
 
-    state = PyGILState_Ensure();
-    Py_DECREF(obj);
-    PyGILState_Release(state);
+    state = PyGILState_Ensure ();
+    Py_DECREF (obj);
+    PyGILState_Release (state);
 }
 
 static gboolean
-handler_marshal(gpointer user_data)
+handler_marshal (gpointer user_data)
 {
     PyObject *tuple, *ret;
     gboolean res;
     PyGILState_STATE state;
 
-    g_return_val_if_fail(user_data != NULL, FALSE);
+    g_return_val_if_fail (user_data != NULL, FALSE);
 
-    state = PyGILState_Ensure();
+    state = PyGILState_Ensure ();
 
     tuple = (PyObject *)user_data;
-    ret = PyObject_CallObject(PyTuple_GetItem(tuple, 0),
-			      PyTuple_GetItem(tuple, 1));
+    ret = PyObject_CallObject (PyTuple_GetItem (tuple, 0),
+                               PyTuple_GetItem (tuple, 1));
     if (!ret) {
-	PyErr_Print();
-	res = FALSE;
+        PyErr_Print ();
+        res = FALSE;
     } else {
-	res = PyObject_IsTrue(ret);
-	Py_DECREF(ret);
+        res = PyObject_IsTrue (ret);
+        Py_DECREF (ret);
     }
 
-    PyGILState_Release(state);
+    PyGILState_Release (state);
 
     return res;
 }
@@ -213,39 +211,37 @@ pygi_source_set_callback (PyGObject *self_module, PyObject *args)
 
     len = PyTuple_Size (args);
     if (len < 2) {
-	PyErr_SetString(PyExc_TypeError,
-			"set_callback requires at least 2 arguments");
-	return NULL;
+        PyErr_SetString (PyExc_TypeError,
+                         "set_callback requires at least 2 arguments");
+        return NULL;
     }
 
-    first = PySequence_GetSlice(args, 0, 2);
-    if (!PyArg_ParseTuple(first, "OO:set_callback", &self, &callback)) {
-	Py_DECREF (first);
-	return NULL;
+    first = PySequence_GetSlice (args, 0, 2);
+    if (!PyArg_ParseTuple (first, "OO:set_callback", &self, &callback)) {
+        Py_DECREF (first);
+        return NULL;
     }
-    Py_DECREF(first);
+    Py_DECREF (first);
 
     if (!pyg_boxed_check (self, G_TYPE_SOURCE)) {
-	PyErr_SetString(PyExc_TypeError, "first argument is not a GLib.Source");
-	return NULL;
+        PyErr_SetString (PyExc_TypeError,
+                         "first argument is not a GLib.Source");
+        return NULL;
     }
 
-    if (!PyCallable_Check(callback)) {
-	PyErr_SetString(PyExc_TypeError, "second argument not callable");
-	return NULL;
+    if (!PyCallable_Check (callback)) {
+        PyErr_SetString (PyExc_TypeError, "second argument not callable");
+        return NULL;
     }
 
-    cbargs = PySequence_GetSlice(args, 2, len);
-    if (cbargs == NULL)
-	return NULL;
+    cbargs = PySequence_GetSlice (args, 2, len);
+    if (cbargs == NULL) return NULL;
 
-    data = Py_BuildValue("(ON)", callback, cbargs);
-    if (data == NULL)
-	return NULL;
+    data = Py_BuildValue ("(ON)", callback, cbargs);
+    if (data == NULL) return NULL;
 
-    g_source_set_callback(pyg_boxed_get (self, GSource),
-			  handler_marshal, data,
-			  destroy_notify);
+    g_source_set_callback (pyg_boxed_get (self, GSource), handler_marshal,
+                           data, destroy_notify);
 
     Py_RETURN_NONE;
 }
@@ -258,7 +254,7 @@ pygi_source_set_callback (PyGObject *self_module, PyObject *args)
  *
  * Returns NULL on error and sets an exception.
  */
-PyObject*
+PyObject *
 pygi_source_new (PyObject *self, PyObject *args)
 {
     PyGRealSource *source;
@@ -267,12 +263,12 @@ pygi_source_new (PyObject *self, PyObject *args)
     g_assert (args == NULL);
 
     py_type = pygi_type_import_by_name ("GLib", "Source");
-    if (!py_type)
-        return NULL;
+    if (!py_type) return NULL;
 
-    source = (PyGRealSource*) g_source_new (&pyg_source_funcs, sizeof (PyGRealSource));
+    source = (PyGRealSource *)g_source_new (&pyg_source_funcs,
+                                            sizeof (PyGRealSource));
     /* g_source_new uses malloc, not slices */
-    boxed = pygi_boxed_new ( (PyTypeObject *) py_type, source, TRUE, 0);
+    boxed = pygi_boxed_new ((PyTypeObject *)py_type, source, TRUE, 0);
     Py_DECREF (py_type);
     if (!boxed) {
         g_source_unref ((GSource *)source);

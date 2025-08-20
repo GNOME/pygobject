@@ -34,10 +34,8 @@ typedef struct {
                         GOptionGroup.destroy() */
 } PyGOptionGroup;
 
-PyObject* pyg_option_group_new(GOptionGroup *group);
+PyObject *pyg_option_group_new (GOptionGroup *group);
 
-int pygi_option_group_register_types(PyObject *d);
+int pygi_option_group_register_types (PyObject *d);
 
 #endif /* __PYG_OPTIONGROUP_H__ */
-
-

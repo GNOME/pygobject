@@ -51,11 +51,11 @@ do_lookup (const gchar *namespace, const gchar *name)
 {
     guint i;
     for (i = 0; i < foreign_structs->len; i++) {
-        PyGIForeignStruct *foreign_struct = \
-                g_ptr_array_index (foreign_structs, i);
+        PyGIForeignStruct *foreign_struct =
+            g_ptr_array_index (foreign_structs, i);
 
-        if ( (strcmp (namespace, foreign_struct->namespace) == 0) &&
-                (strcmp (name, foreign_struct->name) == 0)) {
+        if ((strcmp (namespace, foreign_struct->namespace) == 0)
+            && (strcmp (name, foreign_struct->name) == 0)) {
             return foreign_struct;
         }
     }
@@ -92,8 +92,7 @@ pygi_struct_foreign_lookup_by_name (const char *namespace, const char *name)
     if (result == NULL) {
         PyErr_Format (PyExc_TypeError,
                       "Couldn't find foreign struct converter for '%s.%s'",
-                      namespace,
-                      name);
+                      namespace, name);
     }
 
     return result;
@@ -109,10 +108,9 @@ pygi_struct_foreign_lookup (GIBaseInfo *base_info)
 }
 
 PyObject *
-pygi_struct_foreign_convert_to_g_argument (PyObject        *value,
-                                           GIRegisteredTypeInfo *interface_info,
-                                           GITransfer       transfer,
-                                           GIArgument      *arg)
+pygi_struct_foreign_convert_to_g_argument (
+    PyObject *value, GIRegisteredTypeInfo *interface_info, GITransfer transfer,
+    GIArgument *arg)
 {
     PyObject *result;
 
@@ -120,8 +118,8 @@ pygi_struct_foreign_convert_to_g_argument (PyObject        *value,
     PyGIForeignStruct *foreign_struct = pygi_struct_foreign_lookup (base_info);
 
     if (foreign_struct == NULL) {
-        PyErr_Format(PyExc_KeyError, "could not find foreign type %s",
-                     gi_base_info_get_name (base_info));
+        PyErr_Format (PyExc_KeyError, "could not find foreign type %s",
+                      gi_base_info_get_name (base_info));
         return FALSE;
     }
 
@@ -130,37 +128,31 @@ pygi_struct_foreign_convert_to_g_argument (PyObject        *value,
 }
 
 PyObject *
-pygi_struct_foreign_convert_from_g_argument (GIRegisteredTypeInfo *interface_info,
-                                             GITransfer       transfer,
-                                             GIArgument      *arg)
+pygi_struct_foreign_convert_from_g_argument (
+    GIRegisteredTypeInfo *interface_info, GITransfer transfer, GIArgument *arg)
 {
     GIBaseInfo *base_info = GI_BASE_INFO (interface_info);
     PyGIForeignStruct *foreign_struct = pygi_struct_foreign_lookup (base_info);
 
-    if (foreign_struct == NULL)
-        return NULL;
+    if (foreign_struct == NULL) return NULL;
 
     return foreign_struct->from_func (interface_info, transfer, arg);
 }
 
 PyObject *
-pygi_struct_foreign_release (GIBaseInfo *base_info,
-                             gpointer    struct_)
+pygi_struct_foreign_release (GIBaseInfo *base_info, gpointer struct_)
 {
     PyGIForeignStruct *foreign_struct = pygi_struct_foreign_lookup (base_info);
 
-    if (foreign_struct == NULL)
-        return NULL;
+    if (foreign_struct == NULL) return NULL;
 
-    if (!foreign_struct->release_func)
-        Py_RETURN_NONE;
+    if (!foreign_struct->release_func) Py_RETURN_NONE;
 
     return foreign_struct->release_func (base_info, struct_);
 }
 
 void
-pygi_register_foreign_struct (const char* namespace_,
-                              const char* name,
+pygi_register_foreign_struct (const char *namespace_, const char *name,
                               PyGIArgOverrideToGIArgumentFunc to_func,
                               PyGIArgOverrideFromGIArgumentFunc from_func,
                               PyGIArgOverrideReleaseFunc release_func)
@@ -182,8 +174,7 @@ pygi_require_foreign (PyObject *self, PyObject *args, PyObject *kwargs)
     const char *namespace = NULL;
     const char *symbol = NULL;
 
-    if (!PyArg_ParseTupleAndKeywords (args, kwargs,
-                                      "s|z:require_foreign",
+    if (!PyArg_ParseTupleAndKeywords (args, kwargs, "s|z:require_foreign",
                                       kwlist, &namespace, &symbol)) {
         return NULL;
     }
@@ -220,7 +211,8 @@ pygi_foreign_init (void)
 }
 
 
-PyObject *pygi_register_foreign (PyObject *self, PyObject *args)
+PyObject *
+pygi_register_foreign (PyObject *self, PyObject *args)
 {
     /* We need to try loading the foreign modules upfront so the GType
      * converters are registered:
