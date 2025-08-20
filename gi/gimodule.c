@@ -947,9 +947,7 @@ pygobject_init_wrapper_get (void)
 }
 
 int
-pygobject_constructv (PyGObject *self,
-                      guint n_properties,
-                      const char *names[],
+pygobject_constructv (PyGObject *self, guint n_properties, const char *names[],
                       const GValue values[])
 {
     GObject *obj;
@@ -958,14 +956,14 @@ pygobject_constructv (PyGObject *self,
     g_assert (self->obj == NULL);
     pygobject_init_wrapper_set ((PyObject *)self);
 
-    type = pyg_type_from_object((PyObject *) self);
-    obj = g_object_new_with_properties(type, n_properties, names, values);
+    type = pyg_type_from_object ((PyObject *)self);
+    obj = g_object_new_with_properties (type, n_properties, names, values);
 
     if (G_IS_INITIALLY_UNOWNED (obj)) {
         g_object_ref_sink (obj);
     }
 
-    pygobject_init_wrapper_set(NULL);
+    pygobject_init_wrapper_set (NULL);
     self->obj = obj;
     pygobject_register_wrapper ((PyObject *)self);
 
