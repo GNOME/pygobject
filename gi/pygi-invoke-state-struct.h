@@ -6,8 +6,7 @@
 
 G_BEGIN_DECLS
 
-typedef struct _PyGIInvokeArgState
-{
+typedef struct _PyGIInvokeArgState {
     /* Holds memory for the C value of arguments marshaled "to" or "from" Python. */
     GIArgument arg_value;
 
@@ -24,8 +23,7 @@ typedef struct _PyGIInvokeArgState
 } PyGIInvokeArgState;
 
 
-typedef struct _PyGIInvokeState
-{
+typedef struct _PyGIInvokeState {
     PyObject *py_in_args;
     gssize n_py_in_args;
 

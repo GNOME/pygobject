@@ -29,48 +29,46 @@
 
 GQuark pygboxed_type_key;
 
-PYGI_DEFINE_TYPE("gobject.GBoxed", PyGBoxed_Type, PyGBoxed);
+PYGI_DEFINE_TYPE ("gobject.GBoxed", PyGBoxed_Type, PyGBoxed);
 
 static void
-gboxed_dealloc(PyGBoxed *self)
+gboxed_dealloc (PyGBoxed *self)
 {
     if (self->free_on_dealloc && pyg_boxed_get_ptr (self)) {
-	PyGILState_STATE state = PyGILState_Ensure();
-	g_boxed_free (self->gtype, pyg_boxed_get_ptr (self));
-	PyGILState_Release(state);
+        PyGILState_STATE state = PyGILState_Ensure ();
+        g_boxed_free (self->gtype, pyg_boxed_get_ptr (self));
+        PyGILState_Release (state);
     }
 
-    Py_TYPE(self)->tp_free((PyObject *)self);
+    Py_TYPE (self)->tp_free ((PyObject *)self);
 }
 
-static PyObject*
-gboxed_richcompare(PyObject *self, PyObject *other, int op)
+static PyObject *
+gboxed_richcompare (PyObject *self, PyObject *other, int op)
 {
-    if (Py_TYPE(self) == Py_TYPE(other) &&
-        PyObject_IsInstance(self, (PyObject*)&PyGBoxed_Type))
+    if (Py_TYPE (self) == Py_TYPE (other)
+        && PyObject_IsInstance (self, (PyObject *)&PyGBoxed_Type))
         return pyg_ptr_richcompare (pyg_boxed_get_ptr (self),
-                                    pyg_boxed_get_ptr (other),
-                                    op);
+                                    pyg_boxed_get_ptr (other), op);
     else {
         Py_RETURN_NOTIMPLEMENTED;
     }
 }
 
 static Py_hash_t
-gboxed_hash(PyGBoxed *self)
+gboxed_hash (PyGBoxed *self)
 {
     return (Py_hash_t)(gintptr)(pyg_boxed_get_ptr (self));
 }
 
 static PyObject *
-gboxed_repr(PyGBoxed *boxed)
+gboxed_repr (PyGBoxed *boxed)
 {
     PyObject *module, *repr, *self = (PyObject *)boxed;
     gchar *module_str, *namespace;
 
     module = PyObject_GetAttrString (self, "__module__");
-    if (module == NULL)
-        return NULL;
+    if (module == NULL) return NULL;
 
     if (!PyUnicode_Check (module)) {
         Py_DECREF (module);
@@ -85,46 +83,44 @@ gboxed_repr(PyGBoxed *boxed)
         namespace += 1;
     }
 
-    repr = PyUnicode_FromFormat ("<%s.%s object at %p (%s at %p)>",
-                                 namespace, Py_TYPE (self)->tp_name,
-                                 self, g_type_name (boxed->gtype),
-                                 pyg_boxed_get_ptr (boxed));
+    repr = PyUnicode_FromFormat (
+        "<%s.%s object at %p (%s at %p)>", namespace, Py_TYPE (self)->tp_name,
+        self, g_type_name (boxed->gtype), pyg_boxed_get_ptr (boxed));
     Py_DECREF (module);
     return repr;
 }
 
 static int
-gboxed_init(PyGBoxed *self, PyObject *args, PyObject *kwargs)
+gboxed_init (PyGBoxed *self, PyObject *args, PyObject *kwargs)
 {
     gchar buf[512];
 
-    if (!PyArg_ParseTuple(args, ":GBoxed.__init__"))
-	return -1;
+    if (!PyArg_ParseTuple (args, ":GBoxed.__init__")) return -1;
 
     pyg_boxed_set_ptr (self, NULL);
     self->gtype = 0;
     self->free_on_dealloc = FALSE;
 
-    g_snprintf(buf, sizeof(buf), "%s can not be constructed",
-	       Py_TYPE(self)->tp_name);
-    PyErr_SetString(PyExc_NotImplementedError, buf);
+    g_snprintf (buf, sizeof (buf), "%s can not be constructed",
+                Py_TYPE (self)->tp_name);
+    PyErr_SetString (PyExc_NotImplementedError, buf);
     return -1;
 }
 
 static void
-gboxed_free(PyObject *op)
+gboxed_free (PyObject *op)
 {
-  PyObject_Free(op);
+    PyObject_Free (op);
 }
 
 static PyObject *
-gboxed_copy(PyGBoxed *self)
+gboxed_copy (PyGBoxed *self)
 {
     return pygi_gboxed_new (self->gtype, pyg_boxed_get_ptr (self), TRUE, TRUE);
 }
 
 static PyMethodDef pygboxed_methods[] = {
-    { "copy", (PyCFunction) gboxed_copy, METH_NOARGS },
+    { "copy", (PyCFunction)gboxed_copy, METH_NOARGS },
     { NULL, NULL, 0 },
 };
 
@@ -146,28 +142,28 @@ pygi_register_gboxed (PyObject *dict, const gchar *class_name,
 {
     PyObject *o;
 
-    g_return_if_fail(dict != NULL);
-    g_return_if_fail(class_name != NULL);
-    g_return_if_fail(boxed_type != 0);
+    g_return_if_fail (dict != NULL);
+    g_return_if_fail (class_name != NULL);
+    g_return_if_fail (boxed_type != 0);
 
-    if (!type->tp_dealloc)  type->tp_dealloc  = (destructor)gboxed_dealloc;
+    if (!type->tp_dealloc) type->tp_dealloc = (destructor)gboxed_dealloc;
 
-    Py_SET_TYPE(type, &PyType_Type);
+    Py_SET_TYPE (type, &PyType_Type);
     g_assert (Py_TYPE (&PyGBoxed_Type) != NULL);
     type->tp_base = &PyGBoxed_Type;
 
-    if (PyType_Ready(type) < 0) {
-	g_warning("could not get type `%s' ready", type->tp_name);
-	return;
+    if (PyType_Ready (type) < 0) {
+        g_warning ("could not get type `%s' ready", type->tp_name);
+        return;
     }
 
-    PyDict_SetItemString(type->tp_dict, "__gtype__",
-			 o=pyg_type_wrapper_new(boxed_type));
-    Py_DECREF(o);
+    PyDict_SetItemString (type->tp_dict, "__gtype__",
+                          o = pyg_type_wrapper_new (boxed_type));
+    Py_DECREF (o);
 
-    g_type_set_qdata(boxed_type, pygboxed_type_key, type);
+    g_type_set_qdata (boxed_type, pygboxed_type_key, type);
 
-    PyDict_SetItemString(dict, (char *)class_name, (PyObject *)type);
+    PyDict_SetItemString (dict, (char *)class_name, (PyObject *)type);
 }
 
 /**
@@ -193,24 +189,22 @@ pygi_gboxed_new (GType boxed_type, gpointer boxed, gboolean copy_boxed,
     PyGBoxed *self;
     PyTypeObject *tp;
 
-    g_return_val_if_fail(boxed_type != 0, NULL);
-    g_return_val_if_fail(!copy_boxed || (copy_boxed && own_ref), NULL);
+    g_return_val_if_fail (boxed_type != 0, NULL);
+    g_return_val_if_fail (!copy_boxed || (copy_boxed && own_ref), NULL);
 
-    state = PyGILState_Ensure();
+    state = PyGILState_Ensure ();
 
     if (!boxed) {
-	Py_INCREF(Py_None);
-	PyGILState_Release(state);
-	return Py_None;
+        Py_INCREF (Py_None);
+        PyGILState_Release (state);
+        return Py_None;
     }
 
-    tp = g_type_get_qdata(boxed_type, pygboxed_type_key);
+    tp = g_type_get_qdata (boxed_type, pygboxed_type_key);
 
-    if (!tp)
-        tp = (PyTypeObject *)pygi_type_import_by_g_type(boxed_type);
+    if (!tp) tp = (PyTypeObject *)pygi_type_import_by_g_type (boxed_type);
 
-    if (!tp)
-	tp = (PyTypeObject *)&PyGBoxed_Type; /* fallback */
+    if (!tp) tp = (PyTypeObject *)&PyGBoxed_Type; /* fallback */
 
     if (!PyType_IsSubtype (tp, &PyGBoxed_Type)) {
         PyErr_Format (PyExc_RuntimeError, "%s isn't a GBoxed", tp->tp_name);
@@ -218,20 +212,19 @@ pygi_gboxed_new (GType boxed_type, gpointer boxed, gboolean copy_boxed,
         return NULL;
     }
 
-    self = (PyGBoxed *)tp->tp_alloc(tp, 0);
+    self = (PyGBoxed *)tp->tp_alloc (tp, 0);
 
     if (self == NULL) {
-	PyGILState_Release(state);
+        PyGILState_Release (state);
         return NULL;
     }
 
-    if (copy_boxed)
-	boxed = g_boxed_copy(boxed_type, boxed);
+    if (copy_boxed) boxed = g_boxed_copy (boxed_type, boxed);
     pyg_boxed_set_ptr (self, boxed);
     self->gtype = boxed_type;
     self->free_on_dealloc = own_ref;
 
-    PyGILState_Release(state);
+    PyGILState_Release (state);
 
     return (PyObject *)self;
 }
@@ -240,11 +233,11 @@ pygi_gboxed_new (GType boxed_type, gpointer boxed, gboolean copy_boxed,
  * Returns 0 on success, or -1 and sets an exception.
  */
 int
-pygi_gboxed_register_types(PyObject *d)
+pygi_gboxed_register_types (PyObject *d)
 {
     PyObject *pygtype;
 
-    pygboxed_type_key        = g_quark_from_static_string("PyGBoxed::class");
+    pygboxed_type_key = g_quark_from_static_string ("PyGBoxed::class");
 
     PyGBoxed_Type.tp_dealloc = (destructor)gboxed_dealloc;
     PyGBoxed_Type.tp_richcompare = gboxed_richcompare;
@@ -256,14 +249,13 @@ pygi_gboxed_register_types(PyObject *d)
     PyGBoxed_Type.tp_hash = (hashfunc)gboxed_hash;
     PyGBoxed_Type.tp_alloc = PyType_GenericAlloc;
     PyGBoxed_Type.tp_new = PyType_GenericNew;
-    if (PyType_Ready(&PyGBoxed_Type))
-        return -1;
+    if (PyType_Ready (&PyGBoxed_Type)) return -1;
 
     pygtype = pyg_type_wrapper_new (G_TYPE_POINTER);
     PyDict_SetItemString (PyGBoxed_Type.tp_dict, "__gtype__", pygtype);
     Py_DECREF (pygtype);
 
-    PyDict_SetItemString(d, "GBoxed", (PyObject *)&PyGBoxed_Type);
+    PyDict_SetItemString (d, "GBoxed", (PyObject *)&PyGBoxed_Type);
 
     return 0;
 }

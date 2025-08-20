@@ -36,7 +36,7 @@ extern PyTypeObject PyGIRepository_Type;
 
 extern PyObject *PyGIRepositoryError;
 
-GIRepository* pygi_repository_get_default (void);
+GIRepository *pygi_repository_get_default (void);
 
 int pygi_repository_register_types (PyObject *m);
 
