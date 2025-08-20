@@ -58,7 +58,7 @@ typedef struct {
 #define pyg_boxed_get(v,t)      ((t *)((PyGBoxed *)(v))->boxed)
 #define pyg_boxed_get_ptr(v)    (((PyGBoxed *)(v))->boxed)
 #define pyg_boxed_set_ptr(v,p)  (((PyGBoxed *)(v))->boxed = (gpointer)p)
-#define pyg_boxed_check(v,typecode) (PyObject_TypeCheck(v, &PyGBoxed_Type) && ((PyGBoxed *)(v))->gtype == typecode)
+#define pyg_boxed_check(v,typecode) (PyObject_TypeCheck(v, &PyGBoxed_Type) && ((PyGBoxed *)(v))->gtype == (typecode))
 
 typedef struct {
     PyObject_HEAD
@@ -69,7 +69,7 @@ typedef struct {
 #define pyg_pointer_get(v,t)      ((t *)((PyGPointer *)(v))->pointer)
 #define pyg_pointer_get_ptr(v)    (((PyGPointer *)(v))->pointer)
 #define pyg_pointer_set_ptr(v,p)  (((PyGPointer *)(v))->pointer = (gpointer)p)
-#define pyg_pointer_check(v,typecode) (PyObject_TypeCheck(v, &PyGPointer_Type) && ((PyGPointer *)(v))->gtype == typecode)
+#define pyg_pointer_check(v,typecode) (PyObject_TypeCheck(v, &PyGPointer_Type) && ((PyGPointer *)(v))->gtype == (typecode))
 
 typedef void (*PyGFatalExceptionFunc) (void);
 typedef void (*PyGThreadBlockFunc) (void);
