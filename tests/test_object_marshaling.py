@@ -2,6 +2,7 @@ import unittest
 import weakref
 import gc
 import sys
+import warnings
 
 from gi import PyGIDeprecationWarning
 from gi.repository import GObject
@@ -123,12 +124,14 @@ class TestVFuncsWithObjectArg(unittest.TestCase):
         # of a potential leak. If this occures it is really a bug in the underlying library
         # but pygobject tries to react to this in a reasonable way.
         vfuncs = self.VFuncs()
-        ref_count, is_floating = (
-            vfuncs.get_ref_info_for_vfunc_out_object_transfer_none()
-        )
+        with warnings.catch_warnings(record=True):
+            warnings.simplefilter("always")
+            ref_count, is_floating = (
+                vfuncs.get_ref_info_for_vfunc_return_object_transfer_none()
+            )
 
         # The ref count of the GObject returned to the caller (get_ref_info_for_vfunc_return_object_transfer_none)
-        # should be a single floating ref
+        # should be a single ref
         if hasattr(sys, "getrefcount"):
             self.assertEqual(ref_count, 1)
         self.assertFalse(is_floating)
@@ -139,9 +142,11 @@ class TestVFuncsWithObjectArg(unittest.TestCase):
     def test_vfunc_out_object_transfer_none(self):
         # Same as above except uses out arg instead of return
         vfuncs = self.VFuncs()
-        ref_count, is_floating = (
-            vfuncs.get_ref_info_for_vfunc_out_object_transfer_none()
-        )
+        with warnings.catch_warnings(record=True):
+            warnings.simplefilter("always")
+            ref_count, is_floating = (
+                vfuncs.get_ref_info_for_vfunc_out_object_transfer_none()
+            )
 
         if hasattr(sys, "getrefcount"):
             self.assertEqual(ref_count, 1)
@@ -229,14 +234,16 @@ class TestVFuncsWithFloatingArg(unittest.TestCase):
 
     @unittest.skipUnless(hasattr(sys, "getrefcount"), "refcount specific")
     def test_vfunc_return_object_transfer_none_with_floating(self):
-        # Python is expected to return a single floating reference without warning.
+        # See TestVFuncWithObjectArg.test_vfunc_return_object_transfer_none for an explaination.
         vfuncs = self.VFuncs()
-        ref_count, is_floating = (
-            vfuncs.get_ref_info_for_vfunc_return_object_transfer_none()
-        )
+        with warnings.catch_warnings(record=True):
+            warnings.simplefilter("always")
+            ref_count, is_floating = (
+                vfuncs.get_ref_info_for_vfunc_return_object_transfer_none()
+            )
 
         # The ref count of the GObject returned to the caller (get_ref_info_for_vfunc_return_object_transfer_none)
-        # should be a single floating ref
+        # should be a single ref
         self.assertEqual(ref_count, 1)
         self.assertFalse(is_floating)
 
@@ -247,9 +254,11 @@ class TestVFuncsWithFloatingArg(unittest.TestCase):
     def test_vfunc_out_object_transfer_none_with_floating(self):
         # Same as above except uses out arg instead of return
         vfuncs = self.VFuncs()
-        ref_count, is_floating = (
-            vfuncs.get_ref_info_for_vfunc_out_object_transfer_none()
-        )
+        with warnings.catch_warnings(record=True):
+            warnings.simplefilter("always")
+            ref_count, is_floating = (
+                vfuncs.get_ref_info_for_vfunc_out_object_transfer_none()
+            )
 
         self.assertEqual(ref_count, 1)
         self.assertFalse(is_floating)

@@ -112,7 +112,23 @@ pygi_arg_gobject_out_arg_from_py (PyObject *py_arg, /* in */
          * in a return tuple), we assume the GObject will be free'd before reaching
          * its target and become invalid. So instead of getting invalid object errors
          * we add a new GObject ref.
+         *
+         * Note that this check does not hold up for Python 3.14
          */
+        PyObject *repr = PyObject_Repr (py_arg);
+        gchar *msg = g_strdup_printf (
+            "Adding extra reference for %s, "
+            "for nothing is holding a reference to this object. "
+            "This could potentially lead to a memory leak. "
+            "See: https://bugzilla.gnome.org/show_bug.cgi?id=687522",
+            PyUnicode_AsUTF8 (repr));
+        Py_DECREF (repr);
+        if (PyErr_WarnEx (PyExc_RuntimeWarning, msg, 2)) {
+            g_free (msg);
+            return FALSE;
+        }
+        g_free (msg);
+
         g_object_ref (gobj);
     }
 
