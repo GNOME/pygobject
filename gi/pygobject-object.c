@@ -635,6 +635,41 @@ pygobject_toggle_ref_ensure (PyGObject *self)
     g_object_unref (self->obj);
 }
 
+void
+pygobject_sink (GObject *obj)
+{
+    static int warned = 0;
+    if (!warned) {
+        g_warning (
+            "pygobject_sink() is deprecated and should no longer be used.");
+        warned = 1;
+    }
+}
+
+void
+pygobject_ref_float (PyGObject *self)
+{
+    static int warned = 0;
+    if (!warned) {
+        g_warning (
+            "pygobject_ref_float() is deprecated and should no longer be "
+            "used.");
+        warned = 1;
+    }
+}
+
+void
+pygobject_ref_sink (PyGObject *self)
+{
+    static int warned = 0;
+    if (!warned) {
+        g_warning (
+            "pygobject_ref_sink() is deprecated and should no longer be "
+            "used.");
+        warned = 1;
+    }
+}
+
 /**
  * pygobject_register_wrapper:
  * @self: the wrapper instance
