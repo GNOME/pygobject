@@ -32,7 +32,8 @@ build-image:
   image: quay.io/buildah/stable:latest
   interruptible: true
   rules:
-    - changes:
+    - if: $CI_PROJECT_NAMESPACE == GNOME
+      changes:
         - ".gitlab-ci/Dockerfile"
         - ".gitlab-ci/python-versions.txt"
       when: always
