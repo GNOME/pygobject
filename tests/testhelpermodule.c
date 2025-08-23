@@ -25,28 +25,28 @@ test_type_get_type(void)
 {
     static GType gtype = 0;
     GType parent_type;
-    
+
     if (gtype == 0)
     {
         GTypeInfo *type_info;
         GTypeQuery query;
-	
+
 	parent_type = g_type_from_name("PyGObject");
 	if (parent_type == 0)
 	     g_error("could not get PyGObject from testmodule");
 
 	type_info = (GTypeInfo *)g_new0(GTypeInfo, 1);
-	
+
         g_type_query(parent_type, &query);
         type_info->class_size = (guint16)query.class_size;
         type_info->instance_size = (guint16)query.instance_size;
-	
+
         gtype = g_type_register_static(parent_type,
 				       "TestType", type_info, 0);
 	if (!gtype)
 	     g_error("Could not register TestType");
     }
-    
+
     return gtype;
 }
 
@@ -61,7 +61,7 @@ _wrap_get_test_thread (PyObject * self)
   g_assert (g_type_is_a (TEST_TYPE_THREAD, G_TYPE_OBJECT));
   obj = g_object_new (TEST_TYPE_THREAD, NULL);
   g_assert (obj != NULL);
-  
+
   return pygobject_new(obj);
 }
 
@@ -104,9 +104,9 @@ _wrap_test_interface_iface_method(PyGObject *self, PyObject *args, PyObject *kwa
 
     if (!PyArg_ParseTupleAndKeywords(args, kwargs,":", kwlist))
         return NULL;
-    
+
     test_interface_iface_method(TEST_INTERFACE(self->obj));
-    
+
     Py_RETURN_NONE;
 }
 
@@ -130,7 +130,7 @@ _wrap_TestInterface__do_iface_method(PyObject *cls, PyObject *args, PyObject *kw
 
   if (!PyArg_ParseTupleAndKeywords(args, kwargs,"O!:TestInterface.iface_method", kwlist, &PyTestInterface_Type, &self))
     return NULL;
-  
+
   iface = g_type_interface_peek(g_type_class_peek(pyg_type_from_object(cls)),
 				TEST_TYPE_INTERFACE);
   if (iface->iface_method)
@@ -153,7 +153,7 @@ _wrap_TestInterface__proxy_do_iface_method(TestInterface *self)
     PyObject *py_retval;
     PyObject *py_args;
     PyObject *py_method;
-    
+
     __py_state = PyGILState_Ensure();
     py_self = pygobject_new((GObject *) self);
     if (!py_self) {
@@ -193,7 +193,7 @@ _wrap_TestInterface__proxy_do_iface_method(TestInterface *self)
         PyGILState_Release(__py_state);
         return;
     }
-    
+
     Py_DECREF(py_retval);
     Py_DECREF(py_method);
     Py_DECREF(py_args);
@@ -418,62 +418,62 @@ connectcallbacks (GObject *object)
 {
 
   gchar *data = "user-data";
-  
+
   g_signal_connect (G_OBJECT (object),
                     "test1",
-                    G_CALLBACK (test1_callback), 
+                    G_CALLBACK (test1_callback),
                     data);
   g_signal_connect_swapped (G_OBJECT (object),
                     "test1",
-                    G_CALLBACK (test1_callback_swapped), 
+                    G_CALLBACK (test1_callback_swapped),
                     data);
   g_signal_connect (G_OBJECT (object),
                     "test2",
-                    G_CALLBACK (test2_callback), 
+                    G_CALLBACK (test2_callback),
                     NULL);
   g_signal_connect (G_OBJECT (object),
                     "test3",
-                    G_CALLBACK (test3_callback), 
+                    G_CALLBACK (test3_callback),
                     NULL);
   g_signal_connect (G_OBJECT (object),
                     "test4",
-                    G_CALLBACK (test4_callback), 
+                    G_CALLBACK (test4_callback),
                     NULL);
   g_signal_connect (G_OBJECT (object),
                     "test_float",
-                    G_CALLBACK (test_float_callback), 
+                    G_CALLBACK (test_float_callback),
                     NULL);
   g_signal_connect (G_OBJECT (object),
                     "test_double",
-                    G_CALLBACK (test_double_callback), 
+                    G_CALLBACK (test_double_callback),
                     NULL);
   g_signal_connect (G_OBJECT (object),
                     "test_int64",
-                    G_CALLBACK (test_int64_callback), 
+                    G_CALLBACK (test_int64_callback),
                     NULL);
   g_signal_connect (G_OBJECT (object),
                     "test_string",
-                    G_CALLBACK (test_string_callback), 
+                    G_CALLBACK (test_string_callback),
                     NULL);
   g_signal_connect (G_OBJECT (object),
                     "test_object",
-                    G_CALLBACK (test_object_callback), 
+                    G_CALLBACK (test_object_callback),
                     NULL);
   g_signal_connect (G_OBJECT (object),
                     "test_paramspec",
-                    G_CALLBACK (test_paramspec_callback), 
+                    G_CALLBACK (test_paramspec_callback),
                     NULL);
   g_signal_connect (G_OBJECT (object),
                     "test_gvalue",
-                    G_CALLBACK (test_gvalue_callback), 
+                    G_CALLBACK (test_gvalue_callback),
                     NULL);
   g_signal_connect (G_OBJECT (object),
                     "test_gvalue_ret",
-                    G_CALLBACK (test_gvalue_ret_callback), 
+                    G_CALLBACK (test_gvalue_ret_callback),
                     NULL);
   g_signal_connect (G_OBJECT (object),
                     "test_paramspec_in",
-                    G_CALLBACK (test_paramspec_in_callback), 
+                    G_CALLBACK (test_paramspec_in_callback),
                     NULL);
 }
 
@@ -504,7 +504,7 @@ _wrap_test_value(PyObject *self, PyObject *args)
     PyErr_SetString(PyExc_TypeError, "Could not convert to GValue");
     return NULL;
   }
-  
+
   return pyg_value_as_pyobject(value, FALSE);
 }
 
@@ -536,7 +536,7 @@ _wrap_test_value_array(PyObject *self, PyObject *args)
     PyErr_SetString(PyExc_TypeError, "Could not convert to GValueArray");
     return NULL;
   }
-  
+
   return pyg_value_as_pyobject(value, FALSE);
 }
 
@@ -606,7 +606,7 @@ _wrap_test_gerror_exception(PyObject *self, PyObject *args)
     if (pyg_gerror_exception_check(&err)) {
         pyg_error_check(&err);
         return NULL;
-    }	    
+    }
 
     Py_DECREF(py_args);
     Py_DECREF(py_ret);
@@ -660,6 +660,33 @@ _wrap_test_floating_and_sunk_get_instance_list (PyObject *self)
     return py_list;
 }
 
+
+static PyObject *
+_wrap_force_g_object_ref (PyObject *self, PyObject *args)
+{
+    PyGObject *obj;
+
+    if (!PyArg_ParseTuple (args, "O", &obj)) return NULL;
+
+    g_assert (G_IS_OBJECT (obj->obj));
+    g_object_ref (obj->obj);
+
+    Py_RETURN_NONE;
+}
+
+static PyObject *
+_wrap_force_g_object_unref (PyObject *self, PyObject *args)
+{
+    PyGObject *obj;
+
+    if (!PyArg_ParseTuple (args, "O", &obj)) return NULL;
+
+    g_assert (G_IS_OBJECT (obj->obj));
+    g_object_unref (obj->obj);
+
+    Py_RETURN_NONE;
+}
+
 G_GNUC_BEGIN_IGNORE_DEPRECATIONS
 
 static PyObject *
@@ -700,7 +727,12 @@ _wrap_test_to_unichar_conv (PyObject * self, PyObject *args)
 }
 
 static PyMethodDef testhelper_functions[] = {
-    { "test_parse_constructor_args", (PyCFunction)_wrap_test_parse_constructor_args, METH_VARARGS },
+    { "force_g_object_ref", (PyCFunction)_wrap_force_g_object_ref,
+      METH_VARARGS },
+    { "force_g_object_unref", (PyCFunction)_wrap_force_g_object_unref,
+      METH_VARARGS },
+    { "test_parse_constructor_args",
+      (PyCFunction)_wrap_test_parse_constructor_args, METH_VARARGS },
     { "get_test_thread", (PyCFunction)_wrap_get_test_thread, METH_NOARGS },
     { "test_to_unichar_conv", (PyCFunction)_wrap_test_to_unichar_conv, METH_VARARGS },
     { "get_unknown", (PyCFunction)_wrap_get_unknown, METH_NOARGS },
@@ -708,7 +740,7 @@ static PyMethodDef testhelper_functions[] = {
     { "test_state_ensure_release", (PyCFunction)_wrap_test_state_ensure_release, METH_NOARGS },
     { "test_g_object_new", (PyCFunction)_wrap_test_g_object_new, METH_NOARGS },
     { "connectcallbacks", (PyCFunction)_wrap_connectcallbacks, METH_VARARGS },
-    { "test_value", (PyCFunction)_wrap_test_value, METH_VARARGS },      
+    { "test_value", (PyCFunction)_wrap_test_value, METH_VARARGS },
     { "test_value_array", (PyCFunction)_wrap_test_value_array, METH_VARARGS },
     { "value_array_get_nth_type", (PyCFunction)_wrap_value_array_get_nth_type, METH_VARARGS },
     { "constant_strip_prefix", (PyCFunction)_wrap_constant_strip_prefix, METH_VARARGS },
@@ -759,7 +791,7 @@ PYGI_MODINIT_FUNC PyInit_testhelper(void) {
 
   /* TestInterface */
   PyTestInterface_Type.tp_methods = (struct PyMethodDef*)_PyTestInterface_methods;
-  PyTestInterface_Type.tp_flags = (Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE);  
+  PyTestInterface_Type.tp_flags = (Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE);
   pyg_register_interface(d, "Interface", TEST_TYPE_INTERFACE,
 			 &PyTestInterface_Type);
   pyg_register_interface_info(TEST_TYPE_INTERFACE, &__TestInterface__iinfo);

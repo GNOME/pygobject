@@ -9,6 +9,7 @@ import warnings
 
 from gi.repository import GObject
 from gi.repository import GIMarshallingTests
+import testhelper
 
 try:
     from gi.repository import Regress
@@ -277,7 +278,7 @@ class TestVFuncsWithFloatingArg(unittest.TestCase):
         vfuncs = self.VFuncs()
 
         def ref(obj):
-            obj._ref()
+            testhelper.force_g_object_ref(obj)
             # FIXME: Add an item dictionary so that the python wrapper cannot
             # be destroyed because it is unused. Unfortunately, a weakref does
             # not trigger this handling (though it may be possible through
@@ -307,7 +308,7 @@ class TestVFuncsWithFloatingArg(unittest.TestCase):
         self.assertTrue(vfuncs.object_ref().is_floating())
         # Sinking and unref'ing our "C" one will drop both (as the second is a toggle ref)
         vfuncs.object_ref()._ref_sink()
-        vfuncs.object_ref()._unref()
+        testhelper.force_g_object_unref(vfuncs.object_ref())
 
         gc.collect()
         gc.collect()
