@@ -5,6 +5,7 @@ include:
       tarball-artifact-path: "${TARBALL_ARTIFACT_PATH}"
 
 stages:
+  - images
   - pre-commit
   - build
   - coverage
@@ -15,6 +16,7 @@ stages:
 variables:
   REGISTRY: registry.gitlab.gnome.org/gnome/pygobject
   CI_IMAGE: registry.gitlab.gnome.org/gnome/pygobject/ci
+  CI_DEFAULT_TAG: python-3.13
   TARBALL_ARTIFACT_PATH: "dist/${CI_PROJECT_NAME}-${CI_COMMIT_TAG}.tar.gz"
 
 # Normal build whenever Dockerfile has not changed
@@ -22,6 +24,33 @@ default:
   cache:
     paths:
       - _ccache/
+
+
+# Build images if Dockerfile has changed
+build-image:
+  stage: images
+  image: quay.io/buildah/stable:latest
+  interruptible: true
+  rules:
+    - changes:
+        - ".gitlab-ci/Dockerfile"
+        - ".gitlab-ci/python-versions.txt"
+      when: always
+  variables:
+    STORAGE_DRIVER: vfs
+    BUILDAH_ISOLATION: chroot
+  script:
+    - echo "$CI_REGISTRY_PASSWORD" | buildah login $CI_REGISTRY -u $CI_REGISTRY_USER --password-stdin
+    - |
+      cat .gitlab-ci/python-versions.txt | while read IMAGE_BASE
+      do
+        IMG="$CI_IMAGE:${IMAGE_BASE/:/-}"
+        echo "Building image '$IMG'"
+        buildah build --build-arg BASE=$IMAGE_BASE -t $IMG -f Dockerfile .gitlab-ci
+        buildah push $IMG
+      done
+  cache:
+    paths:
 
 pre-commit:
   stage: pre-commit
@@ -100,9 +129,9 @@ gnome-master:
   script:
     - bash -x ./.gitlab-ci/test-flatpak.sh
 
-python3.12-pdm:
+linux-pdm:
   stage: build
-  image: $CI_IMAGE:python-3.12
+  image: $CI_IMAGE:$CI_DEFAULT_TAG
   variables:
     TEST_GTK_VERSION: "3.0"
   before_script:
@@ -124,7 +153,7 @@ minimal-meson:
 
 coverage:
   stage: coverage
-  image: $CI_IMAGE:python-3.9
+  image: $CI_IMAGE:$CI_DEFAULT_TAG
   artifacts:
     paths:
       - coverage/
@@ -134,7 +163,7 @@ coverage:
 
 pages:
   stage: documentation
-  image: $CI_IMAGE:python-3.13
+  image: $CI_IMAGE:$CI_DEFAULT_TAG
   dependencies:
     - coverage
   before_script:
@@ -153,37 +182,10 @@ pages:
 
 sdist:
   stage: build-release
-  image: $CI_IMAGE:python-3.13
+  image: $CI_IMAGE:$CI_DEFAULT_TAG
   artifacts:
     paths:
       - dist/
   script:
     - git config --global --add safe.directory "$CI_PROJECT_DIR"
     - bash -x ./.gitlab-ci/build-sdists.sh
-
-
-# Build images if Dockerfile has changed
-build-image:
-  stage: build
-  image: quay.io/buildah/stable:latest
-  interruptible: true
-  rules:
-    - changes:
-        - ".gitlab-ci/Dockerfile"
-        - ".gitlab-ci/python-versions.txt"
-      when: on_success
-  variables:
-    STORAGE_DRIVER: vfs
-    BUILDAH_ISOLATION: chroot
-  script:
-    - echo "$CI_REGISTRY_PASSWORD" | buildah login $CI_REGISTRY -u $CI_REGISTRY_USER --password-stdin
-    - |
-      cat .gitlab-ci/python-versions.txt | while read IMAGE_BASE
-      do
-        IMG="$CI_IMAGE:${IMAGE_BASE/:/-}"
-        echo "Building image '$IMG'"
-        buildah build --build-arg BASE=$IMAGE_BASE -t $IMG -f Dockerfile .gitlab-ci
-        buildah push $IMG
-      done
-  cache:
-    paths:
