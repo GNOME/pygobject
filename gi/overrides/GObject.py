@@ -664,17 +664,19 @@ class Object(GObjectModule.Object):
 
     def _ref_sink(self):
         """Deprecated, do not explicitly reference GObjects."""
-        warnings.warn(self._ref.__doc__, PyGIDeprecationWarning, stacklevel=2)
+        warnings.warn(self._ref_sink.__doc__, PyGIDeprecationWarning, stacklevel=2)
         return GObjectModule.Object.ref_sink(self)
 
     def _unref(self):
         """Deprecated, do not explicitly reference GObjects."""
-        warnings.warn(self._ref.__doc__, PyGIDeprecationWarning, stacklevel=2)
+        warnings.warn(self._unref.__doc__, PyGIDeprecationWarning, stacklevel=2)
         return GObjectModule.Object.unref(self)
 
     def _force_floating(self):
         """Deprecated, do not explicitly float GObjects."""
-        warnings.warn(self._ref.__doc__, PyGIDeprecationWarning, stacklevel=2)
+        warnings.warn(
+            self._force_floating.__doc__, PyGIDeprecationWarning, stacklevel=2
+        )
         return GObjectModule.Object.force_floating(self)
 
     ref = _unsupported_method
