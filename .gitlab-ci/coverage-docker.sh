@@ -8,6 +8,8 @@ python ./.gitlab-ci/fixup-lcov-paths.py coverage/*.lcov
 # Remove external headers (except gi tests)
 for path in coverage/*.lcov; do
     lcov --config-file .gitlab-ci/lcovrc -r "${path}" '/usr/include/*' -o "${path}"
+    lcov --config-file .gitlab-ci/lcovrc -r "${path}" '/usr/local/include/*' -o "${path}"
+    lcov --config-file .gitlab-ci/lcovrc -r "${path}" '/opt/pypy/include/*' -o "${path}"
     lcov --config-file .gitlab-ci/lcovrc -r "${path}" '/home/*' -o "${path}"
     lcov --config-file .gitlab-ci/lcovrc -r "${path}" '*/msys64/*' -o "${path}"
     lcov --config-file .gitlab-ci/lcovrc -r "${path}" '*site-packages/*' -o "${path}"
