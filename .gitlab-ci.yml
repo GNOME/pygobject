@@ -47,7 +47,7 @@ build-image:
   stage: images
   image: quay.io/buildah/stable:latest
   rules:
-    - if: $CI_PROJECT_NAMESPACE == "GNOME"
+    - if: $CI_PROJECT_NAMESPACE == "GNOME" && $CI_COMMIT_BRANCH == "main"
       changes:
         - ".gitlab-ci.yml"
         - ".gitlab-ci/Dockerfile"
