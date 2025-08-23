@@ -1,3 +1,19 @@
+spec:
+  inputs:
+    python_versions:
+      type: array
+      default:
+        - "python-3.9"
+        - "python-3.10"
+        - "python-3.11"
+        - "python-3.12"
+        - "python-3.13"
+        - "pypy-3.11"
+    default_version:
+      default: "python-3.13"
+
+---
+
 include:
   - component: gitlab.gnome.org/GNOME/citemplates/release-service@master
     inputs:
@@ -5,6 +21,7 @@ include:
       tarball-artifact-path: "${TARBALL_ARTIFACT_PATH}"
 
 stages:
+  - images
   - pre-commit
   - build
   - coverage
@@ -13,18 +30,47 @@ stages:
   - deploy
 
 variables:
+  REGISTRY: registry.gitlab.gnome.org/gnome/pygobject
+  CI_IMAGE: registry.gitlab.gnome.org/gnome/pygobject/ci
   TARBALL_ARTIFACT_PATH: "dist/${CI_PROJECT_NAME}-${CI_COMMIT_TAG}.tar.gz"
 
+# Normal build whenever Dockerfile has not changed
 default:
-  image: registry.gitlab.gnome.org/gnome/pygobject/main:v26
+  interruptible: true
   cache:
     paths:
       - _ccache/
 
+
+# Build images if Dockerfile has changed
+build-image:
+  stage: images
+  image: quay.io/buildah/stable:latest
+  rules:
+    - if: $CI_PROJECT_NAMESPACE == "GNOME" && $CI_COMMIT_BRANCH == "main"
+      changes:
+        - ".gitlab-ci.yml"
+        - ".gitlab-ci/Dockerfile"
+      when: always
+  variables:
+    STORAGE_DRIVER: vfs
+    BUILDAH_ISOLATION: chroot
+  parallel:
+    matrix:
+      - IMAGE_TAG: $[[ inputs.python_versions ]]
+  script:
+    - echo "$CI_REGISTRY_PASSWORD" | buildah login $CI_REGISTRY -u $CI_REGISTRY_USER --password-stdin
+    - IMG="$CI_IMAGE:$IMAGE_TAG"
+    - echo "Building image '$IMG'"
+    - buildah build --build-arg BASE=${IMAGE_TAG/-/:} -t $IMG -f Dockerfile .gitlab-ci
+    - buildah push $IMG
+  cache:
+    paths:
+
 pre-commit:
   stage: pre-commit
+  image: $CI_IMAGE:$[[ inputs.default_version ]]
   variables:
-    PYTHON_VERSION: "3.13"
     XDG_CACHE_HOME: "$CI_PROJECT_DIR/.cache"
   script:
     - git config --global --add safe.directory "$CI_PROJECT_DIR"
@@ -37,17 +83,12 @@ pre-commit:
 
 linux:
   stage: build
+  image: $CI_IMAGE:$IMAGE_TAG
   parallel:
     matrix:
-      - PYTHON_VERSION:
-          - "3.9"
-          - "3.10"
-          - "3.11"
-          - "3.12"
-          - "3.13"
-          - "pypy3"
+      - IMAGE_TAG: $[[ inputs.python_versions ]]
         TEST_GTK_VERSION: "3.0"
-      - PYTHON_VERSION: "3.11"
+      - IMAGE_TAG: $[[ inputs.default_version ]]
         TEST_GTK_VERSION: "4.0"
   artifacts:
     when: always
@@ -97,10 +138,10 @@ gnome-master:
   script:
     - bash -x ./.gitlab-ci/test-flatpak.sh
 
-python3.12-pdm:
+linux-pdm:
   stage: build
+  image: $CI_IMAGE:$[[ inputs.default_version ]]
   variables:
-    PYTHON_VERSION: "3.12"
     TEST_GTK_VERSION: "3.0"
   before_script:
     - python -m pip install "pdm!=2.17.3"
@@ -121,17 +162,17 @@ minimal-meson:
 
 coverage:
   stage: coverage
+  image: $CI_IMAGE:$[[ inputs.default_version ]]
   artifacts:
     paths:
       - coverage/
-  variables:
-    PYTHON_VERSION: "3.9"
   script:
     - bash -x ./.gitlab-ci/coverage-docker.sh
   coverage: '/^\s+lines\.+:\s+([\d.]+\%)\s+/'
 
 pages:
   stage: documentation
+  image: $CI_IMAGE:$[[ inputs.default_version ]]
   dependencies:
     - coverage
   before_script:
@@ -150,6 +191,7 @@ pages:
 
 sdist:
   stage: build-release
+  image: $CI_IMAGE:$[[ inputs.default_version ]]
   artifacts:
     paths:
       - dist/

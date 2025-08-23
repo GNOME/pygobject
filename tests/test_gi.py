@@ -3218,6 +3218,9 @@ class TestMRO(unittest.TestCase):
         )
         self.assertEqual(expected, E.__mro__)
 
+    @unittest.skipIf(
+        sys.implementation.name == "pypy", "PyPy 3.11 causes cycle among base classes"
+    )
     def test_interface_collision(self):
         # there was a problem with Python bailing out because of
         # http://en.wikipedia.org/wiki/Diamond_problem with interfaces,
