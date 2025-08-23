@@ -623,6 +623,33 @@ _wrap_test_floating_and_sunk_get_instance_list (PyObject *self)
     return py_list;
 }
 
+
+static PyObject *
+_wrap_force_g_object_ref (PyObject *self, PyObject *args)
+{
+    PyGObject *obj;
+
+    if (!PyArg_ParseTuple (args, "O", &obj)) return NULL;
+
+    g_assert (G_IS_OBJECT (obj->obj));
+    g_object_ref (obj->obj);
+
+    Py_RETURN_NONE;
+}
+
+static PyObject *
+_wrap_force_g_object_unref (PyObject *self, PyObject *args)
+{
+    PyGObject *obj;
+
+    if (!PyArg_ParseTuple (args, "O", &obj)) return NULL;
+
+    g_assert (G_IS_OBJECT (obj->obj));
+    g_object_unref (obj->obj);
+
+    Py_RETURN_NONE;
+}
+
 G_GNUC_BEGIN_IGNORE_DEPRECATIONS
 
 static PyObject *
@@ -660,6 +687,10 @@ _wrap_test_to_unichar_conv (PyObject *self, PyObject *args)
 }
 
 static PyMethodDef testhelper_functions[] = {
+    { "force_g_object_ref", (PyCFunction)_wrap_force_g_object_ref,
+      METH_VARARGS },
+    { "force_g_object_unref", (PyCFunction)_wrap_force_g_object_unref,
+      METH_VARARGS },
     { "test_parse_constructor_args",
       (PyCFunction)_wrap_test_parse_constructor_args, METH_VARARGS },
     { "get_test_thread", (PyCFunction)_wrap_get_test_thread, METH_NOARGS },
