@@ -74,12 +74,15 @@ pre-commit:
     XDG_CACHE_HOME: "$CI_PROJECT_DIR/.cache"
   script:
     - git config --global --add safe.directory "$CI_PROJECT_DIR"
-    - python -m pip install -q pre-commit
-    - python -m pre_commit run --all-files
+    - python -m pip install -q --no-warn-script-location pre-commit
+    - python -m pre_commit run --verbose --all-files
   artifacts:
     when: on_failure
     paths:
       - .cache/pre-commit/pre-commit.log
+  cache:
+    paths:
+      - .cache
 
 linux:
   stage: build
