@@ -36,6 +36,7 @@ variables:
 
 # Normal build whenever Dockerfile has not changed
 default:
+  interruptible: true
   cache:
     paths:
       - _ccache/
@@ -45,7 +46,6 @@ default:
 build-image:
   stage: images
   image: quay.io/buildah/stable:latest
-  interruptible: true
   rules:
     - if: $CI_PROJECT_NAMESPACE == "GNOME"
       changes:
