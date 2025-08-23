@@ -4,6 +4,7 @@ import gc
 import sys
 import warnings
 
+from gi import PyGIDeprecationWarning
 from gi.repository import GObject
 from gi.repository import GIMarshallingTests
 
@@ -325,8 +326,10 @@ class TestVFuncsWithFloatingArg(unittest.TestCase):
         self.assertEqual(vfuncs.object_ref().__grefcount__, 2)
         self.assertTrue(vfuncs.object_ref().is_floating())
         # Sinking and unref'ing our "C" one will drop both (as the second is a toggle ref)
-        vfuncs.object_ref()._ref_sink()
-        vfuncs.object_ref()._unref()
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", PyGIDeprecationWarning)
+            vfuncs.object_ref()._ref_sink()
+            vfuncs.object_ref()._unref()
 
         gc.collect()
         gc.collect()
@@ -608,7 +611,9 @@ class TestVFuncsWithHeldFloatingArg(unittest.TestCase):
         self.assertTrue(vfuncs.object_ref().is_floating())
         # ... usually it should have been sunk within C at some point,
         # do it here to avoid a critical warning.
-        vfuncs.object_ref()._ref_sink()
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", PyGIDeprecationWarning)
+            vfuncs.object_ref()._ref_sink()
         # However, that means that the above comment of "sinks and owns" is wrong.
 
         held_object_ref = weakref.ref(vfuncs.object_ref())

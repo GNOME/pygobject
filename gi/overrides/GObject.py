@@ -657,10 +657,25 @@ class Object(GObjectModule.Object):
     watch_closure = _unsupported_method
 
     # Make all reference management methods private but still accessible.
-    _ref = GObjectModule.Object.ref
-    _ref_sink = GObjectModule.Object.ref_sink
-    _unref = GObjectModule.Object.unref
-    _force_floating = GObjectModule.Object.force_floating
+    def _ref(self):
+        """Deprecated, do not explicitly reference GObjects."""
+        warnings.warn(self._ref.__doc__, PyGIDeprecationWarning, stacklevel=2)
+        return GObjectModule.Object.ref(self)
+
+    def _ref_sink(self):
+        """Deprecated, do not explicitly reference GObjects."""
+        warnings.warn(self._ref.__doc__, PyGIDeprecationWarning, stacklevel=2)
+        return GObjectModule.Object.ref_sink(self)
+
+    def _unref(self):
+        """Deprecated, do not explicitly reference GObjects."""
+        warnings.warn(self._ref.__doc__, PyGIDeprecationWarning, stacklevel=2)
+        return GObjectModule.Object.unref(self)
+
+    def _force_floating(self):
+        """Deprecated, do not explicitly float GObjects."""
+        warnings.warn(self._ref.__doc__, PyGIDeprecationWarning, stacklevel=2)
+        return GObjectModule.Object.force_floating(self)
 
     ref = _unsupported_method
     ref_sink = _unsupported_method
