@@ -140,7 +140,7 @@ gnome-master:
 
 linux-pdm:
   stage: build
-  image: $CI_IMAGE:$[[ inputs.python_versions ]]
+  image: $CI_IMAGE:$[[ inputs.default_version ]]
   variables:
     TEST_GTK_VERSION: "3.0"
   before_script:
@@ -162,7 +162,7 @@ minimal-meson:
 
 coverage:
   stage: coverage
-  image: $CI_IMAGE:$[[ inputs.python_versions ]]
+  image: $CI_IMAGE:$[[ inputs.default_version ]]
   artifacts:
     paths:
       - coverage/
@@ -172,7 +172,7 @@ coverage:
 
 pages:
   stage: documentation
-  image: $CI_IMAGE:$[[ inputs.python_versions ]]
+  image: $CI_IMAGE:$[[ inputs.default_version ]]
   dependencies:
     - coverage
   before_script:
@@ -191,7 +191,7 @@ pages:
 
 sdist:
   stage: build-release
-  image: $CI_IMAGE:$[[ inputs.python_versions ]]
+  image: $CI_IMAGE:$[[ inputs.default_version ]]
   artifacts:
     paths:
       - dist/
