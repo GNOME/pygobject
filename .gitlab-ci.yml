@@ -49,8 +49,8 @@ build-image:
   rules:
     - if: $CI_PROJECT_NAMESPACE == "GNOME"
       changes:
+        - ".gitlab-ci.yml"
         - ".gitlab-ci/Dockerfile"
-        - ".gitlab-ci/python-versions.txt"
       when: always
   variables:
     STORAGE_DRIVER: vfs
@@ -69,7 +69,7 @@ build-image:
 
 pre-commit:
   stage: pre-commit
-  image: $CI_IMAGE:python-3.13
+  image: $CI_IMAGE:$[[ inputs.default_version ]]
   variables:
     XDG_CACHE_HOME: "$CI_PROJECT_DIR/.cache"
   script:
