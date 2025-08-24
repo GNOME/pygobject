@@ -69,7 +69,7 @@ pygi_arg_base_setup (
 
     if (arg_info != NULL) {
         arg_cache->arg_name = gi_base_info_get_name ((GIBaseInfo *)arg_info);
-        arg_cache->allow_none = gi_arg_info_may_be_null (arg_info);
+        arg_cache->allow_none = gi_arg_info_may_be_null (arg_info) || (direction & PYGI_DIRECTION_FROM_PYTHON && gi_arg_info_is_optional (arg_info));
 
         if (arg_cache->type_tag == GI_TYPE_TAG_INTERFACE
             || arg_cache->type_tag == GI_TYPE_TAG_ARRAY)
@@ -502,7 +502,7 @@ _callable_cache_generate_args_cache_real (PyGICallableCache *callable_cache,
         arg_cache->arg_name = gi_base_info_get_name ((GIBaseInfo *)arg_info);
         /* Some property (notably booleans), can allow None */
         arg_cache->allow_none = arg_cache->allow_none
-                                || gi_arg_info_may_be_null (arg_info);
+                                || gi_arg_info_may_be_null (arg_info) || (direction & PYGI_DIRECTION_FROM_PYTHON && g_arg_info_is_optional (arg_info));;
 
         gi_base_info_unref ((GIBaseInfo *)arg_info);
     }
