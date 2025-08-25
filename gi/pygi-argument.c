@@ -479,7 +479,7 @@ array_success:
             if (pyg_enum_get_value (g_type, object, &arg.v_int) < 0) break;
         } else if (GI_IS_INTERFACE_INFO (info) || GI_IS_OBJECT_INFO (info)) {
             /* An error within this call will result in a NULL arg */
-            pygi_arg_gobject_out_arg_from_py (object, &arg, transfer);
+            pygi_marshal_from_py_object (object, &arg, transfer);
         } else {
             g_assert_not_reached ();
         }
