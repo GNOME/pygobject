@@ -33,14 +33,14 @@ typedef gboolean (*PyGIObjectMarshalFromPyFunc) (PyObject *py_arg,
                                                  GIArgument *arg,
                                                  GITransfer transfer);
 
-/* _pygi_marshal_from_py_object:
+/* pygi_marshal_from_py_object:
  * py_arg: (in):
  * arg: (out):
  */
-static gboolean
-_pygi_marshal_from_py_object (PyObject *py_arg, /*in*/
-                              GIArgument *arg,  /*out*/
-                              GITransfer transfer)
+gboolean
+pygi_marshal_from_py_object (PyObject *py_arg, /*in*/
+                             GIArgument *arg,  /*out*/
+                             GITransfer transfer)
 {
     GObject *gobj;
 
@@ -92,12 +92,12 @@ _pygi_marshal_from_py_object (PyObject *py_arg, /*in*/
  * from a Python implemented vfuncs, signals, or an assignment to a GObject property.
  */
 gboolean
-pygi_arg_gobject_out_arg_from_py (PyObject *py_arg, /*in*/
-                                  GIArgument *arg,  /*out*/
+pygi_arg_gobject_out_arg_from_py (PyObject *py_arg, /* in */
+                                  GIArgument *arg,  /* out */
                                   GITransfer transfer)
 {
     GObject *gobj;
-    if (!_pygi_marshal_from_py_object (py_arg, arg, transfer)) {
+    if (!pygi_marshal_from_py_object (py_arg, arg, transfer)) {
         return FALSE;
     }
 
@@ -201,7 +201,7 @@ _pygi_marshal_from_py_called_from_py_interface_object (
 {
     return _pygi_marshal_from_py_interface_object (
         state, callable_cache, arg_cache, py_arg, arg, cleanup_data,
-        _pygi_marshal_from_py_object);
+        pygi_marshal_from_py_object);
 }
 
 static void

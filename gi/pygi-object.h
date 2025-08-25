@@ -25,6 +25,10 @@
 
 G_BEGIN_DECLS
 
+gboolean pygi_marshal_from_py_object (PyObject *py_arg, /* in */
+                                      GIArgument *arg,  /* out */
+                                      GITransfer transfer);
+
 gboolean pygi_arg_gobject_out_arg_from_py (PyObject *py_arg, /* in */
                                            GIArgument *arg,  /* out */
                                            GITransfer transfer);
