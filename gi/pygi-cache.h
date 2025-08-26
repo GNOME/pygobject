@@ -228,7 +228,7 @@ struct _PyGIVFuncCache {
 };
 
 
-gboolean pygi_arg_base_setup (
+void pygi_arg_base_setup (
     PyGIArgCache *arg_cache, GITypeInfo *type_info,
     GIArgInfo *arg_info, /* may be NULL for return arguments */
     GITransfer transfer, PyGIDirection direction);

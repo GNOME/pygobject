@@ -877,10 +877,8 @@ pygi_arg_callback_setup_from_info (PyGICallbackCache *arg_cache,
     PyGIArgCache *cache = (PyGIArgCache *)arg_cache;
     gssize child_offset = 0;
 
-    if (!pygi_arg_base_setup ((PyGIArgCache *)arg_cache, type_info, arg_info,
-                              transfer, direction)) {
-        return FALSE;
-    }
+    pygi_arg_base_setup ((PyGIArgCache *)arg_cache, type_info, arg_info,
+                         transfer, direction);
 
     if (callable_cache != NULL) child_offset = callable_cache->args_offset;
 

@@ -320,9 +320,8 @@ pygi_arg_hash_table_setup_from_info (PyGIHashCache *hc, GITypeInfo *type_info,
     GITypeInfo *value_type_info;
     GITransfer item_transfer;
 
-    if (!pygi_arg_base_setup ((PyGIArgCache *)hc, type_info, arg_info,
-                              transfer, direction))
-        return FALSE;
+    pygi_arg_base_setup ((PyGIArgCache *)hc, type_info, arg_info, transfer,
+                         direction);
 
     ((PyGIArgCache *)hc)->destroy_notify =
         (GDestroyNotify)_hash_cache_free_func;

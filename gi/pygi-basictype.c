@@ -1192,9 +1192,7 @@ arg_basic_type_setup_from_info (PyGIArgCache *arg_cache, GITypeInfo *type_info,
 {
     GITypeTag type_tag = gi_type_info_get_tag (type_info);
 
-    if (!pygi_arg_base_setup (arg_cache, type_info, arg_info, transfer,
-                              direction))
-        return FALSE;
+    pygi_arg_base_setup (arg_cache, type_info, arg_info, transfer, direction);
 
     switch (type_tag) {
     case GI_TYPE_TAG_VOID:

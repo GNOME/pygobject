@@ -267,10 +267,7 @@ pygi_arg_gerror_setup_from_info (PyGIArgCache *arg_cache,
                                  GITypeInfo *type_info, GIArgInfo *arg_info,
                                  GITransfer transfer, PyGIDirection direction)
 {
-    if (!pygi_arg_base_setup (arg_cache, type_info, arg_info, transfer,
-                              direction)) {
-        return FALSE;
-    }
+    pygi_arg_base_setup (arg_cache, type_info, arg_info, transfer, direction);
 
     if (direction & PYGI_DIRECTION_FROM_PYTHON) {
         arg_cache->from_py_marshaller = _pygi_marshal_from_py_gerror;
