@@ -865,7 +865,7 @@ _pygi_marshal_cleanup_from_py_interface_callback (PyGIInvokeState *state,
     }
 }
 
-static gboolean
+static void
 pygi_arg_callback_setup_from_info (PyGICallbackCache *arg_cache,
                                    GITypeInfo *type_info,
                                    GIArgInfo *arg_info, /* may be null */
@@ -929,8 +929,6 @@ pygi_arg_callback_setup_from_info (PyGICallbackCache *arg_cache,
     if (direction & PYGI_DIRECTION_TO_PYTHON) {
         cache->to_py_marshaller = _pygi_marshal_to_py_interface_callback;
     }
-
-    return TRUE;
 }
 
 PyGIArgCache *
@@ -946,13 +944,9 @@ pygi_arg_callback_new_from_info (GITypeInfo *type_info,
     callback_cache = g_slice_new0 (PyGICallbackCache);
     if (callback_cache == NULL) return NULL;
 
-    res = pygi_arg_callback_setup_from_info (callback_cache, type_info,
-                                             arg_info, transfer, direction,
-                                             iface_info, callable_cache);
-    if (res) {
-        return (PyGIArgCache *)callback_cache;
-    } else {
-        pygi_arg_cache_free ((PyGIArgCache *)callback_cache);
-        return NULL;
-    }
+    pygi_arg_callback_setup_from_info (callback_cache, type_info, arg_info,
+                                       transfer, direction, iface_info,
+                                       callable_cache);
+
+    return (PyGIArgCache *)callback_cache;
 }

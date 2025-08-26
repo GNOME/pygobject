@@ -270,7 +270,7 @@ _pygi_marshal_to_py_interface_flags (PyGIInvokeState *state,
     return pyg_flags_val_new (iface_cache->py_type, (guint)c_long);
 }
 
-static gboolean
+static void
 pygi_arg_enum_setup_from_info (PyGIArgCache *arg_cache, GITypeInfo *type_info,
                                GIArgInfo *arg_info, GITransfer transfer,
                                PyGIDirection direction)
@@ -280,8 +280,6 @@ pygi_arg_enum_setup_from_info (PyGIArgCache *arg_cache, GITypeInfo *type_info,
 
     if (direction & PYGI_DIRECTION_TO_PYTHON)
         arg_cache->to_py_marshaller = _pygi_marshal_to_py_interface_enum;
-
-    return TRUE;
 }
 
 
@@ -298,17 +296,13 @@ pygi_arg_enum_new_from_info (GITypeInfo *type_info, GIArgInfo *arg_info,
         GI_REGISTERED_TYPE_INFO (iface_info));
     if (cache == NULL) return NULL;
 
-    res = pygi_arg_enum_setup_from_info (cache, type_info, arg_info, transfer,
-                                         direction);
-    if (res) {
-        return cache;
-    } else {
-        pygi_arg_cache_free (cache);
-        return NULL;
-    }
+    pygi_arg_enum_setup_from_info (cache, type_info, arg_info, transfer,
+                                   direction);
+
+    return cache;
 }
 
-static gboolean
+static void
 pygi_arg_flags_setup_from_info (PyGIArgCache *arg_cache, GITypeInfo *type_info,
                                 GIArgInfo *arg_info, GITransfer transfer,
                                 PyGIDirection direction)
@@ -318,8 +312,6 @@ pygi_arg_flags_setup_from_info (PyGIArgCache *arg_cache, GITypeInfo *type_info,
 
     if (direction & PYGI_DIRECTION_TO_PYTHON)
         arg_cache->to_py_marshaller = _pygi_marshal_to_py_interface_flags;
-
-    return TRUE;
 }
 
 
@@ -336,12 +328,8 @@ pygi_arg_flags_new_from_info (GITypeInfo *type_info, GIArgInfo *arg_info,
         GI_REGISTERED_TYPE_INFO (iface_info));
     if (cache == NULL) return NULL;
 
-    res = pygi_arg_flags_setup_from_info (cache, type_info, arg_info, transfer,
-                                          direction);
-    if (res) {
-        return cache;
-    } else {
-        pygi_arg_cache_free (cache);
-        return NULL;
-    }
+    pygi_arg_flags_setup_from_info (cache, type_info, arg_info, transfer,
+                                    direction);
+
+    return cache;
 }
