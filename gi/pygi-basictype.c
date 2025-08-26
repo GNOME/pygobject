@@ -1185,11 +1185,12 @@ marshal_cleanup_to_py_utf8 (PyGIInvokeState *state, PyGIArgCache *arg_cache,
     if (arg_cache->transfer == GI_TRANSFER_EVERYTHING) g_free (data);
 }
 
-static void
-arg_basic_type_setup_from_info (PyGIArgCache *arg_cache, GITypeInfo *type_info,
-                                GIArgInfo *arg_info, GITransfer transfer,
-                                PyGIDirection direction)
+PyGIArgCache *
+pygi_arg_basic_type_new_from_info (GITypeInfo *type_info, GIArgInfo *arg_info,
+                                   GITransfer transfer,
+                                   PyGIDirection direction)
 {
+    PyGIArgCache *arg_cache = pygi_arg_cache_alloc ();
     GITypeTag type_tag = gi_type_info_get_tag (type_info);
 
     pygi_arg_base_setup (arg_cache, type_info, arg_info, transfer, direction);
@@ -1243,18 +1244,6 @@ arg_basic_type_setup_from_info (PyGIArgCache *arg_cache, GITypeInfo *type_info,
     default:
         g_assert_not_reached ();
     }
-}
-
-PyGIArgCache *
-pygi_arg_basic_type_new_from_info (GITypeInfo *type_info, GIArgInfo *arg_info,
-                                   GITransfer transfer,
-                                   PyGIDirection direction)
-{
-    gboolean res = FALSE;
-    PyGIArgCache *arg_cache = pygi_arg_cache_alloc ();
-
-    arg_basic_type_setup_from_info (arg_cache, type_info, arg_info, transfer,
-                                    direction);
 
     return arg_cache;
 }

@@ -262,11 +262,14 @@ _pygi_marshal_to_py_gerror (PyGIInvokeState *state,
     return py_obj;
 }
 
-static void
-pygi_arg_gerror_setup_from_info (PyGIArgCache *arg_cache,
-                                 GITypeInfo *type_info, GIArgInfo *arg_info,
-                                 GITransfer transfer, PyGIDirection direction)
+PyGIArgCache *
+pygi_arg_gerror_new_from_info (GITypeInfo *type_info, GIArgInfo *arg_info,
+                               GITransfer transfer, PyGIDirection direction)
 {
+    PyGIArgCache *arg_cache;
+
+    arg_cache = pygi_arg_cache_alloc ();
+
     pygi_arg_base_setup (arg_cache, type_info, arg_info, transfer, direction);
 
     if (direction & PYGI_DIRECTION_FROM_PYTHON) {
@@ -282,19 +285,6 @@ pygi_arg_gerror_setup_from_info (PyGIArgCache *arg_cache,
         arg_cache->to_py_marshaller = _pygi_marshal_to_py_gerror;
         arg_cache->meta_type = PYGI_META_ARG_TYPE_PARENT;
     }
-}
-
-PyGIArgCache *
-pygi_arg_gerror_new_from_info (GITypeInfo *type_info, GIArgInfo *arg_info,
-                               GITransfer transfer, PyGIDirection direction)
-{
-    gboolean res = FALSE;
-    PyGIArgCache *arg_cache;
-
-    arg_cache = pygi_arg_cache_alloc ();
-
-    pygi_arg_gerror_setup_from_info (arg_cache, type_info, arg_info, transfer,
-                                     direction);
 
     return arg_cache;
 }

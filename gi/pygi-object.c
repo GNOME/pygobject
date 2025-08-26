@@ -310,66 +310,44 @@ _pygi_marshal_cleanup_to_py_interface_object (PyGIInvokeState *state,
     }
 }
 
-static gboolean
-pygi_arg_gobject_setup_from_info (PyGIArgCache *arg_cache,
-                                  GITypeInfo *type_info, GIArgInfo *arg_info,
-                                  GITransfer transfer, PyGIDirection direction,
-                                  PyGICallableCache *callable_cache)
-{
-    /* NOTE: usage of pygi_arg_interface_new_from_info already calls
-     * pygi_arg_interface_setup so no need to do it here.
-     */
-
-    if (direction & PYGI_DIRECTION_FROM_PYTHON) {
-        if (callable_cache->calling_context
-            == PYGI_CALLING_CONTEXT_IS_FROM_C) {
-            arg_cache->from_py_marshaller =
-                _pygi_marshal_from_py_called_from_c_interface_object;
-        } else {
-            arg_cache->from_py_marshaller =
-                _pygi_marshal_from_py_called_from_py_interface_object;
-        }
-
-        arg_cache->from_py_cleanup =
-            _pygi_marshal_cleanup_from_py_interface_object;
-    }
-
-    if (direction & PYGI_DIRECTION_TO_PYTHON) {
-        if (callable_cache->calling_context
-            == PYGI_CALLING_CONTEXT_IS_FROM_C) {
-            arg_cache->to_py_marshaller =
-                _pygi_marshal_to_py_called_from_c_interface_object_cache_adapter;
-        } else {
-            arg_cache->to_py_marshaller =
-                _pygi_marshal_to_py_called_from_py_interface_object_cache_adapter;
-        }
-
-        arg_cache->to_py_cleanup =
-            _pygi_marshal_cleanup_to_py_interface_object;
-    }
-
-    return TRUE;
-}
-
 PyGIArgCache *
 pygi_arg_gobject_new_from_info (GITypeInfo *type_info, GIArgInfo *arg_info,
                                 GITransfer transfer, PyGIDirection direction,
                                 GIRegisteredTypeInfo *iface_info,
                                 PyGICallableCache *callable_cache)
 {
-    gboolean res = FALSE;
     PyGIArgCache *cache = NULL;
 
     cache = pygi_arg_interface_new_from_info (type_info, arg_info, transfer,
                                               direction, iface_info);
     if (cache == NULL) return NULL;
 
-    res = pygi_arg_gobject_setup_from_info (
-        cache, type_info, arg_info, transfer, direction, callable_cache);
-    if (res) {
-        return cache;
-    } else {
-        pygi_arg_cache_free (cache);
-        return NULL;
+    if (direction & PYGI_DIRECTION_FROM_PYTHON) {
+        if (callable_cache->calling_context
+            == PYGI_CALLING_CONTEXT_IS_FROM_C) {
+            cache->from_py_marshaller =
+                _pygi_marshal_from_py_called_from_c_interface_object;
+        } else {
+            cache->from_py_marshaller =
+                _pygi_marshal_from_py_called_from_py_interface_object;
+        }
+
+        cache->from_py_cleanup =
+            _pygi_marshal_cleanup_from_py_interface_object;
     }
+
+    if (direction & PYGI_DIRECTION_TO_PYTHON) {
+        if (callable_cache->calling_context
+            == PYGI_CALLING_CONTEXT_IS_FROM_C) {
+            cache->to_py_marshaller =
+                _pygi_marshal_to_py_called_from_c_interface_object_cache_adapter;
+        } else {
+            cache->to_py_marshaller =
+                _pygi_marshal_to_py_called_from_py_interface_object_cache_adapter;
+        }
+
+        cache->to_py_cleanup = _pygi_marshal_cleanup_to_py_interface_object;
+    }
+
+    return cache;
 }

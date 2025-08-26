@@ -310,15 +310,19 @@ _arg_cache_to_py_ghash_setup (PyGIArgCache *arg_cache)
     arg_cache->to_py_cleanup = _pygi_marshal_cleanup_to_py_ghash;
 }
 
-static gboolean
-pygi_arg_hash_table_setup_from_info (PyGIHashCache *hc, GITypeInfo *type_info,
-                                     GIArgInfo *arg_info, GITransfer transfer,
-                                     PyGIDirection direction,
-                                     PyGICallableCache *callable_cache)
+PyGIArgCache *
+pygi_arg_hash_table_new_from_info (GITypeInfo *type_info, GIArgInfo *arg_info,
+                                   GITransfer transfer,
+                                   PyGIDirection direction,
+                                   PyGICallableCache *callable_cache)
 {
+    PyGIHashCache *hc = NULL;
     GITypeInfo *key_type_info;
     GITypeInfo *value_type_info;
     GITransfer item_transfer;
+
+    hc = g_slice_new0 (PyGIHashCache);
+    if (hc == NULL) return NULL;
 
     pygi_arg_base_setup ((PyGIArgCache *)hc, type_info, arg_info, transfer,
                          direction);
@@ -335,14 +339,16 @@ pygi_arg_hash_table_setup_from_info (PyGIHashCache *hc, GITypeInfo *type_info,
                                         direction, callable_cache, 0, 0);
 
     if (hc->key_cache == NULL) {
-        return FALSE;
+        pygi_arg_cache_free ((PyGIArgCache *)hc);
+        return NULL;
     }
 
     hc->value_cache = pygi_arg_cache_new (value_type_info, NULL, item_transfer,
                                           direction, callable_cache, 0, 0);
 
     if (hc->value_cache == NULL) {
-        return FALSE;
+        pygi_arg_cache_free ((PyGIArgCache *)hc);
+        return NULL;
     }
 
     gi_base_info_unref ((GIBaseInfo *)key_type_info);
@@ -356,27 +362,5 @@ pygi_arg_hash_table_setup_from_info (PyGIHashCache *hc, GITypeInfo *type_info,
         _arg_cache_to_py_ghash_setup ((PyGIArgCache *)hc);
     }
 
-    return TRUE;
-}
-
-PyGIArgCache *
-pygi_arg_hash_table_new_from_info (GITypeInfo *type_info, GIArgInfo *arg_info,
-                                   GITransfer transfer,
-                                   PyGIDirection direction,
-                                   PyGICallableCache *callable_cache)
-{
-    gboolean res = FALSE;
-    PyGIHashCache *hc = NULL;
-
-    hc = g_slice_new0 (PyGIHashCache);
-    if (hc == NULL) return NULL;
-
-    res = pygi_arg_hash_table_setup_from_info (
-        hc, type_info, arg_info, transfer, direction, callable_cache);
-    if (res) {
-        return (PyGIArgCache *)hc;
-    } else {
-        pygi_arg_cache_free ((PyGIArgCache *)hc);
-        return NULL;
-    }
+    return (PyGIArgCache *)hc;
 }

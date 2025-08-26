@@ -396,18 +396,22 @@ _arg_cache_to_py_gslist_setup (PyGIArgCache *arg_cache, GITransfer transfer)
  * GList/GSList Interface
  */
 
-static gboolean
-pygi_arg_glist_setup_from_info (PyGIArgCache *arg_cache, GITypeInfo *type_info,
-                                GIArgInfo *arg_info, GITransfer transfer,
-                                PyGIDirection direction,
-                                PyGICallableCache *callable_cache)
+PyGIArgCache *
+pygi_arg_glist_new_from_info (GITypeInfo *type_info, GIArgInfo *arg_info,
+                              GITransfer transfer, PyGIDirection direction,
+                              PyGICallableCache *callable_cache)
 {
+    PyGIArgCache *arg_cache = (PyGIArgCache *)g_slice_new0 (PyGIArgGList);
+    if (arg_cache == NULL) return NULL;
+
     GITypeTag type_tag = gi_type_info_get_tag (type_info);
 
     if (!pygi_arg_sequence_setup ((PyGISequenceCache *)arg_cache, type_info,
                                   arg_info, transfer, direction,
-                                  callable_cache))
-        return FALSE;
+                                  callable_cache)) {
+        pygi_arg_cache_free (arg_cache);
+        return NULL;
+    }
 
     switch (type_tag) {
     case GI_TYPE_TAG_GLIST: {
@@ -431,25 +435,5 @@ pygi_arg_glist_setup_from_info (PyGIArgCache *arg_cache, GITypeInfo *type_info,
         g_assert_not_reached ();
     }
 
-    return TRUE;
-}
-
-PyGIArgCache *
-pygi_arg_glist_new_from_info (GITypeInfo *type_info, GIArgInfo *arg_info,
-                              GITransfer transfer, PyGIDirection direction,
-                              PyGICallableCache *callable_cache)
-{
-    gboolean res = FALSE;
-
-    PyGIArgCache *arg_cache = (PyGIArgCache *)g_slice_new0 (PyGIArgGList);
-    if (arg_cache == NULL) return NULL;
-
-    res = pygi_arg_glist_setup_from_info (arg_cache, type_info, arg_info,
-                                          transfer, direction, callable_cache);
-    if (res) {
-        return arg_cache;
-    } else {
-        pygi_arg_cache_free (arg_cache);
-        return NULL;
-    }
+    return arg_cache;
 }

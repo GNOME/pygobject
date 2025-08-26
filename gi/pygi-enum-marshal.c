@@ -270,48 +270,25 @@ _pygi_marshal_to_py_interface_flags (PyGIInvokeState *state,
     return pyg_flags_val_new (iface_cache->py_type, (guint)c_long);
 }
 
-static void
-pygi_arg_enum_setup_from_info (PyGIArgCache *arg_cache, GITypeInfo *type_info,
-                               GIArgInfo *arg_info, GITransfer transfer,
-                               PyGIDirection direction)
-{
-    if (direction & PYGI_DIRECTION_FROM_PYTHON)
-        arg_cache->from_py_marshaller = _pygi_marshal_from_py_interface_enum;
-
-    if (direction & PYGI_DIRECTION_TO_PYTHON)
-        arg_cache->to_py_marshaller = _pygi_marshal_to_py_interface_enum;
-}
-
-
 PyGIArgCache *
 pygi_arg_enum_new_from_info (GITypeInfo *type_info, GIArgInfo *arg_info,
                              GITransfer transfer, PyGIDirection direction,
                              GIEnumInfo *iface_info)
 {
-    gboolean res = FALSE;
-    PyGIArgCache *cache = NULL;
+    PyGIArgCache *arg_cache = NULL;
 
-    cache = pygi_arg_interface_new_from_info (
+    arg_cache = pygi_arg_interface_new_from_info (
         type_info, arg_info, transfer, direction,
         GI_REGISTERED_TYPE_INFO (iface_info));
-    if (cache == NULL) return NULL;
+    if (arg_cache == NULL) return NULL;
 
-    pygi_arg_enum_setup_from_info (cache, type_info, arg_info, transfer,
-                                   direction);
-
-    return cache;
-}
-
-static void
-pygi_arg_flags_setup_from_info (PyGIArgCache *arg_cache, GITypeInfo *type_info,
-                                GIArgInfo *arg_info, GITransfer transfer,
-                                PyGIDirection direction)
-{
     if (direction & PYGI_DIRECTION_FROM_PYTHON)
-        arg_cache->from_py_marshaller = _pygi_marshal_from_py_interface_flags;
+        arg_cache->from_py_marshaller = _pygi_marshal_from_py_interface_enum;
 
     if (direction & PYGI_DIRECTION_TO_PYTHON)
-        arg_cache->to_py_marshaller = _pygi_marshal_to_py_interface_flags;
+        arg_cache->to_py_marshaller = _pygi_marshal_to_py_interface_enum;
+
+    return arg_cache;
 }
 
 
@@ -320,16 +297,18 @@ pygi_arg_flags_new_from_info (GITypeInfo *type_info, GIArgInfo *arg_info,
                               GITransfer transfer, PyGIDirection direction,
                               GIFlagsInfo *iface_info)
 {
-    gboolean res = FALSE;
-    PyGIArgCache *cache = NULL;
+    PyGIArgCache *arg_cache = NULL;
 
-    cache = pygi_arg_interface_new_from_info (
+    arg_cache = pygi_arg_interface_new_from_info (
         type_info, arg_info, transfer, direction,
         GI_REGISTERED_TYPE_INFO (iface_info));
-    if (cache == NULL) return NULL;
+    if (arg_cache == NULL) return NULL;
 
-    pygi_arg_flags_setup_from_info (cache, type_info, arg_info, transfer,
-                                    direction);
+    if (direction & PYGI_DIRECTION_FROM_PYTHON)
+        arg_cache->from_py_marshaller = _pygi_marshal_from_py_interface_flags;
 
-    return cache;
+    if (direction & PYGI_DIRECTION_TO_PYTHON)
+        arg_cache->to_py_marshaller = _pygi_marshal_to_py_interface_flags;
+
+    return arg_cache;
 }
