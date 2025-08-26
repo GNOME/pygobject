@@ -8,6 +8,12 @@
 * Use GI Repository singleton if GLib >= 2.85 :mr:`427`
 * Expose finish_func on function info to determine if a function can be used as awaitable :mr:`428`
 * Documentation updates :mr:`424` :mr:`426` :mr:`429` :mr:`430`
+* `ParamSpec` objects now return the expected enum type :mr:`432`
+* Fix `Gio.ActionMap` override for `Gio.Application` :mr:`435`
+* Fix regression for functions with multiple callbacks :mr:`436` :mr:`437`
+* Cleanup: callable argument cache :mr:`438`
+* Format Python and C code :mr:`386`
+* Fix compatibility with GLib 2.84 :mr:`443`
 
 3.52.3 - 2025-03-16
 -------------------
