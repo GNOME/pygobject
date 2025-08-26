@@ -404,7 +404,29 @@ pygi_arg_glist_new_from_info (GITypeInfo *type_info, GIArgInfo *arg_info,
     PyGIArgCache *arg_cache = (PyGIArgCache *)g_slice_new0 (PyGIArgGList);
     if (arg_cache == NULL) return NULL;
 
-    GITypeTag type_tag = gi_type_info_get_tag (type_info);
+    if (!pygi_arg_sequence_setup ((PyGISequenceCache *)arg_cache, type_info,
+                                  arg_info, transfer, direction,
+                                  callable_cache)) {
+        pygi_arg_cache_free (arg_cache);
+        return NULL;
+    }
+
+    if (direction & PYGI_DIRECTION_FROM_PYTHON)
+        _arg_cache_from_py_glist_setup (arg_cache, transfer);
+
+    if (direction & PYGI_DIRECTION_TO_PYTHON)
+        _arg_cache_to_py_glist_setup (arg_cache, transfer);
+
+    return arg_cache;
+}
+
+PyGIArgCache *
+pygi_arg_gslist_new_from_info (GITypeInfo *type_info, GIArgInfo *arg_info,
+                               GITransfer transfer, PyGIDirection direction,
+                               PyGICallableCache *callable_cache)
+{
+    PyGIArgCache *arg_cache = (PyGIArgCache *)g_slice_new0 (PyGIArgGList);
+    if (arg_cache == NULL) return NULL;
 
     if (!pygi_arg_sequence_setup ((PyGISequenceCache *)arg_cache, type_info,
                                   arg_info, transfer, direction,
@@ -413,27 +435,11 @@ pygi_arg_glist_new_from_info (GITypeInfo *type_info, GIArgInfo *arg_info,
         return NULL;
     }
 
-    switch (type_tag) {
-    case GI_TYPE_TAG_GLIST: {
-        if (direction & PYGI_DIRECTION_FROM_PYTHON)
-            _arg_cache_from_py_glist_setup (arg_cache, transfer);
+    if (direction & PYGI_DIRECTION_FROM_PYTHON)
+        _arg_cache_from_py_gslist_setup (arg_cache, transfer);
 
-        if (direction & PYGI_DIRECTION_TO_PYTHON)
-            _arg_cache_to_py_glist_setup (arg_cache, transfer);
-        break;
-    }
-    case GI_TYPE_TAG_GSLIST: {
-        if (direction & PYGI_DIRECTION_FROM_PYTHON)
-            _arg_cache_from_py_gslist_setup (arg_cache, transfer);
-
-        if (direction & PYGI_DIRECTION_TO_PYTHON)
-            _arg_cache_to_py_gslist_setup (arg_cache, transfer);
-
-        break;
-    }
-    default:
-        g_assert_not_reached ();
-    }
+    if (direction & PYGI_DIRECTION_TO_PYTHON)
+        _arg_cache_to_py_gslist_setup (arg_cache, transfer);
 
     return arg_cache;
 }
