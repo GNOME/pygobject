@@ -1,6 +1,11 @@
-3.53.1 - yyyy-mm-dd
+3.54.0 - 2025-09-06
 -------------------
 
+* Fix compatibility with Python 3.14 :mr:`433`
+* Add platform specific symbols back to Gio module :mr:`445`
+* Include docs from old GNOME wiki :mr:`441`
+* Add override for `GLib.MainContext.query()` :mr:`446`
+* Fix optional inout parameter marshalling :mr:`447`
 
 3.53.0 - 2025-08-27
 -------------------
