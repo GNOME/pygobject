@@ -84,6 +84,7 @@ resulttuple_getattro (PyObject *self, PyObject *name)
 
     if (index != NULL) {
         item = PyTuple_GET_ITEM (self, PyLong_AsSsize_t (index));
+        if (item == NULL) Py_RETURN_NONE;
         Py_INCREF (item);
     } else {
         item = PyTuple_Type.tp_getattro (self, name);
