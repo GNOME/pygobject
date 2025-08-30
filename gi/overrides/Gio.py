@@ -20,8 +20,16 @@
 
 import warnings
 
+from contextlib import suppress
+
 from .._ossighelper import register_sigint_fallback, get_event_loop
-from ..overrides import override, deprecated_init, wrap_list_store_equal_func, wrap_list_store_sort_func
+from ..overrides import (
+    override,
+    deprecated_attr,
+    deprecated_init,
+    wrap_list_store_equal_func,
+    wrap_list_store_sort_func,
+)
 from ..module import get_introspection_module
 from gi import PyGIWarning
 
@@ -612,4 +620,31 @@ class File(Gio.File):
 
 
 File = override(File)
-__all__.append('File')
+__all__.append("File")
+
+
+GioPlatform = None
+
+with suppress(ImportError):
+    from gi.repository import GioUnix as GioPlatform
+
+if not GioPlatform:
+    with suppress(ImportError):
+        from gi.repository import GioWin32 as GioPlatform
+
+if GioPlatform:
+    # Add support for using platform-specific Gio symbols.
+    gio_globals = globals()
+
+    for attr in dir(GioPlatform):
+        if (
+            attr.startswith("_")
+            or attr in __all__
+            or attr in gio_globals
+            or hasattr(Gio, attr)
+        ):
+            continue
+
+        gio_globals[attr] = getattr(GioPlatform, attr)
+        deprecated_attr(Gio._namespace, attr, f"{GioPlatform._namespace}.{attr}")
+        __all__.append(attr)
