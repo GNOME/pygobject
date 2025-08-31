@@ -153,11 +153,10 @@ https://my.org/q?x=1&y=2
         context = GLib.MainContext()
         assert context.acquire()
 
-        n_poll, timeout_msec, fds = context.query(0)
+        timeout_msec, fds = context.query(0)
 
-        assert n_poll == 1
         assert timeout_msec == 0
-        assert fds
+        assert len(fds) == 1
 
     @unittest.skipIf(os.name == "nt", "hangs")
     def test_io_add_watch_no_data(self):

@@ -1814,15 +1814,15 @@ static PyObject *
 pyg_main_context_query (PyObject *self, PyObject *args, PyObject *kwargs)
 {
     PyObject *py_main_context;
-    int max_priority = -1, n_fds = -1;
+    int max_priority = -1, n_fds;
     GMainContext *context;
     int timeout_msec = 0;
     GPollFD *fds;
     int n_poll, read_fds, i;
     PyObject *py_out, *py_fds;
 
-    if (!PyArg_ParseTuple (args, "Oii:pyg_main_context_query",
-                           &py_main_context, &max_priority, &n_fds)) {
+    if (!PyArg_ParseTuple (args, "Oi:pyg_main_context_query", &py_main_context,
+                           &max_priority)) {
         return NULL;
     }
 
@@ -1833,6 +1833,8 @@ pyg_main_context_query (PyObject *self, PyObject *args, PyObject *kwargs)
     }
 
     context = pyg_boxed_get (py_main_context, GMainContext);
+
+    n_fds = g_main_context_query (context, max_priority, NULL, NULL, 0);
 
     fds = g_new0 (GPollFD, n_fds);
 
@@ -1853,10 +1855,9 @@ pyg_main_context_query (PyObject *self, PyObject *args, PyObject *kwargs)
     }
     g_free (fds);
 
-    py_out = PyTuple_New (3);
-    PyTuple_SET_ITEM (py_out, 0, PyLong_FromLong (n_poll));
-    PyTuple_SET_ITEM (py_out, 1, PyLong_FromLong (timeout_msec));
-    PyTuple_SET_ITEM (py_out, 2, py_fds);
+    py_out = PyTuple_New (2);
+    PyTuple_SET_ITEM (py_out, 0, PyLong_FromLong (timeout_msec));
+    PyTuple_SET_ITEM (py_out, 1, py_fds);
 
     return py_out;
 }
