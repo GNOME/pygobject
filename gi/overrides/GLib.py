@@ -808,7 +808,12 @@ class IOChannel(GLib.IOChannel):
         return super().__init__()
 
     def read(self, max_count=-1):
+        """Reads data from a :obj:`~gi.repository.GLib.IOChannel`."""
         return io_channel_read(self, max_count)
+
+    def read_chars(self, max_count=-1):
+        """Alias for GLib.IOChannel.read()."""
+        return self.read(max_count)
 
     def readline(self, size_hint=-1):
         # note, size_hint is just to maintain backwards compatible API; the

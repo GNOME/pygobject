@@ -96,6 +96,11 @@ second line
         with open(self.testutf8, "rb") as f:
             self.assertEqual(ch.read(max_count=15), f.read(15))
 
+    def test_file_read_chars(self):
+        ch = GLib.IOChannel(filename=self.testutf8)
+        with open(self.testutf8, "rb") as f:
+            self.assertEqual(ch.read_chars(), f.read())
+
     def test_seek(self):
         ch = GLib.IOChannel(filename=self.testutf8)
         ch.seek(2)
