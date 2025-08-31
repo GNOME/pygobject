@@ -149,6 +149,16 @@ https://my.org/q?x=1&y=2
         self.assertTrue(context.pending() in [True, False])
         self.assertTrue(context.iteration(False) in [True, False])
 
+    def test_main_context_query(self):
+        context = GLib.MainContext()
+        assert context.acquire()
+
+        n_poll, timeout_msec, fds = context.query(0)
+
+        assert n_poll == 1
+        assert timeout_msec == 0
+        assert fds
+
     @unittest.skipIf(os.name == "nt", "hangs")
     def test_io_add_watch_no_data(self):
         (r, w) = os.pipe()

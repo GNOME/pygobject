@@ -1810,6 +1810,57 @@ failure:
     return NULL;
 }
 
+static PyObject *
+pyg_main_context_query (PyObject *self, PyObject *args, PyObject *kwargs)
+{
+    PyObject *py_main_context;
+    int max_priority = -1, n_fds = -1;
+    GMainContext *context;
+    int timeout_msec = 0;
+    GPollFD *fds;
+    int n_poll, read_fds, i;
+    PyObject *py_out, *py_fds;
+
+    if (!PyArg_ParseTuple (args, "Oii:pyg_main_context_query",
+                           &py_main_context, &max_priority, &n_fds)) {
+        return NULL;
+    }
+
+    if (!pyg_boxed_check (py_main_context, G_TYPE_MAIN_CONTEXT)) {
+        PyErr_SetString (PyExc_TypeError,
+                         "first argument is not a GLib.MainContext");
+        return NULL;
+    }
+
+    context = pyg_boxed_get (py_main_context, GMainContext);
+
+    fds = g_new0 (GPollFD, n_fds);
+
+    n_poll = g_main_context_query (context, max_priority, &timeout_msec, fds,
+                                   n_fds);
+
+    read_fds = MIN (n_fds, n_poll);
+    py_fds = PyList_New (read_fds);
+    for (i = 0; i < read_fds; i++) {
+        PyObject *py_boxed =
+            pygi_gboxed_new (G_TYPE_POLLFD, &fds[i], TRUE, TRUE);
+        if (py_boxed == NULL) {
+            Py_DECREF (py_fds);
+            g_free (fds);
+            return NULL;
+        }
+        PyList_SET_ITEM (py_fds, i, py_boxed);
+    }
+    g_free (fds);
+
+    py_out = PyTuple_New (3);
+    PyTuple_SET_ITEM (py_out, 0, PyLong_FromLong (n_poll));
+    PyTuple_SET_ITEM (py_out, 1, PyLong_FromLong (timeout_msec));
+    PyTuple_SET_ITEM (py_out, 2, py_fds);
+
+    return py_out;
+}
+
 static gboolean
 marshal_emission_hook (GSignalInvocationHint *ihint, guint n_param_values,
                        const GValue *param_values, gpointer user_data)
@@ -2133,6 +2184,8 @@ static PyMethodDef _gi_functions[] = {
     { "source_set_callback", (PyCFunction)pygi_source_set_callback,
       METH_VARARGS },
     { "io_channel_read", (PyCFunction)pyg_channel_read, METH_VARARGS },
+    { "main_context_query", (PyCFunction)pyg_main_context_query,
+      METH_VARARGS },
     { "require_foreign", (PyCFunction)pygi_require_foreign,
       METH_VARARGS | METH_KEYWORDS },
     { "register_foreign", (PyCFunction)pygi_register_foreign, METH_NOARGS },

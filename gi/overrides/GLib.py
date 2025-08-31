@@ -27,6 +27,7 @@ from .._gi import (
     source_new,
     source_set_callback,
     io_channel_read,
+    main_context_query,
 )
 from ..overrides import override, deprecated, deprecated_attr
 from gi import PyGIDeprecationWarning, version_info
@@ -572,6 +573,23 @@ class MainContext(GLib.MainContext):
     def iteration(self, may_block=True):
         with get_event_loop(self).paused():
             return super().iteration(may_block)
+
+    def query(
+        self, max_priority: int, n_fds: int = 1
+    ) -> tuple[int, int, list[GLib.PollFD]]:
+        """Determines information necessary to poll this main loop.
+
+        :param max_priority: maximum priority source to check
+        :param n_fds: Number of :class:`~gi.repository.GLib.PollFD` to check
+        :returns:
+          the number of records actually available poll-fds,
+          the timeout (msec) used for polling,
+          and the list of poll fd's.
+
+        Please also check the usage notes in the
+        `C documention <https://docs.gtk.org/glib/method.MainContext.query.html>`__.
+        """
+        return main_context_query(self, max_priority, n_fds)
 
 
 MainContext = override(MainContext)
