@@ -38,6 +38,9 @@ if pycairo_dep.found() and pycairo_dep.type_name() == 'internal'
 endif
 envdata.append('PYTHONPATH', python_paths)
 
+gi_tests_builddir = meson.project_build_root() / 'subprojects' / 'gobject-introspection-tests'
+envdata.prepend('GI_TYPELIB_PATH', gi_tests_builddir)
+
 test('pygobject-test-suite',
   python,
   args: ['-m', 'pytest'],
