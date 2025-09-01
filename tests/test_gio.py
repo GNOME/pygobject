@@ -5,8 +5,12 @@ import warnings
 
 import pytest
 
+GioUnix = None
+with contextlib.suppress(ImportError):
+    from gi.repository import GioUnix
+
 import gi.overrides
-from gi import PyGIWarning
+from gi import PyGIWarning, PyGIDeprecationWarning
 from gi.repository import GLib, Gio
 
 from .helper import ignore_gi_deprecation_warnings
@@ -50,6 +54,86 @@ class TestGio(unittest.TestCase):
             self.assertRegex(
                 str(warn[0].message), ".*Gio\\.VolumeMonitor\\.get\\(\\).*"
             )
+
+
+class TestGioPlatform(unittest.TestCase):
+    desktopFileContent = f"""[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Some Application
+Exec={GLib.find_program_in_path("sh")}
+"""
+
+    def setUp(self):
+        super().setUp()
+
+        required_glib = GLib.MAJOR_VERSION > 2 or (
+            GLib.MAJOR_VERSION == 2
+            and (
+                GLib.MINOR_VERSION > 85
+                or (GLib.MINOR_VERSION == 85 and GLib.MICRO_VERSION >= 5)
+            )
+        )
+
+        if not required_glib:
+            self.skipTest("Installed Gio is not new enough for this test")
+
+        if GioUnix:
+            self.key_file = GLib.KeyFile()
+            self.key_file.load_from_data(
+                self.desktopFileContent,
+                len(self.desktopFileContent),
+                GLib.KeyFileFlags.NONE,
+            )
+
+    @unittest.skipIf(GioUnix is None, "Not supported")
+    def test_desktop_app_info_can_be_created_from_gio_unix(self):
+        app_info = GioUnix.DesktopAppInfo.new_from_keyfile(self.key_file)
+        self.assertIsNotNone(app_info)
+        self.assertIsInstance(app_info, GioUnix.DesktopAppInfo)
+        self.assertIsInstance(app_info, Gio.AppInfo)
+
+    @unittest.skipIf(GioUnix is None, "Not supported")
+    def test_desktop_app_info_can_be_created_from_gio(self):
+        with warnings.catch_warnings(record=True) as warn:
+            warnings.simplefilter("always")
+            app_info = Gio.DesktopAppInfo.new_from_keyfile(self.key_file)
+
+            self.assertEqual(len(warn), 1)
+            self.assertTrue(issubclass(warn[0].category, PyGIDeprecationWarning))
+            self.assertEqual(
+                str(warn[0].message),
+                "Gio.DesktopAppInfo is deprecated; "
+                + "use GioUnix.DesktopAppInfo instead",
+            )
+
+            self.assertIsNotNone(app_info)
+            self.assertIsInstance(app_info, Gio.DesktopAppInfo)
+            self.assertIsInstance(app_info, Gio.AppInfo)
+
+    @unittest.skipIf(GioUnix is None, "Not supported")
+    def test_gio_unix_desktop_app_info_provides_platform_independent_functions(self):
+        app_info = GioUnix.DesktopAppInfo.new_from_keyfile(self.key_file)
+        self.assertEqual(app_info.get_name(), "Some Application")
+
+    @unittest.skipIf(GioUnix is None, "Not supported")
+    @ignore_gi_deprecation_warnings
+    def test_gio_desktop_app_info_provides_platform_independent_functions(self):
+        app_info = Gio.DesktopAppInfo.new_from_keyfile(self.key_file)
+        self.assertEqual(app_info.get_name(), "Some Application")
+
+    @unittest.skipIf(GioUnix is None, "Not supported")
+    def test_gio_unix_desktop_app_info_provides_unix_only_functions(self):
+        app_info = GioUnix.DesktopAppInfo.new_from_keyfile(self.key_file)
+        self.assertTrue(app_info.has_key("Name"))
+        self.assertEqual(app_info.get_string("Name"), "Some Application")
+
+    @unittest.skipIf(GioUnix is None, "Not supported")
+    @ignore_gi_deprecation_warnings
+    def test_gio_desktop_app_info_provides_unix_only_functions(self):
+        app_info = Gio.DesktopAppInfo.new_from_keyfile(self.key_file)
+        self.assertTrue(app_info.has_key("Name"))
+        self.assertEqual(app_info.get_string("Name"), "Some Application")
 
 
 class TestGSettings(unittest.TestCase):
