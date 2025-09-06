@@ -1167,6 +1167,29 @@ class TestArray(unittest.TestCase):
         )
 
 
+class TestLengthArray(unittest.TestCase):
+    def test_length_array_utf8_none_inout(self):
+        assert GIMarshallingTests.length_array_utf8_none_inout(
+            ["🅰", "β", "c", "d"]
+        ) == ["a", "b", "¢", "🔠"]
+
+    def test_length_array_utf8_full_inout(self):
+        assert GIMarshallingTests.length_array_utf8_full_inout(
+            ["🅰", "β", "c", "d"]
+        ) == ["a", "b", "¢", "🔠"]
+
+    def test_length_array_utf8_optional_inout(self):
+        assert GIMarshallingTests.length_array_utf8_optional_inout(
+            ["🅰", "β", "c", "d"]
+        ) == ["a", "b", "¢", "🔠"]
+
+    def test_length_array_utf8_optional_inout_none_arg(self):
+        assert GIMarshallingTests.length_array_utf8_optional_inout(None) == ["a", "b"]
+
+    def test_length_array_utf8_optional_inout_no_arg(self):
+        assert GIMarshallingTests.length_array_utf8_optional_inout() == ["a", "b"]
+
+
 class TestGStrv(unittest.TestCase):
     def test_gstrv_return(self):
         self.assertEqual(["0", "1", "2"], GIMarshallingTests.gstrv_return())
