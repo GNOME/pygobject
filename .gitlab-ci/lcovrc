@@ -6,7 +6,7 @@ branch_coverage = 1
 
 stop_on_error = 0
 
-ignore_errors = inconsistent,unused,empty
+ignore_errors = category,inconsistent,unused,empty
 
 check_data_consistency = 0
 
