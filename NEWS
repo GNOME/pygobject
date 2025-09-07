@@ -1,3 +1,11 @@
+3.55.0 - unreleased
+-------------------
+
+* Remove `GLib.options` module :mr:`273`
+* Support generic parameters for `Gio.ListStore` :mr:`237`
+* Cleanup: replace arguments in cache objects by functions :mr:`439`
+* Always sink floating objects :mr:`442`
+
 3.54.0 - 2025-09-06
 -------------------
 
