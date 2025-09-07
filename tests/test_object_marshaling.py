@@ -299,12 +299,9 @@ class TestVFuncsWithFloatingArg(unittest.TestCase):
 
         def ref(obj):
             testhelper.force_g_object_ref(obj)
-            # FIXME: Add an item dictionary so that the python wrapper cannot
-            # be destroyed because it is unused. Unfortunately, a weakref does
-            # not trigger this handling (though it may be possible through
-            # object resurrection).
-            obj._something = None
-            return weakref.ref(obj)
+
+            # NB. weak reference the underlying GObject!
+            return obj.weak_ref()
 
         vfuncs.ObjectRef = ref
 
@@ -323,7 +320,8 @@ class TestVFuncsWithFloatingArg(unittest.TestCase):
 
         # vfunc caller should only have a single floating ref after the vfunc finishes
         # Add to that the explicit reference we added and then the toggle reference for the dict
-        self.assertEqual(ref_count, 1 + 2)
+        toggle_ref = 1 if sys.implementation.name == "pypy" else 0
+        self.assertEqual(ref_count, toggle_ref + 2)
         self.assertFalse(is_floating)
 
         # There are two references now, one explicit and one from the wrapper
