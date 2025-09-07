@@ -226,6 +226,7 @@ class TestVFuncsWithObjectArg(unittest.TestCase):
 
 class TestVFuncsWithFloatingArg(unittest.TestCase):
     # All tests here work with a floating object by using InitiallyUnowned as the argument
+    # The floating object is sunk as soon as possible.
 
     class VFuncs(VFuncsBase):
         # Object for testing non-floating objects without holding any refs.
@@ -299,40 +300,35 @@ class TestVFuncsWithFloatingArg(unittest.TestCase):
 
         def ref(obj):
             testhelper.force_g_object_ref(obj)
-            # FIXME: Add an item dictionary so that the python wrapper cannot
-            # be destroyed because it is unused. Unfortunately, a weakref does
-            # not trigger this handling (though it may be possible through
-            # object resurrection).
-            obj._something = None
-            return weakref.ref(obj)
+
+            # NB. weak reference the underlying GObject!
+            return obj.weak_ref()
 
         vfuncs.ObjectRef = ref
 
         ref_count, is_floating = vfuncs.get_ref_info_for_vfunc_in_object_transfer_none(
             self.VFuncs.Object
         )
-
         gc.collect()
 
         # New: all objects are "sink"'ed (sunken?). Avoid using floating objects altogether.
 
         # python wrapper should maintain the object as floating and add an additional ref
-        # So, two plus the one we added explicitly. No extra toggle reference to keep the wrapper alive.
+        # So, two plus the one we added explicitly.
         self.assertEqual(vfuncs.in_object_grefcount, 2 + 1)
         self.assertFalse(vfuncs.in_object_is_floating)
 
-        # vfunc caller should only have a single floating ref after the vfunc finishes
-        # Add to that the explicit reference we added and then the toggle reference for the dict
-        self.assertEqual(ref_count, 1 + 2)
+        # Special case for PyPy: the GC has not run, so we have registered an extra reference
+        # Add a call to `PyGC_Collect ()` at the end of `_pygi_closure_handle` to check.
+        pypy_needs_gc = int(sys.implementation.name == "pypy")
+        self.assertEqual(ref_count, 2 + pypy_needs_gc)
         self.assertFalse(is_floating)
 
         # There are two references now, one explicit and one from the wrapper
         self.assertEqual(vfuncs.object_ref().__grefcount__, 2)
         self.assertFalse(vfuncs.object_ref().is_floating())
-        # Sinking and unref'ing our "C" one will drop both (as the second is a toggle ref)
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", PyGIDeprecationWarning)
-            testhelper.force_g_object_unref(vfuncs.object_ref())
+
+        testhelper.force_g_object_unref(vfuncs.object_ref())
 
         gc.collect()
         gc.collect()
