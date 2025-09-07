@@ -54,11 +54,15 @@ GQuark pygobject_class_init_key;
 GQuark pygobject_wrapper_key;
 GQuark pygobject_has_updated_constructor_key;
 GQuark pygobject_instance_data_key;
+GQuark pygobject_instance_dict_key;
 
 /* PyPy doesn't support tp_dictoffset, so we have to work around it */
-#ifndef PYPY_VERSION
+#ifdef PYPY_VERSION
+#define PYGI_OBJECT_USE_TOGGLE_REFS
+#else
 #define PYGI_OBJECT_USE_CUSTOM_DICT
 #endif
+
 
 GClosure *
 gclosure_from_pyfunc (PyGObject *object, PyObject *func)
@@ -565,6 +569,8 @@ pygobject_register_class (PyObject *dict, const gchar *type_name, GType gtype,
     PyDict_SetItemString (dict, (char *)class_name, (PyObject *)type);
 }
 
+#ifdef PYGI_OBJECT_USE_TOGGLE_REFS
+
 static void
 pyg_toggle_notify (gpointer data, GObject *object, gboolean is_last_ref)
 {
@@ -635,6 +641,8 @@ pygobject_toggle_ref_ensure (PyGObject *self)
     g_object_unref (self->obj);
 }
 
+#endif /* PYGI_OBJECT_USE_TOGGLE_REFS */
+
 /**
  * pygobject_register_wrapper:
  * @self: the wrapper instance
@@ -658,7 +666,9 @@ pygobject_register_wrapper (PyObject *self)
     /* save wrapper pointer so we can access it later */
     g_object_set_qdata_full (gself->obj, pygobject_wrapper_key, gself, NULL);
 
+#ifdef PYGI_OBJECT_USE_TOGGLE_REFS
     pygobject_toggle_ref_ensure (gself);
+#endif
 }
 
 static PyObject *
@@ -962,7 +972,10 @@ pygobject_new_full (GObject *obj, gboolean steal, gpointer g_class)
         if (tp->tp_flags & Py_TPFLAGS_HEAPTYPE) Py_INCREF (tp);
         self = PyObject_GC_New (PyGObject, tp);
         if (self == NULL) return NULL;
-        self->inst_dict = NULL;
+        self->inst_dict =
+            g_object_get_qdata (obj, pygobject_instance_dict_key);
+        if (self->inst_dict) Py_INCREF (self->inst_dict);
+
         self->weakreflist = NULL;
         self->private_flags.flags = 0;
         self->obj = obj;
@@ -1144,11 +1157,23 @@ pygobject_traverse (PyGObject *self, visitproc visit, void *arg)
     return ret;
 }
 
+#ifndef PYGI_OBJECT_USE_TOGGLE_REFS
+static void
+pygobject_inst_dict_clear (PyObject *inst_dict)
+{
+    PyGILState_STATE state = PyGILState_Ensure ();
+
+    Py_XDECREF (inst_dict);
+    PyGILState_Release (state);
+}
+#endif
+
 static inline int
 pygobject_clear (PyGObject *self)
 {
     if (self->obj) {
         g_object_set_qdata_full (self->obj, pygobject_wrapper_key, NULL, NULL);
+#ifdef PYGI_OBJECT_USE_TOGGLE_REFS
         if (pygobject_toggle_ref_is_active (self)) {
             g_object_remove_toggle_ref (self->obj, pyg_toggle_notify, NULL);
             self->private_flags.flags &= ~PYGOBJECT_USING_TOGGLE_REF;
@@ -1157,6 +1182,21 @@ pygobject_clear (PyGObject *self)
             g_object_unref (self->obj);
             Py_END_ALLOW_THREADS;
         }
+#else
+        /* Only store the instance dict if we know the gobject will outlive this wrapper. */
+        if (self->inst_dict != NULL && self->obj->ref_count > 1
+            && g_object_get_qdata (self->obj, pygobject_instance_dict_key)
+                   == NULL) {
+            g_object_set_qdata_full (
+                self->obj, pygobject_instance_dict_key,
+                Py_NewRef (self->inst_dict),
+                (GDestroyNotify)pygobject_inst_dict_clear);
+        }
+
+        Py_BEGIN_ALLOW_THREADS;
+        g_object_unref (self->obj);
+        Py_END_ALLOW_THREADS;
+#endif
         self->obj = NULL;
     }
     Py_CLEAR (self->inst_dict);
@@ -2136,8 +2176,17 @@ static PyObject *
 pygobject_get_dict (PyGObject *self, void *closure)
 {
     if (self->inst_dict == NULL) {
+#ifdef PYGI_OBJECT_USE_TOGGLE_REFS
         self->inst_dict = PyDict_New ();
         pygobject_toggle_ref_ensure (self);
+#else
+        self->inst_dict =
+            g_object_get_qdata (self->obj, pygobject_instance_dict_key);
+        if (self->inst_dict)
+            Py_INCREF (self->inst_dict);
+        else
+            self->inst_dict = PyDict_New ();
+#endif
     }
     return Py_NewRef (self->inst_dict);
 }
@@ -2159,6 +2208,7 @@ pygobject_get_pointer (PyGObject *self, void *closure)
     return PyCapsule_New (self->obj, NULL, NULL);
 }
 
+#ifdef PYGI_OBJECT_USE_TOGGLE_REFS
 static int
 pygobject_setattro (PyObject *self, PyObject *name, PyObject *value)
 {
@@ -2167,6 +2217,7 @@ pygobject_setattro (PyObject *self, PyObject *name, PyObject *value)
     pygobject_toggle_ref_ensure ((PyGObject *)self);
     return res;
 }
+#endif
 
 static PyGetSetDef pygobject_getsets[] = {
 #ifdef PYGI_OBJECT_USE_CUSTOM_DICT
@@ -2357,6 +2408,8 @@ pyi_object_register_types (PyObject *d)
         g_quark_from_static_string ("PyGObject::has-updated-constructor");
     pygobject_instance_data_key =
         g_quark_from_static_string ("PyGObject::instance-data");
+    pygobject_instance_dict_key =
+        g_quark_from_static_string ("PyGObject::instance-dict");
 
     /* GObject */
     if (!PY_TYPE_OBJECT)
@@ -2366,7 +2419,9 @@ pyi_object_register_types (PyObject *d)
     PyGObject_Type.tp_richcompare = pygobject_richcompare;
     PyGObject_Type.tp_repr = (reprfunc)pygobject_repr;
     PyGObject_Type.tp_hash = (hashfunc)pygobject_hash;
+#ifdef PYGI_OBJECT_USE_TOGGLE_REFS
     PyGObject_Type.tp_setattro = (setattrofunc)pygobject_setattro;
+#endif
     PyGObject_Type.tp_flags =
         (Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE | Py_TPFLAGS_HAVE_GC);
     PyGObject_Type.tp_traverse = (traverseproc)pygobject_traverse;
