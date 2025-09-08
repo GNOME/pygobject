@@ -57,7 +57,7 @@ def _check_require_version(namespace, stacklevel):
         # namespace or by C code like libpeas
         return
 
-    if namespace in ("GLib", "GObject", "Gio"):
+    if namespace in ("GLib", "GObject", "Gio", "GioUnix", "GioWin32"):
         # part of glib (we have bigger problems if versions change there)
         return
 
