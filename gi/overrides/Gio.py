@@ -28,6 +28,7 @@ from ..overrides import (
     wrap_list_store_equal_func,
     wrap_list_store_sort_func,
 )
+from .._gi import CallableInfo
 from ..module import get_introspection_module
 from gi import PyGIWarning
 
@@ -654,6 +655,9 @@ if GioPlatform:
     # Add support for using platform-specific Gio symbols.
     gio_globals = globals()
 
+    platform_name = f"{GioPlatform._namespace[len(Gio._namespace) :]}"
+    platform_name_lower = platform_name.lower()
+
     for attr in dir(GioPlatform):
         if (
             attr.startswith("_")
@@ -663,6 +667,23 @@ if GioPlatform:
         ):
             continue
 
-        gio_globals[attr] = getattr(GioPlatform, attr)
-        deprecated_attr(Gio._namespace, attr, f"{GioPlatform._namespace}.{attr}")
-        __all__.append(attr)
+        original_attr = getattr(GioPlatform, attr)
+        wrapper_attr = attr
+
+        if isinstance(
+            original_attr, CallableInfo
+        ) and original_attr.get_symbol().startswith(f"g_{platform_name_lower}_"):
+            wrapper_attr = f"{platform_name_lower}_{attr}"
+        else:
+            try:
+                gtype = getattr(original_attr, "__gtype__")
+                if gtype.name.startswith(f"G{platform_name}"):
+                    wrapper_attr = f"{platform_name}{attr}"
+            except AttributeError:
+                pass
+
+        gio_globals[wrapper_attr] = original_attr
+        deprecated_attr(
+            Gio._namespace, wrapper_attr, f"{GioPlatform._namespace}.{attr}"
+        )
+        __all__.append(wrapper_attr)
