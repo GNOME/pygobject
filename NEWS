@@ -1,3 +1,8 @@
+3.54.1 - 2025-09-12
+-------------------
+
+* Excempt GioPlatform namespaces from required version check :mr:`450`
+
 3.54.0 - 2025-09-06
 -------------------
 
