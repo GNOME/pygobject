@@ -1,3 +1,8 @@
+3.54.2 - 2025-09-13
+-------------------
+
+* Prefix platform specific symbols with platform name :mr:`451`
+
 3.54.1 - 2025-09-12
 -------------------
 
