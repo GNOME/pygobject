@@ -153,6 +153,24 @@ Exec={GLib.find_program_in_path("sh")}
             self.assertEqual(GioUnix.mount_points_get, Gio.unix_mount_points_get)
 
     @unittest.skipIf(GioUnix is None, "Not supported")
+    def test_deprecated_unix_type_can_be_used_if_equal_exists_in_gio(self):
+        with warnings.catch_warnings(record=True) as warn:
+            warnings.simplefilter("always")
+
+            input_stream = Gio.UnixInputStream
+            self.assertEqual(len(warn), 1)
+            self.assertTrue(issubclass(warn[0].category, PyGIDeprecationWarning))
+            self.assertEqual(
+                str(warn[0].message),
+                "Gio.UnixInputStream is deprecated; "
+                + "use GioUnix.InputStream instead",
+            )
+
+            self.assertIsNotNone(input_stream)
+            self.assertEqual(Gio.UnixInputStream, GioUnix.InputStream)
+            self.assertNotEqual(Gio.InputStream, GioUnix.InputStream)
+
+    @unittest.skipIf(GioUnix is None, "Not supported")
     def test_deprecated_unix_class_can_be_used_from_gio(self):
         with warnings.catch_warnings(record=True) as warn:
             warnings.simplefilter("always")
@@ -168,6 +186,24 @@ Exec={GLib.find_program_in_path("sh")}
 
             self.assertIsNotNone(monitor)
             self.assertEqual(Gio.UnixMountMonitor.get, GioUnix.MountMonitor.get)
+
+    @unittest.skipIf(GioUnix is None, "Not supported")
+    def test_deprecated_unix_gobject_class_can_be_used_from_gio(self):
+        with warnings.catch_warnings(record=True) as warn:
+            warnings.simplefilter("always")
+
+            input_stream_class = Gio.UnixInputStreamClass
+            self.assertEqual(len(warn), 1)
+            self.assertTrue(issubclass(warn[0].category, PyGIDeprecationWarning))
+            self.assertEqual(
+                str(warn[0].message),
+                "Gio.UnixInputStreamClass is deprecated; "
+                + "use GioUnix.InputStreamClass instead",
+            )
+
+            self.assertIsNotNone(input_stream_class)
+            self.assertEqual(Gio.UnixInputStreamClass, GioUnix.InputStreamClass)
+            self.assertNotEqual(Gio.InputStreamClass, GioUnix.InputStreamClass)
 
 
 class TestGSettings(unittest.TestCase):
