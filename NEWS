@@ -1,3 +1,8 @@
+3.54.3 - 2025-09-21
+-------------------
+
+* Do not skip symbols both in Gio and in platform specific :mr:`452`
+
 3.54.2 - 2025-09-13
 -------------------
 
