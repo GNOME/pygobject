@@ -634,12 +634,7 @@ if GioPlatform:
     platform_name_lower = platform_name.lower()
 
     for attr in dir(GioPlatform):
-        if (
-            attr.startswith("_")
-            or attr in __all__
-            or attr in gio_globals
-            or hasattr(Gio, attr)
-        ):
+        if attr.startswith("_"):
             continue
 
         original_attr = getattr(GioPlatform, attr)
@@ -656,6 +651,27 @@ if GioPlatform:
                     wrapper_attr = f"{platform_name}{attr}"
             except AttributeError:
                 pass
+
+        if wrapper_attr == attr and hasattr(Gio, wrapper_attr):
+            try:
+                name = original_attr.__name__[0]
+            except (AttributeError, IndexError):
+                name = original_attr
+
+            # Fallback if we don't have the original name.
+            if name.islower():
+                wrapper_attr = f"{platform_name_lower}_{attr}"
+            elif "_" in name:
+                wrapper_attr = f"{platform_name.upper()}_{attr}"
+            elif name:
+                wrapper_attr = f"{platform_name}{attr}"
+
+        if (
+            wrapper_attr in __all__
+            or wrapper_attr in gio_globals
+            or hasattr(Gio, wrapper_attr)
+        ):
+            continue
 
         gio_globals[wrapper_attr] = original_attr
         deprecated_attr(
