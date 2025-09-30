@@ -65,6 +65,24 @@ _options = {
 }
 
 
+class OverrideImport:
+    def __init__(self, overrides_path):
+        self.overrides_path = overrides_path
+
+    def find_spec(self, fullname, path, target=None):
+        if not fullname.startswith("gi.overrides"):
+            return None
+        finder = importlib.machinery.PathFinder()
+        # From find_spec the docs:
+        # If name is for a submodule (contains a dot), the parent module is automatically imported.
+        return finder.find_spec(fullname, self.overrides_path)
+
+
+_pgi_overrides_path = os.environ.get("PYGI_OVERRIDES_PATH", "")
+if _pgi_overrides_path:
+    sys.meta_path.insert(0, OverrideImport(_pgi_overrides_path.split(os.pathsep)))
+
+
 class _DummyStaticModule(types.ModuleType):
     __path__ = None
 
