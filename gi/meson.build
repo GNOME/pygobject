@@ -1,4 +1,4 @@
-sources = [
+gi_c_sources = files(
   'pygboxed.c',
   'pygenum.c',
   'pygflags.c',
@@ -42,7 +42,9 @@ sources = [
   'pygi-error.c',
   'pygi-fundamental.c',
   'pygi-value.c',
-]
+)
+
+gi_cairo_c_sources = files('pygi-foreign-cairo.c')
 
 headers = [
   'pygobject.h',
@@ -51,12 +53,13 @@ headers = [
 
 install_headers(headers, subdir : 'pygobject-@0@'.format(platform_version))
 
-python_sources = [
+python_sources = files(
   'events.py',
   '_constants.py',
   'docstring.py',
   '_enum.py',
   '_error.py',
+  '_gi.py',
   '_gtktemplate.py',
   'importer.py',
   '__init__.py',
@@ -66,7 +69,7 @@ python_sources = [
   '_signalhelper.py',
   '_signature.py',
   'types.py',
-]
+)
 
 python.install_sources(python_sources,
   pure : false,
@@ -81,21 +84,6 @@ else
 endif
 
 configure_file(output : 'config.h', configuration : cdata)
-
-giext = python.extension_module('_gi', sources,
-  dependencies : [python_ext_dep, glib_dep, gi_dep, ffi_dep, pythoncapi_compat_dep],
-  install: true,
-  subdir : 'gi',
-  c_args: pyext_c_args + main_c_args + ['-D_INSIDE_PYGOBJECT_']
-)
-
-if cairo_dep.found()
-  gicairoext = python.extension_module('_gi_cairo', ['pygi-foreign-cairo.c'],
-    dependencies : [python_ext_dep, glib_dep, gi_dep, ffi_dep, pycairo_dep, cairo_dep, cairo_gobject_dep, pythoncapi_compat_dep],
-    install: true,
-    subdir : 'gi',
-    c_args: pyext_c_args + main_c_args)
-endif
 
 subdir('overrides')
 subdir('repository')
