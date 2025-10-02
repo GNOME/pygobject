@@ -103,9 +103,9 @@ def init_test_environ():
     sys.path.insert(0, srcdir)
 
     import gi
+    import _gi
 
-    gi_builddir = os.path.dirname(gi._gi.__file__)
-    builddir = os.path.dirname(gi_builddir)
+    builddir = os.path.dirname(_gi.__file__)
     tests_builddir = os.path.join(builddir, "tests")
 
     sys.path.insert(0, tests_builddir)

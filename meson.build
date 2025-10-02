@@ -219,6 +219,21 @@ pygobject_dep = declare_dependency(
 
 subdir('gi')
 
+giext = python.extension_module('_gi', gi_c_sources,
+  dependencies : [python_ext_dep, glib_dep, gi_dep, ffi_dep, pythoncapi_compat_dep],
+  include_directories: include_directories('gi'),
+  install: true,
+  c_args: pyext_c_args + main_c_args + ['-D_INSIDE_PYGOBJECT_']
+)
+
+if cairo_dep.found()
+  gicairoext = python.extension_module('_gi_cairo', gi_cairo_c_sources,
+    dependencies : [python_ext_dep, glib_dep, gi_dep, ffi_dep, pycairo_dep, cairo_dep, cairo_gobject_dep, pythoncapi_compat_dep],
+    include_directories: include_directories('gi'),
+    install: true,
+    c_args: pyext_c_args + main_c_args)
+endif
+
 with_tests = get_option('tests')
 if with_tests
   gi_tests = subproject('gobject-introspection-tests', default_options : ['cairo=' + cairo_dep.found().to_string()])

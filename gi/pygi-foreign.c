@@ -61,7 +61,7 @@ do_lookup (const gchar *namespace, const gchar *name)
 static PyObject *
 pygi_struct_foreign_load_module (const char *namespace)
 {
-    gchar *module_name = g_strconcat ("gi._gi_", namespace, NULL);
+    gchar *module_name = g_strconcat ("_gi_", namespace, NULL);
     PyObject *module = PyImport_ImportModule (module_name);
     g_free (module_name);
     return module;
