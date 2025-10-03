@@ -1,6 +1,5 @@
 [wrap-git]
 directory=pythoncapi-compat
 url=https://github.com/python/pythoncapi-compat.git
-revision=632d1aa0c4be6c67498d6b97630ddd7d7eb0f90a
+revision=97f1582fc44c3912934157a726fb6f44efd7cec9
 depth=1
-diff_files=pythoncapi-compat-meson.diff

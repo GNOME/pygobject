@@ -26,6 +26,7 @@
 /docs/_build
 /PyGObject.egg-info/
 /subprojects/*/
+subprojects/.wraplock
 !/subprojects/packagefiles/
 *.pyd
 *.dll.a
