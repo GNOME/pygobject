@@ -155,6 +155,11 @@ else
     '-fvisibility=hidden',
   ]
 
+  # On MSys2, the compiler errors 'cause it wants a `gnu_printf` format attributes
+  if host_machine.system() == 'windows' and cc.get_id() == 'gcc'
+    main_c_args += ['-Wno-suggest-attribute=format']
+  endif
+
   main_c_args = cc.get_supported_arguments(main_c_args)
 endif
 
