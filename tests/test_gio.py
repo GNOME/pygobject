@@ -88,14 +88,18 @@ Exec={GLib.find_program_in_path("sh")}
                 GLib.KeyFileFlags.NONE,
             )
 
-    @unittest.skipIf(GioUnix is None, "Not supported")
+    @unittest.skipIf(
+        GioUnix is None or "DesktopAppInfo" not in dir(GioUnix), "Not supported"
+    )
     def test_desktop_app_info_can_be_created_from_gio_unix(self):
         app_info = GioUnix.DesktopAppInfo.new_from_keyfile(self.key_file)
         self.assertIsNotNone(app_info)
         self.assertIsInstance(app_info, GioUnix.DesktopAppInfo)
         self.assertIsInstance(app_info, Gio.AppInfo)
 
-    @unittest.skipIf(GioUnix is None, "Not supported")
+    @unittest.skipIf(
+        GioUnix is None or "DesktopAppInfo" not in dir(GioUnix), "Not supported"
+    )
     def test_desktop_app_info_can_be_created_from_gio(self):
         with warnings.catch_warnings(record=True) as warn:
             warnings.simplefilter("always")
@@ -113,24 +117,32 @@ Exec={GLib.find_program_in_path("sh")}
             self.assertIsInstance(app_info, Gio.DesktopAppInfo)
             self.assertIsInstance(app_info, Gio.AppInfo)
 
-    @unittest.skipIf(GioUnix is None, "Not supported")
+    @unittest.skipIf(
+        GioUnix is None or "DesktopAppInfo" not in dir(GioUnix), "Not supported"
+    )
     def test_gio_unix_desktop_app_info_provides_platform_independent_functions(self):
         app_info = GioUnix.DesktopAppInfo.new_from_keyfile(self.key_file)
         self.assertEqual(app_info.get_name(), "Some Application")
 
-    @unittest.skipIf(GioUnix is None, "Not supported")
+    @unittest.skipIf(
+        GioUnix is None or "DesktopAppInfo" not in dir(GioUnix), "Not supported"
+    )
     @ignore_gi_deprecation_warnings
     def test_gio_desktop_app_info_provides_platform_independent_functions(self):
         app_info = Gio.DesktopAppInfo.new_from_keyfile(self.key_file)
         self.assertEqual(app_info.get_name(), "Some Application")
 
-    @unittest.skipIf(GioUnix is None, "Not supported")
+    @unittest.skipIf(
+        GioUnix is None or "DesktopAppInfo" not in dir(GioUnix), "Not supported"
+    )
     def test_gio_unix_desktop_app_info_provides_unix_only_functions(self):
         app_info = GioUnix.DesktopAppInfo.new_from_keyfile(self.key_file)
         self.assertTrue(app_info.has_key("Name"))
         self.assertEqual(app_info.get_string("Name"), "Some Application")
 
-    @unittest.skipIf(GioUnix is None, "Not supported")
+    @unittest.skipIf(
+        GioUnix is None or "DesktopAppInfo" not in dir(GioUnix), "Not supported"
+    )
     @ignore_gi_deprecation_warnings
     def test_gio_desktop_app_info_provides_unix_only_functions(self):
         app_info = Gio.DesktopAppInfo.new_from_keyfile(self.key_file)
