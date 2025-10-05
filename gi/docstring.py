@@ -17,6 +17,8 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
 # USA
 
+from typing import Callable, Optional
+
 from ._gi import (
     VFuncInfo,
     FunctionInfo,
@@ -29,7 +31,7 @@ from ._gi import (
 
 
 #: Module storage for currently registered doc string generator function.
-_generate_doc_string_func = None
+_generate_doc_string_func: Optional[Callable[[object], str]] = None
 
 
 def set_doc_string_generator(func):
@@ -59,7 +61,9 @@ def generate_doc_string(info):
     This passes the info struct to the currently registered doc string
     generator and returns the result.
     """
-    return _generate_doc_string_func(info)
+    if _generate_doc_string_func:
+        return _generate_doc_string_func(info)
+    return None
 
 
 _type_tag_to_py_type = {

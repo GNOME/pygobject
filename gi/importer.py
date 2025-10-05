@@ -21,6 +21,7 @@
 import sys
 import warnings
 import importlib
+import importlib.util
 from contextlib import contextmanager
 
 import gi
@@ -33,7 +34,7 @@ from .overrides import load_overrides
 repository = Repository.get_default()
 
 # only for backwards compatibility
-modules = {}
+modules = {}  # type: ignore[var-annotated]
 
 
 @contextmanager
@@ -110,7 +111,8 @@ class DynamicImporter:
 
     def find_spec(self, fullname, path=None, target=None):
         if self._find_module_check(fullname):
-            return importlib.util.spec_from_loader(fullname, self)
+            # self.load_module() is not required: exec_module is provided
+            return importlib.util.spec_from_loader(fullname, self)  # type: ignore[arg-type]
         return None
 
     def find_module(self, fullname, path=None):

@@ -43,14 +43,14 @@ from ._gi import Repository
 from ._gi import PyGIDeprecationWarning as PyGIDeprecationWarning
 from ._gi import PyGIWarning as PyGIWarning
 
-_versions = {}
+_versions: dict[str, str] = {}
 _overridesdir = os.path.join(os.path.dirname(__file__), "overrides")
 
 # Needed for compatibility with "pygobject.h"/pygobject_init()
 _gobject = types.ModuleType("gi._gobject")
 sys.modules[_gobject.__name__] = _gobject
-_gobject._PyGObject_API = _gi._PyGObject_API
-_gobject.pygobject_version = _gi.pygobject_version
+_gobject._PyGObject_API = _gi._PyGObject_API  # type: ignore[attr-defined]
+_gobject.pygobject_version = _gi.pygobject_version  # type: ignore[attr-defined]
 
 version_info = _gi.pygobject_version[:]
 __version__ = "{}.{}.{}".format(*version_info)
@@ -66,7 +66,7 @@ _options = {
 
 
 class _DummyStaticModule(types.ModuleType):
-    __path__ = None
+    __path__ = None  # type: ignore[assignment]
 
     def __getattr__(self, name):
         raise AttributeError(_static_binding_error)

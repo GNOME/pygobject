@@ -815,7 +815,7 @@ class TestNullableArgs(unittest.TestCase):
 
 
 class TestCallbacks(unittest.TestCase):
-    called = False
+    called: int = False
     main_loop = GLib.MainLoop()
 
     def test_callback(self):

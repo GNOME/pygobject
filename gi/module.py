@@ -49,9 +49,6 @@ from ._constants import TYPE_NONE, TYPE_BOXED, TYPE_POINTER
 
 repository = Repository.get_default()
 
-# Cache of IntrospectionModules that have been loaded.
-_introspection_modules = {}
-
 
 def get_parent_for_object(object_info):
     parent_object_info = object_info.get_parent()
@@ -150,7 +147,7 @@ class IntrospectionModule(ModuleType):
                     if not issubclass(parent, interface)
                 )
                 bases = (parent, *interfaces)
-                metaclass = GObjectMeta
+                metaclass: type = GObjectMeta
             elif isinstance(info, CallbackInfo):
                 bases = (CCallback,)
                 metaclass = GObjectMeta
@@ -198,9 +195,9 @@ class IntrospectionModule(ModuleType):
                     g_type.pytype = wrapper
 
         elif isinstance(info, FunctionInfo):
-            wrapper = info
+            wrapper = info  # type: ignore[assignment]
         elif isinstance(info, ConstantInfo):
-            wrapper = info.get_value()
+            wrapper = info.get_value()  # type: ignore[assignment]
         else:
             raise NotImplementedError(info)
 
@@ -229,6 +226,10 @@ class IntrospectionModule(ModuleType):
         )
 
         return list(result)
+
+
+# Cache of IntrospectionModules that have been loaded.
+_introspection_modules: dict[str, IntrospectionModule] = {}
 
 
 def get_introspection_module(namespace):
