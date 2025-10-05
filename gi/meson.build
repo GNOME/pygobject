@@ -93,3 +93,4 @@ endif
 
 subdir('overrides')
 subdir('repository')
+subdir('typechecker')
