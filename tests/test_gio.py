@@ -80,15 +80,7 @@ Exec={GLib.find_program_in_path("true")} action
     def setUp(self):
         super().setUp()
 
-        required_glib = GLib.MAJOR_VERSION > 2 or (
-            GLib.MAJOR_VERSION == 2
-            and (
-                GLib.MINOR_VERSION > 85
-                or (GLib.MINOR_VERSION == 85 and GLib.MICRO_VERSION >= 5)
-            )
-        )
-
-        if not required_glib:
+        if (GLib.MAJOR_VERSION, GLib.MINOR_VERSION) < (2, 80):
             self.skipTest("Installed Gio is not new enough for this test")
 
         if GioUnix:
@@ -186,13 +178,14 @@ Exec={GLib.find_program_in_path("true")} action
             warnings.simplefilter("always")
             app_info = Gio.DesktopAppInfo.new_from_keyfile(self.key_file)
 
-            self.assertEqual(len(warn), 1)
-            self.assertTrue(issubclass(warn[0].category, PyGIDeprecationWarning))
-            self.assertEqual(
-                str(warn[0].message),
-                "Gio.DesktopAppInfo is deprecated; "
-                + "use GioUnix.DesktopAppInfo instead",
-            )
+            if (GLib.MAJOR_VERSION, GLib.MINOR_VERSION) >= (2, 86):
+                self.assertEqual(len(warn), 1)
+                self.assertTrue(issubclass(warn[0].category, PyGIDeprecationWarning))
+                self.assertEqual(
+                    str(warn[0].message),
+                    "Gio.DesktopAppInfo is deprecated; "
+                    + "use GioUnix.DesktopAppInfo instead",
+                )
 
             self.assertIsNotNone(app_info)
             self.assertIsInstance(app_info, Gio.DesktopAppInfo)
@@ -250,16 +243,19 @@ Exec={GLib.find_program_in_path("true")} action
             warnings.simplefilter("always")
             mount_points = Gio.unix_mount_points_get()
 
-            self.assertEqual(len(warn), 1)
-            self.assertTrue(issubclass(warn[0].category, PyGIDeprecationWarning))
-            self.assertEqual(
-                str(warn[0].message),
-                "Gio.unix_mount_points_get is deprecated; "
-                + "use GioUnix.mount_points_get instead",
-            )
+            if (GLib.MAJOR_VERSION, GLib.MINOR_VERSION) >= (2, 86):
+                self.assertEqual(len(warn), 1)
+                self.assertTrue(issubclass(warn[0].category, PyGIDeprecationWarning))
+                self.assertEqual(
+                    str(warn[0].message),
+                    "Gio.unix_mount_points_get is deprecated; "
+                    + "use GioUnix.mount_points_get instead",
+                )
 
             self.assertIsNotNone(mount_points)
-            self.assertEqual(GioUnix.mount_points_get, Gio.unix_mount_points_get)
+
+            if (GLib.MAJOR_VERSION, GLib.MINOR_VERSION) >= (2, 86):
+                self.assertEqual(GioUnix.mount_points_get, Gio.unix_mount_points_get)
 
     def assert_expected_unix_stream_type(self, stream_type):
         with open("/dev/null", "r+b") as devnull:
@@ -275,13 +271,15 @@ Exec={GLib.find_program_in_path("true")} action
             warnings.simplefilter("always")
 
             input_stream = Gio.UnixInputStream
-            self.assertEqual(len(warn), 1)
-            self.assertTrue(issubclass(warn[0].category, PyGIDeprecationWarning))
-            self.assertEqual(
-                str(warn[0].message),
-                "Gio.UnixInputStream is deprecated; "
-                + "use GioUnix.InputStream instead",
-            )
+
+            if (GLib.MAJOR_VERSION, GLib.MINOR_VERSION) >= (2, 86):
+                self.assertEqual(len(warn), 1)
+                self.assertTrue(issubclass(warn[0].category, PyGIDeprecationWarning))
+                self.assertEqual(
+                    str(warn[0].message),
+                    "Gio.UnixInputStream is deprecated; "
+                    + "use GioUnix.InputStream instead",
+                )
 
             self.assertIsNotNone(input_stream)
             self.assertEqual(Gio.UnixInputStream, GioUnix.InputStream)
@@ -299,13 +297,14 @@ Exec={GLib.find_program_in_path("true")} action
             warnings.simplefilter("always")
             monitor = Gio.UnixMountMonitor.get()
 
-            self.assertEqual(len(warn), 1)
-            self.assertTrue(issubclass(warn[0].category, PyGIDeprecationWarning))
-            self.assertEqual(
-                str(warn[0].message),
-                "Gio.UnixMountMonitor is deprecated; "
-                + "use GioUnix.MountMonitor instead",
-            )
+            if (GLib.MAJOR_VERSION, GLib.MINOR_VERSION) >= (2, 86):
+                self.assertEqual(len(warn), 1)
+                self.assertTrue(issubclass(warn[0].category, PyGIDeprecationWarning))
+                self.assertEqual(
+                    str(warn[0].message),
+                    "Gio.UnixMountMonitor is deprecated; "
+                    + "use GioUnix.MountMonitor instead",
+                )
 
             self.assertIsNotNone(monitor)
             self.assertEqual(Gio.UnixMountMonitor.get, GioUnix.MountMonitor.get)
@@ -316,16 +315,21 @@ Exec={GLib.find_program_in_path("true")} action
             warnings.simplefilter("always")
 
             input_stream_class = Gio.UnixInputStreamClass
-            self.assertEqual(len(warn), 1)
-            self.assertTrue(issubclass(warn[0].category, PyGIDeprecationWarning))
-            self.assertEqual(
-                str(warn[0].message),
-                "Gio.UnixInputStreamClass is deprecated; "
-                + "use GioUnix.InputStreamClass instead",
-            )
+
+            if (GLib.MAJOR_VERSION, GLib.MINOR_VERSION) >= (2, 86):
+                self.assertEqual(len(warn), 1)
+                self.assertTrue(issubclass(warn[0].category, PyGIDeprecationWarning))
+                self.assertEqual(
+                    str(warn[0].message),
+                    "Gio.UnixInputStreamClass is deprecated; "
+                    + "use GioUnix.InputStreamClass instead",
+                )
 
             self.assertIsNotNone(input_stream_class)
-            self.assertEqual(Gio.UnixInputStreamClass, GioUnix.InputStreamClass)
+
+            if (GLib.MAJOR_VERSION, GLib.MINOR_VERSION) >= (2, 86):
+                self.assertEqual(Gio.UnixInputStreamClass, GioUnix.InputStreamClass)
+
             self.assertNotEqual(Gio.InputStreamClass, GioUnix.InputStreamClass)
 
 
