@@ -63,7 +63,20 @@ class TestGioPlatform(unittest.TestCase):
 Version=1.0
 Type=Application
 Name=Some Application
-Exec={GLib.find_program_in_path("sh")}
+Exec={GLib.find_program_in_path("true")} %u
+Actions=act;
+Categories=Development;Profiling;
+GenericName=Test
+Hidden=true
+Keywords=test;example;
+NoDisplay=true
+OnlyShowIn=GNOME;
+StartupWMClass=testTest
+X-Bool=true
+
+[Desktop Action act]
+Name=Take action!
+Exec={GLib.find_program_in_path("true")} action
 """
 
     def setUp(self):
@@ -88,6 +101,75 @@ Exec={GLib.find_program_in_path("sh")}
                 GLib.KeyFileFlags.NONE,
             )
 
+    def assert_expected_desktop_app_info(self, app_info):
+        # All functionality is available as ordinary methods, without
+        # needing extraneous arguments
+        # https://gitlab.gnome.org/GNOME/pygobject/-/issues/719
+        self.assertEqual(app_info.get_action_name("act"), "Take action!")
+        self.assertEqual(app_info.get_boolean("X-Bool"), True)
+        self.assertEqual(app_info.get_categories(), "Development;Profiling;")
+        self.assertIsNone(app_info.get_filename())
+        self.assertEqual(app_info.get_generic_name(), "Test")
+        self.assertEqual(app_info.get_is_hidden(), True)
+        self.assertEqual(app_info.get_keywords(), ["test", "example"])
+        self.assertEqual(app_info.get_locale_string("Keywords"), "test;example;")
+        self.assertEqual(app_info.get_nodisplay(), True)
+        self.assertEqual(app_info.get_show_in("GNOME"), True)
+        self.assertEqual(app_info.get_show_in("KDE"), False)
+        # get_show_in() can be called without an argument, which means NULL
+        self.assertIn(app_info.get_show_in(), [True, False])
+        self.assertIn(app_info.get_show_in(None), [True, False])
+        self.assertEqual(app_info.get_startup_wm_class(), "testTest")
+        self.assertEqual(app_info.get_string("StartupWMClass"), "testTest")
+        self.assertEqual(app_info.get_string_list("Keywords"), ["test", "example"])
+        self.assertEqual(app_info.has_key("Keywords"), True)
+        self.assertEqual(app_info.list_actions(), ["act"])
+
+        # All functionality is also available via unbound methods:
+        # for example Cinnamon relies on this as of October 2025
+        self.assertEqual(
+            GioUnix.DesktopAppInfo.get_action_name(app_info, "act"), "Take action!"
+        )
+        self.assertEqual(
+            Gio.DesktopAppInfo.get_action_name(app_info, "act"), "Take action!"
+        )
+
+        # Exercise methods that actually launch something
+        app_info.launch_action("act")
+        app_info.launch_action("act", None)
+        self.assertTrue(
+            app_info.launch_uris_as_manager(
+                ["about:blank"],
+                None,
+                GLib.SpawnFlags.DEFAULT,
+                None,
+                None,
+                None,
+                None,
+            ),
+        )
+        self.assertTrue(
+            app_info.launch_uris_as_manager(
+                ["about:blank"],
+                None,
+                GLib.SpawnFlags.DEFAULT,
+            ),
+        )
+        self.assertTrue(
+            app_info.launch_uris_as_manager_with_fds(
+                ["about:blank"],
+                None,
+                GLib.SpawnFlags.DEFAULT,
+                None,
+                None,
+                None,
+                None,
+                -1,
+                -1,
+                -1,
+            ),
+        )
+
     @unittest.skipIf(
         GioUnix is None or "DesktopAppInfo" not in dir(GioUnix), "Not supported"
     )
@@ -96,6 +178,7 @@ Exec={GLib.find_program_in_path("sh")}
         self.assertIsNotNone(app_info)
         self.assertIsInstance(app_info, GioUnix.DesktopAppInfo)
         self.assertIsInstance(app_info, Gio.AppInfo)
+        self.assert_expected_desktop_app_info(app_info)
 
     @unittest.skipIf(
         GioUnix is None or "DesktopAppInfo" not in dir(GioUnix), "Not supported"
