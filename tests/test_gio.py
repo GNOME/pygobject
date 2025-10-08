@@ -247,6 +247,14 @@ Exec={GLib.find_program_in_path("true")} action
             self.assertIsNotNone(mount_points)
             self.assertEqual(GioUnix.mount_points_get, Gio.unix_mount_points_get)
 
+    def assert_expected_unix_stream_type(self, stream_type):
+        with open("/dev/null", "r+b") as devnull:
+            stream = stream_type.new(devnull.fileno(), False)
+            self.assertIsNotNone(stream)
+            self.assertEqual(stream.get_close_fd(), False)
+            stream.set_close_fd(False)
+            self.assertNotEqual(stream.get_fd(), -1)
+
     @unittest.skipIf(GioUnix is None, "Not supported")
     def test_deprecated_unix_type_can_be_used_if_equal_exists_in_gio(self):
         with warnings.catch_warnings(record=True) as warn:
@@ -264,6 +272,12 @@ Exec={GLib.find_program_in_path("true")} action
             self.assertIsNotNone(input_stream)
             self.assertEqual(Gio.UnixInputStream, GioUnix.InputStream)
             self.assertNotEqual(Gio.InputStream, GioUnix.InputStream)
+
+            self.assert_expected_unix_stream_type(Gio.UnixInputStream)
+            self.assert_expected_unix_stream_type(GioUnix.InputStream)
+
+            self.assert_expected_unix_stream_type(Gio.UnixOutputStream)
+            self.assert_expected_unix_stream_type(GioUnix.OutputStream)
 
     @unittest.skipIf(GioUnix is None, "Not supported")
     def test_deprecated_unix_class_can_be_used_from_gio(self):
