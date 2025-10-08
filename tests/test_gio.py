@@ -201,6 +201,20 @@ Exec={GLib.find_program_in_path("true")} action
             self.assertIsInstance(app_info, Gio.AppInfo)
 
     @unittest.skipIf(
+        GioUnix is None or "FDMessage" not in dir(GioUnix), "Not supported"
+    )
+    def test_fd_message(self):
+        message = GioUnix.FDMessage.new()
+        self.assertIsNotNone(message)
+
+        with open("/dev/null", "r+b") as devnull:
+            self.assertTrue(message.append_fd(devnull.fileno()))
+            self.assertIsNotNone(message.get_fd_list())
+            fds = message.steal_fds()
+            self.assertEqual(len(fds), 1)
+            os.close(fds[0])
+
+    @unittest.skipIf(
         GioUnix is None or "DesktopAppInfo" not in dir(GioUnix), "Not supported"
     )
     def test_gio_unix_desktop_app_info_provides_platform_independent_functions(self):
