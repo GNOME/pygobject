@@ -5,6 +5,7 @@ python_sources = [
   'GdkPixbuf.py',
   'GObject.py',
   'Gio.py',
+  'GioUnix.py',
   'GIMarshallingTests.py',
   'Pango.py',
   'keysyms.py',
