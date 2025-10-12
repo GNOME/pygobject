@@ -101,9 +101,9 @@ sdist:
     - git config --global --add safe.directory "$CI_PROJECT_DIR"
     - bash -x ./.gitlab-ci/build-sdists.sh
 
-gnome-master:
+gnome-48:
   stage: build_and_test
-  image: quay.io/gnome_infrastructure/gnome-runtime-images:gnome-master
+  image: quay.io/gnome_infrastructure/gnome-runtime-images:gnome-48
   tags:
     - flatpak
   parallel:

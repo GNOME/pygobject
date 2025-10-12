@@ -1,6 +1,6 @@
 app-id: org.gnome.PyGObject.Devel
 runtime: org.gnome.Sdk
-runtime-version: master
+runtime-version: '48'
 sdk: org.gnome.Sdk
 build-options:
   build-args:
@@ -16,6 +16,7 @@ modules:
     buildsystem: simple
     build-commands:
       - python3 --version
+      - glib-compile-schemas --version
       - echo "GTK VERSION ${TEST_GTK_VERSION}"
       - pip3 install --prefix=${FLATPAK_DEST} pycairo pytest pytest-cov
   - name: pygobject
