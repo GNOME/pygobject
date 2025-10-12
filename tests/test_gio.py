@@ -1,6 +1,7 @@
 # -*- Mode: Python; py-indent-offset: 4 -*-
 # vim: tabstop=4 shiftwidth=4 expandtab
 
+import contextlib
 import os
 import unittest
 import warnings
@@ -8,8 +9,12 @@ import warnings
 import pytest
 
 import gi.overrides
-from gi import PyGIWarning
+from gi import PyGIWarning, PyGIDeprecationWarning
 from gi.repository import GLib, Gio
+
+GioUnix = None
+with contextlib.suppress(ImportError):
+    from gi.repository import GioUnix
 
 from .helper import ignore_gi_deprecation_warnings
 
@@ -52,6 +57,40 @@ class TestGio(unittest.TestCase):
             self.assertTrue(issubclass(warn[0].category, PyGIWarning))
             self.assertRegex(str(warn[0].message),
                              '.*Gio\\.VolumeMonitor\\.get\\(\\).*')
+
+    @unittest.skipIf(GioUnix is None, "Not supported")
+    def test_deprecated_unix_function_can_be_called_from_gio(self):
+        with warnings.catch_warnings(record=True) as warn:
+            warnings.simplefilter("always")
+            mount_points = Gio.unix_mount_points_get()
+
+            self.assertEqual(len(warn), 1)
+            self.assertTrue(issubclass(warn[0].category, PyGIDeprecationWarning))
+            self.assertEqual(
+                str(warn[0].message),
+                "Gio.unix_mount_points_get is deprecated; " +
+                "use GioUnix.mount_points_get instead",
+            )
+
+            self.assertIsNotNone(mount_points)
+            self.assertEqual(GioUnix.mount_points_get, Gio.unix_mount_points_get)
+
+    @unittest.skipIf(GioUnix is None, "Not supported")
+    def test_deprecated_unix_class_can_be_used_from_gio(self):
+        with warnings.catch_warnings(record=True) as warn:
+            warnings.simplefilter("always")
+            monitor = Gio.UnixMountMonitor.get()
+
+            self.assertEqual(len(warn), 1)
+            self.assertTrue(issubclass(warn[0].category, PyGIDeprecationWarning))
+            self.assertEqual(
+                str(warn[0].message),
+                "Gio.UnixMountMonitor is deprecated; " +
+                "use GioUnix.MountMonitor instead",
+            )
+
+            self.assertIsNotNone(monitor)
+            self.assertEqual(Gio.UnixMountMonitor.get, GioUnix.MountMonitor.get)
 
 
 class TestGSettings(unittest.TestCase):
