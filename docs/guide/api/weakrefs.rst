@@ -14,7 +14,7 @@ If you want to get notified when the underlying GObject gets finalized use
 .. method:: GObject.Object.weak_ref(callback, *user_data)
 
     Registers a callback to be called when the underlying GObject gets
-    finalized. The callback will receive the give `user_data`.
+    finalized. The callback will receive the given `user_data`.
 
     To unregister the callback call the ``unref()`` method of the returned
     GObjectWeakRef object.
