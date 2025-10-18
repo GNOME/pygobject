@@ -1135,17 +1135,11 @@ static struct PyModuleDef __gimodule = {
     NULL,
 };
 
-#ifdef __GNUC__
-#define PYGI_MODINIT_FUNC                                                     \
-    __attribute__ ((visibility ("default"))) PyMODINIT_FUNC
-#else
-#define PYGI_MODINIT_FUNC PyMODINIT_FUNC
-#endif
-
-PYGI_MODINIT_FUNC PyInit__gi (void);
-
-PYGI_MODINIT_FUNC
-PyInit__gi (void) { return PyModuleDef_Init (&__gimodule); }
+PyMODINIT_FUNC
+PyInit__gi (void)
+{
+    return PyModuleDef_Init (&__gimodule);
+}
 
 static int
 _gi_exec (PyObject *module)

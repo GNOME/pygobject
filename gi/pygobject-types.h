@@ -210,6 +210,12 @@ struct _PyGObject_Functions {
     int (*value_from_pyobject_with_error) (GValue *value, PyObject *obj);
 };
 
+
+/* If PyGObject is statically linked, append PyInit__gi to Python's inittab. */
+PyMODINIT_FUNC PyInit__gi (void);
+PyMODINIT_FUNC PyInit__gi_cairo (void);
+
+
 G_END_DECLS
 
 #endif /* __PYGOBJECT_TYPES_H__ */
