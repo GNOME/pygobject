@@ -40,8 +40,8 @@ if "gobject" in sys.modules:
 from . import _gi
 from ._gi import _API as _API
 from ._gi import Repository
-from ._gi import PyGIDeprecationWarning as PyGIDeprecationWarning
-from ._gi import PyGIWarning as PyGIWarning
+from ._gi import PyGIDeprecationWarning  # noqa: F401
+from ._gi import PyGIWarning  # noqa: F401
 
 _versions = {}
 _overridesdir = os.path.join(os.path.dirname(__file__), "overrides")
