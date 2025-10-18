@@ -1,3 +1,8 @@
+3.52.4 - 2025-10-18
+-------------------
+
+* Backport: GLib 2.86/GioUnix compatibility :mr:`457`
+
 3.52.3 - 2025-03-16
 -------------------
 
@@ -47,7 +52,7 @@ extra properties, such as `value_nicks` and `value_names`.
 * Convenience API for Gdk.RGBA got GDK 4, similar to GDK 3 :mr:`351`
 * Added a [pre-commit](https://pre-commit.com/) configuration :mr:`383`
 * Use standard `enum` module for enums and flags in PyGObject :mr:`394`
-* Added an option to skip [automatic initialization of GTK and GDK](https://pygobject.gnome.org/guide/imports.html) :mr:`368` 
+* Added an option to skip [automatic initialization of GTK and GDK](https://pygobject.gnome.org/guide/imports.html) :mr:`368`
 * PyGObject is no longer automatically tested on i386 architecture :mr:`362`
 * Fixed iterator protocol implementation for properties :mr:`392`
 * Various code and documentation improvements :mr:`346` :mr:`348` :mr:`358`, a.o.
@@ -3408,7 +3413,7 @@ Documentation:
   registered (Paul, :bzbug:`551056`)
 * Fix typos breaking compilation (Frederic Peters :bzbug:`551212`)
 * GFile load_contents methods chop data at first \0
-  (Jonathan Matthew, :bzbug:`551059`) 
+  (Jonathan Matthew, :bzbug:`551059`)
 
 2.15.4 - 2008-09-03
 -------------------
@@ -3487,7 +3492,7 @@ Documentation:
 
 * Add GIO bindings (Johan, Mario Tagliaretti, Thomas Leonard)
 * Move codegen from PyGTK (Johan, Paul Pogonyshev, :bzbug:`542821`)
-* Add more variables to the .pc files (Damien Carbery, Paul, 
+* Add more variables to the .pc files (Damien Carbery, Paul,
   Dan Winship, :bzbug:`486876`)
 * Add pyg_option_group_new to the public API (Johan)
 * Add g_get_application_anme and g_get_progname (Sebastian Rittau)
@@ -3577,10 +3582,10 @@ Documentation:
 
 * distutils build fixes (Cedric)
 * documentation updates (John)
-* gobject.handler_block_by_func and friends now accept methods 
+* gobject.handler_block_by_func and friends now accept methods
   (Johan, Dima, :bzbug:`375589`)
 * avoid truncating of gparamspec (Yevgen Muntyan, :bzbug:`353943`)
-* set __module__ on gobject derived types (Johan, 
+* set __module__ on gobject derived types (Johan,
   Osmo Salomaa, :bzbug:`376099`)
 * Ensure exceptions are raised on errors in gobject.OptionGroup
   (Johan, Laszlo Pandy, :bzbug:`364576`
