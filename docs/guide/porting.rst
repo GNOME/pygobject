@@ -2,6 +2,10 @@
 Porting from Static Bindings
 ============================
 
+.. attention::
+    The pygtkcompat package has been deprecated since PyGObject 3.48.
+    The functionality has been removed since PyGObject 3.52.
+
 Before PyGObject 3, bindings where not generated automatically through gobject
 introspection and where provided as separate Python libraries like pygobject,
 pygtk, pygst etc. We call them static bindings.

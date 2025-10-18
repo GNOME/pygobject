@@ -217,7 +217,6 @@ pygobject_dep = declare_dependency(
 
 
 subdir('gi')
-subdir('pygtkcompat')
 
 with_tests = get_option('tests')
 if with_tests

@@ -2,6 +2,10 @@
 Introspection Porting Guide
 ============================
 
+.. attention::
+    The pygtkcompat package has been deprecated since PyGObject 3.48.
+    The functionality has been removed since PyGObject 3.52.
+
 .. contents::
    :local:
 

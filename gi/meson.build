@@ -58,7 +58,6 @@ python_sources = [
   'module.py',
   '_ossighelper.py',
   '_propertyhelper.py',
-  'pygtkcompat.py',
   '_signalhelper.py',
   '_signature.py',
   'types.py',
