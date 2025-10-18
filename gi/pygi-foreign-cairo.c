@@ -671,13 +671,6 @@ cairo_matrix_from_gvalue (const GValue *value)
     return PycairoMatrix_FromMatrix (matrix);
 }
 
-#ifdef __GNUC__
-#define PYGI_MODINIT_FUNC                                                     \
-    __attribute__ ((visibility ("default"))) PyMODINIT_FUNC
-#else
-#define PYGI_MODINIT_FUNC PyMODINIT_FUNC
-#endif
-
 static PyMethodDef _gi_cairo_functions[] = {
     {
         0,
@@ -694,10 +687,11 @@ static struct PyModuleDef __gi_cairomodule = {
     _gi_cairo_slots,       NULL,        NULL, NULL,
 };
 
-PYGI_MODINIT_FUNC PyInit__gi_cairo (void);
-
-PYGI_MODINIT_FUNC
-PyInit__gi_cairo (void) { return PyModuleDef_Init (&__gi_cairomodule); }
+PyMODINIT_FUNC
+PyInit__gi_cairo (void)
+{
+    return PyModuleDef_Init (&__gi_cairomodule);
+}
 
 
 static int

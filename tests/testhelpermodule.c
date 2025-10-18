@@ -727,16 +727,9 @@ static struct PyModuleDef _testhelpermodule = { PyModuleDef_HEAD_INIT,
                                                 NULL,
                                                 NULL };
 
-#ifdef __GNUC__
-#define PYGI_MODINIT_FUNC                                                     \
-    __attribute__ ((visibility ("default"))) PyMODINIT_FUNC
-#else
-#define PYGI_MODINIT_FUNC PyMODINIT_FUNC
-#endif
+PyMODINIT_FUNC PyInit_testhelper (void);
 
-PYGI_MODINIT_FUNC PyInit_testhelper (void);
-
-PYGI_MODINIT_FUNC
+PyMODINIT_FUNC
 PyInit_testhelper (void)
 {
     PyObject *module;
