@@ -190,6 +190,9 @@ struct _PyGObject_Functions {
     int (*value_from_pyobject_with_error) (GValue *value, PyObject *obj);
 };
 
+/* If PyGObject is statically linked, append PyInit__gi to Python's inittab. */
+PyMODINIT_FUNC PyInit__gi (void);
+
 
 /* Deprecated, only available for API compatibility. */
 #define pyg_threads_enabled     TRUE
