@@ -394,7 +394,8 @@ out:
 }
 
 int
-pygi_set_property_from_pspec (GObject *obj, GParamSpec *pspec, PyObject *py_value)
+pygi_set_property_from_pspec (GObject *obj, GParamSpec *pspec,
+                              PyObject *py_value)
 {
     GValue value = {
         0,

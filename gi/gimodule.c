@@ -49,6 +49,7 @@
 #include "pyginterface.h"
 #include "pygobject-internal.h"
 #include "pygobject-object.h"
+#include "pygobject-props.h"
 #include "pygoptioncontext.h"
 #include "pygoptiongroup.h"
 #include "pygpointer.h"
@@ -2410,7 +2411,8 @@ _gi_exec (PyObject *module)
     if ((ret = pygi_register_constants (module)) < 0) return ret;
     if ((ret = pygi_register_version_tuples (module_dict)) < 0) return ret;
     if ((ret = pygi_register_warnings (module_dict)) < 0) return ret;
-    if ((ret = pyi_object_register_types (module_dict)) < 0) return ret;
+    if ((ret = pyg_object_props_register_types (module_dict)) < 0) return ret;
+    if ((ret = pyg_object_register_types (module_dict)) < 0) return ret;
     if ((ret = pygi_interface_register_types (module_dict)) < 0) return ret;
     if ((ret = pygi_enum_register_types (module)) < 0) return ret;
     if ((ret = pygi_flags_register_types (module)) < 0) return ret;

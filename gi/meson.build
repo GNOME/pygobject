@@ -4,6 +4,7 @@ sources = [
   'pygflags.c',
   'pyginterface.c',
   'pygobject-object.c',
+  'pygobject-props.c',
   'pygpointer.c',
   'pygoptioncontext.c',
   'pygoptiongroup.c',
