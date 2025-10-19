@@ -34,7 +34,9 @@ PyObject *pygi_get_property_value (PyGObject *instance, GParamSpec *pspec);
 PyObject *pygi_get_property_value_by_name (PyGObject *self, gchar *param_name);
 PyObject *pygi_call_do_get_property (PyObject *instance, GParamSpec *pspec);
 
-gint pygi_set_property_value (PyGObject *instance, GParamSpec *pspec,
-                              PyObject *py_value);
+int pygi_set_property_value (PyGObject *instance, GParamSpec *pspec,
+                             PyObject *py_value);
+int pygi_set_property_from_pspec (GObject *obj, GParamSpec *pspec,
+                                  PyObject *py_value);
 
 #endif /* __PYGI_PROPERTY_H__ */

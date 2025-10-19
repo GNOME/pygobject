@@ -218,7 +218,7 @@ pygi_get_property_value_by_name (PyGObject *self, gchar *param_name)
     return pygi_get_property_value (self, pspec);
 }
 
-gint
+int
 pygi_set_property_value (PyGObject *instance, GParamSpec *pspec,
                          PyObject *py_value)
 {
@@ -391,4 +391,45 @@ out:
     if (info != NULL) gi_base_info_unref (info);
 
     return ret_value;
+}
+
+int
+pygi_set_property_from_pspec (GObject *obj, GParamSpec *pspec, PyObject *py_value)
+{
+    GValue value = {
+        0,
+    };
+
+    if (pspec->flags & G_PARAM_CONSTRUCT_ONLY) {
+        PyErr_Format (PyExc_TypeError,
+                      "property '%s' can only be set in constructor",
+                      pspec->name);
+        return -1;
+    }
+
+    if (!(pspec->flags & G_PARAM_WRITABLE)) {
+        PyErr_Format (PyExc_TypeError, "property '%s' is not writable",
+                      pspec->name);
+        return -1;
+    }
+
+    g_value_init (&value, G_PARAM_SPEC_VALUE_TYPE (pspec));
+    if (pyg_param_gvalue_from_pyobject (&value, py_value, pspec) < 0) {
+        PyObject *pvalue_str = PyObject_Repr (py_value);
+        PyErr_Format (
+            PyExc_TypeError,
+            "could not convert %s to type '%s' when setting property '%s.%s'",
+            PyUnicode_AsUTF8 (pvalue_str),
+            g_type_name (G_PARAM_SPEC_VALUE_TYPE (pspec)),
+            G_OBJECT_TYPE_NAME (obj), pspec->name);
+        Py_DECREF (pvalue_str);
+        return -1;
+    }
+
+    Py_BEGIN_ALLOW_THREADS;
+    g_object_set_property (obj, pspec->name, &value);
+    g_value_unset (&value);
+    Py_END_ALLOW_THREADS;
+
+    return 0;
 }

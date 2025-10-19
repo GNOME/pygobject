@@ -282,47 +282,6 @@ PyGProps_getattro (PyGProps *self, PyObject *attr)
     return pygi_get_property_value (self->pygobject, pspec);
 }
 
-static gboolean
-set_property_from_pspec (GObject *obj, GParamSpec *pspec, PyObject *pvalue)
-{
-    GValue value = {
-        0,
-    };
-
-    if (pspec->flags & G_PARAM_CONSTRUCT_ONLY) {
-        PyErr_Format (PyExc_TypeError,
-                      "property '%s' can only be set in constructor",
-                      pspec->name);
-        return FALSE;
-    }
-
-    if (!(pspec->flags & G_PARAM_WRITABLE)) {
-        PyErr_Format (PyExc_TypeError, "property '%s' is not writable",
-                      pspec->name);
-        return FALSE;
-    }
-
-    g_value_init (&value, G_PARAM_SPEC_VALUE_TYPE (pspec));
-    if (pyg_param_gvalue_from_pyobject (&value, pvalue, pspec) < 0) {
-        PyObject *pvalue_str = PyObject_Repr (pvalue);
-        PyErr_Format (
-            PyExc_TypeError,
-            "could not convert %s to type '%s' when setting property '%s.%s'",
-            PyUnicode_AsUTF8 (pvalue_str),
-            g_type_name (G_PARAM_SPEC_VALUE_TYPE (pspec)),
-            G_OBJECT_TYPE_NAME (obj), pspec->name);
-        Py_DECREF (pvalue_str);
-        return FALSE;
-    }
-
-    Py_BEGIN_ALLOW_THREADS;
-    g_object_set_property (obj, pspec->name, &value);
-    g_value_unset (&value);
-    Py_END_ALLOW_THREADS;
-
-    return TRUE;
-}
-
 PYGI_DEFINE_TYPE ("gi._gi.GProps", PyGProps_Type, PyGProps);
 
 static int
@@ -378,9 +337,7 @@ PyGProps_setattro (PyGProps *self, PyObject *attr, PyObject *pvalue)
 
     /* This GType is implemented in Python, or we failed to set it via gi:
      * do a straightforward set. */
-    if (!set_property_from_pspec (obj, pspec, pvalue)) return -1;
-
-    return 0;
+    return pygi_set_property_from_pspec (obj, pspec, pvalue);
 }
 
 static int
@@ -1364,7 +1321,8 @@ pygobject_set_property (PyGObject *self, PyObject *args)
     else if (PyErr_Occurred ())
         return NULL;
 
-    if (!set_property_from_pspec (self->obj, pspec, pvalue)) return NULL;
+    if (pygi_set_property_from_pspec (self->obj, pspec, pvalue) != 0)
+        return NULL;
 
 done:
 
@@ -1410,7 +1368,9 @@ pygobject_set_properties (PyGObject *self, PyObject *args, PyObject *kwargs)
 
             /* ... or the property couldn't be found , so let's try the default
              * call. */
-            if (!set_property_from_pspec (G_OBJECT (self->obj), pspec, value))
+            if (pygi_set_property_from_pspec (G_OBJECT (self->obj), pspec,
+                                              value)
+                != 0)
                 goto exit;
         }
     }
