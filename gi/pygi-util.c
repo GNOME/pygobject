@@ -137,3 +137,31 @@ pyg_constant_strip_prefix (const gchar *name, const gchar *strip_prefix)
     }
     return name;
 }
+
+PyObject *
+pyg_is_python_keyword (const gchar *name)
+{
+    static PyObject *iskeyword = NULL;
+    PyObject *pyname, *result;
+
+    if (!iskeyword) {
+        PyObject *keyword_module = PyImport_ImportModule ("keyword");
+        if (!keyword_module) return NULL;
+
+        iskeyword = PyObject_GetAttrString (keyword_module, "iskeyword");
+        Py_DECREF (keyword_module);
+        if (!iskeyword) return NULL;
+    }
+
+    /* Python 3.x; note that we explicitly keep "print"; it is not a keyword
+     * any more, but we do not want to break API between Python versions */
+    if (strcmp (name, "print") == 0) Py_RETURN_TRUE;
+
+    pyname = PyUnicode_FromString (name);
+    if (!pyname) return NULL;
+
+    result = PyObject_CallOneArg (iskeyword, pyname);
+    Py_DECREF (pyname);
+
+    return result;
+}

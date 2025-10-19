@@ -257,34 +257,6 @@ _base_info_richcompare (PyGIBaseInfo *self, PyObject *other, int op)
 
 PYGI_DEFINE_TYPE ("gi.BaseInfo", PyGIBaseInfo_Type, PyGIBaseInfo);
 
-PyObject *
-_pygi_is_python_keyword (const gchar *name)
-{
-    static PyObject *iskeyword = NULL;
-    PyObject *pyname, *result;
-
-    if (!iskeyword) {
-        PyObject *keyword_module = PyImport_ImportModule ("keyword");
-        if (!keyword_module) return NULL;
-
-        iskeyword = PyObject_GetAttrString (keyword_module, "iskeyword");
-        Py_DECREF (keyword_module);
-        if (!iskeyword) return NULL;
-    }
-
-    /* Python 3.x; note that we explicitly keep "print"; it is not a keyword
-     * any more, but we do not want to break API between Python versions */
-    if (strcmp (name, "print") == 0) Py_RETURN_TRUE;
-
-    pyname = PyUnicode_FromString (name);
-    if (!pyname) return NULL;
-
-    result = PyObject_CallOneArg (iskeyword, pyname);
-    Py_DECREF (pyname);
-
-    return result;
-}
-
 static PyObject *
 _wrap_gi_base_info_get_name (PyGIBaseInfo *self)
 {
@@ -292,7 +264,7 @@ _wrap_gi_base_info_get_name (PyGIBaseInfo *self)
     PyObject *is_keyword, *obj;
 
     name = _safe_base_info_get_name (self->info);
-    is_keyword = _pygi_is_python_keyword (name);
+    is_keyword = pyg_is_python_keyword (name);
     if (!is_keyword) return NULL;
 
     /* escape keywords */

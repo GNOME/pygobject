@@ -13,6 +13,8 @@ const gchar *pyg_constant_strip_prefix (const gchar *name,
 
 gboolean pygi_guint_from_pyssize (Py_ssize_t pyval, guint *result);
 
+PyObject *pyg_is_python_keyword (const gchar *name);
+
 #if PY_VERSION_HEX < 0x030900A4
 #define Py_SET_TYPE(obj, type) ((Py_TYPE (obj) = (type)), (void)0)
 #endif

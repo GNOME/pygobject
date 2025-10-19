@@ -209,7 +209,7 @@ _wrap_gi_repository_find_by_name (PyGIRepository *self, PyObject *args,
         PyObject *is_keyword;
 
         trimmed_name = g_strndup (name, len - 1);
-        is_keyword = _pygi_is_python_keyword (trimmed_name);
+        is_keyword = pyg_is_python_keyword (trimmed_name);
         if (!is_keyword) return NULL;
 
         if (PyObject_IsTrue (is_keyword)) name = trimmed_name;

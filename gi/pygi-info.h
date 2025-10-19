@@ -80,8 +80,6 @@ gsize _pygi_gi_type_info_size (GITypeInfo *type_info);
 
 int pygi_info_register_types (PyObject *m);
 
-PyObject *_pygi_is_python_keyword (const gchar *name);
-
 G_END_DECLS
 
 #endif /* __PYGI_INFO_H__ */
