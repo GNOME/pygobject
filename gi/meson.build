@@ -3,6 +3,7 @@ sources = [
   'pygenum.c',
   'pygflags.c',
   'pyginterface.c',
+  'pygobject-class.c',
   'pygobject-object.c',
   'pygobject-props.c',
   'pygpointer.c',

@@ -718,6 +718,50 @@ pygobject_constructv (PyGObject *self, guint n_properties, const char *names[],
     return 0;
 }
 
+static void
+pygobject_unwatch_closure (gpointer data, GClosure *closure)
+{
+    PyGObjectData *inst_data = data;
+
+    /* Despite no Python API is called the list inst_data->closures
+     * must be protected by GIL as it is used by GC in
+     * pygobject_traverse */
+    PyGILState_STATE state = PyGILState_Ensure ();
+    inst_data->closures = g_slist_remove (inst_data->closures, closure);
+    PyGILState_Release (state);
+}
+
+/**
+ * pygobject_watch_closure:
+ * @self: a GObject wrapper instance
+ * @closure: a GClosure to watch
+ *
+ * Adds a closure to the list of watched closures for the wrapper.
+ * The closure must be one returned by pyg_closure_new().  When the
+ * cycle GC traverses the wrapper instance, it will enumerate the
+ * references to Python objects stored in watched closures.  If the
+ * cycle GC tells the wrapper to clear itself, the watched closures
+ * will be invalidated.
+ */
+void
+pygobject_watch_closure (PyObject *self, GClosure *closure)
+{
+    PyGObject *gself;
+    PyGObjectData *data;
+
+    g_return_if_fail (self != NULL);
+    g_return_if_fail (PyObject_TypeCheck (self, &PyGObject_Type));
+    g_return_if_fail (closure != NULL);
+
+    gself = (PyGObject *)self;
+    data = pygobject_get_inst_data (gself);
+    g_return_if_fail (data != NULL);
+    g_return_if_fail (g_slist_find (data->closures, closure) == NULL);
+    data->closures = g_slist_prepend (data->closures, closure);
+    g_closure_add_invalidate_notifier (closure, data,
+                                       pygobject_unwatch_closure);
+}
+
 void
 pygobject__g_instance_init (GTypeInstance *instance, gpointer g_class)
 {
@@ -784,51 +828,6 @@ pygobject__g_instance_init (GTypeInstance *instance, gpointer g_class)
 
     PyGILState_Release (state);
 }
-
-static void
-pygobject_unwatch_closure (gpointer data, GClosure *closure)
-{
-    PyGObjectData *inst_data = data;
-
-    /* Despite no Python API is called the list inst_data->closures
-     * must be protected by GIL as it is used by GC in
-     * pygobject_traverse */
-    PyGILState_STATE state = PyGILState_Ensure ();
-    inst_data->closures = g_slist_remove (inst_data->closures, closure);
-    PyGILState_Release (state);
-}
-
-/**
- * pygobject_watch_closure:
- * @self: a GObject wrapper instance
- * @closure: a GClosure to watch
- *
- * Adds a closure to the list of watched closures for the wrapper.
- * The closure must be one returned by pyg_closure_new().  When the
- * cycle GC traverses the wrapper instance, it will enumerate the
- * references to Python objects stored in watched closures.  If the
- * cycle GC tells the wrapper to clear itself, the watched closures
- * will be invalidated.
- */
-void
-pygobject_watch_closure (PyObject *self, GClosure *closure)
-{
-    PyGObject *gself;
-    PyGObjectData *data;
-
-    g_return_if_fail (self != NULL);
-    g_return_if_fail (PyObject_TypeCheck (self, &PyGObject_Type));
-    g_return_if_fail (closure != NULL);
-
-    gself = (PyGObject *)self;
-    data = pygobject_get_inst_data (gself);
-    g_return_if_fail (data != NULL);
-    g_return_if_fail (g_slist_find (data->closures, closure) == NULL);
-    data->closures = g_slist_prepend (data->closures, closure);
-    g_closure_add_invalidate_notifier (closure, data,
-                                       pygobject_unwatch_closure);
-}
-
 
 /* -------------- PyGObject behaviour ----------------- */
 
