@@ -20,7 +20,6 @@
 #ifndef __PYGI_BOXED_H__
 #define __PYGI_BOXED_H__
 
-#include <girepository/girepository.h>
 #include <pythoncapi_compat.h>
 
 #include "pygobject-internal.h"

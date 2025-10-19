@@ -41,6 +41,6 @@ void pygobject_watch_closure (PyObject *self, GClosure *closure);
 int pyg_object_register_types (PyObject *d);
 PyObject *pyg_object_new (PyGObject *self, PyObject *args, PyObject *kwargs);
 
-GClosure *gclosure_from_pyfunc (PyGObject *object, PyObject *func);
+void pygobject__g_instance_init (GTypeInstance *instance, gpointer g_class);
 
 #endif /*_PYGOBJECT_OBJECT_H_*/

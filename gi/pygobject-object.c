@@ -22,7 +22,7 @@
 
 #include <pythoncapi_compat.h>
 
-#include "gimodule.h"
+#include "pygobject-internal.h"
 #include "pygboxed.h"
 #include "pygi-basictype.h"
 #include "pygi-fundamental.h"
@@ -61,7 +61,7 @@ GQuark pygobject_instance_data_key;
 #define PYGI_OBJECT_USE_CUSTOM_DICT
 #endif
 
-GClosure *
+static GClosure *
 gclosure_from_pyfunc (PyGObject *object, PyObject *func)
 {
     GSList *l;
@@ -678,6 +678,111 @@ pygobject_new (GObject *obj)
 {
     return pygobject_new_full (obj,
                                /*steal=*/FALSE, NULL);
+}
+
+static GPrivate pygobject_construction_wrapper;
+
+static inline void
+pygobject_init_wrapper_set (PyObject *wrapper)
+{
+    g_private_set (&pygobject_construction_wrapper, wrapper);
+}
+
+static inline PyObject *
+pygobject_init_wrapper_get (void)
+{
+    return (PyObject *)g_private_get (&pygobject_construction_wrapper);
+}
+
+static int
+pygobject_constructv (PyGObject *self, guint n_properties, const char *names[],
+                      const GValue values[])
+{
+    GObject *obj;
+    GType type;
+
+    g_assert (self->obj == NULL);
+    pygobject_init_wrapper_set ((PyObject *)self);
+
+    type = pyg_type_from_object ((PyObject *)self);
+    obj = g_object_new_with_properties (type, n_properties, names, values);
+
+    if (G_IS_INITIALLY_UNOWNED (obj)) {
+        g_object_ref_sink (obj);
+    }
+
+    pygobject_init_wrapper_set (NULL);
+    self->obj = obj;
+    pygobject_register_wrapper ((PyObject *)self);
+
+    return 0;
+}
+
+void
+pygobject__g_instance_init (GTypeInstance *instance, gpointer g_class)
+{
+    GObject *object;
+    PyObject *wrapper, *result;
+    PyGILState_STATE state;
+    gboolean needs_init = FALSE;
+
+    g_return_if_fail (G_IS_OBJECT (instance));
+
+    object = (GObject *)instance;
+
+    wrapper = g_object_get_qdata (object, pygobject_wrapper_key);
+    if (wrapper == NULL) {
+        wrapper = pygobject_init_wrapper_get ();
+        if (wrapper && ((PyGObject *)wrapper)->obj == NULL) {
+            ((PyGObject *)wrapper)->obj = object;
+            pygobject_register_wrapper (wrapper);
+        }
+    }
+    pygobject_init_wrapper_set (NULL);
+
+    state = PyGILState_Ensure ();
+
+    if (wrapper == NULL) {
+        /* this looks like a python object created through
+           * g_object_new -> we have no python wrapper, so create it
+           * now */
+
+        if (g_object_is_floating (object)) {
+            g_object_ref (object);
+            wrapper = pygobject_new_full (object,
+                                          /*steal=*/TRUE, g_class);
+            g_object_force_floating (object);
+        } else {
+            wrapper = pygobject_new_full (object,
+                                          /*steal=*/FALSE, g_class);
+        }
+
+        needs_init = TRUE;
+    }
+
+    /* XXX: used for Gtk.Template */
+    gboolean is_final_subclass = G_OBJECT_TYPE (object)
+                                 == G_OBJECT_CLASS_TYPE (g_class);
+    if (is_final_subclass
+        && PyObject_HasAttrString ((PyObject *)Py_TYPE (wrapper),
+                                   "__dontuse_ginstance_init__")) {
+        result =
+            PyObject_CallMethod (wrapper, "__dontuse_ginstance_init__", NULL);
+        if (result == NULL)
+            PyErr_Print ();
+        else
+            Py_DECREF (result);
+    }
+
+    if (needs_init) {
+        result = PyObject_CallMethod (wrapper, "__init__", NULL);
+        if (result == NULL)
+            PyErr_Print ();
+        else
+            Py_DECREF (result);
+    }
+
+    PyGILState_Release (state);
 }
 
 static void
