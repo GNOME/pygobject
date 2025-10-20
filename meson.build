@@ -226,6 +226,13 @@ giext = python.extension_module('_gi', gi_c_sources,
   c_args: pyext_c_args + main_c_args + ['-D_INSIDE_PYGOBJECT_']
 )
 
+giextlib = shared_library('_gi', gi_c_sources,
+  dependencies : [python.dependency(embed: true), glib_dep, gi_dep, ffi_dep, pythoncapi_compat_dep],
+  include_directories: include_directories('gi'),
+  install: true,
+  c_args: pyext_c_args + main_c_args
+)
+
 if cairo_dep.found()
   gicairoext = python.extension_module('_gi_cairo', gi_cairo_c_sources,
     dependencies : [python_ext_dep, glib_dep, gi_dep, ffi_dep, pycairo_dep, cairo_dep, cairo_gobject_dep, pythoncapi_compat_dep],
