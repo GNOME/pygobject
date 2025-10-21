@@ -76,13 +76,6 @@ python.install_sources(python_sources,
   subdir : 'gi'
 )
 
-# https://github.com/mesonbuild/meson/issues/4117
-if host_machine.system() == 'windows'
-  python_ext_dep = python_dep
-else
-  python_ext_dep = python_dep.partial_dependency(compile_args: true)
-endif
-
 configure_file(output : 'config.h', configuration : cdata)
 
 subdir('overrides')
