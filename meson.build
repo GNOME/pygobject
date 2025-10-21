@@ -224,19 +224,30 @@ pygobject_dep = declare_dependency(
 subdir('gi')
 
 if embed
-  gilib = shared_library('_gi', gi_c_sources,
+  giext = shared_library('_gi', gi_c_sources,
     dependencies : [python_dep, glib_dep, gi_dep, ffi_dep, pythoncapi_compat_dep],
     include_directories: include_directories('gi'),
     install: true,
     c_args: pygiext_c_args + pyext_c_args + main_c_args
   )
+  gilib = declare_dependency(
+    link_with: giext,
+    include_directories: include_directories('gi'),
+    dependencies: [python_dep, glib_dep, gi_dep, ffi_dep]
+  )
 
   if cairo_dep.found()
-    gicairolib = shared_library('_gi_cairo', gi_cairo_c_sources,
+    gicairoext = shared_library('_gi_cairo', gi_cairo_c_sources,
       dependencies : [python_dep, glib_dep, gi_dep, ffi_dep, pycairo_dep, cairo_dep, cairo_gobject_dep, pythoncapi_compat_dep],
       include_directories: include_directories('gi'),
       install: true,
-      c_args: pyext_c_args + main_c_args)
+      c_args: pyext_c_args + main_c_args
+    )
+    gicairolib = declare_dependency(
+      link_with: gicairoext,
+      include_directories: include_directories('gi'),
+      dependencies: [python_dep, glib_dep, gi_dep, ffi_dep, pycairo_dep, cairo_dep, cairo_gobject_dep]
+    )
   endif
 else
   giext = python.extension_module('_gi', gi_c_sources,
@@ -256,7 +267,7 @@ else
 endif
 
 with_tests = get_option('tests')
-if with_tests
+if with_tests and not embed
   gi_tests = subproject('gobject-introspection-tests', default_options : ['cairo=' + cairo_dep.found().to_string()])
 
   # We cannot depend on gobject-introspection-1.0 fallback if we also need GLib to build.
