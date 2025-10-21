@@ -35,7 +35,7 @@ def test_async_callback_with_extra_callbacks():
 
     iteration()
 
-    assert result == [(True, None)]
+    assert result == [(True, True, None)]
 
 
 def test_async_callback_with_extra_callbacks_filled_in():
@@ -55,7 +55,7 @@ def test_async_callback_with_extra_callbacks_filled_in():
 
     iteration()
 
-    assert result == ["test_cb data", (True, None)]
+    assert result == ["test_cb data", (True, True, None)]
 
 
 def test_async_callback_with_extra_callbacks_as_kwarg():
@@ -77,7 +77,7 @@ def test_async_callback_with_extra_callbacks_as_kwarg():
 
     iteration()
 
-    assert result == [None, (True, None)]
+    assert result == [None, (True, True, None)]
 
 
 def test_async_callback_with_extra_callbacks_as_kwarg_and_user_data():
@@ -103,4 +103,4 @@ def test_async_callback_with_extra_callbacks_as_kwarg_and_user_data():
 
     iteration()
 
-    assert result == [None, (True, None)]
+    assert result == [None, (True, True, None)]
