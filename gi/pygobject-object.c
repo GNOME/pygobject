@@ -36,7 +36,7 @@ extern PyObject *PyGIDeprecationWarning;
 static void pygobject_dealloc (PyGObject *self);
 static int pygobject_traverse (PyGObject *self, visitproc visit, void *arg);
 static PyObject *pyg_type_get_bases (GType gtype);
-static inline int pygobject_clear (PyGObject *self);
+static int pygobject_clear (PyGObject *self);
 static PyObject *pygobject_weak_ref_new (GObject *obj, PyObject *callback,
                                          PyObject *user_data);
 static void pygobject_inherit_slots (PyTypeObject *type, PyObject *bases,
@@ -878,7 +878,7 @@ pygobject_inst_dict_clear (PyObject *inst_dict)
     PyGILState_Release (state);
 }
 
-static inline int
+static int
 pygobject_clear (PyGObject *self)
 {
     if (self->obj) {
