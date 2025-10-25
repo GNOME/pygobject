@@ -224,31 +224,35 @@ pygobject_dep = declare_dependency(
 subdir('gi')
 
 if embed
-  giext = shared_library('_gi', gi_c_sources,
+  giext = library('_gi', gi_c_sources,
     dependencies : [python_dep, glib_dep, gi_dep, ffi_dep, pythoncapi_compat_dep],
     include_directories: include_directories('gi'),
     install: true,
     c_args: pygiext_c_args + pyext_c_args + main_c_args
   )
-  gilib = declare_dependency(
-    link_with: giext,
-    include_directories: include_directories('gi'),
-    dependencies: [python_dep, glib_dep, gi_dep, ffi_dep]
-  )
 
   if cairo_dep.found()
-    gicairoext = shared_library('_gi_cairo', gi_cairo_c_sources,
+    gicairoext = library('_gi_cairo', gi_cairo_c_sources,
       dependencies : [python_dep, glib_dep, gi_dep, ffi_dep, pycairo_dep, cairo_dep, cairo_gobject_dep, pythoncapi_compat_dep],
       include_directories: include_directories('gi'),
       install: true,
       c_args: pyext_c_args + main_c_args
     )
-    gicairolib = declare_dependency(
-      link_with: gicairoext,
+    gi_dep = declare_dependency(
+      link_with: [giext, gicairoext],
       include_directories: include_directories('gi'),
       dependencies: [python_dep, glib_dep, gi_dep, ffi_dep, pycairo_dep, cairo_dep, cairo_gobject_dep]
     )
+  else
+    gi_dep = declare_dependency(
+      link_with: giext,
+      include_directories: include_directories('gi'),
+      dependencies: [python_dep, glib_dep, gi_dep, ffi_dep]
+    )
   endif
+
+  meson.override_dependency('pygobject', gi_dep)
+
 else
   giext = python.extension_module('_gi', gi_c_sources,
     dependencies : [python_dep, glib_dep, gi_dep, ffi_dep, pythoncapi_compat_dep],
