@@ -53,11 +53,6 @@ GQuark pygobject_has_updated_constructor_key;
 GQuark pygobject_instance_data_key;
 GQuark pygobject_instance_dict_key;
 
-/* PyPy doesn't support tp_dictoffset, so we have to work around it */
-#ifndef PYPY_VERSION
-#define PYGI_OBJECT_USE_CUSTOM_DICT
-#endif
-
 static GClosure *
 gclosure_from_pyfunc (PyGObject *object, PyObject *func)
 {
@@ -1878,22 +1873,6 @@ static PyMethodDef pygobject_methods[] = {
     { NULL, NULL, 0 },
 };
 
-#ifdef PYGI_OBJECT_USE_CUSTOM_DICT
-static PyObject *
-pygobject_get_dict (PyGObject *self, void *closure)
-{
-    if (self->inst_dict == NULL) {
-        self->inst_dict =
-            g_object_get_qdata (self->obj, pygobject_instance_dict_key);
-        if (self->inst_dict)
-            Py_INCREF (self->inst_dict);
-        else
-            self->inst_dict = PyDict_New ();
-    }
-    return Py_NewRef (self->inst_dict);
-}
-#endif
-
 static PyObject *
 pygobject_get_refcount (PyGObject *self, void *closure)
 {
@@ -1911,8 +1890,8 @@ pygobject_get_pointer (PyGObject *self, void *closure)
 }
 
 static PyGetSetDef pygobject_getsets[] = {
-#ifdef PYGI_OBJECT_USE_CUSTOM_DICT
-    { "__dict__", (getter)pygobject_get_dict, (setter)0 },
+#ifndef PYPY_VERSION
+    { "__dict__", PyObject_GenericGetDict, (setter)0 },
 #endif
     {
         "__grefcount__",
@@ -2117,7 +2096,7 @@ pyg_object_register_types (PyObject *d)
     PyGObject_Type.tp_weaklistoffset = offsetof (PyGObject, weakreflist);
     PyGObject_Type.tp_methods = pygobject_methods;
     PyGObject_Type.tp_getset = pygobject_getsets;
-#ifdef PYGI_OBJECT_USE_CUSTOM_DICT
+#ifndef PYPY_VERSION
     PyGObject_Type.tp_dictoffset = offsetof (PyGObject, inst_dict);
 #endif
     PyGObject_Type.tp_init = (initproc)pygobject_init;
