@@ -581,8 +581,15 @@ pygobject_new_full (GObject *obj, gboolean steal, gpointer g_class)
         if (tp->tp_flags & Py_TPFLAGS_HEAPTYPE) Py_INCREF (tp);
         self = PyObject_GC_New (PyGObject, tp);
         if (self == NULL) return NULL;
+
         self->inst_dict =
             Py_XNewRef (g_object_get_qdata (obj, pygobject_instance_dict_key));
+
+#ifdef PYPY_VERSION
+        /* For PyPy objects, we set a custom dict we can keep around after the object dies */
+        if (self->inst_dict == NULL) self->inst_dict = PyDict_New ();
+        PyObject_GenericSetDict ((PyObject *)self, self->inst_dict, NULL);
+#endif
 
         self->weakreflist = NULL;
         self->private_flags.flags = 0;
@@ -890,8 +897,10 @@ pygobject_clear (PyGObject *self)
                 self->obj, pygobject_instance_dict_key,
                 Py_NewRef (self->inst_dict),
                 (GDestroyNotify)pygobject_inst_dict_clear);
+        } else {
+            g_object_set_qdata_full (self->obj, pygobject_instance_dict_key,
+                                     NULL, NULL);
         }
-
         Py_BEGIN_ALLOW_THREADS;
         g_object_unref (self->obj);
         Py_END_ALLOW_THREADS;
@@ -967,6 +976,9 @@ pygobject_init (PyGObject *self, PyObject *args, PyObject *kwargs)
     const GValue *values = NULL;
     const char **names = NULL;
     GObjectClass *class;
+#ifdef PYPY_VERSION
+    PyObject *pypy_dict;
+#endif
 
     /* Only do GObject creation and property setting if the GObject hasn't
      * already been created. The case where self->obj already exists can occur
@@ -980,6 +992,14 @@ pygobject_init (PyGObject *self, PyObject *args, PyObject *kwargs)
     if (self->obj != NULL) return 0;
 
     if (!PyArg_ParseTuple (args, ":GObject.__init__", NULL)) return -1;
+
+#ifdef PYPY_VERSION
+    /* For PyPy objects, we set a custom dict we can keep around after the object dies */
+    pypy_dict = PyObject_GenericGetDict ((PyObject *)self, NULL);
+    self->inst_dict = PyDict_Copy (pypy_dict);
+    Py_DECREF (pypy_dict);
+    PyObject_GenericSetDict ((PyObject *)self, self->inst_dict, NULL);
+#endif
 
     object_type = pyg_type_from_object ((PyObject *)self);
     if (!object_type) return -1;
