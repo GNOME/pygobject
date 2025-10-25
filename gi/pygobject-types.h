@@ -41,7 +41,7 @@ struct _PyGClosure {
 };
 
 typedef enum {
-    PYGOBJECT_USING_TOGGLE_REF = 1 << 0,
+    PYGOBJECT_USING_TOGGLE_REF = 1 << 0, /* No longer used DO_NOT_USE! */
 } PyGObjectFlags;
 
 /* closures is just an alias for what is found in the
@@ -56,8 +56,8 @@ typedef struct {
     /* using union to preserve ABI compatibility (structure size
        * must not change) */
     union {
-        GSList *closures; /* stale field; no longer updated DO-NOT-USE! */
-        PyGObjectFlags flags;
+        GSList *closures;     /* stale field; no longer updated DO-NOT-USE! */
+        PyGObjectFlags flags; /* stale field; no longer updated DO-NOT-USE! */
     } private_flags;
 
 } PyGObject;
