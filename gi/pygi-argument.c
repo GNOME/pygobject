@@ -22,7 +22,7 @@
 #include <string.h>
 #include <time.h>
 
-#include "pygobject-internal.h"
+#include "pygobject-types.h"
 
 #include <pygenum.h>
 #include <pygflags.h>

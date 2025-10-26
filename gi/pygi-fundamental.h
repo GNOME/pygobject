@@ -27,7 +27,7 @@
 #include <girepository/girepository.h>
 #include <pythoncapi_compat.h>
 
-#include "pygobject-internal.h"
+#include "pygobject-types.h"
 #include "pygpointer.h"
 #include "pygi-type.h"
 

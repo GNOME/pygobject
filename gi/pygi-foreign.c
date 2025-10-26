@@ -24,7 +24,7 @@
 
 #include <girepository/girepository.h>
 
-#include "pygobject-internal.h"
+#include "pygobject-types.h"
 
 #include "pygi-foreign.h"
 

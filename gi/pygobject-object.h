@@ -4,7 +4,7 @@
 #include <glib-object.h>
 #include <pythoncapi_compat.h>
 
-#include "pygobject-internal.h"
+#include "pygobject-types.h"
 
 /* Data that belongs to the GObject instance, not the Python wrapper */
 struct _PyGObjectData {

@@ -25,7 +25,7 @@
 #include <glib-object.h>
 #include <girepository/girepository.h>
 
-#include "pygobject-internal.h"
+#include "pygobject-types.h"
 #include "pygenum.h"
 #include "pygflags.h"
 #include "pygi-basictype.h"

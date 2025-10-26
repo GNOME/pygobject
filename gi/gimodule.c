@@ -45,7 +45,7 @@
 #include "pygi-util.h"
 #include "pygi-value.h"
 #include "pyginterface.h"
-#include "pygobject-internal.h"
+#include "pygobject-types.h"
 #include "pygobject-object.h"
 #include "pygobject-props.h"
 #include "pygoptioncontext.h"

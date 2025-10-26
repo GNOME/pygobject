@@ -22,7 +22,7 @@
 
 #include <pythoncapi_compat.h>
 
-#include "pygobject-internal.h"
+#include "pygobject-types.h"
 
 G_BEGIN_DECLS
 
