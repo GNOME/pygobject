@@ -1,5 +1,5 @@
-#ifndef _PYGOBJECT_OBJECT_PROPS_H_
-#define _PYGOBJECT_OBJECT_PROPS_H_
+#ifndef __PYGOBJECT_OBJECT_PROPS_H__
+#define __PYGOBJECT_OBJECT_PROPS_H__
 
 #include <pythoncapi_compat.h>
 
@@ -10,4 +10,4 @@ extern PyTypeObject PyGProps_Type;
 
 int pyg_object_props_register_types (PyObject *d);
 
-#endif /*_PYGOBJECT_OBJECT_PROPS_H_*/
+#endif /*__PYGOBJECT_OBJECT_PROPS_H__*/
