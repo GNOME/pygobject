@@ -20,11 +20,7 @@
 #ifndef __PYGI_INVOKE_H__
 #define __PYGI_INVOKE_H__
 
-#include <girepository/girepository.h>
-#include <pythoncapi_compat.h>
-
 #include "pygi-info.h"
-#include "pygi-invoke-state-struct.h"
 
 G_BEGIN_DECLS
 

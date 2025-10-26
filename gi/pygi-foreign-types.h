@@ -21,7 +21,7 @@
 #define __PYGI_FOREIGN_TYPES_H__
 
 #include <girepository/girepository.h>
-#include <pygobject-types.h>
+#include <Python.h>
 
 typedef PyObject *(*PyGIArgOverrideToGIArgumentFunc) (
     PyObject *value, GIRegisteredTypeInfo *interface_info, GITransfer transfer,

@@ -25,9 +25,7 @@
 #define __PYGI_FUNDAMENTAL_H__
 
 #include <girepository/girepository.h>
-#include <pythoncapi_compat.h>
 
-#include "pygobject-types.h"
 #include "pygpointer.h"
 #include "pygi-type.h"
 

@@ -31,7 +31,6 @@
 
 #include <girepository/girepository.h>
 #include <girepository/girffi.h>
-#include <pythoncapi_compat.h>
 
 #include "pygi-invoke-state-struct.h"
 

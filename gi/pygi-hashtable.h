@@ -21,7 +21,6 @@
 #define __PYGI_HASHTABLE_H__
 
 #include "pygi-cache.h"
-#include <girepository/girepository.h>
 
 G_BEGIN_DECLS
 

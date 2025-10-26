@@ -20,7 +20,6 @@
 #ifndef __PYGI_FOREIGN_API_H__
 #define __PYGI_FOREIGN_API_H__
 
-#include <girepository/girepository.h>
 #include <pygobject.h>
 #include <pygi-foreign-types.h>
 

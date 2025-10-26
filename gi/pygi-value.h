@@ -19,7 +19,6 @@
 #define __PYGI_VALUE_H__
 
 #include <girepository/girepository.h>
-#include <glib-object.h>
 #include <pythoncapi_compat.h>
 
 G_BEGIN_DECLS

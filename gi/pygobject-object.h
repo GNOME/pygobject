@@ -1,7 +1,6 @@
 #ifndef __PYGOBJECT_OBJECT_H__
 #define __PYGOBJECT_OBJECT_H__
 
-#include <glib-object.h>
 #include <pythoncapi_compat.h>
 
 #include "pygobject-types.h"

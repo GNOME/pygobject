@@ -21,7 +21,6 @@
 #define __PYGI_MARSHAL_CLEANUP_H__
 
 #include "pygi-struct.h"
-#include "pygi-invoke-state-struct.h"
 #include "pygi-cache.h"
 
 G_BEGIN_DECLS

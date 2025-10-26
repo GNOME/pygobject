@@ -21,7 +21,6 @@
 #ifndef __PYGI_STRUCT_MARSHAL_H__
 #define __PYGI_STRUCT_MARSHAL_H__
 
-#include <girepository/girepository.h>
 #include "pygi-cache.h"
 
 G_BEGIN_DECLS

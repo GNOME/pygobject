@@ -22,7 +22,6 @@
 #define __PYGI_TYPE_H__
 
 #include <girepository/girepository.h>
-#include <glib-object.h>
 #include <pythoncapi_compat.h>
 
 #include "pygobject-types.h"

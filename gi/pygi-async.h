@@ -20,10 +20,7 @@
 #ifndef __PYGI_ASYNC_H__
 #define __PYGI_ASYNC_H__
 
-#include <pythoncapi_compat.h>
-
 #include "pygi-info.h"
-#include "pygi-cache.h"
 
 typedef struct {
     PyObject *func;

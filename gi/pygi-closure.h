@@ -27,8 +27,6 @@
 #endif
 
 #include <ffi.h>
-#include <pythoncapi_compat.h>
-#include <girepository/girepository.h>
 
 #include "pygi-cache.h"
 

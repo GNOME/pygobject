@@ -17,10 +17,8 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __PYGI_CCLOSURE_H__
-#define __PYGI_CCLOSURE_H__
-
-#include <pythoncapi_compat.h>
+#ifndef __PYGI_CCALLBACK_H__
+#define __PYGI_CCALLBACK_H__
 
 #include "pygi-cache.h"
 
