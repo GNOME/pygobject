@@ -199,7 +199,6 @@ class TestVFuncsWithObjectArg(unittest.TestCase):
         self.assertFalse(is_floating)
 
         gc.collect()
-        gc.collect()
         self.assertTrue(vfuncs.object_ref() is None)
 
     def test_vfunc_in_object_transfer_full(self):
@@ -219,7 +218,6 @@ class TestVFuncsWithObjectArg(unittest.TestCase):
             self.assertEqual(ref_count, 0)
         self.assertFalse(is_floating)
 
-        gc.collect()
         gc.collect()
         self.assertTrue(vfuncs.object_ref() is None)
 
@@ -331,7 +329,6 @@ class TestVFuncsWithFloatingArg(unittest.TestCase):
         testhelper.force_g_object_unref(vfuncs.object_ref())
 
         gc.collect()
-        gc.collect()
         assert vfuncs.object_ref() is None
 
     def test_vfunc_in_object_transfer_full_with_floating(self):
@@ -351,7 +348,6 @@ class TestVFuncsWithFloatingArg(unittest.TestCase):
             self.assertEqual(ref_count, 0)
         self.assertFalse(is_floating)
 
-        gc.collect()
         gc.collect()
         self.assertTrue(vfuncs.object_ref() is None)
 

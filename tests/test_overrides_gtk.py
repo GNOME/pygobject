@@ -159,7 +159,6 @@ def test_wrapper_toggle_refs():
         w.set_child(b)
     del b
     gc.collect()
-    gc.collect()
     assert w.get_preferred_size().minimum_size.height >= height
 
 

@@ -28,7 +28,6 @@ def test_gobject_weak_ref():
     obj.weak_ref(callback, 1)
     del obj
     gc.collect()
-    gc.collect()
     assert called == [1]
     del called[:]
 

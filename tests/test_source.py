@@ -126,7 +126,6 @@ class TestSource(unittest.TestCase):
 
         s = f()
         gc.collect()
-        gc.collect()
         self.assertTrue(s.is_destroyed())
 
     def test_remove(self):
@@ -220,7 +219,6 @@ class TestSource(unittest.TestCase):
         self.assertTrue(source.is_destroyed())
         del source
         gc.collect()
-        gc.collect()
         self.assertTrue(self.finalized)
 
     def test_python_unref_with_active_source(self):
@@ -251,7 +249,6 @@ class TestSource(unittest.TestCase):
 
         # Delete the source from Python, it should detach
         del source
-        gc.collect()
         gc.collect()
 
         while context.iteration(may_block=False):
