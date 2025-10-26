@@ -27,7 +27,7 @@
 
 #include <pythoncapi_compat.h>
 
-#include "pygi-foreign-api.h"
+#include "pygi-foreign-types.h"
 
 PyObject *pygi_struct_foreign_convert_to_g_argument (
     PyObject *value, GIRegisteredTypeInfo *interface_info, GITransfer transfer,

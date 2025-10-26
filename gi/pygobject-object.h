@@ -1,5 +1,5 @@
-#ifndef _PYGOBJECT_OBJECT_H_
-#define _PYGOBJECT_OBJECT_H_
+#ifndef __PYGOBJECT_OBJECT_H__
+#define __PYGOBJECT_OBJECT_H__
 
 #include <glib-object.h>
 #include <pythoncapi_compat.h>
@@ -46,4 +46,4 @@ void pygobject__g_instance_init (GTypeInstance *instance, gpointer g_class);
 /* from pygobject-class.c */
 void pygobject__g_class_init (GObjectClass *class, PyObject *py_class);
 
-#endif /*_PYGOBJECT_OBJECT_H_*/
+#endif /*__PYGOBJECT_OBJECT_H__*/

@@ -41,7 +41,8 @@ sources = [
   'pygi-hashtable.c']
 
 headers = [
-  'pygobject.h'
+  'pygobject.h',
+  'pygobject-types.h'
 ]
 
 install_headers(headers, subdir : 'pygobject-@0@'.format(platform_version))

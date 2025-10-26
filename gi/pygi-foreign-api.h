@@ -22,26 +22,7 @@
 
 #include <girepository/girepository.h>
 #include <pygobject.h>
-
-typedef PyObject *(*PyGIArgOverrideToGIArgumentFunc) (
-    PyObject *value, GIRegisteredTypeInfo *interface_info, GITransfer transfer,
-    GIArgument *arg);
-typedef PyObject *(*PyGIArgOverrideFromGIArgumentFunc) (
-    GIRegisteredTypeInfo *interface_info, GITransfer transfer, gpointer data);
-typedef PyObject *(*PyGIArgOverrideReleaseFunc) (GIBaseInfo *base_info,
-                                                 gpointer struct_);
-
-
-struct PyGI_API {
-    void (*register_foreign_struct) (
-        const char *namespace_, const char *name,
-        PyGIArgOverrideToGIArgumentFunc to_func,
-        PyGIArgOverrideFromGIArgumentFunc from_func,
-        PyGIArgOverrideReleaseFunc release_func);
-};
-
-
-#ifndef _INSIDE_PYGOBJECT_
+#include <pygi-foreign-types.h>
 
 static struct PyGI_API *PyGI_API = NULL;
 
@@ -73,7 +54,5 @@ pygi_register_foreign_struct (const char *namespace_, const char *name,
                                        release_func);
     Py_RETURN_NONE;
 }
-
-#endif /* _INSIDE_PYGOBJECT_ */
 
 #endif /* __PYGI_FOREIGN_API_H__ */
