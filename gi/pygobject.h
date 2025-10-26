@@ -22,6 +22,10 @@
 
 #include <pygobject-types.h>
 
+#ifdef _INSIDE_PYGOBJECT_
+#error "pygobject.h exposes the external API."
+#endif
+
 G_BEGIN_DECLS
 
 /* Deprecated, only available for API compatibility. */

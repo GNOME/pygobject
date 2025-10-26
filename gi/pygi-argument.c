@@ -24,8 +24,8 @@
 
 #include "pygobject-types.h"
 
-#include <pygenum.h>
-#include <pygflags.h>
+#include "pygenum.h"
+#include "pygflags.h"
 
 #include "pygi-type.h"
 
