@@ -20,7 +20,7 @@
 #ifndef __PYGI_RESULTTUPLE_H__
 #define __PYGI_RESULTTUPLE_H__
 
-#include "Python.h"
+#include <pythoncapi_compat.h>
 
 int pygi_resulttuple_register_types (PyObject *d);
 

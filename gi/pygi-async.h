@@ -20,7 +20,7 @@
 #ifndef __PYGI_ASYNC_H__
 #define __PYGI_ASYNC_H__
 
-#include "Python.h"
+#include <pythoncapi_compat.h>
 
 #include "pygi-info.h"
 #include "pygi-cache.h"
