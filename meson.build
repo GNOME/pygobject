@@ -171,10 +171,6 @@ cdata.set('PYGOBJECT_MAJOR_VERSION', pygobject_version_major)
 cdata.set('PYGOBJECT_MINOR_VERSION', pygobject_version_minor)
 cdata.set('PYGOBJECT_MICRO_VERSION', pygobject_version_micro)
 
-if gio_dep.version().version_compare('< 2.67.4')
-  cdata.set('g_memdup2(ptr,sz)', '(G_LIKELY(((guint64)(sz)) < G_MAXUINT)) ? g_memdup(ptr,sz) : (g_abort(),NULL)')
-endif
-
 configure_file(output : 'config.h', configuration : cdata)
 
 pkgconf = configuration_data()
