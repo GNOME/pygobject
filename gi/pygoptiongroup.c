@@ -20,8 +20,6 @@
 
 #include <config.h>
 
-#include <pythoncapi_compat.h>
-
 #include "pygi-error.h"
 #include "pygi-util.h"
 #include "pygoptiongroup.h"

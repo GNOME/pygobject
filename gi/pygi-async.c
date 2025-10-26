@@ -18,7 +18,6 @@
  */
 
 #include <glib.h>
-#include <pythoncapi_compat.h>
 #include <structmember.h>
 
 #include "pygobject-object.h"

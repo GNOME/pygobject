@@ -20,8 +20,6 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <pythoncapi_compat.h>
-
 #include "pygi-async.h"
 #include "pygi-boxed.h"
 #include "pygi-error.h"

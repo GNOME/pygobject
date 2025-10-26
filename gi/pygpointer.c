@@ -21,7 +21,6 @@
 #include <config.h>
 
 #include <glib-object.h>
-#include <pythoncapi_compat.h>
 
 #include "pygi-type.h"
 #include "pygi-util.h"

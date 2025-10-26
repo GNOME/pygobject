@@ -20,7 +20,6 @@
  */
 
 #include <glib.h>
-#include <pythoncapi_compat.h>
 
 #include "pygi-basictype.h"
 #include "pygi-error.h"

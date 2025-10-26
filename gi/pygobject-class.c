@@ -23,7 +23,6 @@
  */
 
 #include <glib-object.h>
-#include <pythoncapi_compat.h>
 #include <girepository/girepository.h>
 
 #include "pygobject-internal.h"

@@ -23,8 +23,6 @@
  * IN THE SOFTWARE.
  */
 
-#include <pythoncapi_compat.h>
-
 #include "pygi-type.h"
 
 #include "pygboxed.h"

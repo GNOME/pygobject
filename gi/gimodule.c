@@ -22,7 +22,6 @@
  */
 
 #include <glib-object.h>
-#include <pythoncapi_compat.h>
 
 #include "config.h"
 #include "pygboxed.h"

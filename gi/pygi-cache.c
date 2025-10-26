@@ -19,7 +19,6 @@
  */
 
 #include <girepository/girepository.h>
-#include <pythoncapi_compat.h>
 
 #include "pygi-array.h"
 #include "pygi-basictype.h"

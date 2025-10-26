@@ -19,7 +19,6 @@
  */
 
 #include <glib.h>
-#include <pythoncapi_compat.h>
 
 #include "pygi-struct-marshal.h"
 

@@ -24,7 +24,6 @@
 
 #include "pygobject-internal.h"
 
-#include <pythoncapi_compat.h>
 #include <pygenum.h>
 #include <pygflags.h>
 

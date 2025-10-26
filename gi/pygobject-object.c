@@ -20,8 +20,6 @@
 
 #include <config.h>
 
-#include <pythoncapi_compat.h>
-
 #include "pygobject-internal.h"
 #include "pygboxed.h"
 #include "pygi-basictype.h"
