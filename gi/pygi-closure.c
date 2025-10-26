@@ -21,7 +21,6 @@
 #include "pygi-async.h"
 #include "pygi-ccallback.h"
 #include "pygi-error.h"
-#include "pygi-info.h"
 #include "pygi-invoke.h"
 #include "pygi-marshal-cleanup.h"
 

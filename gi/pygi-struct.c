@@ -27,8 +27,6 @@
 #include "pygi-util.h"
 #include "pygpointer.h"
 
-#include <girepository/girepository.h>
-
 
 static GIBaseInfo *
 struct_get_info (PyTypeObject *type)

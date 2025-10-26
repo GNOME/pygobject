@@ -21,12 +21,10 @@
  * USA
  */
 
-#include <glib-object.h>
-
 #include "config.h"
-#include "pygboxed.h"
 #include "pygenum.h"
 #include "pygflags.h"
+#include "pygboxed.h"
 #include "pygi-async.h"
 #include "pygi-basictype.h"
 #include "pygi-boxed.h"

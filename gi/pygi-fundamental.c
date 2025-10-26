@@ -24,8 +24,6 @@
  */
 
 
-#include <girepository/girepository.h>
-
 #include "pygobject-types.h"
 #include "pygi-info.h"
 #include "pygi-util.h"

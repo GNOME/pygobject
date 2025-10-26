@@ -21,8 +21,6 @@
  * IN THE SOFTWARE.
  */
 
-#include <girepository/girepository.h>
-
 #include "pygi-argument.h"
 #include "pygi-fundamental.h"
 #include "pygi-property.h"

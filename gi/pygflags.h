@@ -20,7 +20,6 @@
 #ifndef __PYGOBJECT_FLAGS_H__
 #define __PYGOBJECT_FLAGS_H__
 
-#include <glib-object.h>
 #include <girepository/girepository.h>
 #include <pythoncapi_compat.h>
 

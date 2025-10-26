@@ -18,10 +18,7 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <glib.h>
-
 #include "pygi-type.h"
-
 #include "pygenum.h"
 #include "pygflags.h"
 #include "pygi-enum-marshal.h"

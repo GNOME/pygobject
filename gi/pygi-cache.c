@@ -18,19 +18,14 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <girepository/girepository.h>
-
 #include "pygi-array.h"
 #include "pygi-basictype.h"
-#include "pygi-cache.h"
 #include "pygi-closure.h"
 #include "pygi-enum-marshal.h"
 #include "pygi-error.h"
 #include "pygi-hashtable.h"
-#include "pygi-info.h"
 #include "pygi-invoke.h"
 #include "pygi-list.h"
-#include "pygi-marshal-cleanup.h"
 #include "pygi-object.h"
 #include "pygi-repository.h"
 #include "pygi-resulttuple.h"

@@ -20,6 +20,7 @@
 #ifndef __PYGOBJECT_BOXED_H__
 #define __PYGOBJECT_BOXED_H__
 
+#include <glib-object.h>
 #include <pythoncapi_compat.h>
 
 extern GQuark pygboxed_type_key;

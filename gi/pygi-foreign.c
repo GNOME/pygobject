@@ -22,8 +22,6 @@
  * IN THE SOFTWARE.
  */
 
-#include <girepository/girepository.h>
-
 #include "pygobject-types.h"
 
 #include "pygi-foreign.h"

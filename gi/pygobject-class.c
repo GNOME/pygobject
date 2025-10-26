@@ -22,9 +22,6 @@
  * USA
  */
 
-#include <glib-object.h>
-#include <girepository/girepository.h>
-
 #include "pygobject-types.h"
 #include "pygenum.h"
 #include "pygflags.h"

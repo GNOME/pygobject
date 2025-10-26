@@ -19,10 +19,9 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "pygi-type.h"
-
 #include "pygenum.h"
 #include "pygi-basictype.h"
+#include "pygi-type.h"
 #include "pygi-util.h"
 
 GQuark pygenum_class_key;

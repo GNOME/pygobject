@@ -18,9 +18,6 @@
  */
 
 #include "pygi-marshal-cleanup.h"
-
-#include <glib.h>
-
 #include "pygi-foreign.h"
 
 static inline void

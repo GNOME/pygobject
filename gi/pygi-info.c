@@ -24,9 +24,7 @@
 
 #include "pygi-argument.h"
 #include "pygi-basictype.h"
-#include "pygi-cache.h"
 #include "pygi-fundamental.h"
-#include "pygi-info.h"
 #include "pygi-invoke.h"
 #include "pygi-util.h"
 

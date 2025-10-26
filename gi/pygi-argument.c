@@ -22,8 +22,6 @@
 #include <string.h>
 #include <time.h>
 
-#include "pygobject-types.h"
-
 #include "pygenum.h"
 #include "pygflags.h"
 
