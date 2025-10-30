@@ -41,8 +41,6 @@ PyObject *pygi_guint64_to_py (guint64 value);
 PyObject *pygi_gfloat_to_py (gfloat value);
 PyObject *pygi_gdouble_to_py (gdouble value);
 PyObject *pygi_gboolean_to_py (gboolean value);
-PyObject *pygi_gint8_to_py (gint8 value);
-PyObject *pygi_guint8_to_py (guint8 value);
 PyObject *pygi_utf8_to_py (gchar *value);
 PyObject *pygi_gint_to_py (gint value);
 PyObject *pygi_glong_to_py (glong value);
@@ -64,9 +62,7 @@ gboolean pygi_gulong_from_py (PyObject *object, gulong *result);
 gboolean pygi_gint_from_py (PyObject *object, gint *result);
 gboolean pygi_guint_from_py (PyObject *object, guint *result);
 gboolean pygi_gunichar_from_py (PyObject *py_arg, gunichar *result);
-gboolean pygi_gint8_from_py (PyObject *object, gint8 *result);
 gboolean pygi_gschar_from_py (PyObject *object, gint8 *result);
-gboolean pygi_guint8_from_py (PyObject *object, guint8 *result);
 gboolean pygi_guchar_from_py (PyObject *object, guchar *result);
 
 G_END_DECLS

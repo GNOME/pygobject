@@ -24,6 +24,9 @@
 #include "pygi-basictype.h"
 #include "pygi-util.h"
 
+static gboolean pygi_gint8_from_py (PyObject *object, gint8 *result);
+static gboolean pygi_guint8_from_py (PyObject *object, guint8 *result);
+
 #if defined(G_OS_WIN32)
 #include <float.h>
 static gboolean
@@ -653,7 +656,7 @@ overflow:
     return FALSE;
 }
 
-gboolean
+static gboolean
 pygi_gint8_from_py (PyObject *object, gint8 *result)
 {
     /* If we pass unicode, convert it to a bytes representation
@@ -676,7 +679,7 @@ pygi_gint8_from_py (PyObject *object, gint8 *result)
     return pygi_gint8_from_py_converted (object, result);
 }
 
-PyObject *
+static PyObject *
 pygi_gint8_to_py (gint8 value)
 {
     return PyLong_FromLong (value);
@@ -722,7 +725,7 @@ overflow:
     return FALSE;
 }
 
-gboolean
+static gboolean
 pygi_guint8_from_py (PyObject *object, guint8 *result)
 {
     /* If we pass unicode, convert it to a bytes representation
@@ -745,7 +748,7 @@ pygi_guint8_from_py (PyObject *object, guint8 *result)
     return pygi_guint8_from_py_converted (object, result);
 }
 
-PyObject *
+static PyObject *
 pygi_guint8_to_py (guint8 value)
 {
     return PyLong_FromLong (value);
