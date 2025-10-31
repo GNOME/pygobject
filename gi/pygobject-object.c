@@ -1135,7 +1135,6 @@ pygobject_set_property (PyGObject *self, PyObject *args)
     gchar *param_name;
     GParamSpec *pspec;
     PyObject *pvalue;
-    int ret = -1;
 
     if (!PyArg_ParseTuple (args, "sO:GObject.set_property", &param_name,
                            &pvalue))
@@ -1152,16 +1151,8 @@ pygobject_set_property (PyGObject *self, PyObject *args)
         return NULL;
     }
 
-    ret = pygi_set_property_value (self, pspec, pvalue);
-    if (ret == 0)
-        goto done;
-    else if (PyErr_Occurred ())
-        return NULL;
-
-    if (pygi_set_property_from_pspec (self->obj, pspec, pvalue) != 0)
-        return NULL;
-
-done:
+    pygi_set_property_value (self, pspec, pvalue);
+    if (PyErr_Occurred ()) return NULL;
 
     Py_RETURN_NONE;
 }
@@ -1200,15 +1191,8 @@ pygobject_set_properties (PyGObject *self, PyObject *args, PyObject *kwargs)
 
         ret = pygi_set_property_value (self, pspec, value);
         if (ret != 0) {
-            /* Non-zero return code means that either an error occured ...*/
+            /* Non-zero return code means that an error occurred */
             if (PyErr_Occurred ()) goto exit;
-
-            /* ... or the property couldn't be found , so let's try the default
-             * call. */
-            if (pygi_set_property_from_pspec (G_OBJECT (self->obj), pspec,
-                                              value)
-                != 0)
-                goto exit;
         }
     }
 
