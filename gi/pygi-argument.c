@@ -547,7 +547,7 @@ _pygi_set_g_byte_array_argument (GIArgument *arg, GITypeInfo *type_info,
     GITransfer item_transfer;
     gint ret_val = -01;
 
-    if (item_size != sizeof (gpointer)) {
+    if (item_size != sizeof (gchar)) {
         PyErr_SetString (
             PyExc_NotImplementedError,
             "item_size from python object array != sizeof (char), "
