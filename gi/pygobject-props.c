@@ -131,7 +131,6 @@ PyGProps_setattro (PyGProps *self, PyObject *attr, PyObject *pvalue)
     GParamSpec *pspec;
     char *attr_name, *property_name;
     GObject *obj;
-    int ret = -1;
 
     if (pvalue == NULL) {
         PyErr_SetString (PyExc_TypeError,
@@ -166,19 +165,11 @@ PyGProps_setattro (PyGProps *self, PyObject *attr, PyObject *pvalue)
     if (!pspec) {
         return PyObject_GenericSetAttr ((PyObject *)self, attr, pvalue);
     }
-    if (!pyg_gtype_is_custom (pspec->owner_type)) {
-        /* This GType is not implemented in Python: see if we can set the
-         * property via gi. */
-        ret = pygi_set_property_value (self->pygobject, pspec, pvalue);
-        if (ret == 0)
-            return 0;
-        else if (ret == -1 && PyErr_Occurred ())
-            return -1;
-    }
 
-    /* This GType is implemented in Python, or we failed to set it via gi:
-     * do a straightforward set. */
-    return pygi_set_property_from_pspec (obj, pspec, pvalue);
+    pygi_set_property_value (self->pygobject, pspec, pvalue);
+    if (PyErr_Occurred ()) return -1;
+
+    return 0;
 }
 
 static int
