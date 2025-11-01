@@ -636,7 +636,6 @@ _pygi_set_c_array_argument (GIArgument *arg, GITypeInfo *type_info,
     /* we handle arrays that are really strings specially */
     if (gi_type_info_get_tag (item_type_info) == GI_TYPE_TAG_UINT8
         && PyBytes_Check (object)) {
-        /* XXX: Hopefully zero-terminated! */
         memcpy (array, PyBytes_AsString (object), length);
     } else {
         GITransfer item_transfer =
@@ -1682,7 +1681,7 @@ _pygi_argument_release (GIArgument *arg, GITypeInfo *type_info,
         if (direction == GI_DIRECTION_OUT
             && transfer == GI_TRANSFER_CONTAINER) {
             /* Be careful to avoid keys and values being freed if the
-                 * callee gave a destroy function. */
+             * callee gave a destroy function. */
             g_hash_table_steal_all (hash_table);
         } else {
             g_hash_table_unref (hash_table);
