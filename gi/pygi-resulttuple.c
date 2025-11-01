@@ -335,7 +335,7 @@ resulttuple_dealloc (PyObject *self)
     Py_TYPE (self)->tp_free (self);
 
 done:
-    CPy_TRASHCAN_END (self)
+    CPy_TRASHCAN_END (self);
 }
 #endif
 
