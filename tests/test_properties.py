@@ -1355,7 +1355,6 @@ class CPropertiesTestBase:
         self.assertTrue(isinstance(self.get_prop(obj, "list"), list))
         self.assertEqual(self.get_prop(obj, "list"), ["1", "2", "3"])
 
-    @unittest.expectedFailure
     def test_boxed_glist_ctor(self):
         list_ = [GLib.MININT, 42, GLib.MAXINT]
         obj = GIMarshallingTests.PropertiesObject(some_boxed_glist=list_)
