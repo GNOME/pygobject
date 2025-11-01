@@ -27,12 +27,15 @@ G_BEGIN_DECLS
 
 /* Private */
 /* TODO: change signature: length as arg, return boolean */
-typedef gssize (*PyGIArgArrayLengthPolicy) (gsize item_index, void *user_data1,
-                                            void *user_data2);
+typedef gboolean (*PyGIArgArrayLengthPolicy) (gsize item_index,
+                                              void *user_data1,
+                                              void *user_data2,
+                                              size_t *length);
 
-gssize _pygi_argument_array_length_marshal (gsize length_arg_index,
-                                            void *user_data1,
-                                            void *user_data2);
+gboolean _pygi_argument_array_length_marshal (gsize length_arg_index,
+                                              void *user_data1,
+                                              void *user_data2,
+                                              size_t *length);
 
 gpointer _pygi_arg_to_hash_pointer (const GIArgument *arg,
                                     GITypeInfo *type_info);

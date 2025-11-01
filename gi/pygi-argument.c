@@ -332,14 +332,14 @@ _pygi_type_info_get_free_func (GITypeInfo *type_info, GITransfer transfer,
  *
  * Returns: The length of the array or -1 on failure.
  */
-gssize
+gboolean
 _pygi_argument_array_length_marshal (gsize length_arg_index, void *user_data1,
-                                     void *user_data2)
+                                     void *user_data2, size_t *array_len)
 {
     GIArgInfo length_arg_info;
     GITypeInfo length_type_info;
     GIArgument length_arg;
-    gssize array_len = -1;
+    gssize length = 0;
     GValue *values = (GValue *)user_data1;
     GICallableInfo *callable_info = (GICallableInfo *)user_data2;
 
@@ -349,13 +349,14 @@ _pygi_argument_array_length_marshal (gsize length_arg_index, void *user_data1,
 
     length_arg = _pygi_argument_from_g_value (&(values[length_arg_index]),
                                               &length_type_info);
-    if (!pygi_argument_to_gssize (&length_arg,
-                                  gi_type_info_get_tag (&length_type_info),
-                                  &array_len)) {
-        return -1;
+    if (pygi_argument_to_gssize (
+            &length_arg, gi_type_info_get_tag (&length_type_info), &length)
+        && length >= 0) {
+        *array_len = (size_t)length;
+        return TRUE;
     }
 
-    return array_len;
+    return FALSE;
 }
 
 static size_t
@@ -378,7 +379,7 @@ _pygi_measure_c_zero_terminated_array_length (GIArgument *arg,
     return length;
 }
 
-static gint
+static gboolean
 _pygi_determine_c_array_length (GIArgument *arg, GITypeInfo *type_info,
                                 size_t item_size,
                                 PyGIArgArrayLengthPolicy array_length_policy,
@@ -392,36 +393,33 @@ _pygi_determine_c_array_length (GIArgument *arg, GITypeInfo *type_info,
         /* Array can be arbitrarily long. Best to store the size in a size_t */
         *return_length =
             _pygi_measure_c_zero_terminated_array_length (arg, item_size);
-        return 0;
+        return TRUE;
     } else {
         gboolean has_length;
         has_length = gi_type_info_get_array_fixed_size (type_info, &length);
         if (!has_length) {
             guint length_arg_pos;
             gboolean has_array_length;
-            gssize length_by_policy;
 
             if (G_UNLIKELY (array_length_policy == NULL)) {
-                return -1;
+                return FALSE;
             }
 
             has_array_length = gi_type_info_get_array_length_index (
                 type_info, &length_arg_pos);
             g_assert (has_array_length);
 
-            length_by_policy =
-                array_length_policy (length_arg_pos, user_data1, user_data2);
-            if (length < 0) {
-                return -1;
+            if (!array_length_policy (length_arg_pos, user_data1, user_data2,
+                                      &length)) {
+                return FALSE;
             }
-            length = (size_t)length_by_policy;
         }
     }
 
     /* Getting the length through GI or PyGIArgArrayLengthPolicy
      * will be at most the size of a gint */
     *return_length = length;
-    return 0;
+    return TRUE;
 }
 
 /**
@@ -472,10 +470,9 @@ _pygi_argument_to_array (GIArgument *arg,
 
         gi_base_info_unref ((GIBaseInfo *)item_type_info);
 
-        if (_pygi_determine_c_array_length (arg, type_info, item_size,
-                                            array_length_policy, user_data1,
-                                            user_data2, &length)
-            < 0) {
+        if (!_pygi_determine_c_array_length (arg, type_info, item_size,
+                                             array_length_policy, user_data1,
+                                             user_data2, &length)) {
             g_critical ("Unable to determine array length for %p",
                         arg->v_pointer);
             g_array =
@@ -1418,9 +1415,8 @@ _pygi_get_underlying_array (GIArgument *arg, GITypeInfo *type_info,
 
         gi_base_info_unref ((GIBaseInfo *)item_type_info);
 
-        if (_pygi_determine_c_array_length (arg, type_info, item_size, NULL,
-                                            NULL, NULL, &length)
-            < 0) {
+        if (!_pygi_determine_c_array_length (arg, type_info, item_size, NULL,
+                                             NULL, NULL, &length)) {
             g_critical (
                 "Unable to determine array length of %p, this will leak",
                 arg->v_pointer);
