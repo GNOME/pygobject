@@ -1264,6 +1264,16 @@ class TestGArray(unittest.TestCase):
             [0, GLib.MAXUINT64], GIMarshallingTests.garray_uint64_none_return()
         )
 
+    def test_garray_enum_none_return(self):
+        self.assertEqual(
+            [
+                GIMarshallingTests.GEnum.VALUE1,
+                GIMarshallingTests.GEnum.VALUE2,
+                GIMarshallingTests.GEnum.VALUE3,
+            ],
+            GIMarshallingTests.garray_enum_none_return(),
+        )
+
     def test_garray_utf8_none_return(self):
         self.assertEqual(["0", "1", "2"], GIMarshallingTests.garray_utf8_none_return())
 
