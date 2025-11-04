@@ -6,8 +6,6 @@
 
 G_BEGIN_DECLS
 
-
-PyObject *pyg_integer_richcompare (PyObject *v, PyObject *w, int op);
 PyObject *pyg_ptr_richcompare (void *a, void *b, int op);
 const gchar *pyg_constant_strip_prefix (const gchar *name,
                                         const gchar *strip_prefix);

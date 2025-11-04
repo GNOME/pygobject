@@ -33,39 +33,6 @@ pygi_guint_from_pyssize (Py_ssize_t pyval, guint *result)
 }
 
 PyObject *
-pyg_integer_richcompare (PyObject *v, PyObject *w, int op)
-{
-    PyObject *result;
-    gboolean t;
-
-    switch (op) {
-    case Py_EQ:
-        t = PyLong_AS_LONG (v) == PyLong_AS_LONG (w);
-        break;
-    case Py_NE:
-        t = PyLong_AS_LONG (v) != PyLong_AS_LONG (w);
-        break;
-    case Py_LE:
-        t = PyLong_AS_LONG (v) <= PyLong_AS_LONG (w);
-        break;
-    case Py_GE:
-        t = PyLong_AS_LONG (v) >= PyLong_AS_LONG (w);
-        break;
-    case Py_LT:
-        t = PyLong_AS_LONG (v) < PyLong_AS_LONG (w);
-        break;
-    case Py_GT:
-        t = PyLong_AS_LONG (v) > PyLong_AS_LONG (w);
-        break;
-    default:
-        g_assert_not_reached ();
-    }
-
-    result = t ? Py_True : Py_False;
-    return Py_NewRef (result);
-}
-
-PyObject *
 pyg_ptr_richcompare (void *a, void *b, int op)
 {
     PyObject *res;
