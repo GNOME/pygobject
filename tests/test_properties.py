@@ -1313,6 +1313,22 @@ class CPropertiesTestBase:
         self.assertEqual(self.get_prop(obj, "some-strv"), ["foo"])
         self.assertRaises(TypeError, self.set_prop, self.obj, "some-strv", ["foo", 1])
 
+    def test_byte_array(self):
+        self.assertEqual(self.get_prop(self.obj, "some-byte-array"), [])
+        self.set_prop(self.obj, "some-byte-array", b"hello world")
+        self.assertEqual(self.get_prop(self.obj, "some-byte-array"), b"hello world")
+
+        self.assertRaises(TypeError, self.set_prop, self.obj, "some-byte-array", 1)
+        self.assertRaises(TypeError, self.set_prop, self.obj, "some-byte-array", "foo")
+
+        self.assertEqual(self.get_prop(self.obj, "some-byte-array"), b"hello world")
+
+        self.set_prop(self.obj, "some-byte-array", [1, 2, 3])
+        self.assertEqual(self.get_prop(self.obj, "some-byte-array"), b"\x01\x02\x03")
+
+        obj = GIMarshallingTests.PropertiesObject(some_byte_array=b"hello world")
+        self.assertEqual(self.get_prop(obj, "some-byte-array"), b"hello world")
+
     def test_boxed_struct(self):
         self.assertEqual(self.get_prop(self.obj, "some-boxed-struct"), None)
 
