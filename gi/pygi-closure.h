@@ -49,20 +49,12 @@ typedef struct _PyGICClosure {
     PyGIClosureCache *cache;
 } PyGICClosure;
 
-void _pygi_closure_handle (ffi_cif *cif, void *result, void **args,
-                           void *userdata);
-
 void _pygi_invoke_closure_free (PyGICClosure *invoke_closure);
 
 PyGICClosure *_pygi_make_native_closure (GICallableInfo *info,
                                          PyGIClosureCache *cache,
                                          GIScopeType scope, PyObject *function,
                                          PyObject *user_data);
-
-PyGIArgCache *pygi_arg_callback_new_from_info (
-    GITypeInfo *type_info, GIArgInfo *arg_info, /* may be null */
-    GITransfer transfer, PyGIDirection direction, GICallbackInfo *iface_info,
-    PyGICallableCache *callable_cache);
 
 G_END_DECLS
 

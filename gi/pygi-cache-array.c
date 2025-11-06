@@ -18,14 +18,10 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "pygi-array.h"
 #include "pygi-basictype.h"
 #include "pygi-info.h"
-#include "pygi-marshal-cleanup.h"
 #include "pygi-util.h"
-
-/* Needed for _pygi_marshal_cleanup_from_py_interface_struct_gvalue hack */
-#include "pygi-struct-marshal.h"
+#include "pygi-cache-private.h"
 
 /*
  * GArray to Python
@@ -514,6 +510,7 @@ _pygi_marshal_cleanup_from_py_array (PyGIInvokeState *state,
 /*
  * GArray from Python
  */
+
 static PyObject *
 _pygi_marshal_to_py_array (PyGIInvokeState *state,
                            PyGICallableCache *callable_cache,

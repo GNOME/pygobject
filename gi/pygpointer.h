@@ -20,6 +20,7 @@
 #ifndef __PYGOBJECT_POINTER_H__
 #define __PYGOBJECT_POINTER_H__
 
+#include <glib-object.h>
 #include <pythoncapi_compat.h>
 
 extern GQuark pygpointer_class_key;

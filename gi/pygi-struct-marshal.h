@@ -25,12 +25,6 @@
 
 G_BEGIN_DECLS
 
-PyGIArgCache *pygi_arg_struct_new_from_info (
-    GITypeInfo *type_info, GIArgInfo *arg_info, /* may be null */
-    GITransfer transfer, PyGIDirection direction,
-    GIRegisteredTypeInfo *iface_info);
-
-
 gboolean pygi_arg_gvalue_from_py_marshal (PyObject *py_arg, /*in*/
                                           GIArgument *arg,  /*out*/
                                           GITransfer transfer,
@@ -48,12 +42,6 @@ PyObject *pygi_arg_struct_to_py_marshal (GIArgument *arg,
                                          GITransfer transfer,
                                          gboolean is_allocated,
                                          gboolean is_foreign);
-
-/* Needed for hack in pygi-arg-garray.c */
-void pygi_arg_gvalue_from_py_cleanup (PyGIInvokeState *state,
-                                      PyGIArgCache *arg_cache,
-                                      PyObject *py_arg, gpointer data,
-                                      gboolean was_processed);
 
 G_END_DECLS
 

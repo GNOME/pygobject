@@ -21,7 +21,7 @@
 #include "pygi-type.h"
 #include "pygenum.h"
 #include "pygflags.h"
-#include "pygi-enum-marshal.h"
+#include "pygi-cache-private.h"
 
 static gboolean
 gi_argument_from_c_long (GIArgument *arg_out, long c_long_in,

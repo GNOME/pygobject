@@ -18,52 +18,16 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "pygi-array.h"
 #include "pygi-basictype.h"
 #include "pygi-closure.h"
-#include "pygi-enum-marshal.h"
 #include "pygi-error.h"
-#include "pygi-hashtable.h"
 #include "pygi-invoke.h"
-#include "pygi-list.h"
 #include "pygi-object.h"
 #include "pygi-repository.h"
 #include "pygi-resulttuple.h"
 #include "pygi-struct-marshal.h"
 #include "pygi-type.h"
-
-/* pygi_arg_base_setup:
- * arg_cache: argument cache to initialize
- * type_info: source for type related attributes to cache
- * arg_info: (allow-none): source for argument related attributes to cache
- * transfer: transfer mode to store in the argument cache
- * direction: marshaling direction to store in the cache
- *
- * Initializer for PyGIArgCache
- */
-void
-pygi_arg_base_setup (
-    PyGIArgCache *arg_cache, GITypeInfo *type_info,
-    GIArgInfo *arg_info, /* may be NULL for return arguments */
-    GITransfer transfer, PyGIDirection direction)
-{
-    arg_cache->direction = direction;
-    arg_cache->transfer = transfer;
-    arg_cache->py_arg_index = -1;
-    arg_cache->c_arg_index = -1;
-
-    if (type_info != NULL) {
-        arg_cache->is_pointer = gi_type_info_is_pointer (type_info);
-        arg_cache->type_tag = gi_type_info_get_tag (type_info);
-        gi_base_info_ref ((GIBaseInfo *)type_info);
-        arg_cache->type_info = type_info;
-    }
-
-    if (arg_info != NULL) {
-        gi_base_info_ref ((GIBaseInfo *)arg_info);
-        arg_cache->arg_info = arg_info;
-    }
-}
+#include "pygi-cache-private.h"
 
 void
 pygi_arg_cache_free (PyGIArgCache *cache)
@@ -108,85 +72,6 @@ pygi_arg_cache_is_caller_allocates (PyGIArgCache *cache)
     return FALSE;
 }
 
-/* PyGIInterfaceCache */
-
-static void
-_interface_cache_free_func (PyGIInterfaceCache *cache)
-{
-    if (cache != NULL) {
-        Py_XDECREF (cache->py_type);
-        if (cache->type_name != NULL) g_free (cache->type_name);
-        if (cache->interface_info != NULL)
-            gi_base_info_unref ((GIBaseInfo *)cache->interface_info);
-        g_slice_free (PyGIInterfaceCache, cache);
-    }
-}
-
-/* pygi_arg_interface_setup:
- * arg_cache: argument cache to initialize
- * type_info: source for type related attributes to cache
- * arg_info: (allow-none): source for argument related attributes to cache
- * transfer: transfer mode to store in the argument cache
- * direction: marshaling direction to store in the cache
- * iface_info: interface info to cache
- *
- * Initializer for PyGIInterfaceCache
- *
- * Returns: TRUE on success and FALSE on failure
- */
-static gboolean
-pygi_arg_interface_setup (
-    PyGIInterfaceCache *iface_cache, GITypeInfo *type_info,
-    GIArgInfo *arg_info, /* may be NULL for return arguments */
-    GITransfer transfer, PyGIDirection direction,
-    GIRegisteredTypeInfo *iface_info)
-{
-    GIBaseInfo *base_info = GI_BASE_INFO (iface_info);
-
-    pygi_arg_base_setup ((PyGIArgCache *)iface_cache, type_info, arg_info,
-                         transfer, direction);
-
-    ((PyGIArgCache *)iface_cache)->destroy_notify =
-        (GDestroyNotify)_interface_cache_free_func;
-
-    gi_base_info_ref (base_info);
-    iface_cache->interface_info = iface_info;
-    iface_cache->arg_cache.type_tag = GI_TYPE_TAG_INTERFACE;
-    iface_cache->type_name = _pygi_gi_base_info_get_fullname (base_info);
-    iface_cache->g_type = gi_registered_type_info_get_g_type (iface_info);
-    iface_cache->py_type = pygi_type_import_by_gi_info (base_info);
-
-    if (g_type_is_a (iface_cache->g_type, G_TYPE_OBJECT)) {
-        if (g_str_equal (g_type_name (iface_cache->g_type), "GCancellable"))
-            iface_cache->arg_cache.async_context =
-                PYGI_ASYNC_CONTEXT_CANCELLABLE;
-    }
-
-    if (iface_cache->py_type == NULL) {
-        return FALSE;
-    }
-
-    return TRUE;
-}
-
-PyGIArgCache *
-pygi_arg_interface_new_from_info (
-    GITypeInfo *type_info,
-    GIArgInfo *arg_info, /* may be NULL for return arguments */
-    GITransfer transfer, PyGIDirection direction,
-    GIRegisteredTypeInfo *iface_info)
-{
-    PyGIInterfaceCache *ic;
-
-    ic = g_slice_new0 (PyGIInterfaceCache);
-    if (!pygi_arg_interface_setup (ic, type_info, arg_info, transfer,
-                                   direction, iface_info)) {
-        pygi_arg_cache_free ((PyGIArgCache *)ic);
-        return NULL;
-    }
-
-    return (PyGIArgCache *)ic;
-}
 
 /* PyGISequenceCache */
 

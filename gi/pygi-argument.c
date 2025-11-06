@@ -29,6 +29,7 @@
 
 #include "pygi-argument.h"
 #include "pygi-basictype.h"
+#include "pygi-boxed.h"
 #include "pygi-error.h"
 #include "pygi-foreign.h"
 #include "pygi-info.h"
@@ -792,6 +793,11 @@ _pygi_argument_to_object (GIArgument *arg, GITypeInfo *type_info,
                 arg, GI_REGISTERED_TYPE_INFO (info), g_type, py_type, transfer,
                 FALSE, /*is_allocated*/
                 is_foreign);
+
+            if (object
+                && PyObject_IsInstance (object, (PyObject *)&PyGIBoxed_Type)
+                && transfer == GI_TRANSFER_NOTHING)
+                pygi_boxed_copy_in_place ((PyGIBoxed *)object);
 
             Py_XDECREF (py_type);
         } else if (GI_IS_ENUM_INFO (info)) {

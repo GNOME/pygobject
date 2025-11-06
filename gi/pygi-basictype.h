@@ -29,21 +29,12 @@ gboolean pygi_marshal_from_py_basic_type (PyObject *object, /* in */
                                           GITypeTag type_tag,
                                           GITransfer transfer,
                                           gpointer *cleanup_data);
-gboolean pygi_marshal_from_py_basic_type_cache_adapter (
-    PyGIInvokeState *state, PyGICallableCache *callable_cache,
-    PyGIArgCache *arg_cache, PyObject *py_arg, GIArgument *arg,
-    gpointer *cleanup_data);
 
 PyObject *pygi_marshal_to_py_basic_type (GIArgument *arg, /* in */
                                          GITypeTag type_tag,
                                          GITransfer transfer);
-PyObject *pygi_marshal_to_py_basic_type_cache_adapter (
-    PyGIInvokeState *state, PyGICallableCache *callable_cache,
-    PyGIArgCache *arg_cache, GIArgument *arg, gpointer *cleanup_data);
 
-PyGIArgCache *pygi_arg_basic_type_new_from_info (
-    GITypeInfo *type_info, GIArgInfo *arg_info, /* may be null */
-    GITransfer transfer, PyGIDirection direction);
+gboolean pygi_gpointer_from_py (PyObject *py_arg, gpointer *result);
 
 PyObject *pygi_gint64_to_py (gint64 value);
 PyObject *pygi_guint64_to_py (guint64 value);

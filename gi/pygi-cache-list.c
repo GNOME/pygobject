@@ -18,10 +18,9 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "pygi-list.h"
-
 #include "pygi-argument.h"
 #include "pygi-util.h"
+#include "pygi-cache-private.h"
 
 typedef PyGISequenceCache PyGIArgGList;
 

@@ -29,17 +29,24 @@ sources = [
   'pygi-signal-closure.c',
   'pygi-invoke.c',
   'pygi-cache.c',
+  'pygi-cache-array.c',
+  'pygi-cache-basic.c',
+  'pygi-cache-closure.c',
+  'pygi-cache-enum.c',
+  'pygi-cache-error.c',
+  'pygi-cache-hashtable.c',
+  'pygi-cache-interface.c',
+  'pygi-cache-list.c',
+  'pygi-cache-object.c',
+  'pygi-cache-struct.c',
   'pygi-marshal-cleanup.c',
   'pygi-basictype.c',
-  'pygi-list.c',
-  'pygi-array.c',
   'pygi-error.c',
   'pygi-object.c',
   'pygi-fundamental.c',
   'pygi-value.c',
-  'pygi-enum-marshal.c',
   'pygi-struct-marshal.c',
-  'pygi-hashtable.c']
+  ]
 
 headers = [
   'pygobject.h',

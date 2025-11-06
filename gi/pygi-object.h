@@ -32,13 +32,10 @@ gboolean pygi_arg_gobject_out_arg_from_py (PyObject *py_arg, /* in */
                                            GIArgument *arg,  /* out */
                                            GITransfer transfer);
 
+PyObject *pygi_arg_object_to_py (GIArgument *arg, GITransfer transfer);
+
 PyObject *pygi_arg_object_to_py_called_from_c (GIArgument *arg,
                                                GITransfer transfer);
-
-PyGIArgCache *pygi_arg_gobject_new_from_info (
-    GITypeInfo *type_info, GIArgInfo *arg_info, /* may be null */
-    GITransfer transfer, PyGIDirection direction,
-    GIRegisteredTypeInfo *iface_info, PyGICallableCache *callable_cache);
 
 G_END_DECLS
 
