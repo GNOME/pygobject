@@ -17,14 +17,13 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __PYG_PID_H__
-#define __PYG_PID_H__
+#ifndef __PYG_SPAWN_H__
+#define __PYG_SPAWN_H__
 
-PyObject *pyg_pid_new (GPid pid);
 int pygi_spawn_register_types (PyObject *d);
 
 PyObject *pyglib_spawn_async (PyObject *self, PyObject *args,
                               PyObject *kwargs);
 
 
-#endif /* __PYG_PID_H__ */
+#endif /* __PYG_SPAWN_H__ */

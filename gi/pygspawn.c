@@ -79,7 +79,7 @@ pyg_pid_tp_init (PyObject *self, PyObject *args, PyObject *kwargs)
     return -1;
 }
 
-PyObject *
+static PyObject *
 pyg_pid_new (GPid pid)
 {
     PyObject *long_val;
