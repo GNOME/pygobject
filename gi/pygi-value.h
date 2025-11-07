@@ -34,8 +34,6 @@ int pyg_param_gvalue_from_pyobject (GValue *value, PyObject *py_obj,
 PyObject *pyg_param_gvalue_as_pyobject (const GValue *gvalue,
                                         gboolean copy_boxed,
                                         const GParamSpec *pspec);
-PyObject *pyg_strv_from_gvalue (const GValue *value);
-int pyg_strv_to_gvalue (GValue *value, PyObject *obj);
 
 PyObject *pygi_value_to_py_basic_type (const GValue *value, GType fundamental,
                                        gboolean *handled);
