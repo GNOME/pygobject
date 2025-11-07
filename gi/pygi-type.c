@@ -925,28 +925,6 @@ pyg_closure_new (PyObject *callback, PyObject *extra_args, PyObject *swap_data)
     return closure;
 }
 
-/**
- * pyg_closure_set_exception_handler:
- * @closure: a closure created with pyg_closure_new()
- * @handler: the handler to call when an exception occurs or NULL for none
- *
- * Sets the handler to call when an exception occurs during closure invocation.
- * The handler is responsible for providing a proper return value to the
- * closure invocation. If @handler is %NULL, the default handler will be used.
- * The default handler prints the exception to stderr and doesn't touch the
- * closure's return value.
- */
-void
-pyg_closure_set_exception_handler (GClosure *closure,
-                                   PyClosureExceptionHandler handler)
-{
-    PyGClosure *pygclosure;
-
-    g_return_if_fail (closure != NULL);
-
-    pygclosure = (PyGClosure *)closure;
-    pygclosure->exception_handler = handler;
-}
 /* -------------- PySignalClassClosure ----------------- */
 /* a closure used for the `class closure' of a signal.  As this gets
  * all the info from the first argument to the closure and the
@@ -1252,24 +1230,6 @@ pyg_object_descr_doc_get (void)
     return doc_descr;
 }
 
-
-/**
- * pyg_pyobj_to_unichar_conv:
- *
- * Converts PyObject value to a unichar and write result to memory
- * pointed to by ptr.  Follows the calling convention of a ParseArgs
- * converter (O& format specifier) so it may be used to convert function
- * arguments.
- *
- * Returns: 1 if the conversion succeeds and 0 otherwise.  If the conversion
- *          did not succeesd, a Python exception is raised
- */
-int
-pyg_pyobj_to_unichar_conv (PyObject *py_obj, void *ptr)
-{
-    if (!pygi_gunichar_from_py (py_obj, ptr)) return 0;
-    return 1;
-}
 
 gboolean
 pyg_gtype_is_custom (GType gtype)

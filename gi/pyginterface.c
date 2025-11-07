@@ -46,43 +46,6 @@ pyg_interface_free (PyObject *op)
     PyObject_Free (op);
 }
 
-/**
- * pyg_register_interface:
- * @dict: a module dictionary.
- * @class_name: the class name for the wrapper class.
- * @gtype: the GType of the interface.
- * @type: the wrapper class for the interface.
- *
- * Registers a Python class as the wrapper for a GInterface.  As a
- * convenience it will also place a reference to the wrapper class in
- * the provided module dictionary.
- */
-void
-pyg_register_interface (PyObject *dict, const gchar *class_name, GType gtype,
-                        PyTypeObject *type)
-{
-    PyObject *o;
-
-    Py_SET_TYPE (type, &PyType_Type);
-    g_assert (Py_TYPE (&PyGInterface_Type) != NULL);
-    type->tp_base = &PyGInterface_Type;
-
-    if (PyType_Ready (type) < 0) {
-        g_warning ("could not ready `%s'", type->tp_name);
-        return;
-    }
-
-    if (gtype) {
-        o = pyg_type_wrapper_new (gtype);
-        PyDict_SetItemString (type->tp_dict, "__gtype__", o);
-        Py_DECREF (o);
-    }
-
-    g_type_set_qdata (gtype, pyginterface_type_key, type);
-
-    PyDict_SetItemString (dict, (char *)class_name, (PyObject *)type);
-}
-
 void
 pyg_register_interface_info (GType gtype, const GInterfaceInfo *info)
 {

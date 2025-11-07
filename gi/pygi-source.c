@@ -29,6 +29,7 @@
 #include "pygi-basictype.h"
 #include "pygi-boxed.h"
 #include "pygi-info.h"
+#include "pygi-util.h"
 #include "pygi-source.h"
 
 typedef struct {
@@ -156,24 +157,6 @@ static GSourceFuncs pyg_source_funcs = {
     NULL,
 };
 
-/**
- * _pyglib_destroy_notify:
- * @user_data: a PyObject pointer.
- *
- * A function that can be used as a GDestroyNotify callback that will
- * call Py_DECREF on the data.
- */
-static void
-destroy_notify (gpointer user_data)
-{
-    PyObject *obj = (PyObject *)user_data;
-    PyGILState_STATE state;
-
-    state = PyGILState_Ensure ();
-    Py_DECREF (obj);
-    PyGILState_Release (state);
-}
-
 static gboolean
 handler_marshal (gpointer user_data)
 {
@@ -239,7 +222,7 @@ pygi_source_set_callback (PyGObject *self_module, PyObject *args)
     if (data == NULL) return NULL;
 
     g_source_set_callback (pyg_boxed_get (self, GSource), handler_marshal,
-                           data, destroy_notify);
+                           data, pyg_destroy_notify);
 
     Py_RETURN_NONE;
 }

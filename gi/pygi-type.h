@@ -50,13 +50,9 @@ PyObject *pyg_type_wrapper_new (GType type);
 GType pyg_type_from_object_strict (PyObject *obj, gboolean strict);
 GType pyg_type_from_object (PyObject *obj);
 
-int pyg_pyobj_to_unichar_conv (PyObject *py_obj, void *ptr);
-
 GClosure *pyg_closure_new (PyObject *callback, PyObject *extra_args,
                            PyObject *swap_data);
 GClosure *pyg_signal_class_closure_get (void);
-void pyg_closure_set_exception_handler (GClosure *closure,
-                                        PyClosureExceptionHandler handler);
 
 PyObject *pygi_type_import_by_g_type (GType g_type);
 PyObject *pygi_type_import_by_name (const char *namespace_, const char *name);

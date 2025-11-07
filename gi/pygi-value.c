@@ -862,7 +862,7 @@ pyg_param_gvalue_from_pyobject (GValue *value, PyObject *py_obj,
     if (G_IS_PARAM_SPEC_UNICHAR (pspec)) {
         gunichar u;
 
-        if (!pyg_pyobj_to_unichar_conv (py_obj, &u)) {
+        if (!pygi_gunichar_from_py (py_obj, &u)) {
             PyErr_Clear ();
             return -1;
         }

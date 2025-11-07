@@ -163,3 +163,21 @@ pyg_is_python_keyword (const gchar *name)
 
     return result;
 }
+
+/**
+ * pyg_destroy_notify:
+ * @user_data: a PyObject pointer.
+ *
+ * A function that can be used as a GDestroyNotify callback that will
+ * call Py_DECREF on the data.
+ */
+void
+pyg_destroy_notify (gpointer user_data)
+{
+    PyObject *obj = (PyObject *)user_data;
+    PyGILState_STATE state;
+
+    state = PyGILState_Ensure ();
+    Py_DECREF (obj);
+    PyGILState_Release (state);
+}

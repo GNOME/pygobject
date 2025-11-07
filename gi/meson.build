@@ -11,6 +11,7 @@ sources = [
   'pygoptiongroup.c',
   'pygspawn.c',
   'gimodule.c',
+  'pygi-capi.c',
   'pygi-repository.c',
   'pygi-info.c',
   'pygi-foreign.c',
