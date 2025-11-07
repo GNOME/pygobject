@@ -100,7 +100,7 @@ Marshaler Callbacks
 ===================
 
 Relevant marshaler callbacks are declared in `pygi-cache.h <https://git.gnome.org/browse/pygobject/tree/gi/pygi-cache.h?id=3.13.1#n35>`_
-and we need an implementation of both PyGIMarshalFromPyFunc and PyGIMarshalCleanupFunc.
+and we need an implementation of both PyGIMarshalFromPyFunc and PyGIMarshalFromPyCleanupFunc.
 
 .. code-block:: c
 
@@ -111,11 +111,11 @@ and we need an implementation of both PyGIMarshalFromPyFunc and PyGIMarshalClean
                                                GIArgument        *arg,
                                                gpointer          *cleanup_data);
 
-    typedef void (*PyGIMarshalCleanupFunc) (PyGIInvokeState *state,
-                                            PyGIArgCache    *arg_cache,
-                                            PyObject        *py_arg, /* always NULL for to_py cleanup */
-                                            gpointer         data,
-                                            gboolean         was_processed);
+    typedef void (*PyGIMarshalFromPyCleanupFunc) (PyGIInvokeState *state,
+                                                  PyGIArgCache    *arg_cache,
+                                                  PyObject        *py_arg, /* always NULL for to_py cleanup */
+                                                  gpointer         data,
+                                                  gboolean         was_processed);
 
 PyGIMarshalFromPyFunc is called for each argument prior to executing the callee, the relevant bits are as follows:
 
@@ -132,7 +132,7 @@ PyGIMarshalFromPyFunc is called for each argument prior to executing the callee,
   returns. In our case this will either be NULL or a GBytes pointer, in which case we should
   call g_bytes_unref() on the data.
 
-PyGIMarshalCleanupFunc is called after the callee finishes and to cleanup any temporary data
+PyGIMarshalFromPyCleanupFunc is called after the callee finishes and to cleanup any temporary data
 we created while the callee was running.
 
 Transfer Semantics

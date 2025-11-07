@@ -74,7 +74,7 @@ _pygi_marshal_from_py_glist (PyGIInvokeState *state,
 err:
         /* FIXME: clean up list
         if (sequence_cache->item_cache->from_py_cleanup != NULL) {
-            PyGIMarshalCleanupFunc cleanup = sequence_cache->item_cache->from_py_cleanup;
+            PyGIMarshalFromPyCleanupFunc cleanup = sequence_cache->item_cache->from_py_cleanup;
         }
         */
         Py_XDECREF (py_item);
@@ -146,7 +146,7 @@ _pygi_marshal_from_py_gslist (PyGIInvokeState *state,
 err:
         /* FIXME: Clean up list
         if (sequence_cache->item_cache->from_py_cleanup != NULL) {
-            PyGIMarshalCleanupFunc cleanup = sequence_cache->item_cache->from_py_cleanup;
+            PyGIMarshalFromPyCleanupFunc cleanup = sequence_cache->item_cache->from_py_cleanup;
         }
         */
 
@@ -186,7 +186,7 @@ _pygi_marshal_cleanup_from_py_glist (PyGIInvokeState *state,
 
         /* clean up items first */
         if (sequence_cache->item_cache->from_py_cleanup != NULL) {
-            PyGIMarshalCleanupFunc cleanup_func =
+            PyGIMarshalFromPyCleanupFunc cleanup_func =
                 sequence_cache->item_cache->from_py_cleanup;
             GSList *node = list_;
             gsize i = 0;

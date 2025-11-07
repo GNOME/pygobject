@@ -59,10 +59,10 @@ typedef PyObject *(*PyGIMarshalToPyFunc) (PyGIInvokeState *state,
                                           GIArgument *arg,
                                           gpointer *cleanup_data);
 
-typedef void (*PyGIMarshalCleanupFunc) (PyGIInvokeState *state,
-                                        PyGIArgCache *arg_cache,
-                                        PyObject *py_arg, gpointer data,
-                                        gboolean was_processed);
+typedef void (*PyGIMarshalFromPyCleanupFunc) (PyGIInvokeState *state,
+                                              PyGIArgCache *arg_cache,
+                                              PyObject *py_arg, gpointer data,
+                                              gboolean was_processed);
 
 typedef void (*PyGIMarshalToPyCleanupFunc) (PyGIInvokeState *state,
                                             PyGIArgCache *arg_cache,
@@ -131,7 +131,7 @@ struct _PyGIArgCache {
     PyGIMarshalFromPyFunc from_py_marshaller;
     PyGIMarshalToPyFunc to_py_marshaller;
 
-    PyGIMarshalCleanupFunc from_py_cleanup;
+    PyGIMarshalFromPyCleanupFunc from_py_cleanup;
     PyGIMarshalToPyCleanupFunc to_py_cleanup;
 
     GDestroyNotify destroy_notify;

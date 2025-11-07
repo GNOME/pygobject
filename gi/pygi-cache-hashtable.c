@@ -176,9 +176,9 @@ _pygi_marshal_cleanup_from_py_ghash (PyGIInvokeState *state,
             gpointer key;
             gpointer value;
 
-            PyGIMarshalCleanupFunc key_cleanup_func =
+            PyGIMarshalFromPyCleanupFunc key_cleanup_func =
                 hash_cache->key_cache->from_py_cleanup;
-            PyGIMarshalCleanupFunc value_cleanup_func =
+            PyGIMarshalFromPyCleanupFunc value_cleanup_func =
                 hash_cache->value_cache->from_py_cleanup;
 
             g_hash_table_iter_init (&hiter, hash_);
