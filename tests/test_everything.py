@@ -1080,6 +1080,11 @@ class TestCallbacks(unittest.TestCase):
         self.assertTrue(cb_info["called"])
         self.assertEqual(cb_info["userdata"], (-5, "User Data"))
 
+    def test_array_uint8_none_with_user_data_closure(self):
+        # Everything.test_torture_signature_3(b"data")
+        # Everything.test_torture_signature_3(b"data", None)
+        Everything.test_torture_signature_3(b"data", print, "arg2")
+
     def test_async_ready_callback(self):
         TestCallbacks.called = False
         TestCallbacks.main_loop = GLib.MainLoop()
