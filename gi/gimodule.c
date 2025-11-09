@@ -588,47 +588,6 @@ _wrap_pyg_hook_up_vfunc_implementation (PyObject *self, PyObject *args)
     Py_RETURN_NONE;
 }
 
-#if 0
-/* Not used, left around for future reference */
-static PyObject *
-_wrap_pyg_has_vfunc_implementation (PyObject *self, PyObject *args)
-{
-    PyGIBaseInfo *py_info;
-    PyObject *py_type;
-    PyObject *py_ret;
-    gpointer implementor_class = NULL;
-    gpointer implementor_vtable = NULL;
-    GType implementor_gtype = 0;
-    GIFieldInfo *field_info = NULL;
-
-    if (!PyArg_ParseTuple (args, "O!O!:has_vfunc_implementation",
-                           &PyGIBaseInfo_Type, &py_info,
-                           &PyGTypeWrapper_Type, &py_type))
-        return NULL;
-
-    implementor_gtype = pyg_type_from_object (py_type);
-    g_assert (G_TYPE_IS_CLASSED (implementor_gtype));
-
-    py_ret = Py_False;
-    find_vfunc_info (py_info->info, implementor_gtype, &implementor_class, &implementor_vtable, &field_info);
-    if (field_info != NULL) {
-        gpointer *method_ptr;
-        gint offset;
-
-        offset = gi_field_info_get_offset (field_info);
-        method_ptr = G_STRUCT_MEMBER_P (implementor_vtable, offset);
-        if (*method_ptr != NULL) {
-            py_ret = Py_True;
-        }
-
-        gi_base_info_unref (field_info);
-    }
-    g_type_class_unref (implementor_class);
-
-    return Py_NewRef(py_ret);
-}
-#endif
-
 static PyObject *
 _wrap_pyg_variant_type_from_string (PyObject *self, PyObject *args)
 {
