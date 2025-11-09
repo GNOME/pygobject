@@ -620,6 +620,18 @@ class TestEverything(unittest.TestCase):
         with pytest.raises(UnicodeDecodeError):
             Everything.test_array_of_non_utf8_strings()
 
+    def test_array_callback(self):
+        TestCallbacks.called = 0
+
+        def callback(ints, ints_length, strings, strings_length):
+            self.assertEqual(ints, [-1, 0, 1, 2])
+            self.assertEqual(strings, ["one", "two", "three"])
+            TestCallbacks.called += 1
+            return TestCallbacks.called
+
+        Everything.test_array_callback(callback)
+        self.assertEqual(TestCallbacks.called, 2)
+
     def test_garray_container_return(self):
         # GPtrArray transfer container
         result = Everything.test_garray_container_return()
