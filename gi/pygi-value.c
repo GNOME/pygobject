@@ -262,7 +262,8 @@ pyg_array_from_pyobject (GValue *value, PyObject *obj)
         return -1;
     }
 
-    array = g_array_new (FALSE, TRUE, sizeof (GValue));
+    array = g_array_sized_new (FALSE, TRUE, sizeof (GValue), len);
+    g_array_set_clear_func (array, (GDestroyNotify)g_value_unset);
 
     for (i = 0; i < len; ++i) {
         PyObject *item = PySequence_GetItem (obj, i);
@@ -274,7 +275,7 @@ pyg_array_from_pyobject (GValue *value, PyObject *obj)
 
         if (!item) {
             PyErr_Clear ();
-            g_array_free (array, FALSE);
+            g_array_free (array, TRUE);
             return -1;
         }
 
@@ -284,7 +285,7 @@ pyg_array_from_pyobject (GValue *value, PyObject *obj)
             type = pyg_type_from_object ((PyObject *)Py_TYPE (item));
             if (!type) {
                 PyErr_Clear ();
-                g_array_free (array, FALSE);
+                g_array_free (array, TRUE);
                 Py_DECREF (item);
                 return -1;
             }
@@ -295,7 +296,7 @@ pyg_array_from_pyobject (GValue *value, PyObject *obj)
         Py_DECREF (item);
 
         if (status == -1) {
-            g_array_free (array, FALSE);
+            g_array_free (array, TRUE);
             g_value_unset (&item_value);
             return -1;
         }
