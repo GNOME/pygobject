@@ -17,7 +17,7 @@ modules:
     build-commands:
       - python3 --version
       - echo "GTK VERSION ${TEST_GTK_VERSION}"
-      - pip3 install --prefix=${FLATPAK_DEST} pycairo pytest pytest-cov
+      - pip3 install --prefix=${FLATPAK_DEST} pycairo 'pytest<9' pytest-cov
   - name: pygobject
     buildsystem: meson
     builddir: true

@@ -46,7 +46,7 @@ build = [
     "pycairo",
 ]
 test = [
-    "pytest",
+    "pytest<9",
     "pytest-cov",
 ]
 docs = [
