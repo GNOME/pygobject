@@ -1,10 +1,28 @@
-3.55.0 - unreleased
+3.55.0 - 2025-11-15
 -------------------
+
+Most notable changes are the removal of toggle references.
+If you use python weakrefs to track PyGObjects, you should change
+that to `GObject.Object.weak_ref()`.
+
+An environment variable `PYGI_OVERRIDES_PATH` can be set to add additional
+override paths (especially for testing).
 
 * Remove `GLib.options` module :mr:`273`
 * Support generic parameters for `Gio.ListStore` :mr:`237`
 * Cleanup: replace arguments in cache objects by functions :mr:`439`
 * Always sink floating objects :mr:`442`
+* Excempt GioPlatform namespaces from require_version check :mr:`450`
+* (backwards compat) Expose platform symbols through Gio module :mr:`451` :mr:`452`
+* Update pythoncapi-compat :mr:`455`
+* Add PYGI_OVERRIDES_PATH environment variable :mr:`453`
+* Provide the intended GioUnix API, even on older GLib :mr:`456`
+* Code refactorings :mr:`465` :mr:`466` :mr:`470` :mr:`474`
+* Remove `pygtkcompat` completely :mr:`464`
+* Array improvements :mr:`422`
+* Fix memory leak when array construction fails :mr:`473`
+* Unify properties handling :mr:`469`
+* Replace toggle references :mr:`449`
 
 3.54.0 - 2025-09-06
 -------------------
