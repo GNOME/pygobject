@@ -906,28 +906,22 @@ class TestFilename(unittest.TestCase):
 
 
 class TestArray(unittest.TestCase):
-    @unittest.skipUnless(hasattr(GIMarshallingTests, "array_bool_in"), "too old gi")
     def test_array_bool_in(self):
         GIMarshallingTests.array_bool_in([True, False, True, True])
 
-    @unittest.skipUnless(hasattr(GIMarshallingTests, "array_bool_out"), "too old gi")
     def test_array_bool_out(self):
         assert GIMarshallingTests.array_bool_out() == [True, False, True, True]
 
-    @unittest.skipUnless(hasattr(GIMarshallingTests, "array_int64_in"), "too old gi")
     def test_array_int64_in(self):
         GIMarshallingTests.array_int64_in([-1, 0, 1, 2])
 
-    @unittest.skipUnless(hasattr(GIMarshallingTests, "array_uint64_in"), "too old gi")
     def test_array_uint64_in(self):
         GIMarshallingTests.array_uint64_in([GLib.MAXUINT64, 0, 1, 2])
 
-    @unittest.skipUnless(hasattr(GIMarshallingTests, "array_unichar_in"), "too old gi")
     def test_array_unichar_in(self):
         GIMarshallingTests.array_unichar_in(list(CONSTANT_UCS4))
         GIMarshallingTests.array_unichar_in(CONSTANT_UCS4)
 
-    @unittest.skipUnless(hasattr(GIMarshallingTests, "array_unichar_out"), "too old gi")
     def test_array_unichar_out(self):
         result = list(CONSTANT_UCS4)
         assert GIMarshallingTests.array_unichar_out() == result
@@ -1243,15 +1237,9 @@ class TestArrayGVariant(unittest.TestCase):
 
 
 class TestGArray(unittest.TestCase):
-    @unittest.skipUnless(
-        hasattr(GIMarshallingTests, "garray_bool_none_in"), "too old gi"
-    )
     def test_garray_bool_none_in(self):
         GIMarshallingTests.garray_bool_none_in([True, False, True, True])
 
-    @unittest.skipUnless(
-        hasattr(GIMarshallingTests, "garray_unichar_none_in"), "too old gi"
-    )
     def test_garray_unichar_none_in(self):
         GIMarshallingTests.garray_unichar_none_in(CONSTANT_UCS4)
         GIMarshallingTests.garray_unichar_none_in(list(CONSTANT_UCS4))
