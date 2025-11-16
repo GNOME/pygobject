@@ -196,7 +196,7 @@ pygi_get_property_value (PyGObject *instance, GParamSpec *pspec)
 
     /* Fallback to GValue marshalling. */
     if (py_value == NULL) {
-        py_value = pyg_value_as_pyobject (&value, TRUE);
+        py_value = pyg_value_to_pyobject (&value, TRUE);
     }
 
 out:

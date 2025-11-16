@@ -59,8 +59,8 @@ _pyg_signal_accumulator (GSignalInvocationHint *ihint, GValue *return_accu,
 
     py_ihint = Py_BuildValue ("lNi", (long int)ihint->signal_id, py_detail,
                               ihint->run_type);
-    py_handler_return = pyg_value_as_pyobject (handler_return, TRUE);
-    py_return_accu = pyg_value_as_pyobject (return_accu, FALSE);
+    py_handler_return = pyg_value_to_pyobject (handler_return, TRUE);
+    py_return_accu = pyg_value_to_pyobject (return_accu, FALSE);
     if (data->user_data)
         py_retval = PyObject_CallFunction (data->callable, "NNNO", py_ihint,
                                            py_return_accu, py_handler_return,
@@ -601,7 +601,7 @@ pyg_object_set_property (GObject *object, guint property_id,
     }
 
     py_pspec = pygi_fundamental_new (pspec);
-    py_value = pyg_value_as_pyobject (value, TRUE);
+    py_value = pyg_value_to_pyobject (value, TRUE);
 
     retval = PyObject_CallMethod (object_wrapper, "do_set_property", "OO",
                                   py_pspec, py_value);

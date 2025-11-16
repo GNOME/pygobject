@@ -828,7 +828,7 @@ pyg_closure_marshal (GClosure *closure, GValue *return_value,
             Py_INCREF (pc->swap_data);
             PyTuple_SetItem (params, 0, pc->swap_data);
         } else {
-            PyObject *item = pyg_value_as_pyobject (&param_values[i], FALSE);
+            PyObject *item = pyg_value_to_pyobject (&param_values[i], FALSE);
 
             /* error condition */
             if (!item) {
@@ -986,7 +986,7 @@ pyg_signal_class_closure_marshal (GClosure *closure, GValue *return_value,
        initially because we'll check after the call to see if a copy is needed. */
     params = PyTuple_New (n_param_values - 1);
     for (i = 1; i < n_param_values; i++) {
-        PyObject *item = pyg_value_as_pyobject (&param_values[i], FALSE);
+        PyObject *item = pyg_value_to_pyobject (&param_values[i], FALSE);
 
         /* error condition */
         if (!item) {

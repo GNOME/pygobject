@@ -1195,9 +1195,9 @@ pygbinding_marshal (GClosure *closure, GValue *return_value,
     /* construct Python tuple for the parameter values */
     params = PyTuple_New (2);
     PyTuple_SetItem (params, 0,
-                     pyg_value_as_pyobject (&param_values[0], FALSE));
+                     pyg_value_to_pyobject (&param_values[0], FALSE));
     PyTuple_SetItem (params, 1,
-                     pyg_value_as_pyobject (&param_values[1], FALSE));
+                     pyg_value_to_pyobject (&param_values[1], FALSE));
 
     /* params passed to function may have extra arguments */
     if (pc->extra_args) {
@@ -1614,7 +1614,7 @@ pygobject_emit (PyGObject *self, PyObject *args)
                 was_floating = g_object_is_floating (obj);
             }
         }
-        py_ret = pyg_value_as_pyobject (&ret, TRUE);
+        py_ret = pyg_value_to_pyobject (&ret, TRUE);
         if (!was_floating) g_value_unset (&ret);
     } else {
         py_ret = Py_NewRef (Py_None);
@@ -1699,7 +1699,7 @@ pygobject_chain_from_overridden (PyGObject *self, PyObject *args)
     for (i = 0; i < query.n_params + 1; i++) g_value_unset (&params[i]);
     g_free (params);
     if (query.return_type != G_TYPE_NONE) {
-        py_ret = pyg_value_as_pyobject (&ret, TRUE);
+        py_ret = pyg_value_to_pyobject (&ret, TRUE);
         g_value_unset (&ret);
     } else {
         py_ret = Py_NewRef (Py_None);

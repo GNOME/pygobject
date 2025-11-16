@@ -746,7 +746,7 @@ marshal_emission_hook (GSignalInvocationHint *ihint, guint n_param_values,
     params = PyTuple_New (n_param_values);
 
     for (i = 0; i < n_param_values; i++) {
-        PyObject *item = pyg_value_as_pyobject (&param_values[i], FALSE);
+        PyObject *item = pyg_value_to_pyobject (&param_values[i], FALSE);
 
         /* error condition */
         if (!item) {

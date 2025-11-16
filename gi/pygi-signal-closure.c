@@ -133,7 +133,7 @@ pygi_signal_closure_marshal (GClosure *closure, GValue *return_value,
             PyTuple_SetItem (params, 0, pc->swap_data);
 
         } else if (i == 0) {
-            PyObject *item = pyg_value_as_pyobject (&param_values[i], FALSE);
+            PyObject *item = pyg_value_to_pyobject (&param_values[i], FALSE);
 
             if (!item) {
                 goto out;

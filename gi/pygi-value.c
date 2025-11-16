@@ -735,7 +735,7 @@ value_to_py_structured_type (const GValue *value, GType fundamental,
             return ret;
         } else if (G_VALUE_HOLDS (value, G_TYPE_VALUE)) {
             GValue *n_value = g_value_get_boxed (value);
-            return pyg_value_as_pyobject (n_value, copy_boxed);
+            return pyg_value_to_pyobject (n_value, copy_boxed);
         } else if (holds_value_array) {
             GValueArray *array = (GValueArray *)g_value_get_boxed (value);
             Py_ssize_t n_values = array ? array->n_values : 0;
@@ -744,7 +744,7 @@ value_to_py_structured_type (const GValue *value, GType fundamental,
             for (i = 0; i < n_values; ++i)
                 PyList_SET_ITEM (
                     ret, i,
-                    pyg_value_as_pyobject (array->values + i, copy_boxed));
+                    pyg_value_to_pyobject (array->values + i, copy_boxed));
             return ret;
         } else if (G_VALUE_HOLDS (value, G_TYPE_GSTRING)) {
             GString *string = (GString *)g_value_get_boxed (value);
@@ -815,7 +815,7 @@ value_to_py_structured_type (const GValue *value, GType fundamental,
 
 
 /**
- * pyg_value_as_pyobject:
+ * pyg_value_to_pyobject:
  * @value: the GValue object.
  * @copy_boxed: true if boxed values should be copied.
  *
@@ -825,7 +825,7 @@ value_to_py_structured_type (const GValue *value, GType fundamental,
  * Returns: a PyObject representing the value or %NULL and sets an exception.
  */
 PyObject *
-pyg_value_as_pyobject (const GValue *value, gboolean copy_boxed)
+pyg_value_to_pyobject (const GValue *value, gboolean copy_boxed)
 {
     PyObject *pyobj;
     GType fundamental = G_TYPE_FUNDAMENTAL (G_VALUE_TYPE (value));
@@ -864,10 +864,10 @@ pyg_param_gvalue_from_pyobject (GValue *value, PyObject *py_obj,
         }
         g_value_set_uint (value, u);
         return 0;
-    } else if (PYGI_IS_PARAM_SPEC_VALUE_ARRAY (pspec))
+    } else if (PYGI_IS_PARAM_SPEC_VALUE_ARRAY (pspec)) {
         return pyg_value_array_from_pyobject (
             value, py_obj, PYGI_PARAM_SPEC_VALUE_ARRAY (pspec));
-    else {
+    } else {
         return pyg_value_from_pyobject (value, py_obj);
     }
 }
@@ -882,7 +882,7 @@ pyg__gvalue_get (PyObject *module, PyObject *pygvalue)
         return NULL;
     }
 
-    return pyg_value_as_pyobject (pyg_boxed_get (pygvalue, GValue),
+    return pyg_value_to_pyobject (pyg_boxed_get (pygvalue, GValue),
                                   /*copy_boxed=*/TRUE);
 }
 

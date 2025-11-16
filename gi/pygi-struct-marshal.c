@@ -320,7 +320,7 @@ pygi_arg_struct_to_py_marshal (GIArgument *arg,
     }
 
     if (g_type_is_a (g_type, G_TYPE_VALUE)) {
-        py_obj = pyg_value_as_pyobject (arg->v_pointer, is_allocated);
+        py_obj = pyg_value_to_pyobject (arg->v_pointer, is_allocated);
     } else if (is_foreign) {
         py_obj = pygi_struct_foreign_convert_from_g_argument (
             interface_info, transfer, arg->v_pointer);
