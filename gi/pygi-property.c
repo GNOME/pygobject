@@ -140,11 +140,11 @@ pygi_get_property_value (PyGObject *instance, GParamSpec *pspec)
     Py_BEGIN_ALLOW_THREADS;
     g_value_init (&value, G_PARAM_SPEC_VALUE_TYPE (pspec));
     g_object_get_property (instance->obj, pspec->name, &value);
-    fundamental = G_TYPE_FUNDAMENTAL (G_VALUE_TYPE (&value));
     Py_END_ALLOW_THREADS;
 
 
     /* Fast path basic types which don't need GI type info. */
+    fundamental = G_TYPE_FUNDAMENTAL (G_VALUE_TYPE (&value));
     py_value = pygi_value_to_py_basic_type (&value, fundamental, &handled);
     if (handled) {
         goto out;
@@ -191,7 +191,7 @@ pygi_get_property_value (PyGObject *instance, GParamSpec *pspec)
 
     /* Fallback to GValue marshalling. */
     if (py_value == NULL) {
-        py_value = pyg_param_gvalue_as_pyobject (&value, TRUE, pspec);
+        py_value = pyg_value_as_pyobject (&value, TRUE);
     }
 
 out:
