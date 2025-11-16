@@ -94,6 +94,9 @@ def test_value_set_wrong_value():
 
 
 def test_value_set_wrong_fundamental():
+    class MyCustomFundamentalObject(Regress.TestFundamentalObject):
+        pass
+
     val = GObject.Value(Regress.TestFundamentalSubObject.__gtype__)
 
     with pytest.raises(TypeError, match="Invalid fundamental type for assignment"):
@@ -158,15 +161,22 @@ def test_fundamental_primitive_object():
     assert bitmask.v == 2
 
 
-def test_custom_fundamental_type_vfunc_override(capsys):
+def test_custom_fundamental_type_vfunc_override():
+    class MyCustomFundamentalObject(Regress.TestFundamentalObject):
+        def __init__(self):
+            super().__init__()
+            invocations["__init__"] = True
+
+        def do_finalize(self):
+            invocations["do_finalize"] = True
+
+    invocations = {}
     obj = MyCustomFundamentalObject()
     del obj
     gc.collect()
 
-    out = capsys.readouterr().out
-
-    assert "MyCustomFundamentalObject.__init__" in out
-    assert "MyCustomFundamentalObject.do_finalize" in out
+    assert "__init__" in invocations
+    assert "do_finalize" in invocations
 
 
 @pytest.mark.skipif(not GTK4, reason="requires GTK 4")
@@ -185,12 +195,3 @@ def test_gtk_string_filter_fundamental_property():
 
     assert filter.get_expression() == expr
     assert filter.props.expression == expr
-
-
-class MyCustomFundamentalObject(Regress.TestFundamentalObject):
-    def __init__(self):
-        print("MyCustomFundamentalObject.__init__")  # noqa T20
-        super().__init__()
-
-    def do_finalize(self):
-        print("MyCustomFundamentalObject.do_finalize")  # noqa T20

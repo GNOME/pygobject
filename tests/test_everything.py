@@ -1434,7 +1434,6 @@ class TestTortureProfile(unittest.TestCase):
     def test_torture_profile(self):
         total_time = 0
         object_ = Everything.TestObj()
-        sys.stdout.write("\ttorture test 1 (10000 iterations): ")
 
         start_time = timeit.default_timer()
         for i in range(10000):
@@ -1443,8 +1442,6 @@ class TestTortureProfile(unittest.TestCase):
         end_time = timeit.default_timer()
         delta_time = end_time - start_time
         total_time += delta_time
-
-        sys.stdout.write("\ttorture test 2 (10000 iterations): ")
 
         start_time = timeit.default_timer()
         for i in range(10000):
@@ -1456,7 +1453,6 @@ class TestTortureProfile(unittest.TestCase):
         delta_time = end_time - start_time
         total_time += delta_time
 
-        sys.stdout.write("\ttorture test 3 (10000 iterations): ")
         start_time = timeit.default_timer()
         for i in range(10000):
             with contextlib.suppress(Exception):
@@ -1466,8 +1462,6 @@ class TestTortureProfile(unittest.TestCase):
         end_time = timeit.default_timer()
         delta_time = end_time - start_time
         total_time += delta_time
-
-        sys.stdout.write("\ttorture test 4 (10000 iterations): ")
 
         def callback(userdata):
             return 0
