@@ -1401,10 +1401,13 @@ class CPropertiesTestBase:
 
     def test_unichar(self):
         obj = Regress.TestObj()
-        self.assertEqual(self.get_prop(obj, "unichar"), 0)
+        self.assertEqual(self.get_prop(obj, "unichar"), "")
 
-        self.set_prop(obj, "unichar", ord("🙃"))
-        self.assertEqual(self.get_prop(obj, "unichar"), ord("🙃"))
+        self.set_prop(obj, "unichar", "🙃")
+        self.assertEqual(self.get_prop(obj, "unichar"), "🙃")
+
+        with pytest.raises(TypeError):
+            self.set_prop(obj, "unichar", "🙃🙃🙃")
 
     def test_hash_table(self):
         obj = Regress.TestObj()

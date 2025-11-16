@@ -201,7 +201,7 @@ pygi_gunichar_from_py (PyObject *py_arg, gunichar *result)
     return TRUE;
 }
 
-static PyObject *
+PyObject *
 pygi_gunichar_to_py (gunichar value)
 {
     PyObject *py_obj = NULL;

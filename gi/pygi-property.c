@@ -22,6 +22,7 @@
  */
 
 #include "pygi-argument.h"
+#include "pygi-basictype.h"
 #include "pygi-fundamental.h"
 #include "pygi-property.h"
 #include "pygi-repository.h"
@@ -140,6 +141,12 @@ pygi_get_property_value (PyGObject *instance, GParamSpec *pspec)
     g_value_init (&value, G_PARAM_SPEC_VALUE_TYPE (pspec));
     g_object_get_property (instance->obj, pspec->name, &value);
     Py_END_ALLOW_THREADS;
+
+    // special case: unichar, which has a uint type
+    if (G_IS_PARAM_SPEC_UNICHAR (pspec)) {
+        py_value = pygi_gunichar_to_py (g_value_get_uint (&value));
+        goto out;
+    }
 
     /* Fast path: basic types which don't need GI type info. */
     fundamental = G_TYPE_FUNDAMENTAL (G_VALUE_TYPE (&value));
@@ -431,7 +438,15 @@ pygi_set_property_value (PyGObject *instance, GParamSpec *pspec,
         goto out;
     }
 
-    if (pygi_set_gvalue_for_pspec (pspec, &value, py_value) < 0) {
+    // special case: unichar has an internal type uint
+    if (G_IS_PARAM_SPEC_UNICHAR (pspec)) {
+        gunichar u;
+
+        if (!pygi_gunichar_from_py (py_value, &u)) {
+            goto out;
+        }
+        g_value_set_uint (&value, u);
+    } else if (pygi_set_gvalue_for_pspec (pspec, &value, py_value) < 0) {
         /* If we already have an error set, don't override it,
          * otherwise raise a TypError indcating that we couldn't
          * set the property */
