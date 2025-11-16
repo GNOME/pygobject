@@ -1399,6 +1399,13 @@ class CPropertiesTestBase:
         self.set_prop(obj, "gtype", str)
         self.assertEqual(self.get_prop(obj, "gtype"), GObject.TYPE_STRING)
 
+    def test_unichar(self):
+        obj = Regress.TestObj()
+        self.assertEqual(self.get_prop(obj, "unichar"), 0)
+
+        self.set_prop(obj, "unichar", ord("🙃"))
+        self.assertEqual(self.get_prop(obj, "unichar"), ord("🙃"))
+
     def test_hash_table(self):
         obj = Regress.TestObj()
         self.assertEqual(self.get_prop(obj, "hash-table"), None)
