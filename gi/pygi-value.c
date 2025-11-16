@@ -643,19 +643,17 @@ pyg_value_from_pyobject (GValue *value, PyObject *obj)
 /**
  * pygi_value_to_py_basic_type:
  * @value: the GValue object.
- * @handled: (out): TRUE if the return value is defined
  *
  * This function creates/returns a Python wrapper object that
  * represents the GValue passed as an argument limited to supporting basic types
  * like ints, bools, and strings.
  *
- * Returns: a PyObject representing the value.
+ * Returns: a PyObject representing the value. NULL if value could not be wrapped.
+ *   A error may have been set if translation failed.
  */
 PyObject *
-pygi_value_to_py_basic_type (const GValue *value, GType fundamental,
-                             gboolean *handled)
+pygi_value_to_py_basic_type (const GValue *value, GType fundamental)
 {
-    *handled = TRUE;
     switch (fundamental) {
     case G_TYPE_CHAR:
         return PyLong_FromLong (g_value_get_schar (value));
@@ -688,7 +686,6 @@ pygi_value_to_py_basic_type (const GValue *value, GType fundamental,
     case G_TYPE_STRING:
         return pygi_utf8_to_py (g_value_get_string (value));
     default:
-        *handled = FALSE;
         return NULL;
     }
 }
@@ -831,7 +828,6 @@ PyObject *
 pyg_value_as_pyobject (const GValue *value, gboolean copy_boxed)
 {
     PyObject *pyobj;
-    gboolean handled;
     GType fundamental = G_TYPE_FUNDAMENTAL (G_VALUE_TYPE (value));
 
     /* HACK: special case char and uchar to return PyBytes intstead of integers
@@ -846,8 +842,8 @@ pyg_value_as_pyobject (const GValue *value, gboolean copy_boxed)
         return PyBytes_FromStringAndSize ((char *)&val, 1);
     }
 
-    pyobj = pygi_value_to_py_basic_type (value, fundamental, &handled);
-    if (handled) return pyobj;
+    pyobj = pygi_value_to_py_basic_type (value, fundamental);
+    if (pyobj != NULL || PyErr_Occurred ()) return pyobj;
 
     pyobj = value_to_py_structured_type (value, fundamental, copy_boxed);
     return pyobj;
