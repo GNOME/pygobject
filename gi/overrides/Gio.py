@@ -35,8 +35,8 @@ from gi import PyGIWarning
 from gi.repository import GLib
 from gi.repository import GObject
 
-from typing import Callable, Generic, TypeVar, Union, overload
-from collections.abc import Generator, Sequence
+from typing import Generic, TypeVar, overload
+from collections.abc import Callable, Generator, Sequence
 
 import sys
 
@@ -537,7 +537,7 @@ class ListStore(Gio.ListStore, Generic[ObjectItemType]):
         compare_func = wrap_list_store_sort_func(compare_func)
         return super().insert_sorted(item, compare_func, *user_data)
 
-    def __delitem__(self, key: Union[int, slice]) -> None:
+    def __delitem__(self, key: int | slice) -> None:
         if isinstance(key, slice):
             start, stop, step = key.indices(len(self))
             if step == 1:

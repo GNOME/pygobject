@@ -45,15 +45,13 @@ from ._constants import (
 )
 
 
-from typing import Optional
-
 try:
     # Only available in Python 3.8 or later.
     from typing import get_origin
 except ImportError:
     from typing import _GenericAlias
 
-    def get_origin(type_: object) -> Optional[type]:
+    def get_origin(type_: object) -> type | None:
         """Get the unsubscripted version of a type."""
         if isinstance(type_, _GenericAlias):
             return type_.__origin__

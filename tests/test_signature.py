@@ -1,3 +1,4 @@
+import collections.abc
 import inspect
 import typing
 import unittest
@@ -24,21 +25,20 @@ class Test(unittest.TestCase):
             self,
             destination: Gio.File,
             flags: Gio.FileCopyFlags,
-            cancellable: typing.Optional[Gio.Cancellable] = None,
-            progress_callback: typing.Optional[
-                typing.Callable[[int, int, typing.Any], None]
-            ] = None,
+            cancellable: Gio.Cancellable | None = None,
+            progress_callback: collections.abc.Callable[[int, int, typing.Any], None]
+            | None = None,
             progress_callback_data: typing.Any = None,
         ) -> bool:
-            pass
+            return True
 
         self.assertSignatureEqual(Gio.File.copy, expected)
 
     def test_init_function(self):
         def expected(
-            argv: typing.Optional[list[str]] = None,
-        ) -> tuple[bool, typing.Optional[list[str]]]:
-            pass
+            argv: list[str] | None = None,
+        ) -> tuple[bool, list[str] | None]:
+            return (True, [])
 
         self.assertSignatureEqual(GIMarshallingTests.init_function, expected)
 
@@ -50,13 +50,13 @@ class Test(unittest.TestCase):
 
     def test_inout_arg(self):
         def expected(ints: list[int]) -> list[int]:
-            pass
+            return []
 
         self.assertSignatureEqual(GIMarshallingTests.array_inout, expected)
 
     def test_out_arg(self):
         def expected() -> list[int]:
-            pass
+            return []
 
         self.assertSignatureEqual(GIMarshallingTests.array_out, expected)
 
@@ -140,7 +140,7 @@ class Test(unittest.TestCase):
 
     def test_arg_filename(self):
         def expected(path: str) -> bool:
-            pass
+            return True
 
         self.assertSignatureEqual(GIMarshallingTests.filename_exists, expected)
 
@@ -225,13 +225,13 @@ class Test(unittest.TestCase):
 
     def test_return(self):
         def expected() -> int:
-            pass
+            return 0
 
         self.assertSignatureEqual(GIMarshallingTests.int_return_max, expected)
 
     def test_return_multiple(self):
         def expected() -> tuple[int, int]:
-            pass
+            return (0, 0)
 
         self.assertSignatureEqual(GIMarshallingTests.int_out_out, expected)
         self.assertSignatureEqual(GIMarshallingTests.int_return_out, expected)
@@ -298,8 +298,8 @@ class Test(unittest.TestCase):
                 self,
                 offset: int,
                 type: GLib.SeekType,
-                cancellable: typing.Optional[Gio.Cancellable] = None,
+                cancellable: Gio.Cancellable | None = None,
             ) -> bool:
-                pass
+                return True
 
         self.assertSignatureEqual(Gio.FileIOStream.do_seek, A.expected)

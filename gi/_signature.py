@@ -19,7 +19,8 @@
 
 from importlib import import_module
 from inspect import Parameter, Signature
-from typing import Any, Callable, Optional
+from typing import Any, Optional
+from collections.abc import Callable
 
 from ._error import GError
 from ._gi import (
@@ -139,7 +140,7 @@ def generate_signature(info: CallableInfo) -> Signature:
             # allow-none or user_data from a closure
             default = None
             if annotation is not Parameter.empty and annotation is not Any:
-                annotation = Optional[annotation]
+                annotation = Optional[annotation]  # noqa: UP045
         elif arg.is_optional():
             # TODO: Can we retrieve the default value?
             default = ...
@@ -166,7 +167,7 @@ def generate_signature(info: CallableInfo) -> Signature:
 
     return_annotation = get_pytype(info.get_return_type())
     if info.may_return_null():
-        return_annotation = Optional[return_annotation]
+        return_annotation = Optional[return_annotation]  # noqa: UP045
 
     out_args = []
     for i, arg in enumerate(args):
@@ -176,7 +177,7 @@ def generate_signature(info: CallableInfo) -> Signature:
             continue
         annotation = get_pytype(arg.get_type_info())
         if arg.may_be_null() and annotation is not Parameter.empty:
-            annotation = Optional[annotation]
+            annotation = Optional[annotation]  # noqa: UP045
         out_args.append(annotation)
 
     if return_annotation is not None:
