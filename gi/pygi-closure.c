@@ -260,6 +260,8 @@ _pygi_closure_convert_ffi_arguments (PyGIInvokeArgState *state,
         case GI_TYPE_TAG_VOID:
             state[i].arg_value.v_pointer = *(gpointer *)arg_pointer;
             break;
+        case GI_TYPE_TAG_GTYPE:
+        case GI_TYPE_TAG_FILENAME:
         default:
             g_warning ("Unhandled type tag %s",
                        gi_type_tag_to_string (arg_cache->type_tag));
@@ -580,6 +582,8 @@ end:
         _pygi_invoke_closure_clear_py_data (closure);
         async_free_list = g_slist_prepend (async_free_list, closure);
         break;
+    case GI_SCOPE_TYPE_INVALID:
+    case GI_SCOPE_TYPE_FOREVER:
     default:
         /* Handle new scopes added by gobject-introspection */
         g_critical (

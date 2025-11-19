@@ -135,6 +135,7 @@ else
     '-Wstrict-aliasing',
     '-Wstrict-prototypes',
     '-Wswitch-default',
+    '-Wswitch-enum',
     '-Wundef',
     '-Wunused-but-set-variable',
     '-Wwrite-strings',
