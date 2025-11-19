@@ -18,13 +18,6 @@ from gi.repository import GObject
 from gi.repository import GLib
 from gi.repository import Gio
 
-try:
-    from gi.repository import Gtk
-
-    Gtk
-except ImportError:
-    Gtk = None
-
 from .helper import capture_exceptions
 
 

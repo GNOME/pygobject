@@ -1,3 +1,4 @@
+import gc
 import os
 import sys
 import signal
@@ -29,6 +30,12 @@ def pytest_runtest_call(item):
         if exceptions:
             tp, value, tb = exceptions[0]
             outcome.force_exception(tp(value).with_traceback(tb))
+
+
+def pytest_sessionfinish(session, exitstatus):
+    """Make sure to run GC a couple of times. This helps in memory analysis."""
+    gc.collect()
+    gc.collect()
 
 
 def set_dll_search_path():
