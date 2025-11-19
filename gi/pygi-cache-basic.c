@@ -61,8 +61,9 @@ pygi_marshal_from_py_basic_type_cache_adapter (
     PyGIArgCache *arg_cache, PyObject *py_arg, GIArgument *arg,
     gpointer *cleanup_data)
 {
-    return pygi_marshal_from_py_basic_type (py_arg, arg, arg_cache->type_tag,
+    *arg = pygi_marshal_from_py_basic_type (py_arg, arg_cache->type_tag,
                                             arg_cache->transfer, cleanup_data);
+    return !PyErr_Occurred ();
 }
 
 PyObject *

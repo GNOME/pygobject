@@ -989,73 +989,75 @@ pygi_guint64_to_py (guint64 value)
         return PyLong_FromUnsignedLongLong (value);
 }
 
-gboolean
+GIArgument
 pygi_marshal_from_py_basic_type (PyObject *object, /* in */
-                                 GIArgument *arg,  /* out */
                                  GITypeTag type_tag, GITransfer transfer,
                                  gpointer *cleanup_data /* out */)
 {
+    GIArgument arg = { 0 };
+    gboolean converted = FALSE;
+
     switch (type_tag) {
     case GI_TYPE_TAG_VOID:
         g_warn_if_fail (transfer == GI_TRANSFER_NOTHING);
-        if (pygi_gpointer_from_py (object, &(arg->v_pointer))) {
-            *cleanup_data = arg->v_pointer;
-            return TRUE;
+        if (pygi_gpointer_from_py (object, &(arg.v_pointer))) {
+            *cleanup_data = arg.v_pointer;
+            converted = TRUE;
         }
-        return FALSE;
+        break;
 
     case GI_TYPE_TAG_INT8:
-        return pygi_gint8_from_py (object, &(arg->v_int8));
-
+        converted = pygi_gint8_from_py (object, &(arg.v_int8));
+        break;
     case GI_TYPE_TAG_UINT8:
-        return pygi_guint8_from_py (object, &(arg->v_uint8));
-
+        converted = pygi_guint8_from_py (object, &(arg.v_uint8));
+        break;
     case GI_TYPE_TAG_INT16:
-        return pygi_gint16_from_py (object, &(arg->v_int16));
-
+        converted = pygi_gint16_from_py (object, &(arg.v_int16));
+        break;
     case GI_TYPE_TAG_UINT16:
-        return pygi_guint16_from_py (object, &(arg->v_uint16));
-
+        converted = pygi_guint16_from_py (object, &(arg.v_uint16));
+        break;
     case GI_TYPE_TAG_INT32:
-        return pygi_gint32_from_py (object, &(arg->v_int32));
-
+        converted = pygi_gint32_from_py (object, &(arg.v_int32));
+        break;
     case GI_TYPE_TAG_UINT32:
-        return pygi_guint32_from_py (object, &(arg->v_uint32));
-
+        converted = pygi_guint32_from_py (object, &(arg.v_uint32));
+        break;
     case GI_TYPE_TAG_INT64:
-        return pygi_gint64_from_py (object, &(arg->v_int64));
-
+        converted = pygi_gint64_from_py (object, &(arg.v_int64));
+        break;
     case GI_TYPE_TAG_UINT64:
-        return pygi_guint64_from_py (object, &(arg->v_uint64));
-
+        converted = pygi_guint64_from_py (object, &(arg.v_uint64));
+        break;
     case GI_TYPE_TAG_BOOLEAN:
-        return pygi_gboolean_from_py (object, &(arg->v_boolean));
-
+        converted = pygi_gboolean_from_py (object, &(arg.v_boolean));
+        break;
     case GI_TYPE_TAG_FLOAT:
-        return pygi_gfloat_from_py (object, &(arg->v_float));
-
+        converted = pygi_gfloat_from_py (object, &(arg.v_float));
+        break;
     case GI_TYPE_TAG_DOUBLE:
-        return pygi_gdouble_from_py (object, &(arg->v_double));
-
+        converted = pygi_gdouble_from_py (object, &(arg.v_double));
+        break;
     case GI_TYPE_TAG_GTYPE:
-        return pygi_gtype_from_py (object, &(arg->v_size));
-
+        converted = pygi_gtype_from_py (object, &(arg.v_size));
+        break;
     case GI_TYPE_TAG_UNICHAR:
-        return pygi_gunichar_from_py (object, &(arg->v_uint32));
-
+        converted = pygi_gunichar_from_py (object, &(arg.v_uint32));
+        break;
     case GI_TYPE_TAG_UTF8:
-        if (pygi_utf8_from_py (object, &(arg->v_string))) {
-            *cleanup_data = arg->v_string;
-            return TRUE;
+        if (pygi_utf8_from_py (object, &(arg.v_string))) {
+            *cleanup_data = arg.v_string;
+            converted = TRUE;
         }
-        return FALSE;
+        break;
 
     case GI_TYPE_TAG_FILENAME:
-        if (pygi_filename_from_py (object, &(arg->v_string))) {
-            *cleanup_data = arg->v_string;
-            return TRUE;
+        if (pygi_filename_from_py (object, &(arg.v_string))) {
+            *cleanup_data = arg.v_string;
+            converted = TRUE;
         }
-        return FALSE;
+        break;
 
     case GI_TYPE_TAG_ARRAY:
     case GI_TYPE_TAG_INTERFACE:
@@ -1063,13 +1065,20 @@ pygi_marshal_from_py_basic_type (PyObject *object, /* in */
     case GI_TYPE_TAG_GSLIST:
     case GI_TYPE_TAG_GHASH:
     case GI_TYPE_TAG_ERROR:
-        PyErr_Format (PyExc_TypeError, "Type tag %d not supported", type_tag);
-        return FALSE;
+        PyErr_Format (PyExc_TypeError, "Type tag %s (%d) not supported",
+                      gi_type_tag_to_string (type_tag), type_tag);
+        break;
     default:
         g_assert_not_reached ();
     }
 
-    return TRUE;
+    if (!converted && !PyErr_Occurred ()) {
+        PyErr_Format (PyExc_TypeError,
+                      "Object %R Could not be converted type tag %s", object,
+                      gi_type_tag_to_string (type_tag));
+    }
+
+    return arg;
 }
 
 PyObject *

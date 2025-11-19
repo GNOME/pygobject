@@ -24,11 +24,10 @@
 
 G_BEGIN_DECLS
 
-gboolean pygi_marshal_from_py_basic_type (PyObject *object, /* in */
-                                          GIArgument *arg,  /* out */
-                                          GITypeTag type_tag,
-                                          GITransfer transfer,
-                                          gpointer *cleanup_data);
+GIArgument pygi_marshal_from_py_basic_type (PyObject *object, /* in */
+                                            GITypeTag type_tag,
+                                            GITransfer transfer,
+                                            gpointer *cleanup_data);
 
 PyObject *pygi_marshal_to_py_basic_type (GIArgument *arg, /* in */
                                          GITypeTag type_tag,

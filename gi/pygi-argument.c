@@ -688,8 +688,8 @@ _pygi_argument_from_object (PyObject *object, GITypeInfo *type_info,
     case GI_TYPE_TAG_FILENAME:
     case GI_TYPE_TAG_UNICHAR:
         /* Ignores cleanup data for now. */
-        pygi_marshal_from_py_basic_type (object, &arg, type_tag, transfer,
-                                         &cleanup_data);
+        arg = pygi_marshal_from_py_basic_type (object, type_tag, transfer,
+                                               &cleanup_data);
         break;
     default:
         g_assert_not_reached ();
