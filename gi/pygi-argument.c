@@ -698,6 +698,238 @@ _pygi_argument_from_object (PyObject *object, GITypeInfo *type_info,
     return arg;
 }
 
+static PyObject *
+pygi_argument_array_to_object (GIArgument *arg, GITypeInfo *type_info,
+                               GITransfer transfer)
+{
+    PyObject *object = NULL;
+    /* Arrays are assumed to be packed in a GArray */
+    GArray *array;
+    GITypeInfo *item_type_info;
+    GITypeTag item_type_tag;
+    GITransfer item_transfer;
+    gsize i, item_size;
+
+    if (arg->v_pointer == NULL) return PyList_New (0);
+
+    item_type_info = gi_type_info_get_param_type (type_info, 0);
+    g_assert (item_type_info != NULL);
+
+    item_type_tag = gi_type_info_get_tag (item_type_info);
+    item_transfer = transfer == GI_TRANSFER_CONTAINER ? GI_TRANSFER_NOTHING
+                                                      : transfer;
+
+    array = arg->v_pointer;
+    item_size = g_array_get_element_size (array);
+
+    if (G_UNLIKELY (item_size > sizeof (GIArgument))) {
+        g_critical (
+            "Stack overflow protection. "
+            "Can't copy array element into GIArgument.");
+        return PyList_New (0);
+    }
+
+    if (item_type_tag == GI_TYPE_TAG_UINT8) {
+        /* Return as a byte array */
+        object = PyBytes_FromStringAndSize (array->data, array->len);
+    } else {
+        object = PyList_New (array->len);
+        if (object == NULL) {
+            g_critical ("Failure to allocate array for %u items", array->len);
+            gi_base_info_unref ((GIBaseInfo *)item_type_info);
+            return object;
+        }
+
+        for (i = 0; i < array->len; i++) {
+            GIArgument item = { 0 };
+            PyObject *py_item;
+
+            memcpy (&item, array->data + i * item_size, item_size);
+
+            py_item = _pygi_argument_to_object (&item, item_type_info,
+                                                item_transfer);
+            if (py_item == NULL) {
+                Py_CLEAR (object);
+                _PyGI_ERROR_PREFIX ("Item %zu: ", i);
+                return object;
+            }
+
+            PyList_SET_ITEM (object, i, py_item);
+        }
+    }
+
+    gi_base_info_unref ((GIBaseInfo *)item_type_info);
+    return object;
+}
+
+static PyObject *
+pygi_argument_interface_to_object (GIArgument *arg, GITypeInfo *type_info,
+                                   GITransfer transfer)
+{
+    PyObject *object = NULL;
+    GIBaseInfo *info;
+
+    info = gi_type_info_get_interface (type_info);
+
+    if (GI_IS_CALLBACK_INFO (info)) {
+        PyErr_SetString (PyExc_TypeError,
+                         "Cannot translate callback type to Python object");
+    } else if (GI_IS_STRUCT_INFO (info) || GI_IS_UNION_INFO (info)) {
+        PyObject *py_type;
+        GType g_type =
+            gi_registered_type_info_get_g_type ((GIRegisteredTypeInfo *)info);
+        gboolean is_foreign =
+            (GI_IS_STRUCT_INFO (info))
+            && (gi_struct_info_is_foreign ((GIStructInfo *)info));
+
+        /* Special case variant and none to force loading from py module. */
+        if (g_type == G_TYPE_VARIANT || g_type == G_TYPE_NONE) {
+            py_type = pygi_type_import_by_gi_info (info);
+        } else {
+            py_type = pygi_type_get_from_g_type (g_type);
+        }
+
+        object = pygi_arg_struct_to_py_marshal (
+            arg, GI_REGISTERED_TYPE_INFO (info), g_type, py_type, transfer,
+            FALSE, /*is_allocated*/
+            is_foreign);
+
+        if (object && PyObject_IsInstance (object, (PyObject *)&PyGIBoxed_Type)
+            && transfer == GI_TRANSFER_NOTHING)
+            pygi_boxed_copy_in_place ((PyGIBoxed *)object);
+
+        Py_XDECREF (py_type);
+    } else if (GI_IS_ENUM_INFO (info)) {
+        PyObject *py_type;
+
+        py_type = pygi_type_import_by_gi_info (info);
+        if (!py_type) return NULL;
+
+        if (GI_IS_FLAGS_INFO (info)) {
+            object = pyg_flags_val_new (py_type, arg->v_uint);
+        } else {
+            object = pyg_enum_val_new (py_type, arg->v_int);
+        }
+    } else if (GI_IS_INTERFACE_INFO (info) || GI_IS_OBJECT_INFO (info)) {
+        object = pygi_arg_object_to_py_called_from_c (arg, transfer);
+    } else {
+        g_assert_not_reached ();
+    }
+
+    gi_base_info_unref (info);
+    return object;
+}
+
+static PyObject *
+pygi_argument_list_to_object (GIArgument *arg, GITypeInfo *type_info,
+                              GITransfer transfer)
+{
+    PyObject *object = NULL;
+    GSList *list;
+    gsize length;
+    GITypeInfo *item_type_info;
+    GITransfer item_transfer;
+    gsize i;
+
+    list = arg->v_pointer;
+    length = g_slist_length (list);
+
+    object = PyList_New (length);
+    if (object == NULL) return NULL;
+
+
+    item_type_info = gi_type_info_get_param_type (type_info, 0);
+    g_assert (item_type_info != NULL);
+
+    item_transfer = transfer == GI_TRANSFER_CONTAINER ? GI_TRANSFER_NOTHING
+                                                      : transfer;
+
+    for (i = 0; list != NULL; list = g_slist_next (list), i++) {
+        GIArgument item;
+        PyObject *py_item;
+
+        item.v_pointer = list->data;
+
+        py_item =
+            _pygi_argument_to_object (&item, item_type_info, item_transfer);
+        if (py_item == NULL) {
+            Py_CLEAR (object);
+            _PyGI_ERROR_PREFIX ("Item %zu: ", i);
+            break;
+        }
+
+        PyList_SET_ITEM (object, i, py_item);
+    }
+
+    gi_base_info_unref ((GIBaseInfo *)item_type_info);
+    return object;
+}
+
+static PyObject *
+pygi_argument_hash_table_to_object (GIArgument *arg, GITypeInfo *type_info,
+                                    GITransfer transfer)
+{
+    PyObject *object = NULL;
+    GITypeInfo *key_type_info;
+    GITypeInfo *value_type_info;
+    GITransfer item_transfer;
+    GHashTableIter hash_table_iter;
+    GIArgument key;
+    GIArgument value;
+
+    if (arg->v_pointer == NULL) Py_RETURN_NONE;
+
+
+    object = PyDict_New ();
+    if (object == NULL) return NULL;
+
+    key_type_info = gi_type_info_get_param_type (type_info, 0);
+    g_assert (key_type_info != NULL);
+    g_assert (gi_type_info_get_tag (key_type_info) != GI_TYPE_TAG_VOID);
+
+    value_type_info = gi_type_info_get_param_type (type_info, 1);
+    g_assert (value_type_info != NULL);
+    g_assert (gi_type_info_get_tag (value_type_info) != GI_TYPE_TAG_VOID);
+
+    item_transfer = transfer == GI_TRANSFER_CONTAINER ? GI_TRANSFER_NOTHING
+                                                      : transfer;
+
+    g_hash_table_iter_init (&hash_table_iter, (GHashTable *)arg->v_pointer);
+    while (g_hash_table_iter_next (&hash_table_iter, &key.v_pointer,
+                                   &value.v_pointer)) {
+        PyObject *py_key;
+        PyObject *py_value;
+        int retval;
+
+        py_key = _pygi_argument_to_object (&key, key_type_info, item_transfer);
+        if (py_key == NULL) {
+            break;
+        }
+
+        _pygi_hash_pointer_to_arg (&value, value_type_info);
+        py_value =
+            _pygi_argument_to_object (&value, value_type_info, item_transfer);
+        if (py_value == NULL) {
+            Py_DECREF (py_key);
+            break;
+        }
+
+        retval = PyDict_SetItem (object, py_key, py_value);
+
+        Py_DECREF (py_key);
+        Py_DECREF (py_value);
+
+        if (retval < 0) {
+            Py_CLEAR (object);
+            break;
+        }
+    }
+
+    gi_base_info_unref ((GIBaseInfo *)key_type_info);
+    gi_base_info_unref ((GIBaseInfo *)value_type_info);
+    return object;
+}
+
 /**
  * _pygi_argument_to_object:
  * @arg: The argument to convert to an object.
@@ -727,230 +959,19 @@ _pygi_argument_to_object (GIArgument *arg, GITypeInfo *type_info,
         }
         break;
     }
-    case GI_TYPE_TAG_ARRAY: {
-        /* Arrays are assumed to be packed in a GArray */
-        GArray *array;
-        GITypeInfo *item_type_info;
-        GITypeTag item_type_tag;
-        GITransfer item_transfer;
-        gsize i, item_size;
-
-        if (arg->v_pointer == NULL) return PyList_New (0);
-
-        item_type_info = gi_type_info_get_param_type (type_info, 0);
-        g_assert (item_type_info != NULL);
-
-        item_type_tag = gi_type_info_get_tag (item_type_info);
-        item_transfer = transfer == GI_TRANSFER_CONTAINER ? GI_TRANSFER_NOTHING
-                                                          : transfer;
-
-        array = arg->v_pointer;
-        item_size = g_array_get_element_size (array);
-
-        if (G_UNLIKELY (item_size > sizeof (GIArgument))) {
-            g_critical (
-                "Stack overflow protection. "
-                "Can't copy array element into GIArgument.");
-            return PyList_New (0);
-        }
-
-        if (item_type_tag == GI_TYPE_TAG_UINT8) {
-            /* Return as a byte array */
-            object = PyBytes_FromStringAndSize (array->data, array->len);
-        } else {
-            object = PyList_New (array->len);
-            if (object == NULL) {
-                g_critical ("Failure to allocate array for %u items",
-                            array->len);
-                gi_base_info_unref ((GIBaseInfo *)item_type_info);
-                break;
-            }
-
-            for (i = 0; i < array->len; i++) {
-                GIArgument item = { 0 };
-                PyObject *py_item;
-
-                memcpy (&item, array->data + i * item_size, item_size);
-
-                py_item = _pygi_argument_to_object (&item, item_type_info,
-                                                    item_transfer);
-                if (py_item == NULL) {
-                    Py_CLEAR (object);
-                    _PyGI_ERROR_PREFIX ("Item %zu: ", i);
-                    break;
-                }
-
-                PyList_SET_ITEM (object, i, py_item);
-            }
-        }
-
-        gi_base_info_unref ((GIBaseInfo *)item_type_info);
+    case GI_TYPE_TAG_ARRAY:
+        object = pygi_argument_array_to_object (arg, type_info, transfer);
         break;
-    }
-    case GI_TYPE_TAG_INTERFACE: {
-        GIBaseInfo *info;
-
-        info = gi_type_info_get_interface (type_info);
-
-        if (GI_IS_CALLBACK_INFO (info)) {
-            PyErr_SetString (
-                PyExc_TypeError,
-                "Cannot translate callback type to Python object");
-        } else if (GI_IS_STRUCT_INFO (info) || GI_IS_UNION_INFO (info)) {
-            PyObject *py_type;
-            GType g_type = gi_registered_type_info_get_g_type (
-                (GIRegisteredTypeInfo *)info);
-            gboolean is_foreign =
-                (GI_IS_STRUCT_INFO (info))
-                && (gi_struct_info_is_foreign ((GIStructInfo *)info));
-
-            /* Special case variant and none to force loading from py module. */
-            if (g_type == G_TYPE_VARIANT || g_type == G_TYPE_NONE) {
-                py_type = pygi_type_import_by_gi_info (info);
-            } else {
-                py_type = pygi_type_get_from_g_type (g_type);
-            }
-
-            object = pygi_arg_struct_to_py_marshal (
-                arg, GI_REGISTERED_TYPE_INFO (info), g_type, py_type, transfer,
-                FALSE, /*is_allocated*/
-                is_foreign);
-
-            if (object
-                && PyObject_IsInstance (object, (PyObject *)&PyGIBoxed_Type)
-                && transfer == GI_TRANSFER_NOTHING)
-                pygi_boxed_copy_in_place ((PyGIBoxed *)object);
-
-            Py_XDECREF (py_type);
-        } else if (GI_IS_ENUM_INFO (info)) {
-            PyObject *py_type;
-
-            py_type = pygi_type_import_by_gi_info (info);
-            if (!py_type) return NULL;
-
-            if (GI_IS_FLAGS_INFO (info)) {
-                object = pyg_flags_val_new (py_type, arg->v_uint);
-            } else {
-                object = pyg_enum_val_new (py_type, arg->v_int);
-            }
-        } else if (GI_IS_INTERFACE_INFO (info) || GI_IS_OBJECT_INFO (info)) {
-            object = pygi_arg_object_to_py_called_from_c (arg, transfer);
-        } else {
-            g_assert_not_reached ();
-        }
-
-        gi_base_info_unref (info);
+    case GI_TYPE_TAG_INTERFACE:
+        object = pygi_argument_interface_to_object (arg, type_info, transfer);
         break;
-    }
     case GI_TYPE_TAG_GLIST:
-    case GI_TYPE_TAG_GSLIST: {
-        GSList *list;
-        gsize length;
-        GITypeInfo *item_type_info;
-        GITransfer item_transfer;
-        gsize i;
-
-        list = arg->v_pointer;
-        length = g_slist_length (list);
-
-        object = PyList_New (length);
-        if (object == NULL) {
-            break;
-        }
-
-        item_type_info = gi_type_info_get_param_type (type_info, 0);
-        g_assert (item_type_info != NULL);
-
-        item_transfer = transfer == GI_TRANSFER_CONTAINER ? GI_TRANSFER_NOTHING
-                                                          : transfer;
-
-        for (i = 0; list != NULL; list = g_slist_next (list), i++) {
-            GIArgument item;
-            PyObject *py_item;
-
-            item.v_pointer = list->data;
-
-            py_item = _pygi_argument_to_object (&item, item_type_info,
-                                                item_transfer);
-            if (py_item == NULL) {
-                Py_CLEAR (object);
-                _PyGI_ERROR_PREFIX ("Item %zu: ", i);
-                break;
-            }
-
-            PyList_SET_ITEM (object, i, py_item);
-        }
-
-        gi_base_info_unref ((GIBaseInfo *)item_type_info);
+    case GI_TYPE_TAG_GSLIST:
+        object = pygi_argument_list_to_object (arg, type_info, transfer);
         break;
-    }
-    case GI_TYPE_TAG_GHASH: {
-        GITypeInfo *key_type_info;
-        GITypeInfo *value_type_info;
-        GITransfer item_transfer;
-        GHashTableIter hash_table_iter;
-        GIArgument key;
-        GIArgument value;
-
-        if (arg->v_pointer == NULL) {
-            object = Py_None;
-            Py_INCREF (object);
-            break;
-        }
-
-        object = PyDict_New ();
-        if (object == NULL) {
-            break;
-        }
-
-        key_type_info = gi_type_info_get_param_type (type_info, 0);
-        g_assert (key_type_info != NULL);
-        g_assert (gi_type_info_get_tag (key_type_info) != GI_TYPE_TAG_VOID);
-
-        value_type_info = gi_type_info_get_param_type (type_info, 1);
-        g_assert (value_type_info != NULL);
-        g_assert (gi_type_info_get_tag (value_type_info) != GI_TYPE_TAG_VOID);
-
-        item_transfer = transfer == GI_TRANSFER_CONTAINER ? GI_TRANSFER_NOTHING
-                                                          : transfer;
-
-        g_hash_table_iter_init (&hash_table_iter,
-                                (GHashTable *)arg->v_pointer);
-        while (g_hash_table_iter_next (&hash_table_iter, &key.v_pointer,
-                                       &value.v_pointer)) {
-            PyObject *py_key;
-            PyObject *py_value;
-            int retval;
-
-            py_key =
-                _pygi_argument_to_object (&key, key_type_info, item_transfer);
-            if (py_key == NULL) {
-                break;
-            }
-
-            _pygi_hash_pointer_to_arg (&value, value_type_info);
-            py_value = _pygi_argument_to_object (&value, value_type_info,
-                                                 item_transfer);
-            if (py_value == NULL) {
-                Py_DECREF (py_key);
-                break;
-            }
-
-            retval = PyDict_SetItem (object, py_key, py_value);
-
-            Py_DECREF (py_key);
-            Py_DECREF (py_value);
-
-            if (retval < 0) {
-                Py_CLEAR (object);
-                break;
-            }
-        }
-
-        gi_base_info_unref ((GIBaseInfo *)key_type_info);
-        gi_base_info_unref ((GIBaseInfo *)value_type_info);
+    case GI_TYPE_TAG_GHASH:
+        object = pygi_argument_hash_table_to_object (arg, type_info, transfer);
         break;
-    }
     case GI_TYPE_TAG_ERROR: {
         GError *error = (GError *)arg->v_pointer;
         if (error != NULL && transfer == GI_TRANSFER_NOTHING) {
