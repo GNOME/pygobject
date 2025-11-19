@@ -116,7 +116,7 @@ _pygi_get_storage_type (GITypeInfo *type_info)
 }
 
 void
-_pygi_hash_pointer_to_arg (GIArgument *arg, GITypeInfo *type_info)
+_pygi_hash_pointer_to_arg_in_place (GIArgument *arg, GITypeInfo *type_info)
 {
     GITypeTag type_tag = _pygi_get_storage_type (type_info);
 
@@ -168,35 +168,35 @@ _pygi_hash_pointer_to_arg (GIArgument *arg, GITypeInfo *type_info)
 }
 
 gpointer
-_pygi_arg_to_hash_pointer (const GIArgument *arg, GITypeInfo *type_info)
+_pygi_arg_to_hash_pointer (const GIArgument arg, GITypeInfo *type_info)
 {
     GITypeTag type_tag = _pygi_get_storage_type (type_info);
 
     switch (type_tag) {
     case GI_TYPE_TAG_INT8:
-        return GINT_TO_POINTER (arg->v_int8);
+        return GINT_TO_POINTER (arg.v_int8);
     case GI_TYPE_TAG_UINT8:
-        return GUINT_TO_POINTER (arg->v_uint8);
+        return GUINT_TO_POINTER (arg.v_uint8);
     case GI_TYPE_TAG_INT16:
-        return GINT_TO_POINTER (arg->v_int16);
+        return GINT_TO_POINTER (arg.v_int16);
     case GI_TYPE_TAG_UINT16:
-        return GUINT_TO_POINTER (arg->v_uint16);
+        return GUINT_TO_POINTER (arg.v_uint16);
     case GI_TYPE_TAG_INT32:
-        return GINT_TO_POINTER (arg->v_int32);
+        return GINT_TO_POINTER (arg.v_int32);
     case GI_TYPE_TAG_UINT32:
     case GI_TYPE_TAG_UNICHAR:
-        return GUINT_TO_POINTER (arg->v_uint32);
+        return GUINT_TO_POINTER (arg.v_uint32);
     case GI_TYPE_TAG_INT64:
-        return GINT_TO_POINTER (arg->v_int64);
+        return GINT_TO_POINTER (arg.v_int64);
     case GI_TYPE_TAG_UINT64:
-        return GUINT_TO_POINTER (arg->v_uint64);
+        return GUINT_TO_POINTER (arg.v_uint64);
     case GI_TYPE_TAG_GTYPE:
-        return GSIZE_TO_POINTER (arg->v_size);
+        return GSIZE_TO_POINTER (arg.v_size);
     case GI_TYPE_TAG_UTF8:
     case GI_TYPE_TAG_FILENAME:
     case GI_TYPE_TAG_INTERFACE:
     case GI_TYPE_TAG_ARRAY:
-        return arg->v_pointer;
+        return arg.v_pointer;
     case GI_TYPE_TAG_VOID:
     case GI_TYPE_TAG_BOOLEAN:
     case GI_TYPE_TAG_FLOAT:
@@ -206,7 +206,7 @@ _pygi_arg_to_hash_pointer (const GIArgument *arg, GITypeInfo *type_info)
     case GI_TYPE_TAG_GHASH:
     case GI_TYPE_TAG_ERROR:
         g_critical ("Unsupported type %s", gi_type_tag_to_string (type_tag));
-        return arg->v_pointer;
+        return arg.v_pointer;
     default:
         g_assert_not_reached ();
     }
@@ -233,7 +233,7 @@ _pygi_arg_to_hash_pointer (const GIArgument *arg, GITypeInfo *type_info)
  *          Otherwise don't free the array.
  */
 GArray *
-_pygi_argument_to_array (GIArgument *arg,
+_pygi_argument_to_array (GIArgument arg,
                          PyGIArgArrayLengthPolicy array_length_policy,
                          void *user_data1, void *user_data2,
                          GITypeInfo *type_info, gboolean *out_free_array)
@@ -247,7 +247,7 @@ _pygi_argument_to_array (GIArgument *arg,
     g_return_val_if_fail (
         gi_type_info_get_tag (type_info) == GI_TYPE_TAG_ARRAY, NULL);
 
-    if (arg->v_pointer == NULL) {
+    if (arg.v_pointer == NULL) {
         return NULL;
     }
 
@@ -262,14 +262,13 @@ _pygi_argument_to_array (GIArgument *arg,
 
         if (is_zero_terminated) {
             if (item_size == sizeof (gpointer))
-                length = g_strv_length ((gchar **)arg->v_pointer);
+                length = g_strv_length ((gchar **)arg.v_pointer);
             else if (item_size == 1)
-                length = strlen ((gchar *)arg->v_pointer);
+                length = strlen ((gchar *)arg.v_pointer);
             else if (item_size == sizeof (int))
-                for (length = 0; *(((int *)arg->v_pointer) + length);
-                     length++);
+                for (length = 0; *(((int *)arg.v_pointer) + length); length++);
             else if (item_size == sizeof (short))
-                for (length = 0; *(((short *)arg->v_pointer) + length);
+                for (length = 0; *(((short *)arg.v_pointer) + length);
                      length++);
             else
                 g_assert_not_reached ();
@@ -280,7 +279,7 @@ _pygi_argument_to_array (GIArgument *arg,
 
                 if (G_UNLIKELY (array_length_policy == NULL)) {
                     g_critical ("Unable to determine array length for %p",
-                                arg->v_pointer);
+                                arg.v_pointer);
                     g_array = g_array_new (is_zero_terminated, FALSE,
                                            (guint)item_size);
                     *out_free_array = TRUE;
@@ -301,18 +300,18 @@ _pygi_argument_to_array (GIArgument *arg,
         g_array = g_array_new (is_zero_terminated, FALSE, (guint)item_size);
 
         g_free (g_array->data);
-        g_array->data = arg->v_pointer;
+        g_array->data = arg.v_pointer;
         g_array->len = (guint)length;
         *out_free_array = TRUE;
         break;
     case GI_ARRAY_TYPE_ARRAY:
     case GI_ARRAY_TYPE_BYTE_ARRAY:
         /* Note: GByteArray is really just a GArray */
-        g_array = arg->v_pointer;
+        g_array = arg.v_pointer;
         *out_free_array = FALSE;
         break;
     case GI_ARRAY_TYPE_PTR_ARRAY: {
-        GPtrArray *ptr_array = (GPtrArray *)arg->v_pointer;
+        GPtrArray *ptr_array = (GPtrArray *)arg.v_pointer;
         g_array = g_array_sized_new (FALSE, FALSE, sizeof (gpointer),
                                      ptr_array->len);
         g_array->data = (char *)ptr_array->pdata;
@@ -439,12 +438,12 @@ pygi_argument_interface_from_object (PyObject *object, GITypeInfo *type_info,
         py_type = pygi_type_import_by_gi_info ((GIBaseInfo *)info);
 
         /* Note for G_TYPE_VALUE g_type:
-                 * This will currently leak the GValue that is allocated and
-                 * stashed in arg.v_pointer. Out argument marshaling for caller
-                 * allocated GValues already pass in memory for the GValue.
-                 * Further re-factoring is needed to fix this leak.
-                 * See: https://bugzilla.gnome.org/show_bug.cgi?id=693405
-                 */
+         * This will currently leak the GValue that is allocated and
+         * stashed in arg.v_pointer. Out argument marshaling for caller
+         * allocated GValues already pass in memory for the GValue.
+         * Further re-factoring is needed to fix this leak.
+         * See: https://bugzilla.gnome.org/show_bug.cgi?id=693405
+         */
         pygi_arg_struct_from_py_marshal (
             object, &arg, NULL, /*arg_name*/
             GI_REGISTERED_TYPE_INFO (info), g_type, py_type, transfer,
@@ -619,7 +618,7 @@ pygi_argument_hash_table_from_object (PyObject *object, GITypeInfo *type_info,
 
         g_hash_table_insert (
             hash_table, key.v_pointer,
-            _pygi_arg_to_hash_pointer (&value, value_type_info));
+            _pygi_arg_to_hash_pointer (value, value_type_info));
     }
 
     arg.v_pointer = hash_table;
@@ -906,7 +905,7 @@ pygi_argument_hash_table_to_object (GIArgument arg, GITypeInfo *type_info,
             break;
         }
 
-        _pygi_hash_pointer_to_arg (&value, value_type_info);
+        _pygi_hash_pointer_to_arg_in_place (&value, value_type_info);
         py_value =
             _pygi_argument_to_object (value, value_type_info, item_transfer);
         if (py_value == NULL) {

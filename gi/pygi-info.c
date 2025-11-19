@@ -1831,7 +1831,7 @@ _wrap_gi_constant_info_get_value (PyGIBaseInfo *self)
     type_info = gi_constant_info_get_type_info ((GIConstantInfo *)self->info);
 
     if (gi_type_info_get_tag (type_info) == GI_TYPE_TAG_ARRAY) {
-        value.v_pointer = _pygi_argument_to_array (&value, NULL, NULL, NULL,
+        value.v_pointer = _pygi_argument_to_array (value, NULL, NULL, NULL,
                                                    type_info, &free_array);
     }
 
@@ -2079,8 +2079,8 @@ _wrap_gi_field_info_get_value (PyGIBaseInfo *self, PyObject *args)
 
     if (gi_type_info_get_tag (field_type_info) == GI_TYPE_TAG_ARRAY) {
         value.v_pointer = _pygi_argument_to_array (
-            &value, _struct_field_array_length_marshal, container_info,
-            pointer, field_type_info, &free_array);
+            value, _struct_field_array_length_marshal, container_info, pointer,
+            field_type_info, &free_array);
     }
 
 argument_to_object:

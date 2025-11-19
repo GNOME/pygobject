@@ -168,7 +168,7 @@ pygi_get_property_value (PyGObject *instance, GParamSpec *pspec)
 
         /* Arrays are special cased, see note in _pygi_argument_to_array. */
         if (gi_type_info_get_tag (type_info) == GI_TYPE_TAG_ARRAY) {
-            arg.v_pointer = _pygi_argument_to_array (&arg, NULL, NULL, NULL,
+            arg.v_pointer = _pygi_argument_to_array (arg, NULL, NULL, NULL,
                                                      type_info, &free_array);
         } else if (g_type_is_a (pspec->value_type, G_TYPE_BOXED)) {
             arg.v_pointer = g_value_dup_boxed (&value);

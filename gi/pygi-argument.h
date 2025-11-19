@@ -32,12 +32,13 @@ typedef gboolean (*PyGIArgArrayLengthPolicy) (gsize item_index,
                                               void *user_data2,
                                               gsize *array_len);
 
-gpointer _pygi_arg_to_hash_pointer (const GIArgument *arg,
+gpointer _pygi_arg_to_hash_pointer (const GIArgument arg,
                                     GITypeInfo *type_info);
 
-void _pygi_hash_pointer_to_arg (GIArgument *arg, GITypeInfo *type_info);
+void _pygi_hash_pointer_to_arg_in_place (GIArgument *arg,
+                                         GITypeInfo *type_info);
 
-GArray *_pygi_argument_to_array (GIArgument *arg,
+GArray *_pygi_argument_to_array (GIArgument arg,
                                  PyGIArgArrayLengthPolicy array_length_policy,
                                  void *user_data1, void *user_data2,
                                  GITypeInfo *type_info,

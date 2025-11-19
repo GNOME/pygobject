@@ -123,8 +123,8 @@ _pygi_marshal_from_py_ghash (PyGIInvokeState *state,
 
         g_hash_table_insert (
             hash_,
-            _pygi_arg_to_hash_pointer (&key, hash_cache->key_cache->type_info),
-            _pygi_arg_to_hash_pointer (&value,
+            _pygi_arg_to_hash_pointer (key, hash_cache->key_cache->type_info),
+            _pygi_arg_to_hash_pointer (value,
                                        hash_cache->value_cache->type_info));
         continue;
 err:
@@ -243,7 +243,8 @@ _pygi_marshal_to_py_ghash (PyGIInvokeState *state,
         int retval;
 
 
-        _pygi_hash_pointer_to_arg (&key_arg, hash_cache->key_cache->type_info);
+        _pygi_hash_pointer_to_arg_in_place (&key_arg,
+                                            hash_cache->key_cache->type_info);
         py_key = key_to_py_marshaller (state, callable_cache, key_arg_cache,
                                        &key_arg, &key_cleanup_data);
 
@@ -252,8 +253,8 @@ _pygi_marshal_to_py_ghash (PyGIInvokeState *state,
             return NULL;
         }
 
-        _pygi_hash_pointer_to_arg (&value_arg,
-                                   hash_cache->value_cache->type_info);
+        _pygi_hash_pointer_to_arg_in_place (
+            &value_arg, hash_cache->value_cache->type_info);
         py_value = value_to_py_marshaller (state, callable_cache,
                                            value_arg_cache, &value_arg,
                                            &value_cleanup_data);

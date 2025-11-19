@@ -69,7 +69,7 @@ _pygi_marshal_from_py_glist (PyGIInvokeState *state,
         Py_DECREF (py_item);
         list_ = g_list_prepend (
             list_, _pygi_arg_to_hash_pointer (
-                       &item, sequence_cache->item_cache->type_info));
+                       item, sequence_cache->item_cache->type_info));
         continue;
 err:
         /* FIXME: clean up list
@@ -141,7 +141,7 @@ _pygi_marshal_from_py_gslist (PyGIInvokeState *state,
         Py_DECREF (py_item);
         list_ = g_slist_prepend (
             list_, _pygi_arg_to_hash_pointer (
-                       &item, sequence_cache->item_cache->type_info));
+                       item, sequence_cache->item_cache->type_info));
         continue;
 err:
         /* FIXME: Clean up list
@@ -249,7 +249,8 @@ _pygi_marshal_to_py_glist (PyGIInvokeState *state,
         gpointer item_cleanup_data = NULL;
 
         item_arg.v_pointer = list_->data;
-        _pygi_hash_pointer_to_arg (&item_arg, item_arg_cache->type_info);
+        _pygi_hash_pointer_to_arg_in_place (&item_arg,
+                                            item_arg_cache->type_info);
         py_item = item_to_py_marshaller (state, callable_cache, item_arg_cache,
                                          &item_arg, &item_cleanup_data);
 
@@ -303,7 +304,8 @@ _pygi_marshal_to_py_gslist (PyGIInvokeState *state,
         gpointer item_cleanup_data = NULL;
 
         item_arg.v_pointer = list_->data;
-        _pygi_hash_pointer_to_arg (&item_arg, item_arg_cache->type_info);
+        _pygi_hash_pointer_to_arg_in_place (&item_arg,
+                                            item_arg_cache->type_info);
         py_item = item_to_py_marshaller (state, callable_cache, item_arg_cache,
                                          &item_arg, &item_cleanup_data);
 
