@@ -110,6 +110,7 @@ _pygi_marshal_from_py_ghash (PyGIInvokeState *state,
         PyObject *py_value = PyList_GET_ITEM (py_values, i);
         if (py_key == NULL || py_value == NULL) goto err;
 
+        // LEAK: key_cleanup_data and value_cleanup_data are never cleaned
         if (!key_from_py_marshaller (state, callable_cache,
                                      hash_cache->key_cache, py_key, &key,
                                      &key_cleanup_data))
