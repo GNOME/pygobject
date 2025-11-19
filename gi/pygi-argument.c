@@ -699,7 +699,7 @@ _pygi_argument_from_object (PyObject *object, GITypeInfo *type_info,
 }
 
 static PyObject *
-pygi_argument_array_to_object (GIArgument *arg, GITypeInfo *type_info,
+pygi_argument_array_to_object (GIArgument arg, GITypeInfo *type_info,
                                GITransfer transfer)
 {
     PyObject *object = NULL;
@@ -710,7 +710,7 @@ pygi_argument_array_to_object (GIArgument *arg, GITypeInfo *type_info,
     GITransfer item_transfer;
     gsize i, item_size;
 
-    if (arg->v_pointer == NULL) return PyList_New (0);
+    if (arg.v_pointer == NULL) return PyList_New (0);
 
     item_type_info = gi_type_info_get_param_type (type_info, 0);
     g_assert (item_type_info != NULL);
@@ -719,7 +719,7 @@ pygi_argument_array_to_object (GIArgument *arg, GITypeInfo *type_info,
     item_transfer = transfer == GI_TRANSFER_CONTAINER ? GI_TRANSFER_NOTHING
                                                       : transfer;
 
-    array = arg->v_pointer;
+    array = arg.v_pointer;
     item_size = g_array_get_element_size (array);
 
     if (G_UNLIKELY (item_size > sizeof (GIArgument))) {
@@ -746,8 +746,8 @@ pygi_argument_array_to_object (GIArgument *arg, GITypeInfo *type_info,
 
             memcpy (&item, array->data + i * item_size, item_size);
 
-            py_item = _pygi_argument_to_object (&item, item_type_info,
-                                                item_transfer);
+            py_item =
+                _pygi_argument_to_object (item, item_type_info, item_transfer);
             if (py_item == NULL) {
                 Py_CLEAR (object);
                 _PyGI_ERROR_PREFIX ("Item %zu: ", i);
@@ -763,7 +763,7 @@ pygi_argument_array_to_object (GIArgument *arg, GITypeInfo *type_info,
 }
 
 static PyObject *
-pygi_argument_interface_to_object (GIArgument *arg, GITypeInfo *type_info,
+pygi_argument_interface_to_object (GIArgument arg, GITypeInfo *type_info,
                                    GITransfer transfer)
 {
     PyObject *object = NULL;
@@ -790,7 +790,7 @@ pygi_argument_interface_to_object (GIArgument *arg, GITypeInfo *type_info,
         }
 
         object = pygi_arg_struct_to_py_marshal (
-            arg, GI_REGISTERED_TYPE_INFO (info), g_type, py_type, transfer,
+            &arg, GI_REGISTERED_TYPE_INFO (info), g_type, py_type, transfer,
             FALSE, /*is_allocated*/
             is_foreign);
 
@@ -806,12 +806,12 @@ pygi_argument_interface_to_object (GIArgument *arg, GITypeInfo *type_info,
         if (!py_type) return NULL;
 
         if (GI_IS_FLAGS_INFO (info)) {
-            object = pyg_flags_val_new (py_type, arg->v_uint);
+            object = pyg_flags_val_new (py_type, arg.v_uint);
         } else {
-            object = pyg_enum_val_new (py_type, arg->v_int);
+            object = pyg_enum_val_new (py_type, arg.v_int);
         }
     } else if (GI_IS_INTERFACE_INFO (info) || GI_IS_OBJECT_INFO (info)) {
-        object = pygi_arg_object_to_py_called_from_c (arg, transfer);
+        object = pygi_arg_object_to_py_called_from_c (&arg, transfer);
     } else {
         g_assert_not_reached ();
     }
@@ -821,7 +821,7 @@ pygi_argument_interface_to_object (GIArgument *arg, GITypeInfo *type_info,
 }
 
 static PyObject *
-pygi_argument_list_to_object (GIArgument *arg, GITypeInfo *type_info,
+pygi_argument_list_to_object (GIArgument arg, GITypeInfo *type_info,
                               GITransfer transfer)
 {
     PyObject *object = NULL;
@@ -831,7 +831,7 @@ pygi_argument_list_to_object (GIArgument *arg, GITypeInfo *type_info,
     GITransfer item_transfer;
     gsize i;
 
-    list = arg->v_pointer;
+    list = arg.v_pointer;
     length = g_slist_length (list);
 
     object = PyList_New (length);
@@ -851,7 +851,7 @@ pygi_argument_list_to_object (GIArgument *arg, GITypeInfo *type_info,
         item.v_pointer = list->data;
 
         py_item =
-            _pygi_argument_to_object (&item, item_type_info, item_transfer);
+            _pygi_argument_to_object (item, item_type_info, item_transfer);
         if (py_item == NULL) {
             Py_CLEAR (object);
             _PyGI_ERROR_PREFIX ("Item %zu: ", i);
@@ -866,7 +866,7 @@ pygi_argument_list_to_object (GIArgument *arg, GITypeInfo *type_info,
 }
 
 static PyObject *
-pygi_argument_hash_table_to_object (GIArgument *arg, GITypeInfo *type_info,
+pygi_argument_hash_table_to_object (GIArgument arg, GITypeInfo *type_info,
                                     GITransfer transfer)
 {
     PyObject *object = NULL;
@@ -877,7 +877,7 @@ pygi_argument_hash_table_to_object (GIArgument *arg, GITypeInfo *type_info,
     GIArgument key;
     GIArgument value;
 
-    if (arg->v_pointer == NULL) Py_RETURN_NONE;
+    if (arg.v_pointer == NULL) Py_RETURN_NONE;
 
 
     object = PyDict_New ();
@@ -894,21 +894,21 @@ pygi_argument_hash_table_to_object (GIArgument *arg, GITypeInfo *type_info,
     item_transfer = transfer == GI_TRANSFER_CONTAINER ? GI_TRANSFER_NOTHING
                                                       : transfer;
 
-    g_hash_table_iter_init (&hash_table_iter, (GHashTable *)arg->v_pointer);
+    g_hash_table_iter_init (&hash_table_iter, (GHashTable *)arg.v_pointer);
     while (g_hash_table_iter_next (&hash_table_iter, &key.v_pointer,
                                    &value.v_pointer)) {
         PyObject *py_key;
         PyObject *py_value;
         int retval;
 
-        py_key = _pygi_argument_to_object (&key, key_type_info, item_transfer);
+        py_key = _pygi_argument_to_object (key, key_type_info, item_transfer);
         if (py_key == NULL) {
             break;
         }
 
         _pygi_hash_pointer_to_arg (&value, value_type_info);
         py_value =
-            _pygi_argument_to_object (&value, value_type_info, item_transfer);
+            _pygi_argument_to_object (value, value_type_info, item_transfer);
         if (py_value == NULL) {
             Py_DECREF (py_key);
             break;
@@ -943,7 +943,7 @@ pygi_argument_hash_table_to_object (GIArgument *arg, GITypeInfo *type_info,
  * Returns: A PyObject representing @arg
  */
 PyObject *
-_pygi_argument_to_object (GIArgument *arg, GITypeInfo *type_info,
+_pygi_argument_to_object (GIArgument arg, GITypeInfo *type_info,
                           GITransfer transfer)
 {
     GITypeTag type_tag;
@@ -955,7 +955,7 @@ _pygi_argument_to_object (GIArgument *arg, GITypeInfo *type_info,
     case GI_TYPE_TAG_VOID: {
         if (gi_type_info_is_pointer (type_info)) {
             g_warn_if_fail (transfer == GI_TRANSFER_NOTHING);
-            object = PyLong_FromVoidPtr (arg->v_pointer);
+            object = PyLong_FromVoidPtr (arg.v_pointer);
         }
         break;
     }
@@ -973,7 +973,7 @@ _pygi_argument_to_object (GIArgument *arg, GITypeInfo *type_info,
         object = pygi_argument_hash_table_to_object (arg, type_info, transfer);
         break;
     case GI_TYPE_TAG_ERROR: {
-        GError *error = (GError *)arg->v_pointer;
+        GError *error = (GError *)arg.v_pointer;
         if (error != NULL && transfer == GI_TRANSFER_NOTHING) {
             /* If we have not been transferred the ownership we must copy
                  * the error, because pygi_error_check() is going to free it.

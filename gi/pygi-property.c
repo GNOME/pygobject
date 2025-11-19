@@ -175,7 +175,7 @@ pygi_get_property_value (PyGObject *instance, GParamSpec *pspec)
             transfer = GI_TRANSFER_EVERYTHING;
         }
 
-        py_value = _pygi_argument_to_object (&arg, type_info, transfer);
+        py_value = _pygi_argument_to_object (arg, type_info, transfer);
 
         if (free_array) {
             g_array_free (arg.v_pointer, FALSE);

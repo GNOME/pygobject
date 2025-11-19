@@ -1124,54 +1124,54 @@ pygi_filename_to_py (gchar *value)
  *          the argument.
  */
 PyObject *
-pygi_marshal_to_py_basic_type (GIArgument *arg, GITypeTag type_tag,
+pygi_marshal_to_py_basic_type (GIArgument arg, GITypeTag type_tag,
                                GITransfer transfer)
 {
     switch (type_tag) {
     case GI_TYPE_TAG_BOOLEAN:
-        return pygi_gboolean_to_py (arg->v_boolean);
+        return pygi_gboolean_to_py (arg.v_boolean);
 
     case GI_TYPE_TAG_INT8:
-        return pygi_gint8_to_py (arg->v_int8);
+        return pygi_gint8_to_py (arg.v_int8);
 
     case GI_TYPE_TAG_UINT8:
-        return pygi_guint8_to_py (arg->v_uint8);
+        return pygi_guint8_to_py (arg.v_uint8);
 
     case GI_TYPE_TAG_INT16:
-        return pygi_gint16_to_py (arg->v_int16);
+        return pygi_gint16_to_py (arg.v_int16);
 
     case GI_TYPE_TAG_UINT16:
-        return pygi_guint16_to_py (arg->v_uint16);
+        return pygi_guint16_to_py (arg.v_uint16);
 
     case GI_TYPE_TAG_INT32:
-        return pygi_gint32_to_py (arg->v_int32);
+        return pygi_gint32_to_py (arg.v_int32);
 
     case GI_TYPE_TAG_UINT32:
-        return pygi_guint32_to_py (arg->v_uint32);
+        return pygi_guint32_to_py (arg.v_uint32);
 
     case GI_TYPE_TAG_INT64:
-        return pygi_gint64_to_py (arg->v_int64);
+        return pygi_gint64_to_py (arg.v_int64);
 
     case GI_TYPE_TAG_UINT64:
-        return pygi_guint64_to_py (arg->v_uint64);
+        return pygi_guint64_to_py (arg.v_uint64);
 
     case GI_TYPE_TAG_FLOAT:
-        return pygi_gfloat_to_py (arg->v_float);
+        return pygi_gfloat_to_py (arg.v_float);
 
     case GI_TYPE_TAG_DOUBLE:
-        return pygi_gdouble_to_py (arg->v_double);
+        return pygi_gdouble_to_py (arg.v_double);
 
     case GI_TYPE_TAG_GTYPE:
-        return pyg_type_wrapper_new ((GType)arg->v_size);
+        return pyg_type_wrapper_new ((GType)arg.v_size);
 
     case GI_TYPE_TAG_UNICHAR:
-        return pygi_gunichar_to_py (arg->v_uint32);
+        return pygi_gunichar_to_py (arg.v_uint32);
 
     case GI_TYPE_TAG_UTF8:
-        return pygi_utf8_to_py (arg->v_string);
+        return pygi_utf8_to_py (arg.v_string);
 
     case GI_TYPE_TAG_FILENAME:
-        return pygi_filename_to_py (arg->v_string);
+        return pygi_filename_to_py (arg.v_string);
 
     case GI_TYPE_TAG_VOID:
     case GI_TYPE_TAG_ARRAY:

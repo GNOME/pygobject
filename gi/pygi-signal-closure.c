@@ -195,7 +195,7 @@ pygi_signal_closure_marshal (GClosure *closure, GValue *return_value,
 
             if (pass_struct_by_ref) {
                 /* transfer everything will ensure the struct is not copied when wrapped. */
-                item = _pygi_argument_to_object (&arg, &type_info,
+                item = _pygi_argument_to_object (arg, &type_info,
                                                  GI_TRANSFER_EVERYTHING);
                 if (item
                     && PyObject_IsInstance (item,
@@ -206,7 +206,7 @@ pygi_signal_closure_marshal (GClosure *closure, GValue *return_value,
                 }
 
             } else {
-                item = _pygi_argument_to_object (&arg, &type_info,
+                item = _pygi_argument_to_object (arg, &type_info,
                                                  GI_TRANSFER_NOTHING);
             }
 

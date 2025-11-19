@@ -73,7 +73,7 @@ pygi_marshal_to_py_basic_type_cache_adapter (PyGIInvokeState *state,
                                              GIArgument *arg,
                                              gpointer *cleanup_data)
 {
-    return pygi_marshal_to_py_basic_type (arg, arg_cache->type_tag,
+    return pygi_marshal_to_py_basic_type (*arg, arg_cache->type_tag,
                                           arg_cache->transfer);
 }
 
