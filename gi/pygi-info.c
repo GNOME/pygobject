@@ -1913,7 +1913,7 @@ _struct_field_array_length_marshal (gsize length_index, void *container_ptr,
         }
 
         if (!pygi_argument_to_gsize (
-                &arg, gi_type_info_get_tag (array_len_type_info), array_len)) {
+                arg, gi_type_info_get_tag (array_len_type_info), array_len)) {
             result = FALSE;
         }
 

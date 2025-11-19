@@ -39,44 +39,43 @@
 #include "pygi-value.h"
 
 gboolean
-pygi_argument_to_gsize (GIArgument *arg_in, GITypeTag type_tag,
-                        gsize *gsize_out)
+pygi_argument_to_gsize (GIArgument arg, GITypeTag type_tag, gsize *gsize_out)
 {
     switch (type_tag) {
     case GI_TYPE_TAG_INT8:
-        *gsize_out = arg_in->v_int8;
+        *gsize_out = arg.v_int8;
         return TRUE;
     case GI_TYPE_TAG_UINT8:
-        *gsize_out = arg_in->v_uint8;
+        *gsize_out = arg.v_uint8;
         return TRUE;
     case GI_TYPE_TAG_INT16:
-        *gsize_out = arg_in->v_int16;
+        *gsize_out = arg.v_int16;
         return TRUE;
     case GI_TYPE_TAG_UINT16:
-        *gsize_out = arg_in->v_uint16;
+        *gsize_out = arg.v_uint16;
         return TRUE;
     case GI_TYPE_TAG_INT32:
-        *gsize_out = arg_in->v_int32;
+        *gsize_out = arg.v_int32;
         return TRUE;
     case GI_TYPE_TAG_UINT32:
     case GI_TYPE_TAG_UNICHAR:
-        *gsize_out = arg_in->v_uint32;
+        *gsize_out = arg.v_uint32;
         return TRUE;
     case GI_TYPE_TAG_INT64:
-        if (arg_in->v_uint64 > G_MAXSIZE) {
+        if (arg.v_uint64 > G_MAXSIZE) {
             PyErr_Format (PyExc_TypeError, "Unable to marshal %s to gsize",
                           gi_type_tag_to_string (type_tag));
             return FALSE;
         }
-        *gsize_out = (gsize)arg_in->v_int64;
+        *gsize_out = (gsize)arg.v_int64;
         return TRUE;
     case GI_TYPE_TAG_UINT64:
-        if (arg_in->v_uint64 > G_MAXSIZE) {
+        if (arg.v_uint64 > G_MAXSIZE) {
             PyErr_Format (PyExc_TypeError, "Unable to marshal %s to gsize",
                           gi_type_tag_to_string (type_tag));
             return FALSE;
         }
-        *gsize_out = (gsize)arg_in->v_uint64;
+        *gsize_out = (gsize)arg.v_uint64;
         return TRUE;
     case GI_TYPE_TAG_VOID:
     case GI_TYPE_TAG_BOOLEAN:
@@ -576,7 +575,8 @@ pygi_argument_hash_table_from_object (PyObject *object, GITypeInfo *type_info,
 
     key_type_tag = gi_type_info_get_tag (key_type_info);
 
-    if (key_type_tag == GI_TYPE_TAG_UTF8 || key_type_tag == GI_TYPE_TAG_FILENAME) {
+    if (key_type_tag == GI_TYPE_TAG_UTF8
+        || key_type_tag == GI_TYPE_TAG_FILENAME) {
         hash_func = g_str_hash;
         equal_func = g_str_equal;
     } else {

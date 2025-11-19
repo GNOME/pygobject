@@ -505,8 +505,8 @@ _pygi_marshal_to_py_array (PyGIInvokeState *state,
                 g_assert_not_reached ();
             }
         } else if (array_cache->has_len_arg) {
-            GIArgument *len_arg =
-                &state->args[array_cache->len_arg_index].arg_value;
+            GIArgument len_arg =
+                state->args[array_cache->len_arg_index].arg_value;
             PyGIArgCache *sub_cache = _pygi_callable_cache_get_arg (
                 callable_cache, array_cache->len_arg_index);
 

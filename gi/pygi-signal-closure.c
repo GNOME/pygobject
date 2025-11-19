@@ -94,7 +94,7 @@ _pygi_signal_closure_length_marshal (gsize length_arg_index, void *user_data1,
     length_arg = _pygi_argument_from_g_value (&(values[length_arg_index]),
                                               &length_type_info);
     return pygi_argument_to_gsize (
-        &length_arg, gi_type_info_get_tag (&length_type_info), array_len);
+        length_arg, gi_type_info_get_tag (&length_type_info), array_len);
 }
 
 static void

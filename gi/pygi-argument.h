@@ -53,7 +53,7 @@ PyObject *_pygi_argument_to_object (GIArgument arg, GITypeInfo *type_info,
 void _pygi_argument_release (GIArgument *arg, GITypeInfo *type_info,
                              GITransfer transfer, GIDirection direction);
 
-gboolean pygi_argument_to_gsize (GIArgument *arg_in, GITypeTag type_tag,
+gboolean pygi_argument_to_gsize (GIArgument arg, GITypeTag type_tag,
                                  gsize *gsize_out);
 
 G_END_DECLS
