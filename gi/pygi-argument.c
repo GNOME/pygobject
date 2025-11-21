@@ -129,6 +129,9 @@ _pygi_hash_pointer_to_arg (GIArgument *arg, GITypeInfo *type_info)
     case GI_TYPE_TAG_INT32:
         arg->v_int32 = (gint32)GPOINTER_TO_INT (arg->v_pointer);
         break;
+    case GI_TYPE_TAG_INT64:
+        arg->v_int64 = (gint64)GPOINTER_TO_INT (arg->v_pointer);
+        break;
     case GI_TYPE_TAG_UINT8:
         arg->v_uint8 = (guint8)GPOINTER_TO_UINT (arg->v_pointer);
         break;
@@ -139,13 +142,14 @@ _pygi_hash_pointer_to_arg (GIArgument *arg, GITypeInfo *type_info)
     case GI_TYPE_TAG_UNICHAR:
         arg->v_uint32 = (guint32)GPOINTER_TO_UINT (arg->v_pointer);
         break;
+    case GI_TYPE_TAG_UINT64:
+        arg->v_uint64 = (guint64)GPOINTER_TO_UINT (arg->v_pointer);
+        break;
     case GI_TYPE_TAG_GTYPE:
         arg->v_size = GPOINTER_TO_SIZE (arg->v_pointer);
         break;
     case GI_TYPE_TAG_VOID:
     case GI_TYPE_TAG_BOOLEAN:
-    case GI_TYPE_TAG_INT64:
-    case GI_TYPE_TAG_UINT64:
     case GI_TYPE_TAG_FLOAT:
     case GI_TYPE_TAG_DOUBLE:
     case GI_TYPE_TAG_UTF8:
@@ -171,15 +175,20 @@ _pygi_arg_to_hash_pointer (const GIArgument *arg, GITypeInfo *type_info)
     case GI_TYPE_TAG_INT8:
         return GINT_TO_POINTER (arg->v_int8);
     case GI_TYPE_TAG_UINT8:
-        return GINT_TO_POINTER (arg->v_uint8);
+        return GUINT_TO_POINTER (arg->v_uint8);
     case GI_TYPE_TAG_INT16:
         return GINT_TO_POINTER (arg->v_int16);
     case GI_TYPE_TAG_UINT16:
-        return GINT_TO_POINTER (arg->v_uint16);
+        return GUINT_TO_POINTER (arg->v_uint16);
     case GI_TYPE_TAG_INT32:
         return GINT_TO_POINTER (arg->v_int32);
     case GI_TYPE_TAG_UINT32:
-        return GINT_TO_POINTER (arg->v_uint32);
+    case GI_TYPE_TAG_UNICHAR:
+        return GUINT_TO_POINTER (arg->v_uint32);
+    case GI_TYPE_TAG_INT64:
+        return GINT_TO_POINTER (arg->v_int64);
+    case GI_TYPE_TAG_UINT64:
+        return GUINT_TO_POINTER (arg->v_uint64);
     case GI_TYPE_TAG_GTYPE:
         return GSIZE_TO_POINTER (arg->v_size);
     case GI_TYPE_TAG_UTF8:
@@ -189,15 +198,12 @@ _pygi_arg_to_hash_pointer (const GIArgument *arg, GITypeInfo *type_info)
         return arg->v_pointer;
     case GI_TYPE_TAG_VOID:
     case GI_TYPE_TAG_BOOLEAN:
-    case GI_TYPE_TAG_INT64:
-    case GI_TYPE_TAG_UINT64:
     case GI_TYPE_TAG_FLOAT:
     case GI_TYPE_TAG_DOUBLE:
     case GI_TYPE_TAG_GLIST:
     case GI_TYPE_TAG_GSLIST:
     case GI_TYPE_TAG_GHASH:
     case GI_TYPE_TAG_ERROR:
-    case GI_TYPE_TAG_UNICHAR:
     default:
         g_critical ("Unsupported type %s", gi_type_tag_to_string (type_tag));
         return arg->v_pointer;
