@@ -125,69 +125,62 @@ marshal_cleanup_to_py_utf8 (PyGIInvokeState *state, PyGIArgCache *arg_cache,
 }
 
 PyGIArgCache *
-pygi_arg_basic_type_new_from_info (GITypeInfo *type_info, GIArgInfo *arg_info,
-                                   GITransfer transfer,
-                                   PyGIDirection direction)
+pygi_arg_void_type_new_from_info (GITypeInfo *type_info, GIArgInfo *arg_info,
+                                  GITransfer transfer, PyGIDirection direction)
 {
     PyGIArgCache *arg_cache = pygi_arg_cache_alloc ();
-    GITypeTag type_tag = gi_type_info_get_tag (type_info);
 
     pygi_arg_base_setup (arg_cache, type_info, arg_info, transfer, direction);
 
-    switch (type_tag) {
-    case GI_TYPE_TAG_VOID:
-        if (direction & PYGI_DIRECTION_FROM_PYTHON)
-            arg_cache->from_py_marshaller = marshal_from_py_void;
+    if (direction & PYGI_DIRECTION_FROM_PYTHON)
+        arg_cache->from_py_marshaller = marshal_from_py_void;
 
-        if (direction & PYGI_DIRECTION_TO_PYTHON)
-            arg_cache->to_py_marshaller = marshal_to_py_void;
+    if (direction & PYGI_DIRECTION_TO_PYTHON)
+        arg_cache->to_py_marshaller = marshal_to_py_void;
 
-        break;
-    case GI_TYPE_TAG_BOOLEAN:
-    case GI_TYPE_TAG_INT8:
-    case GI_TYPE_TAG_UINT8:
-    case GI_TYPE_TAG_INT16:
-    case GI_TYPE_TAG_UINT16:
-    case GI_TYPE_TAG_INT32:
-    case GI_TYPE_TAG_UINT32:
-    case GI_TYPE_TAG_INT64:
-    case GI_TYPE_TAG_UINT64:
-    case GI_TYPE_TAG_FLOAT:
-    case GI_TYPE_TAG_DOUBLE:
-    case GI_TYPE_TAG_UNICHAR:
-    case GI_TYPE_TAG_GTYPE:
-        if (direction & PYGI_DIRECTION_FROM_PYTHON)
-            arg_cache->from_py_marshaller =
-                pygi_marshal_from_py_basic_type_cache_adapter;
+    return arg_cache;
+}
 
-        if (direction & PYGI_DIRECTION_TO_PYTHON)
-            arg_cache->to_py_marshaller =
-                pygi_marshal_to_py_basic_type_cache_adapter;
+PyGIArgCache *
+pygi_arg_numeric_type_new_from_info (GITypeInfo *type_info,
+                                     GIArgInfo *arg_info, GITransfer transfer,
+                                     PyGIDirection direction)
+{
+    PyGIArgCache *arg_cache = pygi_arg_cache_alloc ();
 
-        break;
-    case GI_TYPE_TAG_UTF8:
-    case GI_TYPE_TAG_FILENAME:
-        if (direction & PYGI_DIRECTION_FROM_PYTHON) {
-            arg_cache->from_py_marshaller =
-                pygi_marshal_from_py_basic_type_cache_adapter;
-            arg_cache->from_py_cleanup = marshal_cleanup_from_py_utf8;
-        }
+    pygi_arg_base_setup (arg_cache, type_info, arg_info, transfer, direction);
 
-        if (direction & PYGI_DIRECTION_TO_PYTHON) {
-            arg_cache->to_py_marshaller =
-                pygi_marshal_to_py_basic_type_cache_adapter;
-            arg_cache->to_py_cleanup = marshal_cleanup_to_py_utf8;
-        }
+    if (direction & PYGI_DIRECTION_FROM_PYTHON)
+        arg_cache->from_py_marshaller =
+            pygi_marshal_from_py_basic_type_cache_adapter;
 
-        break;
-    case GI_TYPE_TAG_ARRAY:
-    case GI_TYPE_TAG_INTERFACE:
-    case GI_TYPE_TAG_GLIST:
-    case GI_TYPE_TAG_GSLIST:
-    case GI_TYPE_TAG_GHASH:
-    case GI_TYPE_TAG_ERROR:
-    default:
-        g_assert_not_reached ();
+    if (direction & PYGI_DIRECTION_TO_PYTHON)
+        arg_cache->to_py_marshaller =
+            pygi_marshal_to_py_basic_type_cache_adapter;
+
+    return arg_cache;
+}
+
+
+PyGIArgCache *
+pygi_arg_string_type_new_from_info (GITypeInfo *type_info, GIArgInfo *arg_info,
+                                    GITransfer transfer,
+                                    PyGIDirection direction)
+{
+    PyGIArgCache *arg_cache = pygi_arg_cache_alloc ();
+
+    pygi_arg_base_setup (arg_cache, type_info, arg_info, transfer, direction);
+
+    if (direction & PYGI_DIRECTION_FROM_PYTHON) {
+        arg_cache->from_py_marshaller =
+            pygi_marshal_from_py_basic_type_cache_adapter;
+        arg_cache->from_py_cleanup = marshal_cleanup_from_py_utf8;
+    }
+
+    if (direction & PYGI_DIRECTION_TO_PYTHON) {
+        arg_cache->to_py_marshaller =
+            pygi_marshal_to_py_basic_type_cache_adapter;
+        arg_cache->to_py_cleanup = marshal_cleanup_to_py_utf8;
     }
 
     return arg_cache;
