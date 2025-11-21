@@ -77,10 +77,25 @@ pygi_argument_to_gssize (GIArgument *arg_in, GITypeTag type_tag,
         }
         *gssize_out = (gssize)arg_in->v_uint64;
         return TRUE;
-    default:
+    case GI_TYPE_TAG_VOID:
+    case GI_TYPE_TAG_BOOLEAN:
+    case GI_TYPE_TAG_FLOAT:
+    case GI_TYPE_TAG_DOUBLE:
+    case GI_TYPE_TAG_GTYPE:
+    case GI_TYPE_TAG_UTF8:
+    case GI_TYPE_TAG_FILENAME:
+    case GI_TYPE_TAG_ARRAY:
+    case GI_TYPE_TAG_INTERFACE:
+    case GI_TYPE_TAG_GLIST:
+    case GI_TYPE_TAG_GSLIST:
+    case GI_TYPE_TAG_GHASH:
+    case GI_TYPE_TAG_ERROR:
+    case GI_TYPE_TAG_UNICHAR:
         PyErr_Format (PyExc_TypeError, "Unable to marshal %s to gssize",
                       gi_type_tag_to_string (type_tag));
         return FALSE;
+    default:
+        g_assert_not_reached ();
     }
 }
 
@@ -122,15 +137,26 @@ _pygi_hash_pointer_to_arg (GIArgument *arg, GITypeInfo *type_info)
         arg->v_uint16 = (guint16)GPOINTER_TO_UINT (arg->v_pointer);
         break;
     case GI_TYPE_TAG_UINT32:
+    case GI_TYPE_TAG_UNICHAR:
         arg->v_uint32 = (guint32)GPOINTER_TO_UINT (arg->v_pointer);
         break;
     case GI_TYPE_TAG_GTYPE:
         arg->v_size = GPOINTER_TO_SIZE (arg->v_pointer);
         break;
+    case GI_TYPE_TAG_VOID:
+    case GI_TYPE_TAG_BOOLEAN:
+    case GI_TYPE_TAG_INT64:
+    case GI_TYPE_TAG_UINT64:
+    case GI_TYPE_TAG_FLOAT:
+    case GI_TYPE_TAG_DOUBLE:
     case GI_TYPE_TAG_UTF8:
     case GI_TYPE_TAG_FILENAME:
     case GI_TYPE_TAG_INTERFACE:
     case GI_TYPE_TAG_ARRAY:
+    case GI_TYPE_TAG_GLIST:
+    case GI_TYPE_TAG_GSLIST:
+    case GI_TYPE_TAG_GHASH:
+    case GI_TYPE_TAG_ERROR:
         break;
     default:
         g_critical ("Unsupported type %s", gi_type_tag_to_string (type_tag));
@@ -162,6 +188,17 @@ _pygi_arg_to_hash_pointer (const GIArgument *arg, GITypeInfo *type_info)
     case GI_TYPE_TAG_INTERFACE:
     case GI_TYPE_TAG_ARRAY:
         return arg->v_pointer;
+    case GI_TYPE_TAG_VOID:
+    case GI_TYPE_TAG_BOOLEAN:
+    case GI_TYPE_TAG_INT64:
+    case GI_TYPE_TAG_UINT64:
+    case GI_TYPE_TAG_FLOAT:
+    case GI_TYPE_TAG_DOUBLE:
+    case GI_TYPE_TAG_GLIST:
+    case GI_TYPE_TAG_GSLIST:
+    case GI_TYPE_TAG_GHASH:
+    case GI_TYPE_TAG_ERROR:
+    case GI_TYPE_TAG_UNICHAR:
     default:
         g_critical ("Unsupported type %s", gi_type_tag_to_string (type_tag));
         return arg->v_pointer;
@@ -594,13 +631,11 @@ list_item_error:
 
         key_type_tag = gi_type_info_get_tag (key_type_info);
 
-        switch (key_type_tag) {
-        case GI_TYPE_TAG_UTF8:
-        case GI_TYPE_TAG_FILENAME:
+        if (key_type_tag == GI_TYPE_TAG_UTF8
+            || key_type_tag == GI_TYPE_TAG_FILENAME) {
             hash_func = g_str_hash;
             equal_func = g_str_equal;
-            break;
-        default:
+        } else {
             hash_func = NULL;
             equal_func = NULL;
         }
@@ -666,11 +701,28 @@ hash_table_release:
                          "error marshalling is not supported yet");
         /* TODO */
         break;
-    default:
+    case GI_TYPE_TAG_VOID:
+    case GI_TYPE_TAG_INT8:
+    case GI_TYPE_TAG_UINT8:
+    case GI_TYPE_TAG_INT16:
+    case GI_TYPE_TAG_UINT16:
+    case GI_TYPE_TAG_INT32:
+    case GI_TYPE_TAG_UINT32:
+    case GI_TYPE_TAG_GTYPE:
+    case GI_TYPE_TAG_BOOLEAN:
+    case GI_TYPE_TAG_INT64:
+    case GI_TYPE_TAG_UINT64:
+    case GI_TYPE_TAG_FLOAT:
+    case GI_TYPE_TAG_DOUBLE:
+    case GI_TYPE_TAG_UTF8:
+    case GI_TYPE_TAG_FILENAME:
+    case GI_TYPE_TAG_UNICHAR:
         /* Ignores cleanup data for now. */
         pygi_marshal_from_py_basic_type (object, &arg, type_tag, transfer,
                                          &cleanup_data);
         break;
+    default:
+        g_assert_not_reached ();
     }
 
     return arg;
@@ -953,9 +1005,25 @@ _pygi_argument_to_object (GIArgument *arg, GITypeInfo *type_info,
         }
         break;
     }
-    default: {
+    case GI_TYPE_TAG_INT8:
+    case GI_TYPE_TAG_UINT8:
+    case GI_TYPE_TAG_INT16:
+    case GI_TYPE_TAG_UINT16:
+    case GI_TYPE_TAG_INT32:
+    case GI_TYPE_TAG_UINT32:
+    case GI_TYPE_TAG_GTYPE:
+    case GI_TYPE_TAG_BOOLEAN:
+    case GI_TYPE_TAG_INT64:
+    case GI_TYPE_TAG_UINT64:
+    case GI_TYPE_TAG_FLOAT:
+    case GI_TYPE_TAG_DOUBLE:
+    case GI_TYPE_TAG_UTF8:
+    case GI_TYPE_TAG_FILENAME:
+    case GI_TYPE_TAG_UNICHAR:
         object = pygi_marshal_to_py_basic_type (arg, type_tag, transfer);
-    }
+        break;
+    default:
+        g_assert_not_reached ();
     }
 
     return object;

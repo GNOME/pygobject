@@ -92,9 +92,18 @@ _pygi_closure_assign_pyobj_to_retval (gpointer retval, GIArgument *arg,
 
         break;
     }
-    default:
+    case GI_TYPE_TAG_VOID:
+    case GI_TYPE_TAG_UTF8:
+    case GI_TYPE_TAG_FILENAME:
+    case GI_TYPE_TAG_ARRAY:
+    case GI_TYPE_TAG_GLIST:
+    case GI_TYPE_TAG_GSLIST:
+    case GI_TYPE_TAG_GHASH:
+    case GI_TYPE_TAG_ERROR:
         *(ffi_arg *)retval = (ffi_arg)arg->v_pointer;
         break;
+    default:
+        g_assert_not_reached ();
     }
 }
 
@@ -169,10 +178,18 @@ _pygi_closure_assign_pyobj_to_out_argument (gpointer out_arg, GIArgument *arg,
         }
         break;
     }
-
-    default:
+    case GI_TYPE_TAG_VOID:
+    case GI_TYPE_TAG_UTF8:
+    case GI_TYPE_TAG_FILENAME:
+    case GI_TYPE_TAG_ARRAY:
+    case GI_TYPE_TAG_GLIST:
+    case GI_TYPE_TAG_GSLIST:
+    case GI_TYPE_TAG_GHASH:
+    case GI_TYPE_TAG_ERROR:
         *((gpointer *)out_arg) = arg->v_pointer;
         break;
+    default:
+        g_assert_not_reached ();
     }
 }
 

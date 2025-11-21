@@ -44,6 +44,7 @@ gi_argument_from_c_long (GIArgument *arg_out, long c_long_in,
         arg_out->v_int32 = (gint32)c_long_in;
         return TRUE;
     case GI_TYPE_TAG_UINT32:
+    case GI_TYPE_TAG_UNICHAR:
         arg_out->v_uint32 = (guint32)c_long_in;
         return TRUE;
     case GI_TYPE_TAG_INT64:
@@ -52,10 +53,24 @@ gi_argument_from_c_long (GIArgument *arg_out, long c_long_in,
     case GI_TYPE_TAG_UINT64:
         arg_out->v_uint64 = (guint64)c_long_in;
         return TRUE;
-    default:
+    case GI_TYPE_TAG_VOID:
+    case GI_TYPE_TAG_BOOLEAN:
+    case GI_TYPE_TAG_FLOAT:
+    case GI_TYPE_TAG_DOUBLE:
+    case GI_TYPE_TAG_GTYPE:
+    case GI_TYPE_TAG_UTF8:
+    case GI_TYPE_TAG_FILENAME:
+    case GI_TYPE_TAG_ARRAY:
+    case GI_TYPE_TAG_INTERFACE:
+    case GI_TYPE_TAG_GLIST:
+    case GI_TYPE_TAG_GSLIST:
+    case GI_TYPE_TAG_GHASH:
+    case GI_TYPE_TAG_ERROR:
         PyErr_Format (PyExc_TypeError, "Unable to marshal C long %ld to %s",
                       c_long_in, gi_type_tag_to_string (type_tag));
         return FALSE;
+    default:
+        g_assert_not_reached ();
     }
 }
 
@@ -80,6 +95,7 @@ gi_argument_to_c_long (GIArgument *arg_in, long *c_long_out,
         *c_long_out = arg_in->v_int32;
         return TRUE;
     case GI_TYPE_TAG_UINT32:
+    case GI_TYPE_TAG_UNICHAR:
         *c_long_out = arg_in->v_uint32;
         return TRUE;
     case GI_TYPE_TAG_INT64:
@@ -98,10 +114,24 @@ gi_argument_to_c_long (GIArgument *arg_in, long *c_long_out,
         }
         *c_long_out = (glong)arg_in->v_uint64;
         return TRUE;
-    default:
+    case GI_TYPE_TAG_VOID:
+    case GI_TYPE_TAG_BOOLEAN:
+    case GI_TYPE_TAG_FLOAT:
+    case GI_TYPE_TAG_DOUBLE:
+    case GI_TYPE_TAG_GTYPE:
+    case GI_TYPE_TAG_UTF8:
+    case GI_TYPE_TAG_FILENAME:
+    case GI_TYPE_TAG_ARRAY:
+    case GI_TYPE_TAG_INTERFACE:
+    case GI_TYPE_TAG_GLIST:
+    case GI_TYPE_TAG_GSLIST:
+    case GI_TYPE_TAG_GHASH:
+    case GI_TYPE_TAG_ERROR:
         PyErr_Format (PyExc_TypeError, "Unable to marshal %s to C long",
                       gi_type_tag_to_string (type_tag));
         return FALSE;
+    default:
+        g_assert_not_reached ();
     }
 }
 

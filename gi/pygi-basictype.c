@@ -1057,9 +1057,16 @@ pygi_marshal_from_py_basic_type (PyObject *object, /* in */
         }
         return FALSE;
 
-    default:
+    case GI_TYPE_TAG_ARRAY:
+    case GI_TYPE_TAG_INTERFACE:
+    case GI_TYPE_TAG_GLIST:
+    case GI_TYPE_TAG_GSLIST:
+    case GI_TYPE_TAG_GHASH:
+    case GI_TYPE_TAG_ERROR:
         PyErr_Format (PyExc_TypeError, "Type tag %d not supported", type_tag);
         return FALSE;
+    default:
+        g_assert_not_reached ();
     }
 
     return TRUE;
@@ -1157,8 +1164,16 @@ pygi_marshal_to_py_basic_type (GIArgument *arg, GITypeTag type_tag,
     case GI_TYPE_TAG_FILENAME:
         return pygi_filename_to_py (arg->v_string);
 
-    default:
+    case GI_TYPE_TAG_VOID:
+    case GI_TYPE_TAG_ARRAY:
+    case GI_TYPE_TAG_INTERFACE:
+    case GI_TYPE_TAG_GLIST:
+    case GI_TYPE_TAG_GSLIST:
+    case GI_TYPE_TAG_GHASH:
+    case GI_TYPE_TAG_ERROR:
         PyErr_Format (PyExc_TypeError, "Type tag %d not supported", type_tag);
         return NULL;
+    default:
+        g_assert_not_reached ();
     }
 }

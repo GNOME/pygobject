@@ -356,12 +356,17 @@ pygi_set_property_gvalue_from_property_info (GIPropertyInfo *property_info,
         g_array_free (arg_items, TRUE);
         break;
     }
-    default:
+    case GI_TYPE_TAG_VOID:
+    case GI_TYPE_TAG_GSLIST:
+    case GI_TYPE_TAG_ERROR:
+    case GI_TYPE_TAG_UNICHAR:
         PyErr_Format (
             PyExc_NotImplementedError,
             "Setting properties of type %s is not implemented",
             gi_type_tag_to_string (gi_type_info_get_tag (type_info)));
         goto out;
+    default:
+        g_assert_not_reached ();
     }
 
     ret_value = 0;

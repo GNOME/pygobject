@@ -180,6 +180,12 @@ pygi_arg_basic_type_new_from_info (GITypeInfo *type_info, GIArgInfo *arg_info,
         }
 
         break;
+    case GI_TYPE_TAG_ARRAY:
+    case GI_TYPE_TAG_INTERFACE:
+    case GI_TYPE_TAG_GLIST:
+    case GI_TYPE_TAG_GSLIST:
+    case GI_TYPE_TAG_GHASH:
+    case GI_TYPE_TAG_ERROR:
     default:
         g_assert_not_reached ();
     }

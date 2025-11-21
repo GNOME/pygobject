@@ -85,13 +85,11 @@ _pygi_marshal_from_py_ghash (PyGIInvokeState *state,
     key_from_py_marshaller = hash_cache->key_cache->from_py_marshaller;
     value_from_py_marshaller = hash_cache->value_cache->from_py_marshaller;
 
-    switch (hash_cache->key_cache->type_tag) {
-    case GI_TYPE_TAG_UTF8:
-    case GI_TYPE_TAG_FILENAME:
+    if (hash_cache->key_cache->type_tag == GI_TYPE_TAG_UTF8
+        || hash_cache->key_cache->type_tag == GI_TYPE_TAG_FILENAME) {
         hash_func = g_str_hash;
         equal_func = g_str_equal;
-        break;
-    default:
+    } else {
         hash_func = NULL;
         equal_func = NULL;
     }

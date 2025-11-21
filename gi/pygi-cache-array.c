@@ -145,6 +145,7 @@ gi_argument_to_gsize (GIArgument *arg_in, gsize *gsize_out, GITypeTag type_tag)
         *gsize_out = arg_in->v_int32;
         return TRUE;
     case GI_TYPE_TAG_UINT32:
+    case GI_TYPE_TAG_UNICHAR:
         *gsize_out = arg_in->v_uint32;
         return TRUE;
     case GI_TYPE_TAG_INT64:
@@ -163,6 +164,19 @@ gi_argument_to_gsize (GIArgument *arg_in, gsize *gsize_out, GITypeTag type_tag)
         }
         *gsize_out = (gsize)arg_in->v_uint64;
         return TRUE;
+    case GI_TYPE_TAG_VOID:
+    case GI_TYPE_TAG_BOOLEAN:
+    case GI_TYPE_TAG_FLOAT:
+    case GI_TYPE_TAG_DOUBLE:
+    case GI_TYPE_TAG_GTYPE:
+    case GI_TYPE_TAG_UTF8:
+    case GI_TYPE_TAG_FILENAME:
+    case GI_TYPE_TAG_ARRAY:
+    case GI_TYPE_TAG_INTERFACE:
+    case GI_TYPE_TAG_GLIST:
+    case GI_TYPE_TAG_GSLIST:
+    case GI_TYPE_TAG_GHASH:
+    case GI_TYPE_TAG_ERROR:
     default:
         PyErr_Format (PyExc_TypeError, "Unable to marshal %s to gsize",
                       gi_type_tag_to_string (type_tag));
