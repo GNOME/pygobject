@@ -39,43 +39,44 @@
 #include "pygi-value.h"
 
 gboolean
-pygi_argument_to_gssize (GIArgument *arg_in, GITypeTag type_tag,
-                         gssize *gssize_out)
+pygi_argument_to_gsize (GIArgument *arg_in, GITypeTag type_tag,
+                        gsize *gsize_out)
 {
     switch (type_tag) {
     case GI_TYPE_TAG_INT8:
-        *gssize_out = arg_in->v_int8;
+        *gsize_out = arg_in->v_int8;
         return TRUE;
     case GI_TYPE_TAG_UINT8:
-        *gssize_out = arg_in->v_uint8;
+        *gsize_out = arg_in->v_uint8;
         return TRUE;
     case GI_TYPE_TAG_INT16:
-        *gssize_out = arg_in->v_int16;
+        *gsize_out = arg_in->v_int16;
         return TRUE;
     case GI_TYPE_TAG_UINT16:
-        *gssize_out = arg_in->v_uint16;
+        *gsize_out = arg_in->v_uint16;
         return TRUE;
     case GI_TYPE_TAG_INT32:
-        *gssize_out = arg_in->v_int32;
+        *gsize_out = arg_in->v_int32;
         return TRUE;
     case GI_TYPE_TAG_UINT32:
-        *gssize_out = arg_in->v_uint32;
+    case GI_TYPE_TAG_UNICHAR:
+        *gsize_out = arg_in->v_uint32;
         return TRUE;
     case GI_TYPE_TAG_INT64:
-        if (arg_in->v_int64 > G_MAXSSIZE || arg_in->v_int64 < G_MINSSIZE) {
-            PyErr_Format (PyExc_TypeError, "Unable to marshal %s to gssize",
+        if (arg_in->v_uint64 > G_MAXSIZE) {
+            PyErr_Format (PyExc_TypeError, "Unable to marshal %s to gsize",
                           gi_type_tag_to_string (type_tag));
             return FALSE;
         }
-        *gssize_out = (gssize)arg_in->v_int64;
+        *gsize_out = (gsize)arg_in->v_int64;
         return TRUE;
     case GI_TYPE_TAG_UINT64:
-        if (arg_in->v_uint64 > G_MAXSSIZE) {
-            PyErr_Format (PyExc_TypeError, "Unable to marshal %s to gssize",
+        if (arg_in->v_uint64 > G_MAXSIZE) {
+            PyErr_Format (PyExc_TypeError, "Unable to marshal %s to gsize",
                           gi_type_tag_to_string (type_tag));
             return FALSE;
         }
-        *gssize_out = (gssize)arg_in->v_uint64;
+        *gsize_out = (gsize)arg_in->v_uint64;
         return TRUE;
     case GI_TYPE_TAG_VOID:
     case GI_TYPE_TAG_BOOLEAN:
@@ -90,12 +91,10 @@ pygi_argument_to_gssize (GIArgument *arg_in, GITypeTag type_tag,
     case GI_TYPE_TAG_GSLIST:
     case GI_TYPE_TAG_GHASH:
     case GI_TYPE_TAG_ERROR:
-    case GI_TYPE_TAG_UNICHAR:
-        PyErr_Format (PyExc_TypeError, "Unable to marshal %s to gssize",
+    default:
+        PyErr_Format (PyExc_TypeError, "Unable to marshal %s to gsize",
                       gi_type_tag_to_string (type_tag));
         return FALSE;
-    default:
-        g_assert_not_reached ();
     }
 }
 
@@ -205,43 +204,6 @@ _pygi_arg_to_hash_pointer (const GIArgument *arg, GITypeInfo *type_info)
     }
 }
 
-
-/**
- * _pygi_argument_array_length_marshal:
- * @length_arg_index: Index of length argument in the callables args list.
- * @user_data1: (type Array(GValue)): Array of GValue arguments to retrieve length
- * @user_data2: (type GICallableInfo): Callable info to get the argument from.
- *
- * Generic marshalling policy for array length arguments in callables.
- *
- * Returns: The length of the array or -1 on failure.
- */
-gssize
-_pygi_argument_array_length_marshal (gsize length_arg_index, void *user_data1,
-                                     void *user_data2)
-{
-    GIArgInfo length_arg_info;
-    GITypeInfo length_type_info;
-    GIArgument length_arg;
-    gssize array_len = -1;
-    GValue *values = (GValue *)user_data1;
-    GICallableInfo *callable_info = (GICallableInfo *)user_data2;
-
-    gi_callable_info_load_arg (callable_info, (gint)length_arg_index,
-                               &length_arg_info);
-    gi_arg_info_load_type_info (&length_arg_info, &length_type_info);
-
-    length_arg = _pygi_argument_from_g_value (&(values[length_arg_index]),
-                                              &length_type_info);
-    if (!pygi_argument_to_gssize (&length_arg,
-                                  gi_type_info_get_tag (&length_type_info),
-                                  &array_len)) {
-        return -1;
-    }
-
-    return array_len;
-}
-
 /**
  * _pygi_argument_to_array
  * @arg: The argument to convert
@@ -271,8 +233,7 @@ _pygi_argument_to_array (GIArgument *arg,
     GITypeInfo *item_type_info;
     gboolean is_zero_terminated;
     gsize item_size;
-    size_t length;
-    gssize length_policy;
+    gsize length;
     GArray *g_array;
 
     g_return_val_if_fail (
@@ -322,12 +283,10 @@ _pygi_argument_to_array (GIArgument *arg,
                     type_info, &length_arg_pos);
                 g_assert (has_array_length);
 
-                length_policy = array_length_policy (length_arg_pos,
-                                                     user_data1, user_data2);
-                if (length_policy < 0) {
+                if (!array_length_policy (length_arg_pos, user_data1,
+                                          user_data2, &length)) {
                     return NULL;
                 }
-                length = (size_t)length_policy;
             }
         }
 

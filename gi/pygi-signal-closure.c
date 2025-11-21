@@ -66,6 +66,37 @@ pygi_signal_closure_invalidate (gpointer data, GClosure *closure)
     ((PyGISignalClosure *)pc)->signal_info = NULL;
 }
 
+
+/**
+ * _pygi_signal_closure_length_marshal:
+ * @length_arg_index: Index of length argument in the callables args list.
+ * @user_data1: (type Array(GValue)): Array of GValue arguments to retrieve length
+ * @user_data2: (type GICallableInfo): Callable info to get the argument from.
+ * @array_len: (out) length of the array
+ * Generic marshalling policy for array length arguments in callables.
+ *
+ * Returns: TRUE on success, FALSE on failure.
+ */
+static gboolean
+_pygi_signal_closure_length_marshal (gsize length_arg_index, void *user_data1,
+                                     void *user_data2, gsize *array_len)
+{
+    GIArgInfo length_arg_info;
+    GITypeInfo length_type_info;
+    GIArgument length_arg;
+    GValue *values = (GValue *)user_data1;
+    GICallableInfo *callable_info = (GICallableInfo *)user_data2;
+
+    gi_callable_info_load_arg (callable_info, (gint)length_arg_index,
+                               &length_arg_info);
+    gi_arg_info_load_type_info (&length_arg_info, &length_type_info);
+
+    length_arg = _pygi_argument_from_g_value (&(values[length_arg_index]),
+                                              &length_type_info);
+    return pygi_argument_to_gsize (
+        &length_arg, gi_type_info_get_tag (&length_type_info), array_len);
+}
+
 static void
 pygi_signal_closure_marshal (GClosure *closure, GValue *return_value,
                              guint n_param_values, const GValue *param_values,
@@ -130,7 +161,7 @@ pygi_signal_closure_marshal (GClosure *closure, GValue *return_value,
             if (type_tag == GI_TYPE_TAG_ARRAY) {
                 /* Skip the self argument of param_values */
                 arg.v_pointer = _pygi_argument_to_array (
-                    &arg, _pygi_argument_array_length_marshal,
+                    &arg, _pygi_signal_closure_length_marshal,
                     (void *)(param_values + 1), signal_info, &type_info,
                     &free_array);
             }
