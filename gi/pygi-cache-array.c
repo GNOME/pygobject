@@ -110,8 +110,9 @@ gi_argument_from_py_ssize_t (GIArgument *arg_out, Py_ssize_t size_in,
     case GI_TYPE_TAG_GHASH:
     case GI_TYPE_TAG_ERROR:
     case GI_TYPE_TAG_UNICHAR:
-    default:
         goto unhandled_type;
+    default:
+        g_assert_not_reached ();
     }
 
 overflow:

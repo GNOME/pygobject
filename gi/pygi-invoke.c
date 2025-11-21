@@ -360,7 +360,7 @@ _caller_alloc (PyGIArgCache *arg_cache, GIArgument *arg)
             arg->v_pointer = g_byte_array_new ();
             break;
         default:
-            return FALSE;
+            g_assert_not_reached ();
         }
     } else {
         return FALSE;
@@ -534,7 +534,6 @@ _invoke_marshal_in_args (PyGIInvokeState *state,
             break;
         default:
             g_assert_not_reached ();
-            break;
         }
 
         if (py_arg == _PyGIDefaultArgPlaceholder) {

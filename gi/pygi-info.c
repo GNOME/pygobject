@@ -1117,7 +1117,7 @@ _pygi_g_type_tag_size (GITypeTag type_tag)
                       gi_type_tag_to_string (type_tag));
         break;
     default:
-        break;
+        g_assert_not_reached ();
     }
 
     return size;
@@ -1196,7 +1196,7 @@ _pygi_gi_type_info_size (GITypeInfo *type_info)
         size = sizeof (gpointer);
         break;
     default:
-        break;
+        g_assert_not_reached ();
     }
 
     return size;
@@ -1465,7 +1465,6 @@ pygi_gi_struct_info_is_simple (GIStructInfo *struct_info)
         }
         default:
             g_assert_not_reached ();
-            break;
         }
 
         gi_base_info_unref ((GIBaseInfo *)field_type_info);

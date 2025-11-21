@@ -91,10 +91,11 @@ pygi_argument_to_gsize (GIArgument *arg_in, GITypeTag type_tag,
     case GI_TYPE_TAG_GSLIST:
     case GI_TYPE_TAG_GHASH:
     case GI_TYPE_TAG_ERROR:
-    default:
         PyErr_Format (PyExc_TypeError, "Unable to marshal %s to gsize",
                       gi_type_tag_to_string (type_tag));
         return FALSE;
+    default:
+        g_assert_not_reached ();
     }
 }
 
@@ -162,7 +163,7 @@ _pygi_hash_pointer_to_arg (GIArgument *arg, GITypeInfo *type_info)
     case GI_TYPE_TAG_ERROR:
         break;
     default:
-        g_critical ("Unsupported type %s", gi_type_tag_to_string (type_tag));
+        g_assert_not_reached ();
     }
 }
 
@@ -204,9 +205,10 @@ _pygi_arg_to_hash_pointer (const GIArgument *arg, GITypeInfo *type_info)
     case GI_TYPE_TAG_GSLIST:
     case GI_TYPE_TAG_GHASH:
     case GI_TYPE_TAG_ERROR:
-    default:
         g_critical ("Unsupported type %s", gi_type_tag_to_string (type_tag));
         return arg->v_pointer;
+    default:
+        g_assert_not_reached ();
     }
 }
 
@@ -319,10 +321,7 @@ _pygi_argument_to_array (GIArgument *arg,
         break;
     }
     default:
-        g_critical ("Unexpected array type %u",
-                    gi_type_info_get_array_type (type_info));
-        g_array = NULL;
-        break;
+        g_assert_not_reached ();
     }
 
     return g_array;
@@ -1268,6 +1267,6 @@ _pygi_argument_release (GIArgument *arg, GITypeInfo *type_info,
         break;
     }
     default:
-        break;
+        g_assert_not_reached ();
     }
 }

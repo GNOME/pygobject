@@ -243,7 +243,7 @@ pygi_arg_cache_new (GITypeInfo *type_info,
                                                    transfer, direction);
         break;
     default:
-        break;
+        g_assert_not_reached ();
     }
 
     if (arg_cache != NULL) {

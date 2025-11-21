@@ -90,8 +90,7 @@ pyg_ptr_richcompare (void *a, void *b, int op)
         res = (a >= b) ? Py_True : Py_False;
         break;
     default:
-        res = Py_NotImplemented;
-        break;
+        g_assert_not_reached ();
     }
 
     return Py_NewRef (res);

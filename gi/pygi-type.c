@@ -126,7 +126,6 @@ generic_gsize_richcompare (gsize a, gsize b, int op)
         Py_INCREF (res);
         break;
 
-
     case Py_LT:
         res = (a < b) ? Py_True : Py_False;
         Py_INCREF (res);
@@ -148,8 +147,7 @@ generic_gsize_richcompare (gsize a, gsize b, int op)
         break;
 
     default:
-        res = Py_NewRef (Py_NotImplemented);
-        break;
+        g_assert_not_reached ();
     }
 
     return res;

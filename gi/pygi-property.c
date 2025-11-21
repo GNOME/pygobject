@@ -304,6 +304,7 @@ pygi_set_property_gvalue_from_property_info (GIPropertyInfo *property_info,
         break;
     case GI_TYPE_TAG_UINT16:
     case GI_TYPE_TAG_UINT32:
+    case GI_TYPE_TAG_UNICHAR:
         if (G_VALUE_HOLDS_ULONG (value))
             g_value_set_ulong (value, arg.v_ulong);
         else
@@ -359,7 +360,6 @@ pygi_set_property_gvalue_from_property_info (GIPropertyInfo *property_info,
     case GI_TYPE_TAG_VOID:
     case GI_TYPE_TAG_GSLIST:
     case GI_TYPE_TAG_ERROR:
-    case GI_TYPE_TAG_UNICHAR:
         PyErr_Format (
             PyExc_NotImplementedError,
             "Setting properties of type %s is not implemented",

@@ -162,7 +162,7 @@ _pygi_argument_from_g_value (const GValue *value, GITypeInfo *type_info)
         arg.v_pointer = g_value_get_pointer (value);
         break;
     default:
-        break;
+        g_assert_not_reached ();
     }
 
     return arg;
