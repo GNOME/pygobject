@@ -62,6 +62,9 @@ void _pygi_argument_release (GIArgument *arg, GITypeInfo *type_info,
 gboolean pygi_argument_to_gsize (GIArgument arg, GITypeTag type_tag,
                                  gsize *gsize_out);
 
+GIArgument pygi_argument_list_from_py (PyObject *object, GITypeInfo *type_info,
+                                       GITransfer transfer);
+
 G_END_DECLS
 
 #endif /* __PYGI_ARGUMENT_H__ */
