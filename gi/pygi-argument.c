@@ -212,7 +212,7 @@ _pygi_arg_to_hash_pointer (const GIArgument arg, GITypeInfo *type_info)
 }
 
 /**
- * _pygi_argument_to_array
+ * pygi_argument_to_array
  * @arg: The argument to convert
  * @array_length_policy: Closure for marshalling the array length argument when needed.
  * @user_data1: Generic user data passed to the array_length_policy.
@@ -232,10 +232,10 @@ _pygi_arg_to_hash_pointer (const GIArgument arg, GITypeInfo *type_info)
  *          Otherwise don't free the array.
  */
 GArray *
-_pygi_argument_to_array (GIArgument arg,
-                         PyGIArgArrayLengthPolicy array_length_policy,
-                         void *user_data1, void *user_data2,
-                         GITypeInfo *type_info, gboolean *out_free_array)
+pygi_argument_to_array (GIArgument arg,
+                        PyGIArgArrayLengthPolicy array_length_policy,
+                        void *user_data1, void *user_data2,
+                        GITypeInfo *type_info, gboolean *out_free_array)
 {
     GITypeInfo *item_type_info;
     gboolean is_zero_terminated;
@@ -935,7 +935,7 @@ pygi_argument_hash_table_to_object (GIArgument arg, GITypeInfo *type_info,
  * @transfer:
  *
  * If the argument is of type array, it must be encoded in a GArray, by calling
- * _pygi_argument_to_array(). This logic can not be folded into this method
+ * pygi_argument_to_array(). This logic can not be folded into this method
  * as determining array lengths may require access to method call arguments.
  *
  * Returns: A PyObject representing @arg
