@@ -50,11 +50,11 @@ GArray *_pygi_argument_to_array (GIArgument arg,
                                  GITypeInfo *type_info,
                                  gboolean *out_free_array);
 
-GIArgument _pygi_argument_from_object (PyObject *object, GITypeInfo *type_info,
-                                       GITransfer transfer);
+GIArgument pygi_argument_from_object (PyObject *object, GITypeInfo *type_info,
+                                      GITransfer transfer);
 
-PyObject *_pygi_argument_to_object (GIArgument arg, GITypeInfo *type_info,
-                                    GITransfer transfer);
+PyObject *pygi_argument_to_object (GIArgument arg, GITypeInfo *type_info,
+                                   GITransfer transfer);
 
 void _pygi_argument_release (GIArgument *arg, GITypeInfo *type_info,
                              GITransfer transfer, GIDirection direction);

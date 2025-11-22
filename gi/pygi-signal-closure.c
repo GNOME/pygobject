@@ -170,7 +170,7 @@ pygi_signal_closure_marshal (GClosure *closure, GValue *return_value,
              * versions which support signal output arguments as return values.
              * See: https://bugzilla.gnome.org/show_bug.cgi?id=735486
              *
-             * Note the logic here must match the logic path taken in _pygi_argument_to_object.
+             * Note the logic here must match the logic path taken in pygi_argument_to_object.
              */
             if (type_tag == GI_TYPE_TAG_INTERFACE) {
                 GIBaseInfo *info = gi_type_info_get_interface (&type_info);
@@ -193,8 +193,8 @@ pygi_signal_closure_marshal (GClosure *closure, GValue *return_value,
 
             if (pass_struct_by_ref) {
                 /* transfer everything will ensure the struct is not copied when wrapped. */
-                item = _pygi_argument_to_object (arg, &type_info,
-                                                 GI_TRANSFER_EVERYTHING);
+                item = pygi_argument_to_object (arg, &type_info,
+                                                GI_TRANSFER_EVERYTHING);
                 if (item
                     && PyObject_IsInstance (item,
                                             (PyObject *)&PyGIBoxed_Type)) {
@@ -204,8 +204,8 @@ pygi_signal_closure_marshal (GClosure *closure, GValue *return_value,
                 }
 
             } else {
-                item = _pygi_argument_to_object (arg, &type_info,
-                                                 GI_TRANSFER_NOTHING);
+                item = pygi_argument_to_object (arg, &type_info,
+                                                GI_TRANSFER_NOTHING);
             }
 
             if (free_array) {

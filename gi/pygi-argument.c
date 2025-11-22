@@ -223,7 +223,7 @@ _pygi_arg_to_hash_pointer (const GIArgument arg, GITypeInfo *type_info)
  *
  * Make sure an array type argument is wrapped in a GArray.
  *
- * Note: This method can *not* be folded into _pygi_argument_to_object() because
+ * Note: This method can *not* be folded into pygi_argument_to_object() because
  * arrays are special in the sense that they might require access to @args in
  * order to get the length.
  *
@@ -386,8 +386,8 @@ pygi_argument_array_from_object (PyObject *object, GITypeInfo *type_info,
                 goto array_item_error;
             }
 
-            item = _pygi_argument_from_object (py_item, item_type_info,
-                                               item_transfer);
+            item = pygi_argument_from_object (py_item, item_type_info,
+                                              item_transfer);
 
             Py_DECREF (py_item);
 
@@ -505,8 +505,8 @@ pygi_argument_list_from_object (PyObject *object, GITypeInfo *type_info,
             goto list_item_error;
         }
 
-        item = _pygi_argument_from_object (py_item, item_type_info,
-                                           item_transfer);
+        item =
+            pygi_argument_from_object (py_item, item_type_info, item_transfer);
 
         Py_DECREF (py_item);
 
@@ -601,14 +601,13 @@ pygi_argument_hash_table_from_object (PyObject *object, GITypeInfo *type_info,
         py_key = PyList_GET_ITEM (keys, i);
         py_value = PyList_GET_ITEM (values, i);
 
-        key =
-            _pygi_argument_from_object (py_key, key_type_info, item_transfer);
+        key = pygi_argument_from_object (py_key, key_type_info, item_transfer);
         if (PyErr_Occurred ()) {
             goto hash_table_item_error;
         }
 
-        value = _pygi_argument_from_object (py_value, value_type_info,
-                                            item_transfer);
+        value = pygi_argument_from_object (py_value, value_type_info,
+                                           item_transfer);
         if (PyErr_Occurred ()) {
             _pygi_argument_release (&key, type_info, GI_TRANSFER_NOTHING,
                                     GI_DIRECTION_IN);
@@ -639,8 +638,8 @@ hash_table_item_error:
 }
 
 GIArgument
-_pygi_argument_from_object (PyObject *object, GITypeInfo *type_info,
-                            GITransfer transfer)
+pygi_argument_from_object (PyObject *object, GITypeInfo *type_info,
+                           GITransfer transfer)
 {
     GIArgument arg = PYGI_ARG_INIT;
     GITypeTag type_tag;
@@ -649,26 +648,6 @@ _pygi_argument_from_object (PyObject *object, GITypeInfo *type_info,
     type_tag = gi_type_info_get_tag (type_info);
 
     switch (type_tag) {
-    case GI_TYPE_TAG_ARRAY:
-        arg = pygi_argument_array_from_object (object, type_info, transfer);
-        break;
-    case GI_TYPE_TAG_INTERFACE:
-        arg =
-            pygi_argument_interface_from_object (object, type_info, transfer);
-        break;
-    case GI_TYPE_TAG_GLIST:
-    case GI_TYPE_TAG_GSLIST:
-        arg = pygi_argument_list_from_object (object, type_info, transfer);
-        break;
-    case GI_TYPE_TAG_GHASH:
-        arg =
-            pygi_argument_hash_table_from_object (object, type_info, transfer);
-        break;
-    case GI_TYPE_TAG_ERROR:
-        PyErr_SetString (PyExc_NotImplementedError,
-                         "error marshalling is not supported yet");
-        /* TODO */
-        break;
     case GI_TYPE_TAG_VOID:
     case GI_TYPE_TAG_INT8:
     case GI_TYPE_TAG_UINT8:
@@ -688,6 +667,26 @@ _pygi_argument_from_object (PyObject *object, GITypeInfo *type_info,
         /* Ignores cleanup data for now. */
         arg = pygi_marshal_from_py_basic_type (object, type_tag, transfer,
                                                &cleanup_data);
+        break;
+    case GI_TYPE_TAG_ARRAY:
+        arg = pygi_argument_array_from_object (object, type_info, transfer);
+        break;
+    case GI_TYPE_TAG_INTERFACE:
+        arg =
+            pygi_argument_interface_from_object (object, type_info, transfer);
+        break;
+    case GI_TYPE_TAG_GLIST:
+    case GI_TYPE_TAG_GSLIST:
+        arg = pygi_argument_list_from_object (object, type_info, transfer);
+        break;
+    case GI_TYPE_TAG_GHASH:
+        arg =
+            pygi_argument_hash_table_from_object (object, type_info, transfer);
+        break;
+    case GI_TYPE_TAG_ERROR:
+        PyErr_SetString (PyExc_NotImplementedError,
+                         "error marshalling is not supported yet");
+        /* TODO */
         break;
     default:
         g_assert_not_reached ();
@@ -745,7 +744,7 @@ pygi_argument_array_to_object (GIArgument arg, GITypeInfo *type_info,
             memcpy (&item, array->data + i * item_size, item_size);
 
             py_item =
-                _pygi_argument_to_object (item, item_type_info, item_transfer);
+                pygi_argument_to_object (item, item_type_info, item_transfer);
             if (py_item == NULL) {
                 Py_CLEAR (object);
                 _PyGI_ERROR_PREFIX ("Item %zu: ", i);
@@ -849,7 +848,7 @@ pygi_argument_list_to_object (GIArgument arg, GITypeInfo *type_info,
         item.v_pointer = list->data;
 
         py_item =
-            _pygi_argument_to_object (item, item_type_info, item_transfer);
+            pygi_argument_to_object (item, item_type_info, item_transfer);
         if (py_item == NULL) {
             Py_CLEAR (object);
             _PyGI_ERROR_PREFIX ("Item %zu: ", i);
@@ -899,14 +898,14 @@ pygi_argument_hash_table_to_object (GIArgument arg, GITypeInfo *type_info,
         PyObject *py_value;
         int retval;
 
-        py_key = _pygi_argument_to_object (key, key_type_info, item_transfer);
+        py_key = pygi_argument_to_object (key, key_type_info, item_transfer);
         if (py_key == NULL) {
             break;
         }
 
         _pygi_hash_pointer_to_arg_in_place (&value, value_type_info);
         py_value =
-            _pygi_argument_to_object (value, value_type_info, item_transfer);
+            pygi_argument_to_object (value, value_type_info, item_transfer);
         if (py_value == NULL) {
             Py_DECREF (py_key);
             break;
@@ -929,7 +928,7 @@ pygi_argument_hash_table_to_object (GIArgument arg, GITypeInfo *type_info,
 }
 
 /**
- * _pygi_argument_to_object:
+ * pygi_argument_to_object:
  * @arg: The argument to convert to an object.
  * @type_info: Type info for @arg
  * @transfer:
@@ -941,8 +940,8 @@ pygi_argument_hash_table_to_object (GIArgument arg, GITypeInfo *type_info,
  * Returns: A PyObject representing @arg
  */
 PyObject *
-_pygi_argument_to_object (GIArgument arg, GITypeInfo *type_info,
-                          GITransfer transfer)
+pygi_argument_to_object (GIArgument arg, GITypeInfo *type_info,
+                         GITransfer transfer)
 {
     GITypeTag type_tag;
     PyObject *object = NULL;
@@ -950,6 +949,25 @@ _pygi_argument_to_object (GIArgument arg, GITypeInfo *type_info,
     type_tag = gi_type_info_get_tag (type_info);
 
     switch (type_tag) {
+    case GI_TYPE_TAG_VOID:
+    case GI_TYPE_TAG_INT8:
+    case GI_TYPE_TAG_UINT8:
+    case GI_TYPE_TAG_INT16:
+    case GI_TYPE_TAG_UINT16:
+    case GI_TYPE_TAG_INT32:
+    case GI_TYPE_TAG_UINT32:
+    case GI_TYPE_TAG_GTYPE:
+    case GI_TYPE_TAG_BOOLEAN:
+    case GI_TYPE_TAG_INT64:
+    case GI_TYPE_TAG_UINT64:
+    case GI_TYPE_TAG_FLOAT:
+    case GI_TYPE_TAG_DOUBLE:
+    case GI_TYPE_TAG_UTF8:
+    case GI_TYPE_TAG_FILENAME:
+    case GI_TYPE_TAG_UNICHAR:
+        object = pygi_marshal_to_py_basic_type (
+            arg, type_tag, transfer, gi_type_info_is_pointer (type_info));
+        break;
     case GI_TYPE_TAG_ARRAY:
         object = pygi_argument_array_to_object (arg, type_info, transfer);
         break;
@@ -987,25 +1005,6 @@ _pygi_argument_to_object (GIArgument arg, GITypeInfo *type_info,
         }
         break;
     }
-    case GI_TYPE_TAG_VOID:
-    case GI_TYPE_TAG_INT8:
-    case GI_TYPE_TAG_UINT8:
-    case GI_TYPE_TAG_INT16:
-    case GI_TYPE_TAG_UINT16:
-    case GI_TYPE_TAG_INT32:
-    case GI_TYPE_TAG_UINT32:
-    case GI_TYPE_TAG_GTYPE:
-    case GI_TYPE_TAG_BOOLEAN:
-    case GI_TYPE_TAG_INT64:
-    case GI_TYPE_TAG_UINT64:
-    case GI_TYPE_TAG_FLOAT:
-    case GI_TYPE_TAG_DOUBLE:
-    case GI_TYPE_TAG_UTF8:
-    case GI_TYPE_TAG_FILENAME:
-    case GI_TYPE_TAG_UNICHAR:
-        object = pygi_marshal_to_py_basic_type (
-            arg, type_tag, transfer, gi_type_info_is_pointer (type_info));
-        break;
     default:
         g_assert_not_reached ();
     }

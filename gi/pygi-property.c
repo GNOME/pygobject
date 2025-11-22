@@ -178,7 +178,7 @@ pygi_get_property_value (PyGObject *instance, GParamSpec *pspec)
             transfer = GI_TRANSFER_EVERYTHING;
         }
 
-        py_value = _pygi_argument_to_object (arg, type_info, transfer);
+        py_value = pygi_argument_to_object (arg, type_info, transfer);
 
         if (free_array) {
             g_array_free (arg.v_pointer, FALSE);
@@ -232,7 +232,7 @@ pygi_set_property_gvalue_from_property_info (GIPropertyInfo *property_info,
 
     type_info = gi_property_info_get_type_info (property_info);
     transfer = gi_property_info_get_ownership_transfer (property_info);
-    arg = _pygi_argument_from_object (py_value, type_info, transfer);
+    arg = pygi_argument_from_object (py_value, type_info, transfer);
 
     if (PyErr_Occurred ()) goto out;
 

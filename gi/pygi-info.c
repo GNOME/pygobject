@@ -1835,8 +1835,7 @@ _wrap_gi_constant_info_get_value (PyGIBaseInfo *self)
                                                    type_info, &free_array);
     }
 
-    py_value =
-        _pygi_argument_to_object (value, type_info, GI_TRANSFER_NOTHING);
+    py_value = pygi_argument_to_object (value, type_info, GI_TRANSFER_NOTHING);
 
     if (free_array) {
         g_array_free (value.v_pointer, FALSE);
@@ -2085,7 +2084,7 @@ _wrap_gi_field_info_get_value (PyGIBaseInfo *self, PyObject *args)
 
 argument_to_object:
     py_value =
-        _pygi_argument_to_object (value, field_type_info, GI_TRANSFER_NOTHING);
+        pygi_argument_to_object (value, field_type_info, GI_TRANSFER_NOTHING);
 
     if (free_array) {
         g_array_free (value.v_pointer, FALSE);
@@ -2179,8 +2178,8 @@ _wrap_gi_field_info_set_value (PyGIBaseInfo *self, PyObject *args)
                 goto out;
             }
 
-            value = _pygi_argument_from_object (py_value, field_type_info,
-                                                GI_TRANSFER_NOTHING);
+            value = pygi_argument_from_object (py_value, field_type_info,
+                                               GI_TRANSFER_NOTHING);
             if (PyErr_Occurred ()) {
                 gi_base_info_unref (info);
                 goto out;
@@ -2206,8 +2205,8 @@ _wrap_gi_field_info_set_value (PyGIBaseInfo *self, PyObject *args)
                    || gi_type_info_get_tag (field_type_info)
                           == GI_TYPE_TAG_UTF8)) {
         int offset;
-        value = _pygi_argument_from_object (py_value, field_type_info,
-                                            GI_TRANSFER_NOTHING);
+        value = pygi_argument_from_object (py_value, field_type_info,
+                                           GI_TRANSFER_NOTHING);
         if (PyErr_Occurred ()) {
             goto out;
         }
@@ -2220,8 +2219,8 @@ _wrap_gi_field_info_set_value (PyGIBaseInfo *self, PyObject *args)
         goto out;
     }
 
-    value = _pygi_argument_from_object (py_value, field_type_info,
-                                        GI_TRANSFER_EVERYTHING);
+    value = pygi_argument_from_object (py_value, field_type_info,
+                                       GI_TRANSFER_EVERYTHING);
     if (PyErr_Occurred ()) {
         goto out;
     }
