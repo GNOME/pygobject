@@ -45,98 +45,8 @@ _pygi_marshal_from_py_ghash (PyGIInvokeState *state,
                              PyGIArgCache *arg_cache, PyObject *py_arg,
                              GIArgument *arg, gpointer *cleanup_data)
 {
-    PyGIMarshalFromPyFunc key_from_py_marshaller;
-    PyGIMarshalFromPyFunc value_from_py_marshaller;
-
-    int i;
-    Py_ssize_t length;
-    PyObject *py_keys, *py_values;
-
-    GHashFunc hash_func;
-    GEqualFunc equal_func;
-
-    GHashTable *hash_ = NULL;
-    PyGIHashCache *hash_cache = (PyGIHashCache *)arg_cache;
-
-    if (Py_IsNone (py_arg)) {
-        arg->v_pointer = NULL;
-        return TRUE;
-    }
-
-    py_keys = PyMapping_Keys (py_arg);
-    if (py_keys == NULL) {
-        PyErr_Format (PyExc_TypeError, "Must be mapping, not %s",
-                      Py_TYPE (py_arg)->tp_name);
-        return FALSE;
-    }
-
-    length = PyMapping_Length (py_arg);
-    if (length < 0) {
-        Py_DECREF (py_keys);
-        return FALSE;
-    }
-
-    py_values = PyMapping_Values (py_arg);
-    if (py_values == NULL) {
-        Py_DECREF (py_keys);
-        return FALSE;
-    }
-
-    key_from_py_marshaller = hash_cache->key_cache->from_py_marshaller;
-    value_from_py_marshaller = hash_cache->value_cache->from_py_marshaller;
-
-    if (hash_cache->key_cache->type_tag == GI_TYPE_TAG_UTF8
-        || hash_cache->key_cache->type_tag == GI_TYPE_TAG_FILENAME) {
-        hash_func = g_str_hash;
-        equal_func = g_str_equal;
-    } else {
-        hash_func = NULL;
-        equal_func = NULL;
-    }
-
-    hash_ = g_hash_table_new (hash_func, equal_func);
-    if (hash_ == NULL) {
-        PyErr_NoMemory ();
-        Py_DECREF (py_keys);
-        Py_DECREF (py_values);
-        return FALSE;
-    }
-
-    for (i = 0; i < length; i++) {
-        GIArgument key, value;
-        gpointer key_cleanup_data = NULL;
-        gpointer value_cleanup_data = NULL;
-        PyObject *py_key = PyList_GET_ITEM (py_keys, i);
-        PyObject *py_value = PyList_GET_ITEM (py_values, i);
-        if (py_key == NULL || py_value == NULL) goto err;
-
-        // LEAK: key_cleanup_data and value_cleanup_data are never cleaned
-        if (!key_from_py_marshaller (state, callable_cache,
-                                     hash_cache->key_cache, py_key, &key,
-                                     &key_cleanup_data))
-            goto err;
-
-        if (!value_from_py_marshaller (state, callable_cache,
-                                       hash_cache->value_cache, py_value,
-                                       &value, &value_cleanup_data))
-            goto err;
-
-        g_hash_table_insert (
-            hash_,
-            _pygi_arg_to_hash_pointer (key, hash_cache->key_cache->type_info),
-            _pygi_arg_to_hash_pointer (value,
-                                       hash_cache->value_cache->type_info));
-        continue;
-err:
-        /* FIXME: cleanup hash keys and values */
-        Py_DECREF (py_keys);
-        Py_DECREF (py_values);
-        g_hash_table_unref (hash_);
-        _PyGI_ERROR_PREFIX ("Item %i: ", i);
-        return FALSE;
-    }
-
-    arg->v_pointer = hash_;
+    *arg = pygi_argument_hash_table_from_py (py_arg, arg_cache->type_info,
+                                             arg_cache->transfer);
 
     if (arg_cache->transfer == GI_TRANSFER_NOTHING) {
         /* Free everything in cleanup. */
@@ -152,7 +62,7 @@ err:
         *cleanup_data = NULL;
     }
 
-    return TRUE;
+    return !PyErr_Occurred ();
 }
 
 static void
@@ -168,6 +78,7 @@ _pygi_marshal_cleanup_from_py_ghash (PyGIInvokeState *state,
 
         hash_ = (GHashTable *)data;
 
+        // TOOD: This can go away as soon as we add destructors to the hash table init.
         /* clean up keys and values first */
         if (hash_cache->key_cache->from_py_cleanup != NULL
             || hash_cache->value_cache->from_py_cleanup != NULL) {
@@ -293,20 +204,6 @@ _pygi_marshal_cleanup_to_py_ghash (PyGIInvokeState *state,
         g_hash_table_unref ((GHashTable *)data);
 }
 
-static void
-_arg_cache_from_py_ghash_setup (PyGIArgCache *arg_cache)
-{
-    arg_cache->from_py_marshaller = _pygi_marshal_from_py_ghash;
-    arg_cache->from_py_cleanup = _pygi_marshal_cleanup_from_py_ghash;
-}
-
-static void
-_arg_cache_to_py_ghash_setup (PyGIArgCache *arg_cache)
-{
-    arg_cache->to_py_marshaller = _pygi_marshal_to_py_ghash;
-    arg_cache->to_py_cleanup = _pygi_marshal_cleanup_to_py_ghash;
-}
-
 PyGIArgCache *
 pygi_arg_hash_table_new_from_info (GITypeInfo *type_info, GIArgInfo *arg_info,
                                    GITransfer transfer,
@@ -352,11 +249,13 @@ pygi_arg_hash_table_new_from_info (GITypeInfo *type_info, GIArgInfo *arg_info,
     gi_base_info_unref ((GIBaseInfo *)value_type_info);
 
     if (direction & PYGI_DIRECTION_FROM_PYTHON) {
-        _arg_cache_from_py_ghash_setup ((PyGIArgCache *)hc);
+        hc->arg_cache.from_py_marshaller = _pygi_marshal_from_py_ghash;
+        hc->arg_cache.from_py_cleanup = _pygi_marshal_cleanup_from_py_ghash;
     }
 
     if (direction & PYGI_DIRECTION_TO_PYTHON) {
-        _arg_cache_to_py_ghash_setup ((PyGIArgCache *)hc);
+        hc->arg_cache.to_py_marshaller = _pygi_marshal_to_py_ghash;
+        hc->arg_cache.to_py_cleanup = _pygi_marshal_cleanup_to_py_ghash;
     }
 
     return (PyGIArgCache *)hc;

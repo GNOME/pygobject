@@ -1641,7 +1641,7 @@ class TestGHashTable(unittest.TestCase):
         )
 
         self.assertRaises(
-            TypeError,
+            AttributeError,
             GIMarshallingTests.ghashtable_int_none_in,
             "{-1: 1, 0: 0, 1: -1, 2: -2}",
         )
