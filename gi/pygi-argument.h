@@ -65,6 +65,10 @@ gboolean pygi_argument_to_gsize (GIArgument arg, GITypeTag type_tag,
 GIArgument pygi_argument_list_from_py (PyObject *object, GITypeInfo *type_info,
                                        GITransfer transfer);
 
+GIArgument pygi_argument_hash_table_from_py (PyObject *object,
+                                             GITypeInfo *type_info,
+                                             GITransfer transfer);
+
 G_END_DECLS
 
 #endif /* __PYGI_ARGUMENT_H__ */

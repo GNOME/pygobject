@@ -542,9 +542,9 @@ list_item_error:
     return arg;
 }
 
-static GIArgument
-pygi_argument_hash_table_from_object (PyObject *object, GITypeInfo *type_info,
-                                      GITransfer transfer)
+GIArgument
+pygi_argument_hash_table_from_py (PyObject *object, GITypeInfo *type_info,
+                                  GITransfer transfer)
 {
     GIArgument arg = PYGI_ARG_INIT;
     Py_ssize_t length;
@@ -562,7 +562,11 @@ pygi_argument_hash_table_from_object (PyObject *object, GITypeInfo *type_info,
     if (Py_IsNone (object)) return arg;
 
     length = PyMapping_Length (object);
-    if (length < 0) return arg;
+    if (length < 0) {
+        PyErr_Format (PyExc_TypeError, "Must be mapping, not %s",
+                      Py_TYPE (object)->tp_name);
+        return arg;
+    }
 
     keys = PyMapping_Keys (object);
     if (keys == NULL) return arg;
@@ -590,6 +594,7 @@ pygi_argument_hash_table_from_object (PyObject *object, GITypeInfo *type_info,
         equal_func = NULL;
     }
 
+    // TODO: set hash table destroy notifier
     hash_table = g_hash_table_new (hash_func, equal_func);
     if (hash_table == NULL) {
         PyErr_NoMemory ();
@@ -622,7 +627,7 @@ pygi_argument_hash_table_from_object (PyObject *object, GITypeInfo *type_info,
         }
 
         g_hash_table_insert (
-            hash_table, key.v_pointer,
+            hash_table, _pygi_arg_to_hash_pointer (key, key_type_info),
             _pygi_arg_to_hash_pointer (value, value_type_info));
     }
 
@@ -687,8 +692,7 @@ pygi_argument_from_object (PyObject *object, GITypeInfo *type_info,
         arg = pygi_argument_list_from_py (object, type_info, transfer);
         break;
     case GI_TYPE_TAG_GHASH:
-        arg =
-            pygi_argument_hash_table_from_object (object, type_info, transfer);
+        arg = pygi_argument_hash_table_from_py (object, type_info, transfer);
         break;
     case GI_TYPE_TAG_ERROR:
         PyErr_SetString (PyExc_NotImplementedError,
