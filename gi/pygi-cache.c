@@ -184,9 +184,6 @@ pygi_arg_cache_new (GITypeInfo *type_info,
 
     switch (type_tag) {
     case GI_TYPE_TAG_VOID:
-        arg_cache = pygi_arg_void_type_new_from_info (type_info, arg_info,
-                                                      transfer, direction);
-        break;
     case GI_TYPE_TAG_BOOLEAN:
     case GI_TYPE_TAG_INT8:
     case GI_TYPE_TAG_UINT8:
@@ -200,8 +197,8 @@ pygi_arg_cache_new (GITypeInfo *type_info,
     case GI_TYPE_TAG_DOUBLE:
     case GI_TYPE_TAG_UNICHAR:
     case GI_TYPE_TAG_GTYPE:
-        arg_cache = pygi_arg_numeric_type_new_from_info (type_info, arg_info,
-                                                         transfer, direction);
+        arg_cache = pygi_arg_basic_type_new_from_info (type_info, arg_info,
+                                                       transfer, direction);
         break;
     case GI_TYPE_TAG_UTF8:
     case GI_TYPE_TAG_FILENAME:

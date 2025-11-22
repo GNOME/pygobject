@@ -950,13 +950,6 @@ _pygi_argument_to_object (GIArgument arg, GITypeInfo *type_info,
     type_tag = gi_type_info_get_tag (type_info);
 
     switch (type_tag) {
-    case GI_TYPE_TAG_VOID: {
-        if (gi_type_info_is_pointer (type_info)) {
-            g_warn_if_fail (transfer == GI_TRANSFER_NOTHING);
-            object = PyLong_FromVoidPtr (arg.v_pointer);
-        }
-        break;
-    }
     case GI_TYPE_TAG_ARRAY:
         object = pygi_argument_array_to_object (arg, type_info, transfer);
         break;
@@ -994,6 +987,7 @@ _pygi_argument_to_object (GIArgument arg, GITypeInfo *type_info,
         }
         break;
     }
+    case GI_TYPE_TAG_VOID:
     case GI_TYPE_TAG_INT8:
     case GI_TYPE_TAG_UINT8:
     case GI_TYPE_TAG_INT16:
@@ -1009,7 +1003,8 @@ _pygi_argument_to_object (GIArgument arg, GITypeInfo *type_info,
     case GI_TYPE_TAG_UTF8:
     case GI_TYPE_TAG_FILENAME:
     case GI_TYPE_TAG_UNICHAR:
-        object = pygi_marshal_to_py_basic_type (arg, type_tag, transfer);
+        object = pygi_marshal_to_py_basic_type (
+            arg, type_tag, transfer, gi_type_info_is_pointer (type_info));
         break;
     default:
         g_assert_not_reached ();

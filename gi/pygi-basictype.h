@@ -30,7 +30,8 @@ GIArgument pygi_marshal_from_py_basic_type (PyObject *object,
                                             gpointer *cleanup_data);
 
 PyObject *pygi_marshal_to_py_basic_type (GIArgument arg, GITypeTag type_tag,
-                                         GITransfer transfer);
+                                         GITransfer transfer,
+                                         gboolean is_pointer);
 
 gboolean pygi_gpointer_from_py (PyObject *py_arg, gpointer *result);
 

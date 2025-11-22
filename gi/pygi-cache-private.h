@@ -45,11 +45,7 @@ gboolean pygi_arg_sequence_setup (
     GITransfer transfer, PyGIDirection direction,
     PyGICallableCache *callable_cache);
 
-PyGIArgCache *pygi_arg_void_type_new_from_info (
-    GITypeInfo *type_info, GIArgInfo *arg_info, /* may be null */
-    GITransfer transfer, PyGIDirection direction);
-
-PyGIArgCache *pygi_arg_numeric_type_new_from_info (
+PyGIArgCache *pygi_arg_basic_type_new_from_info (
     GITypeInfo *type_info, GIArgInfo *arg_info, /* may be null */
     GITransfer transfer, PyGIDirection direction);
 

@@ -73,35 +73,8 @@ pygi_marshal_to_py_basic_type_cache_adapter (PyGIInvokeState *state,
                                              GIArgument *arg,
                                              gpointer *cleanup_data)
 {
-    return pygi_marshal_to_py_basic_type (*arg, arg_cache->type_tag,
-                                          arg_cache->transfer);
-}
-
-static gboolean
-marshal_from_py_void (PyGIInvokeState *state,
-                      PyGICallableCache *callable_cache,
-                      PyGIArgCache *arg_cache, PyObject *py_arg,
-                      GIArgument *arg, gpointer *cleanup_data)
-{
-    g_warn_if_fail (arg_cache->transfer == GI_TRANSFER_NOTHING);
-
-    if (pygi_gpointer_from_py (py_arg, &(arg->v_pointer))) {
-        *cleanup_data = arg->v_pointer;
-        return TRUE;
-    }
-
-    return FALSE;
-}
-
-static PyObject *
-marshal_to_py_void (PyGIInvokeState *state, PyGICallableCache *callable_cache,
-                    PyGIArgCache *arg_cache, GIArgument *arg,
-                    gpointer *cleanup_data)
-{
-    if (arg_cache->is_pointer) {
-        return PyLong_FromVoidPtr (arg->v_pointer);
-    }
-    Py_RETURN_NONE;
+    return pygi_marshal_to_py_basic_type (
+        *arg, arg_cache->type_tag, arg_cache->transfer, arg_cache->is_pointer);
 }
 
 static void
@@ -126,26 +99,9 @@ marshal_cleanup_to_py_utf8 (PyGIInvokeState *state, PyGIArgCache *arg_cache,
 }
 
 PyGIArgCache *
-pygi_arg_void_type_new_from_info (GITypeInfo *type_info, GIArgInfo *arg_info,
-                                  GITransfer transfer, PyGIDirection direction)
-{
-    PyGIArgCache *arg_cache = pygi_arg_cache_alloc ();
-
-    pygi_arg_base_setup (arg_cache, type_info, arg_info, transfer, direction);
-
-    if (direction & PYGI_DIRECTION_FROM_PYTHON)
-        arg_cache->from_py_marshaller = marshal_from_py_void;
-
-    if (direction & PYGI_DIRECTION_TO_PYTHON)
-        arg_cache->to_py_marshaller = marshal_to_py_void;
-
-    return arg_cache;
-}
-
-PyGIArgCache *
-pygi_arg_numeric_type_new_from_info (GITypeInfo *type_info,
-                                     GIArgInfo *arg_info, GITransfer transfer,
-                                     PyGIDirection direction)
+pygi_arg_basic_type_new_from_info (GITypeInfo *type_info, GIArgInfo *arg_info,
+                                   GITransfer transfer,
+                                   PyGIDirection direction)
 {
     PyGIArgCache *arg_cache = pygi_arg_cache_alloc ();
 

@@ -1114,6 +1114,7 @@ pygi_filename_to_py (gchar *value)
  * @arg: The argument to convert to an object.
  * @type_tag: Type tag for @arg
  * @transfer: Transfer annotation
+ * @is_pointer: value is a (void) pointer
  *
  * Convert the given argument to a Python object. This function
  * is restricted to simple types that only require the GITypeTag
@@ -1125,9 +1126,16 @@ pygi_filename_to_py (gchar *value)
  */
 PyObject *
 pygi_marshal_to_py_basic_type (GIArgument arg, GITypeTag type_tag,
-                               GITransfer transfer)
+                               GITransfer transfer, gboolean is_pointer)
 {
     switch (type_tag) {
+    case GI_TYPE_TAG_VOID:
+        if (is_pointer) {
+            g_warn_if_fail (transfer == GI_TRANSFER_NOTHING);
+            return PyLong_FromVoidPtr (arg.v_pointer);
+        }
+        Py_RETURN_NONE;
+
     case GI_TYPE_TAG_BOOLEAN:
         return pygi_gboolean_to_py (arg.v_boolean);
 
@@ -1173,7 +1181,6 @@ pygi_marshal_to_py_basic_type (GIArgument arg, GITypeTag type_tag,
     case GI_TYPE_TAG_FILENAME:
         return pygi_filename_to_py (arg.v_string);
 
-    case GI_TYPE_TAG_VOID:
     case GI_TYPE_TAG_ARRAY:
     case GI_TYPE_TAG_INTERFACE:
     case GI_TYPE_TAG_GLIST:
