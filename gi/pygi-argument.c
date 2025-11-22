@@ -473,9 +473,9 @@ pygi_argument_interface_from_object (PyObject *object, GITypeInfo *type_info,
     return arg;
 }
 
-static GIArgument
-pygi_argument_list_from_object (PyObject *object, GITypeInfo *type_info,
-                                GITransfer transfer)
+GIArgument
+pygi_argument_list_from_py (PyObject *object, GITypeInfo *type_info,
+                            GITransfer transfer)
 {
     GIArgument arg = { 0 };
     GITypeTag type_tag = gi_type_info_get_tag (type_info);
@@ -486,6 +486,12 @@ pygi_argument_list_from_object (PyObject *object, GITypeInfo *type_info,
     Py_ssize_t i;
 
     if (Py_IsNone (object)) return arg;
+
+    if (!PySequence_Check (object)) {
+        PyErr_Format (PyExc_TypeError, "Must be sequence, not %s",
+                      Py_TYPE (object)->tp_name);
+        return arg;
+    }
 
     length = PySequence_Length (object);
     if (length < 0) return arg;
@@ -498,7 +504,7 @@ pygi_argument_list_from_object (PyObject *object, GITypeInfo *type_info,
 
     for (i = length - 1; i >= 0; i--) {
         PyObject *py_item;
-        GIArgument item;
+        GIArgument item = { 0 };
 
         py_item = PySequence_GetItem (object, i);
         if (py_item == NULL) {
@@ -678,7 +684,7 @@ pygi_argument_from_object (PyObject *object, GITypeInfo *type_info,
         break;
     case GI_TYPE_TAG_GLIST:
     case GI_TYPE_TAG_GSLIST:
-        arg = pygi_argument_list_from_object (object, type_info, transfer);
+        arg = pygi_argument_list_from_py (object, type_info, transfer);
         break;
     case GI_TYPE_TAG_GHASH:
         arg =
