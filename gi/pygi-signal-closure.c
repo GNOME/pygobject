@@ -158,7 +158,7 @@ pygi_signal_closure_marshal (GClosure *closure, GValue *return_value,
             type_tag = gi_type_info_get_tag (&type_info);
             if (type_tag == GI_TYPE_TAG_ARRAY) {
                 /* Skip the self argument of param_values */
-                arg.v_pointer = _pygi_argument_to_array (
+                arg.v_pointer = pygi_argument_to_array (
                     arg, _pygi_signal_closure_length_marshal,
                     (void *)(param_values + 1), signal_info, &type_info,
                     &free_array);
