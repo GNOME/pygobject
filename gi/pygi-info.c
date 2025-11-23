@@ -1974,7 +1974,7 @@ _pygi_gi_registered_type_info_check_object (GIRegisteredTypeInfo *info,
             return -1;
         }
 
-        PyErr_Format (PyExc_TypeError, "Must be %s, not %s",
+        PyErr_Format (PyExc_TypeError, "XXMust be %s, not %s",
                       type_name_expected, object_type->tp_name);
 
         g_free (type_name_expected);

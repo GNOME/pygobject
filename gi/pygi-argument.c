@@ -694,11 +694,20 @@ pygi_argument_from_object (PyObject *object, GITypeInfo *type_info,
     case GI_TYPE_TAG_GHASH:
         arg = pygi_argument_hash_table_from_py (object, type_info, transfer);
         break;
-    case GI_TYPE_TAG_ERROR:
-        PyErr_SetString (PyExc_NotImplementedError,
-                         "error marshalling is not supported yet");
-        /* TODO */
+    case GI_TYPE_TAG_ERROR: {
+        GError *error = NULL;
+        if (Py_IsNone (object)) {
+            arg.v_pointer = NULL;
+        } else if (pygi_error_marshal_from_py (object, &error)) {
+            arg.v_pointer = error;
+        } else {
+            if (!PyErr_Occurred ())
+                PyErr_Format (PyExc_TypeError,
+                              "Cannot create GLib.Error for type %s",
+                              Py_TYPE (object)->tp_name);
+        }
         break;
+    }
     default:
         g_assert_not_reached ();
     }
@@ -996,8 +1005,8 @@ pygi_argument_to_object (GIArgument arg, GITypeInfo *type_info,
         GError *error = (GError *)arg.v_pointer;
         if (error != NULL && transfer == GI_TRANSFER_NOTHING) {
             /* If we have not been transferred the ownership we must copy
-                 * the error, because pygi_error_check() is going to free it.
-                 */
+             * the error, because pygi_error_check() is going to free it.
+             */
             error = g_error_copy (error);
         }
 
