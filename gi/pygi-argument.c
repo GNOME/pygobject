@@ -413,9 +413,9 @@ array_item_error:
     return arg;
 }
 
-static GIArgument
-pygi_argument_interface_from_object (PyObject *object, GITypeInfo *type_info,
-                                     GITransfer transfer)
+GIArgument
+pygi_argument_interface_from_py (PyObject *object, GITypeInfo *type_info,
+                                 GITransfer transfer)
 {
     GIArgument arg = PYGI_ARG_INIT;
     GIBaseInfo *info;
@@ -684,8 +684,7 @@ pygi_argument_from_object (PyObject *object, GITypeInfo *type_info,
         arg = pygi_argument_array_from_object (object, type_info, transfer);
         break;
     case GI_TYPE_TAG_INTERFACE:
-        arg =
-            pygi_argument_interface_from_object (object, type_info, transfer);
+        arg = pygi_argument_interface_from_py (object, type_info, transfer);
         break;
     case GI_TYPE_TAG_GLIST:
     case GI_TYPE_TAG_GSLIST:

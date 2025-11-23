@@ -706,10 +706,16 @@ pyg_flags_get_value (GType flag_type, PyObject *obj, guint *val)
         }
         g_type_class_unref (fclass);
     } else {
-        PyErr_SetString (
-            PyExc_TypeError,
-            "flag values must be strings, ints, longs, or tuples");
-        res = -1;
+        // Try to coerce to long
+        PyObject *py_long = PyNumber_Long (obj);
+        if (py_long != NULL) {
+            if (pygi_guint_from_py (obj, val)) res = 0;
+            Py_DECREF (py_long);
+        }
+        if (res == -1 && !PyErr_Occurred ())
+            PyErr_SetString (
+                PyExc_TypeError,
+                "flag values must be strings, ints, longs, or tuples");
     }
     return res;
 }

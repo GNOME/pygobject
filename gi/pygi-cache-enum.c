@@ -21,6 +21,7 @@
 #include "pygi-type.h"
 #include "pygenum.h"
 #include "pygflags.h"
+#include "pygi-argument.h"
 #include "pygi-cache-private.h"
 
 static gboolean
@@ -210,43 +211,9 @@ _pygi_marshal_from_py_interface_flags (PyGIInvokeState *state,
                                        PyObject *py_arg, GIArgument *arg,
                                        gpointer *cleanup_data)
 {
-    PyObject *py_long;
-    unsigned long c_ulong;
-    gint is_instance;
-    PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)arg_cache;
-    GIBaseInfo *interface;
-
-    is_instance = PyObject_IsInstance (py_arg, iface_cache->py_type);
-
-    py_long = PyNumber_Long (py_arg);
-    if (py_long == NULL) {
-        PyErr_Clear ();
-        goto err;
-    }
-
-    c_ulong = PyLong_AsUnsignedLongMask (py_long);
-    Py_DECREF (py_long);
-
-    /* only 0 or argument of type Flag is allowed */
-    if (!is_instance && c_ulong != 0) goto err;
-
-    /* Write c_long into arg */
-    interface = gi_type_info_get_interface (arg_cache->type_info);
-    g_assert (GI_IS_FLAGS_INFO (interface));
-    if (!gi_argument_from_c_long (
-            arg, c_ulong,
-            gi_enum_info_get_storage_type ((GIEnumInfo *)interface))) {
-        gi_base_info_unref (interface);
-        return FALSE;
-    }
-
-    gi_base_info_unref (interface);
-    return TRUE;
-
-err:
-    PyErr_Format (PyExc_TypeError, "Expected a %s, but got %s",
-                  iface_cache->type_name, Py_TYPE (py_arg)->tp_name);
-    return FALSE;
+    *arg = pygi_argument_interface_from_py (py_arg, arg_cache->type_info,
+                                            arg_cache->transfer);
+    return !PyErr_Occurred ();
 }
 
 static PyObject *
