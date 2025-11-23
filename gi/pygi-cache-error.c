@@ -21,6 +21,7 @@
  */
 
 #include "pygi-error.h"
+#include "pygi-argument.h"
 #include "pygi-cache-private.h"
 
 static gboolean
@@ -29,18 +30,10 @@ _pygi_marshal_from_py_gerror (PyGIInvokeState *state,
                               PyGIArgCache *arg_cache, PyObject *py_arg,
                               GIArgument *arg, gpointer *cleanup_data)
 {
-    GError *error = NULL;
-    if (Py_IsNone (py_arg)) {
-        arg->v_pointer = NULL;
-        *cleanup_data = NULL;
-        return TRUE;
-    } else if (pygi_error_marshal_from_py (py_arg, &error)) {
-        arg->v_pointer = error;
-        *cleanup_data = error;
-        return TRUE;
-    } else {
-        return FALSE;
-    }
+    *arg = pygi_argument_from_object (py_arg, arg_cache->type_info,
+                                      arg_cache->transfer);
+    *cleanup_data = arg->v_pointer;
+    return !PyErr_Occurred ();
 }
 
 
