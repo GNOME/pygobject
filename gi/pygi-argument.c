@@ -452,17 +452,41 @@ pygi_argument_interface_from_py (PyObject *object, GITypeInfo *type_info,
         Py_DECREF (py_type);
     } else if (GI_IS_FLAGS_INFO (info)) {
         /* Check flags before enums: flags are a subtype of enum. */
-        GType g_type;
-
-        g_type =
+        GType g_type =
             gi_registered_type_info_get_g_type ((GIRegisteredTypeInfo *)info);
         if (pyg_flags_get_value (g_type, object, &arg.v_uint) < 0) return arg;
     } else if (GI_IS_ENUM_INFO (info)) {
-        GType g_type;
-
-        g_type =
+        GType g_type =
             gi_registered_type_info_get_g_type ((GIRegisteredTypeInfo *)info);
+        PyObject *expected_py_type =
+            pygi_type_import_by_gi_info ((GIBaseInfo *)info);
+
         if (pyg_enum_get_value (g_type, object, &arg.v_int) < 0) return arg;
+
+        /* If this is not an instance of the Enum type that we want
+         * we need to check if the value is equivilant to one of the
+         * Enum's memebers */
+        if (!PyObject_IsInstance (object, expected_py_type)) {
+            unsigned int i;
+            gboolean is_found = FALSE;
+
+            for (i = 0; i < gi_enum_info_get_n_values (GI_ENUM_INFO (info));
+                 i++) {
+                GIValueInfo *value_info =
+                    gi_enum_info_get_value (GI_ENUM_INFO (info), i);
+                gint enum_value = (gint)gi_value_info_get_value (value_info);
+                gi_base_info_unref ((GIBaseInfo *)value_info);
+                if (arg.v_int == enum_value) {
+                    is_found = TRUE;
+                    break;
+                }
+            }
+
+            if (!is_found)
+                PyErr_Format (PyExc_TypeError, "Expected a %s, but got %s",
+                              g_type_name (g_type), Py_TYPE (object)->tp_name);
+        }
+
     } else if (GI_IS_INTERFACE_INFO (info) || GI_IS_OBJECT_INFO (info)) {
         /* An error within this call will result in a NULL arg */
         pygi_marshal_from_py_object (object, &arg, transfer);
