@@ -25,57 +25,6 @@
 #include "pygi-cache-private.h"
 
 static gboolean
-gi_argument_from_c_long (GIArgument *arg_out, long c_long_in,
-                         GITypeTag type_tag)
-{
-    switch (type_tag) {
-    case GI_TYPE_TAG_INT8:
-        arg_out->v_int8 = (gint8)c_long_in;
-        return TRUE;
-    case GI_TYPE_TAG_UINT8:
-        arg_out->v_uint8 = (guint8)c_long_in;
-        return TRUE;
-    case GI_TYPE_TAG_INT16:
-        arg_out->v_int16 = (gint16)c_long_in;
-        return TRUE;
-    case GI_TYPE_TAG_UINT16:
-        arg_out->v_uint16 = (guint16)c_long_in;
-        return TRUE;
-    case GI_TYPE_TAG_INT32:
-        arg_out->v_int32 = (gint32)c_long_in;
-        return TRUE;
-    case GI_TYPE_TAG_UINT32:
-    case GI_TYPE_TAG_UNICHAR:
-        arg_out->v_uint32 = (guint32)c_long_in;
-        return TRUE;
-    case GI_TYPE_TAG_INT64:
-        arg_out->v_int64 = (gint64)c_long_in;
-        return TRUE;
-    case GI_TYPE_TAG_UINT64:
-        arg_out->v_uint64 = (guint64)c_long_in;
-        return TRUE;
-    case GI_TYPE_TAG_VOID:
-    case GI_TYPE_TAG_BOOLEAN:
-    case GI_TYPE_TAG_FLOAT:
-    case GI_TYPE_TAG_DOUBLE:
-    case GI_TYPE_TAG_GTYPE:
-    case GI_TYPE_TAG_UTF8:
-    case GI_TYPE_TAG_FILENAME:
-    case GI_TYPE_TAG_ARRAY:
-    case GI_TYPE_TAG_INTERFACE:
-    case GI_TYPE_TAG_GLIST:
-    case GI_TYPE_TAG_GSLIST:
-    case GI_TYPE_TAG_GHASH:
-    case GI_TYPE_TAG_ERROR:
-        PyErr_Format (PyExc_TypeError, "Unable to marshal C long %ld to %s",
-                      c_long_in, gi_type_tag_to_string (type_tag));
-        return FALSE;
-    default:
-        g_assert_not_reached ();
-    }
-}
-
-static gboolean
 gi_argument_to_c_long (GIArgument *arg_in, long *c_long_out,
                        GITypeTag type_tag)
 {
@@ -143,65 +92,9 @@ _pygi_marshal_from_py_interface_enum (PyGIInvokeState *state,
                                       PyObject *py_arg, GIArgument *arg,
                                       gpointer *cleanup_data)
 {
-    PyObject *py_long;
-    long c_long;
-    gint is_instance;
-    PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)arg_cache;
-    GIBaseInfo *interface = NULL;
-
-    is_instance = PyObject_IsInstance (py_arg, iface_cache->py_type);
-
-    py_long = PyNumber_Long (py_arg);
-    if (py_long == NULL) {
-        PyErr_Clear ();
-        goto err;
-    }
-
-    c_long = PyLong_AsLong (py_long);
-    Py_DECREF (py_long);
-
-    /* Write c_long into arg */
-    interface = gi_type_info_get_interface (arg_cache->type_info);
-    g_assert (GI_IS_ENUM_INFO (interface));
-    if (!gi_argument_from_c_long (
-            arg, c_long,
-            gi_enum_info_get_storage_type ((GIEnumInfo *)interface))) {
-        g_assert_not_reached ();
-        gi_base_info_unref (interface);
-        return FALSE;
-    }
-
-    /* If this is not an instance of the Enum type that we want
-     * we need to check if the value is equivilant to one of the
-     * Enum's memebers */
-    if (!is_instance) {
-        unsigned int i;
-        gboolean is_found = FALSE;
-
-        for (i = 0; i < gi_enum_info_get_n_values (
-                        GI_ENUM_INFO (iface_cache->interface_info));
-             i++) {
-            GIValueInfo *value_info = gi_enum_info_get_value (
-                GI_ENUM_INFO (iface_cache->interface_info), i);
-            gint64 enum_value = gi_value_info_get_value (value_info);
-            gi_base_info_unref ((GIBaseInfo *)value_info);
-            if (c_long == enum_value) {
-                is_found = TRUE;
-                break;
-            }
-        }
-
-        if (!is_found) goto err;
-    }
-
-    gi_base_info_unref (interface);
-    return TRUE;
-
-err:
-    if (interface) gi_base_info_unref (interface);
-    PyErr_Format (PyExc_TypeError, "Expected a %s, but got %s",
-                  iface_cache->type_name, Py_TYPE (py_arg)->tp_name);
-    return FALSE;
+    *arg = pygi_argument_interface_from_py (py_arg, arg_cache->type_info,
+                                            arg_cache->transfer);
+    return !PyErr_Occurred ();
 }
 
 static gboolean
