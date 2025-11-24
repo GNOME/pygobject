@@ -38,6 +38,10 @@
 #include "pygi-util.h"
 #include "pygi-value.h"
 
+/* GIArgument is initialized based on the assumption that
+ * it's the same size as a gint64 (long long). */
+G_STATIC_ASSERT (sizeof (GIArgument) == sizeof (gint64));
+
 gboolean
 pygi_argument_to_gsize (GIArgument arg, GITypeTag type_tag, gsize *gsize_out)
 {
@@ -329,7 +333,7 @@ static GIArgument
 pygi_argument_array_from_object (PyObject *object, GITypeInfo *type_info,
                                  GITransfer transfer)
 {
-    GIArgument arg = { 0 };
+    GIArgument arg = { .v_uint64 = 0 };
     Py_ssize_t py_length;
     guint length, i;
     gboolean is_zero_terminated;
@@ -417,7 +421,7 @@ static GIArgument
 pygi_argument_interface_from_object (PyObject *object, GITypeInfo *type_info,
                                      GITransfer transfer)
 {
-    GIArgument arg = { 0 };
+    GIArgument arg = { .v_uint64 = 0 };
     GIBaseInfo *info;
 
     info = gi_type_info_get_interface (type_info);
@@ -477,7 +481,7 @@ static GIArgument
 pygi_argument_list_from_object (PyObject *object, GITypeInfo *type_info,
                                 GITransfer transfer)
 {
-    GIArgument arg = { 0 };
+    GIArgument arg = { .v_uint64 = 0 };
     GITypeTag type_tag = gi_type_info_get_tag (type_info);
     Py_ssize_t length;
     GITypeInfo *item_type_info;
@@ -539,7 +543,7 @@ static GIArgument
 pygi_argument_hash_table_from_object (PyObject *object, GITypeInfo *type_info,
                                       GITransfer transfer)
 {
-    GIArgument arg = { 0 };
+    GIArgument arg = { .v_uint64 = 0 };
     Py_ssize_t length;
     PyObject *keys;
     PyObject *values;
@@ -551,7 +555,6 @@ pygi_argument_hash_table_from_object (PyObject *object, GITypeInfo *type_info,
     GHashTable *hash_table;
     GITransfer item_transfer;
     Py_ssize_t i;
-
 
     if (Py_IsNone (object)) return arg;
 
@@ -643,7 +646,7 @@ GIArgument
 _pygi_argument_from_object (PyObject *object, GITypeInfo *type_info,
                             GITransfer transfer)
 {
-    GIArgument arg = { 0 };
+    GIArgument arg = { .v_uint64 = 0 };
     GITypeTag type_tag;
     gpointer cleanup_data = NULL;
 
@@ -740,7 +743,7 @@ pygi_argument_array_to_object (GIArgument arg, GITypeInfo *type_info,
         }
 
         for (i = 0; i < array->len; i++) {
-            GIArgument item = { 0 };
+            GIArgument item;
             PyObject *py_item;
 
             memcpy (&item, array->data + i * item_size, item_size);

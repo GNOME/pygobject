@@ -40,9 +40,7 @@
 GIArgument
 _pygi_argument_from_g_value (const GValue *value, GITypeInfo *type_info)
 {
-    GIArgument arg = {
-        0,
-    };
+    GIArgument arg = { .v_uint64 = 0 };
 
     GITypeTag type_tag = gi_type_info_get_tag (type_info);
 

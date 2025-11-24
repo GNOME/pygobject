@@ -483,9 +483,7 @@ _pygi_closure_clear_retvals (PyGIInvokeState *state, PyGICallableCache *cache,
                              gpointer resp)
 {
     gsize i;
-    GIArgument arg = {
-        0,
-    };
+    GIArgument arg = { .v_uint64 = 0 };
 
     if (cache->return_cache->type_tag != GI_TYPE_TAG_VOID) {
         _pygi_closure_assign_pyobj_to_retval (resp, &arg, cache->return_cache);

@@ -144,9 +144,7 @@ pygi_signal_closure_marshal (GClosure *closure, GValue *return_value,
             GIArgInfo arg_info;
             GITypeInfo type_info;
             GITypeTag type_tag;
-            GIArgument arg = {
-                0,
-            };
+            GIArgument arg;
             PyObject *item = NULL;
             gboolean free_array = FALSE;
             gboolean pass_struct_by_ref = FALSE;

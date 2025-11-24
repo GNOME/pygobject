@@ -705,7 +705,7 @@ pygi_invoke_c_callable (PyGIFunctionCache *function_cache,
                         size_t py_nargsf, PyObject *py_kwnames)
 {
     PyGICallableCache *cache = (PyGICallableCache *)function_cache;
-    GIFFIReturnValue ffi_return_value = { 0 };
+    GIFFIReturnValue ffi_return_value = { .v_uint64 = 0 };
     PyObject *ret = NULL;
 
     if (Py_EnterRecursiveCall (" while calling a GICallable")) return NULL;

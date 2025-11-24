@@ -163,9 +163,7 @@ pygi_get_property_value (PyGObject *instance, GParamSpec *pspec)
     if (property_info) {
         GITypeInfo *type_info = NULL;
         gboolean free_array = FALSE;
-        GIArgument arg = {
-            0,
-        };
+        GIArgument arg;
         GITransfer transfer = GI_TRANSFER_NOTHING;
 
         type_info = gi_property_info_get_type_info (property_info);
@@ -229,9 +227,7 @@ pygi_set_property_gvalue_from_property_info (GIPropertyInfo *property_info,
     GIBaseInfo *info = NULL;
     GITypeTag type_tag;
     GITransfer transfer;
-    GIArgument arg = {
-        0,
-    };
+    GIArgument arg;
     gint ret_value = -1;
 
     type_info = gi_property_info_get_type_info (property_info);

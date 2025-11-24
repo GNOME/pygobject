@@ -747,7 +747,6 @@ pygi_function_cache_invoke (PyGIFunctionCache *function_cache,
     PyGIInvokeState state = {
         0,
     };
-
     return function_cache->invoke (function_cache, &state, py_args, py_nargsf,
                                    py_kwnames);
 }

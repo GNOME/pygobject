@@ -3,7 +3,11 @@ project(
   'c',
   version : '3.55.0',
   meson_version : '>= 0.64.0',
-  default_options : ['warning_level=1', 'buildtype=debugoptimized']
+  default_options : [
+    'warning_level=1',
+    'buildtype=debugoptimized',
+    'c_std=gnu99,c99'
+  ]
 )
 
 pygobject_version = meson.project_version()
