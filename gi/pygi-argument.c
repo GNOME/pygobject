@@ -1003,25 +1003,11 @@ pygi_argument_to_object (GIArgument arg, GITypeInfo *type_info,
         break;
     case GI_TYPE_TAG_ERROR: {
         GError *error = (GError *)arg.v_pointer;
-        if (error != NULL && transfer == GI_TRANSFER_NOTHING) {
-            /* If we have not been transferred the ownership we must copy
-             * the error, because pygi_error_check() is going to free it.
-             */
-            error = g_error_copy (error);
-        }
 
-        if (pygi_error_check (&error)) {
-            PyObject *err_type;
-            PyObject *err_value;
-            PyObject *err_trace;
-            PyErr_Fetch (&err_type, &err_value, &err_trace);
-            Py_XDECREF (err_type);
-            Py_XDECREF (err_trace);
-            object = err_value;
-        } else {
-            object = Py_None;
-            Py_INCREF (object);
-            break;
+        object = pygi_error_marshal_to_py (&error);
+
+        if (transfer == GI_TRANSFER_EVERYTHING && error != NULL) {
+            g_error_free (error);
         }
         break;
     }

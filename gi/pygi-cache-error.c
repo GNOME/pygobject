@@ -54,16 +54,8 @@ _pygi_marshal_to_py_gerror (PyGIInvokeState *state,
                             PyGIArgCache *arg_cache, GIArgument *arg,
                             gpointer *cleanup_data)
 {
-    GError *error = arg->v_pointer;
-    PyObject *py_obj = NULL;
-
-    py_obj = pygi_error_marshal_to_py (&error);
-
-    if (arg_cache->transfer == GI_TRANSFER_EVERYTHING && error != NULL) {
-        g_error_free (error);
-    }
-
-    return py_obj;
+    return pygi_argument_to_object (*arg, arg_cache->type_info,
+                                    arg_cache->transfer);
 }
 
 PyGIArgCache *
