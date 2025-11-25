@@ -580,19 +580,14 @@ gint
 pyg_enum_get_value (GType enum_type, PyObject *obj, gint *val)
 {
     GEnumClass *eclass = NULL;
-    gint res = -1;
 
     g_return_val_if_fail (val != NULL, -1);
     if (!obj) {
         *val = 0;
-        res = 0;
+        return 0;
     } else if (PyLong_Check (obj)) {
-        if (!pygi_gint_from_py (obj, val))
-            res = -1;
-        else
-            res = 0;
-
-        res = pyg_enum_check_type (obj, enum_type);
+        if (pygi_gint_from_py (obj, val))
+            return pyg_enum_check_type (obj, enum_type);
     } else if (PyUnicode_Check (obj)) {
         GEnumValue *info;
         char *str = PyUnicode_AsUTF8 (obj);
@@ -603,7 +598,7 @@ pyg_enum_get_value (GType enum_type, PyObject *obj, gint *val)
             PyErr_SetString (PyExc_TypeError,
                              "could not convert string to enum because there "
                              "is no GType associated to look up the value");
-            res = -1;
+            return -1;
         }
         info = g_enum_get_value_by_name (eclass, str);
         g_type_class_unref (eclass);
@@ -611,17 +606,15 @@ pyg_enum_get_value (GType enum_type, PyObject *obj, gint *val)
         if (!info) info = g_enum_get_value_by_nick (eclass, str);
         if (info) {
             *val = info->value;
-            res = 0;
+            return 0;
         } else {
             PyErr_SetString (PyExc_TypeError, "could not convert string");
-            res = -1;
         }
     } else {
         PyErr_SetString (PyExc_TypeError,
                          "enum values must be strings or ints");
-        res = -1;
     }
-    return res;
+    return -1;
 }
 
 /**
