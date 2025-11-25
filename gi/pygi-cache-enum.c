@@ -25,67 +25,6 @@
 #include "pygi-cache-private.h"
 
 static gboolean
-gi_argument_to_c_long (GIArgument *arg_in, long *c_long_out,
-                       GITypeTag type_tag)
-{
-    switch (type_tag) {
-    case GI_TYPE_TAG_INT8:
-        *c_long_out = arg_in->v_int8;
-        return TRUE;
-    case GI_TYPE_TAG_UINT8:
-        *c_long_out = arg_in->v_uint8;
-        return TRUE;
-    case GI_TYPE_TAG_INT16:
-        *c_long_out = arg_in->v_int16;
-        return TRUE;
-    case GI_TYPE_TAG_UINT16:
-        *c_long_out = arg_in->v_uint16;
-        return TRUE;
-    case GI_TYPE_TAG_INT32:
-        *c_long_out = arg_in->v_int32;
-        return TRUE;
-    case GI_TYPE_TAG_UINT32:
-    case GI_TYPE_TAG_UNICHAR:
-        *c_long_out = arg_in->v_uint32;
-        return TRUE;
-    case GI_TYPE_TAG_INT64:
-        if (arg_in->v_int64 > G_MAXLONG || arg_in->v_int64 < G_MINLONG) {
-            PyErr_Format (PyExc_TypeError, "Unable to marshal %s to C long",
-                          gi_type_tag_to_string (type_tag));
-            return FALSE;
-        }
-        *c_long_out = (glong)arg_in->v_int64;
-        return TRUE;
-    case GI_TYPE_TAG_UINT64:
-        if (arg_in->v_uint64 > G_MAXLONG) {
-            PyErr_Format (PyExc_TypeError, "Unable to marshal %s to C long",
-                          gi_type_tag_to_string (type_tag));
-            return FALSE;
-        }
-        *c_long_out = (glong)arg_in->v_uint64;
-        return TRUE;
-    case GI_TYPE_TAG_VOID:
-    case GI_TYPE_TAG_BOOLEAN:
-    case GI_TYPE_TAG_FLOAT:
-    case GI_TYPE_TAG_DOUBLE:
-    case GI_TYPE_TAG_GTYPE:
-    case GI_TYPE_TAG_UTF8:
-    case GI_TYPE_TAG_FILENAME:
-    case GI_TYPE_TAG_ARRAY:
-    case GI_TYPE_TAG_INTERFACE:
-    case GI_TYPE_TAG_GLIST:
-    case GI_TYPE_TAG_GSLIST:
-    case GI_TYPE_TAG_GHASH:
-    case GI_TYPE_TAG_ERROR:
-        PyErr_Format (PyExc_TypeError, "Unable to marshal %s to C long",
-                      gi_type_tag_to_string (type_tag));
-        return FALSE;
-    default:
-        g_assert_not_reached ();
-    }
-}
-
-static gboolean
 _pygi_marshal_from_py_interface_enum (PyGIInvokeState *state,
                                       PyGICallableCache *callable_cache,
                                       PyGIArgCache *arg_cache,
@@ -115,21 +54,8 @@ _pygi_marshal_to_py_interface_enum (PyGIInvokeState *state,
                                     PyGIArgCache *arg_cache, GIArgument *arg,
                                     gpointer *cleanup_data)
 {
-    PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)arg_cache;
-    GIBaseInfo *interface;
-    long c_long;
-
-    interface = gi_type_info_get_interface (arg_cache->type_info);
-    g_assert (GI_IS_ENUM_INFO (interface) && !GI_IS_FLAGS_INFO (interface));
-
-    if (!gi_argument_to_c_long (
-            arg, &c_long,
-            gi_enum_info_get_storage_type ((GIEnumInfo *)interface))) {
-        return NULL;
-    }
-    gi_base_info_unref (interface);
-
-    return pyg_enum_val_new (iface_cache->py_type, c_long);
+    return pygi_argument_interface_to_py (*arg, arg_cache->type_info,
+                                          arg_cache->transfer);
 }
 
 static PyObject *
@@ -138,22 +64,8 @@ _pygi_marshal_to_py_interface_flags (PyGIInvokeState *state,
                                      PyGIArgCache *arg_cache, GIArgument *arg,
                                      gpointer *cleanup_data)
 {
-    PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)arg_cache;
-    GIBaseInfo *interface;
-    long c_long;
-
-    interface = gi_type_info_get_interface (arg_cache->type_info);
-    g_assert (GI_IS_FLAGS_INFO (interface));
-
-    if (!gi_argument_to_c_long (
-            arg, &c_long,
-            gi_enum_info_get_storage_type ((GIEnumInfo *)interface))) {
-        gi_base_info_unref (interface);
-        return NULL;
-    }
-    gi_base_info_unref (interface);
-
-    return pyg_flags_val_new (iface_cache->py_type, (guint)c_long);
+    return pygi_argument_interface_to_py (*arg, arg_cache->type_info,
+                                          arg_cache->transfer);
 }
 
 PyGIArgCache *

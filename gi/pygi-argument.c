@@ -802,9 +802,9 @@ pygi_argument_array_to_object (GIArgument arg, GITypeInfo *type_info,
     return object;
 }
 
-static PyObject *
-pygi_argument_interface_to_object (GIArgument arg, GITypeInfo *type_info,
-                                   GITransfer transfer)
+PyObject *
+pygi_argument_interface_to_py (GIArgument arg, GITypeInfo *type_info,
+                               GITransfer transfer)
 {
     PyObject *object = NULL;
     GIBaseInfo *info;
@@ -1015,7 +1015,7 @@ pygi_argument_to_object (GIArgument arg, GITypeInfo *type_info,
         object = pygi_argument_array_to_object (arg, type_info, transfer);
         break;
     case GI_TYPE_TAG_INTERFACE:
-        object = pygi_argument_interface_to_object (arg, type_info, transfer);
+        object = pygi_argument_interface_to_py (arg, type_info, transfer);
         break;
     case GI_TYPE_TAG_GLIST:
     case GI_TYPE_TAG_GSLIST:
