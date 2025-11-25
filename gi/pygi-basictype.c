@@ -994,7 +994,7 @@ pygi_marshal_from_py_basic_type (PyObject *object, /* in */
                                  GITypeTag type_tag, GITransfer transfer,
                                  gpointer *cleanup_data /* out */)
 {
-    GIArgument arg = { .v_uint64 = 0 };
+    GIArgument arg = PYGI_ARG_INIT;
     gboolean converted = FALSE;
 
     switch (type_tag) {

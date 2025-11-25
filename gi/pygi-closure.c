@@ -18,6 +18,7 @@
  */
 
 #include "pygi-closure.h"
+#include "pygi-argument.h"
 #include "pygi-async.h"
 #include "pygi-ccallback.h"
 #include "pygi-error.h"
@@ -483,7 +484,7 @@ _pygi_closure_clear_retvals (PyGIInvokeState *state, PyGICallableCache *cache,
                              gpointer resp)
 {
     gsize i;
-    GIArgument arg = { .v_uint64 = 0 };
+    GIArgument arg = PYGI_ARG_INIT;
 
     if (cache->return_cache->type_tag != GI_TYPE_TAG_VOID) {
         _pygi_closure_assign_pyobj_to_retval (resp, &arg, cache->return_cache);

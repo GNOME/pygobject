@@ -25,8 +25,14 @@
 
 G_BEGIN_DECLS
 
+/* GIArgument is initialized based on the assumption that
+ * it's the same size as a gint64 (long long).
+ */
+G_STATIC_ASSERT (sizeof (GIArgument) == sizeof (gint64));
+
+#define PYGI_ARG_INIT { .v_int64 = 0 }
+
 /* Private */
-/* TODO: change signature: length as arg, return boolean */
 typedef gboolean (*PyGIArgArrayLengthPolicy) (gsize item_index,
                                               void *user_data1,
                                               void *user_data2,

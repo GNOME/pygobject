@@ -20,6 +20,7 @@
 #include "pygboxed.h"
 #include "pygenum.h"
 #include "pygflags.h"
+#include "pygi-argument.h"
 #include "pygi-basictype.h"
 #include "pygi-fundamental.h"
 #include "pygi-repository.h"
@@ -40,7 +41,7 @@
 GIArgument
 _pygi_argument_from_g_value (const GValue *value, GITypeInfo *type_info)
 {
-    GIArgument arg = { .v_uint64 = 0 };
+    GIArgument arg = PYGI_ARG_INIT;
 
     GITypeTag type_tag = gi_type_info_get_tag (type_info);
 

@@ -225,7 +225,7 @@ _pygi_marshal_from_py_array (PyGIInvokeState *state,
 
     from_py_marshaller = sequence_cache->item_cache->from_py_marshaller;
     for (i = 0, success_count = 0; i < length; i++) {
-        GIArgument item = { .v_uint64 = 0 };
+        GIArgument item = PYGI_ARG_INIT;
         gpointer item_cleanup_data = NULL;
         PyObject *py_item = PySequence_GetItem (py_arg, i);
         if (py_item == NULL) goto err;

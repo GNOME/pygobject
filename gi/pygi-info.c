@@ -1822,7 +1822,7 @@ static PyObject *
 _wrap_gi_constant_info_get_value (PyGIBaseInfo *self)
 {
     GITypeInfo *type_info;
-    GIArgument value = { .v_uint64 = 0 };
+    GIArgument value = PYGI_ARG_INIT;
     PyObject *py_value;
     gboolean free_array = FALSE;
 
@@ -1882,7 +1882,7 @@ _struct_field_array_length_marshal (gsize length_index, void *container_ptr,
                                     void *struct_data_ptr, gsize *array_len)
 {
     GIFieldInfo *array_len_field = NULL;
-    GIArgument arg = { .v_uint64 = 0 };
+    GIArgument arg = PYGI_ARG_INIT;
     GIBaseInfo *container_info = (GIBaseInfo *)container_ptr;
     gboolean result = TRUE;
 

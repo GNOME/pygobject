@@ -20,6 +20,7 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "pygi-argument.h"
 #include "pygi-async.h"
 #include "pygi-boxed.h"
 #include "pygi-error.h"
@@ -705,7 +706,7 @@ pygi_invoke_c_callable (PyGIFunctionCache *function_cache,
                         size_t py_nargsf, PyObject *py_kwnames)
 {
     PyGICallableCache *cache = (PyGICallableCache *)function_cache;
-    GIFFIReturnValue ffi_return_value = { .v_uint64 = 0 };
+    GIFFIReturnValue ffi_return_value = PYGI_ARG_INIT;
     PyObject *ret = NULL;
 
     if (Py_EnterRecursiveCall (" while calling a GICallable")) return NULL;
