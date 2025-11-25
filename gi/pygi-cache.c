@@ -154,12 +154,8 @@ _arg_cache_new_for_interface (GIBaseInfo *iface_info, GITypeInfo *type_info,
         return pygi_arg_struct_new_from_info (
             type_info, arg_info, transfer, direction,
             GI_REGISTERED_TYPE_INFO (iface_info));
-    } else if (GI_IS_FLAGS_INFO (iface_info)) {
-        /* Check flags before enums: flags are a subtype of enum. */
-        return pygi_arg_flags_new_from_info (type_info, arg_info, transfer,
-                                             direction,
-                                             GI_FLAGS_INFO (iface_info));
     } else if (GI_IS_ENUM_INFO (iface_info)) {
+        /* Flags and enums use the same marshaller */
         return pygi_arg_enum_new_from_info (type_info, arg_info, transfer,
                                             direction,
                                             GI_ENUM_INFO (iface_info));

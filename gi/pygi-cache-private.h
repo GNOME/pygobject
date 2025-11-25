@@ -57,10 +57,6 @@ PyGIArgCache *pygi_arg_enum_new_from_info (
     GITypeInfo *type_info, GIArgInfo *arg_info, /* may be null */
     GITransfer transfer, PyGIDirection direction, GIEnumInfo *iface_info);
 
-PyGIArgCache *pygi_arg_flags_new_from_info (
-    GITypeInfo *type_info, GIArgInfo *arg_info, /* may be null */
-    GITransfer transfer, PyGIDirection direction, GIFlagsInfo *iface_info);
-
 PyGIArgCache *pygi_arg_struct_new_from_info (
     GITypeInfo *type_info, GIArgInfo *arg_info, /* may be null */
     GITransfer transfer, PyGIDirection direction,
