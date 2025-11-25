@@ -661,7 +661,7 @@ pyg_flags_get_value (GType flag_type, PyObject *obj, guint *val)
             PyErr_SetString (PyExc_TypeError,
                              "could not convert string to flag because there "
                              "is no GType associated to look up the value");
-            res = -1;
+            return -1;
         }
         info = g_flags_get_value_by_name (fclass, str);
         g_type_class_unref (fclass);
@@ -687,7 +687,7 @@ pyg_flags_get_value (GType flag_type, PyObject *obj, guint *val)
             PyErr_SetString (PyExc_TypeError,
                              "could not convert string to flag because there "
                              "is no GType associated to look up the value");
-            res = -1;
+            return -1;
         }
 
         for (i = 0; i < len; i++) {
