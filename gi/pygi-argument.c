@@ -107,9 +107,8 @@ _pygi_get_storage_type (GITypeInfo *type_info)
         GIBaseInfo *interface = gi_type_info_get_interface (type_info);
         if (GI_IS_ENUM_INFO (interface))
             type_tag = gi_enum_info_get_storage_type ((GIEnumInfo *)interface);
-        else
-            /* FIXME: we might have something to do for other types */
-            gi_base_info_unref (interface);
+        /* FIXME: we might have something to do for other types */
+        gi_base_info_unref (interface);
     }
     return type_tag;
 }
@@ -665,6 +664,11 @@ hash_table_release:
     return arg;
 
 hash_table_item_error:
+    gi_base_info_unref ((GIBaseInfo *)key_type_info);
+    gi_base_info_unref ((GIBaseInfo *)value_type_info);
+    Py_DECREF (keys);
+    Py_DECREF (values);
+
     /* Free everything we have converted so far. */
     _pygi_argument_release ((GIArgument *)&hash_table, type_info,
                             GI_TRANSFER_NOTHING, GI_DIRECTION_IN);
@@ -905,9 +909,9 @@ pygi_argument_list_to_object (GIArgument arg, GITypeInfo *type_info,
     return object;
 }
 
-static PyObject *
-pygi_argument_hash_table_to_object (GIArgument arg, GITypeInfo *type_info,
-                                    GITransfer transfer)
+PyObject *
+pygi_argument_hash_table_to_py (GIArgument arg, GITypeInfo *type_info,
+                                GITransfer transfer)
 {
     PyObject *object = NULL;
     GITypeInfo *key_type_info;
@@ -941,8 +945,10 @@ pygi_argument_hash_table_to_object (GIArgument arg, GITypeInfo *type_info,
         PyObject *py_value;
         int retval;
 
+        _pygi_hash_pointer_to_arg_in_place (&key, key_type_info);
         py_key = pygi_argument_to_object (key, key_type_info, item_transfer);
         if (py_key == NULL) {
+            Py_CLEAR (object);
             break;
         }
 
@@ -950,6 +956,7 @@ pygi_argument_hash_table_to_object (GIArgument arg, GITypeInfo *type_info,
         py_value =
             pygi_argument_to_object (value, value_type_info, item_transfer);
         if (py_value == NULL) {
+            Py_CLEAR (object);
             Py_DECREF (py_key);
             break;
         }
@@ -967,6 +974,7 @@ pygi_argument_hash_table_to_object (GIArgument arg, GITypeInfo *type_info,
 
     gi_base_info_unref ((GIBaseInfo *)key_type_info);
     gi_base_info_unref ((GIBaseInfo *)value_type_info);
+
     return object;
 }
 
@@ -1022,7 +1030,7 @@ pygi_argument_to_object (GIArgument arg, GITypeInfo *type_info,
         object = pygi_argument_list_to_object (arg, type_info, transfer);
         break;
     case GI_TYPE_TAG_GHASH:
-        object = pygi_argument_hash_table_to_object (arg, type_info, transfer);
+        object = pygi_argument_hash_table_to_py (arg, type_info, transfer);
         break;
     case GI_TYPE_TAG_ERROR: {
         GError *error = (GError *)arg.v_pointer;

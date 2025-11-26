@@ -76,6 +76,10 @@ GIArgument pygi_argument_hash_table_from_py (PyObject *object,
                                              GITypeInfo *type_info,
                                              GITransfer transfer);
 
+PyObject *pygi_argument_hash_table_to_py (GIArgument arg,
+                                          GITypeInfo *type_info,
+                                          GITransfer transfer);
+
 G_END_DECLS
 
 #endif /* __PYGI_ARGUMENT_H__ */
