@@ -72,6 +72,9 @@ PyObject *pygi_argument_interface_to_py (GIArgument arg, GITypeInfo *type_info,
 GIArgument pygi_argument_list_from_py (PyObject *object, GITypeInfo *type_info,
                                        GITransfer transfer);
 
+PyObject *pygi_argument_list_to_py (GIArgument arg, GITypeInfo *type_info,
+                                    GITransfer transfer);
+
 GIArgument pygi_argument_hash_table_from_py (PyObject *object,
                                              GITypeInfo *type_info,
                                              GITransfer transfer);

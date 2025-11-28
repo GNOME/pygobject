@@ -225,12 +225,10 @@ _free_error_slice (GError **error)
 }
 
 static GDestroyNotify
-_pygi_type_info_get_free_func (GITypeInfo *type_info, GITransfer transfer,
-                               gboolean is_none)
+_pygi_type_info_get_destroy_notifier (GITypeInfo *type_info,
+                                      GITransfer transfer)
 {
     GITypeTag type_tag = gi_type_info_get_tag (type_info);
-
-    if (is_none) return NULL;
 
     switch (type_tag) {
     case GI_TYPE_TAG_VOID:
@@ -313,8 +311,8 @@ _pygi_type_info_get_free_func (GITypeInfo *type_info, GITransfer transfer,
         GITransfer item_transfer = transfer == GI_TRANSFER_EVERYTHING
                                        ? GI_TRANSFER_EVERYTHING
                                        : GI_TRANSFER_NOTHING;
-        GDestroyNotify item_free = _pygi_type_info_get_free_func (
-            item_type_info, item_transfer, FALSE);
+        GDestroyNotify item_free = _pygi_type_info_get_destroy_notifier (
+            item_type_info, item_transfer);
 
         gi_base_info_unref ((GIBaseInfo *)item_type_info);
 
@@ -332,10 +330,10 @@ _pygi_type_info_get_free_func (GITypeInfo *type_info, GITransfer transfer,
         GITransfer item_transfer = transfer == GI_TRANSFER_EVERYTHING
                                        ? GI_TRANSFER_EVERYTHING
                                        : GI_TRANSFER_NOTHING;
-        GDestroyNotify key_free_func = _pygi_type_info_get_free_func (
-            key_type_info, item_transfer, FALSE);
-        GDestroyNotify value_free_func = _pygi_type_info_get_free_func (
-            value_type_info, item_transfer, FALSE);
+        GDestroyNotify key_free_func = _pygi_type_info_get_destroy_notifier (
+            key_type_info, item_transfer);
+        GDestroyNotify value_free_func = _pygi_type_info_get_destroy_notifier (
+            value_type_info, item_transfer);
 
         gi_base_info_unref ((GIBaseInfo *)key_type_info);
         gi_base_info_unref ((GIBaseInfo *)value_type_info);
@@ -775,8 +773,8 @@ pygi_argument_hash_table_from_py (PyObject *object, GITypeInfo *type_info,
 
     hash_table = g_hash_table_new_full (
         hash_func, equal_func,
-        _pygi_type_info_get_free_func (key_type_info, item_transfer, FALSE),
-        _pygi_type_info_get_free_func (value_type_info, item_transfer, FALSE));
+        _pygi_type_info_get_destroy_notifier (key_type_info, item_transfer),
+        _pygi_type_info_get_destroy_notifier (value_type_info, item_transfer));
     if (hash_table == NULL) {
         PyErr_NoMemory ();
         goto hash_table_release;
@@ -1019,9 +1017,9 @@ pygi_argument_interface_to_py (GIArgument arg, GITypeInfo *type_info,
     return object;
 }
 
-static PyObject *
-pygi_argument_list_to_object (GIArgument arg, GITypeInfo *type_info,
-                              GITransfer transfer)
+PyObject *
+pygi_argument_list_to_py (GIArgument arg, GITypeInfo *type_info,
+                          GITransfer transfer)
 {
     PyObject *object = NULL;
     GSList *list;
@@ -1035,7 +1033,6 @@ pygi_argument_list_to_object (GIArgument arg, GITypeInfo *type_info,
 
     object = PyList_New (length);
     if (object == NULL) return NULL;
-
 
     item_type_info = gi_type_info_get_param_type (type_info, 0);
     g_assert (item_type_info != NULL);
@@ -1182,7 +1179,7 @@ pygi_argument_to_object (GIArgument arg, GITypeInfo *type_info,
         break;
     case GI_TYPE_TAG_GLIST:
     case GI_TYPE_TAG_GSLIST:
-        object = pygi_argument_list_to_object (arg, type_info, transfer);
+        object = pygi_argument_list_to_py (arg, type_info, transfer);
         break;
     case GI_TYPE_TAG_GHASH:
         object = pygi_argument_hash_table_to_py (arg, type_info, transfer);
@@ -1202,6 +1199,12 @@ pygi_argument_to_object (GIArgument arg, GITypeInfo *type_info,
     }
 
     return object;
+}
+
+static void
+dummy_destroy_notify (gpointer data)
+{
+    /* do nothing */
 }
 
 void
@@ -1361,51 +1364,102 @@ _pygi_argument_release (GIArgument *arg, GITypeInfo *type_info,
     case GI_TYPE_TAG_GLIST:
     case GI_TYPE_TAG_GSLIST: {
         GSList *list;
+        GITypeInfo *item_type_info;
+        GDestroyNotify destroy_notify;
 
         if (arg->v_pointer == NULL) {
             return;
         }
 
         list = arg->v_pointer;
+        item_type_info = gi_type_info_get_param_type (type_info, 0);
+        g_assert (item_type_info != NULL);
 
-        // TODO: simplify to g_(s)list_free_full
+        destroy_notify =
+            _pygi_type_info_get_destroy_notifier (item_type_info, transfer);
+        if (destroy_notify == NULL) destroy_notify = dummy_destroy_notify;
 
-        if ((direction == GI_DIRECTION_IN
-             && transfer != GI_TRANSFER_EVERYTHING)
-            || (direction == GI_DIRECTION_OUT
-                && transfer == GI_TRANSFER_EVERYTHING)) {
-            GITypeInfo *item_type_info;
-            GITransfer item_transfer;
-            GSList *item;
+        // Direction in:
+        //  everything: do nothing
+        //  container: release elements
+        //  nothing: g_list_free_full
+        // Direction out:
+        //  everything: g_list_free_full
+        //  container: g_list_free
+        //  nothing: do nothing
+        // Direction inout:
+        //  not sure yet. Should not happen
 
-            item_type_info = gi_type_info_get_param_type (type_info, 0);
-            g_assert (item_type_info != NULL);
+        switch (direction) {
+        case GI_DIRECTION_IN:
+            switch (transfer) {
+            case GI_TRANSFER_EVERYTHING:
+                break;
+            case GI_TRANSFER_CONTAINER: {
+                GITransfer item_transfer;
+                GSList *item;
 
-            item_transfer = direction == GI_DIRECTION_IN
-                                ? GI_TRANSFER_NOTHING
-                                : GI_TRANSFER_EVERYTHING;
+                item_transfer = direction == GI_DIRECTION_IN
+                                    ? GI_TRANSFER_NOTHING
+                                    : GI_TRANSFER_EVERYTHING;
 
-            /* Free the items */
-            for (item = list; item != NULL; item = g_slist_next (item)) {
-                _pygi_argument_release ((GIArgument *)&item->data,
-                                        item_type_info, item_transfer,
-                                        direction);
+                /* Free the items */
+                for (item = list; item != NULL; item = g_slist_next (item)) {
+                    _pygi_argument_release ((GIArgument *)&item->data,
+                                            item_type_info, item_transfer,
+                                            direction);
+                }
+                break;
             }
-
-            gi_base_info_unref ((GIBaseInfo *)item_type_info);
+            case GI_TRANSFER_NOTHING:
+                if (type_tag == GI_TYPE_TAG_GLIST) {
+                    g_list_free_full ((GList *)list, destroy_notify);
+                } else if (type_tag == GI_TYPE_TAG_GSLIST) {
+                    g_slist_free_full (list, destroy_notify);
+                } else {
+                    g_assert_not_reached ();
+                }
+                break;
+            default:
+                g_assert_not_reached ();
+            }
+            break;
+        case GI_DIRECTION_OUT:
+            switch (transfer) {
+            case GI_TRANSFER_EVERYTHING:
+                if (type_tag == GI_TYPE_TAG_GLIST) {
+                    g_list_free_full ((GList *)list, destroy_notify);
+                } else if (type_tag == GI_TYPE_TAG_GSLIST) {
+                    g_slist_free_full (list, destroy_notify);
+                } else {
+                    g_assert_not_reached ();
+                }
+                break;
+            case GI_TRANSFER_CONTAINER:
+                if (type_tag == GI_TYPE_TAG_GLIST) {
+                    g_list_free ((GList *)list);
+                } else if (type_tag == GI_TYPE_TAG_GSLIST) {
+                    g_slist_free (list);
+                } else {
+                    g_assert_not_reached ();
+                }
+                break;
+            case GI_TRANSFER_NOTHING:
+                break;
+            default:
+                g_assert_not_reached ();
+            }
+            break;
+        case GI_DIRECTION_INOUT:
+            g_debug (
+                "Not sure what to do with inout lists yet. "
+                "Will leak memory for now.");
+            break;
+        default:
+            g_assert_not_reached ();
         }
 
-        if ((direction == GI_DIRECTION_IN && transfer == GI_TRANSFER_NOTHING)
-            || (direction == GI_DIRECTION_OUT
-                && transfer != GI_TRANSFER_NOTHING)) {
-            if (type_tag == GI_TYPE_TAG_GLIST) {
-                g_list_free ((GList *)list);
-            } else {
-                /* type_tag == GI_TYPE_TAG_GSLIST */
-                g_slist_free (list);
-            }
-        }
-
+        gi_base_info_unref ((GIBaseInfo *)item_type_info);
         break;
     }
     case GI_TYPE_TAG_GHASH: {
@@ -1447,4 +1501,6 @@ _pygi_argument_release (GIArgument *arg, GITypeInfo *type_info,
     default:
         g_assert_not_reached ();
     }
+
+    arg->v_int64 = 0;
 }
