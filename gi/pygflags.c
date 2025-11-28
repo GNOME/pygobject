@@ -173,6 +173,7 @@ pyg_flags_add_full (PyObject *module, const char *typename, GType gtype,
 
             add_value (values, gi_base_info_get_name (GI_BASE_INFO (v)),
                        gi_value_info_get_value (v));
+            gi_base_info_unref (v);
         }
     }
 
