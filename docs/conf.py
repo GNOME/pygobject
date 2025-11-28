@@ -14,26 +14,27 @@ def post_process_build(app, exception):
     """Flatten static files and fix HTML paths for subdirectories."""
     if exception:
         return
-    
-    static = Path(app.outdir) / '_static'
+
+    static = Path(app.outdir) / "_static"
     # Flatten images directory
-    if (img := static / 'images').exists():
+    if (img := static / "images").exists():
         for f in img.iterdir():
             if f.is_file():
                 shutil.move(str(f), str(static / f.name))
         img.rmdir()
-    
+
     # Fix _static/ paths in HTML
-    for html in Path(app.outdir).rglob('*.html'):
+    for html in Path(app.outdir).rglob("*.html"):
         depth = len(html.relative_to(app.outdir).parts) - 1
-        prefix = '../' * depth + '_static/' if depth else '_static/'
-        content = html.read_text(encoding='utf-8')
+        prefix = "../" * depth + "_static/" if depth else "_static/"
+        content = html.read_text(encoding="utf-8")
         if (new := re.sub(r'src="_static/', f'src="{prefix}', content)) != content:
-            html.write_text(new, encoding='utf-8')
+            html.write_text(new, encoding="utf-8")
 
 
 def setup(app):
-    app.connect('build-finished', post_process_build)
+    app.connect("build-finished", post_process_build)
+
 
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),

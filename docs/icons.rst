@@ -81,4 +81,4 @@
         <img src="_static/start_linux_light.png" alt="Launch hello world from linux terminal" class="only-light" style="width:60%;display:block;margin:0 auto;">
         <img src="_static/start_linux_dark.png" alt="Launch hello world from linux terminal" class="only-dark" style="width:60%;display:block;margin:0 auto;">
         </div>
-        
+
