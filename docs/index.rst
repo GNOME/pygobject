@@ -40,8 +40,6 @@ information on specific libraries, check out the
 
 .. code:: python
 
-    import sys
-
     import gi
 
     gi.require_version("Gtk", "4.0")
@@ -59,8 +57,7 @@ information on specific libraries, check out the
 
 
     app = MyApplication()
-    exit_status = app.run(sys.argv)
-    sys.exit(exit_status)
+    app.run()
 
 
 How does it work?
