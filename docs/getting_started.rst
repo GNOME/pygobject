@@ -13,8 +13,6 @@ the following content and save it somewhere:
 
 .. code:: python
 
-    import sys
-
     import gi
 
     gi.require_version("Gtk", "4.0")
@@ -32,20 +30,23 @@ the following content and save it somewhere:
 
 
     app = MyApplication()
-    exit_status = app.run(sys.argv)
-    sys.exit(exit_status)
+    app.run()
 
-Before we can run the example application we need to install PyGObject, GTK
-and their dependencies. Follow the instructions for your platform below.
+Before we can run the example application we need to install PyGObject, GTK,
+and their dependencies. Follow the instructions for your platform below or use
+a cross-platform package manager like `conda <https://docs.conda.io/>`_ or
+`Pixi <https://pixi.sh/>`_.
 
-For full IDE support (incl. autocomplete) you will also need typing stubs available here `PyGObject-stubs <https://pypi.org/project/PyGObject-stubs/>`_.
+For full IDE support (incl. autocomplete) you will also need typing stubs
+available here `PyGObject-stubs <https://pypi.org/project/PyGObject-stubs/>`_.
 
-======================================================= ==================================================== ==========================================================
-|ubuntu-logo| :ref:`Ubuntu <ubuntu-getting-started>`    |fedora-logo| :ref:`Fedora <fedora-getting-started>` |arch-logo| :ref:`Arch Linux <arch-getting-started>`
-|windows-logo| :ref:`Windows <windows-getting-started>` |macosx-logo| :ref:`macOS <macosx-getting-started>`  |opensuse-logo| :ref:`openSUSE <opensuse-getting-started>`
-======================================================= ==================================================== ==========================================================
+======================================================= ==================================================== ========================================================== =================================================
+|ubuntu-logo| :ref:`Ubuntu <ubuntu-getting-started>`    |fedora-logo| :ref:`Fedora <fedora-getting-started>` |arch-logo| :ref:`Arch Linux <arch-getting-started>`       |conda-logo| :ref:`Conda <conda-getting-started>`
+|windows-logo| :ref:`Windows <windows-getting-started>` |macosx-logo| :ref:`macOS <macosx-getting-started>`  |opensuse-logo| :ref:`openSUSE <opensuse-getting-started>` |pixi-logo| :ref:`Pixi <pixi-getting-started>`
+======================================================= ==================================================== ========================================================== =================================================
 
-After running the example application have a look at the :doc:`/tutorials/index` for an overview of how to create GTK apps and the `GNOME Python API docs
+After running the example application have a look at the :doc:`/tutorials/index`
+for an overview of how to create GTK apps and the `GNOME Python API docs
 <https://api.pygobject.gnome.org/>`__ for API documentation for all supported
 libraries.
 
@@ -88,9 +89,7 @@ Installing from PyPI with pip:
   #) Change the working directory to where your ``hello.py`` script can be found
   #) Run ``python3 hello.py``
 
-.. figure:: images/start_linux.png
-    :scale: 60%
-
+|start-linux|
 
 .. _fedora-getting-started:
 
@@ -169,6 +168,33 @@ Installing from PyPI with pip:
 .. figure:: images/start_macos.png
     :scale: 70%
 
+.. _conda-getting-started:
+
+|conda-logo| conda
+------------------
+
+#) Go to https://docs.conda.io and install Miniconda or Miniforge
+#) Open a terminal
+#) Execute ``conda create --channel conda-forge --name pygobject pygobject gtk4``
+#) Execute ``conda activate pygobject``
+#) Change the working directory to where your ``hello.py`` script can be found
+#) Run ``python hello.py``
+
+|start-conda|
+
+.. _pixi-getting-started:
+
+|pixi-logo| Pixi
+----------------
+
+#) Go to https://pixi.sh/latest/installation/ and install pixi
+#) Place your ``hello.py`` script into a separate ``hello`` directory
+#) Open a terminal and ``cd hello``
+#) Execute ``pixi init .``
+#) Execute ``pixi add pygobject gtk4``
+#) Run ``pixi run python hello.py``
+
+|start-pixi|
 
 ----
 
