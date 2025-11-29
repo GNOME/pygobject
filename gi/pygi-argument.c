@@ -550,6 +550,7 @@ pygi_argument_array_from_object (PyObject *object, GITypeInfo *type_info,
     return arg;
 
 array_item_error:
+    gi_base_info_unref ((GIBaseInfo *)item_type_info);
     /* Free everything we have converted so far. */
     _pygi_argument_release ((GIArgument *)&array, type_info,
                             GI_TRANSFER_NOTHING, GI_DIRECTION_IN);
