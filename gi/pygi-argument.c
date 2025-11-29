@@ -453,15 +453,20 @@ pygi_argument_interface_from_py (PyObject *object, GITypeInfo *type_info,
         /* Check flags before enums: flags are a subtype of enum. */
         GType g_type =
             gi_registered_type_info_get_g_type ((GIRegisteredTypeInfo *)info);
-        if (pyg_flags_get_value (g_type, object, &arg.v_uint) < 0) return arg;
+        if (pyg_flags_get_value (g_type, object, &arg.v_uint) < 0) {
+            gi_base_info_unref (info);
+            return arg;
+        }
     } else if (GI_IS_ENUM_INFO (info)) {
         GType g_type =
             gi_registered_type_info_get_g_type ((GIRegisteredTypeInfo *)info);
         PyObject *expected_py_type =
             pygi_type_import_by_gi_info ((GIBaseInfo *)info);
 
-        if (pyg_enum_get_value (g_type, object, &arg.v_int) < 0) return arg;
-
+        if (pyg_enum_get_value (g_type, object, &arg.v_int) < 0) {
+            gi_base_info_unref (info);
+            return arg;
+        }
         /* If this is not an instance of the Enum type that we want
          * we need to check if the value is equivilant to one of the
          * Enum's memebers */
