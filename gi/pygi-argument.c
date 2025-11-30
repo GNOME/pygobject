@@ -107,9 +107,8 @@ _pygi_get_storage_type (GITypeInfo *type_info)
         GIBaseInfo *interface = gi_type_info_get_interface (type_info);
         if (GI_IS_ENUM_INFO (interface))
             type_tag = gi_enum_info_get_storage_type ((GIEnumInfo *)interface);
-        else
-            /* FIXME: we might have something to do for other types */
-            gi_base_info_unref (interface);
+        /* FIXME: we might have something to do for other types */
+        gi_base_info_unref (interface);
     }
     return type_tag;
 }
@@ -405,6 +404,8 @@ pygi_argument_array_from_object (PyObject *object, GITypeInfo *type_info,
     return arg;
 
 array_item_error:
+    gi_base_info_unref ((GIBaseInfo *)item_type_info);
+
     /* Free everything we have converted so far. */
     _pygi_argument_release ((GIArgument *)&array, type_info,
                             GI_TRANSFER_NOTHING, GI_DIRECTION_IN);
@@ -528,6 +529,7 @@ pygi_argument_list_from_object (PyObject *object, GITypeInfo *type_info,
     return arg;
 
 list_item_error:
+    gi_base_info_unref ((GIBaseInfo *)item_type_info);
     /* Free everything we have converted so far. */
     _pygi_argument_release ((GIArgument *)&list, type_info,
                             GI_TRANSFER_NOTHING, GI_DIRECTION_IN);
