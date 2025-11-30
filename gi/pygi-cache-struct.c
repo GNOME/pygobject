@@ -158,7 +158,7 @@ arg_boxed_to_py_cleanup (PyGIInvokeState *state, PyGIArgCache *arg_cache,
                          gpointer cleanup_data, gpointer data,
                          gboolean was_processed)
 {
-    if (arg_cache->transfer == GI_TRANSFER_NOTHING)
+    if (cleanup_data != NULL && arg_cache->transfer == GI_TRANSFER_NOTHING)
         pygi_boxed_copy_in_place ((PyGIBoxed *)cleanup_data);
 }
 

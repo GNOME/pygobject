@@ -696,9 +696,12 @@ pygi_argument_list_from_py (PyObject *object, GITypeInfo *type_info,
         }
 
         if (type_tag == GI_TYPE_TAG_GLIST) {
-            list = (GSList *)g_list_prepend ((GList *)list, item.v_pointer);
+            list = (GSList *)g_list_prepend (
+                (GList *)list,
+                _pygi_arg_to_hash_pointer (item, item_type_info));
         } else {
-            list = g_slist_prepend (list, item.v_pointer);
+            list = g_slist_prepend (
+                list, _pygi_arg_to_hash_pointer (item, item_type_info));
         }
     }
 
@@ -1047,6 +1050,7 @@ pygi_argument_list_to_py (GIArgument arg, GITypeInfo *type_info,
 
         item.v_pointer = list->data;
 
+        _pygi_hash_pointer_to_arg_in_place (&item, item_type_info);
         py_item =
             pygi_argument_to_object (item, item_type_info, item_transfer);
         if (py_item == NULL) {
