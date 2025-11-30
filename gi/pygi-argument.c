@@ -412,7 +412,7 @@ _pygi_determine_c_array_length (GIArgument *arg, GITypeInfo *type_info,
 
             length_by_policy =
                 array_length_policy (length_arg_pos, user_data1, user_data2);
-            if (length < 0) {
+            if (length_by_policy < 0) {
                 return -1;
             }
             length = (size_t)length_by_policy;
