@@ -289,8 +289,10 @@ _pygi_marshal_cleanup_to_py_ghash (PyGIInvokeState *state,
 
     /* assume hashtable has boxed key and value */
     if (arg_cache->transfer == GI_TRANSFER_EVERYTHING
-        || arg_cache->transfer == GI_TRANSFER_CONTAINER)
+        || arg_cache->transfer == GI_TRANSFER_CONTAINER) {
+        g_hash_table_steal_all ((GHashTable *)data);
         g_hash_table_unref ((GHashTable *)data);
+    }
 }
 
 static void

@@ -92,6 +92,24 @@ pygi_marshal_to_py_basic_type_cache_adapter (PyGIInvokeState *state,
                                           arg_cache->transfer);
 }
 
+static PyObject *
+pygi_marshal_to_py_utf8_cache_adapter (PyGIInvokeState *state,
+                                       PyGICallableCache *callable_cache,
+                                       PyGIArgCache *arg_cache,
+                                       GIArgument *arg, gpointer *cleanup_data)
+{
+    PyObject *object = pygi_marshal_to_py_basic_type (
+        *arg, arg_cache->type_tag, arg_cache->transfer);
+    /* Python copies the string so we need to free it
+       if the interface is transfering ownership,
+       whether or not it has been processed yet */
+    if (arg_cache->transfer == GI_TRANSFER_EVERYTHING) {
+        pygi_invoke_state_add_cleanup_data (state, g_free, arg->v_pointer);
+    }
+    return object;
+}
+
+
 static gboolean
 marshal_from_py_void (PyGIInvokeState *state,
                       PyGICallableCache *callable_cache,
@@ -117,17 +135,6 @@ marshal_to_py_void (PyGIInvokeState *state, PyGICallableCache *callable_cache,
         return PyLong_FromVoidPtr (arg->v_pointer);
     }
     Py_RETURN_NONE;
-}
-
-static void
-marshal_cleanup_to_py_utf8 (PyGIInvokeState *state, PyGIArgCache *arg_cache,
-                            gpointer cleanup_data, gpointer data,
-                            gboolean was_processed)
-{
-    /* Python copies the string so we need to free it
-       if the interface is transfering ownership,
-       whether or not it has been processed yet */
-    if (arg_cache->transfer == GI_TRANSFER_EVERYTHING) g_free (data);
 }
 
 PyGIArgCache *
@@ -183,9 +190,7 @@ pygi_arg_string_type_new_from_info (GITypeInfo *type_info, GIArgInfo *arg_info,
     }
 
     if (direction & PYGI_DIRECTION_TO_PYTHON) {
-        arg_cache->to_py_marshaller =
-            pygi_marshal_to_py_basic_type_cache_adapter;
-        arg_cache->to_py_cleanup = marshal_cleanup_to_py_utf8;
+        arg_cache->to_py_marshaller = pygi_marshal_to_py_utf8_cache_adapter;
     }
 
     return arg_cache;
