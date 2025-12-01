@@ -54,6 +54,7 @@ _pygi_marshal_from_py_ghash (PyGIInvokeState *state,
 
     GHashFunc hash_func;
     GEqualFunc equal_func;
+    GDestroyNotify key_destroy_func, value_destroy_func;
 
     GHashTable *hash_ = NULL;
     PyGIHashCache *hash_cache = (PyGIHashCache *)arg_cache;
@@ -89,12 +90,22 @@ _pygi_marshal_from_py_ghash (PyGIInvokeState *state,
         || hash_cache->key_cache->type_tag == GI_TYPE_TAG_FILENAME) {
         hash_func = g_str_hash;
         equal_func = g_str_equal;
+        if (arg_cache->transfer == GI_TRANSFER_EVERYTHING) {
+            key_destroy_func = g_free;
+            value_destroy_func = g_free;
+        } else {
+            key_destroy_func = NULL;
+            value_destroy_func = NULL;
+        }
     } else {
         hash_func = NULL;
         equal_func = NULL;
+        key_destroy_func = NULL;
+        value_destroy_func = NULL;
     }
 
-    hash_ = g_hash_table_new (hash_func, equal_func);
+    hash_ = g_hash_table_new_full (hash_func, equal_func, key_destroy_func,
+                                   value_destroy_func);
     if (hash_ == NULL) {
         PyErr_NoMemory ();
         Py_DECREF (py_keys);
@@ -140,59 +151,30 @@ err:
 
     if (arg_cache->transfer == GI_TRANSFER_NOTHING) {
         /* Free everything in cleanup. */
-        *cleanup_data = arg->v_pointer;
+        pygi_invoke_state_add_cleanup_data (
+            state, (GDestroyNotify)g_hash_table_unref, arg->v_pointer);
+
     } else if (arg_cache->transfer == GI_TRANSFER_CONTAINER) {
         /* Make a shallow copy so we can free the elements later in cleanup
          * because it is possible invoke will free the list before our cleanup. */
-        *cleanup_data = g_hash_table_ref (arg->v_pointer);
+        pygi_invoke_state_add_cleanup_data (state,
+                                            (GDestroyNotify)g_hash_table_unref,
+                                            g_hash_table_ref (arg->v_pointer));
     } else { /* GI_TRANSFER_EVERYTHING */
         /* No cleanup, everything is given to the callee.
          * Note that the keys and values will leak for transfer everything because
          * we do not use g_hash_table_new_full and set key/value_destroy_func. */
-        *cleanup_data = NULL;
     }
 
     return TRUE;
 }
 
+
 static void
-_pygi_marshal_cleanup_from_py_ghash (PyGIInvokeState *state,
-                                     PyGIArgCache *arg_cache, PyObject *py_arg,
-                                     gpointer data, gboolean was_processed)
+hash_table_cleanup (gpointer data)
 {
-    if (data == NULL) return;
-
-    if (was_processed) {
-        GHashTable *hash_;
-        PyGIHashCache *hash_cache = (PyGIHashCache *)arg_cache;
-
-        hash_ = (GHashTable *)data;
-
-        /* clean up keys and values first */
-        if (hash_cache->key_cache->from_py_cleanup != NULL
-            || hash_cache->value_cache->from_py_cleanup != NULL) {
-            GHashTableIter hiter;
-            gpointer key;
-            gpointer value;
-
-            PyGIMarshalFromPyCleanupFunc key_cleanup_func =
-                hash_cache->key_cache->from_py_cleanup;
-            PyGIMarshalFromPyCleanupFunc value_cleanup_func =
-                hash_cache->value_cache->from_py_cleanup;
-
-            g_hash_table_iter_init (&hiter, hash_);
-            while (g_hash_table_iter_next (&hiter, &key, &value)) {
-                if (key != NULL && key_cleanup_func != NULL)
-                    key_cleanup_func (state, hash_cache->key_cache, NULL, key,
-                                      TRUE);
-                if (value != NULL && value_cleanup_func != NULL)
-                    value_cleanup_func (state, hash_cache->value_cache, NULL,
-                                        value, TRUE);
-            }
-        }
-
-        g_hash_table_unref (hash_);
-    }
+    g_hash_table_steal_all ((GHashTable *)data);
+    g_hash_table_unref ((GHashTable *)data);
 }
 
 static PyObject *
@@ -276,37 +258,23 @@ _pygi_marshal_to_py_ghash (PyGIInvokeState *state,
         }
     }
 
-    return py_obj;
-}
-
-static void
-_pygi_marshal_cleanup_to_py_ghash (PyGIInvokeState *state,
-                                   PyGIArgCache *arg_cache,
-                                   gpointer cleanup_data, gpointer data,
-                                   gboolean was_processed)
-{
-    if (data == NULL) return;
-
-    /* assume hashtable has boxed key and value */
-    if (arg_cache->transfer == GI_TRANSFER_EVERYTHING
-        || arg_cache->transfer == GI_TRANSFER_CONTAINER) {
-        g_hash_table_steal_all ((GHashTable *)data);
-        g_hash_table_unref ((GHashTable *)data);
+    if (arg_cache->transfer != GI_TRANSFER_NOTHING) {
+        pygi_invoke_state_add_cleanup_data (state, hash_table_cleanup,
+                                            arg->v_pointer);
     }
+    return py_obj;
 }
 
 static void
 _arg_cache_from_py_ghash_setup (PyGIArgCache *arg_cache)
 {
     arg_cache->from_py_marshaller = _pygi_marshal_from_py_ghash;
-    arg_cache->from_py_cleanup = _pygi_marshal_cleanup_from_py_ghash;
 }
 
 static void
 _arg_cache_to_py_ghash_setup (PyGIArgCache *arg_cache)
 {
     arg_cache->to_py_marshaller = _pygi_marshal_to_py_ghash;
-    arg_cache->to_py_cleanup = _pygi_marshal_cleanup_to_py_ghash;
 }
 
 PyGIArgCache *
