@@ -74,3 +74,11 @@ pygi_invoke_state_free (PyGIInvokeState *state)
 
     g_slice_free1 (PyGI_INVOKE_ARG_STATE_SIZE (state->n_args), state->args);
 }
+
+void
+pygi_invoke_state_add_cleanup_data (PyGIInvokeState *state,
+                                    GDestroyNotify notifier, gpointer data)
+{
+    PyGIInvokeStateCleanup cleanup = { notifier, data };
+    g_array_append_val (state->cleanup_data, cleanup);
+}

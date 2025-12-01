@@ -76,6 +76,10 @@ gboolean pygi_invoke_state_init (PyGIInvokeState *state);
 
 void pygi_invoke_state_free (PyGIInvokeState *state);
 
+void pygi_invoke_state_add_cleanup_data (PyGIInvokeState *state,
+                                         GDestroyNotify notifier,
+                                         gpointer data);
+
 G_END_DECLS
 
 #endif
