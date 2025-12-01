@@ -1,15 +1,28 @@
 #include "pygi-invoke-state.h"
 
+/* We keep track of the topmost state invocation.
+ * This allows us to collect all to be freed data in the outermost
+ * array of cleanup data.
+ */
+static GPrivate pygi_invoke_state_private;
 
 /* To reduce calls to g_slice_*() we (1) allocate all the memory depended on
  * the argument count in one go and (2) keep one version per argument count
  * around for faster reuse.
+ *
+ * NB. This should be removed if we want to support threadless-python.
  */
 
 #define PyGI_INVOKE_ARG_STATE_SIZE(n)                                         \
     (n * (sizeof (PyGIInvokeArgState) + sizeof (GIArgument *)))
 #define PyGI_INVOKE_ARG_STATE_N_MAX 10
 static gpointer free_arg_state[PyGI_INVOKE_ARG_STATE_N_MAX];
+
+static void
+do_clean_up_data (PyGIInvokeStateCleanup *cleanup)
+{
+    cleanup->notifier (cleanup->data);
+}
 
 /**
  * pygi_invoke_state_init:
@@ -19,6 +32,7 @@ static gpointer free_arg_state[PyGI_INVOKE_ARG_STATE_N_MAX];
 gboolean
 pygi_invoke_state_init (PyGIInvokeState *state)
 {
+    PyGIInvokeState *outer_state = g_private_get (&pygi_invoke_state_private);
     gpointer mem;
 
     if (state->n_args < PyGI_INVOKE_ARG_STATE_N_MAX
@@ -41,8 +55,16 @@ pygi_invoke_state_init (PyGIInvokeState *state)
                        + state->n_args * sizeof (PyGIInvokeArgState));
     }
 
-    state->cleanup_data =
-        g_array_new (FALSE, TRUE, sizeof (PyGIInvokeStateCleanup));
+    if (outer_state != NULL) {
+        state->cleanup_data = g_array_ref (outer_state->cleanup_data);
+    } else {
+        g_private_set (&pygi_invoke_state_private, state);
+
+        state->cleanup_data =
+            g_array_new (FALSE, TRUE, sizeof (PyGIInvokeStateCleanup));
+        g_array_set_clear_func (state->cleanup_data,
+                                (GDestroyNotify)do_clean_up_data);
+    }
     return TRUE;
 }
 
@@ -53,16 +75,10 @@ pygi_invoke_state_init (PyGIInvokeState *state)
 void
 pygi_invoke_state_free (PyGIInvokeState *state)
 {
+    if (g_private_get (&pygi_invoke_state_private) == state)
+        g_private_set (&pygi_invoke_state_private, NULL);
+
     if (state->cleanup_data) {
-        guint i;
-        for (i = 0; i < state->cleanup_data->len; i++) {
-            PyGIInvokeStateCleanup *cleanup =
-                (PyGIInvokeStateCleanup *)(state->cleanup_data->data
-                                           + i
-                                                 * sizeof (
-                                                     PyGIInvokeStateCleanup));
-            (cleanup->notifier) (cleanup->data);
-        }
         g_clear_pointer (&state->cleanup_data, g_array_unref);
     }
 

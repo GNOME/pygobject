@@ -66,6 +66,21 @@ pygi_marshal_from_py_basic_type_cache_adapter (
     return !PyErr_Occurred ();
 }
 
+static gboolean
+pygi_marshal_from_py_utf8_cache_adapter (PyGIInvokeState *state,
+                                         PyGICallableCache *callable_cache,
+                                         PyGIArgCache *arg_cache,
+                                         PyObject *py_arg, GIArgument *arg,
+                                         gpointer *cleanup_data)
+{
+    *arg = pygi_marshal_from_py_basic_type (py_arg, arg_cache->type_tag,
+                                            arg_cache->transfer, cleanup_data);
+    if (arg_cache->transfer == GI_TRANSFER_NOTHING) {
+        pygi_invoke_state_add_cleanup_data (state, g_free, arg->v_pointer);
+    }
+    return !PyErr_Occurred ();
+}
+
 PyObject *
 pygi_marshal_to_py_basic_type_cache_adapter (PyGIInvokeState *state,
                                              PyGICallableCache *callable_cache,
@@ -102,16 +117,6 @@ marshal_to_py_void (PyGIInvokeState *state, PyGICallableCache *callable_cache,
         return PyLong_FromVoidPtr (arg->v_pointer);
     }
     Py_RETURN_NONE;
-}
-
-static void
-marshal_cleanup_from_py_utf8 (PyGIInvokeState *state, PyGIArgCache *arg_cache,
-                              PyObject *py_arg, gpointer data,
-                              gboolean was_processed)
-{
-    /* We strdup strings so free unless ownership is transferred to C. */
-    if (was_processed && arg_cache->transfer == GI_TRANSFER_NOTHING)
-        g_free (data);
 }
 
 static void
@@ -174,8 +179,7 @@ pygi_arg_string_type_new_from_info (GITypeInfo *type_info, GIArgInfo *arg_info,
 
     if (direction & PYGI_DIRECTION_FROM_PYTHON) {
         arg_cache->from_py_marshaller =
-            pygi_marshal_from_py_basic_type_cache_adapter;
-        arg_cache->from_py_cleanup = marshal_cleanup_from_py_utf8;
+            pygi_marshal_from_py_utf8_cache_adapter;
     }
 
     if (direction & PYGI_DIRECTION_TO_PYTHON) {
