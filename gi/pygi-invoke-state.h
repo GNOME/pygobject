@@ -46,6 +46,8 @@ typedef struct _PyGIInvokeState {
     GIArgument return_arg;
     gpointer to_py_return_arg_cleanup_data;
 
+    GArray *cleanup_data; /* PyGIInvokeStateCleanup */
+
     /* A GError exception which is indirectly bound into the last position of
      * the "args" array if the callable caches "throws" member is set.
      */
@@ -64,6 +66,15 @@ typedef struct _PyGIInvokeState {
     gpointer function_ptr;
 
 } PyGIInvokeState;
+
+typedef struct {
+    GDestroyNotify notifier;
+    gpointer data;
+} PyGIInvokeStateCleanup;
+
+gboolean pygi_invoke_state_init (PyGIInvokeState *state);
+
+void pygi_invoke_state_free (PyGIInvokeState *state);
 
 G_END_DECLS
 

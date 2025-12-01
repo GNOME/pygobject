@@ -316,7 +316,7 @@ _invoke_state_init_from_cache (PyGIInvokeState *state,
     state->args = NULL;
     state->error = NULL;
 
-    if (!_pygi_invoke_arg_state_init (state)) {
+    if (!pygi_invoke_state_init (state)) {
         return FALSE;
     }
 
@@ -329,7 +329,7 @@ _invoke_state_init_from_cache (PyGIInvokeState *state,
 static void
 _invoke_state_clear (PyGIInvokeState *state)
 {
-    _pygi_invoke_arg_state_free (state);
+    pygi_invoke_state_free (state);
     Py_XDECREF (state->py_in_args);
 }
 

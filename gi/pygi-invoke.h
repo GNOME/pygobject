@@ -32,9 +32,9 @@ PyObject *pygi_callable_info_invoke (PyGICallableInfo *self,
                                      PyObject *const *py_args,
                                      size_t py_nargsf, PyObject *kwnames);
 
-gboolean _pygi_invoke_arg_state_init (PyGIInvokeState *state);
+gboolean pygi_invoke_state_init (PyGIInvokeState *state);
 
-void _pygi_invoke_arg_state_free (PyGIInvokeState *state);
+void pygi_invoke_state_free (PyGIInvokeState *state);
 
 G_END_DECLS
 

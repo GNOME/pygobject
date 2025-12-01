@@ -32,7 +32,7 @@
 #include <girepository/girepository.h>
 #include <girepository/girffi.h>
 
-#include "pygi-invoke-state-struct.h"
+#include "pygi-invoke-state.h"
 
 G_BEGIN_DECLS
 

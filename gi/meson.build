@@ -44,6 +44,7 @@ sources = [
   'pygi-error.c',
   'pygi-object.c',
   'pygi-fundamental.c',
+  'pygi-invoke-state.c',
   'pygi-value.c',
   'pygi-struct-marshal.c',
   ]
