@@ -252,14 +252,6 @@ _invoke_state_init_from_cache (PyGIInvokeState *state,
     return TRUE;
 }
 
-static void
-_invoke_state_clear (PyGIInvokeState *state, PyGIFunctionCache *function_cache)
-{
-    pygi_invoke_state_free (state);
-    Py_XDECREF (state->py_in_args);
-    Py_XDECREF (state->py_async);
-}
-
 static gboolean
 _caller_alloc (PyGIArgCache *arg_cache, GIArgument *arg)
 {
@@ -693,7 +685,7 @@ pygi_invoke_c_callable (PyGIFunctionCache *function_cache,
         pygi_marshal_cleanup_args_to_py_marshal_success (state, cache);
 
 err:
-    _invoke_state_clear (state, function_cache);
+    pygi_invoke_state_free (state);
     Py_LeaveRecursiveCall ();
     return ret;
 }

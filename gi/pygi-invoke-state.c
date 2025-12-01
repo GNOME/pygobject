@@ -26,7 +26,7 @@ pygi_invoke_state_init (PyGIInvokeState *state)
         free_arg_state[state->n_args] = NULL;
         memset (mem, 0, PyGI_INVOKE_ARG_STATE_SIZE (state->n_args));
     } else {
-        mem = g_slice_alloc0 (PyGI_INVOKE_ARG_STATE_SIZE (state->n_args));
+        mem = g_malloc0 (PyGI_INVOKE_ARG_STATE_SIZE (state->n_args));
     }
 
     if (mem == NULL && state->n_args != 0) {
@@ -66,13 +66,16 @@ pygi_invoke_state_free (PyGIInvokeState *state)
         g_clear_pointer (&state->cleanup_data, g_array_unref);
     }
 
+    Py_CLEAR (state->py_in_args);
+    Py_CLEAR (state->py_async);
+
     if (state->n_args < PyGI_INVOKE_ARG_STATE_N_MAX
         && free_arg_state[state->n_args] == NULL) {
         free_arg_state[state->n_args] = state->args;
         return;
     }
 
-    g_slice_free1 (PyGI_INVOKE_ARG_STATE_SIZE (state->n_args), state->args);
+    g_free (state->args);
 }
 
 void

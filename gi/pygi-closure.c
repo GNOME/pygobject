@@ -326,13 +326,6 @@ _invoke_state_init_from_cache (PyGIInvokeState *state,
     return TRUE;
 }
 
-static void
-_invoke_state_clear (PyGIInvokeState *state)
-{
-    pygi_invoke_state_free (state);
-    Py_XDECREF (state->py_in_args);
-}
-
 static gboolean
 _pygi_closure_convert_arguments (PyGIInvokeState *state,
                                  PyGIClosureCache *closure_cache)
@@ -608,7 +601,7 @@ end:
         g_assert_not_reached ();
     }
 
-    _invoke_state_clear (&state);
+    pygi_invoke_state_free (&state);
     PyGILState_Release (py_state);
 }
 
