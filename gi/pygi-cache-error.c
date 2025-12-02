@@ -27,16 +27,17 @@ static gboolean
 _pygi_marshal_from_py_gerror (PyGIInvokeState *state,
                               PyGICallableCache *callable_cache,
                               PyGIArgCache *arg_cache, PyObject *py_arg,
-                              GIArgument *arg, gpointer *cleanup_data)
+                              GIArgument *arg,
+                              MarshalCleanupData *cleanup_data)
 {
     GError *error = NULL;
     if (Py_IsNone (py_arg)) {
         arg->v_pointer = NULL;
-        *cleanup_data = NULL;
+        cleanup_data->data = NULL;
         return TRUE;
     } else if (pygi_error_marshal_from_py (py_arg, &error)) {
         arg->v_pointer = error;
-        *cleanup_data = error;
+        cleanup_data->data = error;
         return TRUE;
     } else {
         return FALSE;
@@ -47,11 +48,12 @@ _pygi_marshal_from_py_gerror (PyGIInvokeState *state,
 static void
 _pygi_marshal_from_py_gerror_cleanup (PyGIInvokeState *state,
                                       PyGIArgCache *arg_cache,
-                                      PyObject *py_arg, gpointer data,
+                                      PyObject *py_arg,
+                                      MarshalCleanupData data,
                                       gboolean was_processed)
 {
     if (was_processed) {
-        g_error_free ((GError *)data);
+        g_error_free ((GError *)data.data);
     }
 }
 
@@ -59,7 +61,7 @@ static PyObject *
 _pygi_marshal_to_py_gerror (PyGIInvokeState *state,
                             PyGICallableCache *callable_cache,
                             PyGIArgCache *arg_cache, GIArgument *arg,
-                            gpointer *cleanup_data)
+                            MarshalCleanupData *cleanup_data)
 {
     GError *error = arg->v_pointer;
     PyObject *py_obj = NULL;

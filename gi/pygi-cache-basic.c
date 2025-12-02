@@ -59,10 +59,11 @@ gboolean
 pygi_marshal_from_py_basic_type_cache_adapter (
     PyGIInvokeState *state, PyGICallableCache *callable_cache,
     PyGIArgCache *arg_cache, PyObject *py_arg, GIArgument *arg,
-    gpointer *cleanup_data)
+    MarshalCleanupData *cleanup_data)
 {
     *arg = pygi_marshal_from_py_basic_type (py_arg, arg_cache->type_tag,
-                                            arg_cache->transfer, cleanup_data);
+                                            arg_cache->transfer,
+                                            &(cleanup_data->data));
     return !PyErr_Occurred ();
 }
 
@@ -71,7 +72,7 @@ pygi_marshal_to_py_basic_type_cache_adapter (PyGIInvokeState *state,
                                              PyGICallableCache *callable_cache,
                                              PyGIArgCache *arg_cache,
                                              GIArgument *arg,
-                                             gpointer *cleanup_data)
+                                             MarshalCleanupData *cleanup_data)
 {
     return pygi_marshal_to_py_basic_type (*arg, arg_cache->type_tag,
                                           arg_cache->transfer);
@@ -81,12 +82,12 @@ static gboolean
 marshal_from_py_void (PyGIInvokeState *state,
                       PyGICallableCache *callable_cache,
                       PyGIArgCache *arg_cache, PyObject *py_arg,
-                      GIArgument *arg, gpointer *cleanup_data)
+                      GIArgument *arg, MarshalCleanupData *cleanup_data)
 {
     g_warn_if_fail (arg_cache->transfer == GI_TRANSFER_NOTHING);
 
     if (pygi_gpointer_from_py (py_arg, &(arg->v_pointer))) {
-        *cleanup_data = arg->v_pointer;
+        cleanup_data->data = arg->v_pointer;
         return TRUE;
     }
 
@@ -96,7 +97,7 @@ marshal_from_py_void (PyGIInvokeState *state,
 static PyObject *
 marshal_to_py_void (PyGIInvokeState *state, PyGICallableCache *callable_cache,
                     PyGIArgCache *arg_cache, GIArgument *arg,
-                    gpointer *cleanup_data)
+                    MarshalCleanupData *cleanup_data)
 {
     if (arg_cache->is_pointer) {
         return PyLong_FromVoidPtr (arg->v_pointer);
@@ -106,17 +107,17 @@ marshal_to_py_void (PyGIInvokeState *state, PyGICallableCache *callable_cache,
 
 static void
 marshal_cleanup_from_py_utf8 (PyGIInvokeState *state, PyGIArgCache *arg_cache,
-                              PyObject *py_arg, gpointer data,
+                              PyObject *py_arg, MarshalCleanupData data,
                               gboolean was_processed)
 {
     /* We strdup strings so free unless ownership is transferred to C. */
     if (was_processed && arg_cache->transfer == GI_TRANSFER_NOTHING)
-        g_free (data);
+        g_free (data.data);
 }
 
 static void
 marshal_cleanup_to_py_utf8 (PyGIInvokeState *state, PyGIArgCache *arg_cache,
-                            gpointer cleanup_data, gpointer data,
+                            MarshalCleanupData cleanup_data, gpointer data,
                             gboolean was_processed)
 {
     /* Python copies the string so we need to free it
