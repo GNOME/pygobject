@@ -39,8 +39,8 @@ G_STATIC_ASSERT (sizeof (GIArgument) == sizeof (gint64));
 typedef struct {
     PyObject *object;
     gpointer cache;
-    gpointer cleanup_data;
     PyGIInvokeState state;
+    MarshalCleanupData cleanup_data;
 } PyGIArgumentFromPyCleanupData;
 
 GIArgument pygi_argument_from_py (GITypeInfo *type_info, PyObject *object,

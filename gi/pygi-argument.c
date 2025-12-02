@@ -70,7 +70,7 @@ pygi_argument_from_py_cleanup (PyGIArgumentFromPyCleanupData *arg_cleanup)
 
     if (cache) {
         if (cache->from_py_cleanup != NULL
-            && arg_cleanup->cleanup_data != NULL)
+            && arg_cleanup->cleanup_data.data != NULL)
             cache->from_py_cleanup (&arg_cleanup->state, cache,
                                     arg_cleanup->object,
                                     arg_cleanup->cleanup_data, TRUE);
@@ -84,7 +84,7 @@ pygi_argument_to_py (GITypeInfo *type_info, GIArgument arg,
                      GITransfer transfer)
 {
     PyGIInvokeState state = { 0 };
-    gpointer cleanup_data = NULL;
+    MarshalCleanupData cleanup_data = { 0 };
     PyObject *object;
 
     PyGIArgCache *cache = pygi_arg_cache_new (
@@ -109,7 +109,7 @@ pygi_argument_to_py_with_array_length (GITypeInfo *type_info, GIArgument arg,
 {
     PyGIInvokeState state = { 0 };
     PyGIInvokeArgState arg_state = { 0 };
-    gpointer cleanup_data = NULL;
+    MarshalCleanupData cleanup_data = { 0 };
     PyObject *object;
 
     PyGIArgCache *cache = pygi_arg_garray_new_from_info (
