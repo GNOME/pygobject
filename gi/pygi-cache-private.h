@@ -114,17 +114,19 @@ PyGIArgCache *pygi_arg_gerror_new_from_info (
 gboolean pygi_marshal_from_py_basic_type_cache_adapter (
     PyGIInvokeState *state, PyGICallableCache *callable_cache,
     PyGIArgCache *arg_cache, PyObject *py_arg, GIArgument *arg,
-    gpointer *cleanup_data);
+    MarshalCleanupData *cleanup_data);
 
 PyObject *pygi_marshal_to_py_basic_type_cache_adapter (
     PyGIInvokeState *state, PyGICallableCache *callable_cache,
-    PyGIArgCache *arg_cache, GIArgument *arg, gpointer *cleanup_data);
+    PyGIArgCache *arg_cache, GIArgument *arg,
+    MarshalCleanupData *cleanup_data);
 
 
 /* Needed for hack in pygi-cache-array.c */
 void pygi_arg_gvalue_from_py_cleanup (PyGIInvokeState *state,
                                       PyGIArgCache *arg_cache,
-                                      PyObject *py_arg, gpointer data,
+                                      PyObject *py_arg,
+                                      MarshalCleanupData data,
                                       gboolean was_processed);
 
 G_END_DECLS

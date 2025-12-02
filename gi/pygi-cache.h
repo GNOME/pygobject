@@ -51,22 +51,23 @@ typedef gboolean (*PyGIMarshalFromPyFunc) (PyGIInvokeState *state,
                                            PyGICallableCache *callable_cache,
                                            PyGIArgCache *arg_cache,
                                            PyObject *py_arg, GIArgument *arg,
-                                           gpointer *cleanup_data);
+                                           MarshalCleanupData *cleanup_data);
 
 typedef PyObject *(*PyGIMarshalToPyFunc) (PyGIInvokeState *state,
                                           PyGICallableCache *callable_cache,
                                           PyGIArgCache *arg_cache,
                                           GIArgument *arg,
-                                          gpointer *cleanup_data);
+                                          MarshalCleanupData *cleanup_data);
 
 typedef void (*PyGIMarshalFromPyCleanupFunc) (PyGIInvokeState *state,
                                               PyGIArgCache *arg_cache,
-                                              PyObject *py_arg, gpointer data,
+                                              PyObject *py_arg,
+                                              MarshalCleanupData cleanup_data,
                                               gboolean was_processed);
 
 typedef void (*PyGIMarshalToPyCleanupFunc) (PyGIInvokeState *state,
                                             PyGIArgCache *arg_cache,
-                                            gpointer cleanup_data,
+                                            MarshalCleanupData cleanup_data,
                                             gpointer data,
                                             gboolean was_processed);
 
