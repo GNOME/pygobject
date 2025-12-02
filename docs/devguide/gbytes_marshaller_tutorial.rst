@@ -180,7 +180,7 @@ PyGILState_Ensure/Release pairs:
         Py_ssize_t length;
         PyBytes_AsStringAndSize (py_arg, &buf, &length);
         arg->v_pointer = g_bytes_new_with_free_func (buf, length, threaded_py_bytes_free, py_arg);
-        *cleanup_data = NULL;
+        cleanup_data = { NULL };
         return True;
 
 The above zero copy implementation could also possibly be implemented using memoryviews for accessing a Py_buffer instead of requiring a PyBytes type as input.

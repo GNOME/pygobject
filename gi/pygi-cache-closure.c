@@ -40,7 +40,7 @@ _pygi_marshal_from_py_interface_callback (PyGIInvokeState *state,
                                           PyGICallableCache *callable_cache,
                                           PyGIArgCache *arg_cache,
                                           PyObject *py_arg, GIArgument *arg,
-                                          gpointer *cleanup_data)
+                                          MarshalCleanupData *cleanup_data)
 {
     GICallableInfo *callable_info;
     PyGICClosure *closure;
@@ -168,7 +168,7 @@ _pygi_marshal_from_py_interface_callback (PyGIInvokeState *state,
     }
 
     /* Use the PyGIClosure as data passed to cleanup for GI_SCOPE_TYPE_CALL. */
-    *cleanup_data = closure;
+    cleanup_data->data = closure;
 
     return TRUE;
 }
@@ -178,7 +178,7 @@ _pygi_marshal_to_py_interface_callback (PyGIInvokeState *state,
                                         PyGICallableCache *callable_cache,
                                         PyGIArgCache *arg_cache,
                                         GIArgument *arg,
-                                        gpointer *arg_cleanup_data)
+                                        MarshalCleanupData *arg_cleanup_data)
 {
     PyGICallbackCache *callback_cache = (PyGICallbackCache *)arg_cache;
     gpointer user_data = NULL;
@@ -201,13 +201,13 @@ static void
 _pygi_marshal_cleanup_from_py_interface_callback (PyGIInvokeState *state,
                                                   PyGIArgCache *arg_cache,
                                                   PyObject *py_arg,
-                                                  gpointer data,
+                                                  MarshalCleanupData data,
                                                   gboolean was_processed)
 {
     PyGICallbackCache *callback_cache = (PyGICallbackCache *)arg_cache;
 
     if (was_processed && callback_cache->scope == GI_SCOPE_TYPE_CALL) {
-        _pygi_invoke_closure_free (data);
+        _pygi_invoke_closure_free (data.data);
     }
 }
 
