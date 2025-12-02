@@ -6,6 +6,10 @@
 
 G_BEGIN_DECLS
 
+typedef struct {
+    gpointer data;
+} MarshalCleanupData;
+
 typedef struct _PyGIInvokeArgState {
     /* Holds memory for the C value of arguments marshaled "to" or "from" Python. */
     GIArgument arg_value;
@@ -16,10 +20,10 @@ typedef struct _PyGIInvokeArgState {
     GIArgument arg_pointer;
 
     /* Holds from_py marshaler cleanup data. */
-    gpointer arg_cleanup_data;
+    MarshalCleanupData arg_cleanup_data;
 
     /* Holds to_py marshaler cleanup data. */
-    gpointer to_py_arg_cleanup_data;
+    MarshalCleanupData to_py_arg_cleanup_data;
 } PyGIInvokeArgState;
 
 
@@ -44,7 +48,7 @@ typedef struct _PyGIInvokeState {
 
     /* Memory to receive the result of the C ffi function call. */
     GIArgument return_arg;
-    gpointer to_py_return_arg_cleanup_data;
+    MarshalCleanupData to_py_return_arg_cleanup_data;
 
     /* A GError exception which is indirectly bound into the last position of
      * the "args" array if the callable caches "throws" member is set.
