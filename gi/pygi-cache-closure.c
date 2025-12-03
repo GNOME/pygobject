@@ -168,8 +168,10 @@ _pygi_marshal_from_py_interface_callback (PyGIInvokeState *state,
     }
 
     /* Use the PyGIClosure as data passed to cleanup for GI_SCOPE_TYPE_CALL. */
-    cleanup_data->data = closure;
-
+    if (callback_cache->scope == GI_SCOPE_TYPE_CALL) {
+        cleanup_data->data = closure;
+        cleanup_data->destroy = (GDestroyNotify)_pygi_invoke_closure_free;
+    }
     return TRUE;
 }
 
@@ -204,10 +206,8 @@ _pygi_marshal_cleanup_from_py_interface_callback (PyGIInvokeState *state,
                                                   MarshalCleanupData data,
                                                   gboolean was_processed)
 {
-    PyGICallbackCache *callback_cache = (PyGICallbackCache *)arg_cache;
-
-    if (was_processed && callback_cache->scope == GI_SCOPE_TYPE_CALL) {
-        _pygi_invoke_closure_free (data.data);
+    if (was_processed) {
+        data.destroy (data.data);
     }
 }
 
