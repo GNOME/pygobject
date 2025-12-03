@@ -88,6 +88,7 @@ marshal_from_py_void (PyGIInvokeState *state,
 
     if (pygi_gpointer_from_py (py_arg, &(arg->v_pointer))) {
         cleanup_data->data = arg->v_pointer;
+        cleanup_data->destroy = NULL;
         return TRUE;
     }
 
@@ -105,14 +106,52 @@ marshal_to_py_void (PyGIInvokeState *state, PyGICallableCache *callable_cache,
     Py_RETURN_NONE;
 }
 
+
+static gboolean
+pygi_marshal_from_py_utf8_cache_adapter (PyGIInvokeState *state,
+                                         PyGICallableCache *callable_cache,
+                                         PyGIArgCache *arg_cache,
+                                         PyObject *py_arg, GIArgument *arg,
+                                         MarshalCleanupData *cleanup_data)
+{
+    *arg = pygi_marshal_from_py_basic_type (py_arg, arg_cache->type_tag,
+                                            arg_cache->transfer,
+                                            &(cleanup_data->data));
+
+    /* We strdup strings so free unless ownership is transferred to C. */
+    if (cleanup_data->data && arg_cache->transfer == GI_TRANSFER_NOTHING)
+        cleanup_data->destroy = g_free;
+
+    return !PyErr_Occurred ();
+}
+
+static PyObject *
+pygi_marshal_to_py_utf8_cache_adapter (PyGIInvokeState *state,
+                                       PyGICallableCache *callable_cache,
+                                       PyGIArgCache *arg_cache,
+                                       GIArgument *arg,
+                                       MarshalCleanupData *cleanup_data)
+{
+    PyObject *object = pygi_marshal_to_py_basic_type (
+        *arg, arg_cache->type_tag, arg_cache->transfer);
+
+    /* Python copies the string so we need to free it
+       if the interface is transfering ownership,
+       whether or not it has been processed yet */
+    if (arg_cache->transfer == GI_TRANSFER_EVERYTHING) {
+        cleanup_data->data = arg->v_pointer;
+        cleanup_data->destroy = g_free;
+    }
+
+    return object;
+}
+
 static void
 marshal_cleanup_from_py_utf8 (PyGIInvokeState *state, PyGIArgCache *arg_cache,
                               PyObject *py_arg, MarshalCleanupData data,
                               gboolean was_processed)
 {
-    /* We strdup strings so free unless ownership is transferred to C. */
-    if (was_processed && arg_cache->transfer == GI_TRANSFER_NOTHING)
-        g_free (data.data);
+    if (was_processed && data.destroy) data.destroy (data.data);
 }
 
 static void
@@ -120,10 +159,9 @@ marshal_cleanup_to_py_utf8 (PyGIInvokeState *state, PyGIArgCache *arg_cache,
                             MarshalCleanupData cleanup_data, gpointer data,
                             gboolean was_processed)
 {
-    /* Python copies the string so we need to free it
-       if the interface is transfering ownership,
-       whether or not it has been processed yet */
-    if (arg_cache->transfer == GI_TRANSFER_EVERYTHING) g_free (data);
+    if (cleanup_data.destroy != NULL) {
+        cleanup_data.destroy (cleanup_data.data);
+    }
 }
 
 PyGIArgCache *
@@ -175,13 +213,12 @@ pygi_arg_string_type_new_from_info (GITypeInfo *type_info, GIArgInfo *arg_info,
 
     if (direction & PYGI_DIRECTION_FROM_PYTHON) {
         arg_cache->from_py_marshaller =
-            pygi_marshal_from_py_basic_type_cache_adapter;
+            pygi_marshal_from_py_utf8_cache_adapter;
         arg_cache->from_py_cleanup = marshal_cleanup_from_py_utf8;
     }
 
     if (direction & PYGI_DIRECTION_TO_PYTHON) {
-        arg_cache->to_py_marshaller =
-            pygi_marshal_to_py_basic_type_cache_adapter;
+        arg_cache->to_py_marshaller = pygi_marshal_to_py_utf8_cache_adapter;
         arg_cache->to_py_cleanup = marshal_cleanup_to_py_utf8;
     }
 
