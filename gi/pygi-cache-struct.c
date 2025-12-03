@@ -191,8 +191,7 @@ pygi_arg_gvalue_from_py_cleanup (PyGIInvokeState *state,
                                  MarshalCleanupData cleanup_data,
                                  gboolean was_processed)
 {
-    /* Note py_arg can be NULL for hash table which is a bug. */
-    if (was_processed && py_arg != NULL && cleanup_data.data) {
+    if (was_processed && cleanup_data.data) {
         cleanup_data.destroy (cleanup_data.data);
     }
 }
