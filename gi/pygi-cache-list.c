@@ -57,7 +57,7 @@ _pygi_marshal_from_py_glist (PyGIInvokeState *state,
     from_py_marshaller = sequence_cache->item_cache->from_py_marshaller;
     for (i = 0; i < length; i++) {
         GIArgument item = PYGI_ARG_INIT;
-        MarshalCleanupData item_cleanup_data = { NULL };
+        MarshalCleanupData item_cleanup_data = { NULL, NULL };
         PyObject *py_item = PySequence_GetItem (py_arg, i);
         if (py_item == NULL) goto err;
 
@@ -130,7 +130,7 @@ _pygi_marshal_from_py_gslist (PyGIInvokeState *state,
     from_py_marshaller = sequence_cache->item_cache->from_py_marshaller;
     for (i = 0; i < length; i++) {
         GIArgument item = { 0 };
-        MarshalCleanupData item_cleanup_data = { NULL };
+        MarshalCleanupData item_cleanup_data = { NULL, NULL };
         PyObject *py_item = PySequence_GetItem (py_arg, i);
         if (py_item == NULL) goto err;
 
@@ -305,7 +305,7 @@ _pygi_marshal_to_py_gslist (PyGIInvokeState *state,
     for (i = 0; list_ != NULL; list_ = g_slist_next (list_), i++) {
         GIArgument item_arg;
         PyObject *py_item;
-        MarshalCleanupData item_cleanup_data;
+        MarshalCleanupData item_cleanup_data = { NULL, NULL };
 
         item_arg.v_pointer = list_->data;
         _pygi_hash_pointer_to_arg_in_place (&item_arg,
