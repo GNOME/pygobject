@@ -109,8 +109,8 @@ _pygi_marshal_from_py_ghash (PyGIInvokeState *state,
 
     for (i = 0; i < length; i++) {
         GIArgument key, value;
-        MarshalCleanupData key_cleanup_data = { NULL };
-        MarshalCleanupData value_cleanup_data = { NULL };
+        MarshalCleanupData key_cleanup_data = { NULL, NULL };
+        MarshalCleanupData value_cleanup_data = { NULL, NULL };
         PyObject *py_key = PyList_GET_ITEM (py_keys, i);
         PyObject *py_value = PyList_GET_ITEM (py_values, i);
         if (py_key == NULL || py_value == NULL) goto err;
@@ -246,8 +246,8 @@ _pygi_marshal_to_py_ghash (PyGIInvokeState *state,
     g_hash_table_iter_init (&hash_table_iter, hash_);
     while (g_hash_table_iter_next (&hash_table_iter, &key_arg.v_pointer,
                                    &value_arg.v_pointer)) {
-        MarshalCleanupData key_cleanup_data = { NULL };
-        MarshalCleanupData value_cleanup_data = { NULL };
+        MarshalCleanupData key_cleanup_data = { NULL, NULL };
+        MarshalCleanupData value_cleanup_data = { NULL, NULL };
         PyObject *py_key;
         PyObject *py_value;
         int retval;

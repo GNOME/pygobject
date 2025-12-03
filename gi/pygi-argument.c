@@ -71,6 +71,7 @@ pygi_argument_from_py_cleanup (PyGIArgumentFromPyCleanupData *arg_cleanup)
 
     if (cache) {
         if (cache->from_py_cleanup != NULL
+            && arg_cleanup->cleanup_data.destroy != NULL
             && arg_cleanup->cleanup_data.data != NULL)
             cache->from_py_cleanup (&arg_cleanup->state, cache,
                                     arg_cleanup->object,
@@ -95,7 +96,8 @@ pygi_argument_to_py (GITypeInfo *type_info, GIArgument arg,
     object = cache->to_py_marshaller (&state, /*callable_cache=*/NULL, cache,
                                       &arg, &cleanup_data);
 
-    if (cache->to_py_cleanup && arg.v_pointer)
+    if (cache->to_py_cleanup && cleanup_data.destroy != NULL
+        && cleanup_data.data != NULL)
         cache->to_py_cleanup (&state, cache, cleanup_data, arg.v_pointer,
                               TRUE);
 
