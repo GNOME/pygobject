@@ -217,7 +217,7 @@ _pygi_marshal_cleanup_from_py_glist (PyGIInvokeState *state,
                                      MarshalCleanupData cleanup_data,
                                      gboolean was_processed)
 {
-    if (was_processed) {
+    if (was_processed && cleanup_data.data) {
         GArray *item_cleanups = (GArray *)cleanup_data.data;
         guint i;
 
