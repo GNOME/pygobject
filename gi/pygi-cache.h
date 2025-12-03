@@ -47,8 +47,6 @@ typedef PyGIFunctionCache PyGIFunctionWithInstanceCache;
 typedef PyGIFunctionCache PyGIMethodCache;
 typedef PyGICallableCache PyGIClosureCache;
 
-typedef gpointer MarshalCleanupData;
-
 typedef gboolean (*PyGIMarshalFromPyFunc) (PyGIInvokeState *state,
                                            PyGICallableCache *callable_cache,
                                            PyGIArgCache *arg_cache,
