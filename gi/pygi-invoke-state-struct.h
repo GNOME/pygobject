@@ -8,6 +8,7 @@ G_BEGIN_DECLS
 
 typedef struct {
     gpointer data;
+    GDestroyNotify destroy;
 } MarshalCleanupData;
 
 typedef struct _PyGIInvokeArgState {
