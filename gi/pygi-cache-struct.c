@@ -82,6 +82,13 @@ _is_union_member (GIRegisteredTypeInfo *interface_info, PyObject *py_arg)
  * GValue from Python
  */
 
+static void
+unset_and_free_gvalue (gpointer data)
+{
+    g_value_unset ((GValue *)data);
+    g_free (data);
+}
+
 static gboolean
 pygi_arg_gvalue_from_py_marshal (PyGIInvokeState *state,
                                  PyGICallableCache *callable_cache,
@@ -121,6 +128,7 @@ pygi_arg_gvalue_from_py_marshal (PyGIInvokeState *state,
         if (arg_cache->transfer == GI_TRANSFER_NOTHING) {
             /* Free everything in cleanup. */
             cleanup_data->data = value;
+            cleanup_data->destroy = unset_and_free_gvalue;
         }
     }
 
@@ -129,25 +137,15 @@ pygi_arg_gvalue_from_py_marshal (PyGIInvokeState *state,
     return TRUE;
 }
 
-
 void
 pygi_arg_gvalue_from_py_cleanup (PyGIInvokeState *state,
                                  PyGIArgCache *arg_cache, PyObject *py_arg,
-                                 MarshalCleanupData data,
+                                 MarshalCleanupData cleanup_data,
                                  gboolean was_processed)
 {
     /* Note py_arg can be NULL for hash table which is a bug. */
-    if (was_processed && py_arg != NULL) {
-        GType py_object_type =
-            pyg_type_from_object_strict ((PyObject *)Py_TYPE (py_arg), FALSE);
-
-        /* When a GValue was not passed, it means the marshalers created a new
-         * one to pass in, clean this up.
-         */
-        if (py_object_type != G_TYPE_VALUE) {
-            g_value_unset ((GValue *)data.data);
-            g_slice_free (GValue, data.data);
-        }
+    if (was_processed && py_arg != NULL && cleanup_data.data) {
+        cleanup_data.destroy (cleanup_data.data);
     }
 }
 
@@ -232,6 +230,7 @@ pygi_arg_gclosure_from_py_marshal (PyGIInvokeState *state,
     if (arg_cache->transfer == GI_TRANSFER_NOTHING) {
         /* Free everything in cleanup. */
         cleanup_data->data = closure;
+        cleanup_data->destroy = (GDestroyNotify)g_closure_unref;
     } else { /* GI_TRANSFER_EVERYTHING */
         /* No cleanup, everything is given to the callee. */
         cleanup_data->data = NULL;
@@ -248,8 +247,21 @@ arg_gclosure_from_py_cleanup (PyGIInvokeState *state, PyGIArgCache *arg_cache,
                               gboolean was_processed)
 {
     if (cleanup_data.data != NULL) {
-        g_closure_unref (cleanup_data.data);
+        cleanup_data.destroy (cleanup_data.data);
     }
+}
+
+typedef struct {
+    GIBaseInfo *base_info;
+    gpointer struct_;
+} ForeignReleaseData;
+
+static void
+release_foreign (ForeignReleaseData *data)
+{
+    pygi_struct_foreign_release (data->base_info, data->struct_);
+    gi_base_info_unref (data->base_info);
+    g_free (data);
 }
 
 static gboolean
@@ -271,20 +283,25 @@ pygi_arg_foreign_from_py_marshal (PyGIInvokeState *state,
         py_arg, GI_REGISTERED_TYPE_INFO (iface_cache->interface_info),
         arg_cache->transfer, arg);
 
-    cleanup_data->data = arg->v_pointer;
+    ForeignReleaseData *release_data = g_malloc (sizeof (ForeignReleaseData));
+    release_data->base_info = gi_base_info_ref (
+        GI_BASE_INFO (((PyGIInterfaceCache *)arg_cache)->interface_info));
+    release_data->struct_ = arg->v_pointer;
+    cleanup_data->data = release_data;
+    cleanup_data->destroy = (GDestroyNotify)release_foreign;
 
     return Py_IsNone (success);
 }
 
 static void
 arg_foreign_from_py_cleanup (PyGIInvokeState *state, PyGIArgCache *arg_cache,
-                             PyObject *py_arg, MarshalCleanupData data,
+                             PyObject *py_arg, MarshalCleanupData cleanup_data,
                              gboolean was_processed)
 {
     if (state->failed && was_processed) {
-        pygi_struct_foreign_release (
-            GI_BASE_INFO (((PyGIInterfaceCache *)arg_cache)->interface_info),
-            data.data);
+        cleanup_data.destroy (cleanup_data.data);
+    } else {
+        g_free (cleanup_data.data);
     }
 }
 
@@ -378,7 +395,8 @@ pygi_arg_struct_from_py_marshal (PyGIInvokeState *state,
     /* Assume struct marshaling is always a pointer and assign cleanup_data
      * here rather than passing it further down the chain.
      */
-    cleanup_data->data = arg->v_pointer;
+    // TODO: fix cleanup
+    // cleanup_data->data = arg->v_pointer;
 
     return TRUE;
 }
@@ -420,7 +438,15 @@ pygi_arg_foreign_to_py_marshal (PyGIInvokeState *state,
     py_obj = pygi_struct_foreign_convert_from_g_argument (
         iface_cache->interface_info, arg_cache->transfer, arg->v_pointer);
 
-    cleanup_data->data = py_obj;
+    if (arg_cache->transfer == GI_TRANSFER_EVERYTHING) {
+        ForeignReleaseData *release_data =
+            g_malloc (sizeof (ForeignReleaseData));
+        release_data->base_info = gi_base_info_ref (
+            GI_BASE_INFO (((PyGIInterfaceCache *)arg_cache)->interface_info));
+        release_data->struct_ = arg->v_pointer;
+        cleanup_data->data = release_data;
+        cleanup_data->destroy = (GDestroyNotify)release_foreign;
+    }
 
     return py_obj;
 }
@@ -430,10 +456,8 @@ arg_foreign_to_py_cleanup (PyGIInvokeState *state, PyGIArgCache *arg_cache,
                            MarshalCleanupData cleanup_data, gpointer data,
                            gboolean was_processed)
 {
-    if (!was_processed && arg_cache->transfer == GI_TRANSFER_EVERYTHING) {
-        pygi_struct_foreign_release (
-            GI_BASE_INFO (((PyGIInterfaceCache *)arg_cache)->interface_info),
-            data);
+    if (!was_processed) {
+        cleanup_data.destroy (cleanup_data.data);
     }
 }
 
@@ -463,6 +487,12 @@ pygi_arg_struct_to_py_marshal (PyGIInvokeState *state,
                 is_allocated
                     ? gi_struct_info_get_size (GI_STRUCT_INFO (interface_info))
                     : 0);
+
+            if (transfer == GI_TRANSFER_NOTHING) {
+                cleanup_data->data = py_obj;
+                cleanup_data->destroy =
+                    (GDestroyNotify)pygi_boxed_copy_in_place;
+            }
         }
     } else if (g_type_is_a (g_type, G_TYPE_POINTER)) {
         if (py_type == NULL
@@ -496,8 +526,6 @@ pygi_arg_struct_to_py_marshal (PyGIInvokeState *state,
                       g_type_name (g_type));
     }
 
-    cleanup_data->data = py_obj;
-
     return py_obj;
 }
 
@@ -515,6 +543,7 @@ arg_type_class_from_py_marshal (PyGIInvokeState *state,
 
         if (arg_cache->transfer == GI_TRANSFER_NOTHING) {
             cleanup_data->data = arg->v_pointer;
+            cleanup_data->destroy = (GDestroyNotify)g_type_class_unref;
         }
         return TRUE;
     } else {
@@ -532,7 +561,7 @@ arg_type_class_from_py_cleanup (PyGIInvokeState *state,
                                 gboolean was_processed)
 {
     if (was_processed) {
-        g_type_class_unref (cleanup_data.data);
+        cleanup_data.destroy (cleanup_data.data);
     }
 }
 
@@ -542,7 +571,7 @@ arg_boxed_to_py_cleanup (PyGIInvokeState *state, PyGIArgCache *arg_cache,
                          gboolean was_processed)
 {
     if (arg_cache->transfer == GI_TRANSFER_NOTHING)
-        pygi_boxed_copy_in_place ((PyGIBoxed *)cleanup_data.data);
+        cleanup_data.destroy (cleanup_data.data);
 }
 
 static void
