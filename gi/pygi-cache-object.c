@@ -153,7 +153,10 @@ _pygi_marshal_from_py_interface_object (PyGIInvokeState *state,
                             iface_cache->g_type))) {
         gboolean res;
         res = func (py_arg, arg, arg_cache->transfer);
-        cleanup_data->data = arg->v_pointer;
+        if (arg_cache->transfer == GI_TRANSFER_EVERYTHING) {
+            cleanup_data->data = arg->v_pointer;
+            cleanup_data->destroy = (GDestroyNotify)g_object_unref;
+        }
         return res;
 
     } else {
@@ -218,11 +221,26 @@ pygi_arg_object_to_py (GIArgument *arg, GITransfer transfer)
     return pyobj;
 }
 
+static GDestroyNotify
+destroy_notifier_for_object (gpointer object, PyGIArgCache *arg_cache)
+{
+    if (G_IS_OBJECT (object)) {
+        return (GDestroyNotify)g_object_unref;
+    } else {
+        PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)arg_cache;
+
+        return (GDestroyNotify)gi_object_info_get_unref_function_pointer (
+            (GIObjectInfo *)iface_cache->interface_info);
+    }
+}
+
 static PyObject *
 _pygi_marshal_to_py_called_from_c_interface_object_cache_adapter (
     PyGIInvokeState *state, PyGICallableCache *callable_cache,
     PyGIArgCache *arg_cache, GIArgument *arg, MarshalCleanupData *cleanup_data)
 {
+    PyObject *object;
+    
     /* HACK:
      * The following hack is to work around GTK sending signals which
      * contain floating widgets in them. This assumes control of how
@@ -242,7 +260,15 @@ _pygi_marshal_to_py_called_from_c_interface_object_cache_adapter (
         g_object_ref_sink (arg->v_pointer);
     }
 
-    return pygi_arg_object_to_py (arg, arg_cache->transfer);
+    object = pygi_arg_object_to_py (arg, arg_cache->transfer);
+
+    if (arg_cache->transfer == GI_TRANSFER_EVERYTHING) {
+        cleanup_data->data = arg->v_pointer;
+        cleanup_data->destroy =
+            destroy_notifier_for_object (arg->v_pointer, arg_cache);
+    }
+
+    return object;
 }
 
 static PyObject *
@@ -250,7 +276,15 @@ _pygi_marshal_to_py_called_from_py_interface_object_cache_adapter (
     PyGIInvokeState *state, PyGICallableCache *callable_cache,
     PyGIArgCache *arg_cache, GIArgument *arg, MarshalCleanupData *cleanup_data)
 {
-    return pygi_arg_object_to_py (arg, arg_cache->transfer);
+    PyObject *object = pygi_arg_object_to_py (arg, arg_cache->transfer);
+
+    if (arg_cache->transfer == GI_TRANSFER_EVERYTHING) {
+        cleanup_data->data = arg->v_pointer;
+        cleanup_data->destroy =
+            destroy_notifier_for_object (arg->v_pointer, arg_cache);
+    }
+
+    return object;
 }
 
 static void
@@ -260,33 +294,21 @@ _pygi_marshal_cleanup_to_py_interface_object (PyGIInvokeState *state,
                                               gpointer data,
                                               gboolean was_processed)
 {
-    if (was_processed && state->failed && data != NULL
-        && arg_cache->transfer == GI_TRANSFER_EVERYTHING) {
-        if (G_IS_OBJECT (data)) {
-            g_object_unref (G_OBJECT (data));
-        } else {
-            PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)arg_cache;
-            GIObjectInfoUnrefFunction unref_func;
-
-            unref_func = gi_object_info_get_unref_function_pointer (
-                (GIObjectInfo *)iface_cache->interface_info);
-            if (unref_func) unref_func (data);
-        }
+    if (was_processed && state->failed && cleanup_data.destroy != NULL) {
+        g_assert (cleanup_data.data == data);
+        cleanup_data.destroy (cleanup_data.data);
     }
 }
 
 static void
-_pygi_marshal_cleanup_from_py_interface_object (PyGIInvokeState *state,
-                                                PyGIArgCache *arg_cache,
-                                                PyObject *py_arg,
-                                                MarshalCleanupData data,
-                                                gboolean was_processed)
+_pygi_marshal_cleanup_from_py_interface_object (
+    PyGIInvokeState *state, PyGIArgCache *arg_cache, PyObject *py_arg,
+    MarshalCleanupData cleanup_data, gboolean was_processed)
 {
     /* If we processed the parameter but fail before invoking the method,
        we need to remove the ref we added */
-    if (was_processed && state->failed && data.data != NULL
-        && arg_cache->transfer == GI_TRANSFER_EVERYTHING)
-        g_object_unref (G_OBJECT (data.data));
+    if (was_processed && state->failed && cleanup_data.destroy != NULL)
+        cleanup_data.destroy (cleanup_data.data);
 }
 
 PyGIArgCache *
