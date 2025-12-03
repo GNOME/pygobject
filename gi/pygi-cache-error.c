@@ -38,6 +38,7 @@ _pygi_marshal_from_py_gerror (PyGIInvokeState *state,
     } else if (pygi_error_marshal_from_py (py_arg, &error)) {
         arg->v_pointer = error;
         cleanup_data->data = error;
+        cleanup_data->destroy = (GDestroyNotify)g_error_free;
         return TRUE;
     } else {
         return FALSE;
@@ -52,8 +53,8 @@ _pygi_marshal_from_py_gerror_cleanup (PyGIInvokeState *state,
                                       MarshalCleanupData data,
                                       gboolean was_processed)
 {
-    if (was_processed) {
-        g_error_free ((GError *)data.data);
+    if (was_processed && data.destroy != NULL) {
+        data.destroy (data.data);
     }
 }
 
