@@ -128,7 +128,7 @@ _pygi_marshal_to_py_called_from_py_interface_object_cache_adapter (
     PyGIInvokeState *state, PyGICallableCache *callable_cache,
     PyGIArgCache *arg_cache, GIArgument *arg, MarshalCleanupData *cleanup_data)
 {
-    PyObject *object = pygi_arg_object_to_py (arg, arg_cache->transfer);
+    PyObject *object = pygi_arg_object_to_py (arg);
 
     if (arg_cache->transfer == GI_TRANSFER_EVERYTHING) {
         cleanup_data->data = arg->v_pointer;

@@ -130,7 +130,7 @@ pygi_arg_gobject_out_arg_from_py (PyObject *py_arg, /* in */
  */
 
 PyObject *
-pygi_arg_object_to_py (GIArgument *arg, GITransfer transfer)
+pygi_arg_object_to_py (GIArgument *arg)
 {
     PyObject *pyobj;
 
@@ -138,14 +138,11 @@ pygi_arg_object_to_py (GIArgument *arg, GITransfer transfer)
         pyobj = Py_None;
         Py_INCREF (pyobj);
     } else if (G_IS_OBJECT (arg->v_pointer)) {
-        pyobj =
-            pygobject_new_full (arg->v_pointer,
-                                /*steal=*/transfer == GI_TRANSFER_EVERYTHING,
-                                /*type=*/NULL);
+        pyobj = pygobject_new_full (arg->v_pointer,
+                                    /*steal=*/FALSE,
+                                    /*type=*/NULL);
     } else {
         pyobj = pygi_fundamental_new (arg->v_pointer);
-        if (pyobj && transfer == GI_TRANSFER_EVERYTHING)
-            pygi_fundamental_unref ((PyGIFundamental *)pyobj);
     }
 
     return pyobj;
@@ -173,5 +170,5 @@ pygi_arg_object_to_py_called_from_c (GIArgument *arg, GITransfer transfer)
         g_object_ref_sink (arg->v_pointer);
     }
 
-    return pygi_arg_object_to_py (arg, transfer);
+    return pygi_arg_object_to_py (arg);
 }
