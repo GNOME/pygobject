@@ -53,9 +53,7 @@ _pygi_marshal_from_py_gerror_cleanup (PyGIInvokeState *state,
                                       PyGIMarshalCleanupData cleanup_data,
                                       gboolean was_processed)
 {
-    if (was_processed && cleanup_data.destroy != NULL) {
-        cleanup_data.destroy (cleanup_data.data);
-    }
+    if (was_processed) pygi_marshal_cleanup_data_destroy (&cleanup_data);
 }
 
 static PyObject *
