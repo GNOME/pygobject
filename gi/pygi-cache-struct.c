@@ -298,7 +298,7 @@ arg_foreign_from_py_cleanup (PyGIInvokeState *state, PyGIArgCache *arg_cache,
                              PyObject *py_arg, MarshalCleanupData cleanup_data,
                              gboolean was_processed)
 {
-    if (state->failed && was_processed) {
+    if (state->failed) {
         pygi_marshal_cleanup_data_destroy (&cleanup_data);
     } else {
         g_free (cleanup_data.data);
@@ -570,8 +570,7 @@ arg_boxed_to_py_cleanup (PyGIInvokeState *state, PyGIArgCache *arg_cache,
                          MarshalCleanupData cleanup_data, gpointer data,
                          gboolean was_processed)
 {
-    if (arg_cache->transfer == GI_TRANSFER_NOTHING)
-        pygi_marshal_cleanup_data_destroy (&cleanup_data);
+    pygi_marshal_cleanup_data_destroy (&cleanup_data);
 }
 
 static void
