@@ -50,12 +50,10 @@ static void
 _pygi_marshal_from_py_gerror_cleanup (PyGIInvokeState *state,
                                       PyGIArgCache *arg_cache,
                                       PyObject *py_arg,
-                                      MarshalCleanupData data,
+                                      MarshalCleanupData cleanup_data,
                                       gboolean was_processed)
 {
-    if (was_processed) {
-        data.destroy (data.data);
-    }
+    if (was_processed) pygi_marshal_cleanup_data_destroy (&cleanup_data);
 }
 
 static PyObject *

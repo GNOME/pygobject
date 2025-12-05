@@ -129,6 +129,8 @@ void pygi_arg_gvalue_from_py_cleanup (PyGIInvokeState *state,
                                       MarshalCleanupData data,
                                       gboolean was_processed);
 
+void pygi_marshal_cleanup_data_destroy (MarshalCleanupData *cleanup_data);
+
 G_END_DECLS
 
 #endif /*__PYGI_CACHE_PRIVATE_H__*/
