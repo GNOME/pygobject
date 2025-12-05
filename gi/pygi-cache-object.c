@@ -51,9 +51,10 @@ _pygi_marshal_from_py_interface_object (PyGIInvokeState *state,
                             iface_cache->g_type))) {
         gboolean res;
         res = func (py_arg, arg, arg_cache->transfer);
-        if (arg_cache->transfer == GI_TRANSFER_EVERYTHING)
+        if (arg_cache->transfer == GI_TRANSFER_EVERYTHING) {
             cleanup_data->data = arg->v_pointer;
-        cleanup_data->destroy = (GDestroyNotify)g_object_unref;
+            cleanup_data->destroy = (GDestroyNotify)g_object_unref;
+        }
         return res;
 
     } else {
@@ -145,8 +146,7 @@ _pygi_marshal_cleanup_to_py_interface_object (PyGIInvokeState *state,
                                               gpointer data,
                                               gboolean was_processed)
 {
-    if (was_processed && state->failed && data != NULL
-        && arg_cache->transfer == GI_TRANSFER_EVERYTHING) {
+    if (was_processed && state->failed && cleanup_data.data != NULL) {
         g_assert (cleanup_data.data == data);
         cleanup_data.destroy (cleanup_data.data);
     }
@@ -159,8 +159,7 @@ _pygi_marshal_cleanup_from_py_interface_object (
 {
     /* If we processed the parameter but fail before invoking the method,
        we need to remove the ref we added */
-    if (was_processed && state->failed && cleanup_data.data != NULL
-        && arg_cache->transfer == GI_TRANSFER_EVERYTHING)
+    if (was_processed && state->failed && cleanup_data.data != NULL)
         cleanup_data.destroy (G_OBJECT (cleanup_data.data));
 }
 
