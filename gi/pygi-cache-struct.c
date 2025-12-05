@@ -59,9 +59,7 @@ arg_type_class_from_py_cleanup (PyGIInvokeState *state,
                                 MarshalCleanupData cleanup_data,
                                 gboolean was_processed)
 {
-    if (was_processed) {
-        pygi_marshal_cleanup_data_destroy (&cleanup_data);
-    }
+    pygi_marshal_cleanup_data_destroy (&cleanup_data);
 }
 
 static void
@@ -147,7 +145,8 @@ arg_struct_to_py_marshal_adapter (PyGIInvokeState *state,
         pygi_arg_cache_is_caller_allocates (arg_cache),
         iface_cache->is_foreign);
 
-    if (iface_cache->is_foreign) {
+    if (iface_cache->is_foreign
+        && arg_cache->transfer == GI_TRANSFER_EVERYTHING) {
         ForeignReleaseData *release_data =
             g_malloc (sizeof (ForeignReleaseData));
         release_data->base_info = gi_base_info_ref (
@@ -157,7 +156,8 @@ arg_struct_to_py_marshal_adapter (PyGIInvokeState *state,
         cleanup_data->destroy = (GDestroyNotify)release_foreign;
     } else if (!g_type_is_a (iface_cache->g_type, G_TYPE_VALUE)
                && iface_cache->py_type
-               && g_type_is_a (iface_cache->g_type, G_TYPE_BOXED)) {
+               && g_type_is_a (iface_cache->g_type, G_TYPE_BOXED)
+               && arg_cache->transfer == GI_TRANSFER_NOTHING) {
         cleanup_data->data = ret;
         cleanup_data->destroy = (GDestroyNotify)pygi_boxed_copy_in_place;
     }
@@ -178,7 +178,7 @@ arg_foreign_from_py_cleanup (PyGIInvokeState *state, PyGIArgCache *arg_cache,
                              PyObject *py_arg, MarshalCleanupData cleanup_data,
                              gboolean was_processed)
 {
-    if (state->failed && was_processed) {
+    if (state->failed) {
         pygi_marshal_cleanup_data_destroy (&cleanup_data);
     }
 }
@@ -189,9 +189,7 @@ pygi_arg_gvalue_from_py_cleanup (PyGIInvokeState *state,
                                  MarshalCleanupData cleanup_data,
                                  gboolean was_processed)
 {
-    if (was_processed) {
-        pygi_marshal_cleanup_data_destroy (&cleanup_data);
-    }
+    pygi_marshal_cleanup_data_destroy (&cleanup_data);
 }
 
 static void
@@ -199,7 +197,7 @@ arg_foreign_to_py_cleanup (PyGIInvokeState *state, PyGIArgCache *arg_cache,
                            MarshalCleanupData cleanup_data, gpointer data,
                            gboolean was_processed)
 {
-    if (!was_processed && arg_cache->transfer == GI_TRANSFER_EVERYTHING) {
+    if (!was_processed) {
         pygi_marshal_cleanup_data_destroy (&cleanup_data);
     }
 }
@@ -209,8 +207,7 @@ arg_boxed_to_py_cleanup (PyGIInvokeState *state, PyGIArgCache *arg_cache,
                          MarshalCleanupData cleanup_data, gpointer data,
                          gboolean was_processed)
 {
-    if (arg_cache->transfer == GI_TRANSFER_NOTHING)
-        pygi_marshal_cleanup_data_destroy (&cleanup_data);
+    pygi_marshal_cleanup_data_destroy (&cleanup_data);
 }
 
 static void

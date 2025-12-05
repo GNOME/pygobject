@@ -146,8 +146,7 @@ _pygi_marshal_cleanup_to_py_interface_object (PyGIInvokeState *state,
                                               gpointer data,
                                               gboolean was_processed)
 {
-    if (was_processed && state->failed)
-        pygi_marshal_cleanup_data_destroy (&cleanup_data);
+    if (state->failed) pygi_marshal_cleanup_data_destroy (&cleanup_data);
 }
 
 static void
@@ -157,8 +156,7 @@ _pygi_marshal_cleanup_from_py_interface_object (
 {
     /* If we processed the parameter but fail before invoking the method,
        we need to remove the ref we added */
-    if (was_processed && state->failed)
-        pygi_marshal_cleanup_data_destroy (&cleanup_data);
+    if (state->failed) pygi_marshal_cleanup_data_destroy (&cleanup_data);
 }
 
 PyGIArgCache *
