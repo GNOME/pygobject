@@ -151,9 +151,7 @@ marshal_cleanup_from_py_utf8 (PyGIInvokeState *state, PyGIArgCache *arg_cache,
                               PyGIMarshalCleanupData cleanup_data,
                               gboolean was_processed)
 {
-    /* We strdup strings so free unless ownership is transferred to C. */
-    if (was_processed && cleanup_data.destroy)
-        cleanup_data.destroy (cleanup_data.data);
+    if (was_processed) pygi_marshal_cleanup_data_destroy (&cleanup_data);
 }
 
 static void
@@ -161,10 +159,7 @@ marshal_cleanup_to_py_utf8 (PyGIInvokeState *state, PyGIArgCache *arg_cache,
                             PyGIMarshalCleanupData cleanup_data, gpointer data,
                             gboolean was_processed)
 {
-    if (cleanup_data.destroy != NULL) {
-        g_assert (cleanup_data.data == data);
-        cleanup_data.destroy (cleanup_data.data);
-    }
+    pygi_marshal_cleanup_data_destroy (&cleanup_data);
 }
 
 PyGIArgCache *
