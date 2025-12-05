@@ -104,10 +104,14 @@ err:
             .destroy = (GDestroyNotify)g_list_free
         };
         g_array_append_val (item_cleanups, list_cleanup_data);
+        g_array_set_clear_func (
+            item_cleanups, (GDestroyNotify)pygi_marshal_cleanup_data_destroy);
         break;
     }
     case GI_TRANSFER_CONTAINER:
         /* Only the elements need to be deleted. */
+        g_array_set_clear_func (
+            item_cleanups, (GDestroyNotify)pygi_marshal_cleanup_data_destroy);
         break;
     case GI_TRANSFER_EVERYTHING:
         /* No cleanup, everything is given to the callee. */
@@ -198,10 +202,14 @@ err:
             .destroy = (GDestroyNotify)g_slist_free
         };
         g_array_append_val (item_cleanups, list_cleanup_data);
+        g_array_set_clear_func (
+            item_cleanups, (GDestroyNotify)pygi_marshal_cleanup_data_destroy);
         break;
     }
     case GI_TRANSFER_CONTAINER:
         /* Only the elements need to be deleted. */
+        g_array_set_clear_func (
+            item_cleanups, (GDestroyNotify)pygi_marshal_cleanup_data_destroy);
         break;
     case GI_TRANSFER_EVERYTHING:
         /* No cleanup, everything is given to the callee. */
@@ -220,18 +228,8 @@ _pygi_marshal_cleanup_from_py_glist (PyGIInvokeState *state,
                                      PyGIMarshalCleanupData cleanup_data,
                                      gboolean was_processed)
 {
-    if (was_processed && cleanup_data.destroy != NULL) {
-        GArray *item_cleanups = (GArray *)cleanup_data.data;
-        guint i;
-
-        for (i = 0; i < item_cleanups->len; i++) {
-            PyGIMarshalCleanupData *item_cleanup_data =
-                &g_array_index (item_cleanups, PyGIMarshalCleanupData, i);
-            if (item_cleanup_data->destroy && item_cleanup_data->data)
-                item_cleanup_data->destroy (item_cleanup_data->data);
-        }
-
-        cleanup_data.destroy (cleanup_data.data);
+    if (was_processed) {
+        pygi_marshal_cleanup_data_destroy (&cleanup_data);
     }
 }
 
@@ -299,6 +297,9 @@ _pygi_marshal_to_py_glist (PyGIInvokeState *state,
         };
         g_array_append_val (item_cleanups, list_cleanup_data);
     }
+    g_array_set_clear_func (item_cleanups,
+                            (GDestroyNotify)pygi_marshal_cleanup_data_destroy);
+
     cleanup_data->data = item_cleanups;
     cleanup_data->destroy = (GDestroyNotify)g_array_unref;
 
@@ -365,6 +366,9 @@ _pygi_marshal_to_py_gslist (PyGIInvokeState *state,
         };
         g_array_append_val (item_cleanups, list_cleanup_data);
     }
+    g_array_set_clear_func (item_cleanups,
+                            (GDestroyNotify)pygi_marshal_cleanup_data_destroy);
+
     cleanup_data->data = item_cleanups;
     cleanup_data->destroy = (GDestroyNotify)g_array_unref;
 
@@ -377,17 +381,7 @@ _pygi_marshal_cleanup_to_py_glist (PyGIInvokeState *state,
                                    PyGIMarshalCleanupData cleanup_data,
                                    gpointer data, gboolean was_processed)
 {
-    GArray *item_cleanups = (GArray *)cleanup_data.data;
-    guint i;
-
-    for (i = 0; i < item_cleanups->len; i++) {
-        PyGIMarshalCleanupData *item_cleanup_data =
-            &g_array_index (item_cleanups, PyGIMarshalCleanupData, i);
-        if (item_cleanup_data->destroy && item_cleanup_data->data)
-            item_cleanup_data->destroy (item_cleanup_data->data);
-    }
-
-    cleanup_data.destroy (cleanup_data.data);
+    pygi_marshal_cleanup_data_destroy (&cleanup_data);
 }
 
 static void
