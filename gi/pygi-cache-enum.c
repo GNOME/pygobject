@@ -165,7 +165,6 @@ _pygi_marshal_from_py_interface_enum (PyGIInvokeState *state,
     if (!gi_argument_from_c_long (
             arg, c_long,
             gi_enum_info_get_storage_type ((GIEnumInfo *)interface))) {
-        g_assert_not_reached ();
         gi_base_info_unref (interface);
         return FALSE;
     }
