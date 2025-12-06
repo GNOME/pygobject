@@ -155,8 +155,9 @@ pygi_arg_gobject_new_from_info (GITypeInfo *type_info, GIArgInfo *arg_info,
     if (cache == NULL) return NULL;
 
     if (direction & PYGI_DIRECTION_FROM_PYTHON) {
-        if (callable_cache->calling_context
-            == PYGI_CALLING_CONTEXT_IS_FROM_C) {
+        if (callable_cache != NULL
+            && callable_cache->calling_context
+                   == PYGI_CALLING_CONTEXT_IS_FROM_C) {
             cache->from_py_marshaller =
                 _pygi_marshal_from_py_called_from_c_interface_object;
         } else {
@@ -169,8 +170,9 @@ pygi_arg_gobject_new_from_info (GITypeInfo *type_info, GIArgInfo *arg_info,
     }
 
     if (direction & PYGI_DIRECTION_TO_PYTHON) {
-        if (callable_cache->calling_context
-            == PYGI_CALLING_CONTEXT_IS_FROM_C) {
+        if (callable_cache != NULL
+            && callable_cache->calling_context
+                   == PYGI_CALLING_CONTEXT_IS_FROM_C) {
             cache->to_py_marshaller =
                 _pygi_marshal_to_py_called_from_c_interface_object_cache_adapter;
         } else {
