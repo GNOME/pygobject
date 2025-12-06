@@ -1867,54 +1867,6 @@ static PyMethodDef _PyGIValueInfo_methods[] = {
 /* GIFieldInfo */
 PYGI_DEFINE_TYPE ("gi.FieldInfo", PyGIFieldInfo_Type, PyGIBaseInfo);
 
-static gboolean
-_struct_field_array_length_marshal (gsize length_index, void *container_ptr,
-                                    void *struct_data_ptr, gsize *array_len)
-{
-    GIFieldInfo *array_len_field = NULL;
-    GIArgument arg = PYGI_ARG_INIT;
-    GIBaseInfo *container_info = (GIBaseInfo *)container_ptr;
-    gboolean result = TRUE;
-
-    if (GI_IS_UNION_INFO (container_info)) {
-        array_len_field = gi_union_info_get_field (
-            (GIUnionInfo *)container_info, (gint)length_index);
-    } else if (GI_IS_STRUCT_INFO (container_info)) {
-        array_len_field = gi_struct_info_get_field (
-            (GIStructInfo *)container_info, (gint)length_index);
-    } else if (GI_IS_OBJECT_INFO (container_info)) {
-        array_len_field = gi_object_info_get_field (
-            (GIObjectInfo *)container_info, (gint)length_index);
-    } else {
-        /* Other types don't have fields. */
-        g_assert_not_reached ();
-    }
-
-    if (array_len_field == NULL) {
-        return FALSE;
-    }
-
-    if (gi_field_info_get_field (array_len_field, struct_data_ptr, &arg)) {
-        GITypeInfo *array_len_type_info;
-
-        array_len_type_info = gi_field_info_get_type_info (array_len_field);
-        if (array_len_type_info == NULL) {
-            goto out;
-        }
-
-        if (!pygi_argument_to_gsize (
-                arg, gi_type_info_get_tag (array_len_type_info), array_len)) {
-            result = FALSE;
-        }
-
-        gi_base_info_unref (array_len_type_info);
-    }
-
-out:
-    gi_base_info_unref (array_len_field);
-    return result;
-}
-
 static gint
 _pygi_gi_registered_type_info_check_object (GIRegisteredTypeInfo *info,
                                             PyObject *object)
@@ -2074,15 +2026,8 @@ _wrap_gi_field_info_get_value (PyGIBaseInfo *self, PyObject *args)
         goto out;
     }
 
-    if (gi_type_info_get_tag (field_type_info) == GI_TYPE_TAG_ARRAY) {
-        value.v_pointer = _pygi_argument_to_array (
-            value, _struct_field_array_length_marshal, container_info, pointer,
-            field_type_info, &free_array);
-    }
-
 argument_to_object:
-    py_value =
-        _pygi_argument_to_object (value, field_type_info, GI_TRANSFER_NOTHING);
+    py_value = pygi_argument_to_py (field_type_info, value);
 
     if (free_array) {
         g_array_free (value.v_pointer, FALSE);
