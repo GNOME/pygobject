@@ -837,10 +837,10 @@ pygi_arg_garray_setup (
 }
 
 PyGIArgCache *
-pygi_arg_garray_new_from_info (GITypeInfo *type_info, GIArgInfo *arg_info,
-                               GITransfer transfer, PyGIDirection direction,
-                               PyGICallableCache *callable_cache,
-                               gssize arg_index, gssize *py_arg_index)
+pygi_arg_garray_new_from_info (
+    GITypeInfo *type_info, GIArgInfo *arg_info, GITransfer transfer,
+    PyGIDirection direction, PyGICallableCache *callable_cache /* nullable */,
+    gssize arg_index, gssize *py_arg_index)
 {
     PyGIArgGArray *array_cache = g_slice_new0 (PyGIArgGArray);
     if (array_cache == NULL) return NULL;
@@ -851,8 +851,9 @@ pygi_arg_garray_new_from_info (GITypeInfo *type_info, GIArgInfo *arg_info,
         return NULL;
     }
 
-    pygi_arg_garray_len_arg_setup (array_cache, type_info, callable_cache,
-                                   direction, arg_index, py_arg_index);
+    if (callable_cache)
+        pygi_arg_garray_len_arg_setup (array_cache, type_info, callable_cache,
+                                       direction, arg_index, py_arg_index);
 
     return (PyGIArgCache *)array_cache;
 }
