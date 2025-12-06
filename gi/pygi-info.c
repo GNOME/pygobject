@@ -1835,31 +1835,7 @@ PYGI_DEFINE_TYPE ("gi.ConstantInfo", PyGIConstantInfo_Type, PyGIBaseInfo);
 static PyObject *
 _wrap_gi_constant_info_get_value (PyGIBaseInfo *self)
 {
-    GITypeInfo *type_info;
-    GIArgument value = PYGI_ARG_INIT;
-    PyObject *py_value;
-    gboolean free_array = FALSE;
-
-    gi_constant_info_get_value ((GIConstantInfo *)self->info, &value);
-
-    type_info = gi_constant_info_get_type_info ((GIConstantInfo *)self->info);
-
-    if (gi_type_info_get_tag (type_info) == GI_TYPE_TAG_ARRAY) {
-        value.v_pointer = _pygi_argument_to_array (value, NULL, NULL, NULL,
-                                                   type_info, &free_array);
-    }
-
-    py_value =
-        _pygi_argument_to_object (value, type_info, GI_TRANSFER_NOTHING);
-
-    if (free_array) {
-        g_array_free (value.v_pointer, FALSE);
-    }
-
-    gi_constant_info_free_value (GI_CONSTANT_INFO (self->info), &value);
-    gi_base_info_unref ((GIBaseInfo *)type_info);
-
-    return py_value;
+    return pygi_constant_cache_invoke ((GIConstantInfo *)self->info);
 }
 
 static PyMethodDef _PyGIConstantInfo_methods[] = {
