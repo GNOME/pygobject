@@ -170,9 +170,10 @@ pygi_marshal_cleanup_args_from_py_parameter_fail (PyGIInvokeState *state,
 {
     guint i;
     PyObject *error_type, *error_value, *error_traceback;
-    gboolean have_error = !!PyErr_Occurred ();
 
-    if (have_error) PyErr_Fetch (&error_type, &error_value, &error_traceback);
+    g_assert (PyErr_Occurred ());
+
+    PyErr_Fetch (&error_type, &error_value, &error_traceback);
 
     state->failed = TRUE;
 
@@ -202,7 +203,7 @@ pygi_marshal_cleanup_args_from_py_parameter_fail (PyGIInvokeState *state,
         state->args[i].arg_cleanup_data = NULL;
     }
 
-    if (have_error) PyErr_Restore (error_type, error_value, error_traceback);
+    PyErr_Restore (error_type, error_value, error_traceback);
 }
 
 void
