@@ -292,10 +292,6 @@ _pygi_callable_cache_set_arg (PyGICallableCache *cache, guint index,
     cache->args_cache->pdata[index] = arg_cache;
 }
 
-PyObject *pygi_constant_cache_invoke (GIConstantInfo *info);
-
-PyObject *pygi_argument_to_py (GITypeInfo *type_info, GIArgument value);
-
 G_END_DECLS
 
 #endif /* __PYGI_CACHE_H__ */

@@ -37,6 +37,31 @@
 #include "pygi-struct-marshal.h"
 #include "pygi-util.h"
 #include "pygi-value.h"
+#include "pygi-cache-private.h"
+
+PyObject *
+pygi_argument_to_py (GITypeInfo *type_info, GIArgument value)
+{
+    PyGIInvokeState state = { 0 };
+    gpointer cleanup_data = NULL;
+    PyObject *object;
+
+    PyGIArgCache *cache = pygi_arg_cache_new (type_info, /*arg_info=*/NULL,
+                                              GI_TRANSFER_NOTHING,
+                                              PYGI_DIRECTION_TO_PYTHON,
+                                              /*callable_cache=*/NULL, 0, 0);
+
+    object = cache->to_py_marshaller (&state, /*callable_cache=*/NULL, cache,
+                                      &value, &cleanup_data);
+
+    if (cache->to_py_cleanup && value.v_pointer)
+        cache->to_py_cleanup (&state, cache, cleanup_data, value.v_pointer,
+                              TRUE);
+
+    pygi_arg_cache_free (cache);
+
+    return object;
+}
 
 gboolean
 pygi_argument_to_gsize (GIArgument arg, GITypeTag type_tag, gsize *gsize_out)
