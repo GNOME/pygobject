@@ -223,7 +223,8 @@ static gint
 pygi_set_property_gvalue_from_property_info (GIPropertyInfo *property_info,
                                              GValue *value, PyObject *py_value)
 {
-    GITypeInfo *type_info = NULL;
+    PyGIArgumentFromPyCleanupData arg_cleanup = { 0 };
+    GITypeInfo *type_info;
     GITypeTag type_tag;
     GITransfer transfer;
     GIArgument arg;
@@ -231,17 +232,15 @@ pygi_set_property_gvalue_from_property_info (GIPropertyInfo *property_info,
 
     type_info = gi_property_info_get_type_info (property_info);
     transfer = gi_property_info_get_ownership_transfer (property_info);
-    arg = _pygi_argument_from_object (py_value, type_info, transfer);
+    // arg = _pygi_argument_from_object (py_value, type_info, transfer);
+    arg = pygi_argument_from_py (type_info, py_value, transfer, &arg_cleanup);
 
     if (PyErr_Occurred ()) goto out;
 
-    /* FIXME: Lots of types still unhandled */
     type_tag = gi_type_info_get_tag (type_info);
     switch (type_tag) {
     case GI_TYPE_TAG_INTERFACE: {
         GIBaseInfo *interface = gi_type_info_get_interface (type_info);
-        GType type = gi_registered_type_info_get_g_type (
-            GI_REGISTERED_TYPE_INFO (interface));
 
         switch (pygi_interface_type_tag (interface)) {
         case PYGI_INTERFACE_TYPE_TAG_FLAGS:
@@ -258,12 +257,15 @@ pygi_set_property_gvalue_from_property_info (GIPropertyInfo *property_info,
                 PyErr_Format (
                     PyExc_NotImplementedError,
                     "Setting properties of type '%s' is not implemented",
-                    g_type_name (type));
+                    g_type_name (G_VALUE_TYPE (value)));
                 goto out;
             }
             break;
         case PYGI_INTERFACE_TYPE_TAG_STRUCT:
-        case PYGI_INTERFACE_TYPE_TAG_UNION:
+        case PYGI_INTERFACE_TYPE_TAG_UNION: {
+            GType type = gi_registered_type_info_get_g_type (
+                GI_REGISTERED_TYPE_INFO (interface));
+
             if (g_type_is_a (type, G_TYPE_BOXED)) {
                 g_value_set_boxed (value, arg.v_pointer);
             } else if (g_type_is_a (type, G_TYPE_VARIANT)) {
@@ -276,10 +278,11 @@ pygi_set_property_gvalue_from_property_info (GIPropertyInfo *property_info,
                 goto out;
             }
             break;
+        }
         case PYGI_INTERFACE_TYPE_TAG_CALLBACK:
             PyErr_Format (PyExc_NotImplementedError,
                           "Setting properties of type '%s' is not implemented",
-                          g_type_name (type));
+                          g_type_name (G_VALUE_TYPE (value)));
             goto out;
         default:
             g_assert_not_reached ();
@@ -341,32 +344,33 @@ pygi_set_property_gvalue_from_property_info (GIPropertyInfo *property_info,
         g_value_set_boxed (value, arg.v_pointer);
         break;
     case GI_TYPE_TAG_GLIST:
+    case GI_TYPE_TAG_GSLIST:
         if (G_VALUE_HOLDS_BOXED (value))
             g_value_set_boxed (value, arg.v_pointer);
         else
             g_value_set_pointer (value, arg.v_pointer);
         break;
     case GI_TYPE_TAG_ARRAY: {
+        // TODO: switch array types Fixes https://gitlab.gnome.org/GNOME/pygobject/-/issues/37
         /* This is assumes GI_TYPE_TAG_ARRAY is always a GStrv
          * https://bugzilla.gnome.org/show_bug.cgi?id=688232
          */
-        GArray *arg_items = (GArray *)arg.v_pointer;
-        gchar **strings;
-        guint i;
+        // GArray *arg_items = (GArray *)arg.v_pointer;
+        // gchar **strings;
+        // guint i;
 
-        if (arg_items == NULL) goto out;
+        // if (arg_items == NULL) goto out;
 
-        strings = g_new0 (char *, arg_items->len + 1);
-        for (i = 0; i < arg_items->len; ++i) {
-            strings[i] = g_array_index (arg_items, GIArgument, i).v_string;
-        }
-        strings[arg_items->len] = NULL;
-        g_value_take_boxed (value, strings);
-        g_array_free (arg_items, TRUE);
-        break;
+        // strings = g_new0 (char *, arg_items->len + 1);
+        // for (i = 0; i < arg_items->len; ++i) {
+        //     strings[i] = g_array_index (arg_items, GIArgument, i).v_string;
+        // }
+        // strings[arg_items->len] = NULL;
+        // g_value_take_boxed (value, strings);
+        // g_array_free (arg_items, TRUE);
+        // break;
     }
     case GI_TYPE_TAG_VOID:
-    case GI_TYPE_TAG_GSLIST:
     case GI_TYPE_TAG_ERROR:
         PyErr_Format (
             PyExc_NotImplementedError,
@@ -380,6 +384,9 @@ pygi_set_property_gvalue_from_property_info (GIPropertyInfo *property_info,
     ret_value = 0;
 
 out:
+
+    pygi_argument_from_py_cleanup (&arg_cleanup);
+
     if (type_info != NULL) gi_base_info_unref (type_info);
 
     return ret_value;
