@@ -148,10 +148,9 @@ pygi_arg_gobject_new_from_info (GITypeInfo *type_info, GIArgInfo *arg_info,
                                 GIRegisteredTypeInfo *iface_info,
                                 PyGICallableCache *callable_cache)
 {
-    PyGIArgCache *cache = NULL;
+    PyGIArgCache *cache = pygi_arg_interface_new_from_info (
+        type_info, arg_info, transfer, direction, iface_info);
 
-    cache = pygi_arg_interface_new_from_info (type_info, arg_info, transfer,
-                                              direction, iface_info);
     if (cache == NULL) return NULL;
 
     if (direction & PYGI_DIRECTION_FROM_PYTHON) {

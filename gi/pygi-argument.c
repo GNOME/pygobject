@@ -39,8 +39,49 @@
 #include "pygi-value.h"
 #include "pygi-cache-private.h"
 
+GIArgument
+pygi_argument_from_py (GITypeInfo *type_info, PyObject *object,
+                       GITransfer transfer,
+                       PyGIArgumentFromPyCleanupData *arg_cleanup)
+{
+    GIArgument arg = PYGI_ARG_INIT;
+
+    PyGIArgCache *cache = pygi_arg_cache_new (
+        type_info, /*arg_info=*/NULL, transfer, PYGI_DIRECTION_FROM_PYTHON,
+        /*callable_cache=*/NULL, 0, 0);
+
+    if (!cache->from_py_marshaller (&arg_cleanup->state,
+                                    /*callable_cache=*/NULL, cache, object,
+                                    &arg, &arg_cleanup->cleanup_data)) {
+        if (!PyErr_Occurred ())
+            PyErr_Format (PyExc_TypeError,
+                          "Unable to convert argument %R to its C equivalent",
+                          object);
+    }
+
+    arg_cleanup->cache = cache;
+    arg_cleanup->object = object;
+
+    return arg;
+}
+
+void
+pygi_argument_from_py_cleanup (PyGIArgumentFromPyCleanupData *arg_cleanup)
+{
+    PyGIArgCache *cache = (PyGIArgCache *)arg_cleanup->cache;
+
+    if (cache) {
+        if (cache->from_py_cleanup)
+            cache->from_py_cleanup (&arg_cleanup->state, cache,
+                                    arg_cleanup->object,
+                                    arg_cleanup->cleanup_data, TRUE);
+        pygi_arg_cache_free (cache);
+        memset (arg_cleanup, 0, sizeof (PyGIArgumentFromPyCleanupData));
+    }
+}
+
 PyObject *
-pygi_argument_to_py (GITypeInfo *type_info, GIArgument value)
+pygi_argument_to_py (GITypeInfo *type_info, GIArgument arg)
 {
     PyGIInvokeState state = { 0 };
     gpointer cleanup_data = NULL;
@@ -52,10 +93,10 @@ pygi_argument_to_py (GITypeInfo *type_info, GIArgument value)
                                               /*callable_cache=*/NULL, 0, 0);
 
     object = cache->to_py_marshaller (&state, /*callable_cache=*/NULL, cache,
-                                      &value, &cleanup_data);
+                                      &arg, &cleanup_data);
 
-    if (cache->to_py_cleanup && value.v_pointer)
-        cache->to_py_cleanup (&state, cache, cleanup_data, value.v_pointer,
+    if (cache->to_py_cleanup && arg.v_pointer)
+        cache->to_py_cleanup (&state, cache, cleanup_data, arg.v_pointer,
                               TRUE);
 
     pygi_arg_cache_free (cache);
