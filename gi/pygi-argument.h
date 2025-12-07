@@ -32,6 +32,10 @@ G_STATIC_ASSERT (sizeof (GIArgument) == sizeof (gint64));
 
 #define PYGI_ARG_INIT { .v_int64 = 0 }
 
+PyObject *pygi_argument_to_py (GITypeInfo *type_info, GIArgument value);
+
+/* -- The functions below should be considered deprecated -- */
+
 /* Private */
 typedef gboolean (*PyGIArgArrayLengthPolicy) (gsize item_index,
                                               void *user_data1,
