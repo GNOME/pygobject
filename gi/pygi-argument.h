@@ -20,8 +20,7 @@
 #ifndef __PYGI_ARGUMENT_H__
 #define __PYGI_ARGUMENT_H__
 
-#include <girepository/girepository.h>
-#include <pythoncapi_compat.h>
+#include "pygi-invoke-state-struct.h"
 
 G_BEGIN_DECLS
 
@@ -31,6 +30,26 @@ G_BEGIN_DECLS
 G_STATIC_ASSERT (sizeof (GIArgument) == sizeof (gint64));
 
 #define PYGI_ARG_INIT { .v_int64 = 0 }
+
+/**
+ * Pass PyGIArgumentFromPyCleanupData as zero-initialized struct to pygi_argument_from_py.
+ * Some cleanup related state will be stored in this struct. After processing the argument,
+ * cleanup can be performed by calling pygi_argument_from_py_cleanup.
+ */
+typedef struct {
+    PyObject *object;
+    gpointer cache;
+    gpointer cleanup_data;
+    PyGIInvokeState state;
+} PyGIArgumentFromPyCleanupData;
+
+GIArgument pygi_argument_from_py (GITypeInfo *type_info, PyObject *object,
+                                  GITransfer transfer,
+                                  PyGIArgumentFromPyCleanupData *arg_cleanup);
+
+/* Invoke pygi_argument_from_py_cleanup after you're done handling the argument aquired by pygi_argument_from_py. */
+void pygi_argument_from_py_cleanup (
+    PyGIArgumentFromPyCleanupData *arg_cleanup);
 
 PyObject *pygi_argument_to_py (GITypeInfo *type_info, GIArgument value);
 
