@@ -224,7 +224,6 @@ pygi_set_property_gvalue_from_property_info (GIPropertyInfo *property_info,
                                              GValue *value, PyObject *py_value)
 {
     GITypeInfo *type_info = NULL;
-    GIBaseInfo *info = NULL;
     GITypeTag type_tag;
     GITransfer transfer;
     GIArgument arg;
@@ -240,18 +239,19 @@ pygi_set_property_gvalue_from_property_info (GIPropertyInfo *property_info,
     type_tag = gi_type_info_get_tag (type_info);
     switch (type_tag) {
     case GI_TYPE_TAG_INTERFACE: {
-        GType type;
+        GIBaseInfo *interface = gi_type_info_get_interface (type_info);
+        GType type = gi_registered_type_info_get_g_type (
+            GI_REGISTERED_TYPE_INFO (interface));
 
-        info = gi_type_info_get_interface (type_info);
-        type = gi_registered_type_info_get_g_type (
-            GI_REGISTERED_TYPE_INFO (info));
-
-        if (GI_IS_FLAGS_INFO (info)) {
-            /* Check flags before enums: flags are a subtype of enum. */
+        switch (pygi_interface_type_tag (interface)) {
+        case PYGI_INTERFACE_TYPE_TAG_FLAGS:
             g_value_set_flags (value, arg.v_uint);
-        } else if (GI_IS_ENUM_INFO (info)) {
+            break;
+        case PYGI_INTERFACE_TYPE_TAG_ENUM:
             g_value_set_enum (value, arg.v_int);
-        } else if (GI_IS_INTERFACE_INFO (info) || GI_IS_OBJECT_INFO (info)) {
+            break;
+        case PYGI_INTERFACE_TYPE_TAG_INTERFACE:
+        case PYGI_INTERFACE_TYPE_TAG_OBJECT:
             if (arg.v_pointer == NULL || G_IS_OBJECT (arg.v_pointer)) {
                 g_value_set_object (value, arg.v_pointer);
             } else if (!pygi_fundamental_set_value (value, arg.v_pointer)) {
@@ -261,7 +261,9 @@ pygi_set_property_gvalue_from_property_info (GIPropertyInfo *property_info,
                     g_type_name (type));
                 goto out;
             }
-        } else if (GI_IS_STRUCT_INFO (info) || GI_IS_UNION_INFO (info)) {
+            break;
+        case PYGI_INTERFACE_TYPE_TAG_STRUCT:
+        case PYGI_INTERFACE_TYPE_TAG_UNION:
             if (g_type_is_a (type, G_TYPE_BOXED)) {
                 g_value_set_boxed (value, arg.v_pointer);
             } else if (g_type_is_a (type, G_TYPE_VARIANT)) {
@@ -273,12 +275,17 @@ pygi_set_property_gvalue_from_property_info (GIPropertyInfo *property_info,
                     g_type_name (type));
                 goto out;
             }
-        } else {
+            break;
+        case PYGI_INTERFACE_TYPE_TAG_CALLBACK:
             PyErr_Format (PyExc_NotImplementedError,
                           "Setting properties of type '%s' is not implemented",
                           g_type_name (type));
             goto out;
+        default:
+            g_assert_not_reached ();
         }
+        gi_base_info_unref (interface);
+
         break;
     }
     case GI_TYPE_TAG_BOOLEAN:
@@ -374,7 +381,6 @@ pygi_set_property_gvalue_from_property_info (GIPropertyInfo *property_info,
 
 out:
     if (type_info != NULL) gi_base_info_unref (type_info);
-    if (info != NULL) gi_base_info_unref (info);
 
     return ret_value;
 }

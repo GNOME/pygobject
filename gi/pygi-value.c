@@ -118,19 +118,24 @@ _pygi_argument_from_g_value (const GValue *value, GITypeInfo *type_info)
 
         info = gi_type_info_get_interface (type_info);
 
-        if (GI_IS_FLAGS_INFO (info)) {
-            /* Check flags before enums: flags are a subtype of enum. */
+        switch (pygi_interface_type_tag (info)) {
+        case PYGI_INTERFACE_TYPE_TAG_FLAGS:
             arg.v_uint = g_value_get_flags (value);
-        } else if (GI_IS_ENUM_INFO (info)) {
+            break;
+        case PYGI_INTERFACE_TYPE_TAG_ENUM:
             arg.v_int = g_value_get_enum (value);
-        } else if (GI_IS_INTERFACE_INFO (info) || GI_IS_OBJECT_INFO (info)) {
+            break;
+        case PYGI_INTERFACE_TYPE_TAG_OBJECT:
+        case PYGI_INTERFACE_TYPE_TAG_INTERFACE:
             if (G_VALUE_HOLDS_PARAM (value))
                 arg.v_pointer = g_value_get_param (value);
             else if (G_VALUE_HOLDS_OBJECT (value))
                 arg.v_pointer = g_value_get_object (value);
             else
                 arg.v_pointer = pygi_fundamental_from_value (value);
-        } else if (GI_IS_STRUCT_INFO (info) || GI_IS_UNION_INFO (info)) {
+            break;
+        case PYGI_INTERFACE_TYPE_TAG_STRUCT:
+        case PYGI_INTERFACE_TYPE_TAG_UNION:
             if (G_VALUE_HOLDS (value, G_TYPE_BOXED)) {
                 arg.v_pointer = g_value_get_boxed (value);
             } else if (G_VALUE_HOLDS (value, G_TYPE_VARIANT)) {
@@ -143,11 +148,15 @@ _pygi_argument_from_g_value (const GValue *value, GITypeInfo *type_info)
                     "Converting GValue's of type '%s' is not implemented.",
                     g_type_name (G_VALUE_TYPE (value)));
             }
-        } else {
+            break;
+        case PYGI_INTERFACE_TYPE_TAG_CALLBACK:
             PyErr_Format (
                 PyExc_NotImplementedError,
                 "Converting GValue's of type '%s' is not implemented.",
                 g_type_name (G_TYPE_FROM_INSTANCE (info)));
+            break;
+        default:
+            g_assert_not_reached ();
         }
 
         gi_base_info_unref (info);

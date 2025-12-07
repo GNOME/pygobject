@@ -1153,19 +1153,23 @@ _pygi_gi_type_info_size (GITypeInfo *type_info)
 
         info = gi_type_info_get_interface (type_info);
 
-        if (GI_IS_STRUCT_INFO (info)) {
+        switch (pygi_interface_type_tag (info)) {
+        case PYGI_INTERFACE_TYPE_TAG_STRUCT:
             if (gi_type_info_is_pointer (type_info)) {
                 size = sizeof (gpointer);
             } else {
                 size = gi_struct_info_get_size ((GIStructInfo *)info);
             }
-        } else if (GI_IS_UNION_INFO (info)) {
+            break;
+        case PYGI_INTERFACE_TYPE_TAG_UNION:
             if (gi_type_info_is_pointer (type_info)) {
                 size = sizeof (gpointer);
             } else {
                 size = gi_union_info_get_size ((GIUnionInfo *)info);
             }
-        } else if (GI_IS_ENUM_INFO (info)) {
+            break;
+        case PYGI_INTERFACE_TYPE_TAG_ENUM:
+        case PYGI_INTERFACE_TYPE_TAG_FLAGS:
             if (gi_type_info_is_pointer (type_info)) {
                 size = sizeof (gpointer);
             } else {
@@ -1175,10 +1179,13 @@ _pygi_gi_type_info_size (GITypeInfo *type_info)
                     gi_enum_info_get_storage_type ((GIEnumInfo *)info);
                 size = _pygi_g_type_tag_size (enum_type_tag);
             }
-        } else if (GI_IS_OBJECT_INFO (info) || GI_IS_INTERFACE_INFO (info)
-                   || GI_IS_CALLBACK_INFO (info)) {
+            break;
+        case PYGI_INTERFACE_TYPE_TAG_OBJECT:
+        case PYGI_INTERFACE_TYPE_TAG_INTERFACE:
+        case PYGI_INTERFACE_TYPE_TAG_CALLBACK:
             size = sizeof (gpointer);
-        } else {
+            break;
+        default:
             g_assert_not_reached ();
         }
 
@@ -1439,24 +1446,31 @@ pygi_gi_struct_info_is_simple (GIStructInfo *struct_info)
 
             info = gi_type_info_get_interface (field_type_info);
 
-            if (GI_IS_STRUCT_INFO (info)) {
+            switch (pygi_interface_type_tag (info)) {
+            case PYGI_INTERFACE_TYPE_TAG_STRUCT:
                 if (gi_type_info_is_pointer (field_type_info)) {
                     is_simple = FALSE;
                 } else {
                     is_simple =
                         pygi_gi_struct_info_is_simple ((GIStructInfo *)info);
                 }
-            } else if (GI_IS_UNION_INFO (info)) {
+                break;
+            case PYGI_INTERFACE_TYPE_TAG_UNION:
                 /* TODO */
                 is_simple = FALSE;
-            } else if (GI_IS_ENUM_INFO (info)) {
+                break;
+            case PYGI_INTERFACE_TYPE_TAG_ENUM:
+            case PYGI_INTERFACE_TYPE_TAG_FLAGS:
                 if (gi_type_info_is_pointer (field_type_info)) {
                     is_simple = FALSE;
                 }
-            } else if (GI_IS_OBJECT_INFO (info) || GI_IS_CALLBACK_INFO (info)
-                       || GI_IS_INTERFACE_INFO (info)) {
+                break;
+            case PYGI_INTERFACE_TYPE_TAG_OBJECT:
+            case PYGI_INTERFACE_TYPE_TAG_INTERFACE:
+            case PYGI_INTERFACE_TYPE_TAG_CALLBACK:
                 is_simple = FALSE;
-            } else {
+                break;
+            default:
                 g_assert_not_reached ();
             }
 
@@ -2048,13 +2062,14 @@ _wrap_gi_field_info_get_value (PyGIBaseInfo *self, PyObject *args)
 
         info = gi_type_info_get_interface (field_type_info);
 
-        if (GI_IS_UNION_INFO (info)) {
+        switch (pygi_interface_type_tag (info)) {
+        case PYGI_INTERFACE_TYPE_TAG_UNION:
             PyErr_SetString (PyExc_NotImplementedError,
                              "getting an union is not supported yet");
             gi_base_info_unref (info);
 
             goto out;
-        } else if (GI_IS_STRUCT_INFO (info)) {
+        case PYGI_INTERFACE_TYPE_TAG_STRUCT:
             gsize offset;
 
             offset = gi_field_info_get_offset ((GIFieldInfo *)self->info);
@@ -2064,10 +2079,15 @@ _wrap_gi_field_info_get_value (PyGIBaseInfo *self, PyObject *args)
             gi_base_info_unref (info);
 
             goto argument_to_object;
-        } else {
+        case PYGI_INTERFACE_TYPE_TAG_ENUM:
+        case PYGI_INTERFACE_TYPE_TAG_FLAGS:
+        case PYGI_INTERFACE_TYPE_TAG_OBJECT:
+        case PYGI_INTERFACE_TYPE_TAG_INTERFACE:
+        case PYGI_INTERFACE_TYPE_TAG_CALLBACK:
             gi_base_info_unref (info);
-
-            /* Fallback. */
+            break;
+        default:
+            g_assert_not_reached ();
         }
     }
 

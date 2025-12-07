@@ -36,6 +36,16 @@ typedef struct {
     tovaluefunc tovalue;
 } PyGTypeMarshal;
 
+typedef enum {
+    PYGI_INTERFACE_TYPE_TAG_FLAGS,
+    PYGI_INTERFACE_TYPE_TAG_ENUM,
+    PYGI_INTERFACE_TYPE_TAG_INTERFACE,
+    PYGI_INTERFACE_TYPE_TAG_OBJECT,
+    PYGI_INTERFACE_TYPE_TAG_STRUCT,
+    PYGI_INTERFACE_TYPE_TAG_UNION,
+    PYGI_INTERFACE_TYPE_TAG_CALLBACK
+} PyGIInterfaceTypeTag;
+
 PyGTypeMarshal *pyg_type_lookup (GType type);
 
 gboolean pyg_gtype_is_custom (GType gtype);
@@ -58,5 +68,7 @@ PyObject *pygi_type_import_by_g_type (GType g_type);
 PyObject *pygi_type_import_by_name (const char *namespace_, const char *name);
 PyObject *pygi_type_import_by_gi_info (GIBaseInfo *info);
 PyObject *pygi_type_get_from_g_type (GType g_type);
+
+PyGIInterfaceTypeTag pygi_interface_type_tag (GIBaseInfo *info);
 
 #endif /* __PYGI_TYPE_H__ */

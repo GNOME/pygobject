@@ -140,30 +140,31 @@ _arg_cache_new_for_interface (GIBaseInfo *iface_info, GITypeInfo *type_info,
                               PyGIDirection direction,
                               PyGICallableCache *callable_cache)
 {
-    if (GI_IS_CALLBACK_INFO (iface_info)) {
+    switch (pygi_interface_type_tag (iface_info)) {
+    case PYGI_INTERFACE_TYPE_TAG_CALLBACK:
         return pygi_arg_callback_new_from_info (
             type_info, arg_info, transfer, direction,
             GI_CALLBACK_INFO (iface_info), callable_cache);
-    } else if (GI_IS_OBJECT_INFO (iface_info)
-               || GI_IS_INTERFACE_INFO (iface_info)) {
+    case PYGI_INTERFACE_TYPE_TAG_OBJECT:
+    case PYGI_INTERFACE_TYPE_TAG_INTERFACE:
         return pygi_arg_gobject_new_from_info (
             type_info, arg_info, transfer, direction,
             GI_REGISTERED_TYPE_INFO (iface_info), callable_cache);
-    } else if (GI_IS_STRUCT_INFO (iface_info)
-               || GI_IS_UNION_INFO (iface_info)) {
+    case PYGI_INTERFACE_TYPE_TAG_STRUCT:
+    case PYGI_INTERFACE_TYPE_TAG_UNION:
         return pygi_arg_struct_new_from_info (
             type_info, arg_info, transfer, direction,
             GI_REGISTERED_TYPE_INFO (iface_info));
-    } else if (GI_IS_FLAGS_INFO (iface_info)) {
+    case PYGI_INTERFACE_TYPE_TAG_FLAGS:
         /* Check flags before enums: flags are a subtype of enum. */
         return pygi_arg_flags_new_from_info (type_info, arg_info, transfer,
                                              direction,
                                              GI_FLAGS_INFO (iface_info));
-    } else if (GI_IS_ENUM_INFO (iface_info)) {
+    case PYGI_INTERFACE_TYPE_TAG_ENUM:
         return pygi_arg_enum_new_from_info (type_info, arg_info, transfer,
                                             direction,
                                             GI_ENUM_INFO (iface_info));
-    } else {
+    default:
         g_assert_not_reached ();
     }
 

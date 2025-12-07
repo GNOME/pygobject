@@ -1319,3 +1319,39 @@ pygi_type_register_types (PyObject *d)
 
     return 0;
 }
+
+/**
+ * pygi_interface_type_tag:
+ *
+ * A simple way to map types often obtained by calling
+ * `gi_type_info_get_interface` to an enum.
+ * This makes for easier to read code.
+ */
+PyGIInterfaceTypeTag
+pygi_interface_type_tag (GIBaseInfo *info)
+{
+    PyGIInterfaceTypeTag iface_type_tag;
+
+    if (GI_IS_FLAGS_INFO (info)) {
+        /* Check flags before enums: flags are a subtype of enum. */
+        iface_type_tag = PYGI_INTERFACE_TYPE_TAG_FLAGS;
+    } else if (GI_IS_ENUM_INFO (info)) {
+        iface_type_tag = PYGI_INTERFACE_TYPE_TAG_ENUM;
+    } else if (GI_IS_INTERFACE_INFO (info)) {
+        iface_type_tag = PYGI_INTERFACE_TYPE_TAG_INTERFACE;
+    } else if (GI_IS_OBJECT_INFO (info)) {
+        iface_type_tag = PYGI_INTERFACE_TYPE_TAG_OBJECT;
+    } else if (GI_IS_STRUCT_INFO (info)) {
+        iface_type_tag = PYGI_INTERFACE_TYPE_TAG_STRUCT;
+    } else if (GI_IS_UNION_INFO (info)) {
+        iface_type_tag = PYGI_INTERFACE_TYPE_TAG_UNION;
+    } else if (GI_IS_CALLBACK_INFO (info)) {
+        iface_type_tag = PYGI_INTERFACE_TYPE_TAG_CALLBACK;
+    } else {
+        g_critical ("Type %s is not handled",
+                    g_type_name_from_instance ((GTypeInstance *)info));
+        g_assert_not_reached ();
+    }
+
+    return iface_type_tag;
+}
