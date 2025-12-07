@@ -423,10 +423,13 @@ pygi_argument_interface_from_object (PyObject *object, GITypeInfo *type_info,
 
     info = gi_type_info_get_interface (type_info);
 
-    if (GI_IS_CALLBACK_INFO (info)) {
+    switch (pygi_interface_type_tag (info)) {
+    case PYGI_INTERFACE_TYPE_TAG_CALLBACK:
         PyErr_SetString (PyExc_TypeError,
                          "Cannot translate Python object to callback type");
-    } else if (GI_IS_STRUCT_INFO (info) || GI_IS_UNION_INFO (info)) {
+        break;
+    case PYGI_INTERFACE_TYPE_TAG_STRUCT:
+    case PYGI_INTERFACE_TYPE_TAG_UNION: {
         GType g_type;
         PyObject *py_type;
         gboolean is_foreign =
@@ -451,23 +454,30 @@ pygi_argument_interface_from_object (PyObject *object, GITypeInfo *type_info,
             is_foreign, gi_type_info_is_pointer (type_info));
 
         Py_DECREF (py_type);
-    } else if (GI_IS_FLAGS_INFO (info)) {
-        /* Check flags before enums: flags are a subtype of enum. */
+        break;
+    }
+    case PYGI_INTERFACE_TYPE_TAG_FLAGS: {
         GType g_type;
 
         g_type =
             gi_registered_type_info_get_g_type ((GIRegisteredTypeInfo *)info);
         if (pyg_flags_get_value (g_type, object, &arg.v_uint) < 0) return arg;
-    } else if (GI_IS_ENUM_INFO (info)) {
+        break;
+    }
+    case PYGI_INTERFACE_TYPE_TAG_ENUM: {
         GType g_type;
 
         g_type =
             gi_registered_type_info_get_g_type ((GIRegisteredTypeInfo *)info);
         if (pyg_enum_get_value (g_type, object, &arg.v_int) < 0) return arg;
-    } else if (GI_IS_INTERFACE_INFO (info) || GI_IS_OBJECT_INFO (info)) {
+        break;
+    }
+    case PYGI_INTERFACE_TYPE_TAG_OBJECT:
+    case PYGI_INTERFACE_TYPE_TAG_INTERFACE:
         /* An error within this call will result in a NULL arg */
         pygi_marshal_from_py_object (object, &arg, transfer);
-    } else {
+        break;
+    default:
         g_assert_not_reached ();
     }
     gi_base_info_unref (info);
@@ -771,10 +781,13 @@ pygi_argument_interface_to_object (GIArgument arg, GITypeInfo *type_info,
 
     info = gi_type_info_get_interface (type_info);
 
-    if (GI_IS_CALLBACK_INFO (info)) {
+    switch (pygi_interface_type_tag (info)) {
+    case PYGI_INTERFACE_TYPE_TAG_CALLBACK:
         PyErr_SetString (PyExc_TypeError,
                          "Cannot translate callback type to Python object");
-    } else if (GI_IS_STRUCT_INFO (info) || GI_IS_UNION_INFO (info)) {
+        break;
+    case PYGI_INTERFACE_TYPE_TAG_STRUCT:
+    case PYGI_INTERFACE_TYPE_TAG_UNION: {
         PyObject *py_type;
         GType g_type =
             gi_registered_type_info_get_g_type ((GIRegisteredTypeInfo *)info);
@@ -799,7 +812,10 @@ pygi_argument_interface_to_object (GIArgument arg, GITypeInfo *type_info,
             pygi_boxed_copy_in_place ((PyGIBoxed *)object);
 
         Py_XDECREF (py_type);
-    } else if (GI_IS_ENUM_INFO (info)) {
+        break;
+    }
+    case PYGI_INTERFACE_TYPE_TAG_ENUM:
+    case PYGI_INTERFACE_TYPE_TAG_FLAGS: {
         PyObject *py_type;
 
         py_type = pygi_type_import_by_gi_info (info);
@@ -810,9 +826,13 @@ pygi_argument_interface_to_object (GIArgument arg, GITypeInfo *type_info,
         } else {
             object = pyg_enum_val_new (py_type, arg.v_int);
         }
-    } else if (GI_IS_INTERFACE_INFO (info) || GI_IS_OBJECT_INFO (info)) {
+        break;
+    }
+    case PYGI_INTERFACE_TYPE_TAG_OBJECT:
+    case PYGI_INTERFACE_TYPE_TAG_INTERFACE:
         object = pygi_arg_object_to_py_called_from_c (&arg, transfer);
-    } else {
+        break;
+    default:
         g_assert_not_reached ();
     }
 
@@ -1110,9 +1130,12 @@ _pygi_argument_release (GIArgument *arg, GITypeInfo *type_info,
 
         info = gi_type_info_get_interface (type_info);
 
-        if (GI_IS_CALLBACK_INFO (info)) {
+        switch (pygi_interface_type_tag (info)) {
+        case PYGI_INTERFACE_TYPE_TAG_CALLBACK:
             /* TODO */
-        } else if (GI_IS_STRUCT_INFO (info) || GI_IS_UNION_INFO (info)) {
+            break;
+        case PYGI_INTERFACE_TYPE_TAG_STRUCT:
+        case PYGI_INTERFACE_TYPE_TAG_UNION: {
             GType type;
 
             if (arg->v_pointer == NULL) {
@@ -1158,16 +1181,21 @@ _pygi_argument_release (GIArgument *arg, GITypeInfo *type_info,
                 g_warn_if_fail (!gi_type_info_is_pointer (type_info)
                                 || transfer == GI_TRANSFER_NOTHING);
             }
-        } else if (GI_IS_ENUM_INFO (info)) {
+        }
+        case PYGI_INTERFACE_TYPE_TAG_FLAGS:
+        case PYGI_INTERFACE_TYPE_TAG_ENUM:
             /* nothing */
-        } else if (GI_IS_INTERFACE_INFO (info) || GI_IS_OBJECT_INFO (info)) {
+            break;
+        case PYGI_INTERFACE_TYPE_TAG_OBJECT:
+        case PYGI_INTERFACE_TYPE_TAG_INTERFACE:
             if (arg->v_pointer == NULL) {
                 return;
             }
             if (is_out && transfer == GI_TRANSFER_EVERYTHING) {
                 g_object_unref (arg->v_pointer);
             }
-        } else {
+            break;
+        default:
             g_assert_not_reached ();
         }
 
