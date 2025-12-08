@@ -1944,17 +1944,15 @@ _wrap_gi_field_info_get_value (PyGIBaseInfo *self, PyObject *args)
     GIBaseInfo *container_info;
     gpointer pointer;
     GITypeInfo *field_type_info;
-    GIArgument value;
+    GIArgument value = PYGI_ARG_INIT;
     PyObject *py_value = NULL;
     gboolean free_array = FALSE;
-
-    memset (&value, 0, sizeof (GIArgument));
 
     if (!PyArg_ParseTuple (args, "O:FieldInfo.get_value", &instance)) {
         return NULL;
     }
 
-    container_info = gi_base_info_get_container (self->info);
+    container_info = gi_base_info_get_container (self->info); /* borrowed! */
     g_assert (container_info != NULL);
 
     /* Check the instance. */
