@@ -51,7 +51,8 @@ GIArgument pygi_argument_from_py (GITypeInfo *type_info, PyObject *object,
 void pygi_argument_from_py_cleanup (
     PyGIArgumentFromPyCleanupData *arg_cleanup);
 
-PyObject *pygi_argument_to_py (GITypeInfo *type_info, GIArgument value);
+PyObject *pygi_argument_to_py (GITypeInfo *type_info, GIArgument value,
+                               GITransfer transfer);
 
 /* -- The functions below should be considered deprecated -- */
 
