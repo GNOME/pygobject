@@ -1942,11 +1942,10 @@ _wrap_gi_field_info_get_value (PyGIBaseInfo *self, PyObject *args)
 {
     PyObject *instance;
     GIBaseInfo *container_info;
-    gpointer pointer;
+    gpointer container;
     GITypeInfo *field_type_info;
     GIArgument value = PYGI_ARG_INIT;
     PyObject *py_value = NULL;
-    gboolean free_array = FALSE;
 
     if (!PyArg_ParseTuple (args, "O:FieldInfo.get_value", &instance)) {
         return NULL;
@@ -1965,18 +1964,18 @@ _wrap_gi_field_info_get_value (PyGIBaseInfo *self, PyObject *args)
     /* Get the pointer to the container. */
     if (GI_IS_UNION_INFO (container_info)
         || GI_IS_STRUCT_INFO (container_info)) {
-        pointer = pyg_boxed_get (instance, void);
+        container = pyg_boxed_get (instance, void);
     } else if (GI_IS_OBJECT_INFO (container_info)) {
         if (pygi_check_fundamental (container_info))
-            pointer = pygi_fundamental_get (instance);
+            container = pygi_fundamental_get (instance);
         else
-            pointer = pygobject_get (instance);
+            container = pygobject_get (instance);
     } else {
         /* Other types don't have fields. */
         g_assert_not_reached ();
     }
 
-    if (pointer == NULL) {
+    if (container == NULL) {
         PyErr_Format (PyExc_RuntimeError,
                       "object at %p of type %s is not initialized", instance,
                       Py_TYPE (instance)->tp_name);
@@ -1984,12 +1983,12 @@ _wrap_gi_field_info_get_value (PyGIBaseInfo *self, PyObject *args)
     }
 
     /* Get the field's value. */
-    field_type_info = gi_field_info_get_type_info ((GIFieldInfo *)self->info);
+    field_type_info = gi_field_info_get_type_info (GI_FIELD_INFO (self->info));
 
     /* A few types are not handled by gi_field_info_get_field, so do it here. */
     if (!gi_type_info_is_pointer (field_type_info)
         && gi_type_info_get_tag (field_type_info) == GI_TYPE_TAG_INTERFACE) {
-        GIBaseInfo *info;
+        GIBaseInfo *interface_info;
 
         if (!(gi_field_info_get_flags ((GIFieldInfo *)self->info)
               & GI_FIELD_IS_READABLE)) {
@@ -1997,13 +1996,13 @@ _wrap_gi_field_info_get_value (PyGIBaseInfo *self, PyObject *args)
             goto out;
         }
 
-        info = gi_type_info_get_interface (field_type_info);
+        interface_info = gi_type_info_get_interface (field_type_info);
 
-        switch (pygi_interface_type_tag (info)) {
+        switch (pygi_interface_type_tag (interface_info)) {
         case PYGI_INTERFACE_TYPE_TAG_UNION:
             PyErr_SetString (PyExc_NotImplementedError,
                              "getting an union is not supported yet");
-            gi_base_info_unref (info);
+            gi_base_info_unref (interface_info);
 
             goto out;
         case PYGI_INTERFACE_TYPE_TAG_STRUCT: {
@@ -2011,9 +2010,9 @@ _wrap_gi_field_info_get_value (PyGIBaseInfo *self, PyObject *args)
 
             offset = gi_field_info_get_offset ((GIFieldInfo *)self->info);
 
-            value.v_pointer = (char *)pointer + offset;
+            value.v_pointer = (char *)container + offset;
 
-            gi_base_info_unref (info);
+            gi_base_info_unref (interface_info);
 
             goto argument_to_object;
         }
@@ -2022,14 +2021,14 @@ _wrap_gi_field_info_get_value (PyGIBaseInfo *self, PyObject *args)
         case PYGI_INTERFACE_TYPE_TAG_OBJECT:
         case PYGI_INTERFACE_TYPE_TAG_INTERFACE:
         case PYGI_INTERFACE_TYPE_TAG_CALLBACK:
-            gi_base_info_unref (info);
+            gi_base_info_unref (interface_info);
             break;
         default:
             g_assert_not_reached ();
         }
     }
 
-    if (!gi_field_info_get_field ((GIFieldInfo *)self->info, pointer,
+    if (!gi_field_info_get_field ((GIFieldInfo *)self->info, container,
                                   &value)) {
         PyErr_SetString (PyExc_RuntimeError, "unable to get the value");
         goto out;
@@ -2038,10 +2037,6 @@ _wrap_gi_field_info_get_value (PyGIBaseInfo *self, PyObject *args)
 argument_to_object:
     py_value =
         pygi_argument_to_py (field_type_info, value, GI_TRANSFER_NOTHING);
-
-    if (free_array) {
-        g_array_free (value.v_pointer, FALSE);
-    }
 
 out:
     gi_base_info_unref ((GIBaseInfo *)field_type_info);
