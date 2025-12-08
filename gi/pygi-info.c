@@ -1878,6 +1878,59 @@ static PyMethodDef _PyGIValueInfo_methods[] = {
 /* GIFieldInfo */
 PYGI_DEFINE_TYPE ("gi.FieldInfo", PyGIFieldInfo_Type, PyGIBaseInfo);
 
+static gboolean
+field_array_length (GIFieldInfo *info, void *struct_data_ptr,
+                    gsize *array_length)
+{
+    unsigned int length_index;
+    GIFieldInfo *array_len_field;
+    GIArgument arg = PYGI_ARG_INIT;
+    GITypeInfo *type_info = gi_field_info_get_type_info (info);
+    GIBaseInfo *container_info;
+    gboolean result = TRUE;
+
+    if (!gi_type_info_get_array_length_index (type_info, &length_index)) {
+        gi_base_info_unref (type_info);
+        return FALSE;
+    }
+
+    gi_base_info_unref (type_info);
+
+    container_info = gi_base_info_get_container ((GIBaseInfo *)info);
+
+    if (GI_IS_UNION_INFO (container_info)) {
+        array_len_field = gi_union_info_get_field (
+            (GIUnionInfo *)container_info, length_index);
+    } else if (GI_IS_STRUCT_INFO (container_info)) {
+        array_len_field = gi_struct_info_get_field (
+            (GIStructInfo *)container_info, length_index);
+    } else if (GI_IS_OBJECT_INFO (container_info)) {
+        array_len_field = gi_object_info_get_field (
+            (GIObjectInfo *)container_info, length_index);
+    } else {
+        /* Other types don't have fields. */
+        g_assert_not_reached ();
+    }
+    gi_base_info_unref (container_info);
+
+    if (array_len_field == NULL) {
+        return FALSE;
+    }
+
+    if (gi_field_info_get_field (array_len_field, struct_data_ptr, &arg)) {
+        GITypeInfo *array_len_type_info;
+
+        array_len_type_info = gi_field_info_get_type_info (array_len_field);
+        if (array_len_type_info != NULL) {
+            result = pygi_argument_to_gsize (
+                arg, gi_type_info_get_tag (array_len_type_info), array_length);
+        }
+    }
+
+    gi_base_info_unref (array_len_field);
+    return result;
+}
+
 static gint
 _pygi_gi_registered_type_info_check_object (GIRegisteredTypeInfo *info,
                                             PyObject *object)
@@ -1946,6 +1999,7 @@ _wrap_gi_field_info_get_value (PyGIBaseInfo *self, PyObject *args)
     GITypeInfo *field_type_info;
     GIArgument value = PYGI_ARG_INIT;
     PyObject *py_value = NULL;
+    gsize array_length;
 
     if (!PyArg_ParseTuple (args, "O:FieldInfo.get_value", &instance)) {
         return NULL;
@@ -2035,8 +2089,13 @@ _wrap_gi_field_info_get_value (PyGIBaseInfo *self, PyObject *args)
     }
 
 argument_to_object:
-    py_value =
-        pygi_argument_to_py (field_type_info, value, GI_TRANSFER_NOTHING);
+    if (field_array_length (GI_FIELD_INFO (self->info), container,
+                            &array_length))
+        py_value = pygi_argument_to_py_with_array_length (
+            field_type_info, value, GI_TRANSFER_NOTHING, array_length);
+    else
+        py_value =
+            pygi_argument_to_py (field_type_info, value, GI_TRANSFER_NOTHING);
 
 out:
     gi_base_info_unref ((GIBaseInfo *)field_type_info);

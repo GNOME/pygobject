@@ -1184,7 +1184,7 @@ class TestSignalModuleLevelFunctions(unittest.TestCase):
             my_signal_id,
             "my-signal",
             C.__gtype__,
-            1,
+            GObject.SignalFlags.RUN_FIRST,
             GObject.TYPE_NONE,
             (GObject.TYPE_INT,),
         ]
