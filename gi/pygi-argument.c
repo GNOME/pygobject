@@ -104,6 +104,37 @@ pygi_argument_to_py (GITypeInfo *type_info, GIArgument arg,
     return object;
 }
 
+PyObject *
+pygi_argument_to_py_with_array_length (GITypeInfo *type_info, GIArgument arg,
+                                       GITransfer transfer, gsize array_length)
+{
+    PyGIInvokeState state = { 0 };
+    PyGIInvokeArgState arg_state = { 0 };
+    gpointer cleanup_data = NULL;
+    PyObject *object;
+
+    // PyGIArgCache *cache = pygi_arg_cache_new (
+    //     type_info, /*arg_info=*/NULL, transfer, PYGI_DIRECTION_TO_PYTHON,
+    //     /*callable_cache=*/NULL, 0, 0);
+    PyGIArgCache *cache = pygi_arg_garray_new_from_info (
+        type_info, /*arg_info=*/NULL, transfer, PYGI_DIRECTION_TO_PYTHON,
+        /*callable_cache=*/NULL, 0, NULL);
+    arg_state.arg_value = (GIArgument){ .v_size = array_length };
+    state.args = &arg_state;
+    ((PyGIArgGArray *)cache)->has_len_arg = TRUE;
+
+    object = cache->to_py_marshaller (&state, /*callable_cache=*/NULL, cache,
+                                      &arg, &cleanup_data);
+
+    if (cache->to_py_cleanup && arg.v_pointer)
+        cache->to_py_cleanup (&state, cache, cleanup_data, arg.v_pointer,
+                              TRUE);
+
+    pygi_arg_cache_free (cache);
+
+    return object;
+}
+
 gboolean
 pygi_argument_to_gsize (GIArgument arg, GITypeTag type_tag, gsize *gsize_out)
 {
