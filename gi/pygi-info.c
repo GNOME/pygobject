@@ -1842,7 +1842,7 @@ _wrap_gi_constant_info_get_value (PyGIBaseInfo *self)
 
     gi_constant_info_get_value (info, &value);
 
-    object = pygi_argument_to_py (type_info, value);
+    object = pygi_argument_to_py (type_info, value, GI_TRANSFER_NOTHING);
 
     gi_constant_info_free_value (info, &value);
 
@@ -2037,7 +2037,8 @@ _wrap_gi_field_info_get_value (PyGIBaseInfo *self, PyObject *args)
     }
 
 argument_to_object:
-    py_value = pygi_argument_to_py (field_type_info, value);
+    py_value =
+        pygi_argument_to_py (field_type_info, value, GI_TRANSFER_NOTHING);
 
     if (free_array) {
         g_array_free (value.v_pointer, FALSE);

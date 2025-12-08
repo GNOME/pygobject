@@ -81,16 +81,16 @@ pygi_argument_from_py_cleanup (PyGIArgumentFromPyCleanupData *arg_cleanup)
 }
 
 PyObject *
-pygi_argument_to_py (GITypeInfo *type_info, GIArgument arg)
+pygi_argument_to_py (GITypeInfo *type_info, GIArgument arg,
+                     GITransfer transfer)
 {
     PyGIInvokeState state = { 0 };
     gpointer cleanup_data = NULL;
     PyObject *object;
 
-    PyGIArgCache *cache = pygi_arg_cache_new (type_info, /*arg_info=*/NULL,
-                                              GI_TRANSFER_NOTHING,
-                                              PYGI_DIRECTION_TO_PYTHON,
-                                              /*callable_cache=*/NULL, 0, 0);
+    PyGIArgCache *cache = pygi_arg_cache_new (
+        type_info, /*arg_info=*/NULL, transfer, PYGI_DIRECTION_TO_PYTHON,
+        /*callable_cache=*/NULL, 0, 0);
 
     object = cache->to_py_marshaller (&state, /*callable_cache=*/NULL, cache,
                                       &arg, &cleanup_data);
