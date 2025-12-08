@@ -179,6 +179,7 @@ pygi_get_property_value (PyGObject *instance, GParamSpec *pspec)
         }
 
         py_value = _pygi_argument_to_object (arg, type_info, transfer);
+        // py_value = pygi_argument_to_py (type_info, arg, transfer);
 
         if (free_array) {
             g_array_free (arg.v_pointer, FALSE);
@@ -223,7 +224,7 @@ static gint
 pygi_set_property_gvalue_from_property_info (GIPropertyInfo *property_info,
                                              GValue *value, PyObject *py_value)
 {
-    PyGIArgumentFromPyCleanupData arg_cleanup = { 0 };
+    // PyGIArgumentFromPyCleanupData arg_cleanup = { 0 };
     GITypeInfo *type_info;
     GITypeTag type_tag;
     GITransfer transfer;
@@ -232,8 +233,8 @@ pygi_set_property_gvalue_from_property_info (GIPropertyInfo *property_info,
 
     type_info = gi_property_info_get_type_info (property_info);
     transfer = gi_property_info_get_ownership_transfer (property_info);
-    // arg = _pygi_argument_from_object (py_value, type_info, transfer);
-    arg = pygi_argument_from_py (type_info, py_value, transfer, &arg_cleanup);
+    arg = _pygi_argument_from_object (py_value, type_info, transfer);
+    // arg = pygi_argument_from_py (type_info, py_value, transfer, &arg_cleanup);
 
     if (PyErr_Occurred ()) goto out;
 
@@ -355,20 +356,20 @@ pygi_set_property_gvalue_from_property_info (GIPropertyInfo *property_info,
         /* This is assumes GI_TYPE_TAG_ARRAY is always a GStrv
          * https://bugzilla.gnome.org/show_bug.cgi?id=688232
          */
-        // GArray *arg_items = (GArray *)arg.v_pointer;
-        // gchar **strings;
-        // guint i;
+        GArray *arg_items = (GArray *)arg.v_pointer;
+        gchar **strings;
+        guint i;
 
-        // if (arg_items == NULL) goto out;
+        if (arg_items == NULL) goto out;
 
-        // strings = g_new0 (char *, arg_items->len + 1);
-        // for (i = 0; i < arg_items->len; ++i) {
-        //     strings[i] = g_array_index (arg_items, GIArgument, i).v_string;
-        // }
-        // strings[arg_items->len] = NULL;
-        // g_value_take_boxed (value, strings);
-        // g_array_free (arg_items, TRUE);
-        // break;
+        strings = g_new0 (char *, arg_items->len + 1);
+        for (i = 0; i < arg_items->len; ++i) {
+            strings[i] = g_array_index (arg_items, GIArgument, i).v_string;
+        }
+        strings[arg_items->len] = NULL;
+        g_value_take_boxed (value, strings);
+        g_array_free (arg_items, TRUE);
+        break;
     }
     case GI_TYPE_TAG_VOID:
     case GI_TYPE_TAG_ERROR:
@@ -385,7 +386,7 @@ pygi_set_property_gvalue_from_property_info (GIPropertyInfo *property_info,
 
 out:
 
-    pygi_argument_from_py_cleanup (&arg_cleanup);
+    // pygi_argument_from_py_cleanup (&arg_cleanup);
 
     if (type_info != NULL) gi_base_info_unref (type_info);
 
