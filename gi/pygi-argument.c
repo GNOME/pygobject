@@ -114,9 +114,6 @@ pygi_argument_to_py_with_array_length (GITypeInfo *type_info, GIArgument arg,
     gpointer cleanup_data = NULL;
     PyObject *object;
 
-    // PyGIArgCache *cache = pygi_arg_cache_new (
-    //     type_info, /*arg_info=*/NULL, transfer, PYGI_DIRECTION_TO_PYTHON,
-    //     /*callable_cache=*/NULL, 0, 0);
     PyGIArgCache *cache = pygi_arg_garray_new_from_info (
         type_info, /*arg_info=*/NULL, transfer, PYGI_DIRECTION_TO_PYTHON,
         /*callable_cache=*/NULL, 0, NULL);

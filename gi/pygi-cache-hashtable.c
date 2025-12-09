@@ -143,6 +143,8 @@ err:
     }
 
     arg->v_pointer = hash_;
+    Py_DECREF (py_keys);
+    Py_DECREF (py_values);
 
     if (arg_cache->transfer == GI_TRANSFER_NOTHING) {
         /* Free everything in cleanup. */

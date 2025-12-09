@@ -210,6 +210,7 @@ pygi_set_gvalue_from_property_info (GValue *value,
                                     PyGIArgumentFromPyCleanupData *arg_cleanup)
 {
     GITypeInfo *type_info;
+    GIBaseInfo *interface = NULL;
     GITypeTag type_tag;
     GITransfer transfer;
     GIArgument arg;
@@ -224,7 +225,7 @@ pygi_set_gvalue_from_property_info (GValue *value,
     type_tag = gi_type_info_get_tag (type_info);
     switch (type_tag) {
     case GI_TYPE_TAG_INTERFACE: {
-        GIBaseInfo *interface = gi_type_info_get_interface (type_info);
+        interface = gi_type_info_get_interface (type_info);
 
         switch (pygi_interface_type_tag (interface)) {
         case PYGI_INTERFACE_TYPE_TAG_FLAGS:
@@ -271,8 +272,6 @@ pygi_set_gvalue_from_property_info (GValue *value,
         default:
             g_assert_not_reached ();
         }
-        gi_base_info_unref (interface);
-
         break;
     }
     case GI_TYPE_TAG_BOOLEAN:
@@ -349,6 +348,7 @@ pygi_set_gvalue_from_property_info (GValue *value,
     ret_value = 0;
 
 out:
+    if (interface != NULL) gi_base_info_unref (interface);
     if (type_info != NULL) gi_base_info_unref (type_info);
 
     return ret_value;
