@@ -252,13 +252,17 @@ pygi_arg_callback_new_from_info (GITypeInfo *type_info,
     ((PyGIArgCache *)arg_cache)->destroy_notify =
         (GDestroyNotify)_callback_cache_free_func;
 
-    callback_cache->has_user_data = gi_arg_info_get_closure_index (
-        arg_info, &callback_cache->user_data_index);
+    callback_cache->has_user_data =
+        arg_info != NULL
+        && gi_arg_info_get_closure_index (arg_info,
+                                          &callback_cache->user_data_index);
     if (callback_cache->has_user_data)
         callback_cache->user_data_index += child_offset;
 
-    callback_cache->has_destroy_notify = gi_arg_info_get_destroy_index (
-        arg_info, &callback_cache->destroy_notify_index);
+    callback_cache->has_destroy_notify =
+        arg_info != NULL
+        && gi_arg_info_get_destroy_index (
+            arg_info, &callback_cache->destroy_notify_index);
     if (callback_cache->has_destroy_notify)
         callback_cache->destroy_notify_index += child_offset;
 
@@ -280,7 +284,8 @@ pygi_arg_callback_new_from_info (GITypeInfo *type_info,
                                       destroy_arg_cache);
     }
 
-    callback_cache->scope = gi_arg_info_get_scope (arg_info);
+    callback_cache->scope = arg_info != NULL ? gi_arg_info_get_scope (arg_info)
+                                             : GI_SCOPE_TYPE_INVALID;
     gi_base_info_ref (iface_info);
     callback_cache->interface_info = GI_BASE_INFO (iface_info);
 
