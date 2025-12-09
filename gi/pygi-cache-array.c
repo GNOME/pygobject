@@ -659,6 +659,8 @@ _pygi_marshal_cleanup_to_py_array (PyGIInvokeState *state,
     GIArrayType array_type =
         gi_type_info_get_array_type (arg_cache->type_info);
 
+    if (data == NULL) return;
+
     if (arg_cache->transfer == GI_TRANSFER_EVERYTHING
         || arg_cache->transfer == GI_TRANSFER_CONTAINER) {
         free_array = TRUE;

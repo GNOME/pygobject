@@ -1034,6 +1034,7 @@ cleanup:
     }
     g_free (names);
     g_free (values);
+    g_free (cleanup_data);
 
     g_type_class_unref (class);
 
@@ -2178,6 +2179,7 @@ pyg_object_new (PyGObject *self, PyObject *args, PyObject *kwargs)
     }
     g_free (names);
     g_free (values);
+    g_free (cleanup_data);
 
     g_type_class_unref (class);
 
