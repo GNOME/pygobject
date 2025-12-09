@@ -1118,7 +1118,7 @@ pygi_filename_to_py (gchar *value)
  * Convert the given argument to a Python object. This function
  * is restricted to simple types that only require the GITypeTag
  * and GITransfer. For a more complete conversion routine, use:
- * _pygi_argument_to_object.
+ * pygi_argument_to_py.
  *
  * Returns: A PyObject representing @arg or NULL if it cannot convert
  *          the argument.

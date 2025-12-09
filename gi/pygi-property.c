@@ -161,29 +161,12 @@ pygi_get_property_value (PyGObject *instance, GParamSpec *pspec)
     property_info =
         _pygi_lookup_property_from_g_type (pspec->owner_type, pspec->name);
     if (property_info) {
-        GITypeInfo *type_info = NULL;
-        gboolean free_array = FALSE;
-        GIArgument arg;
-        GITransfer transfer = GI_TRANSFER_NOTHING;
+        GITypeInfo *type_info = gi_property_info_get_type_info (property_info);
+        GITransfer transfer =
+            gi_property_info_get_ownership_transfer (property_info);
+        GIArgument arg = _pygi_argument_from_g_value (&value, type_info);
 
-        type_info = gi_property_info_get_type_info (property_info);
-        arg = _pygi_argument_from_g_value (&value, type_info);
-
-        /* Arrays are special cased, see note in _pygi_argument_to_array. */
-        if (gi_type_info_get_tag (type_info) == GI_TYPE_TAG_ARRAY) {
-            arg.v_pointer = _pygi_argument_to_array (arg, NULL, NULL, NULL,
-                                                     type_info, &free_array);
-        } else if (g_type_is_a (pspec->value_type, G_TYPE_BOXED)) {
-            arg.v_pointer = g_value_dup_boxed (&value);
-            transfer = GI_TRANSFER_EVERYTHING;
-        }
-
-        py_value = _pygi_argument_to_object (arg, type_info, transfer);
-        // py_value = pygi_argument_to_py (type_info, arg, transfer);
-
-        if (free_array) {
-            g_array_free (arg.v_pointer, FALSE);
-        }
+        py_value = pygi_argument_to_py (type_info, arg, transfer);
 
         gi_base_info_unref (type_info);
         gi_base_info_unref (property_info);
