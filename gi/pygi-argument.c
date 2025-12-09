@@ -71,7 +71,8 @@ pygi_argument_from_py_cleanup (PyGIArgumentFromPyCleanupData *arg_cleanup)
     PyGIArgCache *cache = (PyGIArgCache *)arg_cleanup->cache;
 
     if (cache) {
-        if (cache->from_py_cleanup)
+        if (cache->from_py_cleanup != NULL
+            && arg_cleanup->cleanup_data != NULL)
             cache->from_py_cleanup (&arg_cleanup->state, cache,
                                     arg_cleanup->object,
                                     arg_cleanup->cleanup_data, TRUE);
