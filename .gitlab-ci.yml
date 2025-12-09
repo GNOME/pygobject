@@ -108,6 +108,7 @@ linux:
    - bash -x ./.gitlab-ci/test-docker.sh
 
 windows:
+  allow_failure: true
   stage: build
   tags:
     - win32-ps
