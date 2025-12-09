@@ -10,7 +10,7 @@ pacman --noconfirm -S --needed \
     "${MINGW_PACKAGE_PREFIX}"-gobject-introspection \
     "${MINGW_PACKAGE_PREFIX}"-gtk3 \
     "${MINGW_PACKAGE_PREFIX}"-libffi \
-    "${MINGW_PACKAGE_PREFIX}"-meson \
+    "${MINGW_PACKAGE_PREFIX}-meson<1.10" \
     "${MINGW_PACKAGE_PREFIX}"-ninja \
     "${MINGW_PACKAGE_PREFIX}"-python \
     "${MINGW_PACKAGE_PREFIX}"-python-cairo \
