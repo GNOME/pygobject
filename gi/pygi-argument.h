@@ -73,17 +73,8 @@ gpointer _pygi_arg_to_hash_pointer (const GIArgument arg,
 void _pygi_hash_pointer_to_arg_in_place (GIArgument *arg,
                                          GITypeInfo *type_info);
 
-GArray *_pygi_argument_to_array (GIArgument arg,
-                                 PyGIArgArrayLengthPolicy array_length_policy,
-                                 void *user_data1, void *user_data2,
-                                 GITypeInfo *type_info,
-                                 gboolean *out_free_array);
-
 GIArgument _pygi_argument_from_object (PyObject *object, GITypeInfo *type_info,
                                        GITransfer transfer);
-
-PyObject *_pygi_argument_to_object (GIArgument arg, GITypeInfo *type_info,
-                                    GITransfer transfer);
 
 void _pygi_argument_release (GIArgument *arg, GITypeInfo *type_info,
                              GITransfer transfer, GIDirection direction);
