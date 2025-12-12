@@ -262,15 +262,15 @@ pygi_set_property_gvalue_from_property_info (GIPropertyInfo *property_info,
             } else {
                 PyErr_Format (
                     PyExc_NotImplementedError,
-                    "Setting properties of type '%s' is not implemented",
+                    "bSetting properties of type '%s' is not implemented",
                     g_type_name (type));
                 goto out;
             }
             break;
         }
         case PYGI_INTERFACE_TYPE_TAG_CALLBACK:
-            PyErr_Format (PyExc_NotImplementedError,
-                          "Setting properties of type '%s' is not implemented",
+            PyErr_Format (PyExc_TypeError,
+                          "Setting properties of type '%s' is not supported",
                           g_type_name (G_VALUE_TYPE (value)));
             goto out;
         default:
