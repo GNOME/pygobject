@@ -73,12 +73,6 @@ gpointer _pygi_arg_to_hash_pointer (const GIArgument arg,
 void _pygi_hash_pointer_to_arg_in_place (GIArgument *arg,
                                          GITypeInfo *type_info);
 
-GIArgument _pygi_argument_from_object (PyObject *object, GITypeInfo *type_info,
-                                       GITransfer transfer);
-
-void _pygi_argument_release (GIArgument *arg, GITypeInfo *type_info,
-                             GITransfer transfer, GIDirection direction);
-
 gboolean pygi_argument_to_gsize (GIArgument arg, GITypeTag type_tag,
                                  gsize *gsize_out);
 
