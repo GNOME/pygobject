@@ -2241,8 +2241,6 @@ _wrap_gi_field_info_set_value (PyGIBaseInfo *self, PyObject *args)
 
     if (!gi_field_info_set_field ((GIFieldInfo *)self->info, pointer,
                                   &value)) {
-        _pygi_argument_release (&value, field_type_info, GI_TRANSFER_NOTHING,
-                                GI_DIRECTION_IN);
         PyErr_SetString (PyExc_RuntimeError, "unable to set value for field");
         goto out;
     }
