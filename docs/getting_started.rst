@@ -41,9 +41,9 @@ For full IDE support (incl. autocomplete) you will also need typing stubs
 available here `PyGObject-stubs <https://pypi.org/project/PyGObject-stubs/>`_.
 
 ======================================================= ==================================================== ==========================================================
-|ubuntu-logo| :ref:`Ubuntu <ubuntu-getting-started>`    |fedora-logo| :ref:`Fedora <fedora-getting-started>` |arch-logo| :ref:`Arch Linux <arch-getting-started>`      
+|ubuntu-logo| :ref:`Ubuntu <ubuntu-getting-started>`    |fedora-logo| :ref:`Fedora <fedora-getting-started>` |arch-logo| :ref:`Arch Linux <arch-getting-started>`
 |windows-logo| :ref:`Windows <windows-getting-started>` |macosx-logo| :ref:`macOS <macosx-getting-started>`  |opensuse-logo| :ref:`openSUSE <opensuse-getting-started>`
-|conda-logo| :ref:`Conda <conda-getting-started>`       |pixi-logo| :ref:`Pixi <pixi-getting-started>`       |source-logo| :ref:`from Source <devenv>` 
+|conda-logo| :ref:`Conda <conda-getting-started>`       |pixi-logo| :ref:`Pixi <pixi-getting-started>`       |source-logo| :ref:`from Source <devenv>`
 ======================================================= ==================================================== ==========================================================
 
 After running the example application have a look at the :doc:`/tutorials/index`
