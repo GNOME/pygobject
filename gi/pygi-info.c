@@ -2106,6 +2106,7 @@ out:
 static PyObject *
 _wrap_gi_field_info_set_value (PyGIBaseInfo *self, PyObject *args)
 {
+    PyGIArgumentFromPyCleanupData arg_cleanup = { 0 };
     PyObject *instance;
     PyObject *py_value;
     GIBaseInfo *container_info;
@@ -2185,8 +2186,9 @@ _wrap_gi_field_info_set_value (PyGIBaseInfo *self, PyObject *args)
                 goto out;
             }
 
-            value = _pygi_argument_from_object (py_value, field_type_info,
-                                                GI_TRANSFER_NOTHING);
+            /* transfer = nothing, since we will copy the memory and the struct has no pointer references. */
+            value = pygi_argument_from_py (field_type_info, py_value,
+                                           GI_TRANSFER_NOTHING, &arg_cleanup);
             if (PyErr_Occurred ()) {
                 gi_base_info_unref (info);
                 goto out;
@@ -2212,8 +2214,13 @@ _wrap_gi_field_info_set_value (PyGIBaseInfo *self, PyObject *args)
                    || gi_type_info_get_tag (field_type_info)
                           == GI_TYPE_TAG_UTF8)) {
         int offset;
-        value = _pygi_argument_from_object (py_value, field_type_info,
-                                            GI_TRANSFER_NOTHING);
+        GITransfer transfer = gi_type_info_get_tag (field_type_info)
+                                      == GI_TYPE_TAG_VOID
+                                  ? GI_TRANSFER_NOTHING
+                                  : GI_TRANSFER_EVERYTHING;
+
+        value = pygi_argument_from_py (field_type_info, py_value, transfer,
+                                       &arg_cleanup);
         if (PyErr_Occurred ()) {
             goto out;
         }
@@ -2226,8 +2233,8 @@ _wrap_gi_field_info_set_value (PyGIBaseInfo *self, PyObject *args)
         goto out;
     }
 
-    value = _pygi_argument_from_object (py_value, field_type_info,
-                                        GI_TRANSFER_EVERYTHING);
+    value = pygi_argument_from_py (field_type_info, py_value,
+                                   GI_TRANSFER_EVERYTHING, &arg_cleanup);
     if (PyErr_Occurred ()) {
         goto out;
     }
@@ -2243,6 +2250,7 @@ _wrap_gi_field_info_set_value (PyGIBaseInfo *self, PyObject *args)
     retval = Py_None;
 
 out:
+    // pygi_argument_from_py_cleanup (&arg_cleanup);
     gi_base_info_unref ((GIBaseInfo *)field_type_info);
 
     Py_XINCREF (retval);
