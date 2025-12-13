@@ -596,9 +596,6 @@ class TestGApplication(unittest.TestCase):
         self.assertSequenceEqual(app.args, ["spam"])
         self.assertSequenceEqual(app.local_args, ["spam", "eggs"])
 
-    @unittest.skipUnless(
-        hasattr(Gio.Application, "add_main_option"), "Requires newer version of GLib"
-    )
     def test_add_main_option(self):
         stored_options = []
 

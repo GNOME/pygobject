@@ -2248,7 +2248,7 @@ _wrap_gi_field_info_set_value (PyGIBaseInfo *self, PyObject *args)
     retval = Py_None;
 
 out:
-    // pygi_argument_from_py_cleanup (&arg_cleanup);
+    pygi_argument_from_py_cleanup (&arg_cleanup);
     gi_base_info_unref ((GIBaseInfo *)field_type_info);
 
     Py_XINCREF (retval);
