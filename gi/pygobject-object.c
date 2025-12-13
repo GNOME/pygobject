@@ -904,10 +904,10 @@ pygobject_free (PyObject *op)
 }
 
 static gboolean
-pygobject_prepare_construct_properties (GObjectClass *class, PyObject *kwargs,
-                                        guint *n_properties,
-                                        const char **names[],
-                                        const GValue **values)
+pygobject_prepare_construct_properties (
+    GObjectClass *class, PyObject *kwargs, guint *n_properties,
+    const char **names[], const GValue **values,
+    const PyGIArgumentFromPyCleanupData **cleanup_data)
 {
     *n_properties = 0;
     *names = NULL;
@@ -922,9 +922,12 @@ pygobject_prepare_construct_properties (GObjectClass *class, PyObject *kwargs,
         len = PyDict_Size (kwargs);
         *names = g_new (const char *, len);
         *values = g_new0 (GValue, len);
+        *cleanup_data = g_new0 (PyGIArgumentFromPyCleanupData, len);
         while (PyDict_Next (kwargs, &pos, &key, &value)) {
             GParamSpec *pspec;
             GValue *gvalue = &(*values)[*n_properties];
+            PyGIArgumentFromPyCleanupData *arg_cleanup_data =
+                &(*cleanup_data)[*n_properties];
 
             const gchar *key_str = PyUnicode_AsUTF8 (key);
 
@@ -936,7 +939,9 @@ pygobject_prepare_construct_properties (GObjectClass *class, PyObject *kwargs,
                 return FALSE;
             }
             g_value_init (gvalue, G_PARAM_SPEC_VALUE_TYPE (pspec));
-            if (pygi_set_gvalue_for_pspec (pspec, gvalue, value) < 0) {
+            if (pygi_set_gvalue_for_pspec (gvalue, pspec, value,
+                                           arg_cleanup_data)
+                < 0) {
                 if (!PyErr_Occurred ())
                     PyErr_Format (
                         PyExc_TypeError,
@@ -961,6 +966,7 @@ pygobject_init (PyGObject *self, PyObject *args, PyObject *kwargs)
     GType object_type;
     guint n_properties = 0, i;
     const GValue *values = NULL;
+    const PyGIArgumentFromPyCleanupData *cleanup_data = NULL;
     const char **names = NULL;
     GObjectClass *class;
 #ifdef PYPY_VERSION
@@ -1005,8 +1011,8 @@ pygobject_init (PyGObject *self, PyObject *args, PyObject *kwargs)
         return -1;
     }
 
-    if (!pygobject_prepare_construct_properties (class, kwargs, &n_properties,
-                                                 &names, &values))
+    if (!pygobject_prepare_construct_properties (
+            class, kwargs, &n_properties, &names, &values, &cleanup_data))
         goto cleanup;
 
     if (pygobject_constructv (self, n_properties, names, values))
@@ -1014,6 +1020,7 @@ pygobject_init (PyGObject *self, PyObject *args, PyObject *kwargs)
 
 cleanup:
     for (i = 0; i < n_properties; i++) {
+        pygi_argument_from_py_cleanup (&cleanup_data[i]);
         g_free (names[i]);
         g_value_unset (&values[i]);
     }
@@ -2141,6 +2148,7 @@ pyg_object_new (PyGObject *self, PyObject *args, PyObject *kwargs)
     GObjectClass *class;
     guint n_properties = 0, i;
     const GValue *values = NULL;
+    const PyGIArgumentFromPyCleanupData *cleanup_data = NULL;
     const char **names = NULL;
 
     if (!PyArg_ParseTuple (args, "O:gobject.new", &pytype)) {
@@ -2163,12 +2171,13 @@ pyg_object_new (PyGObject *self, PyObject *args, PyObject *kwargs)
         return NULL;
     }
 
-    if (pygobject_prepare_construct_properties (class, kwargs, &n_properties,
-                                                &names, &values)) {
+    if (pygobject_prepare_construct_properties (
+            class, kwargs, &n_properties, &names, &values, &cleanup_data)) {
         obj = g_object_new_with_properties (type, n_properties, names, values);
     }
 
     for (i = 0; i < n_properties; i++) {
+        pygi_argument_from_py_cleanup (&cleanup_data[i]);
         g_free (names[i]);
         g_value_unset (&values[i]);
     }

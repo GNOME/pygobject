@@ -26,6 +26,7 @@
 
 #include <girepository/girepository.h>
 #include <pythoncapi_compat.h>
+#include "pygi-argument.h"
 
 PyObject *pygi_get_property_value (PyGObject *instance, GParamSpec *pspec);
 
@@ -35,7 +36,9 @@ PyObject *pygi_call_do_get_property (PyObject *instance, GParamSpec *pspec);
 int pygi_set_property_value (PyGObject *instance, GParamSpec *pspec,
                              PyObject *py_value);
 
-gint pygi_set_gvalue_for_pspec (GParamSpec *pspec, GValue *value,
-                                PyObject *py_value);
+
+gint pygi_set_gvalue_for_pspec (GValue *value, GParamSpec *pspec,
+                                PyObject *py_value,
+                                PyGIArgumentFromPyCleanupData *cleanup_data);
 
 #endif /* __PYGI_PROPERTY_H__ */
