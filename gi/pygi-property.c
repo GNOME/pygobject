@@ -204,10 +204,11 @@ pygi_get_property_value_by_name (PyGObject *self, gchar *param_name)
 }
 
 static gint
-pygi_set_property_gvalue_from_property_info (GIPropertyInfo *property_info,
-                                             GValue *value, PyObject *py_value)
+pygi_set_gvalue_from_property_info (GValue *value,
+                                    GIPropertyInfo *property_info,
+                                    PyObject *py_value,
+                                    PyGIArgumentFromPyCleanupData *arg_cleanup)
 {
-    PyGIArgumentFromPyCleanupData arg_cleanup = { 0 };
     GITypeInfo *type_info;
     GITypeTag type_tag;
     GITransfer transfer;
@@ -216,13 +217,7 @@ pygi_set_property_gvalue_from_property_info (GIPropertyInfo *property_info,
 
     type_info = gi_property_info_get_type_info (property_info);
     transfer = gi_property_info_get_ownership_transfer (property_info);
-    if (transfer != GI_TRANSFER_EVERYTHING) {
-        // TODO: Argument cleanup should happen after the property is set
-        g_message ("Transfer is %d, but will be set to %d", transfer,
-                   GI_TRANSFER_EVERYTHING);
-        transfer = GI_TRANSFER_EVERYTHING;
-    }
-    arg = pygi_argument_from_py (type_info, py_value, transfer, &arg_cleanup);
+    arg = pygi_argument_from_py (type_info, py_value, transfer, arg_cleanup);
 
     if (PyErr_Occurred ()) goto out;
 
@@ -354,19 +349,18 @@ pygi_set_property_gvalue_from_property_info (GIPropertyInfo *property_info,
     ret_value = 0;
 
 out:
-
-    pygi_argument_from_py_cleanup (&arg_cleanup);
-
     if (type_info != NULL) gi_base_info_unref (type_info);
 
     return ret_value;
 }
 
 gint
-pygi_set_gvalue_for_pspec (GParamSpec *pspec, GValue *value,
-                           PyObject *py_value)
+pygi_set_gvalue_for_pspec (GValue *value, GParamSpec *pspec,
+                           PyObject *py_value,
+                           PyGIArgumentFromPyCleanupData *cleanup_data)
 {
-    gint ret_value = -1;
+    gint ret_value;
+
     /* The owner_type of the pspec gives us the exact type that introduced the
      * property, even if it is a parent class of the instance in question. */
     GIPropertyInfo *property_info =
@@ -375,19 +369,13 @@ pygi_set_gvalue_for_pspec (GParamSpec *pspec, GValue *value,
     /* Set from the GIPropertyInfo, we have introspection data that we can
      * use here */
     if (property_info != NULL) {
-        if (pygi_set_property_gvalue_from_property_info (property_info, value,
-                                                         py_value)
-            < 0)
-            goto out;
+        ret_value = pygi_set_gvalue_from_property_info (
+            value, property_info, py_value, cleanup_data);
     } else {
         /* We don't have introspection data, use the legacy path */
-        if (pyg_param_gvalue_from_pyobject (value, py_value, pspec) < 0)
-            goto out;
+        ret_value = pyg_param_gvalue_from_pyobject (value, py_value, pspec);
     }
 
-    ret_value = 0;
-
-out:
     if (property_info) gi_base_info_unref (property_info);
 
     return ret_value;
@@ -397,35 +385,45 @@ gint
 pygi_set_property_value (PyGObject *instance, GParamSpec *pspec,
                          PyObject *py_value)
 {
-    GValue value = {
-        0,
-    };
-    gint ret_value = -1;
-
-    g_value_init (&value, G_PARAM_SPEC_VALUE_TYPE (pspec));
+    GValue value = { 0 };
+    PyGIArgumentFromPyCleanupData arg_cleanup = { 0 };
+    gint ret_value;
 
     if (pspec->flags & G_PARAM_CONSTRUCT_ONLY) {
         PyErr_Format (PyExc_TypeError,
                       "property '%s' can only be set in constructor",
                       pspec->name);
-        goto out;
+        return -1;
     }
 
     if (!(pspec->flags & G_PARAM_WRITABLE)) {
         PyErr_Format (PyExc_TypeError, "property '%s' is not writable",
                       pspec->name);
-        goto out;
+        return -1;
     }
+
+    g_value_init (&value, G_PARAM_SPEC_VALUE_TYPE (pspec));
 
     // special case: unichar has an internal type uint
     if (G_IS_PARAM_SPEC_UNICHAR (pspec)) {
         gunichar u;
 
         if (!pygi_gunichar_from_py (py_value, &u)) {
-            goto out;
+            return -1;
         }
         g_value_set_uint (&value, u);
-    } else if (pygi_set_gvalue_for_pspec (pspec, &value, py_value) < 0) {
+        g_object_set_property (instance->obj, pspec->name, &value);
+        g_value_unset (&value);
+        return 0;
+    }
+
+    ret_value =
+        pygi_set_gvalue_for_pspec (&value, pspec, py_value, &arg_cleanup);
+
+    if (ret_value == 0) {
+        g_object_set_property (instance->obj, pspec->name, &value);
+        g_value_unset (&value);
+    } else {
         /* If we already have an error set, don't override it,
          * otherwise raise a TypError indcating that we couldn't
          * set the property */
@@ -439,14 +437,9 @@ pygi_set_property_value (PyGObject *instance, GParamSpec *pspec,
                           G_OBJECT_TYPE_NAME (instance->obj), pspec->name);
             Py_DECREF (pvalue_str);
         }
-        goto out;
     }
 
-    g_object_set_property (instance->obj, pspec->name, &value);
-    ret_value = 0;
-
-out:
-    g_value_unset (&value);
+    pygi_argument_from_py_cleanup (&arg_cleanup);
 
     return ret_value;
 }
