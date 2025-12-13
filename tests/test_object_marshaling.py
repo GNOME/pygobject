@@ -642,7 +642,6 @@ class TestVFuncsWithHeldFloatingArg(unittest.TestCase):
         self.assertTrue(held_object_ref() is None)
 
 
-@unittest.skipIf(Regress is None, "Regress is required")
 class TestArgumentTypeErrors(unittest.TestCase):
     def test_object_argument_type_error(self):
         # ensure TypeError is raised for things which are not GObjects
