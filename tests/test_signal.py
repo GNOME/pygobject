@@ -656,9 +656,6 @@ class _TestCMarshaller:
         self.assertEqual(rv.name, "test-param")
         self.assertEqual(rv.nick, "test")
 
-    @unittest.skipUnless(
-        hasattr(GObject, "param_spec_boolean"), "too old gobject-introspection"
-    )
     def test_paramspec_in(self):
         rv = GObject.param_spec_boolean(
             "mybool", "test-bool", "do something", True, GObject.ParamFlags.READABLE

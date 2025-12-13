@@ -1525,9 +1525,6 @@ def test_gobject_inheritance_with_incomplete_initialization():
         bomb.qdata
 
 
-@pytest.mark.skipif(
-    not hasattr(Regress, "AnnotationObject"), reason="no Regress.AnnotationObject"
-)
 def test_get_function_property():
     obj = Regress.AnnotationObject()
 
@@ -1535,9 +1532,6 @@ def test_get_function_property():
         assert obj.props.function_property
 
 
-@pytest.mark.skipif(
-    not hasattr(Regress, "AnnotationObject"), reason="no Regress.AnnotationObject"
-)
 def test_set_function_property():
     obj = Regress.AnnotationObject()
 

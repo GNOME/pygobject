@@ -512,9 +512,6 @@ class TestContextManagers(unittest.TestCase):
         self.assertEqual(self.tracking, [2])
 
 
-@unittest.skipUnless(
-    hasattr(GObject.Binding, "unbind"), "Requires newer GLib which has g_binding_unbind"
-)
 class TestPropertyBindings(unittest.TestCase):
     class TestObject(GObject.GObject):
         int_prop = GObject.Property(default=0, type=int)
