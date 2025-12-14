@@ -34,4 +34,4 @@ subprojects/.wraplock
 pdm.lock
 .pdm-python
 public/
-
+vgdump.txt
