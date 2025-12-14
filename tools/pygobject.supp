@@ -1,0 +1,88 @@
+{
+   LD open
+   Memcheck:Leak
+   fun:malloc
+   fun:malloc
+   fun:*
+   fun:dl_open_worker_begin
+   fun:_dl_catch_exception
+   fun:dl_open_worker
+   fun:_dl_catch_exception
+   fun:_dl_open
+}
+
+{
+   Python GC
+   Memcheck:Cond
+   fun:mark_stacks.lto_priv.0
+   fun:gc_collect_increment
+   fun:_PyGC_Collect
+   fun:_Py_HandlePending
+   fun:_PyEval_EvalFrameDefault
+   fun:_PyEval_EvalFrame
+}
+
+{
+   Python imports
+   Memcheck:Leak
+   ...
+   fun:PyImport_*
+}
+
+{
+   Python module creation
+   Memcheck:Leak
+   ...
+   fun:PyModule_AddFunctions
+}
+
+{
+   Something python unicode initialization
+   Memcheck:Leak
+   ...
+   fun:PyMem_Malloc
+   fun:unicode_subtype_new
+   fun:unicode_new_impl
+   ...
+}
+
+{
+    parse numbers
+    Memcheck:Leak
+    fun:malloc
+    fun:_PyMem_RawMalloc
+    fun:PyMem_RawMalloc
+    fun:_PyObject_Malloc
+    fun:PyObject_Malloc
+    fun:PyFloat_FromDouble
+    fun:parsenumber_raw.lto_priv.0
+    fun:parsenumber
+}
+
+{
+    Cache initialization
+    Memcheck:Leak
+    ...
+    fun:pygi_*_cache_new
+    ...
+}
+
+{
+    Type wrapper initialization
+    Memcheck:Leak
+    fun:malloc
+    fun:_PyMem_RawMalloc
+    fun:PyMem_RawMalloc
+    fun:_PyObject_Malloc
+    fun:PyObject_Malloc
+    fun:_PyObject_New
+    fun:pyg_type_wrapper_new
+}
+
+{
+    static type initialization
+    Memecheck:Leak
+    ...
+    fun:pygi_type_import_by_name
+}
+
