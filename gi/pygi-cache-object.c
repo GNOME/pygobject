@@ -137,7 +137,7 @@ _pygi_marshal_from_py_interface_object (PyGIInvokeState *state,
                                         PyGICallableCache *callable_cache,
                                         PyGIArgCache *arg_cache,
                                         PyObject *py_arg, GIArgument *arg,
-                                        MarshalCleanupData *cleanup_data,
+                                        PyGIMarshalCleanupData *cleanup_data,
                                         PyGIObjectMarshalFromPyFunc func)
 {
     PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)arg_cache;
@@ -179,7 +179,7 @@ static gboolean
 _pygi_marshal_from_py_called_from_c_interface_object (
     PyGIInvokeState *state, PyGICallableCache *callable_cache,
     PyGIArgCache *arg_cache, PyObject *py_arg, GIArgument *arg,
-    MarshalCleanupData *cleanup_data)
+    PyGIMarshalCleanupData *cleanup_data)
 {
     return _pygi_marshal_from_py_interface_object (
         state, callable_cache, arg_cache, py_arg, arg, cleanup_data,
@@ -190,7 +190,7 @@ static gboolean
 _pygi_marshal_from_py_called_from_py_interface_object (
     PyGIInvokeState *state, PyGICallableCache *callable_cache,
     PyGIArgCache *arg_cache, PyObject *py_arg, GIArgument *arg,
-    MarshalCleanupData *cleanup_data)
+    PyGIMarshalCleanupData *cleanup_data)
 {
     return _pygi_marshal_from_py_interface_object (
         state, callable_cache, arg_cache, py_arg, arg, cleanup_data,
@@ -240,7 +240,8 @@ destroy_notifier_for_object (gpointer object, PyGIArgCache *arg_cache)
 static PyObject *
 _pygi_marshal_to_py_called_from_c_interface_object_cache_adapter (
     PyGIInvokeState *state, PyGICallableCache *callable_cache,
-    PyGIArgCache *arg_cache, GIArgument *arg, MarshalCleanupData *cleanup_data)
+    PyGIArgCache *arg_cache, GIArgument *arg,
+    PyGIMarshalCleanupData *cleanup_data)
 {
     PyObject *object;
 
@@ -278,7 +279,8 @@ _pygi_marshal_to_py_called_from_c_interface_object_cache_adapter (
 static PyObject *
 _pygi_marshal_to_py_called_from_py_interface_object_cache_adapter (
     PyGIInvokeState *state, PyGICallableCache *callable_cache,
-    PyGIArgCache *arg_cache, GIArgument *arg, MarshalCleanupData *cleanup_data)
+    PyGIArgCache *arg_cache, GIArgument *arg,
+    PyGIMarshalCleanupData *cleanup_data)
 {
     PyObject *object = pygi_arg_object_to_py (arg, arg_cache->transfer);
 
@@ -293,11 +295,9 @@ _pygi_marshal_to_py_called_from_py_interface_object_cache_adapter (
 }
 
 static void
-_pygi_marshal_cleanup_to_py_interface_object (PyGIInvokeState *state,
-                                              PyGIArgCache *arg_cache,
-                                              MarshalCleanupData cleanup_data,
-                                              gpointer data,
-                                              gboolean was_processed)
+_pygi_marshal_cleanup_to_py_interface_object (
+    PyGIInvokeState *state, PyGIArgCache *arg_cache,
+    PyGIMarshalCleanupData cleanup_data, gpointer data, gboolean was_processed)
 {
     if (was_processed && state->failed && cleanup_data.destroy != NULL) {
         g_assert (cleanup_data.data == data);
@@ -308,7 +308,7 @@ _pygi_marshal_cleanup_to_py_interface_object (PyGIInvokeState *state,
 static void
 _pygi_marshal_cleanup_from_py_interface_object (
     PyGIInvokeState *state, PyGIArgCache *arg_cache, PyObject *py_arg,
-    MarshalCleanupData cleanup_data, gboolean was_processed)
+    PyGIMarshalCleanupData cleanup_data, gboolean was_processed)
 {
     /* If we processed the parameter but fail before invoking the method,
        we need to remove the ref we added */
