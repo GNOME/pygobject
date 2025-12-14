@@ -258,7 +258,7 @@ pygi_set_gvalue_from_property_info (GValue *value,
             } else {
                 PyErr_Format (
                     PyExc_NotImplementedError,
-                    "bSetting properties of type '%s' is not implemented",
+                    "Setting properties of type '%s' is not implemented",
                     g_type_name (type));
                 goto out;
             }
