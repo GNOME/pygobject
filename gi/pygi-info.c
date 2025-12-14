@@ -1919,12 +1919,13 @@ field_array_length (GIFieldInfo *info, void *struct_data_ptr,
     }
 
     if (gi_field_info_get_field (array_len_field, struct_data_ptr, &arg)) {
-        GITypeInfo *array_len_type_info;
+        GITypeInfo *array_len_type_info =
+            gi_field_info_get_type_info (array_len_field);
 
-        array_len_type_info = gi_field_info_get_type_info (array_len_field);
         if (array_len_type_info != NULL) {
             result = pygi_argument_to_gsize (
                 arg, gi_type_info_get_tag (array_len_type_info), array_length);
+            gi_base_info_unref (array_len_type_info);
         }
     }
 
