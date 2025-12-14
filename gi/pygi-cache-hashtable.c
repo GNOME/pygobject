@@ -52,8 +52,10 @@ _pygi_marshal_from_py_ghash (PyGIInvokeState *state,
     Py_ssize_t length;
     PyObject *py_keys, *py_values;
 
-    GHashFunc hash_func;
-    GEqualFunc equal_func;
+    GHashFunc hash_func = NULL;
+    GEqualFunc equal_func = NULL;
+    GDestroyNotify key_destroy_func = NULL;
+    GDestroyNotify value_destroy_func = NULL;
 
     GHashTable *hash_ = NULL;
     PyGIHashCache *hash_cache = (PyGIHashCache *)arg_cache;
@@ -89,12 +91,15 @@ _pygi_marshal_from_py_ghash (PyGIInvokeState *state,
         || hash_cache->key_cache->type_tag == GI_TYPE_TAG_FILENAME) {
         hash_func = g_str_hash;
         equal_func = g_str_equal;
-    } else {
-        hash_func = NULL;
-        equal_func = NULL;
+        key_destroy_func = g_free;
+    }
+    if (hash_cache->value_cache->type_tag == GI_TYPE_TAG_UTF8
+        || hash_cache->value_cache->type_tag == GI_TYPE_TAG_FILENAME) {
+        value_destroy_func = g_free;
     }
 
-    hash_ = g_hash_table_new (hash_func, equal_func);
+    hash_ = g_hash_table_new_full (hash_func, equal_func, key_destroy_func,
+                                   value_destroy_func);
     if (hash_ == NULL) {
         PyErr_NoMemory ();
         Py_DECREF (py_keys);
@@ -317,6 +322,7 @@ pygi_arg_hash_table_new_from_info (GITypeInfo *type_info, GIArgInfo *arg_info,
     GITypeInfo *key_type_info;
     GITypeInfo *value_type_info;
     GITransfer item_transfer;
+    GITypeTag key_type_tag, value_type_tag;
 
     hc = g_slice_new0 (PyGIHashCache);
     if (hc == NULL) return NULL;
@@ -328,9 +334,18 @@ pygi_arg_hash_table_new_from_info (GITypeInfo *type_info, GIArgInfo *arg_info,
         (GDestroyNotify)_hash_cache_free_func;
     key_type_info = gi_type_info_get_param_type (type_info, 0);
     value_type_info = gi_type_info_get_param_type (type_info, 1);
+    key_type_tag = gi_type_info_get_tag (key_type_info);
+    value_type_tag = gi_type_info_get_tag (value_type_info);
 
-    item_transfer = transfer == GI_TRANSFER_CONTAINER ? GI_TRANSFER_NOTHING
-                                                      : transfer;
+    if (key_type_tag == GI_TYPE_TAG_UTF8
+        || key_type_tag == GI_TYPE_TAG_FILENAME
+        || value_type_tag == GI_TYPE_TAG_UTF8
+        || value_type_tag == GI_TYPE_TAG_FILENAME)
+        /* We assign a destroy notifier to the hash table, so we do not need to free strings ourselves. */
+        item_transfer = GI_TRANSFER_EVERYTHING;
+    else
+        item_transfer = transfer == GI_TRANSFER_CONTAINER ? GI_TRANSFER_NOTHING
+                                                          : transfer;
 
     hc->key_cache = pygi_arg_cache_new (key_type_info, NULL, item_transfer,
                                         direction, callable_cache, 0, 0);
