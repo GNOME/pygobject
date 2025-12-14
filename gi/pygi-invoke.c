@@ -559,7 +559,7 @@ _invoke_marshal_in_args (PyGIInvokeState *state,
         if (marshal && arg_cache->from_py_marshaller != NULL
             && arg_cache->meta_type != PYGI_META_ARG_TYPE_CHILD) {
             gboolean success;
-            MarshalCleanupData cleanup_data = { NULL, NULL };
+            PyGIMarshalCleanupData cleanup_data = { NULL, NULL };
 
             if (!pygi_arg_cache_allow_none (arg_cache) && Py_IsNone (py_arg)) {
                 PyErr_Format (PyExc_TypeError,
@@ -596,7 +596,7 @@ _invoke_marshal_out_args (PyGIInvokeState *state,
 
     if (cache->return_cache) {
         if (!pygi_callable_cache_skip_return (cache)) {
-            MarshalCleanupData cleanup_data = { NULL, NULL };
+            PyGIMarshalCleanupData cleanup_data = { NULL, NULL };
             py_return = cache->return_cache->to_py_marshaller (
                 state, cache, cache->return_cache, &state->return_arg,
                 &cleanup_data);
@@ -612,7 +612,7 @@ _invoke_marshal_out_args (PyGIInvokeState *state,
 
                 if (to_py_cleanup != NULL)
                     to_py_cleanup (state, cache->return_cache,
-                                   (MarshalCleanupData){ NULL, NULL },
+                                   (PyGIMarshalCleanupData){ NULL, NULL },
                                    &state->return_arg, FALSE);
             }
         }
@@ -643,7 +643,7 @@ _invoke_marshal_out_args (PyGIInvokeState *state,
     } else if (!cache->has_return && n_out_args == 1) {
         /* if we get here there is one out arg an no return */
         PyGIArgCache *arg_cache = (PyGIArgCache *)cache->to_py_args->data;
-        MarshalCleanupData cleanup_data = { NULL, NULL };
+        PyGIMarshalCleanupData cleanup_data = { NULL, NULL };
         py_out = arg_cache->to_py_marshaller (
             state, cache, arg_cache,
             state->args[arg_cache->c_arg_index].arg_pointer.v_pointer,
@@ -676,7 +676,7 @@ _invoke_marshal_out_args (PyGIInvokeState *state,
 
         for (; py_arg_index < tuple_len; py_arg_index++) {
             PyGIArgCache *arg_cache = (PyGIArgCache *)cache_item->data;
-            MarshalCleanupData cleanup_data = { NULL, NULL };
+            PyGIMarshalCleanupData cleanup_data = { NULL, NULL };
             PyObject *py_obj = arg_cache->to_py_marshaller (
                 state, cache, arg_cache,
                 state->args[arg_cache->c_arg_index].arg_pointer.v_pointer,

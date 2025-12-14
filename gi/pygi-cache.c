@@ -28,6 +28,14 @@
 #include "pygi-cache-private.h"
 
 void
+pygi_marshal_cleanup_data_destroy (PyGIMarshalCleanupData *cleanup_data)
+{
+    if (cleanup_data != NULL && cleanup_data->destroy != NULL
+        && cleanup_data->data != NULL)
+        cleanup_data->destroy (cleanup_data->data);
+}
+
+void
 pygi_arg_cache_free (PyGIArgCache *cache)
 {
     if (cache == NULL) return;

@@ -43,7 +43,8 @@ static gboolean
 _pygi_marshal_from_py_ghash (PyGIInvokeState *state,
                              PyGICallableCache *callable_cache,
                              PyGIArgCache *arg_cache, PyObject *py_arg,
-                             GIArgument *arg, MarshalCleanupData *cleanup_data)
+                             GIArgument *arg,
+                             PyGIMarshalCleanupData *cleanup_data)
 {
     PyGIMarshalFromPyFunc key_from_py_marshaller;
     PyGIMarshalFromPyFunc value_from_py_marshaller;
@@ -89,7 +90,7 @@ _pygi_marshal_from_py_ghash (PyGIInvokeState *state,
 
     if (arg_cache->transfer != GI_TRANSFER_EVERYTHING) {
         item_cleanups = g_array_sized_new (
-            FALSE, TRUE, sizeof (MarshalCleanupData), length * 2 + 1);
+            FALSE, TRUE, sizeof (PyGIMarshalCleanupData), length * 2 + 1);
         cleanup_data->data = item_cleanups;
         cleanup_data->destroy = (GDestroyNotify)g_array_unref;
     }
@@ -120,8 +121,8 @@ _pygi_marshal_from_py_ghash (PyGIInvokeState *state,
 
     for (i = 0; i < py_length; i++) {
         GIArgument key, value;
-        MarshalCleanupData key_cleanup_data = { NULL, NULL };
-        MarshalCleanupData value_cleanup_data = { NULL, NULL };
+        PyGIMarshalCleanupData key_cleanup_data = { NULL, NULL };
+        PyGIMarshalCleanupData value_cleanup_data = { NULL, NULL };
         PyObject *py_key = PyList_GET_ITEM (py_keys, i);
         PyObject *py_value = PyList_GET_ITEM (py_values, i);
         if (py_key == NULL || py_value == NULL) goto err;
@@ -165,7 +166,7 @@ err:
     switch (arg_cache->transfer) {
     case GI_TRANSFER_NOTHING: {
         /* Free everything in cleanup. */
-        MarshalCleanupData hash_cleanup_data = {
+        PyGIMarshalCleanupData hash_cleanup_data = {
             .data = arg->v_pointer,
             .destroy = (GDestroyNotify)g_hash_table_unref
         };
@@ -175,7 +176,7 @@ err:
     case GI_TRANSFER_CONTAINER: {
         /* Make a shallow copy so we can free the elements later in cleanup
          * because it is possible invoke will free the list before our cleanup. */
-        MarshalCleanupData hash_cleanup_data = {
+        PyGIMarshalCleanupData hash_cleanup_data = {
             .data = g_hash_table_ref (arg->v_pointer),
             .destroy = (GDestroyNotify)g_hash_table_unref
         };
@@ -198,7 +199,7 @@ err:
 static void
 _pygi_marshal_cleanup_from_py_ghash (PyGIInvokeState *state,
                                      PyGIArgCache *arg_cache, PyObject *py_arg,
-                                     MarshalCleanupData cleanup_data,
+                                     PyGIMarshalCleanupData cleanup_data,
                                      gboolean was_processed)
 {
     if (was_processed && cleanup_data.destroy != NULL) {
@@ -206,8 +207,8 @@ _pygi_marshal_cleanup_from_py_ghash (PyGIInvokeState *state,
         guint i;
 
         for (i = 0; i < item_cleanups->len; i++) {
-            MarshalCleanupData *item_cleanup_data =
-                &g_array_index (item_cleanups, MarshalCleanupData, i);
+            PyGIMarshalCleanupData *item_cleanup_data =
+                &g_array_index (item_cleanups, PyGIMarshalCleanupData, i);
             if (item_cleanup_data->destroy && item_cleanup_data->data)
                 item_cleanup_data->destroy (item_cleanup_data->data);
         }
@@ -220,7 +221,7 @@ static PyObject *
 _pygi_marshal_to_py_ghash (PyGIInvokeState *state,
                            PyGICallableCache *callable_cache,
                            PyGIArgCache *arg_cache, GIArgument *arg,
-                           MarshalCleanupData *cleanup_data)
+                           PyGIMarshalCleanupData *cleanup_data)
 {
     GHashTable *hash_;
     GHashTableIter hash_table_iter;
@@ -257,8 +258,8 @@ _pygi_marshal_to_py_ghash (PyGIInvokeState *state,
     g_hash_table_iter_init (&hash_table_iter, hash_);
     while (g_hash_table_iter_next (&hash_table_iter, &key_arg.v_pointer,
                                    &value_arg.v_pointer)) {
-        MarshalCleanupData key_cleanup_data = { NULL, NULL };
-        MarshalCleanupData value_cleanup_data = { NULL, NULL };
+        PyGIMarshalCleanupData key_cleanup_data = { NULL, NULL };
+        PyGIMarshalCleanupData value_cleanup_data = { NULL, NULL };
         PyObject *py_key;
         PyObject *py_value;
         int retval;
@@ -309,7 +310,7 @@ _pygi_marshal_to_py_ghash (PyGIInvokeState *state,
 static void
 _pygi_marshal_cleanup_to_py_ghash (PyGIInvokeState *state,
                                    PyGIArgCache *arg_cache,
-                                   MarshalCleanupData cleanup_data,
+                                   PyGIMarshalCleanupData cleanup_data,
                                    gpointer data, gboolean was_processed)
 {
     if (cleanup_data.destroy != NULL && cleanup_data.data != NULL)

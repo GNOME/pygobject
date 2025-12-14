@@ -93,7 +93,7 @@ pygi_marshal_cleanup_args_from_py_marshal_success (PyGIInvokeState *state,
     for (guint i = 0; i < _pygi_callable_cache_args_len (cache); i++) {
         PyGIArgCache *arg_cache = _pygi_callable_cache_get_arg (cache, i);
         PyGIMarshalFromPyCleanupFunc cleanup_func = arg_cache->from_py_cleanup;
-        MarshalCleanupData cleanup_data = state->args[i].arg_cleanup_data;
+        PyGIMarshalCleanupData cleanup_data = state->args[i].arg_cleanup_data;
 
         /* Only cleanup using args_cleanup_data when available.
          * It is the responsibility of the various "from_py" marshalers to return
@@ -108,7 +108,7 @@ pygi_marshal_cleanup_args_from_py_marshal_success (PyGIInvokeState *state,
                 PyTuple_GET_ITEM (state->py_in_args, arg_cache->py_arg_index);
             cleanup_func (state, arg_cache, py_arg, cleanup_data, TRUE);
             state->args[i].arg_cleanup_data =
-                (MarshalCleanupData){ NULL, NULL };
+                (PyGIMarshalCleanupData){ NULL, NULL };
         }
     }
 
@@ -177,7 +177,7 @@ pygi_marshal_cleanup_args_from_py_parameter_fail (PyGIInvokeState *state,
          i++) {
         PyGIArgCache *arg_cache = _pygi_callable_cache_get_arg (cache, i);
         PyGIMarshalFromPyCleanupFunc cleanup_func = arg_cache->from_py_cleanup;
-        MarshalCleanupData cleanup_data = state->args[i].arg_cleanup_data;
+        PyGIMarshalCleanupData cleanup_data = state->args[i].arg_cleanup_data;
         PyObject *py_arg = NULL;
 
         if (arg_cache->py_arg_index < 0) {
@@ -195,7 +195,8 @@ pygi_marshal_cleanup_args_from_py_parameter_fail (PyGIInvokeState *state,
             _cleanup_caller_allocates (state, arg_cache, cleanup_data.data,
                                        FALSE);
         }
-        state->args[i].arg_cleanup_data = (MarshalCleanupData){ NULL, NULL };
+        state->args[i].arg_cleanup_data =
+            (PyGIMarshalCleanupData){ NULL, NULL };
     }
 
     PyErr_Restore (error_type, error_value, error_traceback);

@@ -381,7 +381,7 @@ _pygi_closure_convert_arguments (PyGIInvokeState *state,
             } else if (arg_cache->meta_type != PYGI_META_ARG_TYPE_PARENT) {
                 continue;
             } else {
-                MarshalCleanupData cleanup_data = { NULL, NULL };
+                PyGIMarshalCleanupData cleanup_data = { NULL, NULL };
 
                 value = arg_cache->to_py_marshaller (state, cache, arg_cache,
                                                      &state->args[i].arg_value,

@@ -28,7 +28,7 @@ _pygi_marshal_from_py_gerror (PyGIInvokeState *state,
                               PyGICallableCache *callable_cache,
                               PyGIArgCache *arg_cache, PyObject *py_arg,
                               GIArgument *arg,
-                              MarshalCleanupData *cleanup_data)
+                              PyGIMarshalCleanupData *cleanup_data)
 {
     GError *error = NULL;
     if (Py_IsNone (py_arg)) {
@@ -50,11 +50,11 @@ static void
 _pygi_marshal_from_py_gerror_cleanup (PyGIInvokeState *state,
                                       PyGIArgCache *arg_cache,
                                       PyObject *py_arg,
-                                      MarshalCleanupData data,
+                                      PyGIMarshalCleanupData cleanup_data,
                                       gboolean was_processed)
 {
-    if (was_processed && data.destroy != NULL) {
-        data.destroy (data.data);
+    if (was_processed && cleanup_data.destroy != NULL) {
+        cleanup_data.destroy (cleanup_data.data);
     }
 }
 
@@ -62,7 +62,7 @@ static PyObject *
 _pygi_marshal_to_py_gerror (PyGIInvokeState *state,
                             PyGICallableCache *callable_cache,
                             PyGIArgCache *arg_cache, GIArgument *arg,
-                            MarshalCleanupData *cleanup_data)
+                            PyGIMarshalCleanupData *cleanup_data)
 {
     GError *error = arg->v_pointer;
     PyObject *py_obj = NULL;
