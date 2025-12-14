@@ -1415,9 +1415,7 @@ class CPropertiesTestBase:
 
         self.set_prop(obj, "hash-table", {"mec": 56})
         self.assertTrue(isinstance(self.get_prop(obj, "hash-table"), dict))
-        self.assertEqual(
-            next(iter(self.get_prop(obj, "hash-table").items())), ("mec", 56)
-        )
+        self.assertEqual(list(self.get_prop(obj, "hash-table").items()), [("mec", 56)])
 
     def test_parent_class(self):
         class A(Regress.TestObj):

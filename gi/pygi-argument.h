@@ -47,7 +47,7 @@ GIArgument pygi_argument_from_py (GITypeInfo *type_info, PyObject *object,
                                   GITransfer transfer,
                                   PyGIArgumentFromPyCleanupData *arg_cleanup);
 
-/* Invoke pygi_argument_from_py_cleanup after you're done handling the argument aquired by pygi_argument_from_py. */
+/* Invoke pygi_argument_from_py_cleanup after you're done handling the argument acquired by pygi_argument_from_py. */
 void pygi_argument_from_py_cleanup (
     PyGIArgumentFromPyCleanupData *arg_cleanup);
 

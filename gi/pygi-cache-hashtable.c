@@ -52,8 +52,10 @@ _pygi_marshal_from_py_ghash (PyGIInvokeState *state,
     Py_ssize_t length;
     PyObject *py_keys, *py_values;
 
-    GHashFunc hash_func;
-    GEqualFunc equal_func;
+    GHashFunc hash_func = NULL;
+    GEqualFunc equal_func = NULL;
+    GDestroyNotify key_destroy_func = NULL;
+    GDestroyNotify value_destroy_func = NULL;
 
     GHashTable *hash_ = NULL;
     PyGIHashCache *hash_cache = (PyGIHashCache *)arg_cache;
@@ -89,12 +91,16 @@ _pygi_marshal_from_py_ghash (PyGIInvokeState *state,
         || hash_cache->key_cache->type_tag == GI_TYPE_TAG_FILENAME) {
         hash_func = g_str_hash;
         equal_func = g_str_equal;
-    } else {
-        hash_func = NULL;
-        equal_func = NULL;
+        /* Transfer rule has been updated in hash_table_item_cache_new(). */
+        key_destroy_func = g_free;
+    }
+    if (hash_cache->value_cache->type_tag == GI_TYPE_TAG_UTF8
+        || hash_cache->value_cache->type_tag == GI_TYPE_TAG_FILENAME) {
+        value_destroy_func = g_free;
     }
 
-    hash_ = g_hash_table_new (hash_func, equal_func);
+    hash_ = g_hash_table_new_full (hash_func, equal_func, key_destroy_func,
+                                   value_destroy_func);
     if (hash_ == NULL) {
         PyErr_NoMemory ();
         Py_DECREF (py_keys);
@@ -307,6 +313,35 @@ _arg_cache_to_py_ghash_setup (PyGIArgCache *arg_cache)
     arg_cache->to_py_cleanup = _pygi_marshal_cleanup_to_py_ghash;
 }
 
+static PyGIArgCache *
+hash_table_item_cache_new (GITypeInfo *type_info, int index,
+                           GITransfer transfer, PyGIDirection direction,
+                           PyGICallableCache *callable_cache)
+{
+    PyGIArgCache *cache;
+    GITypeInfo *item_type_info =
+        gi_type_info_get_param_type (type_info, index);
+    GITypeTag item_type_tag = gi_type_info_get_tag (item_type_info);
+    GITransfer item_transfer;
+
+    if (item_type_tag == GI_TYPE_TAG_UTF8
+        || item_type_tag == GI_TYPE_TAG_FILENAME)
+        /* We assign a destroy notifier to the hash table,
+         * so we do not need to free strings ourselves. */
+        item_transfer = GI_TRANSFER_EVERYTHING;
+    else if (transfer == GI_TRANSFER_CONTAINER)
+        item_transfer = GI_TRANSFER_NOTHING;
+    else
+        item_transfer = transfer;
+
+    cache = pygi_arg_cache_new (item_type_info, NULL, item_transfer, direction,
+                                callable_cache, 0, 0);
+
+    gi_base_info_unref ((GIBaseInfo *)item_type_info);
+
+    return cache;
+}
+
 PyGIArgCache *
 pygi_arg_hash_table_new_from_info (GITypeInfo *type_info, GIArgInfo *arg_info,
                                    GITransfer transfer,
@@ -314,9 +349,6 @@ pygi_arg_hash_table_new_from_info (GITypeInfo *type_info, GIArgInfo *arg_info,
                                    PyGICallableCache *callable_cache)
 {
     PyGIHashCache *hc = NULL;
-    GITypeInfo *key_type_info;
-    GITypeInfo *value_type_info;
-    GITransfer item_transfer;
 
     hc = g_slice_new0 (PyGIHashCache);
     if (hc == NULL) return NULL;
@@ -326,30 +358,22 @@ pygi_arg_hash_table_new_from_info (GITypeInfo *type_info, GIArgInfo *arg_info,
 
     ((PyGIArgCache *)hc)->destroy_notify =
         (GDestroyNotify)_hash_cache_free_func;
-    key_type_info = gi_type_info_get_param_type (type_info, 0);
-    value_type_info = gi_type_info_get_param_type (type_info, 1);
 
-    item_transfer = transfer == GI_TRANSFER_CONTAINER ? GI_TRANSFER_NOTHING
-                                                      : transfer;
-
-    hc->key_cache = pygi_arg_cache_new (key_type_info, NULL, item_transfer,
-                                        direction, callable_cache, 0, 0);
+    hc->key_cache = hash_table_item_cache_new (
+        type_info, /*index=*/0, transfer, direction, callable_cache);
 
     if (hc->key_cache == NULL) {
         pygi_arg_cache_free ((PyGIArgCache *)hc);
         return NULL;
     }
 
-    hc->value_cache = pygi_arg_cache_new (value_type_info, NULL, item_transfer,
-                                          direction, callable_cache, 0, 0);
+    hc->value_cache = hash_table_item_cache_new (
+        type_info, /*index=*/1, transfer, direction, callable_cache);
 
     if (hc->value_cache == NULL) {
         pygi_arg_cache_free ((PyGIArgCache *)hc);
         return NULL;
     }
-
-    gi_base_info_unref ((GIBaseInfo *)key_type_info);
-    gi_base_info_unref ((GIBaseInfo *)value_type_info);
 
     if (direction & PYGI_DIRECTION_FROM_PYTHON) {
         _arg_cache_from_py_ghash_setup ((PyGIArgCache *)hc);
