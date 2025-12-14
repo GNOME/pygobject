@@ -59,14 +59,6 @@ PyObject *pygi_argument_to_py_with_array_length (GITypeInfo *type_info,
                                                  GITransfer transfer,
                                                  gsize array_length);
 
-/* -- The functions below should be considered deprecated -- */
-
-/* Private */
-typedef gboolean (*PyGIArgArrayLengthPolicy) (gsize item_index,
-                                              void *user_data1,
-                                              void *user_data2,
-                                              gsize *array_len);
-
 gpointer _pygi_arg_to_hash_pointer (const GIArgument arg,
                                     GITypeInfo *type_info);
 
