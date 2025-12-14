@@ -47,29 +47,24 @@ typedef PyGIFunctionCache PyGIFunctionWithInstanceCache;
 typedef PyGIFunctionCache PyGIMethodCache;
 typedef PyGICallableCache PyGIClosureCache;
 
-typedef gboolean (*PyGIMarshalFromPyFunc) (PyGIInvokeState *state,
-                                           PyGICallableCache *callable_cache,
-                                           PyGIArgCache *arg_cache,
-                                           PyObject *py_arg, GIArgument *arg,
-                                           MarshalCleanupData *cleanup_data);
+typedef gboolean (*PyGIMarshalFromPyFunc) (
+    PyGIInvokeState *state, PyGICallableCache *callable_cache,
+    PyGIArgCache *arg_cache, PyObject *py_arg, GIArgument *arg,
+    PyGIMarshalCleanupData *cleanup_data);
 
-typedef PyObject *(*PyGIMarshalToPyFunc) (PyGIInvokeState *state,
-                                          PyGICallableCache *callable_cache,
-                                          PyGIArgCache *arg_cache,
-                                          GIArgument *arg,
-                                          MarshalCleanupData *cleanup_data);
+typedef PyObject *(*PyGIMarshalToPyFunc) (
+    PyGIInvokeState *state, PyGICallableCache *callable_cache,
+    PyGIArgCache *arg_cache, GIArgument *arg,
+    PyGIMarshalCleanupData *cleanup_data);
 
-typedef void (*PyGIMarshalFromPyCleanupFunc) (PyGIInvokeState *state,
-                                              PyGIArgCache *arg_cache,
-                                              PyObject *py_arg,
-                                              MarshalCleanupData cleanup_data,
-                                              gboolean was_processed);
+typedef void (*PyGIMarshalFromPyCleanupFunc) (
+    PyGIInvokeState *state, PyGIArgCache *arg_cache, PyObject *py_arg,
+    PyGIMarshalCleanupData cleanup_data, gboolean was_processed);
 
-typedef void (*PyGIMarshalToPyCleanupFunc) (PyGIInvokeState *state,
-                                            PyGIArgCache *arg_cache,
-                                            MarshalCleanupData cleanup_data,
-                                            gpointer data,
-                                            gboolean was_processed);
+typedef void (*PyGIMarshalToPyCleanupFunc) (
+    PyGIInvokeState *state, PyGIArgCache *arg_cache,
+    PyGIMarshalCleanupData cleanup_data, gpointer data,
+    gboolean was_processed);
 
 /* Argument meta types denote how we process the argument:
  *  - PYGI_META_ARG_TYPE_PARENT - parents may or may not have children

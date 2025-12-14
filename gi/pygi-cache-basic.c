@@ -59,7 +59,7 @@ gboolean
 pygi_marshal_from_py_basic_type_cache_adapter (
     PyGIInvokeState *state, PyGICallableCache *callable_cache,
     PyGIArgCache *arg_cache, PyObject *py_arg, GIArgument *arg,
-    MarshalCleanupData *cleanup_data)
+    PyGIMarshalCleanupData *cleanup_data)
 {
     *arg = pygi_marshal_from_py_basic_type (py_arg, arg_cache->type_tag,
                                             arg_cache->transfer,
@@ -68,11 +68,10 @@ pygi_marshal_from_py_basic_type_cache_adapter (
 }
 
 PyObject *
-pygi_marshal_to_py_basic_type_cache_adapter (PyGIInvokeState *state,
-                                             PyGICallableCache *callable_cache,
-                                             PyGIArgCache *arg_cache,
-                                             GIArgument *arg,
-                                             MarshalCleanupData *cleanup_data)
+pygi_marshal_to_py_basic_type_cache_adapter (
+    PyGIInvokeState *state, PyGICallableCache *callable_cache,
+    PyGIArgCache *arg_cache, GIArgument *arg,
+    PyGIMarshalCleanupData *cleanup_data)
 {
     return pygi_marshal_to_py_basic_type (*arg, arg_cache->type_tag,
                                           arg_cache->transfer);
@@ -82,7 +81,7 @@ static gboolean
 marshal_from_py_void (PyGIInvokeState *state,
                       PyGICallableCache *callable_cache,
                       PyGIArgCache *arg_cache, PyObject *py_arg,
-                      GIArgument *arg, MarshalCleanupData *cleanup_data)
+                      GIArgument *arg, PyGIMarshalCleanupData *cleanup_data)
 {
     g_warn_if_fail (arg_cache->transfer == GI_TRANSFER_NOTHING);
 
@@ -98,7 +97,7 @@ marshal_from_py_void (PyGIInvokeState *state,
 static PyObject *
 marshal_to_py_void (PyGIInvokeState *state, PyGICallableCache *callable_cache,
                     PyGIArgCache *arg_cache, GIArgument *arg,
-                    MarshalCleanupData *cleanup_data)
+                    PyGIMarshalCleanupData *cleanup_data)
 {
     if (arg_cache->is_pointer) {
         return PyLong_FromVoidPtr (arg->v_pointer);
@@ -112,7 +111,7 @@ pygi_marshal_from_py_utf8_cache_adapter (PyGIInvokeState *state,
                                          PyGICallableCache *callable_cache,
                                          PyGIArgCache *arg_cache,
                                          PyObject *py_arg, GIArgument *arg,
-                                         MarshalCleanupData *cleanup_data)
+                                         PyGIMarshalCleanupData *cleanup_data)
 {
     *arg = pygi_marshal_from_py_basic_type (py_arg, arg_cache->type_tag,
                                             arg_cache->transfer,
@@ -130,7 +129,7 @@ pygi_marshal_to_py_utf8_cache_adapter (PyGIInvokeState *state,
                                        PyGICallableCache *callable_cache,
                                        PyGIArgCache *arg_cache,
                                        GIArgument *arg,
-                                       MarshalCleanupData *cleanup_data)
+                                       PyGIMarshalCleanupData *cleanup_data)
 {
     PyObject *object = pygi_marshal_to_py_basic_type (
         *arg, arg_cache->type_tag, arg_cache->transfer);
@@ -148,16 +147,18 @@ pygi_marshal_to_py_utf8_cache_adapter (PyGIInvokeState *state,
 
 static void
 marshal_cleanup_from_py_utf8 (PyGIInvokeState *state, PyGIArgCache *arg_cache,
-                              PyObject *py_arg, MarshalCleanupData data,
+                              PyObject *py_arg,
+                              PyGIMarshalCleanupData cleanup_data,
                               gboolean was_processed)
 {
     /* We strdup strings so free unless ownership is transferred to C. */
-    if (was_processed && data.destroy) data.destroy (data.data);
+    if (was_processed && cleanup_data.destroy)
+        cleanup_data.destroy (cleanup_data.data);
 }
 
 static void
 marshal_cleanup_to_py_utf8 (PyGIInvokeState *state, PyGIArgCache *arg_cache,
-                            MarshalCleanupData cleanup_data, gpointer data,
+                            PyGIMarshalCleanupData cleanup_data, gpointer data,
                             gboolean was_processed)
 {
     if (cleanup_data.destroy != NULL) {

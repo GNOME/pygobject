@@ -86,7 +86,7 @@ pygi_argument_to_py (GITypeInfo *type_info, GIArgument arg,
                      GITransfer transfer)
 {
     PyGIInvokeState state = { 0 };
-    MarshalCleanupData cleanup_data = { 0 };
+    PyGIMarshalCleanupData cleanup_data = { 0 };
     PyObject *object;
 
     PyGIArgCache *cache = pygi_arg_cache_new (
@@ -113,7 +113,7 @@ pygi_argument_to_py_with_array_length (GITypeInfo *type_info, GIArgument arg,
 {
     PyGIInvokeState state = { 0 };
     PyGIInvokeArgState arg_state = { 0 };
-    MarshalCleanupData cleanup_data = { 0 };
+    PyGIMarshalCleanupData cleanup_data = { 0 };
     PyObject *object;
 
     PyGIArgCache *cache = pygi_arg_garray_new_from_info (

@@ -40,7 +40,7 @@ typedef struct {
     PyObject *object;
     gpointer cache;
     PyGIInvokeState state;
-    MarshalCleanupData cleanup_data;
+    PyGIMarshalCleanupData cleanup_data;
 } PyGIArgumentFromPyCleanupData;
 
 GIArgument pygi_argument_from_py (GITypeInfo *type_info, PyObject *object,
