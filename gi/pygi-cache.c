@@ -29,7 +29,7 @@
 #include "pygi-cache-private.h"
 
 void
-pygi_marshal_cleanup_data_destroy (MarshalCleanupData *cleanup_data)
+pygi_marshal_cleanup_data_destroy (PyGIMarshalCleanupData *cleanup_data)
 {
     if (cleanup_data != NULL && cleanup_data->destroy != NULL
         && cleanup_data->data != NULL)
