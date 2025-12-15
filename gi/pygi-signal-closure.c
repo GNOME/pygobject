@@ -75,6 +75,7 @@ array_length_from_parameter (GICallableInfo *callable_info,
     GIArgInfo length_arg_info;
     GITypeInfo length_type_info;
     GIArgument length_arg;
+    gboolean result;
 
     if (!gi_type_info_get_array_length_index (type_info, &length_arg_index)) {
         return FALSE;
@@ -88,8 +89,13 @@ array_length_from_parameter (GICallableInfo *callable_info,
 
     length_arg = _pygi_argument_from_g_value (&(values[length_arg_index + 1]),
                                               &length_type_info);
-    return pygi_argument_to_gsize (
+    result = pygi_argument_to_gsize (
         length_arg, gi_type_info_get_tag (&length_type_info), array_len);
+
+    gi_base_info_clear (&length_arg_info);
+    gi_base_info_clear (&length_type_info);
+
+    return result;
 }
 
 static void
@@ -146,6 +152,7 @@ pygi_signal_closure_marshal (GClosure *closure, GValue *return_value,
             gi_callable_info_load_arg (GI_CALLABLE_INFO (signal_info), i - 1,
                                        &arg_info);
             type_info = gi_arg_info_get_type_info (&arg_info);
+
             arg = _pygi_argument_from_g_value (&param_values[i], type_info);
             type_tag = gi_type_info_get_tag (type_info);
 
@@ -209,6 +216,8 @@ pygi_signal_closure_marshal (GClosure *closure, GValue *return_value,
             }
 
             gi_base_info_unref (type_info);
+            gi_base_info_clear (&arg_info);
+
             if (item == NULL) {
                 PyErr_Print ();
                 goto out;
