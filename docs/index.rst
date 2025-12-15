@@ -29,7 +29,7 @@
 
 .. include:: ../README.rst
     :start-after: |
-    :end-before: ----
+    :end-before: |
 
 If you want to write a Python application for `GNOME
 <https://www.gnome.org/>`__ or a Python GUI application using GTK, then
