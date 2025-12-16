@@ -33,6 +33,7 @@
 #include "pygi-value.h"
 #include "pygobject-object.h"
 
+extern GQuark pygobject_has_dispose_method;
 
 typedef struct _PyGSignalAccumulatorData {
     PyObject *callable;
@@ -621,35 +622,42 @@ pyg_object_set_property (GObject *object, guint property_id,
 static void
 pyg_object_dispose (GObject *object)
 {
-    PyObject *object_wrapper, *retval;
-    GObjectClass *parent_class;
-    PyGILState_STATE state = PyGILState_Ensure ();
+    GObjectClass *klass = G_OBJECT_GET_CLASS (object);
 
-    object_wrapper = g_object_get_qdata (object, pygobject_wrapper_key);
-    Py_XINCREF (object_wrapper);
+    if (GPOINTER_TO_INT (
+            g_object_get_qdata (object, pygobject_has_dispose_method))) {
+        PyObject *object_wrapper, *retval;
+        PyGILState_STATE state = PyGILState_Ensure ();
 
-    if (object_wrapper != NULL
-        && PyObject_HasAttrString (object_wrapper, "do_dispose")) {
-        retval = PyObject_CallMethod (object_wrapper, "do_dispose", NULL);
-        if (retval)
-            Py_DECREF (retval);
-        else
-            PyErr_Print ();
+        /* We can't create a new Python wrapper in PyPy: it will be garbage collected,
+         * leaving us with an extra reference on our GObject. */
+#ifdef PYPY_VERSION
+        object_wrapper = g_object_get_qdata (object, pygobject_wrapper_key);
+        Py_XINCREF (object_wrapper);
+#else
+        object_wrapper = pygobject_new_full (object, FALSE, klass);
+#endif
+
+        if (object_wrapper != NULL
+            && PyObject_HasAttrString (object_wrapper, "do_dispose")) {
+            retval = PyObject_CallMethod (object_wrapper, "do_dispose", NULL);
+            if (retval)
+                Py_DECREF (retval);
+            else
+                PyErr_Print ();
+        }
+        Py_XDECREF (object_wrapper);
+
+        PyGILState_Release (state);
     }
-    Py_XDECREF (object_wrapper);
-
-    PyGILState_Release (state);
 
     /* Find the first non-pygobject dispose method. */
-    parent_class =
-        g_type_class_peek (g_type_parent (G_TYPE_FROM_INSTANCE (object)));
-    while (parent_class && parent_class->dispose == pyg_object_dispose) {
-        parent_class = g_type_class_peek (
-            g_type_parent (G_TYPE_FROM_CLASS (parent_class)));
+    while (klass && klass->dispose == pyg_object_dispose) {
+        klass = g_type_class_peek_parent (klass);
     }
 
-    if (parent_class && parent_class->dispose) {
-        parent_class->dispose (object);
+    if (klass && klass->dispose) {
+        klass->dispose (object);
     }
 }
 
