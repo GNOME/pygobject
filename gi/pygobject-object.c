@@ -49,7 +49,7 @@ GQuark pygobject_custom_key;
 GQuark pygobject_class_key;
 GQuark pygobject_class_init_key;
 GQuark pygobject_wrapper_key;
-GQuark pygobject_has_updated_constructor_key;
+GQuark pygobject_has_dispose_method;
 GQuark pygobject_instance_data_key;
 
 static GClosure *
@@ -265,6 +265,12 @@ pygobject_register_wrapper (PyObject *self)
     g_assert (gself->obj->ref_count >= 1);
     /* save wrapper pointer so we can access it later */
     g_object_set_qdata_full (gself->obj, pygobject_wrapper_key, gself, NULL);
+
+    /* Add a marker so we know if we should create a new object to call `do_dispose` on.
+     */
+    g_object_set_qdata (
+        gself->obj, pygobject_has_dispose_method,
+        GINT_TO_POINTER (PyObject_HasAttrString (self, "do_dispose")));
 }
 
 static PyObject *
@@ -2058,8 +2064,8 @@ pyg_object_register_types (PyObject *d)
     pygobject_class_init_key =
         g_quark_from_static_string ("PyGObject::class-init");
     pygobject_wrapper_key = g_quark_from_static_string ("PyGObject::wrapper");
-    pygobject_has_updated_constructor_key =
-        g_quark_from_static_string ("PyGObject::has-updated-constructor");
+    pygobject_has_dispose_method =
+        g_quark_from_static_string ("PyGObject::has-dispose-method");
     pygobject_instance_data_key =
         g_quark_from_static_string ("PyGObject::instance-data");
 
