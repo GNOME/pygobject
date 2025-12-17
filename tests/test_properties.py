@@ -1323,6 +1323,18 @@ class CPropertiesTestBase:
         self.assertEqual(self.get_prop(obj, "some-strv"), ["foo"])
         self.assertRaises(TypeError, self.set_prop, self.obj, "some-strv", ["foo", 1])
 
+    def test_some_hash_table(self):
+        self.assertEqual(self.get_prop(self.obj, "some-hash-table"), None)
+        self.set_prop(self.obj, "some-hash-table", {1: "foo", 2: "bar"})
+        self.assertEqual(
+            self.get_prop(self.obj, "some-hash-table"), {1: "foo", 2: "bar"}
+        )
+
+        self.assertRaises(TypeError, self.set_prop, self.obj, "some-hash-table", 1)
+        self.assertRaises(
+            TypeError, self.set_prop, self.obj, "some-hash-table", {"a": "b"}
+        )
+
     def test_boxed_struct(self):
         self.assertEqual(self.get_prop(self.obj, "some-boxed-struct"), None)
 
