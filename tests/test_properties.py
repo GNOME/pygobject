@@ -1293,6 +1293,16 @@ class CPropertiesTestBase:
 
         self.assertAlmostEqual(self.get_prop(obj, "some-double"), 42.0)
 
+    def test_byte_array(self):
+        self.assertEqual(self.get_prop(self.obj, "some-byte-array"), b"")
+        self.set_prop(self.obj, "some-byte-array", b"hello world")
+        self.assertEqual(self.get_prop(self.obj, "some-byte-array"), b"hello world")
+
+        self.assertRaises(TypeError, self.set_prop, self.obj, "some-byte-array", 1)
+        self.assertRaises(
+            TypeError, self.set_prop, self.obj, "some-byte-array", "normal string"
+        )
+
     def test_strv(self):
         self.assertEqual(self.get_prop(self.obj, "some-strv"), [])
         self.set_prop(self.obj, "some-strv", ["hello", "world"])
