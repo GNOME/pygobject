@@ -1,5 +1,6 @@
 python_sources = [
   'GLib.py',
+  'GLibUnix.py',
   'Gtk.py',
   'Gdk.py',
   'GdkPixbuf.py',
