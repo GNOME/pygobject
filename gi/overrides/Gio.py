@@ -642,14 +642,22 @@ File = override(File)
 __all__.append("File")
 
 
-GioPlatform = None
-
-with suppress(ImportError):
-    from gi.repository import GioUnix as GioPlatform
-
-if not GioPlatform:
+def get_gio_platform():
+    """Return the platform-specific Gio module, if available."""
     with suppress(ImportError):
-        from gi.repository import GioWin32 as GioPlatform
+        from gi.repository import GioUnix
+
+        return GioUnix
+
+    with suppress(ImportError):
+        from gi.repository import GioWin32
+
+        return GioWin32
+
+    return None
+
+
+GioPlatform = get_gio_platform()
 
 if GioPlatform:
     # Add support for using platform-specific Gio symbols.
