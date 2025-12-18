@@ -693,6 +693,20 @@ if GioPlatform:
                 pass
 
         if (
+            wrapper_attr == attr
+            and (GLib.MAJOR_VERSION, GLib.MINOR_VERSION) >= (2, 86)
+            and hasattr(Gio, wrapper_attr)
+        ):
+            warnings.warn(
+                (
+                    f"Name conflict for platform-specific symbol {platform_name}.{attr}."
+                    + " No wrapper will be created."
+                ),
+                PyGIWarning,
+                stacklevel=2,
+            )
+
+        if (
             wrapper_attr in __all__
             or wrapper_attr in gio_globals
             or hasattr(Gio, wrapper_attr)
