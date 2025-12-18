@@ -378,12 +378,18 @@ pygi_arg_struct_from_py_marshal (PyGIInvokeState *state,
 }
 
 static PyObject *
-pygi_arg_struct_to_py_marshal (GIArgument *arg,
-                               GIRegisteredTypeInfo *interface_info,
-                               GType g_type, PyObject *py_type,
-                               GITransfer transfer, gboolean is_allocated,
-                               gboolean is_foreign)
+pygi_arg_struct_to_py_marshal (PyGIInvokeState *state,
+                               PyGICallableCache *callable_cache,
+                               PyGIArgCache *arg_cache, GIArgument *arg,
+                               gpointer *cleanup_data)
 {
+    PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)arg_cache;
+    GIRegisteredTypeInfo *interface_info = iface_cache->interface_info;
+    GType g_type = iface_cache->g_type;
+    PyObject *py_type = iface_cache->py_type;
+    GITransfer transfer = arg_cache->transfer;
+    gboolean is_allocated = pygi_arg_cache_is_caller_allocates (arg_cache);
+    gboolean is_foreign = iface_cache->is_foreign;
     PyObject *py_obj = NULL;
 
     if (arg->v_pointer == NULL) {
@@ -436,6 +442,8 @@ pygi_arg_struct_to_py_marshal (GIArgument *arg,
                       g_type_name (g_type));
     }
 
+    *cleanup_data = py_obj;
+
     return py_obj;
 }
 
@@ -470,26 +478,6 @@ arg_type_class_from_py_cleanup (PyGIInvokeState *state,
     if (was_processed) {
         g_type_class_unref (data);
     }
-}
-
-static PyObject *
-arg_struct_to_py_marshal_adapter (PyGIInvokeState *state,
-                                  PyGICallableCache *callable_cache,
-                                  PyGIArgCache *arg_cache, GIArgument *arg,
-                                  gpointer *cleanup_data)
-{
-    PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)arg_cache;
-    PyObject *ret;
-
-    ret = pygi_arg_struct_to_py_marshal (
-        arg, iface_cache->interface_info, iface_cache->g_type,
-        iface_cache->py_type, arg_cache->transfer,
-        pygi_arg_cache_is_caller_allocates (arg_cache),
-        iface_cache->is_foreign);
-
-    *cleanup_data = ret;
-
-    return ret;
 }
 
 
@@ -545,11 +533,8 @@ arg_struct_to_py_setup (PyGIArgCache *arg_cache,
     PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)arg_cache;
 
     if (arg_cache->to_py_marshaller == NULL) {
-        arg_cache->to_py_marshaller = arg_struct_to_py_marshal_adapter;
+        arg_cache->to_py_marshaller = pygi_arg_struct_to_py_marshal;
     }
-
-    iface_cache->is_foreign =
-        gi_struct_info_is_foreign ((GIStructInfo *)iface_info);
 
     if (iface_cache->is_foreign)
         arg_cache->to_py_cleanup = arg_foreign_to_py_cleanup;
