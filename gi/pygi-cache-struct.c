@@ -127,16 +127,21 @@ pygi_arg_gvalue_from_py_marshal (PyObject *py_arg, GIArgument *arg,
     return TRUE;
 }
 
-/* pygi_arg_gclosure_from_py_marshal:
- * py_arg: (in):
- * arg: (out):
- */
 static gboolean
-pygi_arg_gclosure_from_py_marshal (PyObject *py_arg, GIArgument *arg,
-                                   GITransfer transfer)
+pygi_arg_gclosure_from_py_marshal (PyGIInvokeState *state,
+                                   PyGICallableCache *callable_cache,
+                                   PyGIArgCache *arg_cache, PyObject *py_arg,
+                                   GIArgument *arg, gpointer *cleanup_data)
 {
     GClosure *closure;
-    GType object_gtype = pyg_type_from_object_strict (py_arg, FALSE);
+    GType object_gtype;
+
+    if (Py_IsNone (py_arg)) {
+        arg->v_pointer = NULL;
+        return TRUE;
+    }
+
+    object_gtype = pyg_type_from_object_strict (py_arg, FALSE);
 
     if (!(PyCallable_Check (py_arg)
           || g_type_is_a (object_gtype, G_TYPE_CLOSURE))) {
@@ -197,13 +202,28 @@ pygi_arg_gclosure_from_py_marshal (PyObject *py_arg, GIArgument *arg,
         return FALSE;
     }
 
-    /* Add an additional ref when transfering everything to the callee. */
-    if (transfer == GI_TRANSFER_EVERYTHING) {
-        g_closure_ref (closure);
+    arg->v_pointer = closure;
+
+    if (arg_cache->transfer == GI_TRANSFER_NOTHING) {
+        /* Free everything in cleanup. */
+        *cleanup_data = closure;
+    } else { /* GI_TRANSFER_EVERYTHING */
+        /* No cleanup, everything is given to the callee. */
+        *cleanup_data = NULL;
     }
 
-    arg->v_pointer = closure;
     return TRUE;
+}
+
+
+static void
+arg_gclosure_from_py_cleanup (PyGIInvokeState *state, PyGIArgCache *arg_cache,
+                              PyObject *py_arg, gpointer cleanup_data,
+                              gboolean was_processed)
+{
+    if (cleanup_data != NULL) {
+        g_closure_unref (cleanup_data);
+    }
 }
 
 static void
@@ -245,9 +265,7 @@ pygi_arg_struct_from_py_marshal (PyObject *py_arg, GIArgument *arg,
      *        and set the correct marshaller
      */
 
-    if (g_type_is_a (g_type, G_TYPE_CLOSURE)) {
-        return pygi_arg_gclosure_from_py_marshal (py_arg, arg, transfer);
-    } else if (g_type_is_a (g_type, G_TYPE_VALUE)) {
+    if (g_type_is_a (g_type, G_TYPE_VALUE)) {
         return pygi_arg_gvalue_from_py_marshal (py_arg, arg, transfer,
                                                 copy_reference);
     } else if (is_foreign) {
@@ -444,16 +462,6 @@ arg_struct_to_py_marshal_adapter (PyGIInvokeState *state,
 }
 
 static void
-arg_gclosure_from_py_cleanup (PyGIInvokeState *state, PyGIArgCache *arg_cache,
-                              PyObject *py_arg, gpointer cleanup_data,
-                              gboolean was_processed)
-{
-    if (cleanup_data != NULL) {
-        g_closure_unref (cleanup_data);
-    }
-}
-
-static void
 arg_foreign_from_py_cleanup (PyGIInvokeState *state, PyGIArgCache *arg_cache,
                              PyObject *py_arg, gpointer data,
                              gboolean was_processed)
@@ -520,14 +528,13 @@ arg_struct_from_py_setup (PyGIArgCache *arg_cache,
         if (transfer == GI_TRANSFER_NOTHING) {
             arg_cache->from_py_cleanup = arg_type_class_from_py_cleanup;
         }
-
+    } else if (g_type_is_a (iface_cache->g_type, G_TYPE_CLOSURE)) {
+        arg_cache->from_py_marshaller = pygi_arg_gclosure_from_py_marshal;
+        arg_cache->from_py_cleanup = arg_gclosure_from_py_cleanup;
     } else {
         arg_cache->from_py_marshaller = arg_struct_from_py_marshal_adapter;
 
-        if (g_type_is_a (iface_cache->g_type, G_TYPE_CLOSURE)) {
-            arg_cache->from_py_cleanup = arg_gclosure_from_py_cleanup;
-
-        } else if (iface_cache->g_type == G_TYPE_VALUE) {
+        if (iface_cache->g_type == G_TYPE_VALUE) {
             arg_cache->from_py_cleanup = pygi_arg_gvalue_from_py_cleanup;
 
         } else if (iface_cache->is_foreign) {
