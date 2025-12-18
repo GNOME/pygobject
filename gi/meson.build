@@ -43,8 +43,7 @@ sources = [
   'pygi-object.c',
   'pygi-fundamental.c',
   'pygi-value.c',
-  'pygi-struct-marshal.c',
-  ]
+]
 
 headers = [
   'pygobject.h',
