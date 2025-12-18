@@ -25,7 +25,6 @@
 #include "pygi-object.h"
 #include "pygi-repository.h"
 #include "pygi-resulttuple.h"
-#include "pygi-struct-marshal.h"
 #include "pygi-type.h"
 #include "pygi-cache-private.h"
 
