@@ -82,22 +82,23 @@ _is_union_member (GIRegisteredTypeInfo *interface_info, PyObject *py_arg)
  * GValue from Python
  */
 
-/* pygi_arg_gvalue_from_py_marshal:
- * py_arg: (in):
- * arg: (out):
- * transfer:
- * copy_reference: TRUE if arg should use the pointer reference held by py_arg
- *                 when it is already holding a GValue vs. copying the value.
- */
 static gboolean
-pygi_arg_gvalue_from_py_marshal (PyObject *py_arg, GIArgument *arg,
-                                 GITransfer transfer, gboolean copy_reference)
+pygi_arg_gvalue_from_py_marshal (PyGIInvokeState *state,
+                                 PyGICallableCache *callable_cache,
+                                 PyGIArgCache *arg_cache, PyObject *py_arg,
+                                 GIArgument *arg, gpointer *cleanup_data)
 {
     GValue *value;
     GType object_type;
 
+    if (Py_IsNone (py_arg)) {
+        arg->v_pointer = NULL;
+        return TRUE;
+    }
+
     object_type =
         pyg_type_from_object_strict ((PyObject *)Py_TYPE (py_arg), FALSE);
+
     if (object_type == G_TYPE_INVALID) {
         PyErr_SetString (PyExc_RuntimeError,
                          "unable to retrieve object's GType");
@@ -106,14 +107,8 @@ pygi_arg_gvalue_from_py_marshal (PyObject *py_arg, GIArgument *arg,
 
     /* if already a gvalue, use that, else marshal into gvalue */
     if (object_type == G_TYPE_VALUE) {
-        GValue *source_value = pyg_boxed_get (py_arg, GValue);
-        if (copy_reference) {
-            value = source_value;
-        } else {
-            value = g_slice_new0 (GValue);
-            g_value_init (value, G_VALUE_TYPE (source_value));
-            g_value_copy (source_value, value);
-        }
+        /* We borrow a reference*/
+        value = pyg_boxed_get (py_arg, GValue);
     } else {
         value = g_slice_new0 (GValue);
         g_value_init (value, object_type);
@@ -121,10 +116,37 @@ pygi_arg_gvalue_from_py_marshal (PyObject *py_arg, GIArgument *arg,
             g_slice_free (GValue, value);
             return FALSE;
         }
+
+        if (arg_cache->transfer == GI_TRANSFER_NOTHING) {
+            /* Free everything in cleanup. */
+            *cleanup_data = value;
+        }
     }
 
     arg->v_pointer = value;
+
     return TRUE;
+}
+
+
+void
+pygi_arg_gvalue_from_py_cleanup (PyGIInvokeState *state,
+                                 PyGIArgCache *arg_cache, PyObject *py_arg,
+                                 gpointer data, gboolean was_processed)
+{
+    /* Note py_arg can be NULL for hash table which is a bug. */
+    if (was_processed && py_arg != NULL) {
+        GType py_object_type =
+            pyg_type_from_object_strict ((PyObject *)Py_TYPE (py_arg), FALSE);
+
+        /* When a GValue was not passed, it means the marshalers created a new
+         * one to pass in, clean this up.
+         */
+        if (py_object_type != G_TYPE_VALUE) {
+            g_value_unset ((GValue *)data);
+            g_slice_free (GValue, data);
+        }
+    }
 }
 
 static gboolean
@@ -265,10 +287,7 @@ pygi_arg_struct_from_py_marshal (PyObject *py_arg, GIArgument *arg,
      *        and set the correct marshaller
      */
 
-    if (g_type_is_a (g_type, G_TYPE_VALUE)) {
-        return pygi_arg_gvalue_from_py_marshal (py_arg, arg, transfer,
-                                                copy_reference);
-    } else if (is_foreign) {
+    if (is_foreign) {
         PyObject *success;
         success = pygi_struct_foreign_convert_to_g_argument (
             py_arg, GI_REGISTERED_TYPE_INFO (interface_info), transfer, arg);
@@ -473,26 +492,6 @@ arg_foreign_from_py_cleanup (PyGIInvokeState *state, PyGIArgCache *arg_cache,
     }
 }
 
-void
-pygi_arg_gvalue_from_py_cleanup (PyGIInvokeState *state,
-                                 PyGIArgCache *arg_cache, PyObject *py_arg,
-                                 gpointer data, gboolean was_processed)
-{
-    /* Note py_arg can be NULL for hash table which is a bug. */
-    if (was_processed && py_arg != NULL) {
-        GType py_object_type =
-            pyg_type_from_object_strict ((PyObject *)Py_TYPE (py_arg), FALSE);
-
-        /* When a GValue was not passed, it means the marshalers created a new
-         * one to pass in, clean this up.
-         */
-        if (py_object_type != G_TYPE_VALUE) {
-            g_value_unset ((GValue *)data);
-            g_slice_free (GValue, data);
-        }
-    }
-}
-
 static void
 arg_foreign_to_py_cleanup (PyGIInvokeState *state, PyGIArgCache *arg_cache,
                            gpointer cleanup_data, gpointer data,
@@ -531,12 +530,13 @@ arg_struct_from_py_setup (PyGIArgCache *arg_cache,
     } else if (g_type_is_a (iface_cache->g_type, G_TYPE_CLOSURE)) {
         arg_cache->from_py_marshaller = pygi_arg_gclosure_from_py_marshal;
         arg_cache->from_py_cleanup = arg_gclosure_from_py_cleanup;
+    } else if (iface_cache->g_type == G_TYPE_VALUE) {
+        arg_cache->from_py_marshaller = pygi_arg_gvalue_from_py_marshal;
+        arg_cache->from_py_cleanup = pygi_arg_gvalue_from_py_cleanup;
     } else {
         arg_cache->from_py_marshaller = arg_struct_from_py_marshal_adapter;
 
         if (iface_cache->g_type == G_TYPE_VALUE) {
-            arg_cache->from_py_cleanup = pygi_arg_gvalue_from_py_cleanup;
-
         } else if (iface_cache->is_foreign) {
             arg_cache->from_py_cleanup = arg_foreign_from_py_cleanup;
         }
