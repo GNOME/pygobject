@@ -206,6 +206,22 @@ pygi_arg_gclosure_from_py_marshal (PyObject *py_arg, GIArgument *arg,
     return TRUE;
 }
 
+static void
+raise_type_error (PyObject *py_arg, const gchar *arg_name,
+                  GIRegisteredTypeInfo *interface_info)
+{
+    gchar *type_name =
+        _pygi_gi_base_info_get_fullname (GI_BASE_INFO (interface_info));
+    PyObject *module = PyObject_GetAttrString (py_arg, "__module__");
+
+    PyErr_Format (PyExc_TypeError, "argument %s: Expected %s, but got %s%s%s",
+                  arg_name ? arg_name : "self", type_name,
+                  module ? PyUnicode_AsUTF8 (module) : "", module ? "." : "",
+                  Py_TYPE (py_arg)->tp_name);
+    if (module) Py_DECREF (module);
+    g_free (type_name);
+}
+
 /* pygi_arg_struct_from_py_marshal:
  *
  * Dispatcher to various sub marshalers
@@ -245,7 +261,8 @@ pygi_arg_struct_from_py_marshal (PyObject *py_arg, GIArgument *arg,
         is_union = _is_union_member (GI_REGISTERED_TYPE_INFO (interface_info),
                                      py_arg);
         if (!is_union) {
-            goto type_error;
+            raise_type_error (py_arg, arg_name, interface_info);
+            return FALSE;
         }
     }
 
@@ -263,7 +280,8 @@ pygi_arg_struct_from_py_marshal (PyObject *py_arg, GIArgument *arg,
                 arg->v_pointer = g_boxed_copy (g_type, arg->v_pointer);
             }
         } else {
-            goto type_error;
+            raise_type_error (py_arg, arg_name, interface_info);
+            return FALSE;
         }
 
     } else if (g_type_is_a (g_type, G_TYPE_POINTER)
@@ -289,20 +307,6 @@ pygi_arg_struct_from_py_marshal (PyObject *py_arg, GIArgument *arg,
         return FALSE;
     }
     return TRUE;
-
-type_error: {
-    gchar *type_name =
-        _pygi_gi_base_info_get_fullname (GI_BASE_INFO (interface_info));
-    PyObject *module = PyObject_GetAttrString (py_arg, "__module__");
-
-    PyErr_Format (PyExc_TypeError, "argument %s: Expected %s, but got %s%s%s",
-                  arg_name ? arg_name : "self", type_name,
-                  module ? PyUnicode_AsUTF8 (module) : "", module ? "." : "",
-                  Py_TYPE (py_arg)->tp_name);
-    if (module) Py_DECREF (module);
-    g_free (type_name);
-    return FALSE;
-}
 }
 
 static PyObject *
