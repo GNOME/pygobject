@@ -685,25 +685,12 @@ if GioPlatform:
             wrapper_attr = f"{platform_name_lower}_{attr}"
         else:
             try:
-                gtype = getattr(original_attr, "__gtype__")
-                if gtype.name.startswith(f"G{platform_name}"):
+                info = getattr(original_attr, "__info__")
+                type_name = info.get_type_name()
+                if not type_name or type_name.startswith(f"G{platform_name}"):
                     wrapper_attr = f"{platform_name}{attr}"
             except AttributeError:
                 pass
-
-        if wrapper_attr == attr and hasattr(Gio, wrapper_attr):
-            try:
-                name = original_attr.__name__[0]
-            except (AttributeError, IndexError):
-                name = original_attr
-
-            # Fallback if we don't have the original name.
-            if name.islower():
-                wrapper_attr = f"{platform_name_lower}_{attr}"
-            elif "_" in name:
-                wrapper_attr = f"{platform_name.upper()}_{attr}"
-            elif name:
-                wrapper_attr = f"{platform_name}{attr}"
 
         if (
             wrapper_attr in __all__
