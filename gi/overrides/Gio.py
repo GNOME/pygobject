@@ -18,8 +18,6 @@
 import asyncio
 import warnings
 
-from contextlib import suppress
-
 from .._ossighelper import register_sigint_fallback, get_event_loop
 from ..overrides import (
     override,
@@ -28,12 +26,12 @@ from ..overrides import (
     wrap_list_store_equal_func,
     wrap_list_store_sort_func,
 )
-from .._gi import CallableInfo
-from ..module import get_introspection_module
-from gi import (
-    PyGIWarning,
-    require_version,
+from ..module import (
+    get_introspection_module,
+    get_fallback_platform_specific_module_symbol,
+    get_platform_specific_module,
 )
+from gi import PyGIWarning
 
 
 from gi.repository import GLib
@@ -646,51 +644,19 @@ File = override(File)
 __all__.append("File")
 
 
-def get_gio_platform():
-    """Return the platform-specific Gio module, if available."""
-    with suppress((ValueError, ImportError)):
-        require_version("GioUnix", Gio._version)
-        from gi.repository import GioUnix
-
-        return GioUnix
-
-    with suppress((ValueError, ImportError)):
-        require_version("GioWin32", Gio._version)
-        from gi.repository import GioWin32
-
-        return GioWin32
-
-    return None
-
-
-GioPlatform = get_gio_platform()
+GioPlatform = get_platform_specific_module(Gio)
 
 if GioPlatform:
     # Add support for using platform-specific Gio symbols.
     gio_globals = globals()
 
-    platform_name = f"{GioPlatform._namespace[len(Gio._namespace) :]}"
-    platform_name_lower = platform_name.lower()
-
     for attr in dir(GioPlatform):
         if attr.startswith("_"):
             continue
 
-        original_attr = getattr(GioPlatform, attr)
-        wrapper_attr = attr
-
-        if isinstance(
-            original_attr, CallableInfo
-        ) and original_attr.get_symbol().startswith(f"g_{platform_name_lower}_"):
-            wrapper_attr = f"{platform_name_lower}_{attr}"
-        else:
-            try:
-                info = getattr(original_attr, "__info__")
-                type_name = info.get_type_name()
-                if not type_name or type_name.startswith(f"G{platform_name}"):
-                    wrapper_attr = f"{platform_name}{attr}"
-            except AttributeError:
-                pass
+        original_attr, wrapper_attr = get_fallback_platform_specific_module_symbol(
+            Gio, GioPlatform, attr
+        )
 
         if (
             wrapper_attr == attr
@@ -699,7 +665,7 @@ if GioPlatform:
         ):
             warnings.warn(
                 (
-                    f"Name conflict for platform-specific symbol {platform_name}.{attr}."
+                    f"Name conflict for platform-specific symbol {GioPlatform._namespace}.{attr}."
                     + " No wrapper will be created."
                 ),
                 PyGIWarning,

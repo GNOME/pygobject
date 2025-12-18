@@ -18,12 +18,15 @@
 # USA
 
 import importlib
+from contextlib import suppress
 from threading import Lock
 from types import ModuleType
 
 import gi
+import warnings
 
 from ._gi import (
+    CallableInfo,
     Repository,
     FunctionInfo,
     RegisteredTypeInfo,
@@ -244,3 +247,47 @@ def get_introspection_module(namespace):
     module = IntrospectionModule(namespace, version)
     _introspection_modules[namespace] = module
     return module
+
+
+def get_platform_specific_module(namespace):
+    """Return the platform-specific module for the given namespace, if available."""
+    with suppress((ValueError, ImportError)):
+        gi.require_version(f"{namespace._namespace}Unix", namespace._version)
+        return importlib.import_module(f"gi.repository.{namespace._namespace}Unix")
+
+    with suppress((ValueError, ImportError)):
+        gi.require_version(f"{namespace._namespace}Win32", namespace._version)
+        return importlib.import_module(f"gi.repository.{namespace._namespace}Win32")
+
+    return None
+
+
+def get_fallback_platform_specific_module_symbol(
+    namespace, platform_namespace, symbol, prefix="g"
+):
+    """Return the original attribute and the wrapper attribute name for a
+    platform-specific symbol fallback.
+    """
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", gi.PyGIDeprecationWarning)
+        original_attr = getattr(platform_namespace, symbol)
+    wrapper_attr = symbol
+
+    assert platform_namespace._namespace.startswith(namespace._namespace)
+    platform_name = f"{platform_namespace._namespace[len(namespace._namespace) :]}"
+    platform_name_lower = platform_name.lower()
+
+    if isinstance(
+        original_attr, CallableInfo
+    ) and original_attr.get_symbol().startswith(f"{prefix}_{platform_name_lower}_"):
+        wrapper_attr = f"{platform_name_lower}_{symbol}"
+    else:
+        try:
+            info = getattr(original_attr, "__info__")
+            type_name = info.get_type_name()
+            if not type_name or type_name.startswith(f"G{platform_name}"):
+                wrapper_attr = f"{platform_name}{symbol}"
+        except AttributeError:
+            pass
+
+    return (original_attr, wrapper_attr)
