@@ -299,18 +299,17 @@ raise_type_error (PyObject *py_arg, const gchar *arg_name,
     g_free (type_name);
 }
 
-/* pygi_arg_struct_from_py_marshal:
- *
- * Dispatcher to various sub marshalers
- */
 static gboolean
-pygi_arg_struct_from_py_marshal (PyObject *py_arg, GIArgument *arg,
-                                 const gchar *arg_name,
-                                 GIRegisteredTypeInfo *interface_info,
-                                 GType g_type, PyObject *py_type,
-                                 GITransfer transfer, gboolean copy_reference,
-                                 gboolean is_foreign, gboolean is_pointer)
+pygi_arg_struct_from_py_marshal (PyGIInvokeState *state,
+                                 PyGICallableCache *callable_cache,
+                                 PyGIArgCache *arg_cache, PyObject *py_arg,
+                                 GIArgument *arg, gpointer *cleanup_data)
 {
+    PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)arg_cache;
+    const gchar *arg_name = pygi_arg_cache_get_name (arg_cache);
+    GIRegisteredTypeInfo *interface_info =
+        GI_REGISTERED_TYPE_INFO (iface_cache->interface_info);
+    GType g_type = iface_cache->g_type;
     gboolean is_union = FALSE;
 
     if (Py_IsNone (py_arg)) {
@@ -318,7 +317,7 @@ pygi_arg_struct_from_py_marshal (PyObject *py_arg, GIArgument *arg,
         return TRUE;
     }
 
-    if (!PyObject_IsInstance (py_arg, py_type)) {
+    if (!PyObject_IsInstance (py_arg, iface_cache->py_type)) {
         /* first check to see if this is a member of the expected union */
         is_union = _is_union_member (GI_REGISTERED_TYPE_INFO (interface_info),
                                      py_arg);
@@ -338,7 +337,7 @@ pygi_arg_struct_from_py_marshal (PyObject *py_arg, GIArgument *arg,
         if (is_union || pyg_boxed_check (py_arg, g_type)
             || g_type_is_a (pyg_type_from_object (py_arg), g_type)) {
             arg->v_pointer = pyg_boxed_get (py_arg, void);
-            if (transfer == GI_TRANSFER_EVERYTHING) {
+            if (arg_cache->transfer == GI_TRANSFER_EVERYTHING) {
                 arg->v_pointer = g_boxed_copy (g_type, arg->v_pointer);
             }
         } else {
@@ -349,8 +348,9 @@ pygi_arg_struct_from_py_marshal (PyObject *py_arg, GIArgument *arg,
     } else if (g_type_is_a (g_type, G_TYPE_POINTER)
                || g_type_is_a (g_type, G_TYPE_VARIANT)
                || g_type == G_TYPE_NONE) {
-        g_warn_if_fail (g_type_is_a (g_type, G_TYPE_VARIANT) || !is_pointer
-                        || transfer == GI_TRANSFER_NOTHING);
+        g_warn_if_fail (g_type_is_a (g_type, G_TYPE_VARIANT)
+                        || !arg_cache->is_pointer
+                        || arg_cache->transfer == GI_TRANSFER_NOTHING);
 
         if (g_type_is_a (g_type, G_TYPE_VARIANT)
             && pyg_type_from_object (py_arg) != G_TYPE_VARIANT) {
@@ -358,7 +358,7 @@ pygi_arg_struct_from_py_marshal (PyObject *py_arg, GIArgument *arg,
             return FALSE;
         }
         arg->v_pointer = pyg_pointer_get (py_arg, void);
-        if (transfer == GI_TRANSFER_EVERYTHING) {
+        if (arg_cache->transfer == GI_TRANSFER_EVERYTHING) {
             g_variant_ref ((GVariant *)arg->v_pointer);
         }
 
@@ -368,6 +368,12 @@ pygi_arg_struct_from_py_marshal (PyObject *py_arg, GIArgument *arg,
                       g_type_name (g_type));
         return FALSE;
     }
+
+    /* Assume struct marshaling is always a pointer and assign cleanup_data
+     * here rather than passing it further down the chain.
+     */
+    *cleanup_data = arg->v_pointer;
+
     return TRUE;
 }
 
@@ -443,7 +449,10 @@ arg_type_class_from_py_marshal (PyGIInvokeState *state,
 
     if (G_TYPE_IS_CLASSED (gtype)) {
         arg->v_pointer = g_type_class_ref (gtype);
-        *cleanup_data = arg->v_pointer;
+
+        if (arg_cache->transfer == GI_TRANSFER_NOTHING) {
+            *cleanup_data = arg->v_pointer;
+        }
         return TRUE;
     } else {
         PyErr_Format (PyExc_TypeError,
@@ -461,28 +470,6 @@ arg_type_class_from_py_cleanup (PyGIInvokeState *state,
     if (was_processed) {
         g_type_class_unref (data);
     }
-}
-
-static gboolean
-arg_struct_from_py_marshal_adapter (PyGIInvokeState *state,
-                                    PyGICallableCache *callable_cache,
-                                    PyGIArgCache *arg_cache, PyObject *py_arg,
-                                    GIArgument *arg, gpointer *cleanup_data)
-{
-    PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)arg_cache;
-
-    gboolean res = pygi_arg_struct_from_py_marshal (
-        py_arg, arg, pygi_arg_cache_get_name (arg_cache),
-        GI_REGISTERED_TYPE_INFO (iface_cache->interface_info),
-        iface_cache->g_type, iface_cache->py_type, arg_cache->transfer,
-        TRUE, /*copy_reference*/
-        iface_cache->is_foreign, arg_cache->is_pointer);
-
-    /* Assume struct marshaling is always a pointer and assign cleanup_data
-     * here rather than passing it further down the chain.
-     */
-    *cleanup_data = arg->v_pointer;
-    return res;
 }
 
 static PyObject *
@@ -536,11 +523,7 @@ arg_struct_from_py_setup (PyGIArgCache *arg_cache,
 
     if (gi_struct_info_is_gtype_struct ((GIStructInfo *)iface_info)) {
         arg_cache->from_py_marshaller = arg_type_class_from_py_marshal;
-        /* Since we always add a ref in the marshalling, only unref the
-         * GTypeClass when we don't transfer ownership. */
-        if (transfer == GI_TRANSFER_NOTHING) {
-            arg_cache->from_py_cleanup = arg_type_class_from_py_cleanup;
-        }
+        arg_cache->from_py_cleanup = arg_type_class_from_py_cleanup;
     } else if (g_type_is_a (iface_cache->g_type, G_TYPE_CLOSURE)) {
         arg_cache->from_py_marshaller = pygi_arg_gclosure_from_py_marshal;
         arg_cache->from_py_cleanup = arg_gclosure_from_py_cleanup;
@@ -551,7 +534,7 @@ arg_struct_from_py_setup (PyGIArgCache *arg_cache,
         arg_cache->from_py_marshaller = pygi_arg_foreign_from_py_marshal;
         arg_cache->from_py_cleanup = arg_foreign_from_py_cleanup;
     } else {
-        arg_cache->from_py_marshaller = arg_struct_from_py_marshal_adapter;
+        arg_cache->from_py_marshaller = pygi_arg_struct_from_py_marshal;
     }
 }
 
