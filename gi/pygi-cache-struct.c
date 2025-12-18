@@ -248,6 +248,41 @@ arg_gclosure_from_py_cleanup (PyGIInvokeState *state, PyGIArgCache *arg_cache,
     }
 }
 
+static gboolean
+pygi_arg_foreign_from_py_marshal (PyGIInvokeState *state,
+                                  PyGICallableCache *callable_cache,
+                                  PyGIArgCache *arg_cache, PyObject *py_arg,
+                                  GIArgument *arg, gpointer *cleanup_data)
+{
+    PyObject *success;
+    PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)arg_cache;
+
+    if (Py_IsNone (py_arg)) {
+        arg->v_pointer = NULL;
+        return TRUE;
+    }
+
+    success = pygi_struct_foreign_convert_to_g_argument (
+        py_arg, GI_REGISTERED_TYPE_INFO (iface_cache->interface_info),
+        arg_cache->transfer, arg);
+
+    *cleanup_data = arg->v_pointer;
+
+    return Py_IsNone (success);
+}
+
+static void
+arg_foreign_from_py_cleanup (PyGIInvokeState *state, PyGIArgCache *arg_cache,
+                             PyObject *py_arg, gpointer data,
+                             gboolean was_processed)
+{
+    if (state->failed && was_processed) {
+        pygi_struct_foreign_release (
+            GI_BASE_INFO (((PyGIInterfaceCache *)arg_cache)->interface_info),
+            data);
+    }
+}
+
 static void
 raise_type_error (PyObject *py_arg, const gchar *arg_name,
                   GIRegisteredTypeInfo *interface_info)
@@ -283,17 +318,7 @@ pygi_arg_struct_from_py_marshal (PyObject *py_arg, GIArgument *arg,
         return TRUE;
     }
 
-    /* FIXME: handle this large if statement in the cache
-     *        and set the correct marshaller
-     */
-
-    if (is_foreign) {
-        PyObject *success;
-        success = pygi_struct_foreign_convert_to_g_argument (
-            py_arg, GI_REGISTERED_TYPE_INFO (interface_info), transfer, arg);
-
-        return (Py_IsNone (success));
-    } else if (!PyObject_IsInstance (py_arg, py_type)) {
+    if (!PyObject_IsInstance (py_arg, py_type)) {
         /* first check to see if this is a member of the expected union */
         is_union = _is_union_member (GI_REGISTERED_TYPE_INFO (interface_info),
                                      py_arg);
@@ -480,17 +505,6 @@ arg_struct_to_py_marshal_adapter (PyGIInvokeState *state,
     return ret;
 }
 
-static void
-arg_foreign_from_py_cleanup (PyGIInvokeState *state, PyGIArgCache *arg_cache,
-                             PyObject *py_arg, gpointer data,
-                             gboolean was_processed)
-{
-    if (state->failed && was_processed) {
-        pygi_struct_foreign_release (
-            GI_BASE_INFO (((PyGIInterfaceCache *)arg_cache)->interface_info),
-            data);
-    }
-}
 
 static void
 arg_foreign_to_py_cleanup (PyGIInvokeState *state, PyGIArgCache *arg_cache,
@@ -533,13 +547,11 @@ arg_struct_from_py_setup (PyGIArgCache *arg_cache,
     } else if (iface_cache->g_type == G_TYPE_VALUE) {
         arg_cache->from_py_marshaller = pygi_arg_gvalue_from_py_marshal;
         arg_cache->from_py_cleanup = pygi_arg_gvalue_from_py_cleanup;
+    } else if (iface_cache->is_foreign) {
+        arg_cache->from_py_marshaller = pygi_arg_foreign_from_py_marshal;
+        arg_cache->from_py_cleanup = arg_foreign_from_py_cleanup;
     } else {
         arg_cache->from_py_marshaller = arg_struct_from_py_marshal_adapter;
-
-        if (iface_cache->g_type == G_TYPE_VALUE) {
-        } else if (iface_cache->is_foreign) {
-            arg_cache->from_py_cleanup = arg_foreign_from_py_cleanup;
-        }
     }
 }
 
