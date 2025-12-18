@@ -1,3 +1,4 @@
+import contextlib
 import os
 import sys
 import unittest
@@ -8,6 +9,14 @@ import subprocess
 import pytest
 from gi.repository import GLib
 from gi import PyGIDeprecationWarning
+
+
+PLATFORM_SPLIT_VERSION = (2, 88)
+
+
+GLibUnix = None
+with contextlib.suppress(ImportError):
+    from gi.repository import GLibUnix
 
 
 class TestGLib(unittest.TestCase):
@@ -313,3 +322,180 @@ https://my.org/q?x=1&y=2
         source_id = source.attach()
         self.assertEqual(context, source.get_context())
         self.assertTrue(GLib.Source.remove(source_id))
+
+
+class TestGLibPlatform(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        # TODO: Make this more dynamic in case we'll support Win32
+        cls.platform_glib = GLibUnix
+
+        if cls.platform_glib:
+            cls.platform_full_name = cls.platform_glib._namespace
+            cls.platform_name = f"{cls.platform_full_name[len(GLib._namespace) :]}"
+
+        unittest.TestCase.setUpClass()
+
+    def assertPlatformTypeFallback(self, symbol_name):
+        self.assertIn(symbol_name, dir(GLib))
+
+        platform_symbol_name = symbol_name
+        if symbol_name.startswith(f"{self.platform_name}"):
+            platform_symbol_name = symbol_name[len(self.platform_name) :]
+        elif symbol_name.startswith(f"{self.platform_name.lower()}_"):
+            platform_symbol_name = symbol_name[len(self.platform_name) + 1 :]
+
+        with warnings.catch_warnings(record=True) as warn:
+            symbol = getattr(GLib, symbol_name)
+            self.assertIsNotNone(symbol)
+
+            platform_symbol = getattr(self.platform_glib, platform_symbol_name)
+            self.assertIsNotNone(platform_symbol)
+            self.maybeAssertDeprecationWarning(warn, symbol_name, platform_symbol_name)
+
+            if (GLib.MAJOR_VERSION, GLib.MINOR_VERSION) >= PLATFORM_SPLIT_VERSION:
+                self.assertEqual(platform_symbol, symbol)
+
+    def maybeAssertDeprecationWarning(self, warn, symbol_name, new_symbol_name):
+        if (GLib.MAJOR_VERSION, GLib.MINOR_VERSION) >= PLATFORM_SPLIT_VERSION:
+            self.assertDeprecationWarning(
+                warn,
+                "GLib",
+                self.platform_full_name,
+                symbol_name,
+                new_symbol_name,
+            )
+
+    def assertDeprecationWarning(
+        self, warn, namespace, new_namespace, symbol_name, new_symbol_name
+    ):
+        self.assertGreaterEqual(len(warn), 1)
+        self.assertTrue(
+            any(issubclass(w.category, PyGIDeprecationWarning) for w in warn)
+        )
+
+        expected_message = (
+            f"{namespace}.{symbol_name} is deprecated; "
+            + f"use {new_namespace}.{new_symbol_name} instead"
+        )
+        if len(warn) == 1:
+            self.assertEqual(expected_message, str(warn[0].message))
+            return
+
+        self.assertIn(
+            expected_message,
+            [str(w.message) for w in warn],
+        )
+
+    @unittest.skipIf(GLibUnix is None, "Not supported")
+    def test_fallback_unix_pipe(self):
+        self.assertPlatformTypeFallback("UnixPipe")
+
+    @unittest.skipIf(GLibUnix is None, "Not supported")
+    def test_fallback_unix_pipe_end(self):
+        self.assertPlatformTypeFallback("UnixPipeEnd")
+
+    @unittest.skipIf(GLibUnix is None, "Not supported")
+    def test_fallback_closefrom(self):
+        self.assertPlatformTypeFallback("closefrom")
+
+    @unittest.skipIf(GLibUnix is None, "Not supported")
+    def test_fallback_unix_error_quark(self):
+        self.assertPlatformTypeFallback("unix_error_quark")
+
+    @unittest.skipIf(GLibUnix is None, "Not supported")
+    def test_fallback_unix_fd_add_full(self):
+        self.assertPlatformTypeFallback("unix_fd_add_full")
+
+    @unittest.skipIf(
+        GLibUnix is None or (GLib.MAJOR_VERSION, GLib.MINOR_VERSION) < (2, 87),
+        "Not supported",
+    )
+    def test_fallback_unix_fd_query_path(self):
+        self.assertPlatformTypeFallback("unix_fd_query_path")
+
+    @unittest.skipIf(GLibUnix is None, "Not supported")
+    def test_fallback_unix_fd_source_new(self):
+        self.assertPlatformTypeFallback("unix_fd_source_new")
+
+    @unittest.skipIf(GLibUnix is None, "Not supported")
+    def test_fallback_fdwalk_set_cloexec(self):
+        self.assertPlatformTypeFallback("fdwalk_set_cloexec")
+
+    @unittest.skipIf(GLibUnix is None, "Not supported")
+    def test_fallback_unix_get_passwd_entry(self):
+        self.assertPlatformTypeFallback("unix_get_passwd_entry")
+
+    @unittest.skipIf(GLibUnix is None, "Not supported")
+    def test_fallback_unix_open_pipe(self):
+        self.assertPlatformTypeFallback("unix_open_pipe")
+
+    @unittest.skipIf(GLibUnix is None, "Not supported")
+    def test_fallback_unix_set_fd_nonblocking(self):
+        self.assertPlatformTypeFallback("unix_set_fd_nonblocking")
+
+    @unittest.skipIf(
+        GLibUnix is None
+        or (GLib.MAJOR_VERSION, GLib.MINOR_VERSION) < PLATFORM_SPLIT_VERSION,
+        "Not supported",
+    )
+    def test_fallback_unix_signal_add(self):
+        self.assertPlatformTypeFallback("unix_signal_add")
+
+    @unittest.skipIf(GLibUnix is None, "Not supported")
+    def test_fallback_unix_signal_add_full(self):
+        self.assertPlatformTypeFallback(
+            "unix_signal_add"
+            if "signal_add" in dir(GLibUnix)
+            else "unix_signal_add_full"
+        )
+
+    @unittest.skipIf(GLibUnix is None, "Not supported")
+    def test_fallback_unix_signal_source_new(self):
+        self.assertPlatformTypeFallback("unix_signal_source_new")
+
+    @unittest.skipIf(GLibUnix is None, "Not supported")
+    def test_glib_unix_pipe(self):
+        pipe = GLibUnix.Pipe()
+        self.assertEqual(pipe.fds, [0, 0])
+
+    @unittest.skipIf(GLibUnix is None, "Not supported")
+    def test_glib_unix_pipe_fallback(self):
+        with warnings.catch_warnings(record=True) as warn:
+            pipe = GLib.UnixPipe()
+            self.maybeAssertDeprecationWarning(warn, "UnixPipe", "Pipe")
+        self.assertEqual(pipe.fds, [0, 0])
+
+    @unittest.skipIf(GLibUnix is None, "Not supported")
+    def test_glib_unix_error_quark(self):
+        self.assertGreater(GLibUnix.error_quark(), 0)
+
+    @unittest.skipIf(GLibUnix is None, "Not supported")
+    def test_glib_unix_error_quark_fallback(self):
+        with warnings.catch_warnings(record=True) as warn:
+            self.assertGreater(GLib.unix_error_quark(), 0)
+            self.maybeAssertDeprecationWarning(warn, "unix_error_quark", "error_quark")
+
+    @unittest.skipIf(
+        GLibUnix is None
+        or (GLib.MAJOR_VERSION, GLib.MINOR_VERSION) < PLATFORM_SPLIT_VERSION,
+        "Not supported",
+    )
+    def test_glib_unix_signal_add_full_deprecation(self):
+        with warnings.catch_warnings(record=True) as warn:
+            self.assertIsNotNone(GLibUnix.signal_add_full)
+            self.assertDeprecationWarning(
+                warn, "GLibUnix", "GLibUnix", "signal_add_full", "signal_add"
+            )
+
+    @unittest.skipIf(GLibUnix is None, "Not supported")
+    def test_glib_unix_signal_add_full_wrapper_deprecation(self):
+        with warnings.catch_warnings(record=True) as warn:
+            self.assertIsNotNone(GLib.unix_signal_add_full)
+            new_namespace = "GLibUnix" if "signal_add" in dir(GLibUnix) else "GLib"
+            new_symbol = (
+                "signal_add" if "signal_add" in dir(GLibUnix) else "unix_signal_add"
+            )
+            self.assertDeprecationWarning(
+                warn, "GLib", new_namespace, "unix_signal_add_full", new_symbol
+            )

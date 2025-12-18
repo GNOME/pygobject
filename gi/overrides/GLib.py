@@ -25,12 +25,17 @@ import socket
 import typing
 
 from .._ossighelper import register_sigint_fallback, get_event_loop
+from ..module import (
+    get_fallback_platform_specific_module_symbol,
+    get_platform_specific_module,
+)
 from .._gi import (
     variant_type_from_string,
     source_new,
     source_set_callback,
     io_channel_read,
     main_context_query,
+    PyGIWarning,
 )
 from ..overrides import override, deprecated, deprecated_attr
 from gi import PyGIDeprecationWarning, version_info
@@ -1032,3 +1037,49 @@ deprecated_attr(
 pyglib_version = version_info
 __all__.append("pyglib_version")
 deprecated_attr("GLib", "pyglib_version", "gi.version_info")
+
+GLibPlatform = get_platform_specific_module(GLib)
+
+if GLibPlatform:
+    # Add support for using platform-specific GLib symbols.
+    glib_globals = globals()
+
+    for attr in dir(GLibPlatform):
+        if attr.startswith("_"):
+            continue
+
+        original_attr, wrapper_attr = get_fallback_platform_specific_module_symbol(
+            GLib, GLibPlatform, attr
+        )
+
+        if (
+            wrapper_attr == attr
+            and (GLib.MAJOR_VERSION, GLib.MINOR_VERSION) >= (2, 88)
+            and hasattr(GLib, wrapper_attr)
+        ):
+            warnings.warn(
+                (
+                    f"Name conflict for platform-specific symbol {GLibPlatform._namespace}.{attr}."
+                    + " No wrapper will be created."
+                ),
+                PyGIWarning,
+                stacklevel=2,
+            )
+
+        if (
+            wrapper_attr in __all__
+            or wrapper_attr in glib_globals
+            or hasattr(GLib, wrapper_attr)
+        ):
+            continue
+
+        glib_globals[wrapper_attr] = original_attr
+        deprecated_attr(
+            GLib._namespace, wrapper_attr, f"{GLibPlatform._namespace}.{attr}"
+        )
+        __all__.append(wrapper_attr)
+
+if hasattr(GLibPlatform, "signal_add"):
+    deprecated_attr(
+        "GLib", "unix_signal_add_full", f"{GLibPlatform._namespace}.signal_add"
+    )
