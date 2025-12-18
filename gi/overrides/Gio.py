@@ -30,7 +30,11 @@ from ..overrides import (
 )
 from .._gi import CallableInfo
 from ..module import get_introspection_module
-from gi import PyGIWarning
+from gi import (
+    PyGIWarning,
+    require_version,
+)
+
 
 from gi.repository import GLib
 from gi.repository import GObject
@@ -644,12 +648,14 @@ __all__.append("File")
 
 def get_gio_platform():
     """Return the platform-specific Gio module, if available."""
-    with suppress(ImportError):
+    with suppress((ValueError, ImportError)):
+        require_version("GioUnix", Gio._version)
         from gi.repository import GioUnix
 
         return GioUnix
 
-    with suppress(ImportError):
+    with suppress((ValueError, ImportError)):
+        require_version("GioWin32", Gio._version)
         from gi.repository import GioWin32
 
         return GioWin32
