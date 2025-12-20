@@ -131,9 +131,6 @@ boxed_new (PyTypeObject *type, PyObject *args, PyObject *kwargs)
         goto out;
     }
 
-    self->size = size;
-    self->slice_allocated = TRUE;
-
 out:
     gi_base_info_unref (info);
 
