@@ -119,8 +119,8 @@ pygi_marshal_from_py_utf8_cache_adapter (PyGIInvokeState *state,
                                             &(cleanup_data->data));
 
     /* We strdup strings so free unless ownership is transferred to C. */
-    if (cleanup_data->data && arg_cache->transfer == GI_TRANSFER_NOTHING)
-        cleanup_data->destroy = g_free;
+    //    if (cleanup_data->data && arg_cache->transfer == GI_TRANSFER_NOTHING)
+    //        cleanup_data->destroy = g_free;
 
     return !PyErr_Occurred ();
 }
@@ -138,10 +138,10 @@ pygi_marshal_to_py_utf8_cache_adapter (PyGIInvokeState *state,
     /* Python copies the string so we need to free it
        if the interface is transfering ownership,
        whether or not it has been processed yet */
-    if (arg_cache->transfer == GI_TRANSFER_EVERYTHING) {
-        cleanup_data->data = arg->v_pointer;
-        cleanup_data->destroy = g_free;
-    }
+    //    if (arg_cache->transfer == GI_TRANSFER_EVERYTHING) {
+    //        cleanup_data->data = arg->v_pointer;
+    //        cleanup_data->destroy = g_free;
+    //    }
 
     return object;
 }
@@ -151,7 +151,10 @@ marshal_cleanup_from_py_utf8 (PyGIInvokeState *state, PyGIArgCache *arg_cache,
                               PyObject *py_arg, MarshalCleanupData data,
                               gboolean was_processed)
 {
-    if (was_processed && data.destroy) data.destroy (data.data);
+    /* We strdup strings so free unless ownership is transferred to C. */
+    if (was_processed && arg_cache->transfer == GI_TRANSFER_NOTHING)
+        g_free (data.data);
+    //if (was_processed && data.destroy) data.destroy (data.data);
 }
 
 static void
@@ -159,9 +162,11 @@ marshal_cleanup_to_py_utf8 (PyGIInvokeState *state, PyGIArgCache *arg_cache,
                             MarshalCleanupData cleanup_data, gpointer data,
                             gboolean was_processed)
 {
-    if (cleanup_data.destroy != NULL) {
-        cleanup_data.destroy (cleanup_data.data);
-    }
+    if (arg_cache->transfer == GI_TRANSFER_EVERYTHING) g_free (data);
+
+    //if (cleanup_data.destroy != NULL) {
+    //    cleanup_data.destroy (cleanup_data.data);
+    //}
 }
 
 PyGIArgCache *
