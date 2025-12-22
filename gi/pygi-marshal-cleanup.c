@@ -77,8 +77,7 @@ _cleanup_caller_allocates (PyGIInvokeState *state, PyGIArgCache *cache,
  *
  * The out stage must call one of these cleanup functions which are all final:
  *    - pygi_marshal_cleanup_args_to_py_marshal_success
- *    - pygi_marshal_cleanup_args_return_fail
- *    - pygi_marshal_cleanup_args_to_py_parameter_fail
+ *    - set state->failed to TRUE
  *
  **/
 void
@@ -200,19 +199,4 @@ pygi_marshal_cleanup_args_from_py_parameter_fail (PyGIInvokeState *state,
     }
 
     PyErr_Restore (error_type, error_value, error_traceback);
-}
-
-void
-pygi_marshal_cleanup_args_return_fail (PyGIInvokeState *state,
-                                       PyGICallableCache *cache)
-{
-    state->failed = TRUE;
-}
-
-void
-pygi_marshal_cleanup_args_to_py_parameter_fail (PyGIInvokeState *state,
-                                                PyGICallableCache *cache,
-                                                gssize failed_to_py_arg_index)
-{
-    state->failed = TRUE;
 }
