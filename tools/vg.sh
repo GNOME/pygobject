@@ -4,6 +4,9 @@
 #    $ tools/vg.sh tests/test_gi.py
 #
 
+export VALGRIND=1
+export PYTHONMALLOC=malloc
+
 valgrind --leak-check=full \
 	--suppressions=/usr/share/glib-2.0/valgrind/glib.supp \
 	--suppressions=tools/pygobject.supp \
