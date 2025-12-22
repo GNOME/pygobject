@@ -602,7 +602,7 @@ _invoke_marshal_out_args (PyGIInvokeState *state,
                 &cleanup_data);
             state->to_py_return_arg_cleanup_data = cleanup_data;
             if (py_return == NULL) {
-                pygi_marshal_cleanup_args_return_fail (state, cache);
+                state->failed = TRUE;
                 return NULL;
             }
         } else {
@@ -651,7 +651,7 @@ _invoke_marshal_out_args (PyGIInvokeState *state,
         state->args[arg_cache->c_arg_index].to_py_arg_cleanup_data =
             cleanup_data;
         if (py_out == NULL) {
-            pygi_marshal_cleanup_args_to_py_parameter_fail (state, cache, 0);
+            state->failed = TRUE;
             return NULL;
         }
 
@@ -664,8 +664,7 @@ _invoke_marshal_out_args (PyGIInvokeState *state,
         py_out = pygi_resulttuple_new (cache->resulttuple_type, tuple_len);
 
         if (py_out == NULL) {
-            pygi_marshal_cleanup_args_to_py_parameter_fail (state, cache,
-                                                            py_arg_index);
+            state->failed = TRUE;
             return NULL;
         }
 
@@ -686,9 +685,7 @@ _invoke_marshal_out_args (PyGIInvokeState *state,
 
             if (py_obj == NULL) {
                 if (cache->has_return) py_arg_index--;
-
-                pygi_marshal_cleanup_args_to_py_parameter_fail (state, cache,
-                                                                py_arg_index);
+                state->failed = TRUE;
                 Py_DECREF (py_out);
                 return NULL;
             }
