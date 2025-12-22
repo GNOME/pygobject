@@ -224,9 +224,7 @@ err:
 
 static void
 _pygi_marshal_cleanup_from_py_glist (PyGIInvokeState *state,
-                                     PyGIArgCache *arg_cache, PyObject *py_arg,
-                                     PyGIMarshalCleanupData cleanup_data,
-                                     gboolean was_processed)
+                                     PyGIMarshalCleanupData cleanup_data)
 {
     pygi_marshal_cleanup_data_destroy (&cleanup_data);
 }
@@ -375,9 +373,7 @@ _pygi_marshal_to_py_gslist (PyGIInvokeState *state,
 
 static void
 _pygi_marshal_cleanup_to_py_glist (PyGIInvokeState *state,
-                                   PyGIArgCache *arg_cache,
-                                   PyGIMarshalCleanupData cleanup_data,
-                                   gpointer data, gboolean was_processed)
+                                   PyGIMarshalCleanupData cleanup_data)
 {
     pygi_marshal_cleanup_data_destroy (&cleanup_data);
 }

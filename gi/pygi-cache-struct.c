@@ -139,9 +139,7 @@ pygi_arg_gvalue_from_py_marshal (PyGIInvokeState *state,
 
 void
 pygi_arg_gvalue_from_py_cleanup (PyGIInvokeState *state,
-                                 PyGIArgCache *arg_cache, PyObject *py_arg,
-                                 PyGIMarshalCleanupData cleanup_data,
-                                 gboolean was_processed)
+                                 PyGIMarshalCleanupData cleanup_data)
 {
     pygi_marshal_cleanup_data_destroy (&cleanup_data);
 }
@@ -238,10 +236,8 @@ pygi_arg_gclosure_from_py_marshal (PyGIInvokeState *state,
 
 
 static void
-arg_gclosure_from_py_cleanup (PyGIInvokeState *state, PyGIArgCache *arg_cache,
-                              PyObject *py_arg,
-                              PyGIMarshalCleanupData cleanup_data,
-                              gboolean was_processed)
+arg_gclosure_from_py_cleanup (PyGIInvokeState *state,
+                              PyGIMarshalCleanupData cleanup_data)
 {
     pygi_marshal_cleanup_data_destroy (&cleanup_data);
 }
@@ -289,10 +285,8 @@ pygi_arg_foreign_from_py_marshal (PyGIInvokeState *state,
 }
 
 static void
-arg_foreign_from_py_cleanup (PyGIInvokeState *state, PyGIArgCache *arg_cache,
-                             PyObject *py_arg,
-                             PyGIMarshalCleanupData cleanup_data,
-                             gboolean was_processed)
+arg_foreign_from_py_cleanup (PyGIInvokeState *state,
+                             PyGIMarshalCleanupData cleanup_data)
 {
     if (state->failed) {
         pygi_marshal_cleanup_data_destroy (&cleanup_data);
@@ -450,9 +444,8 @@ pygi_arg_foreign_to_py_marshal (PyGIInvokeState *state,
 }
 
 static void
-arg_foreign_to_py_cleanup (PyGIInvokeState *state, PyGIArgCache *arg_cache,
-                           PyGIMarshalCleanupData cleanup_data, gpointer data,
-                           gboolean was_processed)
+arg_foreign_to_py_cleanup (PyGIInvokeState *state,
+                           PyGIMarshalCleanupData cleanup_data)
 {
     if (state->failed) {
         pygi_marshal_cleanup_data_destroy (&cleanup_data);
@@ -558,17 +551,14 @@ arg_type_class_from_py_marshal (PyGIInvokeState *state,
 
 static void
 arg_type_class_from_py_cleanup (PyGIInvokeState *state,
-                                PyGIArgCache *arg_cache, PyObject *py_arg,
-                                PyGIMarshalCleanupData cleanup_data,
-                                gboolean was_processed)
+                                PyGIMarshalCleanupData cleanup_data)
 {
     pygi_marshal_cleanup_data_destroy (&cleanup_data);
 }
 
 static void
-arg_boxed_to_py_cleanup (PyGIInvokeState *state, PyGIArgCache *arg_cache,
-                         PyGIMarshalCleanupData cleanup_data, gpointer data,
-                         gboolean was_processed)
+arg_boxed_to_py_cleanup (PyGIInvokeState *state,
+                         PyGIMarshalCleanupData cleanup_data)
 {
     pygi_marshal_cleanup_data_destroy (&cleanup_data);
 }
