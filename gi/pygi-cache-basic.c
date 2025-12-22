@@ -146,18 +146,15 @@ pygi_marshal_to_py_utf8_cache_adapter (PyGIInvokeState *state,
 }
 
 static void
-marshal_cleanup_from_py_utf8 (PyGIInvokeState *state, PyGIArgCache *arg_cache,
-                              PyObject *py_arg,
-                              PyGIMarshalCleanupData cleanup_data,
-                              gboolean was_processed)
+marshal_cleanup_from_py_utf8 (PyGIInvokeState *state,
+                              PyGIMarshalCleanupData cleanup_data)
 {
     pygi_marshal_cleanup_data_destroy (&cleanup_data);
 }
 
 static void
-marshal_cleanup_to_py_utf8 (PyGIInvokeState *state, PyGIArgCache *arg_cache,
-                            PyGIMarshalCleanupData cleanup_data, gpointer data,
-                            gboolean was_processed)
+marshal_cleanup_to_py_utf8 (PyGIInvokeState *state,
+                            PyGIMarshalCleanupData cleanup_data)
 {
     pygi_marshal_cleanup_data_destroy (&cleanup_data);
 }

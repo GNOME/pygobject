@@ -58,13 +58,10 @@ typedef PyObject *(*PyGIMarshalToPyFunc) (
     PyGIMarshalCleanupData *cleanup_data);
 
 typedef void (*PyGIMarshalFromPyCleanupFunc) (
-    PyGIInvokeState *state, PyGIArgCache *arg_cache, PyObject *py_arg,
-    PyGIMarshalCleanupData cleanup_data, gboolean was_processed);
+    PyGIInvokeState *state, PyGIMarshalCleanupData cleanup_data);
 
 typedef void (*PyGIMarshalToPyCleanupFunc) (
-    PyGIInvokeState *state, PyGIArgCache *arg_cache,
-    PyGIMarshalCleanupData cleanup_data, gpointer data,
-    gboolean was_processed);
+    PyGIInvokeState *state, PyGIMarshalCleanupData cleanup_data);
 
 /* Argument meta types denote how we process the argument:
  *  - PYGI_META_ARG_TYPE_PARENT - parents may or may not have children

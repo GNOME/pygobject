@@ -72,9 +72,8 @@ pygi_argument_from_py_cleanup (PyGIArgumentFromPyCleanupData *arg_cleanup)
         if (cache->from_py_cleanup != NULL
             //&& arg_cleanup->cleanup_data.destroy != NULL
             && arg_cleanup->cleanup_data.data != NULL)
-            cache->from_py_cleanup (&arg_cleanup->state, cache,
-                                    arg_cleanup->object,
-                                    arg_cleanup->cleanup_data, TRUE);
+            cache->from_py_cleanup (&arg_cleanup->state,
+                                    arg_cleanup->cleanup_data);
         pygi_arg_cache_free (cache);
         memset (arg_cleanup, 0, sizeof (PyGIArgumentFromPyCleanupData));
     }
@@ -98,8 +97,7 @@ pygi_argument_to_py (GITypeInfo *type_info, GIArgument arg,
     if (cache->to_py_cleanup
         //&& cleanup_data.destroy != NULL
         && cleanup_data.data != NULL)
-        cache->to_py_cleanup (&state, cache, cleanup_data, arg.v_pointer,
-                              TRUE);
+        cache->to_py_cleanup (&state, cleanup_data);
 
     pygi_arg_cache_free (cache);
 
@@ -126,8 +124,7 @@ pygi_argument_to_py_with_array_length (GITypeInfo *type_info, GIArgument arg,
                                       &arg, &cleanup_data);
 
     if (cache->to_py_cleanup && arg.v_pointer)
-        cache->to_py_cleanup (&state, cache, cleanup_data, arg.v_pointer,
-                              TRUE);
+        cache->to_py_cleanup (&state, cleanup_data);
 
     pygi_arg_cache_free (cache);
 

@@ -124,10 +124,7 @@ PyObject *pygi_marshal_to_py_basic_type_cache_adapter (
 
 /* Needed for hack in pygi-cache-array.c */
 void pygi_arg_gvalue_from_py_cleanup (PyGIInvokeState *state,
-                                      PyGIArgCache *arg_cache,
-                                      PyObject *py_arg,
-                                      PyGIMarshalCleanupData cleanup_data,
-                                      gboolean was_processed);
+                                      PyGIMarshalCleanupData cleanup_data);
 
 void pygi_marshal_cleanup_data_destroy (PyGIMarshalCleanupData *cleanup_data);
 

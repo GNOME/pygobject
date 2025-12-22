@@ -607,13 +607,13 @@ _invoke_marshal_out_args (PyGIInvokeState *state,
             }
         } else {
             if (cache->return_cache->transfer == GI_TRANSFER_EVERYTHING) {
-                PyGIMarshalToPyCleanupFunc to_py_cleanup =
-                    cache->return_cache->to_py_cleanup;
+                // TODO: Do we have something to clean? Is this the right place?
+                // PyGIMarshalToPyCleanupFunc to_py_cleanup =
+                //     cache->return_cache->to_py_cleanup;
 
-                if (to_py_cleanup != NULL)
-                    to_py_cleanup (state, cache->return_cache,
-                                   (PyGIMarshalCleanupData){ NULL, NULL },
-                                   &state->return_arg, FALSE);
+                // if (to_py_cleanup != NULL)
+                //     to_py_cleanup (state,
+                //                    (PyGIMarshalCleanupData){ NULL, NULL });
             }
         }
     }
