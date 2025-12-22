@@ -40,7 +40,6 @@ sources = [
   'pygi-marshal-cleanup.c',
   'pygi-basictype.c',
   'pygi-error.c',
-  'pygi-object.c',
   'pygi-fundamental.c',
   'pygi-value.c',
 ]

@@ -33,7 +33,6 @@
 #include "pygi-error.h"
 #include "pygi-foreign.h"
 #include "pygi-info.h"
-#include "pygi-object.h"
 #include "pygi-util.h"
 #include "pygi-value.h"
 #include "pygi-cache-private.h"
