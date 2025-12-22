@@ -200,10 +200,7 @@ _pygi_marshal_to_py_interface_callback (
 
 static void
 _pygi_marshal_cleanup_from_py_interface_callback (PyGIInvokeState *state,
-                                                  PyGIArgCache *arg_cache,
-                                                  PyObject *py_arg,
-                                                  PyGIMarshalCleanupData data,
-                                                  gboolean was_processed)
+                                                  PyGIMarshalCleanupData data)
 {
     pygi_marshal_cleanup_data_destroy (&data);
 }
