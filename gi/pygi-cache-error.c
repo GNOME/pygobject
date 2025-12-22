@@ -48,10 +48,7 @@ _pygi_marshal_from_py_gerror (PyGIInvokeState *state,
 
 static void
 _pygi_marshal_from_py_gerror_cleanup (PyGIInvokeState *state,
-                                      PyGIArgCache *arg_cache,
-                                      PyObject *py_arg,
-                                      PyGIMarshalCleanupData cleanup_data,
-                                      gboolean was_processed)
+                                      PyGIMarshalCleanupData cleanup_data)
 {
     pygi_marshal_cleanup_data_destroy (&cleanup_data);
 }
