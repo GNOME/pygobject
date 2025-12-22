@@ -22,7 +22,6 @@
 #include "pygi-closure.h"
 #include "pygi-error.h"
 #include "pygi-invoke.h"
-#include "pygi-object.h"
 #include "pygi-repository.h"
 #include "pygi-resulttuple.h"
 #include "pygi-type.h"
