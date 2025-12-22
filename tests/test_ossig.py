@@ -89,6 +89,7 @@ class TestOverridesWakeupOnAlarm(unittest.TestCase):
             app.connect("activate", lambda *args: None)
             app.run()
 
+    @unittest.skipIf(os.getenv("VALGRIND") is not None, "makes valgrind crash")
     @unittest.skipIf(Gtk is None or os.name == "nt", "not on Windows")
     @unittest.skipIf(Gtk is None or Gtk_version == "4.0", "not in gtk4")
     def test_gtk_main(self):
@@ -98,6 +99,7 @@ class TestOverridesWakeupOnAlarm(unittest.TestCase):
         with self._run_with_timeout(2000, Gtk.main_quit):
             Gtk.main()
 
+    @unittest.skipIf(os.getenv("VALGRIND") is not None, "makes valgrind crash")
     @unittest.skipIf(Gtk is None or os.name == "nt", "not on Windows")
     @unittest.skipIf(Gtk is None or Gtk_version == "4.0", "not in gtk4")
     def test_gtk_dialog_run(self):
