@@ -393,8 +393,7 @@ _pygi_closure_convert_arguments (PyGIInvokeState *state,
                 state->args[i].to_py_arg_cleanup_data = cleanup_data;
 
                 if (value == NULL) {
-                    pygi_marshal_cleanup_args_to_py_parameter_fail (state,
-                                                                    cache, i);
+                    state->failed = TRUE;
                     return FALSE;
                 }
             }
@@ -430,7 +429,7 @@ _pygi_closure_set_out_arguments (PyGIInvokeState *state,
             &state->args[0].arg_cleanup_data);
 
         if (!success) {
-            pygi_marshal_cleanup_args_return_fail (state, cache);
+            state->failed = TRUE;
             return FALSE;
         }
 
@@ -453,8 +452,7 @@ _pygi_closure_set_out_arguments (PyGIInvokeState *state,
             if (PyTuple_Check (py_retval)) {
                 item = PyTuple_GET_ITEM (py_retval, i_py_retval);
             } else if (i_py_retval != 0) {
-                pygi_marshal_cleanup_args_to_py_parameter_fail (state, cache,
-                                                                i_py_retval);
+                state->failed = TRUE;
                 return FALSE;
             }
 
@@ -463,8 +461,7 @@ _pygi_closure_set_out_arguments (PyGIInvokeState *state,
                 &state->args[i_py_retval].arg_cleanup_data);
 
             if (!success) {
-                pygi_marshal_cleanup_args_to_py_parameter_fail (state, cache,
-                                                                i_py_retval);
+                state->failed = TRUE;
                 return FALSE;
             }
 
