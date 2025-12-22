@@ -151,7 +151,7 @@ marshal_cleanup_from_py_utf8 (PyGIInvokeState *state, PyGIArgCache *arg_cache,
                               PyGIMarshalCleanupData cleanup_data,
                               gboolean was_processed)
 {
-    if (was_processed) pygi_marshal_cleanup_data_destroy (&cleanup_data);
+    pygi_marshal_cleanup_data_destroy (&cleanup_data);
 }
 
 static void
