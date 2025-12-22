@@ -205,7 +205,7 @@ _pygi_marshal_cleanup_from_py_interface_callback (PyGIInvokeState *state,
                                                   PyGIMarshalCleanupData data,
                                                   gboolean was_processed)
 {
-    if (was_processed) pygi_marshal_cleanup_data_destroy (&data);
+    pygi_marshal_cleanup_data_destroy (&data);
 }
 
 static void
