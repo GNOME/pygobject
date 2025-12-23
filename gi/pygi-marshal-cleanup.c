@@ -104,8 +104,6 @@ pygi_marshal_cleanup_args_from_py_marshal_success (PyGIInvokeState *state,
             && arg_cache->py_arg_index >= 0
             && arg_cache->direction & PYGI_DIRECTION_FROM_PYTHON) {
             cleanup_func (state, cleanup_data);
-            state->args[i].arg_cleanup_data =
-                (PyGIMarshalCleanupData){ NULL, NULL };
         }
     }
 

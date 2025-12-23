@@ -153,12 +153,11 @@ _pygi_marshal_from_py_interface_object (PyGIInvokeState *state,
                             iface_cache->g_type))) {
         gboolean res;
         res = func (py_arg, arg, arg_cache->transfer);
-        /* FixMe: should only add destroy for state->failed
         if (arg_cache->transfer == GI_TRANSFER_EVERYTHING) {
-            cleanup_data->data = arg->v_pointer;
-            cleanup_data->destroy = (GDestroyNotify)g_object_unref;
+            pygi_marshal_cleanup_data_init_full (
+                cleanup_data, arg->v_pointer, NULL,
+                (GDestroyNotify)g_object_unref);
         }
-        */
         return res;
 
     } else {
@@ -223,7 +222,6 @@ pygi_arg_object_to_py (GIArgument *arg, GITransfer transfer)
     return pyobj;
 }
 
-/*
 static GDestroyNotify
 destroy_notifier_for_object (gpointer object, PyGIArgCache *arg_cache)
 {
@@ -236,7 +234,7 @@ destroy_notifier_for_object (gpointer object, PyGIArgCache *arg_cache)
             (GIObjectInfo *)iface_cache->interface_info);
     }
 }
-*/
+
 static PyObject *
 _pygi_marshal_to_py_called_from_c_interface_object_cache_adapter (
     PyGIInvokeState *state, PyGICallableCache *callable_cache,
@@ -266,13 +264,12 @@ _pygi_marshal_to_py_called_from_c_interface_object_cache_adapter (
 
     object = pygi_arg_object_to_py (arg, arg_cache->transfer);
 
-    /* FixME: this should only trigger if state->failed
     if (arg_cache->transfer == GI_TRANSFER_EVERYTHING) {
-        cleanup_data->data = arg->v_pointer;
-        cleanup_data->destroy =
-            destroy_notifier_for_object (arg->v_pointer, arg_cache);
+        pygi_marshal_cleanup_data_init_full (
+            cleanup_data, arg->v_pointer, NULL,
+            destroy_notifier_for_object (arg->v_pointer, arg_cache));
     }
-*/
+
     return object;
 }
 
@@ -284,13 +281,12 @@ _pygi_marshal_to_py_called_from_py_interface_object_cache_adapter (
 {
     PyObject *object = pygi_arg_object_to_py (arg, arg_cache->transfer);
 
-    /* FixMe: Should only set this for state->failed calls
     if (arg_cache->transfer == GI_TRANSFER_EVERYTHING) {
-        cleanup_data->data = arg->v_pointer;
-        cleanup_data->destroy =
-            destroy_notifier_for_object (arg->v_pointer, arg_cache);
+        pygi_marshal_cleanup_data_init_full (
+            cleanup_data, arg->v_pointer, NULL,
+            destroy_notifier_for_object (arg->v_pointer, arg_cache));
     }
-*/
+
     return object;
 }
 
@@ -298,7 +294,8 @@ static void
 _pygi_marshal_cleanup_to_py_interface_object (
     PyGIInvokeState *state, PyGIMarshalCleanupData cleanup_data)
 {
-    if (state->failed) pygi_marshal_cleanup_data_destroy (&cleanup_data);
+    if (state->failed)
+        pygi_marshal_cleanup_data_destroy_failed (&cleanup_data);
 }
 
 static void
@@ -307,7 +304,8 @@ _pygi_marshal_cleanup_from_py_interface_object (
 {
     /* If we processed the parameter but fail before invoking the method,
        we need to remove the ref we added */
-    if (state->failed) pygi_marshal_cleanup_data_destroy (&cleanup_data);
+    if (state->failed)
+        pygi_marshal_cleanup_data_destroy_failed (&cleanup_data);
 }
 
 PyGIArgCache *

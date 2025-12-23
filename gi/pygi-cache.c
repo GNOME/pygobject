@@ -27,12 +27,57 @@
 #include "pygi-type.h"
 #include "pygi-cache-private.h"
 
+/**
+ * pygi_marshal_cleanup_data_init:
+ *
+ * Destroy function is the same for both successful and failed invocations.
+ */
+void
+pygi_marshal_cleanup_data_init (PyGIMarshalCleanupData *cleanup_data,
+                                gpointer data, GDestroyNotify destroy)
+{
+    cleanup_data->data = data;
+    cleanup_data->destroy = destroy;
+    cleanup_data->destroy_failed = destroy;
+}
+
+/**
+ * pygi_marshal_cleanup_data_init_full:
+ *
+ * Use different calls for successful and failed invocations.
+ */
+void
+pygi_marshal_cleanup_data_init_full (PyGIMarshalCleanupData *cleanup_data,
+                                     gpointer data, GDestroyNotify destroy,
+                                     GDestroyNotify destroy_failed)
+{
+    cleanup_data->data = data;
+    cleanup_data->destroy = destroy;
+    cleanup_data->destroy_failed = destroy_failed;
+}
+
 void
 pygi_marshal_cleanup_data_destroy (PyGIMarshalCleanupData *cleanup_data)
 {
     if (cleanup_data != NULL && cleanup_data->destroy != NULL
-        && cleanup_data->data != NULL)
+        && cleanup_data->data != NULL) {
         cleanup_data->destroy (cleanup_data->data);
+        cleanup_data->data = NULL;
+        cleanup_data->destroy = NULL;
+        cleanup_data->destroy_failed = NULL;
+    }
+}
+
+void
+pygi_marshal_cleanup_data_destroy_failed (PyGIMarshalCleanupData *cleanup_data)
+{
+    if (cleanup_data != NULL && cleanup_data->destroy_failed != NULL
+        && cleanup_data->data != NULL) {
+        cleanup_data->destroy_failed (cleanup_data->data);
+        cleanup_data->data = NULL;
+        cleanup_data->destroy = NULL;
+        cleanup_data->destroy_failed = NULL;
+    }
 }
 
 void

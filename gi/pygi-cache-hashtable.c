@@ -91,8 +91,8 @@ _pygi_marshal_from_py_ghash (PyGIInvokeState *state,
     if (arg_cache->transfer != GI_TRANSFER_EVERYTHING) {
         item_cleanups = g_array_sized_new (
             FALSE, TRUE, sizeof (PyGIMarshalCleanupData), length * 2 + 1);
-        cleanup_data->data = item_cleanups;
-        cleanup_data->destroy = (GDestroyNotify)g_array_unref;
+        pygi_marshal_cleanup_data_init (cleanup_data, item_cleanups,
+                                        (GDestroyNotify)g_array_unref);
     }
 
     key_from_py_marshaller = hash_cache->key_cache->from_py_marshaller;
@@ -290,8 +290,8 @@ _pygi_marshal_to_py_ghash (PyGIInvokeState *state,
 
     if (arg_cache->transfer == GI_TRANSFER_EVERYTHING
         || arg_cache->transfer == GI_TRANSFER_CONTAINER) {
-        cleanup_data->data = arg->v_pointer;
-        cleanup_data->destroy = (GDestroyNotify)g_hash_table_unref;
+        pygi_marshal_cleanup_data_init (cleanup_data, arg->v_pointer,
+                                        (GDestroyNotify)g_hash_table_unref);
     }
 
     return py_obj;
