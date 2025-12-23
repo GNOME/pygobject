@@ -199,13 +199,6 @@ _pygi_marshal_to_py_interface_callback (
 }
 
 static void
-_pygi_marshal_cleanup_from_py_interface_callback (PyGIInvokeState *state,
-                                                  PyGIMarshalCleanupData data)
-{
-    pygi_marshal_cleanup_data_destroy (&data);
-}
-
-static void
 _callback_cache_free_func (PyGICallbackCache *cache)
 {
     if (cache != NULL) {
@@ -288,8 +281,6 @@ pygi_arg_callback_new_from_info (GITypeInfo *type_info,
             GI_CALLABLE_INFO (callback_cache->interface_info));
         arg_cache->from_py_marshaller =
             _pygi_marshal_from_py_interface_callback;
-        arg_cache->from_py_cleanup =
-            _pygi_marshal_cleanup_from_py_interface_callback;
 
         if (callback_cache->scope == GI_SCOPE_TYPE_ASYNC)
             callback_cache->arg_cache.async_context =

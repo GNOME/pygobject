@@ -46,14 +46,6 @@ _pygi_marshal_from_py_gerror (PyGIInvokeState *state,
     }
 }
 
-
-static void
-_pygi_marshal_from_py_gerror_cleanup (PyGIInvokeState *state,
-                                      PyGIMarshalCleanupData cleanup_data)
-{
-    pygi_marshal_cleanup_data_destroy (&cleanup_data);
-}
-
 static PyObject *
 _pygi_marshal_to_py_gerror (PyGIInvokeState *state,
                             PyGICallableCache *callable_cache,
@@ -84,7 +76,6 @@ pygi_arg_gerror_new_from_info (GITypeInfo *type_info, GIArgInfo *arg_info,
 
     if (direction & PYGI_DIRECTION_FROM_PYTHON) {
         arg_cache->from_py_marshaller = _pygi_marshal_from_py_gerror;
-        arg_cache->from_py_cleanup = _pygi_marshal_from_py_gerror_cleanup;
     }
 
     if (direction & PYGI_DIRECTION_TO_PYTHON) {
