@@ -127,8 +127,8 @@ pygi_arg_gvalue_from_py_marshal (PyGIInvokeState *state,
 
         if (arg_cache->transfer == GI_TRANSFER_NOTHING) {
             /* Free everything in cleanup. */
-            cleanup_data->data = value;
-            cleanup_data->destroy = unset_and_free_gvalue;
+            pygi_marshal_cleanup_data_init (cleanup_data, value,
+                                            unset_and_free_gvalue);
         }
     }
 
@@ -224,11 +224,11 @@ pygi_arg_gclosure_from_py_marshal (PyGIInvokeState *state,
 
     if (arg_cache->transfer == GI_TRANSFER_NOTHING) {
         /* Free everything in cleanup. */
-        cleanup_data->data = closure;
-        cleanup_data->destroy = (GDestroyNotify)g_closure_unref;
+        pygi_marshal_cleanup_data_init (cleanup_data, closure,
+                                        (GDestroyNotify)g_closure_unref);
     } else { /* GI_TRANSFER_EVERYTHING */
         /* No cleanup, everything is given to the callee. */
-        cleanup_data->data = NULL;
+        g_assert (cleanup_data->data == NULL);
     }
 
     return TRUE;
@@ -248,11 +248,17 @@ typedef struct {
 } ForeignReleaseData;
 
 static void
+free_foreign_release_data (ForeignReleaseData *data)
+{
+    gi_base_info_unref (data->base_info);
+    g_free (data);
+}
+
+static void
 release_foreign (ForeignReleaseData *data)
 {
     pygi_struct_foreign_release (data->base_info, data->struct_);
-    gi_base_info_unref (data->base_info);
-    g_free (data);
+    free_foreign_release_data (data);
 }
 
 static gboolean
@@ -278,8 +284,9 @@ pygi_arg_foreign_from_py_marshal (PyGIInvokeState *state,
     release_data->base_info = gi_base_info_ref (
         GI_BASE_INFO (((PyGIInterfaceCache *)arg_cache)->interface_info));
     release_data->struct_ = arg->v_pointer;
-    cleanup_data->data = release_data;
-    cleanup_data->destroy = (GDestroyNotify)release_foreign;
+    pygi_marshal_cleanup_data_init_full (
+        cleanup_data, release_data, (GDestroyNotify)free_foreign_release_data,
+        (GDestroyNotify)release_foreign);
 
     return Py_IsNone (success);
 }
@@ -289,11 +296,9 @@ arg_foreign_from_py_cleanup (PyGIInvokeState *state,
                              PyGIMarshalCleanupData cleanup_data)
 {
     if (state->failed) {
-        pygi_marshal_cleanup_data_destroy (&cleanup_data);
+        pygi_marshal_cleanup_data_destroy_failed (&cleanup_data);
     } else if (cleanup_data.data != NULL) {
-        gi_base_info_unref (
-            ((ForeignReleaseData *)cleanup_data.data)->base_info);
-        g_free (cleanup_data.data);
+        pygi_marshal_cleanup_data_destroy (&cleanup_data);
     }
 }
 
@@ -436,8 +441,10 @@ pygi_arg_foreign_to_py_marshal (PyGIInvokeState *state,
         release_data->base_info = gi_base_info_ref (
             GI_BASE_INFO (((PyGIInterfaceCache *)arg_cache)->interface_info));
         release_data->struct_ = arg->v_pointer;
-        cleanup_data->data = release_data;
-        cleanup_data->destroy = (GDestroyNotify)release_foreign;
+        pygi_marshal_cleanup_data_init_full (
+            cleanup_data, release_data,
+            (GDestroyNotify)free_foreign_release_data,
+            (GDestroyNotify)release_foreign);
     }
 
     return py_obj;
@@ -448,11 +455,9 @@ arg_foreign_to_py_cleanup (PyGIInvokeState *state,
                            PyGIMarshalCleanupData cleanup_data)
 {
     if (state->failed) {
-        pygi_marshal_cleanup_data_destroy (&cleanup_data);
+        pygi_marshal_cleanup_data_destroy_failed (&cleanup_data);
     } else if (cleanup_data.data != NULL) {
-        gi_base_info_unref (
-            ((ForeignReleaseData *)cleanup_data.data)->base_info);
-        g_free (cleanup_data.data);
+        pygi_marshal_cleanup_data_destroy (&cleanup_data);
     }
 }
 
@@ -484,9 +489,9 @@ pygi_arg_struct_to_py_marshal (PyGIInvokeState *state,
                     : 0);
 
             if (transfer == GI_TRANSFER_NOTHING) {
-                cleanup_data->data = py_obj;
-                cleanup_data->destroy =
-                    (GDestroyNotify)pygi_boxed_copy_in_place;
+                pygi_marshal_cleanup_data_init (
+                    cleanup_data, py_obj,
+                    (GDestroyNotify)pygi_boxed_copy_in_place);
             }
         }
     } else if (g_type_is_a (g_type, G_TYPE_POINTER)) {
@@ -537,8 +542,9 @@ arg_type_class_from_py_marshal (PyGIInvokeState *state,
         arg->v_pointer = g_type_class_ref (gtype);
 
         if (arg_cache->transfer == GI_TRANSFER_NOTHING) {
-            cleanup_data->data = arg->v_pointer;
-            cleanup_data->destroy = (GDestroyNotify)g_type_class_unref;
+            pygi_marshal_cleanup_data_init (
+                cleanup_data, arg->v_pointer,
+                (GDestroyNotify)g_type_class_unref);
         }
         return TRUE;
     } else {
