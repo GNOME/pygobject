@@ -166,7 +166,7 @@ pyg_option_context_parse (PyGOptionContext *self, PyObject *args,
         return NULL;
     }
 
-    new_argv = PyList_New (g_strv_length (argv_content));
+    new_argv = PyList_New ((Py_ssize_t)g_strv_length (argv_content));
     for (pos = 0; pos < argv_length; pos++) {
         arg = PyUnicode_FromString (argv_content[pos]);
         PyList_SetItem (new_argv, pos, arg);

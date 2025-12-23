@@ -162,7 +162,7 @@ create_signal (GType instance_type, const gchar *signal_name, PyObject *tuple)
 
     param_types = g_new (GType, n_params);
     for (i = 0; i < n_params; i++) {
-        PyObject *item = PySequence_GetItem (py_param_types, i);
+        PyObject *item = PySequence_GetItem (py_param_types, (Py_ssize_t)i);
 
         param_types[i] = pyg_type_from_object (item);
         if (param_types[i] == 0) {

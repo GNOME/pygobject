@@ -290,7 +290,7 @@ pyg_type_get_bases (GType gtype)
     parent_type = g_type_parent (gtype);
     py_parent_type = pygobject_lookup_class (parent_type);
     interfaces = g_type_interfaces (gtype, &n_interfaces);
-    bases = PyTuple_New (n_interfaces + 1);
+    bases = PyTuple_New ((Py_ssize_t)n_interfaces + 1);
     /* We will always put the parent at the first position in bases */
     Py_INCREF (py_parent_type); /* PyTuple_SetItem steals a reference */
     PyTuple_SetItem (bases, 0, (PyObject *)py_parent_type);
@@ -302,7 +302,8 @@ pyg_type_get_bases (GType gtype)
             py_interface_type = pygobject_lookup_class (interface_type);
             Py_INCREF (
                 py_interface_type); /* PyTuple_SetItem steals a reference */
-            PyTuple_SetItem (bases, i + 1, (PyObject *)py_interface_type);
+            PyTuple_SetItem (bases, (Py_ssize_t)i + 1,
+                             (PyObject *)py_interface_type);
         }
     }
     g_free (interfaces);
@@ -1577,7 +1578,7 @@ pygobject_emit (PyGObject *self, PyObject *args)
         g_value_init (&params[i + 1],
                       query.param_types[i] & ~G_SIGNAL_TYPE_STATIC_SCOPE);
     for (i = 0; i < query.n_params; i++) {
-        PyObject *item = PyTuple_GetItem (args, i + 1);
+        PyObject *item = PyTuple_GetItem (args, (Py_ssize_t)i + 1);
 
         if (pyg_value_from_pyobject (&params[i + 1], item) < 0) {
             gchar buf[128];
@@ -1672,7 +1673,7 @@ pygobject_chain_from_overridden (PyGObject *self, PyObject *args)
         g_value_init (&params[i + 1],
                       query.param_types[i] & ~G_SIGNAL_TYPE_STATIC_SCOPE);
     for (i = 0; i < query.n_params; i++) {
-        PyObject *item = PyTuple_GetItem (args, i);
+        PyObject *item = PyTuple_GetItem (args, (Py_ssize_t)i);
 
         if (pyg_boxed_check (
                 item, query.param_types[i] & ~G_SIGNAL_TYPE_STATIC_SCOPE)) {

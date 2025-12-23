@@ -96,7 +96,7 @@ gi_argument_to_c_long (GIArgument *arg_in, long *c_long_out,
         return TRUE;
     case GI_TYPE_TAG_UINT32:
     case GI_TYPE_TAG_UNICHAR:
-        *c_long_out = arg_in->v_uint32;
+        *c_long_out = (long)arg_in->v_uint32;
         return TRUE;
     case GI_TYPE_TAG_INT64:
         if (arg_in->v_int64 > G_MAXLONG || arg_in->v_int64 < G_MINLONG) {

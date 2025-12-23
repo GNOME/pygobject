@@ -752,7 +752,7 @@ marshal_emission_hook (GSignalInvocationHint *ihint, guint n_param_values,
     state = PyGILState_Ensure ();
 
     /* construct Python tuple for the parameter values */
-    params = PyTuple_New (n_param_values);
+    params = PyTuple_New ((Py_ssize_t)n_param_values);
 
     for (i = 0; i < n_param_values; i++) {
         PyObject *item = pyg_value_to_pyobject (&param_values[i], FALSE);
@@ -761,7 +761,7 @@ marshal_emission_hook (GSignalInvocationHint *ihint, guint n_param_values,
         if (!item) {
             goto out;
         }
-        PyTuple_SetItem (params, i, item);
+        PyTuple_SetItem (params, (Py_ssize_t)i, item);
     }
 
     args = (PyObject *)user_data;
@@ -886,7 +886,7 @@ pyg_signal_new (PyObject *self, PyObject *args)
 
     param_types = g_new (GType, n_params);
     for (i = 0; i < n_params; i++) {
-        PyObject *item = PySequence_GetItem (py_param_types, i);
+        PyObject *item = PySequence_GetItem (py_param_types, (Py_ssize_t)i);
 
         param_types[i] = pyg_type_from_object (item);
         if (param_types[i] == 0) {
@@ -947,14 +947,14 @@ pyg_object_class_list_properties (PyObject *self, PyObject *args)
         return NULL;
     }
 
-    list = PyTuple_New (nprops);
+    list = PyTuple_New ((Py_ssize_t)nprops);
     if (list == NULL) {
         g_free (specs);
         g_type_class_unref (class);
         return NULL;
     }
     for (i = 0; i < nprops; i++) {
-        PyTuple_SetItem (list, i, pygi_fundamental_new (specs[i]));
+        PyTuple_SetItem (list, (Py_ssize_t)i, pygi_fundamental_new (specs[i]));
     }
     g_free (specs);
     if (class)

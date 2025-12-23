@@ -247,7 +247,7 @@ _wrap_gi_repository_get_infos (PyGIRepository *self, PyObject *args,
     }
 
     n_infos = gi_repository_get_n_infos (self->repository, namespace_);
-    infos = PyTuple_New (n_infos);
+    infos = PyTuple_New ((Py_ssize_t)n_infos);
 
     for (i = 0; i < n_infos; i++) {
         GIBaseInfo *info;
@@ -265,7 +265,7 @@ _wrap_gi_repository_get_infos (PyGIRepository *self, PyObject *args,
             break;
         }
 
-        PyTuple_SET_ITEM (infos, i, py_info);
+        PyTuple_SET_ITEM (infos, (Py_ssize_t)i, py_info);
     }
 
     return infos;

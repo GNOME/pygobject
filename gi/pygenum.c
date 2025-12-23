@@ -88,7 +88,7 @@ add_value (PyObject *dict, const char *value_nick, gint64 value)
         return;
     }
 
-    v = PyLong_FromLong (value);
+    v = PyLong_FromInt64 (value);
     PyMapping_SetItemString (dict, upper, v);
     Py_DECREF (v);
     g_free (upper);

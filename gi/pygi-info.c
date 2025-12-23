@@ -147,7 +147,7 @@ _make_infos_tuple (PyGIBaseInfo *self, GetNInfosCallback get_n_infos,
 
     n_infos = get_n_infos ((GIBaseInfo *)self->info);
 
-    infos = PyTuple_New (n_infos);
+    infos = PyTuple_New ((Py_ssize_t)n_infos);
     if (infos == NULL) {
         return NULL;
     }
@@ -999,7 +999,7 @@ _wrap_gi_type_info_get_array_fixed_size (PyGIBaseInfo *self)
 {
     size_t size;
     if (gi_type_info_get_array_fixed_size (GI_TYPE_INFO (self->info), &size))
-        return pygi_gulong_to_py (size);
+        return pygi_gsize_to_py (size);
 
     g_assert_not_reached ();
 }

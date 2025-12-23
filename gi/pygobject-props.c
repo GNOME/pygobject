@@ -205,7 +205,7 @@ pygobject_props_dir (PyGProps *self)
 
     class = g_type_class_ref (self->gtype);
     props = g_object_class_list_properties (class, &n_props);
-    props_list = PyList_New (n_props);
+    props_list = PyList_New ((Py_ssize_t)n_props);
 
     for (i = 0; i < n_props; i++) {
         char *name;
@@ -214,7 +214,7 @@ pygobject_props_dir (PyGProps *self)
         g_strdelimit (name, "-", '_');
         prop_str = PyUnicode_FromString (name);
 
-        PyList_SetItem (props_list, i, prop_str);
+        PyList_SetItem (props_list, (Py_ssize_t)i, prop_str);
         g_free (name);
     }
 
