@@ -2069,7 +2069,7 @@ _wrap_gi_field_info_get_value (PyGIBaseInfo *self, PyObject *args)
             gi_base_info_unref (info);
 
             goto out;
-        case PYGI_INTERFACE_TYPE_TAG_STRUCT:
+        case PYGI_INTERFACE_TYPE_TAG_STRUCT: {
             gsize offset;
 
             offset = gi_field_info_get_offset ((GIFieldInfo *)self->info);
@@ -2079,6 +2079,7 @@ _wrap_gi_field_info_get_value (PyGIBaseInfo *self, PyObject *args)
             gi_base_info_unref (info);
 
             goto argument_to_object;
+        }
         case PYGI_INTERFACE_TYPE_TAG_ENUM:
         case PYGI_INTERFACE_TYPE_TAG_FLAGS:
         case PYGI_INTERFACE_TYPE_TAG_OBJECT:
