@@ -33,12 +33,11 @@ _pygi_marshal_from_py_gerror (PyGIInvokeState *state,
     GError *error = NULL;
     if (Py_IsNone (py_arg)) {
         arg->v_pointer = NULL;
-        cleanup_data->data = NULL;
         return TRUE;
     } else if (pygi_error_marshal_from_py (py_arg, &error)) {
         arg->v_pointer = error;
-        cleanup_data->data = error;
-        cleanup_data->destroy = (GDestroyNotify)g_error_free;
+        pygi_marshal_cleanup_data_init (cleanup_data, error,
+                                        (GDestroyNotify)g_error_free);
         return TRUE;
     } else {
         return FALSE;
