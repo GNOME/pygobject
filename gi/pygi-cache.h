@@ -57,12 +57,6 @@ typedef PyObject *(*PyGIMarshalToPyFunc) (
     PyGIArgCache *arg_cache, GIArgument *arg,
     PyGIMarshalCleanupData *cleanup_data);
 
-typedef void (*PyGIMarshalFromPyCleanupFunc) (
-    PyGIInvokeState *state, PyGIMarshalCleanupData cleanup_data);
-
-typedef void (*PyGIMarshalToPyCleanupFunc) (
-    PyGIInvokeState *state, PyGIMarshalCleanupData cleanup_data);
-
 /* Argument meta types denote how we process the argument:
  *  - PYGI_META_ARG_TYPE_PARENT - parents may or may not have children
  *    but are always processed via the normal marshaller for their
@@ -123,9 +117,6 @@ struct _PyGIArgCache {
 
     PyGIMarshalFromPyFunc from_py_marshaller;
     PyGIMarshalToPyFunc to_py_marshaller;
-
-    PyGIMarshalFromPyCleanupFunc from_py_cleanup;
-    PyGIMarshalToPyCleanupFunc to_py_cleanup;
 
     GDestroyNotify destroy_notify;
 

@@ -200,13 +200,6 @@ err:
     return TRUE;
 }
 
-static void
-_pygi_marshal_cleanup_from_py_ghash (PyGIInvokeState *state,
-                                     PyGIMarshalCleanupData cleanup_data)
-{
-    pygi_marshal_cleanup_data_destroy (&cleanup_data);
-}
-
 static PyObject *
 _pygi_marshal_to_py_ghash (PyGIInvokeState *state,
                            PyGICallableCache *callable_cache,
@@ -297,13 +290,6 @@ _pygi_marshal_to_py_ghash (PyGIInvokeState *state,
     return py_obj;
 }
 
-static void
-_pygi_marshal_cleanup_to_py_ghash (PyGIInvokeState *state,
-                                   PyGIMarshalCleanupData cleanup_data)
-{
-    pygi_marshal_cleanup_data_destroy (&cleanup_data);
-}
-
 static PyGIArgCache *
 hash_table_item_cache_new (GITypeInfo *type_info, int index,
                            GITransfer transfer, PyGIDirection direction,
@@ -368,12 +354,10 @@ pygi_arg_hash_table_new_from_info (GITypeInfo *type_info, GIArgInfo *arg_info,
 
     if (direction & PYGI_DIRECTION_FROM_PYTHON) {
         hc->arg_cache.from_py_marshaller = _pygi_marshal_from_py_ghash;
-        hc->arg_cache.from_py_cleanup = _pygi_marshal_cleanup_from_py_ghash;
     }
 
     if (direction & PYGI_DIRECTION_TO_PYTHON) {
         hc->arg_cache.to_py_marshaller = _pygi_marshal_to_py_ghash;
-        hc->arg_cache.to_py_cleanup = _pygi_marshal_cleanup_to_py_ghash;
     }
 
     return (PyGIArgCache *)hc;
