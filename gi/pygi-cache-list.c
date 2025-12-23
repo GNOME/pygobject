@@ -189,7 +189,7 @@ _pygi_marshal_cleanup_from_py_glist (PyGIInvokeState *state,
             PyGIMarshalFromPyCleanupFunc cleanup_func =
                 sequence_cache->item_cache->from_py_cleanup;
             GSList *node = list_;
-            gsize i = 0;
+            Py_ssize_t i = 0;
             while (node != NULL) {
                 PyObject *py_item = PySequence_GetItem (py_arg, i);
                 cleanup_func (state, sequence_cache->item_cache, py_item,

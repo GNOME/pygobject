@@ -256,7 +256,7 @@ create_property (const gchar *prop_name, GType prop_type, const gchar *nick,
 
     switch (G_TYPE_FUNDAMENTAL (prop_type)) {
     case G_TYPE_CHAR: {
-        gchar minimum, maximum, default_value;
+        gint8 minimum, maximum, default_value;
 
         if (!PyArg_ParseTuple (args, "ccc", &minimum, &maximum,
                                &default_value))

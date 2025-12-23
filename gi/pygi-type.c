@@ -1173,18 +1173,18 @@ object_doc_descr_get (PyObject *self, PyObject *obj, PyObject *type)
     if (g_type_is_a (gtype, G_TYPE_OBJECT)) {
         GType parent = G_TYPE_OBJECT;
         GArray *parents = g_array_new (FALSE, FALSE, sizeof (GType));
-        int iparent;
+        guint iparent;
 
         while (parent) {
             g_array_append_val (parents, parent);
             parent = g_type_next_base (gtype, parent);
         }
 
-        for (iparent = parents->len - 1; iparent >= 0; --iparent) {
+        for (iparent = parents->len; iparent > 0; iparent--) {
             GType *interfaces;
             guint n_interfaces, i;
 
-            parent = g_array_index (parents, GType, iparent);
+            parent = g_array_index (parents, GType, iparent - 1);
             add_signal_docs (parent, string);
             add_property_docs (parent, string);
 
@@ -1197,7 +1197,8 @@ object_doc_descr_get (PyObject *self, PyObject *obj, PyObject *type)
         g_array_free (parents, TRUE);
     }
 
-    pystring = PyUnicode_FromStringAndSize (string->str, string->len);
+    pystring =
+        PyUnicode_FromStringAndSize (string->str, (Py_ssize_t)string->len);
     g_string_free (string, TRUE);
     return pystring;
 }
@@ -1272,7 +1273,8 @@ strv_to_gvalue (GValue *value, PyObject *obj)
     if (!(PyTuple_Check (obj) || PyList_Check (obj))) return -1;
 
     argc = PySequence_Length (obj);
-    argv = g_new (gchar *, argc + 1);
+    if (argc < 0) return -1;
+    argv = g_new (gchar *, (gsize)argc + 1);
     for (i = 0; i < argc; ++i) {
         PyObject *item = PySequence_Fast_GET_ITEM (obj, i);
         if (!pygi_utf8_from_py (item, &(argv[i]))) goto error;

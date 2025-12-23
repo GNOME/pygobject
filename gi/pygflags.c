@@ -283,7 +283,8 @@ pyg_flags_register (PyTypeObject *flags_class, char *type_name)
     if (!values) goto out;
 
     length = PyList_Size (values);
-    flags_values = g_new0 (GFlagsValue, length + 1);
+    if (length < 0) goto out;
+    flags_values = g_new0 (GFlagsValue, (gsize)length + 1);
     for (i = 0; i < length; i++) {
         PyObject *value = PyList_GetItem (values, i);
         PyObject *name = PyObject_GetAttrString (value, "name");

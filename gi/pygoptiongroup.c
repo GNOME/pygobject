@@ -176,7 +176,7 @@ pyg_option_group_add_entries (PyGOptionGroup *self, PyObject *args,
         return NULL;
     }
 
-    entries = g_new0 (GOptionEntry, entry_count + 1);
+    entries = g_new0 (GOptionEntry, (gsize)entry_count + 1);
     for (pos = 0; pos < entry_count; pos++) {
         gchar *long_name, *description, *arg_description;
         entry_tuple = PyList_GetItem (list, pos);

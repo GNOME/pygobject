@@ -139,7 +139,7 @@ pyg_option_context_parse (PyGOptionContext *self, PyObject *args,
         return NULL;
     }
 
-    argv_content = g_new (char *, argv_length + 1);
+    argv_content = g_new (char *, (gsize)argv_length + 1);
     argv_content[argv_length] = NULL;
     for (pos = 0; pos < argv_length; pos++) {
         arg = PyList_GetItem (argv, pos);

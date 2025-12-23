@@ -164,7 +164,8 @@ pyglib_spawn_async (PyObject *object, PyObject *args, PyObject *kwargs)
         return NULL;
     }
     len = PySequence_Length (pyargv);
-    argv = g_new0 (char *, len + 1);
+    if (len < 0) return NULL;
+    argv = g_new0 (char *, (gsize)len + 1);
     for (i = 0; i < len; ++i) {
         PyObject *tmp = PySequence_ITEM (pyargv, i);
         if (tmp == NULL || !PyUnicode_Check (tmp)) {
@@ -189,7 +190,8 @@ pyglib_spawn_async (PyObject *object, PyObject *args, PyObject *kwargs)
             return NULL;
         }
         len = PySequence_Length (pyenvp);
-        envp = g_new0 (char *, len + 1);
+        if (len < 0) return NULL;
+        envp = g_new0 (char *, (gsize)len + 1);
         for (i = 0; i < len; ++i) {
             PyObject *tmp = PySequence_ITEM (pyenvp, i);
             if (tmp == NULL || !PyUnicode_Check (tmp)) {

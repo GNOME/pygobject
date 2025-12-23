@@ -92,7 +92,7 @@ gi_argument_from_py_ssize_t (GIArgument *arg_out, Py_ssize_t size_in,
 
     case GI_TYPE_TAG_UINT64:
         if (size_in >= 0) {
-            arg_out->v_uint64 = size_in;
+            arg_out->v_uint64 = (guint64)size_in;
             return TRUE;
         } else {
             goto overflow;
@@ -325,7 +325,8 @@ err:
         /* Only attempt per item cleanup on pointer items */
         if (sequence_cache->item_cache->is_pointer) {
             for (j = 0; j < success_count; j++) {
-                PyObject *py_seq_item = PySequence_GetItem (py_arg, j);
+                PyObject *py_seq_item =
+                    PySequence_GetItem (py_arg, (Py_ssize_t)j);
                 cleanup_func (state, sequence_cache->item_cache, py_seq_item,
                               is_ptr_array
                                   ? g_ptr_array_index ((GPtrArray *)array_, j)
@@ -442,7 +443,7 @@ _pygi_marshal_cleanup_from_py_array (PyGIInvokeState *state,
                     }
                 }
 
-                py_item = PySequence_GetItem (py_arg, i);
+                py_item = PySequence_GetItem (py_arg, (Py_ssize_t)i);
                 cleanup_func (state, sequence_cache->item_cache, py_item, item,
                               TRUE);
                 Py_XDECREF (py_item);
@@ -494,7 +495,7 @@ _wrap_c_array (PyGIInvokeState *state, PyGIArgGArray *array_cache,
     } else if (array_cache->has_len_arg) {
         GIArgument len_arg = state->args[array_cache->len_arg_index].arg_value;
 
-        len = len_arg.v_long;
+        len = len_arg.v_ulong;
     }
 
     return g_array_new_take (data, (guint)len, FALSE,

@@ -238,9 +238,8 @@ _wrap_gi_repository_get_infos (PyGIRepository *self, PyObject *args,
     static char *kwlist[] = { "namespace", NULL };
 
     const char *namespace_;
-    gssize n_infos;
+    unsigned int n_infos, i;
     PyObject *infos;
-    gint i;
 
     if (!PyArg_ParseTupleAndKeywords (args, kwargs, "s:Repository.get_infos",
                                       kwlist, &namespace_)) {
@@ -248,12 +247,6 @@ _wrap_gi_repository_get_infos (PyGIRepository *self, PyObject *args,
     }
 
     n_infos = gi_repository_get_n_infos (self->repository, namespace_);
-    if (n_infos < 0) {
-        PyErr_Format (PyExc_RuntimeError, "Namespace '%s' not loaded",
-                      namespace_);
-        return NULL;
-    }
-
     infos = PyTuple_New (n_infos);
 
     for (i = 0; i < n_infos; i++) {

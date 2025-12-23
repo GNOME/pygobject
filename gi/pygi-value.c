@@ -86,7 +86,7 @@ _pygi_argument_from_g_value (const GValue *value, GITypeInfo *type_info)
             arg.v_uint64 = g_value_get_uint64 (value);
         break;
     case GI_TYPE_TAG_UNICHAR:
-        arg.v_uint32 = g_value_get_schar (value);
+        arg.v_uint32 = (guint32)g_value_get_ulong (value);
         break;
     case GI_TYPE_TAG_FLOAT:
         arg.v_float = g_value_get_float (value);
@@ -756,8 +756,8 @@ value_to_py_structured_type (const GValue *value, GType fundamental,
             return ret;
         } else if (G_VALUE_HOLDS (value, G_TYPE_GSTRING)) {
             GString *string = (GString *)g_value_get_boxed (value);
-            PyObject *ret =
-                PyUnicode_FromStringAndSize (string->str, string->len);
+            PyObject *ret = PyUnicode_FromStringAndSize (
+                string->str, (Py_ssize_t)string->len);
             return ret;
         }
         bm = pyg_type_lookup (G_VALUE_TYPE (value));

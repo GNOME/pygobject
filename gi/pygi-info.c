@@ -141,9 +141,9 @@ static PyObject *
 _make_infos_tuple (PyGIBaseInfo *self, GetNInfosCallback get_n_infos,
                    MakeInfosCallback get_info)
 {
-    gint n_infos;
     PyObject *infos;
-    gint i;
+    guint n_infos;
+    guint i;
 
     n_infos = get_n_infos ((GIBaseInfo *)self->info);
 
@@ -961,9 +961,9 @@ _wrap_gi_type_info_get_param_type (PyGIBaseInfo *self, PyObject *py_n)
 {
     GIBaseInfo *info;
     PyObject *py_info;
-    gint n;
+    guint n;
 
-    if (!pygi_gint_from_py (py_n, &n)) return NULL;
+    if (!pygi_guint_from_py (py_n, &n)) return NULL;
 
     info = (GIBaseInfo *)gi_type_info_get_param_type ((GITypeInfo *)self->info,
                                                       n);
@@ -1395,8 +1395,8 @@ gboolean
 pygi_gi_struct_info_is_simple (GIStructInfo *struct_info)
 {
     gboolean is_simple;
-    gint n_field_infos;
-    gint i;
+    guint n_field_infos;
+    guint i;
 
     is_simple = TRUE;
 
@@ -1902,13 +1902,13 @@ _struct_field_array_length_marshal (gsize length_index, void *container_ptr,
 
     if (GI_IS_UNION_INFO (container_info)) {
         array_len_field = gi_union_info_get_field (
-            (GIUnionInfo *)container_info, (gint)length_index);
+            (GIUnionInfo *)container_info, length_index);
     } else if (GI_IS_STRUCT_INFO (container_info)) {
         array_len_field = gi_struct_info_get_field (
-            (GIStructInfo *)container_info, (gint)length_index);
+            (GIStructInfo *)container_info, length_index);
     } else if (GI_IS_OBJECT_INFO (container_info)) {
         array_len_field = gi_object_info_get_field (
-            (GIObjectInfo *)container_info, (gint)length_index);
+            (GIObjectInfo *)container_info, length_index);
     } else {
         /* Other types don't have fields. */
         g_assert_not_reached ();
@@ -2188,7 +2188,7 @@ _wrap_gi_field_info_set_value (PyGIBaseInfo *self, PyObject *args)
         } else if (GI_IS_STRUCT_INFO (info)) {
             gboolean is_simple;
             gsize offset;
-            gssize size;
+            gsize size;
 
             is_simple = pygi_gi_struct_info_is_simple ((GIStructInfo *)info);
 
@@ -2209,7 +2209,6 @@ _wrap_gi_field_info_set_value (PyGIBaseInfo *self, PyObject *args)
 
             offset = gi_field_info_get_offset ((GIFieldInfo *)self->info);
             size = gi_struct_info_get_size ((GIStructInfo *)info);
-            g_assert (size > 0);
 
             memmove ((char *)pointer + offset, value.v_pointer, size);
 

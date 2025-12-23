@@ -340,7 +340,7 @@ _caller_alloc (PyGIArgCache *arg_cache, GIArgument *arg)
                 foreign_struct, iface_cache->interface_info,
                 GI_TRANSFER_EVERYTHING, arg);
         } else {
-            gssize size = gi_struct_info_get_size (
+            gsize size = gi_struct_info_get_size (
                 (GIStructInfo *)iface_cache->interface_info);
             arg->v_pointer = g_malloc0 (size);
         }

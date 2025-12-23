@@ -233,7 +233,7 @@ _pygi_marshal_from_py_interface_flags (PyGIInvokeState *state,
     interface = gi_type_info_get_interface (arg_cache->type_info);
     g_assert (GI_IS_FLAGS_INFO (interface));
     if (!gi_argument_from_c_long (
-            arg, c_ulong,
+            arg, (long)c_ulong,
             gi_enum_info_get_storage_type ((GIEnumInfo *)interface))) {
         gi_base_info_unref (interface);
         return FALSE;

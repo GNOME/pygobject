@@ -87,7 +87,7 @@ _pygi_signal_closure_length_marshal (gsize length_arg_index, void *user_data1,
     GValue *values = (GValue *)user_data1;
     GICallableInfo *callable_info = (GICallableInfo *)user_data2;
 
-    gi_callable_info_load_arg (callable_info, (gint)length_arg_index,
+    gi_callable_info_load_arg (callable_info, length_arg_index,
                                &length_arg_info);
     gi_arg_info_load_type_info (&length_arg_info, &length_type_info);
 
@@ -107,8 +107,8 @@ pygi_signal_closure_marshal (GClosure *closure, GValue *return_value,
     PyObject *params, *ret = NULL;
     guint i;
     GISignalInfo *signal_info;
-    gint n_sig_info_args;
-    gint sig_info_highest_arg;
+    guint n_sig_info_args;
+    guint sig_info_highest_arg;
     GSList *list_item = NULL;
     GSList *pass_by_ref_structs = NULL;
 
@@ -117,7 +117,6 @@ pygi_signal_closure_marshal (GClosure *closure, GValue *return_value,
     signal_info = ((PyGISignalClosure *)closure)->signal_info;
     n_sig_info_args =
         gi_callable_info_get_n_args (GI_CALLABLE_INFO (signal_info));
-    g_assert_cmpint (n_sig_info_args, >=, 0);
     /* the first argument to a signal callback is instance,
        but instance is not counted in the introspection data */
     sig_info_highest_arg = n_sig_info_args + 1;

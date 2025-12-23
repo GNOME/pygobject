@@ -623,6 +623,12 @@ pyg_channel_read (PyObject *self, PyObject *args, PyObject *kwargs)
                            &max_count)) {
         return NULL;
     }
+    if (max_count < -1) {
+        PyErr_SetString (
+            PyExc_ValueError,
+            "Channel read count should be a positive number or -1");
+        return NULL;
+    }
     if (!pyg_boxed_check (py_iochannel, G_TYPE_IO_CHANNEL)) {
         PyErr_SetString (PyExc_TypeError,
                          "first argument is not a GLib.IOChannel");
@@ -642,15 +648,17 @@ pyg_channel_read (PyObject *self, PyObject *args, PyObject *kwargs)
         if (max_count == -1)
             buf_size = CHUNK_SIZE;
         else {
-            buf_size = max_count - total_read;
+            buf_size = (gsize)max_count - total_read;
             if (buf_size > CHUNK_SIZE) buf_size = CHUNK_SIZE;
         }
 
         if (ret_obj == NULL) {
-            ret_obj = PyBytes_FromStringAndSize ((char *)NULL, buf_size);
+            ret_obj =
+                PyBytes_FromStringAndSize ((char *)NULL, (Py_ssize_t)buf_size);
             if (ret_obj == NULL) goto failure;
         } else if (buf_size + total_read > (gsize)PyBytes_Size (ret_obj)) {
-            if (_PyBytes_Resize (&ret_obj, buf_size + total_read) == -1)
+            if (_PyBytes_Resize (&ret_obj, (Py_ssize_t)(buf_size + total_read))
+                == -1)
                 goto failure;
         }
 
@@ -667,7 +675,8 @@ pyg_channel_read (PyObject *self, PyObject *args, PyObject *kwargs)
     }
 
     if (total_read != (gsize)PyBytes_Size (ret_obj)) {
-        if (_PyBytes_Resize (&ret_obj, total_read) == -1) goto failure;
+        if (_PyBytes_Resize (&ret_obj, (Py_ssize_t)total_read) == -1)
+            goto failure;
     }
 
     return ret_obj;
@@ -703,7 +712,7 @@ pyg_main_context_query (PyObject *self, PyObject *args, PyObject *kwargs)
 
     n_fds = g_main_context_query (context, max_priority, NULL, NULL, 0);
 
-    fds = g_new0 (GPollFD, n_fds);
+    fds = g_new0 (GPollFD, (gsize)n_fds);
 
     n_poll = g_main_context_query (context, max_priority, &timeout_msec, fds,
                                    n_fds);

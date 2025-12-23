@@ -282,7 +282,8 @@ pyg_enum_register (PyTypeObject *enum_class, char *type_name)
     if (!values) goto out;
 
     length = PyList_Size (values);
-    enum_values = g_new0 (GEnumValue, length + 1);
+    if (length < 0) goto out;
+    enum_values = g_new0 (GEnumValue, (gsize)length + 1);
     for (i = 0; i < length; i++) {
         PyObject *value = PyList_GetItem (values, i);
         PyObject *name = PyObject_GetAttrString (value, "name");

@@ -36,8 +36,8 @@
 static gboolean
 _is_union_member (GIRegisteredTypeInfo *interface_info, PyObject *py_arg)
 {
-    gint i;
-    gint n_fields;
+    guint i;
+    guint n_fields;
     GIUnionInfo *union_info;
     gboolean is_member = FALSE;
 

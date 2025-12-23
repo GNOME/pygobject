@@ -925,9 +925,9 @@ pygobject_prepare_construct_properties (GObjectClass *class, PyObject *kwargs,
         Py_ssize_t pos = 0;
         PyObject *key;
         PyObject *value;
-        Py_ssize_t len;
+        gsize len;
 
-        len = PyDict_Size (kwargs);
+        len = (gsize)PyDict_Size (kwargs);
         *names = g_new (const char *, len);
         *values = g_new0 (GValue, len);
         while (PyDict_Next (kwargs, &pos, &key, &value)) {

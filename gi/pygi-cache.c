@@ -499,7 +499,7 @@ _callable_cache_deinit_real (PyGICallableCache *cache)
 static gboolean
 _callable_cache_init (PyGICallableCache *cache, GICallableInfo *callable_info)
 {
-    gint n_args;
+    guint n_args;
 
     cache->info = gi_base_info_ref (GI_BASE_INFO (callable_info));
 
@@ -523,14 +523,11 @@ _callable_cache_init (PyGICallableCache *cache, GICallableInfo *callable_info)
         g_free (warning);
     }
 
-    n_args = (gint)cache->args_offset
-             + gi_callable_info_get_n_args (callable_info);
+    n_args = cache->args_offset + gi_callable_info_get_n_args (callable_info);
 
-    if (n_args >= 0) {
-        cache->args_cache =
-            g_ptr_array_new_full (n_args, (GDestroyNotify)pygi_arg_cache_free);
-        g_ptr_array_set_size (cache->args_cache, n_args);
-    }
+    cache->args_cache =
+        g_ptr_array_new_full (n_args, (GDestroyNotify)pygi_arg_cache_free);
+    g_ptr_array_set_size (cache->args_cache, (gint)n_args);
 
     if (!cache->generate_args_cache (cache, callable_info)) {
         _callable_cache_deinit_real (cache);
@@ -654,7 +651,7 @@ _function_cache_init (PyGIFunctionCache *function_cache,
                 gi_base_info_get_container ((GIBaseInfo *)callable_info);
             const char *name = gi_base_info_get_name (callable_cache->info);
             GIBaseInfo *async_finish = NULL;
-            gint name_len;
+            size_t name_len;
             gchar *finish_name = NULL;
 
             /* This appears to be an async routine. As we have the
@@ -816,7 +813,7 @@ _constructor_cache_invoke_real (PyGIFunctionCache *function_cache,
     }
 
     ret = _function_cache_invoke_real (function_cache, state, py_args + 1,
-                                       nargs - 1, py_kwnames);
+                                       (size_t)nargs - 1, py_kwnames);
 
     if (ret == NULL || pygi_callable_cache_skip_return (cache)) return ret;
 
@@ -953,7 +950,7 @@ _vfunc_cache_invoke_real (PyGIFunctionCache *function_cache,
     }
 
     ret = _function_cache_invoke_real (function_cache, state, py_args + 1,
-                                       nargs - 1, py_kwnames);
+                                       (size_t)nargs - 1, py_kwnames);
 
     return ret;
 }

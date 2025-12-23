@@ -43,23 +43,23 @@ pygi_argument_to_gsize (GIArgument arg, GITypeTag type_tag, gsize *gsize_out)
 {
     switch (type_tag) {
     case GI_TYPE_TAG_INT8:
-        *gsize_out = arg.v_int8;
+        *gsize_out = (gsize)arg.v_int8;
         return TRUE;
     case GI_TYPE_TAG_UINT8:
-        *gsize_out = arg.v_uint8;
+        *gsize_out = (gsize)arg.v_uint8;
         return TRUE;
     case GI_TYPE_TAG_INT16:
-        *gsize_out = arg.v_int16;
+        *gsize_out = (gsize)arg.v_int16;
         return TRUE;
     case GI_TYPE_TAG_UINT16:
-        *gsize_out = arg.v_uint16;
+        *gsize_out = (gsize)arg.v_uint16;
         return TRUE;
     case GI_TYPE_TAG_INT32:
-        *gsize_out = arg.v_int32;
+        *gsize_out = (gsize)arg.v_int32;
         return TRUE;
     case GI_TYPE_TAG_UINT32:
     case GI_TYPE_TAG_UNICHAR:
-        *gsize_out = arg.v_uint32;
+        *gsize_out = (gsize)arg.v_uint32;
         return TRUE;
     case GI_TYPE_TAG_INT64:
         if (arg.v_uint64 > G_MAXSIZE) {
@@ -764,7 +764,7 @@ pygi_argument_array_to_object (GIArgument arg, GITypeInfo *type_info,
                 return object;
             }
 
-            PyList_SET_ITEM (object, i, py_item);
+            PyList_SET_ITEM (object, (Py_ssize_t)i, py_item);
         }
     }
 
@@ -854,7 +854,7 @@ pygi_argument_list_to_object (GIArgument arg, GITypeInfo *type_info,
     list = arg.v_pointer;
     length = g_slist_length (list);
 
-    object = PyList_New (length);
+    object = PyList_New ((Py_ssize_t)length);
     if (object == NULL) return NULL;
 
 
@@ -878,7 +878,7 @@ pygi_argument_list_to_object (GIArgument arg, GITypeInfo *type_info,
             break;
         }
 
-        PyList_SET_ITEM (object, i, py_item);
+        PyList_SET_ITEM (object, (Py_ssize_t)i, py_item);
     }
 
     gi_base_info_unref ((GIBaseInfo *)item_type_info);

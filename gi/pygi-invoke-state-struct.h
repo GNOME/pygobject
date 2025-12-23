@@ -30,7 +30,7 @@ typedef struct _PyGIInvokeState {
     /* Number of arguments the ffi wrapped C function takes. Used as the exact
      * count for argument related arrays held in this struct.
      */
-    gssize n_args;
+    guint n_args;
 
     /* List of arguments passed to ffi. Elements can point directly to values held in
      * arg_values for "in/from Python" or indirectly via arg_pointers for
