@@ -36,8 +36,10 @@ _pygi_marshal_from_py_gerror (PyGIInvokeState *state,
         return TRUE;
     } else if (pygi_error_marshal_from_py (py_arg, &error)) {
         arg->v_pointer = error;
-        pygi_marshal_cleanup_data_init (cleanup_data, error,
-                                        (GDestroyNotify)g_error_free);
+        if (arg_cache->transfer == GI_TRANSFER_NOTHING) {
+            pygi_marshal_cleanup_data_init (cleanup_data, error,
+                                            (GDestroyNotify)g_error_free);
+        }
         return TRUE;
     } else {
         return FALSE;
@@ -82,11 +84,7 @@ pygi_arg_gerror_new_from_info (GITypeInfo *type_info, GIArgInfo *arg_info,
 
     if (direction & PYGI_DIRECTION_FROM_PYTHON) {
         arg_cache->from_py_marshaller = _pygi_marshal_from_py_gerror;
-
-        /* Assign cleanup function if we manage memory after call completion. */
-        if (arg_cache->transfer == GI_TRANSFER_NOTHING) {
-            arg_cache->from_py_cleanup = _pygi_marshal_from_py_gerror_cleanup;
-        }
+        arg_cache->from_py_cleanup = _pygi_marshal_from_py_gerror_cleanup;
     }
 
     if (direction & PYGI_DIRECTION_TO_PYTHON) {
