@@ -150,9 +150,7 @@ else
     '-Wno-missing-field-initializers',
     '-Wno-unused-parameter',
     '-Wno-discarded-qualifiers',
-    '-Wno-sign-conversion',
     '-Wno-cast-function-type',
-    '-Wno-int-conversion',
   ]
 
   main_c_args += [
