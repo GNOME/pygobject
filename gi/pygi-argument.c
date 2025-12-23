@@ -380,7 +380,7 @@ pygi_argument_array_from_object (PyObject *object, GITypeInfo *type_info,
             PyObject *py_item;
             GIArgument item;
 
-            py_item = PySequence_GetItem (object, i);
+            py_item = PySequence_GetItem (object, (Py_ssize_t)i);
             if (py_item == NULL) {
                 goto array_item_error;
             }
@@ -741,9 +741,10 @@ pygi_argument_array_to_object (GIArgument arg, GITypeInfo *type_info,
 
     if (item_type_tag == GI_TYPE_TAG_UINT8) {
         /* Return as a byte array */
-        object = PyBytes_FromStringAndSize (array->data, array->len);
+        object =
+            PyBytes_FromStringAndSize (array->data, (Py_ssize_t)array->len);
     } else {
-        object = PyList_New (array->len);
+        object = PyList_New ((Py_ssize_t)array->len);
         if (object == NULL) {
             g_critical ("Failure to allocate array for %u items", array->len);
             gi_base_info_unref ((GIBaseInfo *)item_type_info);

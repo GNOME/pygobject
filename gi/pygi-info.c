@@ -168,7 +168,7 @@ _make_infos_tuple (PyGIBaseInfo *self, GetNInfosCallback get_n_infos,
             break;
         }
 
-        PyTuple_SET_ITEM (infos, i, py_info);
+        PyTuple_SET_ITEM (infos, (Py_ssize_t)i, py_info);
     }
 
     return infos;
@@ -801,7 +801,7 @@ static PyObject *
 _wrap_gi_property_info_get_flags (PyGIBaseInfo *self)
 {
     return pygi_guint_to_py (
-        gi_property_info_get_flags ((GIPropertyInfo *)self->info));
+        (guint)gi_property_info_get_flags ((GIPropertyInfo *)self->info));
 }
 
 static PyObject *

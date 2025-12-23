@@ -1101,7 +1101,8 @@ pygi_filename_to_py (gchar *value)
     }
 
 #ifdef G_OS_WIN32
-    py_obj = PyUnicode_DecodeUTF8 (value, strlen (value), "surrogatepass");
+    py_obj = PyUnicode_DecodeUTF8 (value, (Py_ssize_t)strlen (value),
+                                   "surrogatepass");
 #else
     py_obj = PyUnicode_DecodeFSDefault (value);
 #endif

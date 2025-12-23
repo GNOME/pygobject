@@ -277,9 +277,10 @@ _wrap_g_type_wrapper__get_children (PyGTypeWrapper *self, void *closure)
 
     children = g_type_children (self->type, &n_children);
 
-    retval = PyList_New (n_children);
+    retval = PyList_New ((Py_ssize_t)n_children);
     for (i = 0; i < n_children; i++)
-        PyList_SetItem (retval, i, pyg_type_wrapper_new (children[i]));
+        PyList_SetItem (retval, (Py_ssize_t)i,
+                        pyg_type_wrapper_new (children[i]));
     g_free (children);
 
     return retval;
@@ -294,9 +295,10 @@ _wrap_g_type_wrapper__get_interfaces (PyGTypeWrapper *self, void *closure)
 
     interfaces = g_type_interfaces (self->type, &n_interfaces);
 
-    retval = PyList_New (n_interfaces);
+    retval = PyList_New ((Py_ssize_t)n_interfaces);
     for (i = 0; i < n_interfaces; i++)
-        PyList_SetItem (retval, i, pyg_type_wrapper_new (interfaces[i]));
+        PyList_SetItem (retval, (Py_ssize_t)i,
+                        pyg_type_wrapper_new (interfaces[i]));
     g_free (interfaces);
 
     return retval;
@@ -733,8 +735,8 @@ pyg_type_lookup (GType type)
 
     if (type == G_TYPE_INVALID) return NULL;
 
-    marshal_helper =
-        GPOINTER_TO_INT (g_type_get_qdata (type, pyg_type_marshal_helper_key));
+    marshal_helper = (marshal_helper_data_e)GPOINTER_TO_INT (
+        g_type_get_qdata (type, pyg_type_marshal_helper_key));
 
     /* If we called this function before with @type and nothing was found,
      * return NULL early to not spend time in the loop below */
@@ -820,7 +822,7 @@ pyg_closure_marshal (GClosure *closure, GValue *return_value,
     state = PyGILState_Ensure ();
 
     /* construct Python tuple for the parameter values */
-    params = PyTuple_New (n_param_values);
+    params = PyTuple_New ((Py_ssize_t)n_param_values);
     for (i = 0; i < n_param_values; i++) {
         /* swap in a different initial data for connect_object() */
         if (i == 0 && G_CCLOSURE_SWAP_DATA (closure)) {
@@ -845,7 +847,7 @@ pyg_closure_marshal (GClosure *closure, GValue *return_value,
 
                 goto out;
             }
-            PyTuple_SetItem (params, i, item);
+            PyTuple_SetItem (params, (Py_ssize_t)i, item);
         }
     }
     /* params passed to function may have extra arguments */
@@ -984,7 +986,7 @@ pyg_signal_class_closure_marshal (GClosure *closure, GValue *return_value,
 
     /* construct Python tuple for the parameter values; don't copy boxed values
        initially because we'll check after the call to see if a copy is needed. */
-    params = PyTuple_New (n_param_values - 1);
+    params = PyTuple_New ((Py_ssize_t)n_param_values - 1);
     for (i = 1; i < n_param_values; i++) {
         PyObject *item = pyg_value_to_pyobject (&param_values[i], FALSE);
 
@@ -994,7 +996,7 @@ pyg_signal_class_closure_marshal (GClosure *closure, GValue *return_value,
             PyGILState_Release (state);
             return;
         }
-        PyTuple_SetItem (params, i - 1, item);
+        PyTuple_SetItem (params, (Py_ssize_t)i - 1, item);
     }
 
     ret = PyObject_CallObject (method, params);
@@ -1004,7 +1006,7 @@ pyg_signal_class_closure_marshal (GClosure *closure, GValue *return_value,
     py_len = PyTuple_Size (params);
     len = (guint)py_len;
     for (i = 0; i < len; i++) {
-        PyObject *item = PyTuple_GetItem (params, i);
+        PyObject *item = PyTuple_GetItem (params, (Py_ssize_t)i);
         if (item != NULL && PyObject_TypeCheck (item, &PyGBoxed_Type)
             && Py_REFCNT (item) != 1) {
             PyGBoxed *boxed_item = (PyGBoxed *)item;

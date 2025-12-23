@@ -227,7 +227,7 @@ _pygi_marshal_from_py_array (PyGIInvokeState *state,
     for (i = 0, success_count = 0; i < length; i++) {
         GIArgument item = PYGI_ARG_INIT;
         gpointer item_cleanup_data = NULL;
-        PyObject *py_item = PySequence_GetItem (py_arg, i);
+        PyObject *py_item = PySequence_GetItem (py_arg, (Py_ssize_t)i);
         if (py_item == NULL) goto err;
 
         if (!from_py_marshaller (state, callable_cache,
@@ -351,8 +351,8 @@ array_success:
             callable_cache, array_cache->len_arg_index);
 
         if (!gi_argument_from_py_ssize_t (
-                &state->args[child_cache->c_arg_index].arg_value, length,
-                child_cache->type_tag)) {
+                &state->args[child_cache->c_arg_index].arg_value,
+                (Py_ssize_t)length, child_cache->type_tag)) {
             goto err;
         }
     }
@@ -530,7 +530,8 @@ _pygi_marshal_to_py_array (PyGIInvokeState *state,
         if (arg->v_pointer == NULL) {
             py_obj = PyBytes_FromString ("");
         } else {
-            py_obj = PyBytes_FromStringAndSize (array_->data, array_->len);
+            py_obj = PyBytes_FromStringAndSize (array_->data,
+                                                (Py_ssize_t)array_->len);
         }
     } else {
         if (arg->v_pointer == NULL) {
@@ -543,7 +544,7 @@ _pygi_marshal_to_py_array (PyGIInvokeState *state,
             PyGIArgCache *item_arg_cache;
             GPtrArray *item_cleanups;
 
-            py_obj = PyList_New (array_->len);
+            py_obj = PyList_New ((Py_ssize_t)array_->len);
             if (py_obj == NULL) goto err;
 
             item_cleanups = g_ptr_array_sized_new (array_->len);
@@ -613,7 +614,7 @@ _pygi_marshal_to_py_array (PyGIInvokeState *state,
 
                     goto err;
                 }
-                PyList_SET_ITEM (py_obj, i, py_item);
+                PyList_SET_ITEM (py_obj, (Py_ssize_t)i, py_item);
                 processed_items++;
             }
         }

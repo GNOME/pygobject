@@ -231,13 +231,13 @@ pygobject_enable_threads (void)
 static int
 pygobject_gil_state_ensure (void)
 {
-    return PyGILState_Ensure ();
+    return (int)PyGILState_Ensure ();
 }
 
 static void
 pygobject_gil_state_release (int flag)
 {
-    PyGILState_Release (flag);
+    PyGILState_Release ((PyGILState_STATE)flag);
 }
 
 

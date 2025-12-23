@@ -123,7 +123,7 @@ pygi_signal_closure_marshal (GClosure *closure, GValue *return_value,
     g_assert_cmpint (sig_info_highest_arg, ==, n_param_values);
 
     /* construct Python tuple for the parameter values */
-    params = PyTuple_New (n_param_values);
+    params = PyTuple_New ((Py_ssize_t)n_param_values);
     for (i = 0; i < n_param_values; i++) {
         /* swap in a different initial data for connect_object() */
         if (i == 0 && G_CCLOSURE_SWAP_DATA (closure)) {
@@ -137,7 +137,7 @@ pygi_signal_closure_marshal (GClosure *closure, GValue *return_value,
             if (!item) {
                 goto out;
             }
-            PyTuple_SetItem (params, i, item);
+            PyTuple_SetItem (params, (Py_ssize_t)i, item);
 
         } else if (i < (guint)sig_info_highest_arg) {
             GIArgInfo arg_info;
@@ -215,7 +215,7 @@ pygi_signal_closure_marshal (GClosure *closure, GValue *return_value,
                 PyErr_Print ();
                 goto out;
             }
-            PyTuple_SetItem (params, i, item);
+            PyTuple_SetItem (params, (Py_ssize_t)i, item);
         }
     }
     /* params passed to function may have extra arguments */

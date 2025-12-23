@@ -127,7 +127,8 @@ pyglib_spawn_async (PyObject *object, PyObject *args, PyObject *kwargs)
     char **argv, **envp = NULL;
     PyObject *func = Py_None, *user_data = NULL;
     char *working_directory = NULL;
-    int flags = 0, _stdin = -1, _stdout = -1, _stderr = -1;
+    GSpawnFlags flags = 0;
+    int _stdin = -1, _stdout = -1, _stderr = -1;
     PyObject *pystdin = NULL, *pystdout = NULL, *pystderr = NULL;
     gint *standard_input, *standard_output, *standard_error;
     struct _PyGChildSetupData *callback_data = NULL;

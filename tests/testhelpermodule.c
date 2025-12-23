@@ -83,7 +83,8 @@ _wrap_test_g_object_new (PyObject *self)
     PyObject *rv;
 
     obj = g_object_new (g_type_from_name ("PyGObject"), NULL);
-    rv = PyLong_FromLong (obj->ref_count); /* should be == 2 at this point */
+    rv = PyLong_FromUnsignedLong (
+        obj->ref_count); /* should be == 2 at this point */
     g_object_unref (obj);
     return rv;
 }
@@ -475,7 +476,7 @@ _wrap_test_value (PyObject *self, PyObject *args)
 static PyObject *
 _wrap_test_state_ensure_release (PyObject *self, PyObject *args)
 {
-    int state = pyg_gil_state_ensure ();
+    PyGILState_STATE state = pyg_gil_state_ensure ();
     pyg_gil_state_release (state);
 
     Py_RETURN_NONE;
@@ -666,7 +667,7 @@ _wrap_test_parse_constructor_args (PyObject *self, PyObject *args)
         return NULL;
     }
 
-    return PyLong_FromLong (nparams);
+    return PyLong_FromUnsignedLong (nparams);
 }
 
 G_GNUC_END_IGNORE_DEPRECATIONS
@@ -681,7 +682,7 @@ _wrap_test_to_unichar_conv (PyObject *self, PyObject *args)
 
     if (!pyg_pyobj_to_unichar_conv (obj, &result)) return NULL;
 
-    return PyLong_FromLong (result);
+    return PyLong_FromUnsignedLong (result);
 }
 
 static PyMethodDef testhelper_functions[] = {

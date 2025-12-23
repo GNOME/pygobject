@@ -60,10 +60,10 @@ _pygi_closure_assign_pyobj_to_retval (gpointer retval, GIArgument *arg,
         *((ffi_arg *)retval) = arg->v_uint32;
         break;
     case GI_TYPE_TAG_INT64:
-        *((ffi_sarg *)retval) = arg->v_int64;
+        *((ffi_sarg *)retval) = (ffi_sarg)arg->v_int64;
         break;
     case GI_TYPE_TAG_UINT64:
-        *((ffi_arg *)retval) = arg->v_uint64;
+        *((ffi_arg *)retval) = (ffi_arg)arg->v_uint64;
         break;
     case GI_TYPE_TAG_FLOAT:
         *((gfloat *)retval) = arg->v_float;
@@ -286,7 +286,7 @@ _pygi_closure_convert_ffi_arguments (PyGIInvokeArgState *state,
     }
 
     if (pygi_callable_cache_can_throw_gerror (cache)) {
-        gssize error_index = _pygi_callable_cache_args_len (cache);
+        guint error_index = _pygi_callable_cache_args_len (cache);
 
         state[error_index].arg_value.v_pointer =
             *(gpointer *)args[error_index];
@@ -300,7 +300,7 @@ _invoke_state_init_from_cache (PyGIInvokeState *state,
     PyGICallableCache *cache = (PyGICallableCache *)closure_cache;
 
     state->n_args = _pygi_callable_cache_args_len (cache);
-    state->n_py_in_args = state->n_args;
+    state->n_py_in_args = (gssize)state->n_args;
 
     /* Increment after setting the number of Python input args */
     if (pygi_callable_cache_can_throw_gerror (cache)) {
@@ -499,8 +499,8 @@ _pygi_closure_clear_retvals (PyGIInvokeState *state, PyGICallableCache *cache,
         }
     }
 
-    if (pygi_callable_cache_can_throw_gerror (cache)) {
-        gssize error_index = state->n_args - 1;
+    if (pygi_callable_cache_can_throw_gerror (cache) && state->n_args > 0) {
+        guint error_index = state->n_args - 1;
         GError **error =
             (GError **)state->args[error_index].arg_value.v_pointer;
 

@@ -319,7 +319,7 @@ _callable_cache_generate_args_cache_real (PyGICallableCache *callable_cache,
 
         /* This only happens when dealing with callbacks */
         if (gi_arg_info_get_closure_index (arg_info, &closure_index)
-            && ((gssize)closure_index) == i) {
+            && closure_index == i) {
             callable_cache->user_data_index = i;
             callable_cache->has_user_data = TRUE;
 
@@ -330,7 +330,7 @@ _callable_cache_generate_args_cache_real (PyGICallableCache *callable_cache,
             direction = _pygi_get_direction (callable_cache, GI_DIRECTION_IN);
             arg_cache->direction = direction;
             arg_cache->meta_type = PYGI_META_ARG_TYPE_CLOSURE;
-            arg_cache->c_arg_index = i;
+            arg_cache->c_arg_index = (gssize)i;
             arg_cache->is_pointer = TRUE;
 
         } else {
@@ -349,11 +349,12 @@ _callable_cache_generate_args_cache_real (PyGICallableCache *callable_cache,
             if (arg_cache != NULL) {
                 /* ensure c_arg_index always aligns with callable_cache->args_cache
                  * and all of the various PyGIInvokeState arrays. */
-                arg_cache->c_arg_index = arg_index;
+                arg_cache->c_arg_index = (gssize)arg_index;
 
                 if (arg_cache->meta_type
                     == PYGI_META_ARG_TYPE_CHILD_WITH_PYARG) {
-                    arg_cache->py_arg_index = callable_cache->n_py_args;
+                    arg_cache->py_arg_index =
+                        (gssize)callable_cache->n_py_args;
                     callable_cache->n_py_args++;
                 }
 
@@ -370,13 +371,13 @@ _callable_cache_generate_args_cache_real (PyGICallableCache *callable_cache,
                 transfer = gi_arg_info_get_ownership_transfer (arg_info);
 
                 if (direction & PYGI_DIRECTION_FROM_PYTHON) {
-                    py_arg_index = callable_cache->n_py_args;
+                    py_arg_index = (gssize)callable_cache->n_py_args;
                     callable_cache->n_py_args++;
                 }
 
-                arg_cache = pygi_arg_cache_new (type_info, arg_info, transfer,
-                                                direction, callable_cache,
-                                                arg_index, py_arg_index);
+                arg_cache = pygi_arg_cache_new (
+                    type_info, arg_info, transfer, direction, callable_cache,
+                    (gssize)arg_index, py_arg_index);
 
                 if (arg_cache == NULL) {
                     gi_base_info_unref ((GIBaseInfo *)type_info);
@@ -435,7 +436,7 @@ _callable_cache_generate_args_cache_real (PyGICallableCache *callable_cache,
             }
 
             if (last_explicit_arg_index == -1) {
-                last_explicit_arg_index = i - 1;
+                last_explicit_arg_index = (gssize)i - 1;
 
                 /* If the last "from python" argument in the args list is a child
                 * with pyarg (currently only callback user_data). Set it to eat

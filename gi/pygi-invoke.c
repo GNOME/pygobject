@@ -63,7 +63,7 @@ _py_args_combine_and_check_length (PyGICallableCache *cache,
 {
     PyObject *combined_py_args = NULL;
     Py_ssize_t n_py_args, n_py_kwargs, i, skipped_args = 0;
-    gssize n_expected_args = cache->n_py_args;
+    Py_ssize_t n_expected_args = (Py_ssize_t)cache->n_py_args;
 
     n_py_args = PyVectorcall_NARGS (py_nargsf);
     if (py_kwnames == NULL)
@@ -302,7 +302,7 @@ _invoke_state_init_from_cache (PyGIInvokeState *state,
     state->error = NULL;
 
     if (pygi_callable_cache_can_throw_gerror (cache)) {
-        gssize error_index = state->n_args - 1;
+        gsize error_index = state->n_args - 1;
         /* The ffi argument for GError needs to be a triple pointer. */
         state->args[error_index].arg_pointer.v_pointer = &state->error;
         state->ffi_args[error_index] = &(state->args[error_index].arg_pointer);
@@ -408,7 +408,7 @@ _invoke_marshal_in_args (PyGIInvokeState *state,
     PyGICallableCache *cache = (PyGICallableCache *)function_cache;
     gssize i;
 
-    if (state->n_py_in_args > cache->n_py_args) {
+    if (state->n_py_in_args > (gssize)cache->n_py_args) {
         char *full_name = pygi_callable_cache_get_full_name (cache);
         PyErr_Format (PyExc_TypeError,
                       "%s() takes exactly %zd argument(s) (%zd given)",
@@ -593,7 +593,8 @@ _invoke_marshal_out_args (PyGIInvokeState *state,
     PyGICallableCache *cache = (PyGICallableCache *)function_cache;
     PyObject *py_out = NULL;
     PyObject *py_return = NULL;
-    gssize n_out_args = cache->n_to_py_args - cache->n_to_py_child_args;
+    gssize n_out_args = (gssize)cache->n_to_py_args
+                        - (gssize)cache->n_to_py_child_args;
 
     if (cache->return_cache) {
         if (!pygi_callable_cache_skip_return (cache)) {
