@@ -58,8 +58,8 @@ _pygi_marshal_from_py_glist (PyGIInvokeState *state,
     if (arg_cache->transfer != GI_TRANSFER_EVERYTHING) {
         item_cleanups = g_array_sized_new (
             FALSE, TRUE, sizeof (PyGIMarshalCleanupData), length + 1);
-        cleanup_data->data = item_cleanups;
-        cleanup_data->destroy = (GDestroyNotify)g_array_unref;
+        pygi_marshal_cleanup_data_init (cleanup_data, item_cleanups,
+                                        (GDestroyNotify)g_array_unref);
     }
 
     from_py_marshaller = sequence_cache->item_cache->from_py_marshaller;
@@ -155,8 +155,8 @@ _pygi_marshal_from_py_gslist (PyGIInvokeState *state,
     if (arg_cache->transfer != GI_TRANSFER_EVERYTHING) {
         item_cleanups = g_array_sized_new (
             FALSE, TRUE, sizeof (PyGIMarshalCleanupData), length + 1);
-        cleanup_data->data = item_cleanups;
-        cleanup_data->destroy = (GDestroyNotify)g_array_unref;
+        pygi_marshal_cleanup_data_init (cleanup_data, item_cleanups,
+                                        (GDestroyNotify)g_array_unref);
     }
 
     from_py_marshaller = sequence_cache->item_cache->from_py_marshaller;
@@ -296,8 +296,8 @@ _pygi_marshal_to_py_glist (PyGIInvokeState *state,
     g_array_set_clear_func (item_cleanups,
                             (GDestroyNotify)pygi_marshal_cleanup_data_destroy);
 
-    cleanup_data->data = item_cleanups;
-    cleanup_data->destroy = (GDestroyNotify)g_array_unref;
+    pygi_marshal_cleanup_data_init (cleanup_data, item_cleanups,
+                                    (GDestroyNotify)g_array_unref);
 
     return py_obj;
 }
@@ -365,8 +365,8 @@ _pygi_marshal_to_py_gslist (PyGIInvokeState *state,
     g_array_set_clear_func (item_cleanups,
                             (GDestroyNotify)pygi_marshal_cleanup_data_destroy);
 
-    cleanup_data->data = item_cleanups;
-    cleanup_data->destroy = (GDestroyNotify)g_array_unref;
+    pygi_marshal_cleanup_data_init (cleanup_data, item_cleanups,
+                                    (GDestroyNotify)g_array_unref);
 
     return py_obj;
 }

@@ -85,13 +85,7 @@ marshal_from_py_void (PyGIInvokeState *state,
 {
     g_warn_if_fail (arg_cache->transfer == GI_TRANSFER_NOTHING);
 
-    if (pygi_gpointer_from_py (py_arg, &(arg->v_pointer))) {
-        cleanup_data->data = arg->v_pointer;
-        cleanup_data->destroy = NULL;
-        return TRUE;
-    }
-
-    return FALSE;
+    return pygi_gpointer_from_py (py_arg, &(arg->v_pointer));
 }
 
 static PyObject *
@@ -138,8 +132,7 @@ pygi_marshal_to_py_utf8_cache_adapter (PyGIInvokeState *state,
        if the interface is transfering ownership,
        whether or not it has been processed yet */
     if (arg_cache->transfer == GI_TRANSFER_EVERYTHING) {
-        cleanup_data->data = arg->v_pointer;
-        cleanup_data->destroy = g_free;
+        pygi_marshal_cleanup_data_init (cleanup_data, arg->v_pointer, g_free);
     }
 
     return object;

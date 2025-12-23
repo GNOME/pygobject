@@ -412,8 +412,8 @@ array_success:
         g_array_set_clear_func (
             item_cleanups, (GDestroyNotify)pygi_marshal_cleanup_data_destroy);
 
-        cleanup_data->data = item_cleanups;
-        cleanup_data->destroy = (GDestroyNotify)g_array_unref;
+        pygi_marshal_cleanup_data_init (cleanup_data, item_cleanups,
+                                        (GDestroyNotify)g_array_unref);
     }
 
     return TRUE;
@@ -600,8 +600,8 @@ _pygi_marshal_to_py_array (PyGIInvokeState *state,
             g_array_set_clear_func (
                 item_cleanups,
                 (GDestroyNotify)pygi_marshal_cleanup_data_destroy);
-            cleanup_data->data = item_cleanups;
-            cleanup_data->destroy = (GDestroyNotify)g_array_unref;
+            pygi_marshal_cleanup_data_init (cleanup_data, item_cleanups,
+                                            (GDestroyNotify)g_array_unref);
         }
     }
 
