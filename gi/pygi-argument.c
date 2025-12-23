@@ -69,11 +69,7 @@ pygi_argument_from_py_cleanup (PyGIArgumentFromPyCleanupData *arg_cleanup)
     PyGIArgCache *cache = (PyGIArgCache *)arg_cleanup->cache;
 
     if (cache) {
-        if (cache->from_py_cleanup != NULL
-            //&& arg_cleanup->cleanup_data.destroy != NULL
-            && arg_cleanup->cleanup_data.data != NULL)
-            cache->from_py_cleanup (&arg_cleanup->state,
-                                    arg_cleanup->cleanup_data);
+        pygi_marshal_cleanup_data_destroy (&arg_cleanup->cleanup_data);
         pygi_arg_cache_free (cache);
         memset (arg_cleanup, 0, sizeof (PyGIArgumentFromPyCleanupData));
     }
@@ -94,11 +90,7 @@ pygi_argument_to_py (GITypeInfo *type_info, GIArgument arg,
     object = cache->to_py_marshaller (&state, /*callable_cache=*/NULL, cache,
                                       &arg, &cleanup_data);
 
-    if (cache->to_py_cleanup
-        //&& cleanup_data.destroy != NULL
-        && cleanup_data.data != NULL)
-        cache->to_py_cleanup (&state, cleanup_data);
-
+    pygi_marshal_cleanup_data_destroy (&cleanup_data);
     pygi_arg_cache_free (cache);
 
     return object;
@@ -123,9 +115,7 @@ pygi_argument_to_py_with_array_length (GITypeInfo *type_info, GIArgument arg,
     object = cache->to_py_marshaller (&state, /*callable_cache=*/NULL, cache,
                                       &arg, &cleanup_data);
 
-    if (cache->to_py_cleanup && arg.v_pointer)
-        cache->to_py_cleanup (&state, cleanup_data);
-
+    pygi_marshal_cleanup_data_destroy (&cleanup_data);
     pygi_arg_cache_free (cache);
 
     return object;

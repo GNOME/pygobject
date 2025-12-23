@@ -19,6 +19,7 @@
 
 #include "pygi-marshal-cleanup.h"
 #include "pygi-foreign.h"
+#include "pygi-cache-private.h"
 
 static inline void
 _cleanup_caller_allocates (PyGIInvokeState *state, PyGIArgCache *cache,
@@ -91,8 +92,8 @@ pygi_marshal_cleanup_args_from_py_marshal_success (PyGIInvokeState *state,
 
     for (guint i = 0; i < _pygi_callable_cache_args_len (cache); i++) {
         PyGIArgCache *arg_cache = _pygi_callable_cache_get_arg (cache, i);
-        PyGIMarshalFromPyCleanupFunc cleanup_func = arg_cache->from_py_cleanup;
-        PyGIMarshalCleanupData cleanup_data = state->args[i].arg_cleanup_data;
+        PyGIMarshalCleanupData *cleanup_data =
+            &state->args[i].arg_cleanup_data;
 
         /* Only cleanup using args_cleanup_data when available.
          * It is the responsibility of the various "from_py" marshalers to return
@@ -100,10 +101,12 @@ pygi_marshal_cleanup_args_from_py_marshal_success (PyGIInvokeState *state,
          * PyGIInvokeState.args_cleanup_data stores this data (via _invoke_marshal_in_args)
          * for the duration of the invoke up until this point.
          */
-        if (cleanup_func && cleanup_data.data != NULL
-            && arg_cache->py_arg_index >= 0
+        if (arg_cache->py_arg_index >= 0
             && arg_cache->direction & PYGI_DIRECTION_FROM_PYTHON) {
-            cleanup_func (state, cleanup_data);
+            if (state->failed)
+                pygi_marshal_cleanup_data_destroy_failed (cleanup_data);
+            else
+                pygi_marshal_cleanup_data_destroy (cleanup_data);
         }
     }
 
@@ -122,26 +125,32 @@ pygi_marshal_cleanup_args_to_py_marshal_success (PyGIInvokeState *state,
 
     /* clean up the return if available */
     if (cache->return_cache != NULL) {
-        PyGIMarshalToPyCleanupFunc cleanup_func =
-            cache->return_cache->to_py_cleanup;
-        if (cleanup_func && state->return_arg.v_pointer != NULL)
-            cleanup_func (state, state->to_py_return_arg_cleanup_data);
+        if (state->failed)
+            pygi_marshal_cleanup_data_destroy_failed (
+                &state->to_py_return_arg_cleanup_data);
+        else
+            pygi_marshal_cleanup_data_destroy (
+                &state->to_py_return_arg_cleanup_data);
     }
 
     /* Now clean up args */
     cache_item = cache->to_py_args;
     while (cache_item) {
         PyGIArgCache *arg_cache = (PyGIArgCache *)cache_item->data;
-        PyGIMarshalToPyCleanupFunc cleanup_func = arg_cache->to_py_cleanup;
         gpointer data =
             state->args[arg_cache->c_arg_index].arg_value.v_pointer;
+        PyGIMarshalCleanupData *cleanup_data =
+            &state->args[arg_cache->c_arg_index].to_py_arg_cleanup_data;
 
-        if (cleanup_func != NULL && data != NULL)
-            cleanup_func (
-                state,
-                state->args[arg_cache->c_arg_index].to_py_arg_cleanup_data);
-        else if (pygi_arg_cache_is_caller_allocates (arg_cache)
-                 && data != NULL) {
+        if (cleanup_data->data != NULL
+            && (cleanup_data->destroy != NULL
+                || cleanup_data->destroy_failed != NULL)) {
+            if (state->failed)
+                pygi_marshal_cleanup_data_destroy_failed (cleanup_data);
+            else
+                pygi_marshal_cleanup_data_destroy (cleanup_data);
+        } else if (pygi_arg_cache_is_caller_allocates (arg_cache)
+                   && data != NULL) {
             _cleanup_caller_allocates (state, arg_cache, data, TRUE);
         }
 
@@ -152,9 +161,29 @@ pygi_marshal_cleanup_args_to_py_marshal_success (PyGIInvokeState *state,
 }
 
 void
+pygi_marshal_cleanup_return_to_py_marshal_success (PyGIInvokeState *state,
+                                                   PyGICallableCache *cache)
+{
+    PyObject *error_type, *error_value, *error_traceback;
+    gboolean have_error = !!PyErr_Occurred ();
+
+    if (have_error) PyErr_Fetch (&error_type, &error_value, &error_traceback);
+
+    if (cache->return_cache != NULL) {
+        if (state->failed)
+            pygi_marshal_cleanup_data_destroy_failed (
+                &state->to_py_return_arg_cleanup_data);
+        else
+            pygi_marshal_cleanup_data_destroy (
+                &state->to_py_return_arg_cleanup_data);
+    }
+
+    if (have_error) PyErr_Restore (error_type, error_value, error_traceback);
+}
+
+void
 pygi_marshal_cleanup_args_from_py_parameter_fail (PyGIInvokeState *state,
-                                                  PyGICallableCache *cache,
-                                                  gssize failed_arg_index)
+                                                  PyGICallableCache *cache)
 {
     PyObject *error_type, *error_value, *error_traceback;
 
@@ -164,28 +193,24 @@ pygi_marshal_cleanup_args_from_py_parameter_fail (PyGIInvokeState *state,
 
     state->failed = TRUE;
 
-    for (guint i = 0; i < _pygi_callable_cache_args_len (cache)
-                      && i <= (guint)failed_arg_index;
-         i++) {
+    for (guint i = 0; i < _pygi_callable_cache_args_len (cache); i++) {
         PyGIArgCache *arg_cache = _pygi_callable_cache_get_arg (cache, i);
-        PyGIMarshalFromPyCleanupFunc cleanup_func = arg_cache->from_py_cleanup;
-        PyGIMarshalCleanupData cleanup_data = state->args[i].arg_cleanup_data;
+        PyGIMarshalCleanupData *cleanup_data =
+            &state->args[i].arg_cleanup_data;
 
         if (arg_cache->py_arg_index < 0) {
             continue;
         }
 
-        if (cleanup_func && cleanup_data.data != NULL
-            && arg_cache->direction == PYGI_DIRECTION_FROM_PYTHON) {
-            cleanup_func (state, cleanup_data);
-
+        if (arg_cache->direction == PYGI_DIRECTION_FROM_PYTHON) {
+            pygi_marshal_cleanup_data_destroy_failed (cleanup_data);
         } else if (pygi_arg_cache_is_caller_allocates (arg_cache)
-                   && cleanup_data.data != NULL) {
-            _cleanup_caller_allocates (state, arg_cache, cleanup_data.data,
+                   && cleanup_data->data != NULL) {
+            _cleanup_caller_allocates (state, arg_cache, cleanup_data->data,
                                        FALSE);
         }
         state->args[i].arg_cleanup_data =
-            (PyGIMarshalCleanupData){ NULL, NULL };
+            (PyGIMarshalCleanupData){ NULL, NULL, NULL };
     }
 
     PyErr_Restore (error_type, error_value, error_traceback);
