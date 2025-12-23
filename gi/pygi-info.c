@@ -999,7 +999,7 @@ _wrap_gi_type_info_get_array_fixed_size (PyGIBaseInfo *self)
 {
     size_t size;
     if (gi_type_info_get_array_fixed_size (GI_TYPE_INFO (self->info), &size))
-        return pygi_gint_to_py (size);
+        return pygi_gulong_to_py (size);
 
     g_assert_not_reached ();
 }
@@ -1892,7 +1892,7 @@ static PyMethodDef _PyGIValueInfo_methods[] = {
 PYGI_DEFINE_TYPE ("gi.FieldInfo", PyGIFieldInfo_Type, PyGIBaseInfo);
 
 static gboolean
-_struct_field_array_length_marshal (gsize length_index, void *container_ptr,
+_struct_field_array_length_marshal (guint length_index, void *container_ptr,
                                     void *struct_data_ptr, gsize *array_len)
 {
     GIFieldInfo *array_len_field = NULL;
@@ -2225,7 +2225,7 @@ _wrap_gi_field_info_set_value (PyGIBaseInfo *self, PyObject *args)
                && (gi_type_info_get_tag (field_type_info) == GI_TYPE_TAG_VOID
                    || gi_type_info_get_tag (field_type_info)
                           == GI_TYPE_TAG_UTF8)) {
-        int offset;
+        size_t offset;
         value = _pygi_argument_from_object (py_value, field_type_info,
                                             GI_TRANSFER_NOTHING);
         if (PyErr_Occurred ()) {
@@ -2273,14 +2273,14 @@ _wrap_gi_field_info_get_flags (PyGIBaseInfo *self)
 static PyObject *
 _wrap_gi_field_info_get_size (PyGIBaseInfo *self)
 {
-    return pygi_gint_to_py (
+    return pygi_gsize_to_py (
         gi_field_info_get_size (GI_FIELD_INFO (self->info)));
 }
 
 static PyObject *
 _wrap_gi_field_info_get_offset (PyGIBaseInfo *self)
 {
-    return pygi_gint_to_py (
+    return pygi_gsize_to_py (
         gi_field_info_get_offset (GI_FIELD_INFO (self->info)));
 }
 
@@ -2324,7 +2324,7 @@ _wrap_gi_vfunc_info_get_flags (PyGIBaseInfo *self)
 static PyObject *
 _wrap_gi_vfunc_info_get_offset (PyGIBaseInfo *self)
 {
-    return pygi_gint_to_py (
+    return pygi_gsize_to_py (
         gi_vfunc_info_get_offset ((GIVFuncInfo *)self->info));
 }
 

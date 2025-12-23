@@ -72,7 +72,7 @@ pyg_flags_from_gtype (GType gtype, guint value)
 }
 
 static void
-add_value (PyObject *dict, const char *value_nick, unsigned int value)
+add_value (PyObject *dict, const char *value_nick, gint64 value)
 {
     char *upper = g_ascii_strup (value_nick, -1);
     char *c;
@@ -88,7 +88,7 @@ add_value (PyObject *dict, const char *value_nick, unsigned int value)
         return;
     }
 
-    v = PyLong_FromUnsignedLong (value);
+    v = PyLong_FromInt64 (value);
     PyMapping_SetItemString (dict, upper, v);
     Py_DECREF (v);
     g_free (upper);
@@ -300,7 +300,7 @@ pyg_flags_register (PyTypeObject *flags_class, char *type_name)
             goto out;
         }
 
-        flags_values[i].value = PyLong_AsUnsignedLongMask (value);
+        flags_values[i].value = (guint)PyLong_AsUnsignedLongMask (value);
         flags_values[i].value_name =
             g_strdup (PyUnicode_AsUTF8AndSize (name, NULL));
         c = g_ascii_strdown (flags_values[i].value_name, -1);

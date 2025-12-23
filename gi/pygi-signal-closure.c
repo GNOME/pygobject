@@ -78,7 +78,7 @@ pygi_signal_closure_invalidate (gpointer data, GClosure *closure)
  * Returns: TRUE on success, FALSE on failure.
  */
 static gboolean
-_pygi_signal_closure_length_marshal (gsize length_arg_index, void *user_data1,
+_pygi_signal_closure_length_marshal (guint length_arg_index, void *user_data1,
                                      void *user_data2, gsize *array_len)
 {
     GIArgInfo length_arg_info;

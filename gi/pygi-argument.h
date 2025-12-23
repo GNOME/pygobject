@@ -33,7 +33,7 @@ G_STATIC_ASSERT (sizeof (GIArgument) == sizeof (gint64));
 #define PYGI_ARG_INIT { .v_int64 = 0 }
 
 /* Private */
-typedef gboolean (*PyGIArgArrayLengthPolicy) (gsize item_index,
+typedef gboolean (*PyGIArgArrayLengthPolicy) (guint item_index,
                                               void *user_data1,
                                               void *user_data2,
                                               gsize *array_len);

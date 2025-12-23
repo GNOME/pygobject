@@ -270,7 +270,7 @@ pyg_array_from_pyobject (GValue *value, PyObject *obj)
         return -1;
     }
 
-    array = g_array_sized_new (FALSE, TRUE, sizeof (GValue), len);
+    array = g_array_sized_new (FALSE, TRUE, sizeof (GValue), (guint)len);
     g_array_set_clear_func (array, (GDestroyNotify)g_value_unset);
 
     for (i = 0; i < len; ++i) {

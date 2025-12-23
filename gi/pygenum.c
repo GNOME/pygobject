@@ -30,7 +30,7 @@ PyTypeObject *PyGEnum_Type;
 static PyObject *IntEnum_Type;
 
 PyObject *
-pyg_enum_val_new (PyObject *pyclass, int value)
+pyg_enum_val_new (PyObject *pyclass, long value)
 {
     PyObject *retval, *intvalue;
     PyObject *args[2] = { NULL };
@@ -72,7 +72,7 @@ pyg_enum_from_gtype (GType gtype, int value)
 }
 
 static void
-add_value (PyObject *dict, const char *value_nick, int value)
+add_value (PyObject *dict, const char *value_nick, gint64 value)
 {
     char *upper = g_ascii_strup (value_nick, -1);
     char *c;
@@ -299,7 +299,7 @@ pyg_enum_register (PyTypeObject *enum_class, char *type_name)
             goto out;
         }
 
-        enum_values[i].value = PyLong_AsLong (value);
+        enum_values[i].value = PyLong_AsInt (value);
         enum_values[i].value_name =
             g_strdup (PyUnicode_AsUTF8AndSize (name, NULL));
         c = g_ascii_strdown (enum_values[i].value_name, -1);

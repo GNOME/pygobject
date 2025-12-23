@@ -280,7 +280,7 @@ static gboolean
 _callable_cache_generate_args_cache_real (PyGICallableCache *callable_cache,
                                           GICallableInfo *callable_info)
 {
-    gssize i;
+    guint i;
     guint arg_index;
     GITypeInfo *return_info;
     GITransfer return_transfer;
@@ -307,7 +307,7 @@ _callable_cache_generate_args_cache_real (PyGICallableCache *callable_cache,
 
     callable_cache->has_user_data = FALSE;
 
-    for (i = 0, arg_index = (guint)callable_cache->args_offset;
+    for (i = 0, arg_index = callable_cache->args_offset;
          arg_index < _pygi_callable_cache_args_len (callable_cache);
          i++, arg_index++) {
         PyGIArgCache *arg_cache = NULL;
@@ -420,10 +420,9 @@ _callable_cache_generate_args_cache_real (PyGICallableCache *callable_cache,
 
     /* Reverse loop through all the arguments to setup arg_name_hash
      * and find the number of required arguments */
-    for (i = ((gssize)_pygi_callable_cache_args_len (callable_cache)) - 1;
-         i >= 0; i--) {
+    for (i = _pygi_callable_cache_args_len (callable_cache); i > 0; i--) {
         PyGIArgCache *arg_cache =
-            _pygi_callable_cache_get_arg (callable_cache, i);
+            _pygi_callable_cache_get_arg (callable_cache, i - 1);
 
         if (arg_cache->meta_type != PYGI_META_ARG_TYPE_CHILD
             && arg_cache->meta_type != PYGI_META_ARG_TYPE_CLOSURE
@@ -436,7 +435,7 @@ _callable_cache_generate_args_cache_real (PyGICallableCache *callable_cache,
             }
 
             if (last_explicit_arg_index == -1) {
-                last_explicit_arg_index = i;
+                last_explicit_arg_index = i - 1;
 
                 /* If the last "from python" argument in the args list is a child
                 * with pyarg (currently only callback user_data). Set it to eat
@@ -994,7 +993,7 @@ pygi_vfunc_cache_new (GICallableInfo *info)
 PyGIClosureCache *
 pygi_closure_cache_new (GICallableInfo *info)
 {
-    gssize i;
+    guint i;
     PyGIClosureCache *closure_cache;
     PyGICallableCache *callable_cache;
 
@@ -1012,8 +1011,7 @@ pygi_closure_cache_new (GICallableInfo *info)
      *
      * See: https://bugzilla.gnome.org/show_bug.cgi?id=652115
      */
-    for (i = 0; (gsize)i < _pygi_callable_cache_args_len (callable_cache);
-         i++) {
+    for (i = 0; i < _pygi_callable_cache_args_len (callable_cache); i++) {
         PyGIArgCache *arg_cache;
         PyGIArgGArray *garray_cache;
         PyGIArgCache *len_arg_cache;
@@ -1034,8 +1032,7 @@ pygi_closure_cache_new (GICallableInfo *info)
      * do not recognize user_data/data arguments correctly.
      */
     if (!callable_cache->has_user_data) {
-        for (i = 0; (gsize)i < _pygi_callable_cache_args_len (callable_cache);
-             i++) {
+        for (i = 0; i < _pygi_callable_cache_args_len (callable_cache); i++) {
             PyGIArgCache *arg_cache;
 
             arg_cache = g_ptr_array_index (callable_cache->args_cache, i);

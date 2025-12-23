@@ -523,7 +523,7 @@ pygi_guint_from_py (PyObject *object, guint *result)
     }
 
     Py_DECREF (number);
-    *result = long_value;
+    *result = (guint)long_value;
     return TRUE;
 
 overflow:

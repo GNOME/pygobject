@@ -147,6 +147,7 @@ else
 
   main_c_args += [
     '-Wsign-conversion',
+    '-Wconversion',
     '-Wno-incompatible-pointer-types-discards-qualifiers',
     '-Wno-missing-field-initializers',
     '-Wno-unused-parameter',
