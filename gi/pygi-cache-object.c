@@ -290,24 +290,6 @@ _pygi_marshal_to_py_called_from_py_interface_object_cache_adapter (
     return object;
 }
 
-static void
-_pygi_marshal_cleanup_to_py_interface_object (
-    PyGIInvokeState *state, PyGIMarshalCleanupData cleanup_data)
-{
-    if (state->failed)
-        pygi_marshal_cleanup_data_destroy_failed (&cleanup_data);
-}
-
-static void
-_pygi_marshal_cleanup_from_py_interface_object (
-    PyGIInvokeState *state, PyGIMarshalCleanupData cleanup_data)
-{
-    /* If we processed the parameter but fail before invoking the method,
-       we need to remove the ref we added */
-    if (state->failed)
-        pygi_marshal_cleanup_data_destroy_failed (&cleanup_data);
-}
-
 PyGIArgCache *
 pygi_arg_gobject_new_from_info (GITypeInfo *type_info, GIArgInfo *arg_info,
                                 GITransfer transfer, PyGIDirection direction,
@@ -329,9 +311,6 @@ pygi_arg_gobject_new_from_info (GITypeInfo *type_info, GIArgInfo *arg_info,
             cache->from_py_marshaller =
                 _pygi_marshal_from_py_called_from_py_interface_object;
         }
-
-        cache->from_py_cleanup =
-            _pygi_marshal_cleanup_from_py_interface_object;
     }
 
     if (direction & PYGI_DIRECTION_TO_PYTHON) {
@@ -344,8 +323,6 @@ pygi_arg_gobject_new_from_info (GITypeInfo *type_info, GIArgInfo *arg_info,
             cache->to_py_marshaller =
                 _pygi_marshal_to_py_called_from_py_interface_object_cache_adapter;
         }
-
-        cache->to_py_cleanup = _pygi_marshal_cleanup_to_py_interface_object;
     }
 
     return cache;
