@@ -419,13 +419,6 @@ array_success:
     return TRUE;
 }
 
-static void
-_pygi_marshal_cleanup_from_py_array (PyGIInvokeState *state,
-                                     PyGIMarshalCleanupData cleanup_data)
-{
-    pygi_marshal_cleanup_data_destroy (&cleanup_data);
-}
-
 /*
  * GArray from Python
  */
@@ -631,13 +624,6 @@ err:
 }
 
 static void
-_pygi_marshal_cleanup_to_py_array (PyGIInvokeState *state,
-                                   PyGIMarshalCleanupData cleanup_data)
-{
-    pygi_marshal_cleanup_data_destroy (&cleanup_data);
-}
-
-static void
 _array_cache_free_func (PyGIArgGArray *cache)
 {
     if (cache != NULL) {
@@ -751,12 +737,10 @@ pygi_arg_garray_setup (
 
     if (direction & PYGI_DIRECTION_FROM_PYTHON) {
         arg_cache->from_py_marshaller = _pygi_marshal_from_py_array;
-        arg_cache->from_py_cleanup = _pygi_marshal_cleanup_from_py_array;
     }
 
     if (direction & PYGI_DIRECTION_TO_PYTHON) {
         arg_cache->to_py_marshaller = _pygi_marshal_to_py_array;
-        arg_cache->to_py_cleanup = _pygi_marshal_cleanup_to_py_array;
     }
 
     return TRUE;

@@ -137,13 +137,6 @@ pygi_arg_gvalue_from_py_marshal (PyGIInvokeState *state,
     return TRUE;
 }
 
-void
-pygi_arg_gvalue_from_py_cleanup (PyGIInvokeState *state,
-                                 PyGIMarshalCleanupData cleanup_data)
-{
-    pygi_marshal_cleanup_data_destroy (&cleanup_data);
-}
-
 static gboolean
 pygi_arg_gclosure_from_py_marshal (PyGIInvokeState *state,
                                    PyGICallableCache *callable_cache,
@@ -234,14 +227,6 @@ pygi_arg_gclosure_from_py_marshal (PyGIInvokeState *state,
     return TRUE;
 }
 
-
-static void
-arg_gclosure_from_py_cleanup (PyGIInvokeState *state,
-                              PyGIMarshalCleanupData cleanup_data)
-{
-    pygi_marshal_cleanup_data_destroy (&cleanup_data);
-}
-
 typedef struct {
     GIBaseInfo *base_info;
     gpointer struct_;
@@ -289,17 +274,6 @@ pygi_arg_foreign_from_py_marshal (PyGIInvokeState *state,
         (GDestroyNotify)release_foreign);
 
     return Py_IsNone (success);
-}
-
-static void
-arg_foreign_from_py_cleanup (PyGIInvokeState *state,
-                             PyGIMarshalCleanupData cleanup_data)
-{
-    if (state->failed) {
-        pygi_marshal_cleanup_data_destroy_failed (&cleanup_data);
-    } else if (cleanup_data.data != NULL) {
-        pygi_marshal_cleanup_data_destroy (&cleanup_data);
-    }
 }
 
 static void
@@ -450,17 +424,6 @@ pygi_arg_foreign_to_py_marshal (PyGIInvokeState *state,
     return py_obj;
 }
 
-static void
-arg_foreign_to_py_cleanup (PyGIInvokeState *state,
-                           PyGIMarshalCleanupData cleanup_data)
-{
-    if (state->failed) {
-        pygi_marshal_cleanup_data_destroy_failed (&cleanup_data);
-    } else if (cleanup_data.data != NULL) {
-        pygi_marshal_cleanup_data_destroy (&cleanup_data);
-    }
-}
-
 static PyObject *
 pygi_arg_struct_to_py_marshal (PyGIInvokeState *state,
                                PyGICallableCache *callable_cache,
@@ -556,20 +519,6 @@ arg_type_class_from_py_marshal (PyGIInvokeState *state,
 }
 
 static void
-arg_type_class_from_py_cleanup (PyGIInvokeState *state,
-                                PyGIMarshalCleanupData cleanup_data)
-{
-    pygi_marshal_cleanup_data_destroy (&cleanup_data);
-}
-
-static void
-arg_boxed_to_py_cleanup (PyGIInvokeState *state,
-                         PyGIMarshalCleanupData cleanup_data)
-{
-    pygi_marshal_cleanup_data_destroy (&cleanup_data);
-}
-
-static void
 arg_struct_from_py_setup (PyGIArgCache *arg_cache,
                           GIRegisteredTypeInfo *iface_info,
                           GITransfer transfer)
@@ -578,16 +527,12 @@ arg_struct_from_py_setup (PyGIArgCache *arg_cache,
 
     if (gi_struct_info_is_gtype_struct ((GIStructInfo *)iface_info)) {
         arg_cache->from_py_marshaller = arg_type_class_from_py_marshal;
-        arg_cache->from_py_cleanup = arg_type_class_from_py_cleanup;
     } else if (g_type_is_a (iface_cache->g_type, G_TYPE_CLOSURE)) {
         arg_cache->from_py_marshaller = pygi_arg_gclosure_from_py_marshal;
-        arg_cache->from_py_cleanup = arg_gclosure_from_py_cleanup;
     } else if (iface_cache->g_type == G_TYPE_VALUE) {
         arg_cache->from_py_marshaller = pygi_arg_gvalue_from_py_marshal;
-        arg_cache->from_py_cleanup = pygi_arg_gvalue_from_py_cleanup;
     } else if (iface_cache->is_foreign) {
         arg_cache->from_py_marshaller = pygi_arg_foreign_from_py_marshal;
-        arg_cache->from_py_cleanup = arg_foreign_from_py_cleanup;
     } else {
         arg_cache->from_py_marshaller = pygi_arg_struct_from_py_marshal;
     }
@@ -603,12 +548,8 @@ arg_struct_to_py_setup (PyGIArgCache *arg_cache,
         arg_cache->to_py_marshaller = pygi_arg_gvalue_to_py_marshal;
     } else if (iface_cache->is_foreign) {
         arg_cache->to_py_marshaller = pygi_arg_foreign_to_py_marshal;
-        arg_cache->to_py_cleanup = arg_foreign_to_py_cleanup;
     } else {
         arg_cache->to_py_marshaller = pygi_arg_struct_to_py_marshal;
-        if (iface_cache->py_type
-            && g_type_is_a (iface_cache->g_type, G_TYPE_BOXED))
-            arg_cache->to_py_cleanup = arg_boxed_to_py_cleanup;
     }
 }
 

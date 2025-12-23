@@ -138,20 +138,6 @@ pygi_marshal_to_py_utf8_cache_adapter (PyGIInvokeState *state,
     return object;
 }
 
-static void
-marshal_cleanup_from_py_utf8 (PyGIInvokeState *state,
-                              PyGIMarshalCleanupData cleanup_data)
-{
-    pygi_marshal_cleanup_data_destroy (&cleanup_data);
-}
-
-static void
-marshal_cleanup_to_py_utf8 (PyGIInvokeState *state,
-                            PyGIMarshalCleanupData cleanup_data)
-{
-    pygi_marshal_cleanup_data_destroy (&cleanup_data);
-}
-
 PyGIArgCache *
 pygi_arg_void_type_new_from_info (GITypeInfo *type_info, GIArgInfo *arg_info,
                                   GITransfer transfer, PyGIDirection direction)
@@ -202,12 +188,10 @@ pygi_arg_string_type_new_from_info (GITypeInfo *type_info, GIArgInfo *arg_info,
     if (direction & PYGI_DIRECTION_FROM_PYTHON) {
         arg_cache->from_py_marshaller =
             pygi_marshal_from_py_utf8_cache_adapter;
-        arg_cache->from_py_cleanup = marshal_cleanup_from_py_utf8;
     }
 
     if (direction & PYGI_DIRECTION_TO_PYTHON) {
         arg_cache->to_py_marshaller = pygi_marshal_to_py_utf8_cache_adapter;
-        arg_cache->to_py_cleanup = marshal_cleanup_to_py_utf8;
     }
 
     return arg_cache;

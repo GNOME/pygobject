@@ -224,14 +224,6 @@ err:
     return TRUE;
 }
 
-static void
-_pygi_marshal_cleanup_from_py_glist (PyGIInvokeState *state,
-                                     PyGIMarshalCleanupData cleanup_data)
-{
-    pygi_marshal_cleanup_data_destroy (&cleanup_data);
-}
-
-
 /*
  * GList and GSList to Python
  */
@@ -373,42 +365,6 @@ _pygi_marshal_to_py_gslist (PyGIInvokeState *state,
     return py_obj;
 }
 
-static void
-_pygi_marshal_cleanup_to_py_glist (PyGIInvokeState *state,
-                                   PyGIMarshalCleanupData cleanup_data)
-{
-    pygi_marshal_cleanup_data_destroy (&cleanup_data);
-}
-
-static void
-_arg_cache_from_py_glist_setup (PyGIArgCache *arg_cache, GITransfer transfer)
-{
-    arg_cache->from_py_marshaller = _pygi_marshal_from_py_glist;
-    arg_cache->from_py_cleanup = _pygi_marshal_cleanup_from_py_glist;
-}
-
-static void
-_arg_cache_to_py_glist_setup (PyGIArgCache *arg_cache, GITransfer transfer)
-{
-    arg_cache->to_py_marshaller = _pygi_marshal_to_py_glist;
-    arg_cache->to_py_cleanup = _pygi_marshal_cleanup_to_py_glist;
-}
-
-static void
-_arg_cache_from_py_gslist_setup (PyGIArgCache *arg_cache, GITransfer transfer)
-{
-    arg_cache->from_py_marshaller = _pygi_marshal_from_py_gslist;
-    arg_cache->from_py_cleanup = _pygi_marshal_cleanup_from_py_glist;
-}
-
-static void
-_arg_cache_to_py_gslist_setup (PyGIArgCache *arg_cache, GITransfer transfer)
-{
-    arg_cache->to_py_marshaller = _pygi_marshal_to_py_gslist;
-    arg_cache->to_py_cleanup = _pygi_marshal_cleanup_to_py_glist;
-}
-
-
 /*
  * GList/GSList Interface
  */
@@ -429,10 +385,10 @@ pygi_arg_glist_new_from_info (GITypeInfo *type_info, GIArgInfo *arg_info,
     }
 
     if (direction & PYGI_DIRECTION_FROM_PYTHON)
-        _arg_cache_from_py_glist_setup (arg_cache, transfer);
+        arg_cache->from_py_marshaller = _pygi_marshal_from_py_glist;
 
     if (direction & PYGI_DIRECTION_TO_PYTHON)
-        _arg_cache_to_py_glist_setup (arg_cache, transfer);
+        arg_cache->to_py_marshaller = _pygi_marshal_to_py_glist;
 
     return arg_cache;
 }
@@ -453,10 +409,10 @@ pygi_arg_gslist_new_from_info (GITypeInfo *type_info, GIArgInfo *arg_info,
     }
 
     if (direction & PYGI_DIRECTION_FROM_PYTHON)
-        _arg_cache_from_py_gslist_setup (arg_cache, transfer);
+        arg_cache->from_py_marshaller = _pygi_marshal_from_py_gslist;
 
     if (direction & PYGI_DIRECTION_TO_PYTHON)
-        _arg_cache_to_py_gslist_setup (arg_cache, transfer);
+        arg_cache->to_py_marshaller = _pygi_marshal_to_py_gslist;
 
     return arg_cache;
 }
