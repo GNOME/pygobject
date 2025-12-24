@@ -408,11 +408,10 @@ array_success:
     }
 
     if (item_cleanups) {
-        g_array_set_clear_func (
-            item_cleanups, (GDestroyNotify)pygi_marshal_cleanup_data_destroy);
-
-        pygi_marshal_cleanup_data_init (cleanup_data, item_cleanups,
-                                        (GDestroyNotify)g_array_unref);
+        pygi_marshal_cleanup_data_init_full (
+            cleanup_data, item_cleanups,
+            (GDestroyNotify)pygi_marshal_cleanup_data_destroy_array,
+            (GDestroyNotify)pygi_marshal_cleanup_data_destroy_array_failed);
     }
 
     return TRUE;
@@ -500,7 +499,6 @@ _pygi_marshal_to_py_array (PyGIInvokeState *state,
 
             item_cleanups = g_array_sized_new (
                 FALSE, TRUE, sizeof (PyGIMarshalCleanupData), array_->len);
-            // g_array_set_clear_func (item_cleanups, pygi_marshal_cleanup_data_array_clear_func);
 
             item_arg_cache = seq_cache->item_cache;
             item_to_py_marshaller = item_arg_cache->to_py_marshaller;
@@ -589,11 +587,11 @@ _pygi_marshal_to_py_array (PyGIInvokeState *state,
                 }
             }
 
-            g_array_set_clear_func (
-                item_cleanups,
-                (GDestroyNotify)pygi_marshal_cleanup_data_destroy);
-            pygi_marshal_cleanup_data_init (cleanup_data, item_cleanups,
-                                            (GDestroyNotify)g_array_unref);
+            pygi_marshal_cleanup_data_init_full (
+                cleanup_data, item_cleanups,
+                (GDestroyNotify)pygi_marshal_cleanup_data_destroy_array,
+                (GDestroyNotify)
+                    pygi_marshal_cleanup_data_destroy_array_failed);
         }
     }
 
