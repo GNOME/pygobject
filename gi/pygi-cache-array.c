@@ -241,7 +241,7 @@ _pygi_marshal_from_py_array (PyGIInvokeState *state,
     from_py_marshaller = sequence_cache->item_cache->from_py_marshaller;
     for (i = 0, success_count = 0; i < length; i++) {
         GIArgument item = PYGI_ARG_INIT;
-        PyGIMarshalCleanupData item_cleanup_data = { NULL, NULL };
+        PyGIMarshalCleanupData item_cleanup_data = { 0 };
         PyObject *py_item = PySequence_GetItem (py_arg, i);
         if (py_item == NULL) goto err;
 
@@ -372,12 +372,13 @@ array_success:
             g_array_free (array_, FALSE);
             g_assert (item_cleanups == NULL);
         } else {
-            PyGIMarshalCleanupData array_cleanup_data = {
-                .data = array_,
-                .destroy = arg_cache->transfer == GI_TRANSFER_NOTHING
-                               ? (GDestroyNotify)g_array_unref
-                               : (GDestroyNotify)free_array_keep_segment
-            };
+            PyGIMarshalCleanupData array_cleanup_data = { 0 };
+            pygi_marshal_cleanup_data_init (
+                &array_cleanup_data, array_,
+                arg_cache->transfer == GI_TRANSFER_NOTHING
+                    ? (GDestroyNotify)g_array_unref
+                    : (GDestroyNotify)free_array_keep_segment);
+
             g_array_append_val (item_cleanups, array_cleanup_data);
         }
     } else {
@@ -386,11 +387,11 @@ array_success:
         switch (arg_cache->transfer) {
         case GI_TRANSFER_NOTHING: {
             /* Free everything in cleanup. */
-            PyGIMarshalCleanupData array_cleanup_data = {
-                .data = array_,
-                .destroy = is_ptr_array ? (GDestroyNotify)g_ptr_array_unref
-                                        : (GDestroyNotify)g_array_unref
-            };
+            PyGIMarshalCleanupData array_cleanup_data = { 0 };
+            pygi_marshal_cleanup_data_init (
+                &array_cleanup_data, array_,
+                is_ptr_array ? (GDestroyNotify)g_ptr_array_unref
+                             : (GDestroyNotify)g_array_unref);
             g_array_append_val (item_cleanups, array_cleanup_data);
             break;
         }
@@ -568,22 +569,22 @@ _pygi_marshal_to_py_array (PyGIInvokeState *state,
             if (arg_cache->transfer == GI_TRANSFER_EVERYTHING
                 || arg_cache->transfer == GI_TRANSFER_CONTAINER) {
                 if (array_type == GI_ARRAY_TYPE_C) {
-                    PyGIMarshalCleanupData array_cleanup_data = {
-                        .data = array_->data,
-                        .destroy = (GDestroyNotify)g_free
-                    };
+                    PyGIMarshalCleanupData array_cleanup_data = { 0 };
+                    pygi_marshal_cleanup_data_init (&array_cleanup_data,
+                                                    array_->data,
+                                                    (GDestroyNotify)g_free);
                     g_array_append_val (item_cleanups, array_cleanup_data);
                 } else if (array_type == GI_ARRAY_TYPE_PTR_ARRAY) {
-                    PyGIMarshalCleanupData array_cleanup_data = {
-                        .data = array_,
-                        .destroy = (GDestroyNotify)g_ptr_array_unref
-                    };
+                    PyGIMarshalCleanupData array_cleanup_data = { 0 };
+                    pygi_marshal_cleanup_data_init (
+                        &array_cleanup_data, array_,
+                        (GDestroyNotify)g_ptr_array_unref);
                     g_array_append_val (item_cleanups, array_cleanup_data);
                 } else {
-                    PyGIMarshalCleanupData array_cleanup_data = {
-                        .data = array_,
-                        .destroy = (GDestroyNotify)g_array_unref
-                    };
+                    PyGIMarshalCleanupData array_cleanup_data = { 0 };
+                    pygi_marshal_cleanup_data_init (
+                        &array_cleanup_data, array_,
+                        (GDestroyNotify)g_array_unref);
                     g_array_append_val (item_cleanups, array_cleanup_data);
                 }
             }
