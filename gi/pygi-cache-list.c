@@ -221,8 +221,7 @@ _pygi_marshal_to_py_glist (PyGIInvokeState *state,
                            gpointer *cleanup_data)
 {
     GList *list_;
-    guint length;
-    guint i;
+    Py_ssize_t length, i;
     GPtrArray *item_cleanups;
 
     PyGIMarshalToPyFunc item_to_py_marshaller;
@@ -232,12 +231,13 @@ _pygi_marshal_to_py_glist (PyGIInvokeState *state,
     PyObject *py_obj = NULL;
 
     list_ = arg->v_pointer;
-    length = g_list_length (list_);
+    length = (Py_ssize_t)g_list_length (list_);
+    g_assert (length >= 0);
 
     py_obj = PyList_New (length);
     if (py_obj == NULL) return NULL;
 
-    item_cleanups = g_ptr_array_sized_new (length);
+    item_cleanups = g_ptr_array_sized_new ((guint)length);
     *cleanup_data = item_cleanups;
 
     item_arg_cache = seq_cache->item_cache;
@@ -276,8 +276,7 @@ _pygi_marshal_to_py_gslist (PyGIInvokeState *state,
                             gpointer *cleanup_data)
 {
     GSList *list_;
-    guint length;
-    guint i;
+    Py_ssize_t length, i;
     GPtrArray *item_cleanups;
 
     PyGIMarshalToPyFunc item_to_py_marshaller;
@@ -287,12 +286,13 @@ _pygi_marshal_to_py_gslist (PyGIInvokeState *state,
     PyObject *py_obj = NULL;
 
     list_ = arg->v_pointer;
-    length = g_slist_length (list_);
+    length = (Py_ssize_t)g_slist_length (list_);
+    g_assert (length >= 0);
 
     py_obj = PyList_New (length);
     if (py_obj == NULL) return NULL;
 
-    item_cleanups = g_ptr_array_sized_new (length);
+    item_cleanups = g_ptr_array_sized_new ((guint)length);
     *cleanup_data = item_cleanups;
 
     item_arg_cache = seq_cache->item_cache;

@@ -186,9 +186,9 @@ static int
 pyg_value_array_from_pyobject (GValue *value, PyObject *obj,
                                const GParamSpecValueArray *pspec)
 {
-    Py_ssize_t seq_len;
+    Py_ssize_t seq_len, i;
     GValueArray *value_array;
-    guint len, i;
+    guint len;
 
     seq_len = PySequence_Length (obj);
     if (seq_len == -1) {
@@ -202,7 +202,7 @@ pyg_value_array_from_pyobject (GValue *value, PyObject *obj,
 
     value_array = g_value_array_new (len);
 
-    for (i = 0; i < len; ++i) {
+    for (i = 0; i < seq_len; ++i) {
         PyObject *item = PySequence_GetItem (obj, i);
         GType type;
 
@@ -746,7 +746,7 @@ value_to_py_structured_type (const GValue *value, GType fundamental,
             return pyg_value_to_pyobject (n_value, copy_boxed);
         } else if (holds_value_array) {
             GValueArray *array = (GValueArray *)g_value_get_boxed (value);
-            Py_ssize_t n_values = array ? array->n_values : 0;
+            Py_ssize_t n_values = array ? (Py_ssize_t)array->n_values : 0;
             PyObject *ret = PyList_New (n_values);
             int i;
             for (i = 0; i < n_values; ++i)
