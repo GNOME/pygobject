@@ -140,6 +140,9 @@ void pygi_marshal_cleanup_data_destroy (PyGIMarshalCleanupData *cleanup_data);
 void pygi_marshal_cleanup_data_destroy_failed (
     PyGIMarshalCleanupData *cleanup_data);
 
+void pygi_marshal_cleanup_data_destroy_array (GArray *item_cleanups);
+void pygi_marshal_cleanup_data_destroy_array_failed (GArray *item_cleanups);
+
 G_END_DECLS
 
 #endif /*__PYGI_CACHE_PRIVATE_H__*/

@@ -80,6 +80,26 @@ pygi_marshal_cleanup_data_destroy_failed (PyGIMarshalCleanupData *cleanup_data)
     }
 }
 
+
+void
+pygi_marshal_cleanup_data_destroy_array (GArray *item_cleanups)
+{
+    g_array_set_clear_func (item_cleanups,
+                            (GDestroyNotify)pygi_marshal_cleanup_data_destroy);
+
+    g_array_unref (item_cleanups);
+}
+
+void
+pygi_marshal_cleanup_data_destroy_array_failed (GArray *item_cleanups)
+{
+    g_array_set_clear_func (
+        item_cleanups,
+        (GDestroyNotify)pygi_marshal_cleanup_data_destroy_failed);
+
+    g_array_unref (item_cleanups);
+}
+
 void
 pygi_arg_cache_free (PyGIArgCache *cache)
 {

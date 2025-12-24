@@ -59,8 +59,10 @@ _pygi_marshal_from_py_glist (PyGIInvokeState *state,
     if (arg_cache->transfer != GI_TRANSFER_EVERYTHING) {
         item_cleanups = g_array_sized_new (
             FALSE, TRUE, sizeof (PyGIMarshalCleanupData), length + 1);
-        pygi_marshal_cleanup_data_init (cleanup_data, item_cleanups,
-                                        (GDestroyNotify)g_array_unref);
+        pygi_marshal_cleanup_data_init_full (
+            cleanup_data, item_cleanups,
+            (GDestroyNotify)pygi_marshal_cleanup_data_destroy_array,
+            (GDestroyNotify)pygi_marshal_cleanup_data_destroy_array_failed);
     }
 
     from_py_marshaller = sequence_cache->item_cache->from_py_marshaller;
@@ -104,14 +106,10 @@ err:
         pygi_marshal_cleanup_data_init (&list_cleanup_data, arg->v_pointer,
                                         (GDestroyNotify)g_list_free);
         g_array_append_val (item_cleanups, list_cleanup_data);
-        g_array_set_clear_func (
-            item_cleanups, (GDestroyNotify)pygi_marshal_cleanup_data_destroy);
         break;
     }
     case GI_TRANSFER_CONTAINER:
         /* Only the elements need to be deleted. */
-        g_array_set_clear_func (
-            item_cleanups, (GDestroyNotify)pygi_marshal_cleanup_data_destroy);
         break;
     case GI_TRANSFER_EVERYTHING:
         /* No cleanup, everything is given to the callee. */
@@ -156,8 +154,10 @@ _pygi_marshal_from_py_gslist (PyGIInvokeState *state,
     if (arg_cache->transfer != GI_TRANSFER_EVERYTHING) {
         item_cleanups = g_array_sized_new (
             FALSE, TRUE, sizeof (PyGIMarshalCleanupData), length + 1);
-        pygi_marshal_cleanup_data_init (cleanup_data, item_cleanups,
-                                        (GDestroyNotify)g_array_unref);
+        pygi_marshal_cleanup_data_init_full (
+            cleanup_data, item_cleanups,
+            (GDestroyNotify)pygi_marshal_cleanup_data_destroy_array,
+            (GDestroyNotify)pygi_marshal_cleanup_data_destroy_array_failed);
     }
 
     from_py_marshaller = sequence_cache->item_cache->from_py_marshaller;
@@ -202,14 +202,10 @@ err:
         pygi_marshal_cleanup_data_init (&list_cleanup_data, arg->v_pointer,
                                         (GDestroyNotify)g_slist_free);
         g_array_append_val (item_cleanups, list_cleanup_data);
-        g_array_set_clear_func (
-            item_cleanups, (GDestroyNotify)pygi_marshal_cleanup_data_destroy);
         break;
     }
     case GI_TRANSFER_CONTAINER:
         /* Only the elements need to be deleted. */
-        g_array_set_clear_func (
-            item_cleanups, (GDestroyNotify)pygi_marshal_cleanup_data_destroy);
         break;
     case GI_TRANSFER_EVERYTHING:
         /* No cleanup, everything is given to the callee. */
@@ -284,11 +280,12 @@ _pygi_marshal_to_py_glist (PyGIInvokeState *state,
                                         (GDestroyNotify)g_list_free);
         g_array_append_val (item_cleanups, list_cleanup_data);
     }
-    g_array_set_clear_func (item_cleanups,
-                            (GDestroyNotify)pygi_marshal_cleanup_data_destroy);
 
-    pygi_marshal_cleanup_data_init (cleanup_data, item_cleanups,
-                                    (GDestroyNotify)g_array_unref);
+    pygi_marshal_cleanup_data_init_full (
+        cleanup_data, item_cleanups,
+        (GDestroyNotify)pygi_marshal_cleanup_data_destroy_array,
+        (GDestroyNotify)pygi_marshal_cleanup_data_destroy_array_failed);
+
 
     return py_obj;
 }
@@ -352,11 +349,12 @@ _pygi_marshal_to_py_gslist (PyGIInvokeState *state,
                                         (GDestroyNotify)g_slist_free);
         g_array_append_val (item_cleanups, list_cleanup_data);
     }
-    g_array_set_clear_func (item_cleanups,
-                            (GDestroyNotify)pygi_marshal_cleanup_data_destroy);
 
-    pygi_marshal_cleanup_data_init (cleanup_data, item_cleanups,
-                                    (GDestroyNotify)g_array_unref);
+    pygi_marshal_cleanup_data_init_full (
+        cleanup_data, item_cleanups,
+        (GDestroyNotify)pygi_marshal_cleanup_data_destroy_array,
+        (GDestroyNotify)pygi_marshal_cleanup_data_destroy_array_failed);
+
 
     return py_obj;
 }
