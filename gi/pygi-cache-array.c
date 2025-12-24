@@ -489,133 +489,123 @@ _pygi_marshal_to_py_array (PyGIInvokeState *state,
         } else {
             py_obj = PyBytes_FromStringAndSize (array_->data, array_->len);
         }
+    } else if (arg->v_pointer == NULL) {
+        py_obj = PyList_New (0);
     } else {
-        if (arg->v_pointer == NULL) {
-            py_obj = PyList_New (0);
-        } else {
-            guint i;
+        guint i;
 
-            gsize item_size;
-            PyGIMarshalToPyFunc item_to_py_marshaller;
-            PyGIArgCache *item_arg_cache;
-            gboolean item_size_warning = FALSE;
+        gsize item_size;
+        PyGIMarshalToPyFunc item_to_py_marshaller;
+        PyGIArgCache *item_arg_cache;
+        gboolean item_size_warning = FALSE;
 
-            py_obj = PyList_New (array_->len);
-            if (py_obj == NULL) goto err;
+        py_obj = PyList_New (array_->len);
+        if (py_obj == NULL) goto err;
 
-            item_cleanups = g_array_sized_new (
-                FALSE, TRUE, sizeof (PyGIMarshalCleanupData), array_->len);
+        item_cleanups = g_array_sized_new (
+            FALSE, TRUE, sizeof (PyGIMarshalCleanupData), array_->len);
 
-            item_arg_cache = seq_cache->item_cache;
-            item_to_py_marshaller = item_arg_cache->to_py_marshaller;
+        item_arg_cache = seq_cache->item_cache;
+        item_to_py_marshaller = item_arg_cache->to_py_marshaller;
 
-            item_size = g_array_get_element_size (array_);
+        item_size = g_array_get_element_size (array_);
 
-            for (i = 0; i < array_->len; i++) {
-                GIArgument item_arg = PYGI_ARG_INIT;
-                PyObject *py_item;
-                PyGIMarshalCleanupData item_cleanup_data = { 0 };
+        for (i = 0; i < array_->len; i++) {
+            GIArgument item_arg = PYGI_ARG_INIT;
+            PyObject *py_item;
+            PyGIMarshalCleanupData item_cleanup_data = { 0 };
 
-                /* If we are receiving an array of pointers, simply assign the pointer
+            /* If we are receiving an array of pointers, simply assign the pointer
                  * and move on, letting the per-item marshaler deal with the
                  * various transfer modes and ref counts (e.g. g_variant_ref_sink).
                  */
-                if (array_type == GI_ARRAY_TYPE_PTR_ARRAY) {
-                    item_arg.v_pointer =
-                        g_ptr_array_index ((GPtrArray *)array_, i);
-
-                } else if (item_arg_cache->is_pointer) {
-                    if (item_size == sizeof (gpointer)) {
-                        item_arg.v_pointer =
-                            g_array_index (array_, gpointer, i);
-                    } else {
-                        // TODO: this warning needs to be actionable
-                        //  I do not have enough context to show which field/argument is in error, maybe
-                        //  allow to raise errors for those cases (e.g. an option that can be set in unit tests)
-                        if (!item_size_warning) {
-                            g_warning (
-                                "Array type is assumed to be a pointer, but "
-                                "item size is %" G_GSIZE_FORMAT " bytes",
-                                item_size);
-                            item_size_warning = TRUE;
-                        }
-
-                        // For now, copy the right number of bytes
-                        memcpy (&item_arg, array_->data + i * item_size,
-                                item_size);
-                    }
-                } else if (item_arg_cache->type_tag == GI_TYPE_TAG_INTERFACE) {
-                    PyGIInterfaceCache *iface_cache =
-                        (PyGIInterfaceCache *)item_arg_cache;
-
-                    /* FIXME: This probably doesn't work with boxed types or gvalues.
-                     * See fx. _pygi_marshal_from_py_array() */
-                    if (GI_IS_STRUCT_INFO (iface_cache->interface_info)) {
-                        if (arg_cache->transfer == GI_TRANSFER_EVERYTHING
-                            && !g_type_is_a (iface_cache->g_type,
-                                             G_TYPE_BOXED)) {
-                            /* array elements are structs */
-                            gpointer *_struct = g_malloc (item_size);
-                            memcpy (_struct, array_->data + i * item_size,
-                                    item_size);
-                            item_arg.v_pointer = _struct;
-                        } else {
-                            item_arg.v_pointer = array_->data + i * item_size;
-                        }
-                    } else if (GI_IS_ENUM_INFO (iface_cache->interface_info)) {
-                        memcpy (&item_arg, array_->data + i * item_size,
-                                item_size);
-                    } else {
-                        item_arg.v_pointer =
-                            g_array_index (array_, gpointer, i);
-                    }
+            if (array_type == GI_ARRAY_TYPE_PTR_ARRAY) {
+                item_arg.v_pointer =
+                    g_ptr_array_index ((GPtrArray *)array_, i);
+            } else if (item_arg_cache->is_pointer) {
+                if (item_size == sizeof (gpointer)) {
+                    item_arg.v_pointer = g_array_index (array_, gpointer, i);
                 } else {
+                    // TODO: this warning needs to be actionable
+                    //  I do not have enough context to show which field/argument is in error, maybe
+                    //  allow to raise errors for those cases (e.g. an option that can be set in unit tests)
+                    if (!item_size_warning) {
+                        g_warning (
+                            "Array type is assumed to be a pointer, but "
+                            "item size is %" G_GSIZE_FORMAT " bytes",
+                            item_size);
+                        item_size_warning = TRUE;
+                    }
+
+                    // For now, copy the right number of bytes
                     memcpy (&item_arg, array_->data + i * item_size,
                             item_size);
                 }
+            } else if (item_arg_cache->type_tag == GI_TYPE_TAG_INTERFACE) {
+                PyGIInterfaceCache *iface_cache =
+                    (PyGIInterfaceCache *)item_arg_cache;
 
-                py_item = item_to_py_marshaller (state, callable_cache,
-                                                 item_arg_cache, &item_arg,
-                                                 &item_cleanup_data);
-                g_array_append_val (item_cleanups, item_cleanup_data);
-
-                if (py_item == NULL) {
-                    Py_CLEAR (py_obj);
-
-                    goto err;
-                }
-                PyList_SET_ITEM (py_obj, i, py_item);
-            }
-
-            if (arg_cache->transfer == GI_TRANSFER_EVERYTHING
-                || arg_cache->transfer == GI_TRANSFER_CONTAINER) {
-                if (array_type == GI_ARRAY_TYPE_C) {
-                    PyGIMarshalCleanupData array_cleanup_data = { 0 };
-                    pygi_marshal_cleanup_data_init (&array_cleanup_data,
-                                                    array_->data,
-                                                    (GDestroyNotify)g_free);
-                    g_array_append_val (item_cleanups, array_cleanup_data);
-                } else if (array_type == GI_ARRAY_TYPE_PTR_ARRAY) {
-                    PyGIMarshalCleanupData array_cleanup_data = { 0 };
-                    pygi_marshal_cleanup_data_init (
-                        &array_cleanup_data, array_,
-                        (GDestroyNotify)g_ptr_array_unref);
-                    g_array_append_val (item_cleanups, array_cleanup_data);
+                /* FIXME: This probably doesn't work with boxed types or gvalues.
+                 * See fx. _pygi_marshal_from_py_array() */
+                if (GI_IS_STRUCT_INFO (iface_cache->interface_info)) {
+                    if (arg_cache->transfer == GI_TRANSFER_EVERYTHING
+                        && !g_type_is_a (iface_cache->g_type, G_TYPE_BOXED)) {
+                        /* array elements are structs */
+                        gpointer *_struct = g_malloc (item_size);
+                        memcpy (_struct, array_->data + i * item_size,
+                                item_size);
+                        item_arg.v_pointer = _struct;
+                    } else {
+                        item_arg.v_pointer = array_->data + i * item_size;
+                    }
+                } else if (GI_IS_ENUM_INFO (iface_cache->interface_info)) {
+                    memcpy (&item_arg, array_->data + i * item_size,
+                            item_size);
                 } else {
-                    PyGIMarshalCleanupData array_cleanup_data = { 0 };
-                    pygi_marshal_cleanup_data_init (
-                        &array_cleanup_data, array_,
-                        (GDestroyNotify)g_array_unref);
-                    g_array_append_val (item_cleanups, array_cleanup_data);
+                    item_arg.v_pointer = g_array_index (array_, gpointer, i);
                 }
+            } else {
+                memcpy (&item_arg, array_->data + i * item_size, item_size);
             }
 
-            pygi_marshal_cleanup_data_init_full (
-                cleanup_data, item_cleanups,
-                (GDestroyNotify)pygi_marshal_cleanup_data_destroy_array,
-                (GDestroyNotify)
-                    pygi_marshal_cleanup_data_destroy_array_failed);
+            py_item = item_to_py_marshaller (state, callable_cache,
+                                             item_arg_cache, &item_arg,
+                                             &item_cleanup_data);
+            g_array_append_val (item_cleanups, item_cleanup_data);
+
+            if (py_item == NULL) {
+                Py_CLEAR (py_obj);
+
+                goto err;
+            }
+            PyList_SET_ITEM (py_obj, i, py_item);
         }
+
+        if (arg_cache->transfer == GI_TRANSFER_EVERYTHING
+            || arg_cache->transfer == GI_TRANSFER_CONTAINER) {
+            if (array_type == GI_ARRAY_TYPE_C) {
+                PyGIMarshalCleanupData array_cleanup_data = { 0 };
+                pygi_marshal_cleanup_data_init (
+                    &array_cleanup_data, array_->data, (GDestroyNotify)g_free);
+                g_array_append_val (item_cleanups, array_cleanup_data);
+            } else if (array_type == GI_ARRAY_TYPE_PTR_ARRAY) {
+                PyGIMarshalCleanupData array_cleanup_data = { 0 };
+                pygi_marshal_cleanup_data_init (
+                    &array_cleanup_data, array_,
+                    (GDestroyNotify)g_ptr_array_unref);
+                g_array_append_val (item_cleanups, array_cleanup_data);
+            } else {
+                PyGIMarshalCleanupData array_cleanup_data = { 0 };
+                pygi_marshal_cleanup_data_init (&array_cleanup_data, array_,
+                                                (GDestroyNotify)g_array_unref);
+                g_array_append_val (item_cleanups, array_cleanup_data);
+            }
+        }
+
+        pygi_marshal_cleanup_data_init_full (
+            cleanup_data, item_cleanups,
+            (GDestroyNotify)pygi_marshal_cleanup_data_destroy_array,
+            (GDestroyNotify)pygi_marshal_cleanup_data_destroy_array_failed);
     }
 
     if (array_type == GI_ARRAY_TYPE_C) {
