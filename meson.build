@@ -114,6 +114,7 @@ else
     '-Wall',
     '-Warray-bounds',
     '-Wcast-align',
+    '-Wconversion',
     '-Wduplicated-branches',
     '-Wextra',
     '-Wformat=2',
@@ -146,9 +147,6 @@ else
   ]
 
   main_c_args += [
-    '-Wsign-conversion',
-    '-Wconversion',
-    '-Werror=sign-conversion',
     '-Wno-incompatible-pointer-types-discards-qualifiers',
     '-Wno-missing-field-initializers',
     '-Wno-unused-parameter',
