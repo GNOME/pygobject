@@ -91,8 +91,10 @@ _pygi_marshal_from_py_ghash (PyGIInvokeState *state,
     if (arg_cache->transfer != GI_TRANSFER_EVERYTHING) {
         item_cleanups = g_array_sized_new (
             FALSE, TRUE, sizeof (PyGIMarshalCleanupData), length * 2 + 1);
-        pygi_marshal_cleanup_data_init (cleanup_data, item_cleanups,
-                                        (GDestroyNotify)g_array_unref);
+        pygi_marshal_cleanup_data_init_full (
+            cleanup_data, item_cleanups,
+            (GDestroyNotify)pygi_marshal_cleanup_data_destroy_array,
+            (GDestroyNotify)pygi_marshal_cleanup_data_destroy_array_failed);
     }
 
     key_from_py_marshaller = hash_cache->key_cache->from_py_marshaller;
@@ -170,8 +172,6 @@ err:
         pygi_marshal_cleanup_data_init (&hash_cleanup_data, arg->v_pointer,
                                         (GDestroyNotify)g_hash_table_unref);
         g_array_append_val (item_cleanups, hash_cleanup_data);
-        g_array_set_clear_func (
-            item_cleanups, (GDestroyNotify)pygi_marshal_cleanup_data_destroy);
         break;
     }
     case GI_TRANSFER_CONTAINER: {
@@ -182,8 +182,6 @@ err:
                                         g_hash_table_ref (arg->v_pointer),
                                         (GDestroyNotify)g_hash_table_unref);
         g_array_append_val (item_cleanups, hash_cleanup_data);
-        g_array_set_clear_func (
-            item_cleanups, (GDestroyNotify)pygi_marshal_cleanup_data_destroy);
         break;
     }
     case GI_TRANSFER_EVERYTHING:
