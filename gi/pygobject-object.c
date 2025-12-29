@@ -1022,6 +1022,16 @@ cleanup:
 
     g_type_class_unref (class);
 
+    /* Call __post_init__ as a simpler alternative to __init__: without parameters.
+     * This is similar to how dataclasses do additional initialization. */
+    if (!PyErr_Occurred ()
+        && PyObject_HasAttrString ((PyObject *)self, "__post_init__")) {
+        PyObject *result =
+            PyObject_CallMethod ((PyObject *)self, "__post_init__", NULL);
+        if (result == NULL) return -1;
+        Py_DECREF (result);
+    }
+
     return (self->obj) ? 0 : -1;
 }
 

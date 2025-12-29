@@ -278,3 +278,22 @@ def test_gobject_cycle_is_collected():
     gc.collect()
 
     assert ref() is None
+
+
+def test_object_with_post_init():
+    class PostInit(Regress.TestObj):
+        def __post_init__(self):
+            self.post_init_called = True
+
+    obj = PostInit()
+
+    assert obj.post_init_called
+
+
+def test_object_with_post_init_raises_exception():
+    class PostInit(Regress.TestObj):
+        def __post_init__(self):
+            raise ValueError("Catch me")
+
+    with pytest.raises(ValueError, match="Catch me"):
+        PostInit()
