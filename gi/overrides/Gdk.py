@@ -455,6 +455,12 @@ if GDK3:
     SELECTION_TYPE_STRING = Gdk.atom_intern("STRING", True)
     __all__.append("SELECTION_TYPE_STRING")
 
+
+if GDK4 and not hasattr(Gdk.PaintableFlags, "SIZE"):
+    Gdk.PaintableFlags.SIZE = getattr(Gdk.PaintableFlags, "STATIC_SIZE")
+    Gdk.PaintableFlags.CONTENTS = getattr(Gdk.PaintableFlags, "STATIC_CONTENTS")
+
+
 if GDK3 and get_option("legacy_autoinit"):
     import sys
 

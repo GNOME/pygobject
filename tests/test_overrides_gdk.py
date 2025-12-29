@@ -333,3 +333,11 @@ class TestGdk(unittest.TestCase):
         self.assertTrue(isinstance(filelist, Gdk.FileList))
         self.assertEqual(len(filelist), 1)
         self.assertEqual(filelist[0], f)
+
+    @unittest.skipUnless(GDK4, "only in gdk4")
+    @unittest.skipUnless(gtkver() >= (4, 21, 0), "available since 4.21")
+    def test_paintable_flags(self):
+        self.assertEqual(Gdk.PaintableFlags.SIZE, Gdk.PaintableFlags.STATIC_SIZE)
+        self.assertEqual(
+            Gdk.PaintableFlags.CONTENTS, Gdk.PaintableFlags.STATIC_CONTENTS
+        )
