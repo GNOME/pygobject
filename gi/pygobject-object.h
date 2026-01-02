@@ -8,6 +8,7 @@
 /* Data that belongs to the GObject instance, not the Python wrapper */
 struct _PyGObjectData {
     PyTypeObject *type; /* wrapper type for this instance */
+    PyObject *inst_dict;
     GSList *closures;
 };
 
