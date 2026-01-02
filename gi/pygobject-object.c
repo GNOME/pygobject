@@ -251,6 +251,15 @@ pygobject_register_class (PyObject *dict, const gchar *type_name, GType gtype,
     PyDict_SetItemString (dict, (char *)class_name, (PyObject *)type);
 }
 
+static void
+pygobject_inst_dict_clear (PyObject *inst_dict)
+{
+    PyGILState_STATE state = PyGILState_Ensure ();
+
+    Py_XDECREF (inst_dict);
+    PyGILState_Release (state);
+}
+
 /**
  * pygobject_register_wrapper:
  * @self: the wrapper instance
@@ -264,6 +273,7 @@ void
 pygobject_register_wrapper (PyObject *self)
 {
     PyGObject *gself;
+    PyObject *inst_dict;
 
     g_return_if_fail (self != NULL);
     g_return_if_fail (PyObject_TypeCheck (self, &PyGObject_Type));
@@ -273,6 +283,13 @@ pygobject_register_wrapper (PyObject *self)
     g_assert (gself->obj->ref_count >= 1);
     /* save wrapper pointer so we can access it later */
     g_object_set_qdata_full (gself->obj, pygobject_wrapper_key, gself, NULL);
+
+    /* Keep a copy of the instance dictionary around,
+     * so instance variables can outlive the wrapper object. */
+    inst_dict = PyObject_GenericGetDict (self, NULL);
+    g_object_set_qdata_full (gself->obj, pygobject_instance_dict_key,
+                             inst_dict,
+                             (GDestroyNotify)pygobject_inst_dict_clear);
 }
 
 static PyObject *
@@ -871,35 +888,12 @@ pygobject_traverse (PyGObject *self, visitproc visit, void *arg)
     return ret;
 }
 
-static void
-pygobject_inst_dict_clear (PyObject *inst_dict)
-{
-    PyGILState_STATE state = PyGILState_Ensure ();
-
-    Py_XDECREF (inst_dict);
-    PyGILState_Release (state);
-}
-
 static int
 pygobject_clear (PyGObject *self)
 {
     if (self->obj) {
         g_object_set_qdata_full (self->obj, pygobject_wrapper_key, NULL, NULL);
-
-        /* Only store the instance dict if we know the gobject will outlive this wrapper. */
-        if (self->inst_dict != NULL && PyDict_Size (self->inst_dict) > 0) {
-            g_object_set_qdata_full (
-                self->obj, pygobject_instance_dict_key,
-                Py_NewRef (self->inst_dict),
-                (GDestroyNotify)pygobject_inst_dict_clear);
-        } else {
-            g_object_set_qdata_full (self->obj, pygobject_instance_dict_key,
-                                     NULL, NULL);
-        }
-        Py_BEGIN_ALLOW_THREADS;
-        g_object_unref (self->obj);
-        Py_END_ALLOW_THREADS;
-        self->obj = NULL;
+        g_clear_pointer (&self->obj, g_object_unref);
     }
     Py_CLEAR (self->inst_dict);
     return 0;
