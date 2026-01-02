@@ -275,5 +275,6 @@ def test_gobject_cycle_is_collected():
     del a, b, c
 
     gc.collect()
+    gc.collect()
 
-    assert ref() is not None
+    assert ref() is None
