@@ -1,4 +1,5 @@
 import gc
+import sys
 import weakref
 
 import pytest
@@ -114,7 +115,6 @@ def test_value_object_retains_object_property_value():
     container = Regress.TestObj()
     obj = ValueObj()
     obj.model = MySpecialListStore()
-    # obj.model = Gio.ListStore.new(Regress.TestObj.__gtype__)
     container.props.bare = obj
 
     del obj
@@ -168,3 +168,112 @@ def test_object_with_signal_callback():
 
     assert obj_id == id(new_obj)
     assert new_obj.props.int == 42
+
+
+def test_objects_with_cyclic_dependency_and_instance_dict():
+    # Test with a cycle:
+    #
+    # a --> b --> c --> d
+    #       ^-----------'
+    a, b, c, d = [Regress.TestObj(int=i) for i in range(4)]
+
+    b.name = "b"
+
+    a.props.bare = b
+    b.props.bare = c
+    b.c = c
+    c.props.bare = d
+    c.d = d
+    d.props.bare = b
+    d.b = b
+
+    del b, c, d
+
+    gc.collect()
+    gc.collect()
+
+    new_b = a.props.bare
+    new_c = new_b.props.bare
+    new_d = new_c.props.bare
+
+    assert new_d.props.bare is new_b
+    assert a.props.bare.name == "b"
+
+
+def test_objects_with_cyclic_dependency_without_instance_dict():
+    # Test with a cycle:
+    #
+    # a --> b --> c --> d
+    #       ^-----------'
+    a, b, c, d = [Regress.TestObj(int=i) for i in range(4)]
+
+    a.props.bare = b
+    b.props.bare = c
+    c.props.bare = d
+    d.props.bare = b
+
+    del b, c, d
+
+    gc.collect()
+    gc.collect()
+
+    new_b = a.props.bare
+    new_c = new_b.props.bare
+    new_d = new_c.props.bare
+
+    assert new_d.props.bare is new_b
+
+
+def test_chained_objects_are_collected():
+    # a --> b --> c
+    a, b, c = [Regress.TestObj(int=i) for i in range(3)]
+    a.b = b
+    b.c = c
+
+    aref = a.weak_ref()
+    cref = c.weak_ref()
+    del a, b, c
+
+    gc.collect()
+    gc.collect()  # some more for PyPy
+    gc.collect()
+    gc.collect()
+
+    assert aref() is None
+    assert cref() is None
+
+
+def test_objects_can_be_deleted():
+    a = Regress.TestObj()
+
+    pyref = weakref.ref(a)
+    gref = a.weak_ref()
+    del a
+
+    gc.collect()  # for PyPy
+    gc.collect()
+
+    assert pyref() is None
+    assert gref() is None
+
+
+@pytest.mark.skipif(
+    sys.implementation.name == "pypy", reason="Doesn't play nice with PyPy GC"
+)
+def test_gobject_cycle_is_collected():
+    # Test with a cycle:
+    #
+    # a --> b --> c
+    # ^-----------'
+    a, b, c = [Regress.TestObj(int=i) for i in range(3)]
+
+    a.b = b
+    b.c = c
+    c.a = a
+
+    ref = a.weak_ref()
+    del a, b, c
+
+    gc.collect()
+
+    assert ref() is not None
