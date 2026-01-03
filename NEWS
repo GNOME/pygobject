@@ -1,3 +1,18 @@
+3.55.1 - 2026-01-03
+-------------------
+
+* Enable `-Wswitch-enum` compiler option :mr:`476`
+* Pass `GIArgument` as value argument :mr:`447` :mr:`480`
+* Support unichar properties :mr:`475`
+* Minimum supported Python version is 3.10 :mr:`478`
+* docs: Add conda and pixi to getting started :mr:`481`
+* Fix a few memory leaks, refactorings and cleanup :mr:`483` :mr:`484` :mr:`485` :mr:`486`
+* docs: Website updates :mr:`488`
+* Add backwards compatibility for `Gdk.PaintableFlags.SIZE`/`CONTENTS` :mr:`496`
+* Fix missing instance variables when objects are garbage collected (regression from :mr:`449`) :mr:`497`
+* Use a (temporary) object to make sure `do_dispose()` is called :mr:`491`
+* Call `do_constructed()` at the end of object initialization :mr:`495`
+
 3.55.0 - 2025-11-15
 -------------------
 
