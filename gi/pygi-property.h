@@ -25,7 +25,7 @@
 #define __PYGI_PROPERTY_H__
 
 #include <girepository/girepository.h>
-#include <pythoncapi_compat.h>
+#include <Python.h>
 
 PyObject *pygi_get_property_value (PyGObject *instance, GParamSpec *pspec);
 

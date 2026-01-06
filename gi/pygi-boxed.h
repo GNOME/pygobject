@@ -20,7 +20,7 @@
 #ifndef __PYGI_BOXED_H__
 #define __PYGI_BOXED_H__
 
-#include <pythoncapi_compat.h>
+#include <Python.h>
 
 #include "pygobject-types.h"
 

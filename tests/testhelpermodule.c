@@ -1,6 +1,6 @@
 #include <string.h>
 
-#include <pythoncapi_compat.h>
+#include <Python.h>
 #include <pygobject.h>
 
 #include "test-floating.h"

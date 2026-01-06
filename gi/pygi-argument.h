@@ -21,7 +21,7 @@
 #define __PYGI_ARGUMENT_H__
 
 #include <girepository/girepository.h>
-#include <pythoncapi_compat.h>
+#include <Python.h>
 
 G_BEGIN_DECLS
 

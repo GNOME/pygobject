@@ -2,7 +2,7 @@
 #define __PYGI_INVOKE_STATE_STRUCT_H__
 
 #include <girepository/girepository.h>
-#include <pythoncapi_compat.h>
+#include <Python.h>
 
 G_BEGIN_DECLS
 

@@ -2,7 +2,7 @@
 #define __PYGI_UTIL_H__
 
 #include <glib.h>
-#include <pythoncapi_compat.h>
+#include <Python.h>
 
 G_BEGIN_DECLS
 

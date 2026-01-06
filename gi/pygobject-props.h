@@ -1,7 +1,7 @@
 #ifndef __PYGOBJECT_OBJECT_PROPS_H__
 #define __PYGOBJECT_OBJECT_PROPS_H__
 
-#include <pythoncapi_compat.h>
+#include <Python.h>
 
 
 extern PyTypeObject PyGPropsIter_Type;

@@ -23,6 +23,7 @@
 #include "pygi-async.h"
 #include "pygi-invoke.h"
 #include "pygi-util.h"
+#include <structmember.h>
 
 static PyObject *asyncio_InvalidStateError;
 static PyObject *asyncio_get_running_loop;
@@ -542,13 +543,13 @@ pygi_async_new (PyObject *finish_func, PyObject *cancellable)
 }
 
 static struct PyMemberDef async_members[] = {
-    { "_asyncio_future_blocking", Py_T_BOOL,
+    { "_asyncio_future_blocking", T_BOOL,
       offsetof (PyGIAsync, _asyncio_future_blocking), 0, NULL },
-    { "_loop", Py_T_OBJECT_EX, offsetof (PyGIAsync, loop), Py_READONLY, NULL },
-    { "_finish_func", Py_T_OBJECT_EX, offsetof (PyGIAsync, finish_func),
-      Py_READONLY, NULL },
-    { "cancellable", Py_T_OBJECT_EX, offsetof (PyGIAsync, cancellable),
-      Py_READONLY, "The Gio.Cancellable associated with the task." },
+    { "_loop", T_OBJECT_EX, offsetof (PyGIAsync, loop), READONLY, NULL },
+    { "_finish_func", T_OBJECT_EX, offsetof (PyGIAsync, finish_func), READONLY,
+      NULL },
+    { "cancellable", T_OBJECT_EX, offsetof (PyGIAsync, cancellable), READONLY,
+      "The Gio.Cancellable associated with the task." },
     {
         NULL,
     },

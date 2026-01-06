@@ -24,7 +24,7 @@
 #ifndef __PYGI_CAPI_H__
 #define __PYGI_CAPI_H__
 
-#include <pythoncapi_compat.h>
+#include <Python.h>
 
 int pygi_register_warnings (PyObject *d);
 

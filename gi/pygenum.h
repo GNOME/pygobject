@@ -21,7 +21,7 @@
 #define __PYGOBJECT_ENUM_H__
 
 #include <girepository/girepository.h>
-#include <pythoncapi_compat.h>
+#include <Python.h>
 
 extern GQuark pygenum_class_key;
 

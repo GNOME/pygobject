@@ -21,7 +21,7 @@
 #define __PYG_OPTIONGROUP_H__
 
 #include <glib.h>
-#include <pythoncapi_compat.h>
+#include <Python.h>
 
 extern PyTypeObject PyGOptionGroup_Type;
 

@@ -21,7 +21,7 @@
 #define __PYGOBJECT_BOXED_H__
 
 #include <glib-object.h>
-#include <pythoncapi_compat.h>
+#include <Python.h>
 
 extern GQuark pygboxed_type_key;
 

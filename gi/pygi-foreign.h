@@ -25,7 +25,7 @@
 #ifndef __PYGI_FOREIGN_H__
 #define __PYGI_FOREIGN_H__
 
-#include <pythoncapi_compat.h>
+#include <Python.h>
 
 #include "pygi-foreign-types.h"
 

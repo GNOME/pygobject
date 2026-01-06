@@ -21,7 +21,7 @@
 #define __PYGOBJECT_FLAGS_H__
 
 #include <girepository/girepository.h>
-#include <pythoncapi_compat.h>
+#include <Python.h>
 
 extern GQuark pygflags_class_key;
 

@@ -47,11 +47,6 @@ with_pycairo = get_option('pycairo')
 
 cc = meson.get_compiler('c')
 
-pythoncapi_compat = subproject('pythoncapi-compat')
-pythoncapi_compat_dep = declare_dependency(
-    include_directories: pythoncapi_compat.get_variable('incdir')
-)
-
 if not with_pycairo.disabled()
   cairo_dep = dependency('cairo', required: with_pycairo.enabled() and cc.get_id() != 'msvc')
   cairo_gobject_dep = dependency('cairo-gobject', required: with_pycairo.enabled() and cc.get_id() != 'msvc')

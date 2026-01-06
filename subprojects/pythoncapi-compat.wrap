@@ -1,5 +1,0 @@
-[wrap-git]
-directory=pythoncapi-compat
-url=https://github.com/python/pythoncapi-compat.git
-revision=22811c3f0e69908894d2bd724f572b32667f2141
-depth=1
