@@ -3,7 +3,6 @@ import unittest
 import sys
 import gc
 import warnings
-import timeit
 
 import pytest
 
@@ -2743,18 +2742,6 @@ class TestTreeModel(unittest.TestCase):
         filtered.set_visible_func(foo)
         filtered.refilter()
         assert len(filtered) == 0
-
-    def test_list_store_performance(self):
-        model = Gtk.ListStore(int, str)
-
-        iterations = 2000
-        start = timeit.default_timer()
-        i = iterations
-        while i > 0:
-            model.append([1, "hello"])
-            i -= 1
-        end = timeit.default_timer()
-        sys.stderr.write("[%.0f μs/append] " % ((end - start) * 1000000 / iterations))
 
     def test_filter_new_default(self):
         # Test filter_new accepts implicit default of None
