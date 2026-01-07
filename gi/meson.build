@@ -7,7 +7,6 @@ sources = [
   'pygobject-object.c',
   'pygobject-props.c',
   'pygpointer.c',
-  'pygspawn.c',
   'gimodule.c',
   'pygi-capi.c',
   'pygi-repository.c',
