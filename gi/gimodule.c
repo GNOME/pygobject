@@ -48,7 +48,6 @@
 #include "pygobject-object.h"
 #include "pygobject-props.h"
 #include "pygpointer.h"
-#include "pygspawn.h"
 
 PyObject *PyGIWarning;
 PyObject *PyGIDeprecationWarning;
@@ -1037,15 +1036,6 @@ static PyMethodDef _gi_functions[] = {
     { "require_foreign", (PyCFunction)pygi_require_foreign,
       METH_VARARGS | METH_KEYWORDS },
     { "register_foreign", (PyCFunction)pygi_register_foreign, METH_NOARGS },
-    { "spawn_async", (PyCFunction)pyglib_spawn_async,
-      METH_VARARGS | METH_KEYWORDS,
-      "spawn_async(argv, envp=None, working_directory=None,\n"
-      "            flags=0, child_setup=None, user_data=None,\n"
-      "            standard_input=None, standard_output=None,\n"
-      "            standard_error=None) -> (pid, stdin, stdout, stderr)\n"
-      "\n"
-      "Execute a child program asynchronously within a glib.MainLoop()\n"
-      "See the reference manual for a complete reference.\n" },
     { "type_register", _wrap_pyg_type_register, METH_VARARGS },
     { "enum_register", _wrap_pyg_enum_register, METH_VARARGS },
     { "flags_register", _wrap_pyg_flags_register, METH_VARARGS },
@@ -1181,8 +1171,6 @@ _gi_exec (PyObject *module)
     if ((ret = pygi_ccallback_register_types (module)) < 0) return ret;
     if ((ret = pygi_resulttuple_register_types (module)) < 0) return ret;
     if ((ret = pygi_async_register_types (module) < 0)) return ret;
-
-    if ((ret = pygi_spawn_register_types (module_dict)) < 0) return ret;
 
     if ((ret = pygi_register_constants (module)) < 0) return ret;
     if ((ret = pygi_register_version_tuples (module_dict)) < 0) return ret;

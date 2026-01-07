@@ -65,8 +65,45 @@ from gi import _gi
 from gi._error import GError
 
 Error = GError
-Pid = _gi.Pid
-spawn_async = _gi.spawn_async
+
+
+class Pid:
+    def __init__(self, pid):
+        self._pid = pid
+
+    def __int__(self):
+        return self._pid
+
+    def close(self):
+        GLib.spawn_close_pid(self._pid)
+
+
+def spawn_async(
+    argv,
+    envp=None,
+    working_directory=None,
+    flags=0,
+    child_setup=None,
+    user_data=None,
+    standard_input=False,
+    standard_output=False,
+    standard_error=False,
+):
+    if not standard_input:
+        flags |= GLib.SpawnFlags.STDIN_FROM_DEV_NULL
+    if not standard_output:
+        flags |= GLib.SpawnFlags.CHILD_INHERITS_STDOUT
+    if not standard_error:
+        flags |= GLib.SpawnFlags.CHILD_INHERITS_STDERR
+
+    result = GLib.spawn_async_with_pipes(
+        working_directory, argv, envp, flags, child_setup, user_data
+    )
+    assert result[0] is True
+    return (Pid(result[1]), *(fd or None for fd in result[2:]))
+
+
+spawn_async.__doc__ = GLib.spawn_async_with_pipes.__doc__
 
 
 def threads_init():
