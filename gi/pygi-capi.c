@@ -31,7 +31,6 @@
 #include "pygi-value.h"
 #include "pyginterface.h"
 #include "pygobject-object.h"
-#include "pygoptiongroup.h"
 #include "pygpointer.h"
 #include "pygi-capi.h"
 
@@ -463,7 +462,7 @@ struct _PyGObject_Functions pygobject_api_functions = {
 
     pygi_gerror_exception_check,
 
-    pyg_option_group_new,
+    NULL, /* previously pyg_option_group_new */
     pyg_type_from_object_strict,
 
     pygobject_new_full,

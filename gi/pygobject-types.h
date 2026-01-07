@@ -195,12 +195,14 @@ struct _PyGObject_Functions {
     void (*add_warning_redirection) (const char *domain, PyObject *warning);
     void (*disable_warning_redirections) (void);
 
-    /* type_register_custom API now removed, but leave a pointer here to not
-     * break ABI. */
+    /* type_register_custom API is removed, but left a pointer to not break ABI. */
     void *_type_register_custom;
 
     gboolean (*gerror_exception_check) (GError **error);
-    PyObject *(*option_group_new) (GOptionGroup *group);
+
+    /* option_group_new API is removed, but left a pointer to not break ABI. */
+    void *_option_group_new;
+
     GType (*type_from_object_strict) (PyObject *obj, gboolean strict);
 
     PyObject *(*newgobj_full) (GObject *obj, gboolean steal, gpointer g_class);

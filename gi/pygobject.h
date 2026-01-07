@@ -98,7 +98,6 @@ struct _PyGObject_Functions *_PyGObject_API;
 #define pyg_disable_warning_redirections                                      \
     (_PyGObject_API->disable_warning_redirections)
 #define pyg_gerror_exception_check (_PyGObject_API->gerror_exception_check)
-#define pyg_option_group_new       (_PyGObject_API->option_group_new)
 
 
 /**

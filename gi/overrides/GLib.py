@@ -41,8 +41,6 @@ from gi import _gi
 from gi._error import GError
 
 Error = GError
-OptionContext = _gi.OptionContext
-OptionGroup = _gi.OptionGroup
 Pid = _gi.Pid
 spawn_async = _gi.spawn_async
 
@@ -82,8 +80,6 @@ Error.new_literal = staticmethod(gerror_new_literal)
 __all__ += [
     "Error",
     "GError",
-    "OptionContext",
-    "OptionGroup",
     "Pid",
     "spawn_async",
     "threads_init",

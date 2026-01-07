@@ -7,8 +7,6 @@ sources = [
   'pygobject-object.c',
   'pygobject-props.c',
   'pygpointer.c',
-  'pygoptioncontext.c',
-  'pygoptiongroup.c',
   'pygspawn.c',
   'gimodule.c',
   'pygi-capi.c',

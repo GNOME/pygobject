@@ -47,8 +47,6 @@
 #include "pygobject-types.h"
 #include "pygobject-object.h"
 #include "pygobject-props.h"
-#include "pygoptioncontext.h"
-#include "pygoptiongroup.h"
 #include "pygpointer.h"
 #include "pygspawn.h"
 
@@ -1185,9 +1183,6 @@ _gi_exec (PyObject *module)
     if ((ret = pygi_async_register_types (module) < 0)) return ret;
 
     if ((ret = pygi_spawn_register_types (module_dict)) < 0) return ret;
-    if ((ret = pygi_option_context_register_types (module_dict)) < 0)
-        return ret;
-    if ((ret = pygi_option_group_register_types (module_dict)) < 0) return ret;
 
     if ((ret = pygi_register_constants (module)) < 0) return ret;
     if ((ret = pygi_register_version_tuples (module_dict)) < 0) return ret;
