@@ -204,3 +204,22 @@ class TestProcess(unittest.TestCase):
             self.assertEqual(
                 GLib.SpawnFlags.DO_NOT_REAP_CHILD, GLib.SPAWN_DO_NOT_REAP_CHILD
             )
+
+
+@pytest.mark.skipif(os.name == "nt", reason="not on Windows")
+def test_spawn_async_fds_with_child_setup(tmp_path):
+    callback_file = tmp_path / "child_setup_called"
+
+    def cb(data):
+        callback_file.write_text(str(data))
+
+    pid, _stdin, _stdout, _stderr = GLib.spawn_async(
+        ["cat"],
+        flags=GLib.SpawnFlags.SEARCH_PATH,
+        child_setup=cb,
+        user_data="data",
+    )
+    pid.close()
+
+    assert callback_file.exists()
+    assert callback_file.read_text() == "data"
