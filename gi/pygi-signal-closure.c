@@ -81,12 +81,13 @@ array_length_from_parameter (GICallableInfo *callable_info,
         return FALSE;
     }
 
-    g_assert (length_arg_index <= n_values);
+    g_assert (length_arg_index + 1 < n_values);
 
     gi_callable_info_load_arg (callable_info, length_arg_index,
                                &length_arg_info);
     gi_arg_info_load_type_info (&length_arg_info, &length_type_info);
 
+    /* Take the next value: values[0] is "self". */
     length_arg = _pygi_argument_from_g_value (&(values[length_arg_index + 1]),
                                               &length_type_info);
     result = pygi_argument_to_gsize (
