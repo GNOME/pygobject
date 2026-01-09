@@ -68,8 +68,8 @@ pygi_signal_closure_invalidate (gpointer data, GClosure *closure)
 
 static gboolean
 array_length_from_parameter (GICallableInfo *callable_info,
-                             GITypeInfo *type_info, guint n_values,
-                             GValue *values, gsize *array_len)
+                             GITypeInfo *type_info, GValue *values,
+                             guint n_values, gsize *array_len)
 {
     guint length_arg_index;
     GIArgInfo length_arg_info;
@@ -189,7 +189,7 @@ pygi_signal_closure_marshal (GClosure *closure, GValue *return_value,
 
                 if (array_length_from_parameter (
                         GI_CALLABLE_INFO (signal_info), type_info,
-                        n_param_values, param_values, &array_length))
+                        param_values, n_param_values, &array_length))
                     item = pygi_argument_to_py_with_array_length (
                         type_info, arg, GI_TRANSFER_EVERYTHING, array_length);
                 else
@@ -208,7 +208,7 @@ pygi_signal_closure_marshal (GClosure *closure, GValue *return_value,
 
                 if (array_length_from_parameter (
                         GI_CALLABLE_INFO (signal_info), type_info,
-                        n_param_values, param_values, &array_length))
+                        param_values, n_param_values, &array_length))
                     item = pygi_argument_to_py_with_array_length (
                         type_info, arg, GI_TRANSFER_NOTHING, array_length);
                 else
