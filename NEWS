@@ -1,3 +1,10 @@
+3.55.2 - (unreleased)
+-------------------
+
+* Use cache logic for field/property/constant/signal closure marshalling :mr:`487`
+* Refactor struct and object marshaller code :mr:`493`
+* Remove wrappers for `GLib.OptionContext` and `GLib.OptionGroup` :mr:`499`
+
 3.55.1 - 2026-01-03
 -------------------
 
