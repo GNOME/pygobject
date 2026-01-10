@@ -73,49 +73,33 @@ Mapping out the C Code
 
 We now have enough information to correlate to the various switch statements in
 the PyGI caching system which will help us place our new marshaling code. Starting
-with `pygi-cache.c:pygi_arg_cache_new <https://git.gnome.org/browse/pygobject/tree/gi/pygi-cache.c?id=3.13.1#n345>`_
-you can trace through `_arg_cache_new_for_interface <https://git.gnome.org/browse/pygobject/tree/gi/pygi-cache.c?id=3.13.1#n291>`_
-and finally land in `pygi-struct-marshal.c:pygi_arg_struct_new_from_info <https://git.gnome.org/browse/pygobject/tree/gi/pygi-struct-marshal.c?id=3.13.1#n489>`_.
+with `pygi-cache.c:pygi_arg_cache_new <https://gitlab.gnome.org/GNOME/pygobject/-/blob/main/gi/pygi-cache.c#L173>`_
+you can trace through `_arg_cache_new_for_interface <https://gitlab.gnome.org/GNOME/pygobject/-/blob/main/gi/pygi-cache.c#L136>`_
+and finally land in `pygi-cache-struct.c:pygi_arg_struct_new_from_info <https://gitlab.gnome.org/GNOME/pygobject/-/blob/main/gi/pygi-cache-struct.c#L584>`_.
 
 For this bug, we are looking to add a "from py" marshaling convenience.
-So we could add a new conditional in `_pygi_marshal_from_py_interface_struct <https://git.gnome.org/browse/pygobject/tree/gi/pygi-struct-marshal.c?id=3.13.1#n191>`_ within the G_TYPE_BOXED conditional. However, note this text in the function:
+So we could add a new conditional in `arg_struct_from_py_setup <https://gitlab.gnome.org/GNOME/pygobject/-/blob/main/gi/pygi-cache-struct.c#L541>`_ within the ``G_TYPE_BOXED`` conditional. However, note this text in the function:
 
-.. code-block:: c
-
-    /* FIXME: handle this large if statement in the cache
-     *        and set the correct marshaller
-     */
-
-What this means is _pygi_marshal_from_py_interface_struct is actually dispatching
-to sub-types of GIStructInfo at runtime for every argument. Not very ideal considering
-we have this whole caching system for marshaling arguments.
-
-Instead what we should really do is create a new from_py_marshaller and from_py_cleanup
-callback pair specifically for GBytes arguments which are baked in at cache setup time.
+Instead what we should really do is create a new from_py_marshaller
+specifically for GBytes arguments which are baked in at cache setup time.
 Essentially specializing GBytes as early as possible in
-`_arg_cache_from_py_interface_struct_setup <https://git.gnome.org/browse/pygobject/tree/gi/pygi-struct-marshal.c?id=3.13.1#n434>`_
-by setting arg_cache->from_py_marshaller and arg_cache->from_py_cleanup.
+`pygi_arg_struct_to_py_marshal <https://gitlab.gnome.org/GNOME/pygobject/-/blob/main/gi/pygi-cache-struct.c#L435>`_
+by setting ``arg_cache->from_py_marshaller``.
 
 Marshaler Callbacks
 ===================
 
-Relevant marshaler callbacks are declared in `pygi-cache.h <https://git.gnome.org/browse/pygobject/tree/gi/pygi-cache.h?id=3.13.1#n35>`_
-and we need an implementation of both PyGIMarshalFromPyFunc and PyGIMarshalFromPyCleanupFunc.
+Relevant marshaler callbacks are declared in `pygi-cache.h <https://gitlab.gnome.org/GNOME/pygobject/-/blob/main/gi/pygi-cache.h#L50>`_
+and we need an implementation of both ``PyGIMarshalFromPyFunc``.
 
 .. code-block:: c
 
-    typedef gboolean (*PyGIMarshalFromPyFunc) (PyGIInvokeState   *state,
-                                               PyGICallableCache *callable_cache,
-                                               PyGIArgCache      *arg_cache,
-                                               PyObject          *py_arg,
-                                               GIArgument        *arg,
-                                               gpointer          *cleanup_data);
-
-    typedef void (*PyGIMarshalFromPyCleanupFunc) (PyGIInvokeState *state,
-                                                  PyGIArgCache    *arg_cache,
-                                                  PyObject        *py_arg, /* always NULL for to_py cleanup */
-                                                  gpointer         data,
-                                                  gboolean         was_processed);
+    typedef gboolean (*PyGIMarshalFromPyFunc) (PyGIInvokeState        *state,
+                                               PyGICallableCache      *callable_cache,
+                                               PyGIArgCache           *arg_cache,
+                                               PyObject               *py_arg,
+                                               GIArgument             *arg,
+                                               PyGIMarshalCleanupData *cleanup_data);
 
 PyGIMarshalFromPyFunc is called for each argument prior to executing the callee, the relevant bits are as follows:
 
@@ -128,11 +112,14 @@ PyGIMarshalFromPyFunc is called for each argument prior to executing the callee,
   NULL, returning TRUE from the marshaling callback.
 * arg_cache->transfer - Determines how memory should be managed for the argument.
 * cleanup_data - This is an output argument that can be set to custom data which passed back
-  to us in the cleanup callback as "data", used for freeing relevant memory after the callee
-  returns. In our case this will either be NULL or a GBytes pointer, in which case we should
-  call g_bytes_unref() on the data.
+  to us. used for freeing relevant memory after the callee
+  returns.
+  Alongside the data we also provide two GDestroyNotify functions: one for the success case (everything is handled)
+  and one for the failure case (didn't work, clean all up).
+  In our case we should set the data to the GBytes pointer, the destroy function to NULL depending on transfer semantics.
+  The destroy_failure function should always point to ``g_bytes_unref()``.
 
-PyGIMarshalFromPyCleanupFunc is called after the callee finishes and to cleanup any temporary data
+The cleanup functions are called after the callee finishes and to cleanup any temporary data
 we created while the callee was running.
 
 Transfer Semantics
