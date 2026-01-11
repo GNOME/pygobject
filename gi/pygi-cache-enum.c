@@ -144,20 +144,25 @@ _pygi_marshal_from_py_interface_enum (PyGIInvokeState *state,
 {
     PyObject *py_long;
     long c_long;
+    gint c_int;
     gint is_instance;
     PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)arg_cache;
     GIBaseInfo *interface = NULL;
+    GType enum_type =
+        gi_registered_type_info_get_g_type (iface_cache->interface_info);
 
-    is_instance = PyObject_IsInstance (py_arg, iface_cache->py_type);
+    if (pyg_enum_get_value (enum_type, py_arg, &c_int) == 0) {
+        c_long = c_int;
+    } else {
+        py_long = PyNumber_Long (py_arg);
+        if (py_long == NULL) {
+            PyErr_Clear ();
+            goto err;
+        }
 
-    py_long = PyNumber_Long (py_arg);
-    if (py_long == NULL) {
-        PyErr_Clear ();
-        goto err;
+        c_long = PyLong_AsLong (py_long);
+        Py_DECREF (py_long);
     }
-
-    c_long = PyLong_AsLong (py_long);
-    Py_DECREF (py_long);
 
     /* Write c_long into arg */
     interface = gi_type_info_get_interface (arg_cache->type_info);
@@ -168,6 +173,8 @@ _pygi_marshal_from_py_interface_enum (PyGIInvokeState *state,
         gi_base_info_unref (interface);
         return FALSE;
     }
+
+    is_instance = PyObject_IsInstance (py_arg, iface_cache->py_type);
 
     /* If this is not an instance of the Enum type that we want
      * we need to check if the value is equivilant to one of the

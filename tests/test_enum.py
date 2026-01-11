@@ -4,6 +4,11 @@ import unittest
 from gi.repository import GObject
 from .helper import capture_glib_warnings
 
+try:
+    from gi.repository import Gtk
+except ImportError:
+    Gtk = None
+
 
 _lock = threading.Lock()
 counter = 0
@@ -77,6 +82,12 @@ class EnumTests(unittest.TestCase):
         self.assertEqual(
             str(w[0].message), f"cannot register existing type '{type_name}'"
         )
+
+    @unittest.skipUnless(Gtk, "Gtk not available")
+    def test_enum_as_string(self):
+        box = Gtk.Box(orientation="vertical")
+
+        assert box.props.orientation == Gtk.Orientation.VERTICAL
 
 
 class FlagsTests(unittest.TestCase):
