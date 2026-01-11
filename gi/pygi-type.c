@@ -603,7 +603,7 @@ pyg_enum_get_value (GType enum_type, PyObject *obj, gint *val)
             PyErr_SetString (PyExc_TypeError,
                              "could not convert string to enum because there "
                              "is no GType associated to look up the value");
-            res = -1;
+            return -1;
         }
         info = g_enum_get_value_by_name (eclass, str);
         g_type_class_unref (eclass);

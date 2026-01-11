@@ -151,7 +151,8 @@ _pygi_marshal_from_py_interface_enum (PyGIInvokeState *state,
     GType enum_type =
         gi_registered_type_info_get_g_type (iface_cache->interface_info);
 
-    if (pyg_enum_get_value (enum_type, py_arg, &c_int) == 0) {
+    if (enum_type != G_TYPE_NONE
+        && pyg_enum_get_value (enum_type, py_arg, &c_int) == 0) {
         c_long = c_int;
     } else {
         py_long = PyNumber_Long (py_arg);
@@ -225,7 +226,8 @@ _pygi_marshal_from_py_interface_flags (PyGIInvokeState *state,
     GType flags_type =
         gi_registered_type_info_get_g_type (iface_cache->interface_info);
 
-    if (pyg_flags_get_value (flags_type, py_arg, &c_uint) == 0) {
+    if (flags_type != G_TYPE_NONE
+        && pyg_flags_get_value (flags_type, py_arg, &c_uint) == 0) {
         c_ulong = c_uint;
     } else {
         is_instance = PyObject_IsInstance (py_arg, iface_cache->py_type);
