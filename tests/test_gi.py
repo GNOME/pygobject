@@ -2227,7 +2227,7 @@ class TestGFlags(unittest.TestCase):
         GIMarshallingTests.flags_in_zero(Number(0))
         GIMarshallingTests.Flags.in_zero(Number(0))
 
-        self.assertRaises(TypeError, GIMarshallingTests.flags_in, 1 << 1)
+        GIMarshallingTests.flags_in(1 << 1)
         self.assertRaises(
             TypeError, GIMarshallingTests.flags_in, "GIMarshallingTests.Flags.VALUE2"
         )
@@ -2327,7 +2327,7 @@ class TestNoTypeFlags(unittest.TestCase):
         )
         GIMarshallingTests.no_type_flags_in_zero(Number(0))
 
-        self.assertRaises(TypeError, GIMarshallingTests.no_type_flags_in, 1 << 1)
+        GIMarshallingTests.no_type_flags_in(1 << 1)
         self.assertRaises(
             TypeError,
             GIMarshallingTests.no_type_flags_in,
