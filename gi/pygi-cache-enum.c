@@ -166,6 +166,7 @@ _pygi_marshal_from_py_interface_enum (PyGIInvokeState *state,
     /* If this is not an instance of the Enum type that we want
      * we need to check if the value is equivilant to one of the
      * Enum's memebers */
+
     if (!PyObject_IsInstance (py_arg, iface_cache->py_type)) {
         unsigned int i;
         gboolean is_found = FALSE;
@@ -183,17 +184,16 @@ _pygi_marshal_from_py_interface_enum (PyGIInvokeState *state,
             }
         }
 
-        if (!is_found) goto err;
+        if (!is_found) {
+            PyErr_Format (PyExc_TypeError, "Expected a %s, but got %s",
+                          iface_cache->type_name, Py_TYPE (py_arg)->tp_name);
+            gi_base_info_unref (interface);
+            return FALSE;
+        }
     }
 
     gi_base_info_unref (interface);
     return TRUE;
-
-err:
-    if (interface) gi_base_info_unref (interface);
-    PyErr_Format (PyExc_TypeError, "Expected a %s, but got %s",
-                  iface_cache->type_name, Py_TYPE (py_arg)->tp_name);
-    return FALSE;
 }
 
 static gboolean
