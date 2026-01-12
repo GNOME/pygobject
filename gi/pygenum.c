@@ -431,29 +431,6 @@ pyg_enum_get_value_nick (PyObject *self, void *closure)
     return retval;
 }
 
-int
-pyg_enum_check_type (PyObject *obj, GType expected_type)
-{
-    GType gtype;
-
-    if (expected_type == G_TYPE_NONE) return 0;
-
-    /* Only match the GType if this is a PyGEnum_Type subclass */
-    if (!PyObject_TypeCheck (obj, PyGEnum_Type)) return 0;
-
-    gtype = get_enum_gtype (Py_TYPE (obj));
-    if (gtype == G_TYPE_INVALID) return -1;
-
-    if (gtype != expected_type) {
-        PyErr_Format (PyExc_TypeError,
-                      "expected enumeration type %s, but got %s instead",
-                      g_type_name (expected_type), g_type_name (gtype));
-        return -1;
-    }
-
-    return 0;
-}
-
 static PyGetSetDef pyg_enum_getsets[] = {
     { "value_name", (getter)pyg_enum_get_value_name, (setter)0 },
     { "value_nick", (getter)pyg_enum_get_value_nick, (setter)0 },

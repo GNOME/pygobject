@@ -589,12 +589,7 @@ pyg_enum_get_value (GType enum_type, PyObject *obj, gint *val)
     }
 
     if (PyNumber_Check (obj)) {
-        if (!pygi_gint_from_py (obj, val))
-            res = -1;
-        else
-            res = 0;
-
-        res = pyg_enum_check_type (obj, enum_type);
+        if (pygi_gint_from_py (obj, val)) res = 0;
     } else if (PyUnicode_Check (obj)) {
         GEnumValue *info;
         char *str = PyUnicode_AsUTF8 (obj);

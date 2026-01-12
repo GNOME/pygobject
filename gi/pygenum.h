@@ -39,8 +39,6 @@ PyObject *pyg_enum_val_new (PyObject *pyclass, int value);
 
 PyObject *pyg_enum_from_gtype (GType gtype, int value);
 
-int pyg_enum_check_type (PyObject *obj, GType expected_type);
-
 gint pyg_enum_get_value (GType enum_type, PyObject *obj, gint *val);
 
 int pygi_enum_register_types (PyObject *mod);
