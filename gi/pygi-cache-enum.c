@@ -142,45 +142,31 @@ _pygi_marshal_from_py_interface_enum (PyGIInvokeState *state,
                                       PyObject *py_arg, GIArgument *arg,
                                       gpointer *cleanup_data)
 {
-    PyObject *py_long;
-    long c_long;
     gint c_int;
-    gint is_instance;
     PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)arg_cache;
     GIBaseInfo *interface = NULL;
     GType enum_type =
         gi_registered_type_info_get_g_type (iface_cache->interface_info);
 
-    if (enum_type != G_TYPE_NONE
-        && pyg_enum_get_value (enum_type, py_arg, &c_int) == 0) {
-        c_long = c_int;
-    } else {
-        py_long = PyNumber_Long (py_arg);
-        if (py_long == NULL) {
-            PyErr_Clear ();
-            goto err;
-        }
-
-        c_long = PyLong_AsLong (py_long);
-        Py_DECREF (py_long);
+    if (pyg_enum_get_value (enum_type, py_arg, &c_int) != 0) {
+        return FALSE;
     }
 
     /* Write c_long into arg */
     interface = gi_type_info_get_interface (arg_cache->type_info);
     g_assert (GI_IS_ENUM_INFO (interface));
     if (!gi_argument_from_c_long (
-            arg, c_long,
+            arg, c_int,
             gi_enum_info_get_storage_type ((GIEnumInfo *)interface))) {
         gi_base_info_unref (interface);
         return FALSE;
     }
 
-    is_instance = PyObject_IsInstance (py_arg, iface_cache->py_type);
 
     /* If this is not an instance of the Enum type that we want
      * we need to check if the value is equivilant to one of the
      * Enum's memebers */
-    if (!is_instance) {
+    if (!PyObject_IsInstance (py_arg, iface_cache->py_type)) {
         unsigned int i;
         gboolean is_found = FALSE;
 
@@ -191,7 +177,7 @@ _pygi_marshal_from_py_interface_enum (PyGIInvokeState *state,
                 GI_ENUM_INFO (iface_cache->interface_info), i);
             gint64 enum_value = gi_value_info_get_value (value_info);
             gi_base_info_unref ((GIBaseInfo *)value_info);
-            if (c_long == enum_value) {
+            if (c_int == enum_value) {
                 is_found = TRUE;
                 break;
             }
@@ -217,38 +203,21 @@ _pygi_marshal_from_py_interface_flags (PyGIInvokeState *state,
                                        PyObject *py_arg, GIArgument *arg,
                                        gpointer *cleanup_data)
 {
-    PyObject *py_long;
-    //guint c_uint;
-    unsigned long c_ulong;
+    guint c_uint;
     PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)arg_cache;
     GIBaseInfo *interface;
-    //GType flags_type =
-    //    gi_registered_type_info_get_g_type (iface_cache->interface_info);
+    GType flags_type =
+        gi_registered_type_info_get_g_type (iface_cache->interface_info);
 
-    //if (flags_type != G_TYPE_NONE
-    //    && pyg_flags_get_value (flags_type, py_arg, &c_uint) == 0) {
-    //    c_ulong = c_uint;
-    //} else {
-    gint is_instance = PyObject_IsInstance (py_arg, iface_cache->py_type);
-
-    py_long = PyNumber_Long (py_arg);
-    if (py_long == NULL) {
-        PyErr_Clear ();
-        goto err;
+    if (pyg_flags_get_value (flags_type, py_arg, &c_uint) != 0) {
+        return FALSE;
     }
-
-    c_ulong = PyLong_AsUnsignedLongMask (py_long);
-    Py_DECREF (py_long);
-
-    /* only 0 or argument of type Flag is allowed */
-    if (!is_instance && c_ulong != 0) goto err;
-    //}
 
     /* Write c_long into arg */
     interface = gi_type_info_get_interface (arg_cache->type_info);
     g_assert (GI_IS_FLAGS_INFO (interface));
     if (!gi_argument_from_c_long (
-            arg, c_ulong,
+            arg, c_uint,
             gi_enum_info_get_storage_type ((GIEnumInfo *)interface))) {
         gi_base_info_unref (interface);
         return FALSE;
@@ -256,11 +225,6 @@ _pygi_marshal_from_py_interface_flags (PyGIInvokeState *state,
 
     gi_base_info_unref (interface);
     return TRUE;
-
-err:
-    PyErr_Format (PyExc_TypeError, "Expected a %s, but got %s",
-                  iface_cache->type_name, Py_TYPE (py_arg)->tp_name);
-    return FALSE;
 }
 
 static PyObject *

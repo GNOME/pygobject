@@ -2327,7 +2327,7 @@ class TestNoTypeFlags(unittest.TestCase):
         )
         GIMarshallingTests.no_type_flags_in_zero(Number(0))
 
-        self.assertRaises(TypeError, GIMarshallingTests.no_type_flags_in, 1 << 1)
+        GIMarshallingTests.no_type_flags_in(1 << 1)
         self.assertRaises(
             TypeError,
             GIMarshallingTests.no_type_flags_in,

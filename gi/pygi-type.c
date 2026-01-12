@@ -585,8 +585,10 @@ pyg_enum_get_value (GType enum_type, PyObject *obj, gint *val)
     g_return_val_if_fail (val != NULL, -1);
     if (!obj) {
         *val = 0;
-        res = 0;
-    } else if (PyLong_Check (obj)) {
+        return 0;
+    }
+
+    if (PyNumber_Check (obj)) {
         if (!pygi_gint_from_py (obj, val))
             res = -1;
         else
@@ -648,8 +650,10 @@ pyg_flags_get_value (GType flag_type, PyObject *obj, guint *val)
     g_return_val_if_fail (val != NULL, -1);
     if (!obj) {
         *val = 0;
-        res = 0;
-    } else if (PyLong_Check (obj)) {
+        return 0;
+    }
+
+    if (PyNumber_Check (obj)) {
         if (pygi_guint_from_py (obj, val)) res = 0;
     } else if (PyUnicode_Check (obj)) {
         GFlagsValue *info;
