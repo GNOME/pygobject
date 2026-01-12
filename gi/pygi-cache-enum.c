@@ -218,32 +218,31 @@ _pygi_marshal_from_py_interface_flags (PyGIInvokeState *state,
                                        gpointer *cleanup_data)
 {
     PyObject *py_long;
-    guint c_uint;
+    //guint c_uint;
     unsigned long c_ulong;
-    gint is_instance;
     PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)arg_cache;
     GIBaseInfo *interface;
-    GType flags_type =
-        gi_registered_type_info_get_g_type (iface_cache->interface_info);
+    //GType flags_type =
+    //    gi_registered_type_info_get_g_type (iface_cache->interface_info);
 
-    if (flags_type != G_TYPE_NONE
-        && pyg_flags_get_value (flags_type, py_arg, &c_uint) == 0) {
-        c_ulong = c_uint;
-    } else {
-        is_instance = PyObject_IsInstance (py_arg, iface_cache->py_type);
+    //if (flags_type != G_TYPE_NONE
+    //    && pyg_flags_get_value (flags_type, py_arg, &c_uint) == 0) {
+    //    c_ulong = c_uint;
+    //} else {
+    gint is_instance = PyObject_IsInstance (py_arg, iface_cache->py_type);
 
-        py_long = PyNumber_Long (py_arg);
-        if (py_long == NULL) {
-            PyErr_Clear ();
-            goto err;
-        }
-
-        c_ulong = PyLong_AsUnsignedLongMask (py_long);
-        Py_DECREF (py_long);
-
-        /* only 0 or argument of type Flag is allowed */
-        if (!is_instance && c_ulong != 0) goto err;
+    py_long = PyNumber_Long (py_arg);
+    if (py_long == NULL) {
+        PyErr_Clear ();
+        goto err;
     }
+
+    c_ulong = PyLong_AsUnsignedLongMask (py_long);
+    Py_DECREF (py_long);
+
+    /* only 0 or argument of type Flag is allowed */
+    if (!is_instance && c_ulong != 0) goto err;
+    //}
 
     /* Write c_long into arg */
     interface = gi_type_info_get_interface (arg_cache->type_info);
