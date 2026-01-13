@@ -305,7 +305,14 @@ class _GLibEventLoopRunMixin:
             _ossighelper.register_sigint_fallback(self._main_loop.quit),
             self.running(self._main_loop.quit),
         ):
-            g_main_loop_run(self._main_loop)
+            if hasattr(self, "_run_forever_setup"):
+                self._run_forever_setup()
+                try:
+                    g_main_loop_run(self._main_loop)
+                finally:
+                    self._run_forever_cleanup()
+            else:
+                g_main_loop_run(self._main_loop)
 
 
 class _SourceBase(GLib.Source):
