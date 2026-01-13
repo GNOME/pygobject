@@ -189,9 +189,12 @@ class TestAsync(unittest.TestCase):
 
             ctx = GLib.MainContext.new()
             GLib.MainContext.push_thread_default(ctx)
-            self.addCleanup(GLib.MainContext.pop_thread_default, ctx)
-
-            res = f.enumerate_children_async("standard::*", 0, GLib.PRIORITY_DEFAULT)
-            self.assertIsNone(res)
+            try:
+                res = f.enumerate_children_async(
+                    "standard::*", 0, GLib.PRIORITY_DEFAULT
+                )
+                self.assertIsNone(res)
+            finally:
+                GLib.MainContext.pop_thread_default(ctx)
 
         self.loop.run_until_complete(run())

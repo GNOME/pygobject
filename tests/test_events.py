@@ -59,6 +59,7 @@ except:
 import gi
 import gi.events
 import asyncio
+import signal
 import socket
 import threading
 from gi.repository import GLib, Gio
@@ -111,13 +112,19 @@ class SubprocessWatcherTests(SubprocessMixin, TestCase):
         super().tearDown()
 
     def test_subprocess_read_pipe_cancelled(self):
-        raise unittest.SkipTest("GLib event loop can not be run with asyncio.run()")
+        raise unittest.SkipTest(
+            "GLib event loop can not be run with plain asyncio.run()"
+        )
 
     def test_subprocess_read_write_pipe_cancelled(self):
-        raise unittest.SkipTest("GLib event loop can not be run with asyncio.run()")
+        raise unittest.SkipTest(
+            "GLib event loop can not be run with plain asyncio.run()"
+        )
 
     def test_subprocess_write_pipe_cancelled(self):
-        raise unittest.SkipTest("GLib event loop can not be run with asyncio.run()")
+        raise unittest.SkipTest(
+            "GLib event loop can not be run with plain asyncio.run()"
+        )
 
 
 class GLibEventLoopPolicyTests(unittest.TestCase):
@@ -447,3 +454,77 @@ class GLibEventLoopPolicyTests(unittest.TestCase):
         loop = policy.get_event_loop()
         loop.run_until_complete(run())
         loop.close()
+
+    @unittest.skipIf(
+        sys.version_info < (3, 12),
+        "Older python versions do not have the loop_factory parameter",
+    )
+    def test_asyncio_run(self):
+        coro_state = 0
+
+        async def coro():
+            nonlocal coro_state
+            coro_state = 1
+
+            await asyncio.sleep(1)
+            coro_state = 2
+
+            # asyncio.run registered a SIGINT handler to quit
+            if sys.platform == "win32":
+                signal.raise_signal(signal.SIGINT)
+            else:
+                os.kill(os.getpid(), signal.SIGINT)
+
+            # The signal is processed when we return to the mainloop
+            await asyncio.sleep(0)
+            coro_state = 3
+
+        with self.assertRaises(KeyboardInterrupt):
+            asyncio.run(coro(), loop_factory=gi.events.GLibEventLoop)
+
+        # This works fine a second time as the first loop is unregistered (and closed)
+        with self.assertRaises(KeyboardInterrupt):
+            asyncio.run(coro(), loop_factory=gi.events.GLibEventLoop)
+
+        self.assertEqual(coro_state, 2)
+
+    def test_eventloop_context(self):
+        # Main thread has only the implicit default main context
+        self.assertIsNone(GLib.MainContext.get_thread_default())
+
+        loop = gi.events.GLibEventLoop(main_context=GLib.MainContext())
+
+        def check_loop_cannot_run(check_loop):
+            with self.assertRaises(RuntimeError), check_loop:
+                pass
+
+            with self.assertRaises(RuntimeError):
+                future = loop_samectx.create_future()
+                future.set_result(True)
+                loop_samectx.run_until_complete(future)
+
+        def check_loop_can_run(check_loop):
+            with check_loop:
+                pass
+
+            future = loop_samectx.create_future()
+            future.set_result(True)
+            loop_samectx.run_until_complete(future)
+
+        with loop:
+            # Entering the context manager sets the thread default
+            self.assertEqual(
+                hash(loop._context), hash(GLib.MainContext.get_thread_default())
+            )
+
+            loop_samectx = gi.events.GLibEventLoop()
+            self.assertEqual(hash(loop._context), hash(loop_samectx._context))
+            check_loop_cannot_run(loop_samectx)
+
+            # We can do the same excercise with another main context
+            loop_otherctx = gi.events.GLibEventLoop(GLib.MainContext())
+            check_loop_cannot_run(loop_otherctx)
+
+        # But, once we are outside it works fine.
+        check_loop_can_run(loop_samectx)
+        check_loop_can_run(loop_otherctx)
