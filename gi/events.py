@@ -164,16 +164,21 @@ class _GLibEventLoopMixin:
                     self._quit_funcs[-1]()
             return
 
-        # Outermost nesting
-        self._check_closed()
-        self._set_coroutine_origin_tracking(self._debug)
-        self._thread_id = threading.get_ident()
+        if hasattr(self, "_run_forever_setup"):
+            self._run_forever_setup()
+        else:
+            # Outermost nesting
+            self._check_closed()
+            self._set_coroutine_origin_tracking(self._debug)
+            self._thread_id = threading.get_ident()
 
-        old_agen_hooks = sys.get_asyncgen_hooks()
-        sys.set_asyncgen_hooks(
-            firstiter=self._asyncgen_firstiter_hook,
-            finalizer=self._asyncgen_finalizer_hook,
-        )
+            old_agen_hooks = sys.get_asyncgen_hooks()
+            sys.set_asyncgen_hooks(
+                firstiter=self._asyncgen_firstiter_hook,
+                finalizer=self._asyncgen_finalizer_hook,
+            )
+            asyncio._set_running_loop(self)
+
         try:
             asyncio._set_running_loop(self)
             assert not self._selector._source._dispatching
@@ -192,14 +197,19 @@ class _GLibEventLoopMixin:
             self._selector.detach()
             self._context.release()
             self._thread_id = None
-            asyncio._set_running_loop(None)
-            with contextlib.suppress(AttributeError):
-                self._set_coroutine_origin_tracking(False)
-            sys.set_asyncgen_hooks(*old_agen_hooks)
+
+            if hasattr(self, "_run_forever_setup"):
+                self._run_forever_cleanup()
+            else:
+                asyncio._set_running_loop(None)
+                with contextlib.suppress(AttributeError):
+                    self._set_coroutine_origin_tracking(False)
+                sys.set_asyncgen_hooks(*old_agen_hooks)
+
+                self._stopping = False
 
             self._quit_funcs.pop()
             assert len(self._quit_funcs) == 0
-            self._stopping = False
 
     def time(self):
         return GLib.get_monotonic_time() / 1000000
