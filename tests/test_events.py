@@ -85,6 +85,15 @@ class SubprocessWatcherTests(SubprocessMixin, TestCase):
         self.loop.close()
         super().tearDown()
 
+    def test_subprocess_read_pipe_cancelled(self):
+        raise unittest.SkipTest("GLib event loop can not be run with asyncio.run()")
+
+    def test_subprocess_read_write_pipe_cancelled(self):
+        raise unittest.SkipTest("GLib event loop can not be run with asyncio.run()")
+
+    def test_subprocess_write_pipe_cancelled(self):
+        raise unittest.SkipTest("GLib event loop can not be run with asyncio.run()")
+
 
 class GLibEventLoopPolicyTests(unittest.TestCase):
     def create_policy(self):
