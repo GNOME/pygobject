@@ -111,16 +111,40 @@ class _GLibEventLoopMixin:
     the python mainloop _run_once handler when needed. This in turn calls
     self._selector.select(), which means we just need to make sure to return
     our already prepared events at that point.
+
+    If no main_context is passed, then the current default main context will
+    be used when available. If the thread does not yet have any main context
+    set, then a main context will be created.
+
+    When creating an event loop like this, it should be used as a context
+    manager. This ensure that the main context is set for the thread, that
+    GLib routines will properly iterate the EventLoop and that no second
+    EventLoop for the same main context is created by accident.
     """
 
     def __init__(self, main_context):
-        # A mainloop in case we want to run our context
-        assert main_context is not None
+        # This allows creating a reasonable GLibEventLoop for the current
+        # thread without needing to pass anything.
+        if main_context is None:
+            main_context = GLib.MainContext.get_thread_default()
+
+            if main_context is None:
+                if threading.current_thread() is threading.main_thread():
+                    # If there is none, and we are on the main thread,
+                    # then use the default context
+                    main_context = GLib.MainContext.default()
+                else:
+                    # Otherwise, create a new context
+                    main_context = GLib.MainContext()
+
         self._context = main_context
         self._main_loop = GLib.MainLoop.new(self._context, False)
         self._quit_funcs = []
         self._idle_tasks = []
         self._may_iterate = False
+        self._loop_enter_count = 0
+        self._loop_was_set = False
+        self._ctx_was_set = False
 
     @contextmanager
     def paused(self):
@@ -189,7 +213,8 @@ class _GLibEventLoopMixin:
             self._idle_source.set_name("GLibEventLoop._idle_source")
             if self._idle_tasks:
                 self._idle_source.set_priority(self._idle_tasks[0][0])
-            yield
+            with self:
+                yield
         finally:
             self._may_iterate = False
             self._idle_source.destroy()
@@ -299,6 +324,53 @@ class _GLibEventLoopMixin:
             f"closed={self.is_closed()} debug={self.get_debug()} "
             f"ctx=0x{hash(self._context):X} loop=0x{hash(self._main_loop):X}>"
         )
+
+    # The purpose of these mixins is to se the thread local main context,
+    # which is useful for threading without an EventLoopPolicy.
+    def __enter__(self):
+        # Already entered, assume everything is fine
+        if self._loop_enter_count > 0:
+            self._loop_enter_count += 1
+            return
+
+        if not self.is_running() and asyncio._get_running_loop() is not None:
+            raise RuntimeError("Thread already has a python EventLoop")
+
+        # Fetch the current MainContext to verify the state
+        ctx = GLib.MainContext.get_thread_default()
+        if ctx is None and threading.current_thread() is threading.main_thread():
+            ctx = GLib.MainContext.default()
+
+        # Only permit a new EventLoop, if any old one is closed already
+        if (
+            ctx is not None
+            and hash(ctx) in GLibEventLoopPolicy._loops
+            and not GLibEventLoopPolicy._loops[hash(ctx)].is_closed()
+        ):
+            if GLibEventLoopPolicy._loops[hash(ctx)] is not self:
+                raise RuntimeError(
+                    f"A GLibEventLoop is already registered through the policy ({GLibEventLoopPolicy._loops[hash(ctx)]}, self={self})"
+                )
+
+            self._loop_was_set = True
+        else:
+            GLibEventLoopPolicy._loops[hash(self._context)] = self
+
+        if hash(ctx) != hash(self._context):
+            GLib.MainContext.push_thread_default(self._context)
+            self._ctx_was_set = True
+
+        self._loop_enter_count += 1
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self._loop_enter_count -= 1
+        if self._loop_enter_count == 0:
+            if not self._loop_was_set:
+                del GLibEventLoopPolicy._loops[hash(self._context)]
+            if self._ctx_was_set:
+                GLib.MainContext.pop_thread_default(self._context)
+            self._loop_was_set = False
+            self._ctx_was_set = False
 
 
 class _GLibEventLoopRunMixin:
@@ -420,7 +492,7 @@ if sys.platform != "win32":
         #
         # The rest is done by the mixin which overrides run_forever to simply
         # iterate the main context.
-        def __init__(self, main_context):
+        def __init__(self, main_context=None):
             _GLibEventLoopMixin.__init__(self, main_context)
 
             # _UnixSelectorEventLoop uses _signal_handlers, we could do the same,
@@ -656,7 +728,7 @@ else:
         """
 
         # This is based on the Windows ProactorEventLoop
-        def __init__(self, main_context):
+        def __init__(self, main_context=None):
             _GLibEventLoopMixin.__init__(self, main_context)
 
             proactor = _Proactor(self._context, self)
@@ -724,8 +796,21 @@ else:
             self._source.disable()
 
 
-class GLibEventLoopPolicy(asyncio.AbstractEventLoopPolicy):
+# The following are deprecated in 3.13 and will be removed in 3.16,
+# keep current code working that uses it to the point that we can.
+# NOTE: Convenient filtering was added in python 3.10, just ignore all warnings
+with warnings.catch_warnings():
+    AbstractEventLoopPolicy = getattr(asyncio, "AbstractEventLoopPolicy", object)
+
+_set_event_loop_policy = getattr(asyncio, "set_event_loop_policy", lambda: None)
+_get_event_loop_policy = getattr(asyncio, "get_event_loop_policy", lambda: None)
+
+
+class GLibEventLoopPolicy(AbstractEventLoopPolicy):
     """An asyncio event loop policy that runs the GLib main loop.
+
+    NOTE: Python 3.16 is removing the concept of the event loop policy.
+    FIXME: say what to do in the future
 
     The policy allows creating a new EventLoop for threads other than the main
     thread. For the main thread, you can use get_event_loop() to retrieve the
@@ -741,10 +826,11 @@ class GLibEventLoopPolicy(asyncio.AbstractEventLoopPolicy):
     asyncio.
     """
 
-    def __init__(self):
-        self._loops = {}
-        self._child_watcher = None
+    _loops = {}
+    # COMPAT: child watchers were removed in cpython 3.12
+    _child_watcher = None
 
+    def __init__(self):
         self.__orig_policy = None
 
     def get_event_loop(self):
@@ -760,6 +846,14 @@ class GLibEventLoopPolicy(asyncio.AbstractEventLoopPolicy):
 
         Returns a new GLibEventLoop or raises an exception.
         """
+        return self._get_event_loop(force_implicit=True)
+
+    def get_event_loop_for_context(self, ctx):
+        """Get the event loop for a specific context."""
+        return self._get_event_loop_for_context(ctx, force_implicit=True)
+
+    @classmethod
+    def _get_event_loop(cls, force_implicit=False):
         # Get the thread default main context
         ctx = GLib.MainContext.get_thread_default()
         # If there is none, and we are on the main thread, then use the default context
@@ -773,24 +867,30 @@ class GLibEventLoopPolicy(asyncio.AbstractEventLoopPolicy):
                 f"There is no main context set for thread {threading.current_thread().name!r}."
             )
 
-        return self.get_event_loop_for_context(ctx)
+        return cls._get_event_loop_for_context(ctx, force_implicit=force_implicit)
 
-    def get_event_loop_for_context(self, ctx):
+    @classmethod
+    def _get_event_loop_for_context(cls, ctx, force_implicit=False):
         """Get the event loop for a specific context."""
         # Note: We cannot attach it to ctx, as getting the default will always
         #       return a new python wrapper. But, we can use hash() as that returns
         #       the pointer to the C structure.
         try:
-            loop = self._loops[hash(ctx)]
+            loop = cls._loops[hash(ctx)]
             if not loop.is_closed():
                 return loop
         except KeyError:
             pass
 
-        self._loops[hash(ctx)] = GLibEventLoop(ctx)
-        if self._child_watcher and ctx == GLib.MainContext.default():
-            self._child_watcher.attach_loop(self.get_event_loop())
-        return self._loops[hash(ctx)]
+        if not force_implicit:
+            with warnings.catch_warnings():
+                if not isinstance(_get_event_loop_policy(), GLibEventLoopPolicy):
+                    return None
+
+        cls._loops[hash(ctx)] = GLibEventLoop(ctx)
+        if cls._child_watcher and ctx == GLib.MainContext.default():
+            cls._child_watcher.attach_loop(cls._loops[hash(ctx)])
+        return cls._loops[hash(ctx)]
 
     def set_event_loop(self, loop):
         """Set the event loop for the current context (python thread) to loop.
@@ -834,8 +934,10 @@ class GLibEventLoopPolicy(asyncio.AbstractEventLoopPolicy):
         return GLibEventLoop(GLib.MainContext())
 
     def __enter__(self):
-        self.__orig_policy = asyncio.get_event_loop_policy()
-        asyncio.set_event_loop_policy(self)
+        with warnings.catch_warnings():
+            self.__orig_policy = _get_event_loop_policy()
+            _set_event_loop_policy(self)
+
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
@@ -846,7 +948,8 @@ class GLibEventLoopPolicy(asyncio.AbstractEventLoopPolicy):
         for loop in self._loops.values():
             loop.close()
 
-        asyncio.set_event_loop_policy(self.__orig_policy)
+        with warnings.catch_warnings():
+            _set_event_loop_policy(self.__orig_policy)
 
         # Do not supress any exceptions
         return False
@@ -859,14 +962,17 @@ class GLibEventLoopPolicy(asyncio.AbstractEventLoopPolicy):
     # We just provide a reasonable sane child watcher and disallow the user
     # from choosing one as e.g. MultiLoopChildWatcher is problematic.
     #
-    # TODO: Use PidfdChildWatcher when available
-    if sys.platform != "win32":
+    # COMPAT: child watchers were removed in python 3.12
+    if sys.platform != "win32" and hasattr(
+        AbstractEventLoopPolicy, "get_child_watcher"
+    ):
 
-        def get_child_watcher(self):
-            if self._child_watcher is None:
-                self._child_watcher = asyncio.ThreadedChildWatcher()
+        @classmethod
+        def get_child_watcher(cls):
+            if cls._child_watcher is None:
+                cls._child_watcher = asyncio.ThreadedChildWatcher()
 
                 if threading.current_thread() is threading.main_thread():
-                    self._child_watcher.attach_loop(self.get_event_loop())
+                    cls._child_watcher.attach_loop(cls._get_event_loop())
 
-            return self._child_watcher
+            return cls._child_watcher

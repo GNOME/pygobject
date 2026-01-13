@@ -263,9 +263,11 @@ def get_event_loop(ctx):
     # correct context.
     loop = asyncio._get_running_loop()
     if loop is None:
-        policy = asyncio.get_event_loop_policy()
-        if isinstance(policy, events.GLibEventLoopPolicy):
-            loop = policy.get_event_loop_for_context(ctx)
+        # NOTE: We intentionally ignore the event loop policy.
+        # It is removed in python 3.16 and we cannot properly check if one was
+        # set by the user. Also, it is fair to assume that if one is set, then
+        # it will be ours.
+        loop = events.GLibEventLoopPolicy._get_event_loop()
 
     if (
         isinstance(loop, events.GLibEventLoop)
