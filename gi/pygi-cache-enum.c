@@ -247,7 +247,12 @@ _pygi_marshal_to_py_interface_enum (PyGIInvokeState *state,
     }
     gi_base_info_unref (interface);
 
-    return pyg_enum_val_new (iface_cache->py_type, c_long);
+    if (c_long < INT_MIN || c_long > INT_MAX) {
+        PyErr_Format (PyExc_OverflowError, "Value %ld is not in integer range",
+                      c_long);
+        return NULL;
+    }
+    return pyg_enum_val_new (iface_cache->py_type, (int)c_long);
 }
 
 static PyObject *

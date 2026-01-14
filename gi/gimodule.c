@@ -561,7 +561,7 @@ _wrap_pyg_hook_up_vfunc_implementation (PyObject *self, PyObject *args)
     if (field_info != NULL) {
         GITypeInfo *type_info;
         GICallableInfo *callable_info;
-        gint offset;
+        size_t offset;
 
         type_info = gi_field_info_get_type_info (field_info);
         callable_info =

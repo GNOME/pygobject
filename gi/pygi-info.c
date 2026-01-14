@@ -999,7 +999,7 @@ _wrap_gi_type_info_get_array_fixed_size (PyGIBaseInfo *self)
 {
     size_t size;
     if (gi_type_info_get_array_fixed_size (GI_TYPE_INFO (self->info), &size))
-        return pygi_gint_to_py (size);
+        return pygi_gsize_to_py (size);
 
     g_assert_not_reached ();
 }
@@ -2215,7 +2215,7 @@ _wrap_gi_field_info_set_value (PyGIBaseInfo *self, PyObject *args)
                && (gi_type_info_get_tag (field_type_info) == GI_TYPE_TAG_VOID
                    || gi_type_info_get_tag (field_type_info)
                           == GI_TYPE_TAG_UTF8)) {
-        int offset;
+        size_t offset;
         GITransfer transfer = gi_type_info_get_tag (field_type_info)
                                       == GI_TYPE_TAG_VOID
                                   ? GI_TRANSFER_NOTHING
@@ -2267,14 +2267,14 @@ _wrap_gi_field_info_get_flags (PyGIBaseInfo *self)
 static PyObject *
 _wrap_gi_field_info_get_size (PyGIBaseInfo *self)
 {
-    return pygi_gint_to_py (
+    return pygi_gsize_to_py (
         gi_field_info_get_size (GI_FIELD_INFO (self->info)));
 }
 
 static PyObject *
 _wrap_gi_field_info_get_offset (PyGIBaseInfo *self)
 {
-    return pygi_gint_to_py (
+    return pygi_gsize_to_py (
         gi_field_info_get_offset (GI_FIELD_INFO (self->info)));
 }
 
@@ -2318,7 +2318,7 @@ _wrap_gi_vfunc_info_get_flags (PyGIBaseInfo *self)
 static PyObject *
 _wrap_gi_vfunc_info_get_offset (PyGIBaseInfo *self)
 {
-    return pygi_gint_to_py (
+    return pygi_gsize_to_py (
         gi_vfunc_info_get_offset ((GIVFuncInfo *)self->info));
 }
 

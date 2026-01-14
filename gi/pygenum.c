@@ -172,7 +172,7 @@ pyg_enum_add_full (PyObject *module, const char *typename, GType gtype,
             GIValueInfo *v = gi_enum_info_get_value (info, i);
 
             add_value (values, gi_base_info_get_name (GI_BASE_INFO (v)),
-                       gi_value_info_get_value (v));
+                       (int)gi_value_info_get_value (v));
             gi_base_info_unref (v);
         }
     }
@@ -298,7 +298,7 @@ pyg_enum_register (PyTypeObject *enum_class, char *type_name)
             goto out;
         }
 
-        enum_values[i].value = PyLong_AsLong (value);
+        enum_values[i].value = (int)PyLong_AsLong (value);
         enum_values[i].value_name =
             g_strdup (PyUnicode_AsUTF8AndSize (name, NULL));
         c = g_ascii_strdown (enum_values[i].value_name, -1);
