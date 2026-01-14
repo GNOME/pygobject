@@ -27,9 +27,6 @@
 #include "pygi-type.h"
 #include "pygi-cache-private.h"
 
-typedef gboolean (*GenerateArgsCacheFunc) (PyGICallableCache *callable_cache,
-                                           GICallableInfo *callable_info);
-
 void
 pygi_arg_cache_free (PyGIArgCache *cache)
 {
@@ -497,12 +494,27 @@ _callable_cache_deinit_real (PyGICallableCache *cache)
     g_clear_pointer (&cache->return_cache, pygi_arg_cache_free);
 }
 
-static gboolean
-_callable_cache_init (PyGICallableCache *cache, GICallableInfo *callable_info,
-                      GenerateArgsCacheFunc generate_args_cache)
+static void
+ensure_callable_args_cache (PyGICallableCache *cache,
+                            GICallableInfo *callable_info)
 {
     gint n_args;
 
+    if (cache->args_cache != NULL) return;
+
+    n_args = (gint)cache->args_offset
+             + gi_callable_info_get_n_args (callable_info);
+
+    if (n_args >= 0) {
+        cache->args_cache =
+            g_ptr_array_new_full (n_args, (GDestroyNotify)pygi_arg_cache_free);
+        g_ptr_array_set_size (cache->args_cache, n_args);
+    }
+}
+
+static gboolean
+_callable_cache_init (PyGICallableCache *cache, GICallableInfo *callable_info)
+{
     cache->info = gi_base_info_ref (GI_BASE_INFO (callable_info));
 
     if (cache->deinit == NULL) cache->deinit = _callable_cache_deinit_real;
@@ -522,16 +534,9 @@ _callable_cache_init (PyGICallableCache *cache, GICallableInfo *callable_info,
         g_free (warning);
     }
 
-    n_args = (gint)cache->args_offset
-             + gi_callable_info_get_n_args (callable_info);
+    ensure_callable_args_cache (cache, callable_info);
 
-    if (n_args >= 0) {
-        cache->args_cache =
-            g_ptr_array_new_full (n_args, (GDestroyNotify)pygi_arg_cache_free);
-        g_ptr_array_set_size (cache->args_cache, n_args);
-    }
-
-    if (!generate_args_cache (cache, callable_info)) {
+    if (!_callable_cache_generate_args_cache_real (cache, callable_info)) {
         _callable_cache_deinit_real (cache);
         return FALSE;
     }
@@ -603,8 +608,7 @@ _function_cache_deinit_real (PyGICallableCache *callable_cache)
 
 static gboolean
 _function_cache_init (PyGIFunctionCache *function_cache,
-                      GICallableInfo *callable_info,
-                      GenerateArgsCacheFunc generate_args_cache)
+                      GICallableInfo *callable_info)
 {
     PyGICallableCache *callable_cache = (PyGICallableCache *)function_cache;
     GIFunctionInvoker *invoker = &function_cache->invoker;
@@ -619,9 +623,7 @@ _function_cache_init (PyGIFunctionCache *function_cache,
     if (function_cache->invoke == NULL)
         function_cache->invoke = _function_cache_invoke_real;
 
-    if (!_callable_cache_init (callable_cache, callable_info,
-                               generate_args_cache))
-        return FALSE;
+    if (!_callable_cache_init (callable_cache, callable_info)) return FALSE;
 
     /* Check if this function is an async routine that is capable of returning
      * an async awaitable object.
@@ -734,8 +736,7 @@ pygi_function_cache_new (GICallableInfo *info)
 
     function_cache = g_new0 (PyGIFunctionCache, 1);
 
-    if (!_function_cache_init (function_cache, info,
-                               _callable_cache_generate_args_cache_real)) {
+    if (!_function_cache_init (function_cache, info)) {
         g_free (function_cache);
         return NULL;
     }
@@ -768,8 +769,7 @@ pygi_ccallback_cache_new (GICallableInfo *info, GCallback function_ptr)
 
     function_cache->invoker.native_address = function_ptr;
 
-    if (!_function_cache_init (function_cache, info,
-                               _callable_cache_generate_args_cache_real)) {
+    if (!_function_cache_init (function_cache, info)) {
         g_free (ccallback_cache);
         return NULL;
     }
@@ -847,8 +847,7 @@ pygi_constructor_cache_new (GICallableInfo *info)
 
     function_cache->invoke = _constructor_cache_invoke_real;
 
-    if (!_function_cache_init (function_cache, info,
-                               _callable_cache_generate_args_cache_real)) {
+    if (!_function_cache_init (function_cache, info)) {
         g_free (constructor_cache);
         return NULL;
     }
@@ -859,7 +858,7 @@ pygi_constructor_cache_new (GICallableInfo *info)
 /* PyGIFunctionWithInstanceCache */
 
 static gboolean
-_function_with_instance_cache_generate_args_cache_real (
+_function_with_instance_cache_generate_self_arg (
     PyGICallableCache *callable_cache, GICallableInfo *callable_info)
 {
     GIBaseInfo *interface_info;
@@ -882,25 +881,26 @@ _function_with_instance_cache_generate_args_cache_real (
     instance_cache->py_arg_index = 0;
     instance_cache->c_arg_index = 0;
 
+    callable_cache->args_offset += 1;
+
+    ensure_callable_args_cache (callable_cache, callable_info);
+
     _pygi_callable_cache_set_arg (callable_cache, 0, instance_cache);
 
-    callable_cache->n_py_args++;
+    callable_cache->n_py_args += 1;
 
-    return _callable_cache_generate_args_cache_real (callable_cache,
-                                                     callable_info);
+    return TRUE;
 }
 
 static gboolean
 _function_with_instance_cache_init (PyGIFunctionWithInstanceCache *fwi_cache,
                                     GICallableInfo *info)
 {
-    PyGICallableCache *callable_cache = (PyGICallableCache *)fwi_cache;
+    if (!_function_with_instance_cache_generate_self_arg (
+            (PyGICallableCache *)fwi_cache, info))
+        return FALSE;
 
-    callable_cache->args_offset += 1;
-
-    return _function_cache_init (
-        (PyGIFunctionCache *)fwi_cache, info,
-        _function_with_instance_cache_generate_args_cache_real);
+    return _function_cache_init ((PyGIFunctionCache *)fwi_cache, info);
 }
 
 /* PyGIMethodCache */
@@ -1011,8 +1011,7 @@ pygi_closure_cache_new (GICallableInfo *info)
 
     callable_cache->calling_context = PYGI_CALLING_CONTEXT_IS_FROM_C;
 
-    if (!_callable_cache_init (callable_cache, info,
-                               _callable_cache_generate_args_cache_real)) {
+    if (!_callable_cache_init (callable_cache, info)) {
         g_free (closure_cache);
         return NULL;
     }
