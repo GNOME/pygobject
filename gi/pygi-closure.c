@@ -60,10 +60,10 @@ _pygi_closure_assign_pyobj_to_retval (gpointer retval, GIArgument *arg,
         *((ffi_arg *)retval) = arg->v_uint32;
         break;
     case GI_TYPE_TAG_INT64:
-        *((ffi_sarg *)retval) = arg->v_int64;
+        *((ffi_sarg *)retval) = (ffi_sarg)arg->v_int64;
         break;
     case GI_TYPE_TAG_UINT64:
-        *((ffi_arg *)retval) = arg->v_uint64;
+        *((ffi_arg *)retval) = (ffi_arg)arg->v_uint64;
         break;
     case GI_TYPE_TAG_FLOAT:
         *((gfloat *)retval) = arg->v_float;

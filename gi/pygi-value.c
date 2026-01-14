@@ -264,7 +264,7 @@ pyg_array_from_pyobject (GValue *value, PyObject *obj)
     GArray *array;
 
     len = PySequence_Length (obj);
-    if (len < 0 || len > UINT_MAX) {
+    if (len < 0 || (size_t)len > UINT_MAX) {
         PyErr_Clear ();
         return -1;
     }

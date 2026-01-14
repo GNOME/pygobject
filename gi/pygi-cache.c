@@ -315,7 +315,7 @@ _callable_cache_generate_args_cache_real (PyGICallableCache *callable_cache,
 
         /* This only happens when dealing with callbacks */
         if (gi_arg_info_get_closure_index (arg_info, &closure_index)
-            && ((gssize)closure_index) == i) {
+            && closure_index == i) {
             callable_cache->user_data_index = i;
             callable_cache->has_user_data = TRUE;
 
@@ -656,7 +656,7 @@ _function_cache_init (PyGIFunctionCache *function_cache,
                 gi_base_info_get_container ((GIBaseInfo *)callable_info);
             const char *name = gi_base_info_get_name (callable_cache->info);
             GIBaseInfo *async_finish = NULL;
-            unsigned long name_len;
+            size_t name_len;
             gchar *finish_name = NULL;
 
             /* This appears to be an async routine. As we have the

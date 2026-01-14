@@ -242,7 +242,7 @@ pygi_arg_callback_new_from_info (GITypeInfo *type_info,
     if (callback_cache == NULL) return NULL;
 
     arg_cache = (PyGIArgCache *)callback_cache;
-    gssize child_offset = 0;
+    unsigned int child_offset = 0;
 
     pygi_arg_base_setup ((PyGIArgCache *)arg_cache, type_info, arg_info,
                          transfer, direction);
