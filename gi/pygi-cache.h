@@ -201,9 +201,6 @@ struct _PyGICallableCache {
     gssize n_py_args;
 
     void (*deinit) (PyGICallableCache *callable_cache);
-
-    gboolean (*generate_args_cache) (PyGICallableCache *callable_cache,
-                                     GICallableInfo *callable_info);
 };
 
 struct _PyGIFunctionCache {

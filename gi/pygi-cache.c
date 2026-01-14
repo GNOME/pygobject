@@ -27,6 +27,9 @@
 #include "pygi-type.h"
 #include "pygi-cache-private.h"
 
+typedef gboolean (*GenerateArgsCacheFunc) (PyGICallableCache *callable_cache,
+                                           GICallableInfo *callable_info);
+
 void
 pygi_arg_cache_free (PyGIArgCache *cache)
 {
@@ -495,16 +498,14 @@ _callable_cache_deinit_real (PyGICallableCache *cache)
 }
 
 static gboolean
-_callable_cache_init (PyGICallableCache *cache, GICallableInfo *callable_info)
+_callable_cache_init (PyGICallableCache *cache, GICallableInfo *callable_info,
+                      GenerateArgsCacheFunc generate_args_cache)
 {
     gint n_args;
 
     cache->info = gi_base_info_ref (GI_BASE_INFO (callable_info));
 
     if (cache->deinit == NULL) cache->deinit = _callable_cache_deinit_real;
-
-    if (cache->generate_args_cache == NULL)
-        cache->generate_args_cache = _callable_cache_generate_args_cache_real;
 
     if (gi_base_info_is_deprecated (GI_BASE_INFO (callable_info))) {
         const gchar *deprecated = gi_base_info_get_attribute (
@@ -530,7 +531,7 @@ _callable_cache_init (PyGICallableCache *cache, GICallableInfo *callable_info)
         g_ptr_array_set_size (cache->args_cache, n_args);
     }
 
-    if (!cache->generate_args_cache (cache, callable_info)) {
+    if (!generate_args_cache (cache, callable_info)) {
         _callable_cache_deinit_real (cache);
         return FALSE;
     }
@@ -602,7 +603,8 @@ _function_cache_deinit_real (PyGICallableCache *callable_cache)
 
 static gboolean
 _function_cache_init (PyGIFunctionCache *function_cache,
-                      GICallableInfo *callable_info)
+                      GICallableInfo *callable_info,
+                      GenerateArgsCacheFunc generate_args_cache)
 {
     PyGICallableCache *callable_cache = (PyGICallableCache *)function_cache;
     GIFunctionInvoker *invoker = &function_cache->invoker;
@@ -617,7 +619,9 @@ _function_cache_init (PyGIFunctionCache *function_cache,
     if (function_cache->invoke == NULL)
         function_cache->invoke = _function_cache_invoke_real;
 
-    if (!_callable_cache_init (callable_cache, callable_info)) return FALSE;
+    if (!_callable_cache_init (callable_cache, callable_info,
+                               generate_args_cache))
+        return FALSE;
 
     /* Check if this function is an async routine that is capable of returning
      * an async awaitable object.
@@ -730,7 +734,8 @@ pygi_function_cache_new (GICallableInfo *info)
 
     function_cache = g_new0 (PyGIFunctionCache, 1);
 
-    if (!_function_cache_init (function_cache, info)) {
+    if (!_function_cache_init (function_cache, info,
+                               _callable_cache_generate_args_cache_real)) {
         g_free (function_cache);
         return NULL;
     }
@@ -763,7 +768,8 @@ pygi_ccallback_cache_new (GICallableInfo *info, GCallback function_ptr)
 
     function_cache->invoker.native_address = function_ptr;
 
-    if (!_function_cache_init (function_cache, info)) {
+    if (!_function_cache_init (function_cache, info,
+                               _callable_cache_generate_args_cache_real)) {
         g_free (ccallback_cache);
         return NULL;
     }
@@ -841,7 +847,8 @@ pygi_constructor_cache_new (GICallableInfo *info)
 
     function_cache->invoke = _constructor_cache_invoke_real;
 
-    if (!_function_cache_init (function_cache, info)) {
+    if (!_function_cache_init (function_cache, info,
+                               _callable_cache_generate_args_cache_real)) {
         g_free (constructor_cache);
         return NULL;
     }
@@ -890,10 +897,10 @@ _function_with_instance_cache_init (PyGIFunctionWithInstanceCache *fwi_cache,
     PyGICallableCache *callable_cache = (PyGICallableCache *)fwi_cache;
 
     callable_cache->args_offset += 1;
-    callable_cache->generate_args_cache =
-        _function_with_instance_cache_generate_args_cache_real;
 
-    return _function_cache_init ((PyGIFunctionCache *)fwi_cache, info);
+    return _function_cache_init (
+        (PyGIFunctionCache *)fwi_cache, info,
+        _function_with_instance_cache_generate_args_cache_real);
 }
 
 /* PyGIMethodCache */
@@ -1004,7 +1011,8 @@ pygi_closure_cache_new (GICallableInfo *info)
 
     callable_cache->calling_context = PYGI_CALLING_CONTEXT_IS_FROM_C;
 
-    if (!_callable_cache_init (callable_cache, info)) {
+    if (!_callable_cache_init (callable_cache, info,
+                               _callable_cache_generate_args_cache_real)) {
         g_free (closure_cache);
         return NULL;
     }
