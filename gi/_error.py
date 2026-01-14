@@ -23,28 +23,41 @@
 # Developers wanting to use the GError class in their applications should
 # use gi.repository.GLib.GError
 
+from __future__ import annotations
+
+import typing
+
+if typing.TYPE_CHECKING:
+    from typing_extensions import Self
+
 
 class GError(RuntimeError):
-    def __init__(self, message="unknown error", domain="pygi-error", code=0):
+    message: str
+    domain: str
+    code: int
+
+    def __init__(
+        self, message: str = "unknown error", domain: str = "pygi-error", code: int = 0
+    ) -> None:
         super().__init__(message)
         self.message = message
         self.domain = domain
         self.code = code
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.domain:s}: {self.message:s} ({self.code:d})"
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"{GError.__module__.rsplit('.', 1)[-1]:s}.{GError.__name__:s}('{self.message:s}', '{self.domain:s}', {self.code:d})"
 
-    def copy(self):
+    def copy(self) -> Self:
         return GError(self.message, self.domain, self.code)
 
-    def matches(self, domain, code):
+    def matches(self, domain: str | int, code: int) -> bool:
         """Placeholder that will be monkey patched in GLib overrides."""
         raise NotImplementedError
 
     @staticmethod
-    def new_literal(domain, message, code):
+    def new_literal(domain: int, message: str, code: int) -> Self:
         """Placeholder that will be monkey patched in GLib overrides."""
         raise NotImplementedError

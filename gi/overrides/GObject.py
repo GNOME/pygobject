@@ -21,11 +21,13 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
 # USA
 
+from __future__ import annotations
+
 import functools
 import warnings
+import typing
 from collections import namedtuple
 
-import gi.module
 from gi.overrides import override, deprecated_attr
 from gi.repository import GLib
 from gi import PyGIDeprecationWarning
@@ -33,8 +35,23 @@ from gi import _propertyhelper as propertyhelper
 from gi import _signalhelper as signalhelper
 from gi import _gi
 
+# Typing relies on https://github.com/pygobject/pygobject-stubs.
+if typing.TYPE_CHECKING:
+    # Import stubs for type checking this file.
+    # FIXME: For IDE typing support, you need to copy
+    # pygobject-stubs/src/gi-stubs/repository/*.pyi to gi/repository/
+    from gi.repository import GObject as GObjectModule
 
-GObjectModule = gi.module.get_introspection_module("GObject")
+    # Type annotations cannot have `GObject.` prefix because they are copied into
+    # GObject stubs module which cannot refer to itself. Use type aliases.
+    GType: typing.TypeAlias = GObjectModule.GType
+    Object = GObjectModule.Object
+    ConnectFlags = GObjectModule.ConnectFlags
+else:
+    from gi.module import get_introspection_module
+
+    GObjectModule = get_introspection_module("GObject")
+
 
 __all__ = []
 
@@ -171,34 +188,34 @@ for name in [
     __all__.append(name)
 
 
-TYPE_INVALID = GObjectModule.type_from_name("invalid")
-TYPE_NONE = GObjectModule.type_from_name("void")
-TYPE_INTERFACE = GObjectModule.type_from_name("GInterface")
-TYPE_CHAR = GObjectModule.type_from_name("gchar")
-TYPE_UCHAR = GObjectModule.type_from_name("guchar")
-TYPE_BOOLEAN = GObjectModule.type_from_name("gboolean")
-TYPE_INT = GObjectModule.type_from_name("gint")
-TYPE_UINT = GObjectModule.type_from_name("guint")
-TYPE_LONG = GObjectModule.type_from_name("glong")
-TYPE_ULONG = GObjectModule.type_from_name("gulong")
-TYPE_INT64 = GObjectModule.type_from_name("gint64")
-TYPE_UINT64 = GObjectModule.type_from_name("guint64")
-TYPE_ENUM = GObjectModule.type_from_name("GEnum")
-TYPE_FLAGS = GObjectModule.type_from_name("GFlags")
-TYPE_FLOAT = GObjectModule.type_from_name("gfloat")
-TYPE_DOUBLE = GObjectModule.type_from_name("gdouble")
-TYPE_STRING = GObjectModule.type_from_name("gchararray")
-TYPE_POINTER = GObjectModule.type_from_name("gpointer")
-TYPE_BOXED = GObjectModule.type_from_name("GBoxed")
-TYPE_PARAM = GObjectModule.type_from_name("GParam")
-TYPE_OBJECT = GObjectModule.type_from_name("GObject")
-TYPE_PYOBJECT = GObjectModule.type_from_name("PyObject")
-TYPE_GTYPE = GObjectModule.type_from_name("GType")
-TYPE_STRV = GObjectModule.type_from_name("GStrv")
-TYPE_VARIANT = GObjectModule.type_from_name("GVariant")
-TYPE_GSTRING = GObjectModule.type_from_name("GString")
-TYPE_VALUE = GObjectModule.Value.__gtype__
-TYPE_UNICHAR = TYPE_UINT
+TYPE_INVALID: GType = GObjectModule.type_from_name("invalid")
+TYPE_NONE: GType = GObjectModule.type_from_name("void")
+TYPE_INTERFACE: GType = GObjectModule.type_from_name("GInterface")
+TYPE_CHAR: GType = GObjectModule.type_from_name("gchar")
+TYPE_UCHAR: GType = GObjectModule.type_from_name("guchar")
+TYPE_BOOLEAN: GType = GObjectModule.type_from_name("gboolean")
+TYPE_INT: GType = GObjectModule.type_from_name("gint")
+TYPE_UINT: GType = GObjectModule.type_from_name("guint")
+TYPE_LONG: GType = GObjectModule.type_from_name("glong")
+TYPE_ULONG: GType = GObjectModule.type_from_name("gulong")
+TYPE_INT64: GType = GObjectModule.type_from_name("gint64")
+TYPE_UINT64: GType = GObjectModule.type_from_name("guint64")
+TYPE_ENUM: GType = GObjectModule.type_from_name("GEnum")
+TYPE_FLAGS: GType = GObjectModule.type_from_name("GFlags")
+TYPE_FLOAT: GType = GObjectModule.type_from_name("gfloat")
+TYPE_DOUBLE: GType = GObjectModule.type_from_name("gdouble")
+TYPE_STRING: GType = GObjectModule.type_from_name("gchararray")
+TYPE_POINTER: GType = GObjectModule.type_from_name("gpointer")
+TYPE_BOXED: GType = GObjectModule.type_from_name("GBoxed")
+TYPE_PARAM: GType = GObjectModule.type_from_name("GParam")
+TYPE_OBJECT: GType = GObjectModule.type_from_name("GObject")
+TYPE_PYOBJECT: GType = GObjectModule.type_from_name("PyObject")
+TYPE_GTYPE: GType = GObjectModule.type_from_name("GType")
+TYPE_STRV: GType = GObjectModule.type_from_name("GStrv")
+TYPE_VARIANT: GType = GObjectModule.type_from_name("GVariant")
+TYPE_GSTRING: GType = GObjectModule.type_from_name("GString")
+TYPE_VALUE: GType = GObjectModule.Value.__gtype__
+TYPE_UNICHAR: GType = TYPE_UINT
 __all__ += [
     "TYPE_BOOLEAN",
     "TYPE_BOXED",
@@ -313,7 +330,9 @@ __all__ += [
 
 
 class Value(GObjectModule.Value):
-    def __init__(self, value_type=None, py_value=None):
+    def __init__(
+        self, value_type: GType | None = None, py_value: typing.Any | None = None
+    ) -> None:
         GObjectModule.Value.__init__(self)
         if value_type is not None:
             self.init(value_type)
@@ -326,7 +345,7 @@ class Value(GObjectModule.Value):
         # code is currently very slow.
         return _gi._gvalue_get_type(self)
 
-    def set_boxed(self, boxed):
+    def set_boxed(self, boxed: GBoxed):
         if not self.__g_type.is_a(TYPE_BOXED):
             warnings.warn(
                 "Calling set_boxed() on a non-boxed type deprecated",
@@ -338,7 +357,7 @@ class Value(GObjectModule.Value):
         # the type information is stored on the GValue.
         _gi._gvalue_set(self, boxed)
 
-    def get_boxed(self):
+    def get_boxed(self) -> GBoxed:
         if not self.__g_type.is_a(TYPE_BOXED):
             warnings.warn(
                 "Calling get_boxed() on a non-boxed type deprecated",
@@ -347,7 +366,7 @@ class Value(GObjectModule.Value):
             )
         return _gi._gvalue_get(self)
 
-    def set_value(self, py_value):
+    def set_value(self, py_value: typing.Any) -> None:
         gtype = self.__g_type
 
         if gtype == TYPE_CHAR:
@@ -378,7 +397,7 @@ class Value(GObjectModule.Value):
                     raise TypeError("GObject.Value needs to be initialized first")
                 raise
 
-    def get_value(self):
+    def get_value(self) -> typing.Any:
         gtype = self.__g_type
 
         if gtype == TYPE_CHAR:
@@ -406,7 +425,7 @@ class Value(GObjectModule.Value):
                 return None
             raise
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<Value ({self.__g_type.name}) {self.get_value()}>"
 
 
@@ -414,7 +433,7 @@ Value = override(Value)
 __all__.append("Value")
 
 
-def type_from_name(name):
+def type_from_name(name: str) -> GType:
     type_ = GObjectModule.type_from_name(name)
     if type_ == TYPE_INVALID:
         raise RuntimeError(f"unknown type name: {name}")
@@ -424,7 +443,7 @@ def type_from_name(name):
 __all__.append("type_from_name")
 
 
-def type_parent(type_):
+def type_parent(type_: GType | Object) -> GType:
     parent = GObjectModule.type_parent(type_)
     if parent == TYPE_INVALID:
         raise RuntimeError("no parent for type")
@@ -434,14 +453,14 @@ def type_parent(type_):
 __all__.append("type_parent")
 
 
-def _validate_type_for_signal_method(type_):
+def _validate_type_for_signal_method(type_: GType | Object) -> None:
     if hasattr(type_, "__gtype__"):
         type_ = type_.__gtype__
     if not type_.is_instantiatable() and not type_.is_interface():
         raise TypeError(f"type must be instantiable or an interface, got {type_}")
 
 
-def signal_list_ids(type_):
+def signal_list_ids(type_: GType | Object) -> tuple[int, ...]:
     _validate_type_for_signal_method(type_)
     return GObjectModule.signal_list_ids(type_)
 
@@ -449,7 +468,7 @@ def signal_list_ids(type_):
 __all__.append("signal_list_ids")
 
 
-def signal_list_names(type_):
+def signal_list_names(type_: GType | Object) -> tuple[str, ...]:
     ids = signal_list_ids(type_)
     return tuple(GObjectModule.signal_name(i) for i in ids)
 
@@ -457,7 +476,7 @@ def signal_list_names(type_):
 __all__.append("signal_list_names")
 
 
-def signal_lookup(name, type_):
+def signal_lookup(name: str, type_: GType | Object) -> int:
     _validate_type_for_signal_method(type_)
     return GObjectModule.signal_lookup(name, type_)
 
@@ -479,11 +498,16 @@ SignalQuery = namedtuple(
 )
 
 
-def signal_query(id_or_name, type_=None):
-    if type_ is not None:
-        id_or_name = signal_lookup(id_or_name, type_)
+def signal_query(
+    id_or_name: int | str, type_: GType | Object | None = None
+) -> SignalQuery | None:
+    if isinstance(id_or_name, str):
+        assert type_ is not None, "type_ is required when looking up signal by name"
+        signal_id = signal_lookup(id_or_name, type_)
+    else:
+        signal_id = id_or_name
 
-    res = GObjectModule.signal_query(id_or_name)
+    res = GObjectModule.signal_query(signal_id)
     assert res is not None
 
     if res.signal_id == 0:
@@ -507,18 +531,18 @@ __all__.append("signal_query")
 
 
 class _HandlerBlockManager:
-    def __init__(self, obj, handler_id):
+    def __init__(self, obj: Object, handler_id: int):
         self.obj = obj
         self.handler_id = handler_id
 
-    def __enter__(self):
+    def __enter__(self) -> None:
         pass
 
-    def __exit__(self, exc_type, exc_value, traceback):
+    def __exit__(self, exc_type, exc_value, traceback) -> None:
         GObjectModule.signal_handler_unblock(self.obj, self.handler_id)
 
 
-def signal_handler_block(obj, handler_id):
+def signal_handler_block(obj: Object, handler_id: int) -> typing.ContextManager[None]:
     """Blocks the signal handler from being invoked until
     handler_unblock() is called.
 
@@ -542,7 +566,9 @@ def signal_handler_block(obj, handler_id):
 __all__.append("signal_handler_block")
 
 
-def signal_parse_name(detailed_signal, itype, force_detail_quark):
+def signal_parse_name(
+    detailed_signal: str, itype: GType | Object, force_detail_quark: bool
+) -> tuple[int, int]:
     """Parse a detailed signal name into (signal_id, detail).
 
     :param str detailed_signal:
@@ -564,7 +590,7 @@ def signal_parse_name(detailed_signal, itype, force_detail_quark):
 __all__.append("signal_parse_name")
 
 
-def remove_emission_hook(obj, detailed_signal, hook_id):
+def remove_emission_hook(obj: Object, detailed_signal: str, hook_id: int) -> None:
     signal_id, _detail = signal_parse_name(detailed_signal, obj, True)
     GObjectModule.signal_remove_emission_hook(signal_id, hook_id)
 
@@ -601,13 +627,13 @@ __all__ += ["add_emission_hook", "signal_new"]
 
 
 class _FreezeNotifyManager:
-    def __init__(self, obj):
+    def __init__(self, obj: Object):
         self.obj = obj
 
-    def __enter__(self):
+    def __enter__(self) -> None:
         pass
 
-    def __exit__(self, exc_type, exc_value, traceback):
+    def __exit__(self, exc_type, exc_value, traceback) -> None:
         self.obj.thaw_notify()
 
 
@@ -699,7 +725,7 @@ class Object(GObjectModule.Object):
     __copy__ = _gi.GObject.__copy__
     __deepcopy__ = _gi.GObject.__deepcopy__
 
-    def freeze_notify(self):
+    def freeze_notify(self) -> typing.ContextManager[None]:
         """Freezes the object's property-changed notification queue.
 
         :returns:
@@ -717,7 +743,13 @@ class Object(GObjectModule.Object):
         super().freeze_notify()
         return _FreezeNotifyManager(self)
 
-    def connect_data(self, detailed_signal, handler, *data, connect_flags=0):
+    def connect_data(
+        self,
+        detailed_signal: str,
+        handler: typing.Callable,
+        *data: typing.Any,
+        connect_flags: ConnectFlags = 0,
+    ) -> int:
         """Connect a callback to the given signal with optional user data.
 
         :param str detailed_signal:
@@ -770,10 +802,10 @@ class Object(GObjectModule.Object):
     # Deprecated Methods
     #
 
-    def stop_emission(self, detailed_signal):
+    def stop_emission(self, detailed_signal: str) -> None:
         """Deprecated, please use stop_emission_by_name."""
         warnings.warn(self.stop_emission.__doc__, PyGIDeprecationWarning, stacklevel=2)
-        return self.stop_emission_by_name(detailed_signal)
+        self.stop_emission_by_name(detailed_signal)
 
     emit_stop_by_name = stop_emission
 
@@ -811,19 +843,19 @@ __all__ += ["Property", "Signal", "SignalOverride", "property"]
 @override
 class ParamSpec(GObjectModule.ParamSpec):
     @property
-    def nick(self):
+    def nick(self) -> str:
         return self._nick
 
     @nick.setter
-    def nick(self, nick):
+    def nick(self, nick: str) -> None:
         self._nick = nick
 
     @property
-    def blurb(self):
+    def blurb(self) -> str:
         return self._blurb
 
     @blurb.setter
-    def blurb(self, blurb):
+    def blurb(self, blurb: str) -> None:
         self._blurb = blurb
 
 
