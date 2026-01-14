@@ -406,7 +406,6 @@ _invoke_marshal_in_args (PyGIInvokeState *state,
                          PyGIFunctionCache *function_cache)
 {
     PyGICallableCache *cache = (PyGICallableCache *)function_cache;
-    gssize i;
 
     if (state->n_py_in_args > cache->n_py_args) {
         char *full_name = pygi_callable_cache_get_full_name (cache);
@@ -439,7 +438,7 @@ _invoke_marshal_in_args (PyGIInvokeState *state,
             pygi_async_new (function_cache->async_finish, cancellable);
     }
 
-    for (i = 0; (gsize)i < _pygi_callable_cache_args_len (cache); i++) {
+    for (guint i = 0; i < _pygi_callable_cache_args_len (cache); i++) {
         GIArgument *c_arg = &state->args[i].arg_value;
         PyGIArgCache *arg_cache = g_ptr_array_index (cache->args_cache, i);
         PyObject *py_arg = NULL;

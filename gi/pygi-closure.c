@@ -198,9 +198,7 @@ static void
 _pygi_closure_convert_ffi_arguments (PyGIInvokeArgState *state,
                                      PyGICallableCache *cache, void **args)
 {
-    guint i;
-
-    for (i = 0; i < _pygi_callable_cache_args_len (cache); i++) {
+    for (guint i = 0; i < _pygi_callable_cache_args_len (cache); i++) {
         PyGIArgCache *arg_cache = g_ptr_array_index (cache->args_cache, i);
         gpointer arg_pointer;
 
@@ -286,7 +284,7 @@ _pygi_closure_convert_ffi_arguments (PyGIInvokeArgState *state,
     }
 
     if (pygi_callable_cache_can_throw_gerror (cache)) {
-        gssize error_index = _pygi_callable_cache_args_len (cache);
+        guint error_index = _pygi_callable_cache_args_len (cache);
 
         state[error_index].arg_value.v_pointer =
             *(gpointer *)args[error_index];
@@ -339,16 +337,14 @@ _pygi_closure_convert_arguments (PyGIInvokeState *state,
 {
     PyGICallableCache *cache = (PyGICallableCache *)closure_cache;
     gssize n_in_args = 0;
-    gssize i;
 
-    for (i = 0; (gsize)i < _pygi_callable_cache_args_len (cache); i++) {
+    for (guint i = 0; i < _pygi_callable_cache_args_len (cache); i++) {
         PyGIArgCache *arg_cache = g_ptr_array_index (cache->args_cache, i);
 
         if (arg_cache->direction & PYGI_DIRECTION_TO_PYTHON) {
             PyObject *value;
 
-            if (cache->has_user_data
-                && ((gssize)cache->user_data_index) == i) {
+            if (cache->has_user_data && (cache->user_data_index) == i) {
                 if (state->user_data == NULL) {
                     /* user_data can be NULL for connect functions which don't accept
                      * user_data or as the default for user_data in the middle of function
@@ -414,7 +410,6 @@ _pygi_closure_set_out_arguments (PyGIInvokeState *state,
                                  PyGICallableCache *cache, PyObject *py_retval,
                                  void *resp)
 {
-    gssize i;
     gssize i_py_retval = 0;
     gboolean success;
 
@@ -439,7 +434,7 @@ _pygi_closure_set_out_arguments (PyGIInvokeState *state,
         i_py_retval++;
     }
 
-    for (i = 0; (gsize)i < _pygi_callable_cache_args_len (cache); i++) {
+    for (guint i = 0; i < _pygi_callable_cache_args_len (cache); i++) {
         PyGIArgCache *arg_cache = g_ptr_array_index (cache->args_cache, i);
 
         if (arg_cache->direction & PYGI_DIRECTION_FROM_PYTHON) {
@@ -483,14 +478,13 @@ static void
 _pygi_closure_clear_retvals (PyGIInvokeState *state, PyGICallableCache *cache,
                              gpointer resp)
 {
-    gsize i;
     GIArgument arg = PYGI_ARG_INIT;
 
     if (cache->return_cache->type_tag != GI_TYPE_TAG_VOID) {
         _pygi_closure_assign_pyobj_to_retval (resp, &arg, cache->return_cache);
     }
 
-    for (i = 0; i < _pygi_callable_cache_args_len (cache); i++) {
+    for (guint i = 0; i < _pygi_callable_cache_args_len (cache); i++) {
         PyGIArgCache *arg_cache = g_ptr_array_index (cache->args_cache, i);
 
         if (arg_cache->direction & PYGI_DIRECTION_FROM_PYTHON) {

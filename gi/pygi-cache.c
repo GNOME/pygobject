@@ -611,7 +611,6 @@ _function_cache_init (PyGIFunctionCache *function_cache,
     PyGICallableCache *callable_cache = (PyGICallableCache *)function_cache;
     GIFunctionInvoker *invoker = &function_cache->invoker;
     GError *error = NULL;
-    guint i;
 
     callable_cache->calling_context = PYGI_CALLING_CONTEXT_IS_FROM_PY;
 
@@ -630,7 +629,8 @@ _function_cache_init (PyGIFunctionCache *function_cache,
         PyGIArgCache *cancellable = NULL;
         PyGIArgCache *async_callback = NULL;
 
-        for (i = 0; i < _pygi_callable_cache_args_len (callable_cache); i++) {
+        for (guint i = 0; i < _pygi_callable_cache_args_len (callable_cache);
+             i++) {
             PyGIArgCache *arg_cache =
                 _pygi_callable_cache_get_arg (callable_cache, i);
 

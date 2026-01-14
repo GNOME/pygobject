@@ -86,13 +86,12 @@ void
 pygi_marshal_cleanup_args_from_py_marshal_success (PyGIInvokeState *state,
                                                    PyGICallableCache *cache)
 {
-    guint i;
     PyObject *error_type, *error_value, *error_traceback;
     gboolean have_error = !!PyErr_Occurred ();
 
     if (have_error) PyErr_Fetch (&error_type, &error_value, &error_traceback);
 
-    for (i = 0; i < _pygi_callable_cache_args_len (cache); i++) {
+    for (guint i = 0; i < _pygi_callable_cache_args_len (cache); i++) {
         PyGIArgCache *arg_cache = _pygi_callable_cache_get_arg (cache, i);
         PyGIMarshalFromPyCleanupFunc cleanup_func = arg_cache->from_py_cleanup;
         gpointer cleanup_data = state->args[i].arg_cleanup_data;
@@ -168,7 +167,6 @@ pygi_marshal_cleanup_args_from_py_parameter_fail (PyGIInvokeState *state,
                                                   PyGICallableCache *cache,
                                                   gssize failed_arg_index)
 {
-    guint i;
     PyObject *error_type, *error_value, *error_traceback;
 
     g_assert (PyErr_Occurred ());
@@ -177,8 +175,8 @@ pygi_marshal_cleanup_args_from_py_parameter_fail (PyGIInvokeState *state,
 
     state->failed = TRUE;
 
-    for (i = 0; i < _pygi_callable_cache_args_len (cache)
-                && i <= (guint)failed_arg_index;
+    for (guint i = 0; i < _pygi_callable_cache_args_len (cache)
+                      && i <= (guint)failed_arg_index;
          i++) {
         PyGIArgCache *arg_cache = _pygi_callable_cache_get_arg (cache, i);
         PyGIMarshalFromPyCleanupFunc cleanup_func = arg_cache->from_py_cleanup;

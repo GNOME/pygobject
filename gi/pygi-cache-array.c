@@ -785,13 +785,11 @@ pygi_arg_garray_len_arg_setup (PyGIArgGArray *seq_cache, GITypeInfo *type_info,
          */
         if (((gssize)seq_cache->len_arg_index) < arg_index
             && direction & PYGI_DIRECTION_FROM_PYTHON) {
-            guint i;
             (*py_arg_index) -= 1;
             callable_cache->n_py_args -= 1;
 
-            for (i = (guint)seq_cache->len_arg_index + 1;
-                 (gsize)i < _pygi_callable_cache_args_len (callable_cache);
-                 i++) {
+            for (guint i = seq_cache->len_arg_index + 1;
+                 i < _pygi_callable_cache_args_len (callable_cache); i++) {
                 PyGIArgCache *update_cache =
                     _pygi_callable_cache_get_arg (callable_cache, i);
                 if (update_cache == NULL) break;
