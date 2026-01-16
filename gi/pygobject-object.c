@@ -52,6 +52,15 @@ GQuark pygobject_wrapper_key;
 GQuark pygobject_has_dispose_method;
 GQuark pygobject_instance_data_key;
 
+
+static inline PyGObjectData *
+pyg_object_peek_inst_data (GObject *obj)
+{
+    if (!obj) return NULL;
+    return ((PyGObjectData *)g_object_get_qdata (obj,
+                                                 pygobject_instance_data_key));
+}
+
 static GClosure *
 gclosure_from_pyfunc (PyGObject *object, PyObject *func)
 {
@@ -256,6 +265,7 @@ void
 pygobject_register_wrapper (PyObject *self)
 {
     PyGObject *gself;
+    PyGObjectData *inst_data;
 
     g_return_if_fail (self != NULL);
     g_return_if_fail (PyObject_TypeCheck (self, &PyGObject_Type));
@@ -263,6 +273,26 @@ pygobject_register_wrapper (PyObject *self)
     gself = (PyGObject *)self;
 
     g_assert (gself->obj->ref_count >= 1);
+
+    /* this forces inst_data->type to be updated, which could prove
+     * important if a new wrapper has to be created and it is of a
+     * unregistered type */
+    inst_data = pygobject_get_inst_data (gself);
+    g_assert (inst_data != NULL);
+
+    if (inst_data->inst_dict == NULL) {
+        PyObject *inst_dict = PyObject_GenericGetDict (self, NULL);
+#ifdef PYPY_VERSION
+        inst_data->inst_dict = PyDict_Copy (inst_dict);
+        Py_DECREF (inst_dict);
+        PyObject_GenericSetDict (self, inst_data->inst_dict, NULL);
+#else
+        inst_data->inst_dict = inst_dict;
+#endif
+    } else {
+        PyObject_GenericSetDict (self, inst_data->inst_dict, NULL);
+    }
+
     /* save wrapper pointer so we can access it later */
     g_object_set_qdata_full (gself->obj, pygobject_wrapper_key, gself, NULL);
 
@@ -575,14 +605,7 @@ pygobject_new_full (GObject *obj, gboolean steal, gpointer g_class)
         self = PyObject_GC_New (PyGObject, tp);
         if (self == NULL) return NULL;
 
-        self->inst_dict = inst_data ? Py_XNewRef (inst_data->inst_dict) : NULL;
-
-#ifdef PYPY_VERSION
-        /* For PyPy objects, we set a custom dict we can keep around after the object dies */
-        if (self->inst_dict == NULL) self->inst_dict = PyDict_New ();
-        PyObject_GenericSetDict ((PyObject *)self, self->inst_dict, NULL);
-#endif
-
+        self->inst_dict = NULL;
         self->weakreflist = NULL;
         self->private_flags.flags = 0;
         self->obj = obj;
@@ -833,21 +856,11 @@ pygobject_repr (PyGObject *self)
     return repr;
 }
 
-static inline void
-pygobject_retain_inst_dict (PyGObject *self, PyGObjectData *data)
-{
-    /* Keep a copy of the instance dictionary around,
-     * so instance variables can outlive the wrapper object. */
-    if (data != NULL && self->inst_dict != NULL && data->inst_dict == NULL)
-        data->inst_dict = Py_NewRef (self->inst_dict);
-}
-
 static int
 pygobject_traverse (PyGObject *self, visitproc visit, void *arg)
 {
     int ret = 0;
-    GSList *tmp;
-    PyGObjectData *data = pygobject_get_inst_data (self);
+    PyGObjectData *data = pyg_object_peek_inst_data (self->obj);
 
     if (self->inst_dict) {
         ret = visit (self->inst_dict, arg);
@@ -861,7 +874,7 @@ pygobject_traverse (PyGObject *self, visitproc visit, void *arg)
         if (data->inst_dict) ret = visit (data->inst_dict, arg);
         if (ret != 0) return ret;
 
-        for (tmp = data->closures; tmp != NULL; tmp = tmp->next) {
+        for (GSList *tmp = data->closures; tmp != NULL; tmp = tmp->next) {
             PyGClosure *closure = tmp->data;
 
             if (closure->callback) ret = visit (closure->callback, arg);
@@ -880,13 +893,7 @@ pygobject_traverse (PyGObject *self, visitproc visit, void *arg)
 static int
 pygobject_clear (PyGObject *self)
 {
-    /* this forces inst_data->type to be updated, which could prove
-     * important if a new wrapper has to be created and it is of a
-     * unregistered type */
-    PyGObjectData *inst_data = pygobject_get_inst_data (self);
-
     if (self->obj) {
-        pygobject_retain_inst_dict (self, inst_data);
         g_object_set_qdata_full (self->obj, pygobject_wrapper_key, NULL, NULL);
         Py_BEGIN_ALLOW_THREADS;
         g_clear_pointer (&self->obj, g_object_unref);
@@ -968,9 +975,6 @@ pygobject_init (PyGObject *self, PyObject *args, PyObject *kwargs)
     const PyGIArgumentFromPyCleanupData *cleanup_data = NULL;
     const char **names = NULL;
     GObjectClass *class;
-#ifdef PYPY_VERSION
-    PyObject *pypy_dict;
-#endif
 
     /* Only do GObject creation and property setting if the GObject hasn't
      * already been created. The case where self->obj already exists can occur
@@ -984,14 +988,6 @@ pygobject_init (PyGObject *self, PyObject *args, PyObject *kwargs)
     if (self->obj != NULL) return 0;
 
     if (!PyArg_ParseTuple (args, ":GObject.__init__", NULL)) return -1;
-
-#ifdef PYPY_VERSION
-    /* For PyPy objects, we set a custom dict we can keep around after the object dies */
-    pypy_dict = PyObject_GenericGetDict ((PyObject *)self, NULL);
-    self->inst_dict = PyDict_Copy (pypy_dict);
-    Py_DECREF (pypy_dict);
-    PyObject_GenericSetDict ((PyObject *)self, self->inst_dict, NULL);
-#endif
 
     object_type = pyg_type_from_object ((PyObject *)self);
     if (!object_type) return -1;
