@@ -850,7 +850,6 @@ pygobject_traverse (PyGObject *self, visitproc visit, void *arg)
     PyGObjectData *data = pygobject_get_inst_data (self);
 
     if (self->inst_dict) {
-        pygobject_retain_inst_dict (self, data);
         ret = visit (self->inst_dict, arg);
         if (ret != 0) return ret;
     }

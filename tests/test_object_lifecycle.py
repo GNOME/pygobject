@@ -224,6 +224,31 @@ def test_objects_with_cyclic_dependency_without_instance_dict():
     assert new_d.props.bare is new_b
 
 
+def test_objects_with_cyclic_dependency_and_instance_dict_no_content():
+    # Test with a cycle:
+    #
+    # b <-> a <-> c
+    #       ^---> d
+    a, b, c, d = [Regress.TestObj(int=i) for i in range(4)]
+
+    b.name = "b"
+
+    a.props.bare = b
+    a.all = [b, c, d]
+    b.props.bare = a
+    b.a = a
+    c.props.bare = a
+    c.a = a
+    d.props.bare = a
+    d.a = a
+    del b, c, d
+
+    gc.collect()
+    gc.collect()
+
+    assert a.props.bare.name == "b"
+
+
 def test_chained_objects_are_collected():
     # a --> b --> c
     a, b, c = [Regress.TestObj(int=i) for i in range(3)]
