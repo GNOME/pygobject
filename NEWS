@@ -1,9 +1,12 @@
-3.55.2 - (unreleased)
+3.55.2 - 2026-01-17
 -------------------
 
-* Use cache logic for field/property/constant/signal closure marshalling :mr:`487`
+* Use cache logic for field/property/constant/signal closure marshalling :mr:`487` :mr:`500`
 * Refactor struct and object marshaller code :mr:`493`
 * Remove wrappers for `GLib.OptionContext` and `GLib.OptionGroup` :mr:`499`
+* Fix issue when Python objects are garbage collected (regression from :mr:`449`) :mr:`507`
+* Windows build failure with Python 3.13 :mr:`502`
+* Refactoring :mr:`504` :mr:`505`
 
 3.55.1 - 2026-01-03
 -------------------
