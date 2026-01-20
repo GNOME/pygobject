@@ -76,8 +76,17 @@ class GLibEventLoopTests(GLibEventLoopTestsMixin, TestCase):
         super().__init__(*args)
         self.loop = None
 
+    def _cleanup_glib_event_loop(self, loop):
+        if not loop.is_closed():
+            loop.close()
+            raise AssertionError("Loop was no closed by the test")
+
     def create_event_loop(self):
-        return gi.events.GLibEventLoop(GLib.MainContext())
+        loop = gi.events.GLibEventLoop(GLib.MainContext())
+
+        self.addCleanup(self._cleanup_glib_event_loop, loop)
+
+        return loop
 
 
 class SubprocessWatcherTests(SubprocessMixin, TestCase):
