@@ -76,6 +76,14 @@ class GLibEventLoopTests(GLibEventLoopTestsMixin, TestCase):
         super().__init__(*args)
         self.loop = None
 
+    def setUp(self):
+        # Ensure a previous test did not leave an event loop around
+        assert gi.events.GLibEventLoopPolicy._get_event_loop() is None, (
+            "A previous test appears to have left an EventLoop open"
+        )
+
+        super().setUp()
+
     def _cleanup_glib_event_loop(self, loop):
         if not loop.is_closed():
             loop.close()
