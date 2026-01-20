@@ -33,8 +33,6 @@
 #include "pygi-value.h"
 #include "pygobject-object.h"
 
-extern GQuark pygobject_has_dispose_method;
-
 typedef struct _PyGSignalAccumulatorData {
     PyObject *callable;
     PyObject *user_data;
@@ -623,30 +621,27 @@ static void
 pyg_object_dispose (GObject *object)
 {
     GObjectClass *klass = G_OBJECT_GET_CLASS (object);
+    PyGObjectData *inst_data = pyg_object_peek_inst_data (object);
 
-    if (GPOINTER_TO_INT (
-            g_object_get_qdata (object, pygobject_has_dispose_method))) {
-        PyObject *object_wrapper, *retval;
+    if (inst_data && inst_data->dispose_object) {
+        PyGObject *object_wrapper;
+        PyObject *retval;
         PyGILState_STATE state = PyGILState_Ensure ();
 
-        /* We can't create a new Python wrapper in PyPy: it will be garbage collected,
-         * leaving us with an extra reference on our GObject. */
-#ifdef PYPY_VERSION
-        object_wrapper = g_object_get_qdata (object, pygobject_wrapper_key);
-        Py_XINCREF (object_wrapper);
-#else
-        object_wrapper = pygobject_new_full (object, FALSE, klass);
-#endif
+        object_wrapper = (PyGObject *)inst_data->dispose_object;
+        inst_data->dispose_object = NULL;
 
-        if (object_wrapper != NULL
-            && PyObject_HasAttrString (object_wrapper, "do_dispose")) {
-            retval = PyObject_CallMethod (object_wrapper, "do_dispose", NULL);
-            if (retval)
-                Py_DECREF (retval);
-            else
-                PyErr_Print ();
-        }
-        Py_XDECREF (object_wrapper);
+        object_wrapper->obj = g_object_ref (object);
+        retval = PyObject_CallMethod ((PyObject *)object_wrapper, "do_dispose",
+                                      NULL);
+        g_clear_object (&object_wrapper->obj);
+
+        if (retval)
+            Py_DECREF (retval);
+        else
+            PyErr_Print ();
+
+        Py_DECREF (object_wrapper);
 
         PyGILState_Release (state);
     }
