@@ -4,9 +4,16 @@ import unittest
 
 try:
     if sys.platform != "win32":
-        from test.test_asyncio.test_events import (
-            UnixEventLoopTestsMixin as GLibEventLoopTestsMixin,
-        )
+        try:
+            # cpython <= 3.13
+            from test.test_asyncio.test_events import (
+                UnixEventLoopTestsMixin as GLibEventLoopTestsMixin,
+            )
+        except:
+            # cpython >= 3.14
+            from test.test_asyncio.test_events import (
+                EventLoopTestsMixin as GLibEventLoopTestsMixin,
+            )
     else:
         from test.test_asyncio.test_events import EventLoopTestsMixin
 
@@ -35,8 +42,8 @@ except:
         def test_unix_event_loop_tests_missing(self):
             import warnings
 
-            warnings.warn("UnixEventLoopTestsMixin is unavailable, not running tests!")
-            self.skipTest("UnixEventLoopTestsMixin is unavailable, not running tests!")
+            warnings.warn("No EventLoopTestsMixin found, not running tests!")
+            self.skipTest("No EventLoopTestsMixin found, not running tests!")
 
     class SubprocessMixin:
         def test_subprocess_mixin_tests_missing(self):
