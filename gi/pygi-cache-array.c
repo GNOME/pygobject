@@ -321,6 +321,9 @@ err:
         gsize j;
         PyGIMarshalFromPyCleanupFunc cleanup_func =
             sequence_cache->item_cache->from_py_cleanup;
+        PyObject *type, *value, *traceback;
+
+        PyErr_Fetch (&type, &value, &traceback);
 
         /* Only attempt per item cleanup on pointer items */
         if (sequence_cache->item_cache->is_pointer) {
@@ -334,6 +337,8 @@ err:
                 Py_DECREF (py_seq_item);
             }
         }
+
+        PyErr_Restore (type, value, traceback);
     }
 
     if (is_ptr_array)
