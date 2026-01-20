@@ -633,14 +633,16 @@ class Source(GLib.Source):
     def finalize(self) -> None:
         pass
 
-    def set_callback(self, fn, user_data=None):
+    def set_callback(
+        self, func: typing.Callable[..., bool], *user_data: typing.Any
+    ) -> None:
         if hasattr(self, "__pygi_custom_source"):
             # use our custom pygi_source_set_callback() if for a GSource object
             # with custom functions
-            source_set_callback(self, fn, user_data)
+            source_set_callback(self, func, *user_data)
         else:
             # otherwise, for Idle and Timeout, use the standard method
-            super().set_callback(fn, user_data)
+            super().set_callback(func, *user_data)
 
     def get_current_time(self) -> float:
         return GLib.get_real_time() * 0.000001
