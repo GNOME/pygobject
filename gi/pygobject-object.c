@@ -99,7 +99,7 @@ pygobject_data_free (PyGObjectData *data)
     state_saved = Py_IsInitialized ();
     if (state_saved) {
         state = PyGILState_Ensure ();
-        Py_DECREF (data->type);
+        Py_CLEAR (data->type);
         Py_CLEAR (data->inst_dict);
         /* We cannot use Py_BEGIN_ALLOW_THREADS here because this is inside
 	 * a branch. */
@@ -107,10 +107,8 @@ pygobject_data_free (PyGObjectData *data)
     }
 
     tmp = closures = data->closures;
-#ifndef NDEBUG
     data->closures = NULL;
-    data->type = NULL;
-#endif
+
     while (tmp) {
         GClosure *closure = tmp->data;
 
@@ -591,12 +589,11 @@ pygobject_new_full (GObject *obj, gboolean steal, gpointer g_class)
         PyTypeObject *tp;
         if (inst_data)
             tp = inst_data->type;
-        else {
-            if (g_class)
-                tp = pygobject_lookup_class (G_OBJECT_CLASS_TYPE (g_class));
-            else
-                tp = pygobject_lookup_class (G_OBJECT_TYPE (obj));
-        }
+        else if (g_class)
+            tp = pygobject_lookup_class (G_OBJECT_CLASS_TYPE (g_class));
+        else
+            tp = pygobject_lookup_class (G_OBJECT_TYPE (obj));
+
         g_assert (tp != NULL);
 
         /* need to bump type refcount if created with
