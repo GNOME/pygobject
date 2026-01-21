@@ -18,6 +18,7 @@
 # USA
 
 import re
+import warnings
 
 from ._constants import TYPE_INVALID
 from .docstring import generate_doc_string
@@ -30,6 +31,7 @@ from ._gi import (
     register_interface_info,
     hook_up_vfunc_implementation,
     GInterface,
+    PyGIWarning,
 )
 from . import _gi
 
@@ -202,6 +204,17 @@ def find_vfunc_conflict_in_bases(vfunc, bases):
 
 class _GObjectMetaBase(type):
     """Metaclass for automatically registering GObject classes."""
+
+    def __new__(cls, name, bases, namespace, **kwargs):
+        if "__slots__" in namespace:
+            warnings.warn(
+                f"GObject derived class {name} shouldn't use __slots__.",
+                PyGIWarning,
+                stacklevel=2,
+            )
+            del namespace["__slots__"]
+
+        return super().__new__(cls, name, bases, namespace, **kwargs)
 
     def __init__(cls, name, bases, dict_):
         type.__init__(cls, name, bases, dict_)

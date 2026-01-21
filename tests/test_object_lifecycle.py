@@ -1,9 +1,11 @@
 import gc
 import sys
+import warnings
 import weakref
 
 import pytest
 
+from gi import PyGIWarning
 from gi.repository import GObject, Gio, Regress
 
 
@@ -168,6 +170,64 @@ def test_object_with_signal_callback():
 
     assert obj_id == id(new_obj)
     assert new_obj.props.int == 42
+
+
+with warnings.catch_warnings():
+    warnings.filterwarnings("ignore", ".*use __slots__.*")
+
+    class SlotObj(Regress.TestObj):
+        __slots__ = ["py_int"]
+
+        def __init__(self):
+            super().__init__()
+
+
+def test_class_with_slots_raises_warning():
+    with warnings.catch_warnings(record=True) as warn:
+
+        class _SlotClass(GObject.Object):
+            __slots__ = ["py_int"]
+
+    assert warn[0].category is PyGIWarning
+    assert "SlotClass shouldn't use __slots__." in str(warn[0].message)
+
+
+def test_subclass_with_slots_raises_warning():
+    class BaseClass(GObject.Object):
+        pass
+
+    with warnings.catch_warnings(record=True) as warn:
+
+        class _SlotClass(BaseClass):
+            __slots__ = ["py_int"]
+
+    assert warn[0].category is PyGIWarning
+    assert "SlotClass shouldn't use __slots__." in str(warn[0].message)
+
+
+def test_slot_object_can_be_created():
+    container = Regress.TestObj()
+    obj = SlotObj()
+    obj.py_int = 42
+    container.props.bare = obj
+
+    del obj
+    gc.collect()  # for pypy
+    new_obj = container.props.bare
+
+    assert new_obj.py_int == 42
+
+
+def test_slot_object_without_values_can_be_created():
+    container = Regress.TestObj()
+    obj = SlotObj()
+    container.props.bare = obj
+
+    del obj
+    gc.collect()  # for pypy
+    new_obj = container.props.bare
+
+    assert new_obj
 
 
 def test_objects_with_cyclic_dependency_and_instance_dict():
