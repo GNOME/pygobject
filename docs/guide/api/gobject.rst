@@ -17,6 +17,10 @@ the GObject and Python type system.
 In addition :obj:`GObject.Object` has support for :any:`signals <signals>` and
 :any:`properties <properties>`
 
+.. note::
+    Due to how PyGObject deals with GObject internally, it's not possible to use
+    `slots <https://docs.python.org/3/reference/datamodel.html#slots>`_ (``__slots__``).
+
 .. toctree::
     :titlesonly:
     :maxdepth: 1
