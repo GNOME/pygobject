@@ -1,3 +1,4 @@
+import os
 import sys
 import pytest
 import unittest
@@ -37,6 +38,7 @@ try:
     from test.test_asyncio.test_subprocess import SubprocessMixin
     from test.test_asyncio.utils import TestCase
 except:
+    assert "CI" not in os.environ, "Could not find asyncio test suite in CI!"
 
     class GLibEventLoopTestsMixin:
         def test_unix_event_loop_tests_missing(self):
@@ -54,7 +56,6 @@ except:
 
     from unittest import TestCase
 
-import sys
 import gi
 import gi.events
 import asyncio
