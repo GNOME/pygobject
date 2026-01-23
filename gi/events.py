@@ -334,13 +334,6 @@ class _SourceBase(GLib.Source):
         self.set_can_recurse(False)
         self.set_name("python asyncio integration")
 
-        # WARNING: We must not under *any* circumstance have a reference back
-        # and creating a loop. The GLib.Source.__del__ handler sets the pointer
-        # to NULL and the BaseEventLoop.__del__ tries to close the loop causing
-        # FDs to be unregistered.
-        # By making sure there are no references back we (hopefully) force the
-        # GC to be well behaved and first clean up the eventloop and selector
-        # before destroying the source.
         self._selector = weakref.ref(selector)
 
         self._ready = []
@@ -382,7 +375,8 @@ class _SelectorMixin:
         self._source = _Source(self)
 
     def close(self):
-        if self._source:
+        # See _Selector.unregister
+        if self._source and hash(self._source):
             self._source.destroy()
             self._source = None
         super().close()
@@ -616,7 +610,10 @@ if sys.platform != "win32":
             fd = _fileobj_to_fd(fileobj)
             key = self._fd_to_key[fd]
 
-            if self._source:
+            # As __del__ might have happened, the source may be an empty shell
+            # object and calling a function on it will crash us.
+            # Catch this by checking that the contained pointer is not NULL.
+            if self._source and hash(self._source):
                 self._source.remove_unix_fd(key._tag)
             del self._fd_to_key[fd]
 
