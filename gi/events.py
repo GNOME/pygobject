@@ -164,6 +164,7 @@ class _GLibEventLoopMixin:
                     self._quit_funcs[-1]()
             return
 
+        # cpython >= 3.13 has _run_forever_setup (see also _GLibEventLoopRunMixin)
         if hasattr(self, "_run_forever_setup"):
             self._run_forever_setup()
         else:
@@ -305,6 +306,8 @@ class _GLibEventLoopRunMixin:
     # This class exists so we don't need to copy the ProactorEventLoop.run_forever,
     # instead, we change the MRO using a metaclass, so that super() sees this class
     # when called in ProactorEventLoop.run_forever.
+    #
+    # This class is only needed for cpython < 3.13.
 
     def run_forever(self):
         # NOTE: self._check_running was only added in 3.8 (with a typo in 3.7)
