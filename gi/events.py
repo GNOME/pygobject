@@ -181,7 +181,6 @@ class _GLibEventLoopMixin:
             asyncio._set_running_loop(self)
 
         try:
-            asyncio._set_running_loop(self)
             assert not self._selector._source._dispatching
             self._may_iterate = True
             self._selector.attach()
