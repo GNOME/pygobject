@@ -108,6 +108,7 @@ Who Is Using PyGObject?
 * `GNOME Tweaks <https://wiki.gnome.org/Apps/Tweaks>`__ - a tool to customize advanced GNOME options
 * `GNOME Video Player <https://gitlab.gnome.org/GNOME/showtime/>`__ - a GNOME video player
 * `Gramps <https://gramps-project.org/>`__ - a genealogy program
+* `Iotas <https://apps.gnome.org/Iotas/>`__ - simple note taking
 * `Komikku <https://valos.gitlab.io/Komikku/>`__ - a manga reader
 * `Lollypop <https://wiki.gnome.org/Apps/Lollypop>`__ - a modern music player
 * `Lutris <https://lutris.net/>`__ - a video game manager
@@ -120,6 +121,7 @@ Who Is Using PyGObject?
 * `Pithos <https://pithos.github.io/>`__ - a Pandora Radio client
 * `Pitivi <https://www.pitivi.org/>`__ - a free and open source video editor
 * `Plots <https://github.com/alexhuntley/Plots/>`__ - a graph plotting app
+* `Pulp <https://gitlab.gnome.org/cheywood/Pulp/>`__ - a minimal take on RSS reading
 * `Quod Libet <https://quodlibet.readthedocs.io/>`__ - a music library manager / player
 * `Secrets <https://apps.gnome.org/Secrets/>`__ - a password manager
 * `Setzer <https://www.cvfosammmm.org/setzer/>`__ - a LaTeX editor
@@ -131,7 +133,7 @@ The following applications or libraries use PyGObject for optional features,
 such as plugins or as optional backends:
 
 * `beets <https://beets.io/>`__ - a music library manager and MusicBrainz tagger
-* `gedit <https://wiki.gnome.org/Apps/Gedit>`_- a GNOME text editor
+* `gedit <https://wiki.gnome.org/Apps/Gedit>`__ - a GNOME text editor
 * `matplotlib <https://matplotlib.org/>`__ - a python 2D plotting library
 * `Totem <https://wiki.gnome.org/Apps/Videos>`__ - a video player for GNOME
 
