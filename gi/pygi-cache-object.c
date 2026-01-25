@@ -119,6 +119,31 @@ pygi_arg_gobject_out_arg_from_py (PyObject *py_arg, /* in */
         g_free (msg);
 
         g_object_ref (gobj);
+
+        if (((PyGObject *)py_arg)->private_flags.flags
+            & PYGOBJECT_GOBJECT_WAS_FLOATING) {
+            /*
+             * We want to re-float instances that were floating and the Python
+             * wrapper assumed ownership. With the additional caveat that there
+             * are not any strong references beyond the return tuple.
+             */
+            g_object_force_floating (gobj);
+
+        } else {
+            // This may no longer be true, due to differences in refcounting
+            PyObject *repr = PyObject_Repr (py_arg);
+            gchar *msg = g_strdup_printf (
+                "Expecting to marshal a borrowed reference for %s, "
+                "but nothing in Python is holding a reference to this object. "
+                "See: https://bugzilla.gnome.org/show_bug.cgi?id=687522",
+                PyUnicode_AsUTF8 (repr));
+            Py_DECREF (repr);
+            if (PyErr_WarnEx (PyExc_RuntimeWarning, msg, 2)) {
+                g_free (msg);
+                return FALSE;
+            }
+            g_free (msg);
+        }
     }
 
     return TRUE;
@@ -223,6 +248,8 @@ _pygi_marshal_to_py_called_from_c_interface_object_cache_adapter (
     PyGIInvokeState *state, PyGICallableCache *callable_cache,
     PyGIArgCache *arg_cache, GIArgument *arg, gpointer *cleanup_data)
 {
+    PyObject *object;
+
     /* HACK:
      * The following hack is to work around GTK sending signals which
      * contain floating widgets in them. This assumes control of how
@@ -231,18 +258,18 @@ _pygi_marshal_to_py_called_from_c_interface_object_cache_adapter (
      * mode and then re-forcing the object as floating afterwards.
      *
      * See: https://bugzilla.gnome.org/show_bug.cgi?id=693400
-     *
-     * (a GtkCellRendererText issue that has since been fixed)
-     * In modern bindings this should no longer be needed. We sink the object
-     * as soon as it's created and that's that.
      */
     if (arg->v_pointer != NULL && arg_cache->transfer == GI_TRANSFER_NOTHING
         && G_IS_OBJECT (arg->v_pointer)
         && g_object_is_floating (arg->v_pointer)) {
-        g_object_ref_sink (arg->v_pointer);
+        g_object_ref (arg->v_pointer);
+        object = pygi_arg_object_to_py (arg, GI_TRANSFER_EVERYTHING);
+        g_object_force_floating (arg->v_pointer);
+    } else {
+        object = pygi_arg_object_to_py (arg, arg_cache->transfer);
     }
 
-    return pygi_arg_object_to_py (arg, arg_cache->transfer);
+    return object;
 }
 
 static PyObject *

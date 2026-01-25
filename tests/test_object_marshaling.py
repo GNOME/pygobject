@@ -124,14 +124,16 @@ class TestVFuncsWithObjectArg(unittest.TestCase):
         # of a potential leak. If this occures it is really a bug in the underlying library
         # but pygobject tries to react to this in a reasonable way.
         vfuncs = self.VFuncs()
-        with warnings.catch_warnings(record=True):
+        with warnings.catch_warnings(record=True) as warn:
             warnings.simplefilter("always")
             ref_count, is_floating = (
-                vfuncs.get_ref_info_for_vfunc_return_object_transfer_none()
+                vfuncs.get_ref_info_for_vfunc_out_object_transfer_none()
             )
+            if hasattr(sys, "getrefcount"):
+                self.assertTrue(issubclass(warn[0].category, RuntimeWarning))
 
         # The ref count of the GObject returned to the caller (get_ref_info_for_vfunc_return_object_transfer_none)
-        # should be a single ref
+        # should be a single floating ref
         if hasattr(sys, "getrefcount"):
             self.assertEqual(ref_count, 1)
         self.assertFalse(is_floating)
@@ -142,11 +144,13 @@ class TestVFuncsWithObjectArg(unittest.TestCase):
     def test_vfunc_out_object_transfer_none(self):
         # Same as above except uses out arg instead of return
         vfuncs = self.VFuncs()
-        with warnings.catch_warnings(record=True):
+        with warnings.catch_warnings(record=True) as warn:
             warnings.simplefilter("always")
             ref_count, is_floating = (
                 vfuncs.get_ref_info_for_vfunc_out_object_transfer_none()
             )
+            if hasattr(sys, "getrefcount"):
+                self.assertTrue(issubclass(warn[0].category, RuntimeWarning))
 
         if hasattr(sys, "getrefcount"):
             self.assertEqual(ref_count, 1)
@@ -224,7 +228,6 @@ class TestVFuncsWithObjectArg(unittest.TestCase):
 
 class TestVFuncsWithFloatingArg(unittest.TestCase):
     # All tests here work with a floating object by using InitiallyUnowned as the argument
-    # The floating object is sunk as soon as possible.
 
     class VFuncs(VFuncsBase):
         # Object for testing non-floating objects without holding any refs.
@@ -233,18 +236,16 @@ class TestVFuncsWithFloatingArg(unittest.TestCase):
 
     @unittest.skipUnless(hasattr(sys, "getrefcount"), "refcount specific")
     def test_vfunc_return_object_transfer_none_with_floating(self):
-        # See TestVFuncWithObjectArg.test_vfunc_return_object_transfer_none for an explaination.
+        # Python is expected to return a single floating reference without warning.
         vfuncs = self.VFuncs()
-        with warnings.catch_warnings(record=True):
-            warnings.simplefilter("always")
-            ref_count, is_floating = (
-                vfuncs.get_ref_info_for_vfunc_return_object_transfer_none()
-            )
+        ref_count, is_floating = (
+            vfuncs.get_ref_info_for_vfunc_return_object_transfer_none()
+        )
 
         # The ref count of the GObject returned to the caller (get_ref_info_for_vfunc_return_object_transfer_none)
-        # should be a single ref
+        # should be a single floating ref
         self.assertEqual(ref_count, 1)
-        self.assertFalse(is_floating)
+        self.assertTrue(is_floating)
 
         gc.collect()
         self.assertTrue(vfuncs.object_ref() is None)
@@ -253,14 +254,12 @@ class TestVFuncsWithFloatingArg(unittest.TestCase):
     def test_vfunc_out_object_transfer_none_with_floating(self):
         # Same as above except uses out arg instead of return
         vfuncs = self.VFuncs()
-        with warnings.catch_warnings(record=True):
-            warnings.simplefilter("always")
-            ref_count, is_floating = (
-                vfuncs.get_ref_info_for_vfunc_out_object_transfer_none()
-            )
+        ref_count, is_floating = (
+            vfuncs.get_ref_info_for_vfunc_out_object_transfer_none()
+        )
 
         self.assertEqual(ref_count, 1)
-        self.assertFalse(is_floating)
+        self.assertTrue(is_floating)
 
         gc.collect()
         self.assertTrue(vfuncs.object_ref() is None)
@@ -309,18 +308,16 @@ class TestVFuncsWithFloatingArg(unittest.TestCase):
         )
         gc.collect()
 
-        # New: all objects are "sink"'ed (sunken?). Avoid using floating objects altogether.
-
         # python wrapper should maintain the object as floating and add an additional ref
         # So, two plus the one we added explicitly.
         self.assertEqual(vfuncs.in_object_grefcount, 2 + 1)
-        self.assertFalse(vfuncs.in_object_is_floating)
+        self.assertTrue(vfuncs.in_object_is_floating)
 
         # Special case for PyPy: the GC has not run, so we have registered an extra reference
         # Add a call to `PyGC_Collect ()` at the end of `_pygi_closure_handle` to check.
         pypy_needs_gc = int(sys.implementation.name == "pypy")
         self.assertEqual(ref_count, 2 + pypy_needs_gc)
-        self.assertFalse(is_floating)
+        self.assertTrue(is_floating)
 
         # There are two references now, one explicit and one from the wrapper
         self.assertEqual(vfuncs.object_ref().__grefcount__, 2)
@@ -329,7 +326,7 @@ class TestVFuncsWithFloatingArg(unittest.TestCase):
         testhelper.force_g_object_unref(vfuncs.object_ref())
 
         gc.collect()
-        assert vfuncs.object_ref() is None
+        self.assertTrue(vfuncs.object_ref() is None)
 
     def test_vfunc_in_object_transfer_full_with_floating(self):
         vfuncs = self.VFuncs()
@@ -590,20 +587,20 @@ class TestVFuncsWithHeldFloatingArg(unittest.TestCase):
         gc.collect()
 
         # Ref count inside vfunc from the perspective of Python
-        self.assertFalse(vfuncs.in_object_is_floating)
+        self.assertTrue(vfuncs.in_object_is_floating)
         self.assertEqual(
             vfuncs.in_object_grefcount, 2
         )  # python wrapper sinks and owns the gobject
 
         # Ref count from the perspective of C after the vfunc is called
-        self.assertFalse(is_floating)
+        self.assertTrue(is_floating)
         self.assertEqual(ref_count, 2)  # floating + held by wrapper
 
         # Current ref count after C cleans up its reference
         self.assertEqual(vfuncs.object_ref().__grefcount__, 1)
 
         # Our reference is still floating at this point ...
-        self.assertFalse(vfuncs.object_ref().is_floating())
+        self.assertTrue(vfuncs.object_ref().is_floating())
         # ... usually it should have been sunk within C at some point,
         # do it here to avoid a critical warning.
         with warnings.catch_warnings():

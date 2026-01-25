@@ -33,6 +33,10 @@ void pygobject_watch_closure (PyObject *self, GClosure *closure);
 int pyg_object_register_types (PyObject *d);
 PyObject *pyg_object_new (PyGObject *self, PyObject *args, PyObject *kwargs);
 
+void pygobject_ref_float (PyGObject *self);
+void pygobject_ref_sink (PyGObject *self);
+void pygobject_sink (GObject *obj);
+
 void pygobject__g_instance_init (GTypeInstance *instance, gpointer g_class);
 
 /* from pygobject-class.c */
