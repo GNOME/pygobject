@@ -1,5 +1,7 @@
 import tempfile
 import os
+import weakref
+
 import pytest
 
 Gtk = pytest.importorskip("gi.repository.Gtk")
@@ -728,3 +730,55 @@ def test_python_class_hierarchy():
     children = childBox.get_children() if not GTK4 else list(childBox)
 
     assert len(children) == 1
+
+
+@pytest.mark.skipif(not GTK4, reason="GTK 4 only")
+def test_finalization_of_custom_child_objects():
+    xml = """
+    <?xml version="1.0" encoding="UTF-8"?>
+    <interface>
+    <requires lib="gtk" version="4.0" />
+    <template class="CustomBox" parent="GtkBox">
+        <child>
+            <object class="CustomLabel">
+                <property name="label">CustomLabel</property>
+            </object>
+        </child>
+    </template>
+    </interface>
+    """
+
+    class CustomLabel(Gtk.Label):
+        __gtype_name__ = "CustomLabel"
+
+        def do_unroot(self) -> None:
+            check_finalize(self)
+
+    @Gtk.Template(string=xml)
+    class CustomBox(Gtk.Box):
+        __gtype_name__ = "CustomBox"
+
+        def do_unroot(self) -> None:
+            check_finalize(self)
+
+    finalized = []
+
+    def check_finalize(obj) -> None:
+        name = obj.__class__.__name__
+        obj.weak_ref(lambda: finalized.append(f"{name} -> GObject finalized"))
+        weakref.finalize(obj, finalized.append, f"{name} -> PyObject finalized")
+
+    custom_box = CustomBox()
+    box = Gtk.Box()
+    box.append(custom_box)
+    window = Gtk.Window()
+    window.set_child(box)
+    window.present()
+    box.remove(custom_box)
+
+    del custom_box
+
+    assert "CustomBox -> PyObject finalized" in finalized
+    assert "CustomBox -> GObject finalized" in finalized
+    assert "CustomLabel -> PyObject finalized" in finalized
+    assert "CustomLabel -> GObject finalized" in finalized
