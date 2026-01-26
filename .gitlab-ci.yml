@@ -161,7 +161,7 @@ minimal-meson:
   stage: build
   image: quay.io/fedora/fedora:40
   before_script:
-    - dnf install --assumeyes gcc meson git flex bison diffutils python3-devel python3-pytest gobject-introspection-devel
+    - dnf install --assumeyes gcc meson git flex bison diffutils python3-devel python3-test python3-pytest gobject-introspection-devel
   script:
     - meson setup _build
     - meson compile -C _build
