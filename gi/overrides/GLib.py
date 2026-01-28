@@ -715,7 +715,7 @@ __all__.append("Timeout")
 
 # backwards compatible API
 def idle_add(
-    function: typing.Callable[..., bool],
+    function: typing.Callable[..., bool | None],
     *user_data: typing.Any,
     priority: int = GLib.PRIORITY_DEFAULT_IDLE,
 ) -> int:
@@ -727,7 +727,7 @@ __all__.append("idle_add")
 
 def timeout_add(
     interval: int,
-    function: typing.Callable[..., bool],
+    function: typing.Callable[..., bool | None],
     *user_data: typing.Any,
     priority: int = GLib.PRIORITY_DEFAULT,
 ) -> int:
@@ -739,7 +739,7 @@ __all__.append("timeout_add")
 
 def timeout_add_seconds(
     interval: int,
-    function: typing.Callable[..., bool],
+    function: typing.Callable[..., bool | None],
     *user_data: typing.Any,
     priority: int = GLib.PRIORITY_DEFAULT,
 ) -> int:
@@ -908,7 +908,7 @@ class IOChannel(GLib.IOChannel):
     def add_watch(
         self,
         condition: IOCondition,
-        callback: typing.Callable[..., bool],
+        callback: typing.Callable[..., bool | None],
         *user_data: typing.Any,
         priority: int = GLib.PRIORITY_DEFAULT,
     ) -> int:
