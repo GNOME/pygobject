@@ -1958,7 +1958,7 @@ pygobject_weak_ref_notify (PyGObjectWeakRef *self, GObject *dummy)
                               " of type %s, should return None",
                               Py_TYPE (retval)->tp_name);
             Py_DECREF (retval);
-            PyErr_Print ();
+            if (PyErr_Occurred ()) PyErr_Print ();
         } else
             PyErr_Print ();
         Py_CLEAR (self->callback);
