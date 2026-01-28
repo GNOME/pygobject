@@ -774,7 +774,10 @@ pygobject__g_instance_init (GTypeInstance *instance, gpointer g_class)
         else
             Py_DECREF (result);
 
+#ifndef PYPY_VERSION
+        /* TODO: why does this decref cause PyPy to crash? */
         Py_DECREF (wrapper);
+#endif
     }
 
     PyGILState_Release (state);

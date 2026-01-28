@@ -67,7 +67,7 @@ PyGProps_dealloc (PyGProps *self)
 {
     PyObject_GC_UnTrack ((PyObject *)self);
 
-    Py_XSETREF (self->pygobject, NULL);
+    Py_CLEAR (self->pygobject);
 
     PyObject_GC_Del ((PyObject *)self);
 }
