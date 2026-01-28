@@ -1,3 +1,4 @@
+import sys
 import unittest
 import pytest
 
@@ -56,9 +57,9 @@ class TestObject(unittest.TestCase):
         self.assertEqual(o.props.label, "goodbye")
         self.assertRaises(AttributeError, getattr, o.props, "nosuchprop")
 
+    @unittest.skipIf(sys.implementation.name == "pypy", reason="GC is unpredictable")
     def test_new_refcount(self):
-        # TODO: justify why this should be 2
-        self.assertEqual(testhelper.test_g_object_new(), 2)
+        self.assertEqual(testhelper.test_g_object_new(), 1)
 
 
 class TestGValueConversion(unittest.TestCase):

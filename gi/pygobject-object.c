@@ -773,6 +773,8 @@ pygobject__g_instance_init (GTypeInstance *instance, gpointer g_class)
             PyErr_Print ();
         else
             Py_DECREF (result);
+
+        Py_DECREF (wrapper);
     }
 
     PyGILState_Release (state);
