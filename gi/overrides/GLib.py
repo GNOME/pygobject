@@ -850,6 +850,10 @@ class IOChannel(GLib.IOChannel):
             "either a valid file descriptor, file name, or window handle must be supplied"
         )
 
+    def __init__(self, *args, **kwargs):
+        # Call super without arguments to avoid deprecation warning
+        return super().__init__()
+
     def read(self, max_count: int = -1) -> bytes:
         """Reads data from a :obj:`~gi.repository.GLib.IOChannel`."""
         return io_channel_read(self, max_count)
