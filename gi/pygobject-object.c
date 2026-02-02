@@ -274,9 +274,6 @@ pygobject_register_wrapper (PyObject *self)
 
     g_assert (gself->obj->ref_count >= 1);
 
-    /* this forces inst_data->type to be updated, which could prove
-     * important if a new wrapper has to be created and it is of a
-     * unregistered type */
     inst_data = pygobject_get_inst_data (gself);
     g_assert (inst_data != NULL);
 
@@ -899,6 +896,15 @@ static int
 pygobject_clear (PyGObject *self)
 {
     if (self->obj) {
+        PyGObjectData *inst_data = pygobject_get_inst_data (self);
+
+        /* The __class__ of the object may have changed. If so, update it. */
+        if (inst_data != NULL && inst_data->type != Py_TYPE (self)) {
+            Py_DECREF ((PyObject *)inst_data->type);
+            inst_data->type = Py_TYPE (self);
+            Py_INCREF ((PyObject *)inst_data->type);
+        }
+
         g_object_set_qdata_full (self->obj, pygobject_wrapper_key, NULL, NULL);
         Py_BEGIN_ALLOW_THREADS;
         g_clear_pointer (&self->obj, g_object_unref);

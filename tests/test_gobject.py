@@ -945,3 +945,23 @@ def test_list_properties():
     for obj in [Gio.ActionEntry, Gio.DBusError, 0, object()]:
         with pytest.raises(TypeError):
             list_props(obj)
+
+
+def test_custom_class_update():
+    # Example from Gaupol <https://github.com/otsaloma/gaupol>
+
+    class CustomAction(Gio.SimpleAction):
+        def __new__(cls):
+            action = Gio.SimpleAction.new("custom-action")
+            action.__class__ = cls
+            return action
+
+    action = CustomAction()
+    assert type(action) is CustomAction
+
+    group = Gio.SimpleActionGroup()
+    group.insert(action)
+    del action
+    new_action = group.lookup("custom-action")
+
+    assert type(new_action) is CustomAction
