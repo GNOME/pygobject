@@ -1897,7 +1897,8 @@ field_array_length (GIFieldInfo *info, void *struct_data_ptr,
 
     gi_base_info_unref (type_info);
 
-    container_info = gi_base_info_get_container ((GIBaseInfo *)info);
+    container_info =
+        gi_base_info_get_container ((GIBaseInfo *)info); /* borrowed! */
 
     if (GI_IS_UNION_INFO (container_info)) {
         array_len_field = gi_union_info_get_field (
@@ -1912,7 +1913,6 @@ field_array_length (GIFieldInfo *info, void *struct_data_ptr,
         /* Other types don't have fields. */
         g_assert_not_reached ();
     }
-    gi_base_info_unref (container_info);
 
     if (array_len_field == NULL) {
         return FALSE;

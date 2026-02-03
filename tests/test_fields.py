@@ -1,9 +1,7 @@
 import math
 import unittest
 
-from gi.repository import GLib
-from gi.repository import Regress
-from gi.repository import GIMarshallingTests
+from gi.repository import GIMarshallingTests, GLib, Regress
 
 
 class Number:
@@ -177,3 +175,13 @@ class TestFields(unittest.TestCase):
     def test_ghashtable(self):
         obj = Regress.TestObj()
         self.assertTrue(obj.hash_table is None)
+
+    def test_array_field_with_length_annotation(self):
+        """Regression test for <https://gitlab.gnome.org/GNOME/pygobject/-/issues/738>
+        Every time an array field was accessed, the reference count of the struct info would be decreased.
+        This was only the case for array fields with a length annotation.
+        """
+        ITERATIONS = 100  # mostly arbitrarily chosen, but should be high enough to drop the reference count to zero.
+        obj = Regress.AnnotationFields()
+        for _ in range(0, ITERATIONS):
+            obj.arr
