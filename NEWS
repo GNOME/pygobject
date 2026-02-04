@@ -1,3 +1,15 @@
+3.55.3 - 2026-02-04
+-------------------
+
+* Add typing annotations to `GLib` and `GObject` overrides :mr:`506` :mr:`513`
+* Do not allow `__slots__` in GObject subclasses :mr:`508`
+* Documentation updates :mr:`510`
+* overrides/GLib: Add wrappers for `GLibUnix` split :mr:`492`
+* Fix leak in object initialization :mr:`514`
+* asyncio support without EventLoopPolicy :mr:`503` :mr:`509`
+* Fix crash in string/array marshalling (regression from :mr:`487`) :mr:`516`
+* Update class type on wrapper destruction (regression from :mr:`449`) :mr:`515`
+
 3.55.2 - 2026-01-17
 -------------------
 
