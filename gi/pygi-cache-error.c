@@ -36,10 +36,12 @@ _pygi_marshal_from_py_gerror (PyGIInvokeState *state,
         return TRUE;
     } else if (pygi_error_marshal_from_py (py_arg, &error)) {
         arg->v_pointer = error;
-        if (arg_cache->transfer == GI_TRANSFER_NOTHING) {
-            pygi_marshal_cleanup_data_init (cleanup_data, error,
-                                            (GDestroyNotify)g_error_free);
-        }
+        pygi_marshal_cleanup_data_init_full (
+            cleanup_data, error,
+            arg_cache->transfer == GI_TRANSFER_NOTHING
+                ? (GDestroyNotify)g_error_free
+                : NULL,
+            (GDestroyNotify)g_error_free);
         return TRUE;
     } else {
         return FALSE;
