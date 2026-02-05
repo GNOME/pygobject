@@ -168,10 +168,13 @@ _pygi_marshal_from_py_interface_callback (PyGIInvokeState *state,
     }
 
     /* Use the PyGIClosure as data passed to cleanup for GI_SCOPE_TYPE_CALL. */
-    if (callback_cache->scope == GI_SCOPE_TYPE_CALL) {
-        pygi_marshal_cleanup_data_init (
-            cleanup_data, closure, (GDestroyNotify)_pygi_invoke_closure_free);
-    }
+    pygi_marshal_cleanup_data_init_full (
+        cleanup_data, closure,
+        callback_cache->scope == GI_SCOPE_TYPE_CALL
+            ? (GDestroyNotify)_pygi_invoke_closure_free
+            : NULL,
+        (GDestroyNotify)_pygi_invoke_closure_free);
+
     return TRUE;
 }
 
