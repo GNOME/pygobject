@@ -27,6 +27,8 @@ _cleanup_caller_allocates (PyGIInvokeState *state, PyGIArgCache *cache,
 {
     PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)cache;
 
+    if (data == NULL) return;
+
     /* check GValue first because GValue is also a boxed sub-type */
     if (g_type_is_a (iface_cache->g_type, G_TYPE_VALUE)) {
         if (was_processed) g_value_unset (data);
@@ -137,8 +139,6 @@ pygi_marshal_cleanup_args_to_py_marshal_success (PyGIInvokeState *state,
     cache_item = cache->to_py_args;
     while (cache_item) {
         PyGIArgCache *arg_cache = (PyGIArgCache *)cache_item->data;
-        gpointer data =
-            state->args[arg_cache->c_arg_index].arg_value.v_pointer;
         PyGIMarshalCleanupData *cleanup_data =
             &state->args[arg_cache->c_arg_index].to_py_arg_cleanup_data;
 
@@ -149,8 +149,9 @@ pygi_marshal_cleanup_args_to_py_marshal_success (PyGIInvokeState *state,
                 pygi_marshal_cleanup_data_destroy_failed (cleanup_data);
             else
                 pygi_marshal_cleanup_data_destroy (cleanup_data);
-        } else if (pygi_arg_cache_is_caller_allocates (arg_cache)
-                   && data != NULL) {
+        } else if (pygi_arg_cache_is_caller_allocates (arg_cache)) {
+            gpointer data =
+                state->args[arg_cache->c_arg_index].arg_value.v_pointer;
             _cleanup_caller_allocates (state, arg_cache, data, TRUE);
         }
 
@@ -204,8 +205,7 @@ pygi_marshal_cleanup_args_from_py_parameter_fail (PyGIInvokeState *state,
 
         if (arg_cache->direction == PYGI_DIRECTION_FROM_PYTHON) {
             pygi_marshal_cleanup_data_destroy_failed (cleanup_data);
-        } else if (pygi_arg_cache_is_caller_allocates (arg_cache)
-                   && cleanup_data->data != NULL) {
+        } else if (pygi_arg_cache_is_caller_allocates (arg_cache)) {
             _cleanup_caller_allocates (state, arg_cache, cleanup_data->data,
                                        FALSE);
         }
