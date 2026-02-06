@@ -112,8 +112,11 @@ pygi_marshal_from_py_utf8_cache_adapter (PyGIInvokeState *state,
                                             &(cleanup_data->data));
 
     /* We strdup strings so free unless ownership is transferred to C. */
-    if (cleanup_data->data && arg_cache->transfer == GI_TRANSFER_NOTHING)
-        cleanup_data->destroy = g_free;
+    if (cleanup_data->data != NULL)
+        pygi_marshal_cleanup_data_init_full (
+            cleanup_data, arg->v_pointer,
+            arg_cache->transfer == GI_TRANSFER_NOTHING ? g_free : NULL,
+            g_free);
 
     return !PyErr_Occurred ();
 }
@@ -131,9 +134,9 @@ pygi_marshal_to_py_utf8_cache_adapter (PyGIInvokeState *state,
     /* Python copies the string so we need to free it
        if the interface is transfering ownership,
        whether or not it has been processed yet */
-    if (arg_cache->transfer == GI_TRANSFER_EVERYTHING) {
-        pygi_marshal_cleanup_data_init (cleanup_data, arg->v_pointer, g_free);
-    }
+    pygi_marshal_cleanup_data_init_full (
+        cleanup_data, arg->v_pointer,
+        arg_cache->transfer == GI_TRANSFER_EVERYTHING ? g_free : NULL, g_free);
 
     return object;
 }
