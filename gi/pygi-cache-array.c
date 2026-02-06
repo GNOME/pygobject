@@ -369,7 +369,7 @@ array_success:
         arg->v_pointer = array_->data;
 
         if (cleanup_transfer == GI_TRANSFER_EVERYTHING) {
-            g_array_free (array_, FALSE);
+            free_array_keep_segment (array_);
             g_assert (item_cleanups == NULL);
         } else {
             PyGIMarshalCleanupData array_cleanup_data = { 0 };
