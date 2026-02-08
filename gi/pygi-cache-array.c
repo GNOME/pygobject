@@ -179,7 +179,6 @@ _pygi_marshal_from_py_array (PyGIInvokeState *state,
         gi_type_info_is_zero_terminated (arg_cache->type_info);
     GIArrayType array_type;
     GArray *item_cleanups = NULL;
-    gboolean should_free_c_array = TRUE;
 
     if (Py_IsNone (py_arg)) {
         arg->v_pointer = NULL;
@@ -265,105 +264,103 @@ _pygi_marshal_from_py_array (PyGIInvokeState *state,
         if (arg_cache->transfer != GI_TRANSFER_EVERYTHING)
             item_cleanups = g_array_sized_new (
                 FALSE, TRUE, sizeof (PyGIMarshalCleanupData), 1);
-        goto array_success;
     } else {
         /* Last item is for the array itself. */
         item_cleanups = g_array_sized_new (
             FALSE, TRUE, sizeof (PyGIMarshalCleanupData), length + 1);
-    }
 
-    from_py_marshaller = sequence_cache->item_cache->from_py_marshaller;
-    for (i = 0; i < length; i++) {
-        GIArgument item = PYGI_ARG_INIT;
-        PyGIMarshalCleanupData item_cleanup_data = { 0 };
-        PyObject *py_item = PySequence_GetItem (py_arg, i);
-        if (py_item == NULL) goto err;
+        from_py_marshaller = sequence_cache->item_cache->from_py_marshaller;
+        for (i = 0; i < length; i++) {
+            GIArgument item = PYGI_ARG_INIT;
+            PyGIMarshalCleanupData item_cleanup_data = { 0 };
+            PyObject *py_item = PySequence_GetItem (py_arg, i);
+            if (py_item == NULL) goto err;
 
-        if (!from_py_marshaller (state, callable_cache,
-                                 sequence_cache->item_cache, py_item, &item,
-                                 &item_cleanup_data)) {
+            if (!from_py_marshaller (state, callable_cache,
+                                     sequence_cache->item_cache, py_item,
+                                     &item, &item_cleanup_data)) {
+                Py_DECREF (py_item);
+                goto err;
+            }
             Py_DECREF (py_item);
-            goto err;
-        }
-        Py_DECREF (py_item);
 
-        if (item_cleanup_data.data != NULL
-            && item_cleanup_data.data != item.v_pointer) {
-            /* We only support one level of data discrepancy between an items
-             * data and its cleanup data. This is because we only track a single
-             * extra cleanup data pointer per-argument and cannot track the entire
-             * array of items differing data and cleanup_data.
-             * For example, this would fail if trying to marshal an array of
-             * callback closures marked with SCOPE call type where the cleanup data
-             * is different from the items v_pointer, likewise an array of arrays.
-             */
-            PyErr_SetString (
-                PyExc_RuntimeError,
-                "Cannot cleanup item data for array due to "
-                "the items data its cleanup data being different.");
-            goto err;
-        }
-
-        /* FIXME: it is much more efficent to have seperate marshaller
-         *        for ptr arrays than doing the evaluation
-         *        and casting each loop iteration
-         */
-        if (is_ptr_array) {
-            g_ptr_array_add ((GPtrArray *)array_, item.v_pointer);
-        } else if (sequence_cache->item_cache->is_pointer) {
-            /* if the item is a pointer, simply copy the pointer */
-            g_assert (item_size == sizeof (item.v_pointer));
-            g_array_insert_val (array_, i, item);
-        } else if (sequence_cache->item_cache->type_tag
-                   == GI_TYPE_TAG_INTERFACE) {
-            /* Special case handling of flat arrays of gvalue/boxed/struct */
-            PyGIInterfaceCache *item_iface_cache =
-                (PyGIInterfaceCache *)sequence_cache->item_cache;
-            GIBaseInfo *base_info =
-                (GIBaseInfo *)item_iface_cache->interface_info;
-
-            if (GI_IS_STRUCT_INFO (base_info)
-                || GI_IS_UNION_INFO (base_info)) {
-                if (g_type_is_a (item_iface_cache->g_type, G_TYPE_VALUE)) {
-                    /* Special case GValue flat arrays to properly init and copy the contents. */
-                    GValue *dest =
-                        (GValue *)(void *)(array_->data + (i * item_size));
-                    if (item.v_pointer != NULL) {
-                        memset (dest, 0, item_size);
-                        g_value_init (dest,
-                                      G_VALUE_TYPE ((GValue *)item.v_pointer));
-                        g_value_copy ((GValue *)item.v_pointer, dest);
-                    }
-                    /* Manually increment the length because we are manually setting the memory. */
-                    array_->len++;
-
-                } else {
-                    /* Handles flat arrays of boxed or struct types. */
-                    g_array_insert_vals (array_, i, item.v_pointer, 1);
-                }
-
-                /* Cleanup any memory left by the per-item marshaler because
-                 * _pygi_marshal_cleanup_from_py_array will not know about this
-                 * due to "item" being a temporarily marshaled value done on the stack.
+            if (item_cleanup_data.data != NULL
+                && item_cleanup_data.data != item.v_pointer) {
+                /* We only support one level of data discrepancy between an items
+                 * data and its cleanup data. This is because we only track a single
+                 * extra cleanup data pointer per-argument and cannot track the entire
+                 * array of items differing data and cleanup_data.
+                 * For example, this would fail if trying to marshal an array of
+                 * callback closures marked with SCOPE call type where the cleanup data
+                 * is different from the items v_pointer, likewise an array of arrays.
                  */
-                if (item_cleanup_data.destroy && item_cleanup_data.data) {
-                    item_cleanup_data.destroy (item_cleanup_data.data);
-                    item_cleanup_data.data = NULL;
-                    item_cleanup_data.destroy = NULL;
+                PyErr_SetString (
+                    PyExc_RuntimeError,
+                    "Cannot cleanup item data for array due to "
+                    "the items data its cleanup data being different.");
+                goto err;
+            }
+
+            /* FIXME: it is much more efficent to have seperate marshaller
+             *        for ptr arrays than doing the evaluation
+             *        and casting each loop iteration
+             */
+            if (is_ptr_array) {
+                g_ptr_array_add ((GPtrArray *)array_, item.v_pointer);
+            } else if (sequence_cache->item_cache->is_pointer) {
+                /* if the item is a pointer, simply copy the pointer */
+                g_assert (item_size == sizeof (item.v_pointer));
+                g_array_insert_val (array_, i, item);
+            } else if (sequence_cache->item_cache->type_tag
+                       == GI_TYPE_TAG_INTERFACE) {
+                /* Special case handling of flat arrays of gvalue/boxed/struct */
+                PyGIInterfaceCache *item_iface_cache =
+                    (PyGIInterfaceCache *)sequence_cache->item_cache;
+                GIBaseInfo *base_info =
+                    (GIBaseInfo *)item_iface_cache->interface_info;
+
+                if (GI_IS_STRUCT_INFO (base_info)
+                    || GI_IS_UNION_INFO (base_info)) {
+                    if (g_type_is_a (item_iface_cache->g_type, G_TYPE_VALUE)) {
+                        /* Special case GValue flat arrays to properly init and copy the contents. */
+                        GValue *dest =
+                            (GValue *)(void *)(array_->data + (i * item_size));
+                        if (item.v_pointer != NULL) {
+                            memset (dest, 0, item_size);
+                            g_value_init (
+                                dest, G_VALUE_TYPE ((GValue *)item.v_pointer));
+                            g_value_copy ((GValue *)item.v_pointer, dest);
+                        }
+                        /* Manually increment the length because we are manually setting the memory. */
+                        array_->len++;
+
+                    } else {
+                        /* Handles flat arrays of boxed or struct types. */
+                        g_array_insert_vals (array_, i, item.v_pointer, 1);
+                    }
+
+                    /* Cleanup any memory left by the per-item marshaler because
+                     * _pygi_marshal_cleanup_from_py_array will not know about this
+                     * due to "item" being a temporarily marshaled value done on the stack.
+                     */
+                    if (item_cleanup_data.destroy && item_cleanup_data.data) {
+                        item_cleanup_data.destroy (item_cleanup_data.data);
+                        item_cleanup_data.data = NULL;
+                        item_cleanup_data.destroy = NULL;
+                    }
+                } else {
+                    g_array_insert_val (array_, i, item);
                 }
             } else {
+                /* default value copy of a simple type */
                 g_array_insert_val (array_, i, item);
             }
-        } else {
-            /* default value copy of a simple type */
-            g_array_insert_val (array_, i, item);
-        }
 
-        if (item_cleanups)
-            g_array_append_val (item_cleanups, item_cleanup_data);
+            if (item_cleanups)
+                g_array_append_val (item_cleanups, item_cleanup_data);
+        }
     }
 
-array_success:
     if (!_marshal_length_arg_from_py (state, callable_cache, array_cache,
                                       length))
         goto err;
@@ -378,10 +375,8 @@ array_success:
         arg->v_pointer = array_->data;
 
         if (arg_cache->transfer == GI_TRANSFER_EVERYTHING) {
-            if (should_free_c_array) {
-                pygi_marshal_cleanup_data_init_full (
-                    &array_cleanup_data, array_->data, NULL, g_free);
-            }
+            pygi_marshal_cleanup_data_init_full (&array_cleanup_data,
+                                                 array_->data, NULL, g_free);
             free_array_keep_segment (array_);
         } else {
             pygi_marshal_cleanup_data_init_full (
