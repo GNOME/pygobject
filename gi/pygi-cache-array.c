@@ -140,6 +140,25 @@ free_array_keep_segment (GArray *array)
 }
 
 static gboolean
+_marshal_length_arg_from_py (PyGIInvokeState *state,
+                             PyGICallableCache *callable_cache,
+                             PyGIArgGArray *array_cache, guint length)
+{
+    if (array_cache->has_len_arg) {
+        /* we have an child arg to handle */
+        PyGIArgCache *child_cache = _pygi_callable_cache_get_arg (
+            callable_cache, array_cache->len_arg_index);
+
+        if (!gi_argument_from_py_ssize_t (
+                &state->args[child_cache->c_arg_index].arg_value, length,
+                child_cache->type_tag)) {
+            return FALSE;
+        }
+    }
+    return TRUE;
+}
+
+static gboolean
 _pygi_marshal_from_py_array (PyGIInvokeState *state,
                              PyGICallableCache *callable_cache,
                              PyGIArgCache *arg_cache, PyObject *py_arg,
@@ -335,35 +354,11 @@ _pygi_marshal_from_py_array (PyGIInvokeState *state,
         if (item_cleanups)
             g_array_append_val (item_cleanups, item_cleanup_data);
     }
-    goto array_success;
-
-err:
-    if (item_cleanups) {
-        g_array_set_clear_func (
-            item_cleanups,
-            (GDestroyNotify)pygi_marshal_cleanup_data_destroy_failed);
-        g_clear_pointer (&item_cleanups, g_array_unref);
-    }
-
-    if (is_ptr_array)
-        g_ptr_array_free ((GPtrArray *)array_, TRUE);
-    else
-        g_array_free (array_, TRUE);
-    _PyGI_ERROR_PREFIX ("Item %u: ", i);
-    return FALSE;
 
 array_success:
-    if (array_cache->has_len_arg) {
-        /* we have an child arg to handle */
-        PyGIArgCache *child_cache = _pygi_callable_cache_get_arg (
-            callable_cache, array_cache->len_arg_index);
-
-        if (!gi_argument_from_py_ssize_t (
-                &state->args[child_cache->c_arg_index].arg_value, length,
-                child_cache->type_tag)) {
-            goto err;
-        }
-    }
+    if (!_marshal_length_arg_from_py (state, callable_cache, array_cache,
+                                      length))
+        goto err;
 
     if (array_type == GI_ARRAY_TYPE_C) {
         PyGIMarshalCleanupData array_cleanup_data = { 0 };
@@ -429,6 +424,21 @@ array_success:
     }
 
     return TRUE;
+
+err:
+    if (item_cleanups) {
+        g_array_set_clear_func (
+            item_cleanups,
+            (GDestroyNotify)pygi_marshal_cleanup_data_destroy_failed);
+        g_clear_pointer (&item_cleanups, g_array_unref);
+    }
+
+    if (is_ptr_array)
+        g_ptr_array_free ((GPtrArray *)array_, TRUE);
+    else
+        g_array_free (array_, TRUE);
+    _PyGI_ERROR_PREFIX ("Item %u: ", i);
+    return FALSE;
 }
 
 /*
