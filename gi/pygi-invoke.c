@@ -596,11 +596,9 @@ _invoke_marshal_out_args (PyGIInvokeState *state,
 
     if (cache->return_cache) {
         if (!pygi_callable_cache_skip_return (cache)) {
-            PyGIMarshalCleanupData cleanup_data = { NULL, NULL };
             py_return = cache->return_cache->to_py_marshaller (
                 state, cache, cache->return_cache, &state->return_arg,
-                &cleanup_data);
-            state->to_py_return_arg_cleanup_data = cleanup_data;
+                &state->to_py_return_arg_cleanup_data);
             if (py_return == NULL) {
                 state->failed = TRUE;
                 return NULL;
