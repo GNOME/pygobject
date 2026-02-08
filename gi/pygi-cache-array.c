@@ -166,7 +166,6 @@ _pygi_marshal_from_py_array (PyGIInvokeState *state,
                              PyGIMarshalCleanupData *cleanup_data)
 {
     PyGIMarshalFromPyFunc from_py_marshaller;
-    guint i = 0;
     Py_ssize_t py_length;
     size_t fixed_size;
     guint length;
@@ -228,7 +227,7 @@ _pygi_marshal_from_py_array (PyGIInvokeState *state,
             /* Borrowing, nothing to clean up. */
             if (!_marshal_length_arg_from_py (state, callable_cache,
                                               array_cache, length))
-                goto err;
+                return FALSE;
 
             return TRUE;
         }
@@ -261,52 +260,36 @@ _pygi_marshal_from_py_array (PyGIInvokeState *state,
             array_->data[length] = '\0';
         }
         /* Only need cleanup for the array itself. */
-        if (arg_cache->transfer != GI_TRANSFER_EVERYTHING)
-            item_cleanups = g_array_sized_new (
-                FALSE, TRUE, sizeof (PyGIMarshalCleanupData), 1);
+        item_cleanups = g_array_sized_new (FALSE, TRUE,
+                                           sizeof (PyGIMarshalCleanupData), 1);
     } else {
         /* Last item is for the array itself. */
         item_cleanups = g_array_sized_new (
             FALSE, TRUE, sizeof (PyGIMarshalCleanupData), length + 1);
 
         from_py_marshaller = sequence_cache->item_cache->from_py_marshaller;
-        for (i = 0; i < length; i++) {
+        for (guint i = 0; i < length; i++) {
             GIArgument item = PYGI_ARG_INIT;
             PyGIMarshalCleanupData item_cleanup_data = { 0 };
             PyObject *py_item = PySequence_GetItem (py_arg, i);
-            if (py_item == NULL) goto err;
+            if (py_item == NULL) {
+                _PyGI_ERROR_PREFIX ("Item %u: ", i);
+                goto err;
+            }
 
             if (!from_py_marshaller (state, callable_cache,
                                      sequence_cache->item_cache, py_item,
                                      &item, &item_cleanup_data)) {
                 Py_DECREF (py_item);
+                _PyGI_ERROR_PREFIX ("Item %u: ", i);
                 goto err;
             }
             Py_DECREF (py_item);
 
-            if (item_cleanup_data.data != NULL
-                && item_cleanup_data.data != item.v_pointer) {
-                /* We only support one level of data discrepancy between an items
-                 * data and its cleanup data. This is because we only track a single
-                 * extra cleanup data pointer per-argument and cannot track the entire
-                 * array of items differing data and cleanup_data.
-                 * For example, this would fail if trying to marshal an array of
-                 * callback closures marked with SCOPE call type where the cleanup data
-                 * is different from the items v_pointer, likewise an array of arrays.
-                 */
-                PyErr_SetString (
-                    PyExc_RuntimeError,
-                    "Cannot cleanup item data for array due to "
-                    "the items data its cleanup data being different.");
-                goto err;
-            }
+            g_array_append_val (item_cleanups, item_cleanup_data);
 
-            /* FIXME: it is much more efficent to have seperate marshaller
-             *        for ptr arrays than doing the evaluation
-             *        and casting each loop iteration
-             */
             if (is_ptr_array) {
-                g_ptr_array_add ((GPtrArray *)array_, item.v_pointer);
+                g_ptr_array_insert ((GPtrArray *)array_, i, item.v_pointer);
             } else if (sequence_cache->item_cache->is_pointer) {
                 /* if the item is a pointer, simply copy the pointer */
                 g_assert (item_size == sizeof (item.v_pointer));
@@ -338,16 +321,6 @@ _pygi_marshal_from_py_array (PyGIInvokeState *state,
                         /* Handles flat arrays of boxed or struct types. */
                         g_array_insert_vals (array_, i, item.v_pointer, 1);
                     }
-
-                    /* Cleanup any memory left by the per-item marshaler because
-                     * _pygi_marshal_cleanup_from_py_array will not know about this
-                     * due to "item" being a temporarily marshaled value done on the stack.
-                     */
-                    if (item_cleanup_data.destroy && item_cleanup_data.data) {
-                        item_cleanup_data.destroy (item_cleanup_data.data);
-                        item_cleanup_data.data = NULL;
-                        item_cleanup_data.destroy = NULL;
-                    }
                 } else {
                     g_array_insert_val (array_, i, item);
                 }
@@ -355,9 +328,6 @@ _pygi_marshal_from_py_array (PyGIInvokeState *state,
                 /* default value copy of a simple type */
                 g_array_insert_val (array_, i, item);
             }
-
-            if (item_cleanups)
-                g_array_append_val (item_cleanups, item_cleanup_data);
         }
     }
 
@@ -374,20 +344,13 @@ _pygi_marshal_from_py_array (PyGIInvokeState *state,
          */
         arg->v_pointer = array_->data;
 
-        if (arg_cache->transfer == GI_TRANSFER_EVERYTHING) {
-            pygi_marshal_cleanup_data_init_full (&array_cleanup_data,
-                                                 array_->data, NULL, g_free);
-            free_array_keep_segment (array_);
-        } else {
-            pygi_marshal_cleanup_data_init_full (
-                &array_cleanup_data, array_,
-                arg_cache->transfer == GI_TRANSFER_NOTHING
-                    ? (GDestroyNotify)g_array_unref
-                    : (GDestroyNotify)free_array_keep_segment,
-                (GDestroyNotify)free_array_keep_segment);
-        }
-        if (item_cleanups)
-            g_array_append_val (item_cleanups, array_cleanup_data);
+        pygi_marshal_cleanup_data_init_full (
+            &array_cleanup_data, array_,
+            arg_cache->transfer == GI_TRANSFER_NOTHING
+                ? (GDestroyNotify)g_array_unref
+                : (GDestroyNotify)free_array_keep_segment,
+            (GDestroyNotify)free_array_keep_segment);
+        g_array_append_val (item_cleanups, array_cleanup_data);
     } else {
         PyGIMarshalCleanupData array_cleanup_data = { 0 };
         arg->v_pointer = array_;
@@ -401,7 +364,6 @@ _pygi_marshal_from_py_array (PyGIInvokeState *state,
                              : (GDestroyNotify)g_array_unref,
                 is_ptr_array ? (GDestroyNotify)free_ptr_array_keep_segment
                              : (GDestroyNotify)free_array_keep_segment);
-            g_array_append_val (item_cleanups, array_cleanup_data);
             break;
         }
         case GI_TRANSFER_CONTAINER:
@@ -412,19 +374,17 @@ _pygi_marshal_from_py_array (PyGIInvokeState *state,
                 &array_cleanup_data, array_, NULL,
                 is_ptr_array ? (GDestroyNotify)free_ptr_array_keep_segment
                              : (GDestroyNotify)free_array_keep_segment);
-            g_array_append_val (item_cleanups, array_cleanup_data);
             break;
         default:
             g_assert_not_reached ();
         }
+        g_array_append_val (item_cleanups, array_cleanup_data);
     }
 
-    if (item_cleanups) {
-        pygi_marshal_cleanup_data_init_full (
-            cleanup_data, item_cleanups,
-            (GDestroyNotify)pygi_marshal_cleanup_data_destroy_array,
-            (GDestroyNotify)pygi_marshal_cleanup_data_destroy_array_failed);
-    }
+    pygi_marshal_cleanup_data_init_full (
+        cleanup_data, item_cleanups,
+        (GDestroyNotify)pygi_marshal_cleanup_data_destroy_array,
+        (GDestroyNotify)pygi_marshal_cleanup_data_destroy_array_failed);
 
     return TRUE;
 
@@ -440,7 +400,6 @@ err:
         g_ptr_array_free ((GPtrArray *)array_, TRUE);
     else
         g_array_free (array_, TRUE);
-    _PyGI_ERROR_PREFIX ("Item %u: ", i);
     return FALSE;
 }
 
