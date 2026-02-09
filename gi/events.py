@@ -863,6 +863,9 @@ class GLibEventLoopPolicy(AbstractEventLoopPolicy):
         # We do not create a main context implicitly;
         # we create a mainloop for an existing context though
         if ctx is None:
+            if not force_implicit:
+                return None
+
             raise RuntimeError(
                 f"There is no main context set for thread {threading.current_thread().name!r}."
             )
