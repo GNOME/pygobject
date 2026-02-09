@@ -458,6 +458,7 @@ _pygi_marshal_to_py_array (PyGIInvokeState *state,
     GIArrayType array_type =
         gi_type_info_get_array_type (arg_cache->type_info);
     GArray *item_cleanups = NULL;
+    PyGIMarshalCleanupData array_cleanup_data = { 0 };
 
     /* GArrays make it easier to iterate over arrays
      * with different element sizes but requires that
@@ -484,7 +485,6 @@ _pygi_marshal_to_py_array (PyGIInvokeState *state,
         PyGIMarshalToPyFunc item_to_py_marshaller;
         PyGIArgCache *item_arg_cache;
         gboolean item_size_warning = FALSE;
-        PyGIMarshalCleanupData array_cleanup_data = { 0 };
 
         py_obj = PyList_New (array_->len);
         if (py_obj == NULL) goto err;
@@ -503,9 +503,9 @@ _pygi_marshal_to_py_array (PyGIInvokeState *state,
             PyGIMarshalCleanupData item_cleanup_data = { 0 };
 
             /* If we are receiving an array of pointers, simply assign the pointer
-                 * and move on, letting the per-item marshaler deal with the
-                 * various transfer modes and ref counts (e.g. g_variant_ref_sink).
-                 */
+             * and move on, letting the per-item marshaler deal with the
+             * various transfer modes and ref counts (e.g. g_variant_ref_sink).
+             */
             if (array_type == GI_ARRAY_TYPE_PTR_ARRAY) {
                 item_arg.v_pointer =
                     g_ptr_array_index ((GPtrArray *)array_, i);
@@ -567,40 +567,38 @@ _pygi_marshal_to_py_array (PyGIInvokeState *state,
             }
             PyList_SET_ITEM (py_obj, i, py_item);
         }
+    }
 
-        if (array_type == GI_ARRAY_TYPE_C) {
-            pygi_marshal_cleanup_data_init_full (
-                &array_cleanup_data, array_->data,
-                arg_cache->transfer != GI_TRANSFER_NOTHING
-                    ? (GDestroyNotify)g_free
-                    : NULL,
-                (GDestroyNotify)g_free);
-        } else if (array_type == GI_ARRAY_TYPE_PTR_ARRAY) {
-            pygi_marshal_cleanup_data_init_full (
-                &array_cleanup_data, array_,
-                arg_cache->transfer != GI_TRANSFER_NOTHING
-                    ? (GDestroyNotify)g_ptr_array_unref
-                    : NULL,
-                (GDestroyNotify)g_ptr_array_unref);
-        } else {
-            pygi_marshal_cleanup_data_init_full (
-                &array_cleanup_data, array_,
-                arg_cache->transfer != GI_TRANSFER_NOTHING
-                    ? (GDestroyNotify)g_array_unref
-                    : NULL,
-                (GDestroyNotify)g_array_unref);
-        }
+    if (array_type == GI_ARRAY_TYPE_C) {
+        pygi_marshal_cleanup_data_init_full (
+            item_cleanups ? &array_cleanup_data : cleanup_data, array_->data,
+            arg_cache->transfer != GI_TRANSFER_NOTHING ? (GDestroyNotify)g_free
+                                                       : NULL,
+            (GDestroyNotify)g_free);
+        g_array_free (array_, FALSE);
+    } else if (array_type == GI_ARRAY_TYPE_PTR_ARRAY) {
+        pygi_marshal_cleanup_data_init_full (
+            item_cleanups ? &array_cleanup_data : cleanup_data, array_,
+            arg_cache->transfer != GI_TRANSFER_NOTHING
+                ? (GDestroyNotify)g_ptr_array_unref
+                : NULL,
+            (GDestroyNotify)g_ptr_array_unref);
+    } else {
+        pygi_marshal_cleanup_data_init_full (
+            item_cleanups ? &array_cleanup_data : cleanup_data, array_,
+            arg_cache->transfer != GI_TRANSFER_NOTHING
+                ? (GDestroyNotify)g_array_unref
+                : NULL,
+            (GDestroyNotify)g_array_unref);
+    }
 
+    if (item_cleanups) {
         g_array_append_val (item_cleanups, array_cleanup_data);
 
         pygi_marshal_cleanup_data_init_full (
             cleanup_data, item_cleanups,
             (GDestroyNotify)pygi_marshal_cleanup_data_destroy_array,
             (GDestroyNotify)pygi_marshal_cleanup_data_destroy_array_failed);
-    }
-
-    if (array_type == GI_ARRAY_TYPE_C) {
-        g_array_free (array_, FALSE);
     }
 
     return py_obj;
