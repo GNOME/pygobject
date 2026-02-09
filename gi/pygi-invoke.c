@@ -734,9 +734,7 @@ pygi_invoke_c_callable (PyGIFunctionCache *function_cache,
 
     ret = _invoke_marshal_out_args (state, function_cache);
     pygi_marshal_cleanup_args_from_py_marshal_success (state, cache);
-
-    if (ret != NULL)
-        pygi_marshal_cleanup_args_to_py_marshal_success (state, cache);
+    pygi_marshal_cleanup_args_to_py_marshal_success (state, cache);
 
 err:
     _invoke_state_clear (state, function_cache);

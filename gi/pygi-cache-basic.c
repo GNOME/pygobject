@@ -132,11 +132,12 @@ pygi_marshal_to_py_utf8_cache_adapter (PyGIInvokeState *state,
         *arg, arg_cache->type_tag, arg_cache->transfer);
 
     /* Python copies the string so we need to free it
-       if the interface is transfering ownership,
-       whether or not it has been processed yet */
+     * if the interface is transfering ownership,
+     * whether or not it has been processed yet */
     pygi_marshal_cleanup_data_init_full (
         cleanup_data, arg->v_pointer,
-        arg_cache->transfer == GI_TRANSFER_EVERYTHING ? g_free : NULL, g_free);
+        arg_cache->transfer == GI_TRANSFER_EVERYTHING ? g_free : NULL,
+        arg_cache->transfer == GI_TRANSFER_EVERYTHING ? g_free : NULL);
 
     return object;
 }
