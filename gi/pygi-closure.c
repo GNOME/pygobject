@@ -553,13 +553,12 @@ _pygi_closure_handle (ffi_cif *cif, void *result, void **args, void *data)
         goto end;
     }
 
-    pygi_marshal_cleanup_args_to_py_marshal_success (&state, closure->cache);
+    pygi_marshal_cleanup_args_to_py (&state, closure->cache);
     success = _pygi_closure_set_out_arguments (&state, closure->cache, retval,
                                                result);
 
     if (!success) {
-        pygi_marshal_cleanup_args_from_py_marshal_success (&state,
-                                                           closure->cache);
+        pygi_marshal_cleanup_args_from_py (&state, closure->cache);
         _pygi_closure_clear_retvals (&state, closure->cache, result);
     }
 
