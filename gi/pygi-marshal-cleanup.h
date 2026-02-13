@@ -25,16 +25,13 @@
 
 G_BEGIN_DECLS
 
-void pygi_marshal_cleanup_args_from_py_marshal_success (
-    PyGIInvokeState *state, PyGICallableCache *cache);
+void pygi_marshal_cleanup_args_from_py (PyGIInvokeState *state,
+                                        PyGICallableCache *cache);
 void pygi_marshal_cleanup_args_from_py_parameter_fail (
     PyGIInvokeState *state, PyGICallableCache *cache);
 
-void pygi_marshal_cleanup_args_to_py_marshal_success (
-    PyGIInvokeState *state, PyGICallableCache *cache);
-
-void pygi_marshal_cleanup_return_to_py_marshal_success (
-    PyGIInvokeState *state, PyGICallableCache *cache);
+void pygi_marshal_cleanup_args_to_py (PyGIInvokeState *state,
+                                      PyGICallableCache *cache);
 
 G_END_DECLS
 
