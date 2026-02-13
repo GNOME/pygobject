@@ -73,24 +73,33 @@ _cleanup_caller_allocates (PyGIInvokeState *state, PyGIArgCache *cache,
  * stage (either success or failure)
  *
  * The in stage must call one of these cleanup functions:
- *    - pygi_marshal_cleanup_args_from_py_marshal_success
+ *    - pygi_marshal_cleanup_args_from_py
  *       (continue to out stage)
  *    - pygi_marshal_cleanup_args_from_py_parameter_fail
  *       (final, exit from invoke)
  *
  * The out stage must call one of these cleanup functions which are all final:
- *    - pygi_marshal_cleanup_args_to_py_marshal_success
- *    - set state->failed to TRUE
+ *    - pygi_marshal_cleanup_args_to_py
  *
  **/
 void
-pygi_marshal_cleanup_args_from_py_marshal_success (PyGIInvokeState *state,
-                                                   PyGICallableCache *cache)
+pygi_marshal_cleanup_args_from_py (PyGIInvokeState *state,
+                                   PyGICallableCache *cache)
 {
     PyObject *error_type, *error_value, *error_traceback;
     gboolean have_error = !!PyErr_Occurred ();
 
     if (have_error) PyErr_Fetch (&error_type, &error_value, &error_traceback);
+
+    /* clean up the return if available */
+    if (cache->return_cache != NULL) {
+        if (state->failed)
+            pygi_marshal_cleanup_data_destroy_failed (
+                &state->from_py_return_arg_cleanup_data);
+        else
+            pygi_marshal_cleanup_data_destroy (
+                &state->from_py_return_arg_cleanup_data);
+    }
 
     for (guint i = 0; i < _pygi_callable_cache_args_len (cache); i++) {
         PyGIArgCache *arg_cache = _pygi_callable_cache_get_arg (cache, i);
@@ -116,8 +125,8 @@ pygi_marshal_cleanup_args_from_py_marshal_success (PyGIInvokeState *state,
 }
 
 void
-pygi_marshal_cleanup_args_to_py_marshal_success (PyGIInvokeState *state,
-                                                 PyGICallableCache *cache)
+pygi_marshal_cleanup_args_to_py (PyGIInvokeState *state,
+                                 PyGICallableCache *cache)
 {
     GSList *cache_item;
     PyObject *error_type, *error_value, *error_traceback;
@@ -156,27 +165,6 @@ pygi_marshal_cleanup_args_to_py_marshal_success (PyGIInvokeState *state,
         }
 
         cache_item = cache_item->next;
-    }
-
-    if (have_error) PyErr_Restore (error_type, error_value, error_traceback);
-}
-
-void
-pygi_marshal_cleanup_return_to_py_marshal_success (PyGIInvokeState *state,
-                                                   PyGICallableCache *cache)
-{
-    PyObject *error_type, *error_value, *error_traceback;
-    gboolean have_error = !!PyErr_Occurred ();
-
-    if (have_error) PyErr_Fetch (&error_type, &error_value, &error_traceback);
-
-    if (cache->return_cache != NULL) {
-        if (state->failed)
-            pygi_marshal_cleanup_data_destroy_failed (
-                &state->to_py_return_arg_cleanup_data);
-        else
-            pygi_marshal_cleanup_data_destroy (
-                &state->to_py_return_arg_cleanup_data);
     }
 
     if (have_error) PyErr_Restore (error_type, error_value, error_traceback);
