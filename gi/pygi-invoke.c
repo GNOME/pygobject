@@ -572,7 +572,7 @@ _invoke_marshal_in_args (PyGIInvokeState *state,
             }
             success = arg_cache->from_py_marshaller (
                 state, cache, arg_cache, py_arg, c_arg, &cleanup_data);
-            state->args[i].arg_cleanup_data = cleanup_data;
+            state->args[i].from_py_arg_cleanup_data = cleanup_data;
 
             if (!success) {
                 pygi_marshal_cleanup_args_from_py_parameter_fail (state,

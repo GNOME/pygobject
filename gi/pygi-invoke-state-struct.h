@@ -22,7 +22,7 @@ typedef struct _PyGIInvokeArgState {
     GIArgument arg_pointer;
 
     /* Holds from_py marshaler cleanup data. */
-    PyGIMarshalCleanupData arg_cleanup_data;
+    PyGIMarshalCleanupData from_py_arg_cleanup_data;
 
     /* Holds to_py marshaler cleanup data. */
     PyGIMarshalCleanupData to_py_arg_cleanup_data;
