@@ -182,7 +182,7 @@ static PyObject *
 _pygi_marshal_to_py_interface_callback (
     PyGIInvokeState *state, PyGICallableCache *callable_cache,
     PyGIArgCache *arg_cache, GIArgument *arg,
-    PyGIMarshalCleanupData *arg_cleanup_data)
+    PyGIMarshalCleanupData *from_py_arg_cleanup_data)
 {
     PyGICallbackCache *callback_cache = (PyGICallbackCache *)arg_cache;
     gpointer user_data = NULL;

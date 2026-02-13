@@ -421,7 +421,7 @@ _pygi_closure_set_out_arguments (PyGIInvokeState *state,
 
         success = cache->return_cache->from_py_marshaller (
             state, cache, cache->return_cache, item, &state->return_arg,
-            &state->args[0].arg_cleanup_data);
+            &state->from_py_return_arg_cleanup_data);
 
         if (!success) {
             state->failed = TRUE;
@@ -453,7 +453,7 @@ _pygi_closure_set_out_arguments (PyGIInvokeState *state,
 
             success = arg_cache->from_py_marshaller (
                 state, cache, arg_cache, item, &state->args[i].arg_value,
-                &state->args[i_py_retval].arg_cleanup_data);
+                &state->args[i_py_retval].from_py_arg_cleanup_data);
 
             if (!success) {
                 state->failed = TRUE;
