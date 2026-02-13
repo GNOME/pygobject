@@ -937,7 +937,7 @@ pygobject_prepare_construct_properties (
         while (PyDict_Next (kwargs, &pos, &key, &value)) {
             GParamSpec *pspec;
             GValue *gvalue = &(*values)[*n_properties];
-            PyGIArgumentFromPyCleanupData *arg_cleanup_data =
+            PyGIArgumentFromPyCleanupData *from_py_arg_cleanup_data =
                 &(*cleanup_data)[*n_properties];
 
             const gchar *key_str = PyUnicode_AsUTF8 (key);
@@ -951,7 +951,7 @@ pygobject_prepare_construct_properties (
             }
             g_value_init (gvalue, G_PARAM_SPEC_VALUE_TYPE (pspec));
             if (pygi_set_gvalue_for_pspec (gvalue, pspec, value,
-                                           arg_cleanup_data)
+                                           from_py_arg_cleanup_data)
                 < 0) {
                 if (!PyErr_Occurred ())
                     PyErr_Format (
