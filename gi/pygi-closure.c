@@ -389,7 +389,6 @@ _pygi_closure_convert_arguments (PyGIInvokeState *state,
                 state->args[i].to_py_arg_cleanup_data = cleanup_data;
 
                 if (value == NULL) {
-                    state->failed = TRUE;
                     return FALSE;
                 }
             }
@@ -424,7 +423,6 @@ _pygi_closure_set_out_arguments (PyGIInvokeState *state,
             &state->from_py_return_arg_cleanup_data);
 
         if (!success) {
-            state->failed = TRUE;
             return FALSE;
         }
 
@@ -447,7 +445,6 @@ _pygi_closure_set_out_arguments (PyGIInvokeState *state,
             if (PyTuple_Check (py_retval)) {
                 item = PyTuple_GET_ITEM (py_retval, i_py_retval);
             } else if (i_py_retval != 0) {
-                state->failed = TRUE;
                 return FALSE;
             }
 
@@ -456,7 +453,6 @@ _pygi_closure_set_out_arguments (PyGIInvokeState *state,
                 &state->args[i_py_retval].from_py_arg_cleanup_data);
 
             if (!success) {
-                state->failed = TRUE;
                 return FALSE;
             }
 
@@ -518,7 +514,7 @@ _pygi_closure_handle (ffi_cif *cif, void *result, void **args, void *data)
     PyGILState_STATE py_state;
     PyGICClosure *closure = data;
     PyObject *retval;
-    gboolean success;
+    gboolean success = TRUE;
     PyGIInvokeState state = { 0 };
 
     /* Ignore closures when Python is not initialized. This can happen in cases
@@ -551,13 +547,12 @@ _pygi_closure_handle (ffi_cif *cif, void *result, void **args, void *data)
         goto end;
     }
 
-    pygi_marshal_cleanup_args_to_py (&state, closure->cache, !state.failed);
-    success = _pygi_closure_set_out_arguments (&state, closure->cache, retval,
-                                               result);
+    pygi_marshal_cleanup_args_to_py (&state, closure->cache, success);
+    success |= _pygi_closure_set_out_arguments (&state, closure->cache, retval,
+                                                result);
 
     if (!success) {
-        pygi_marshal_cleanup_args_from_py (&state, closure->cache,
-                                           !state.failed);
+        pygi_marshal_cleanup_args_from_py (&state, closure->cache, success);
         _pygi_closure_clear_retvals (&state, closure->cache, result);
     }
 
