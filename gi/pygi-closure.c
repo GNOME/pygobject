@@ -519,9 +519,7 @@ _pygi_closure_handle (ffi_cif *cif, void *result, void **args, void *data)
     PyGICClosure *closure = data;
     PyObject *retval;
     gboolean success;
-    PyGIInvokeState state = {
-        0,
-    };
+    PyGIInvokeState state = { 0 };
 
     /* Ignore closures when Python is not initialized. This can happen in cases
      * where calling Python implemented vfuncs can happen at shutdown time.
