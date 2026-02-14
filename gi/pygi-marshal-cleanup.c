@@ -180,8 +180,6 @@ pygi_marshal_cleanup_args_from_py_parameter_fail (PyGIInvokeState *state,
 
     PyErr_Fetch (&error_type, &error_value, &error_traceback);
 
-    state->failed = TRUE;
-
     for (guint i = 0; i < _pygi_callable_cache_args_len (cache); i++) {
         PyGIArgCache *arg_cache = _pygi_callable_cache_get_arg (cache, i);
         PyGIMarshalCleanupData *cleanup_data =
