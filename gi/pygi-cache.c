@@ -820,9 +820,7 @@ pygi_function_cache_invoke (PyGIFunctionCache *function_cache,
                             PyObject *const *py_args, size_t py_nargsf,
                             PyObject *py_kwnames)
 {
-    PyGIInvokeState state = {
-        0,
-    };
+    PyGIInvokeState state = { 0 };
     return function_cache->invoke (function_cache, &state, py_args, py_nargsf,
                                    py_kwnames);
 }
@@ -854,9 +852,7 @@ pygi_ccallback_cache_invoke (PyGICCallbackCache *ccallback_cache,
                              PyObject *py_kwnames, gpointer user_data)
 {
     PyGIFunctionCache *function_cache = (PyGIFunctionCache *)ccallback_cache;
-    PyGIInvokeState state = {
-        0,
-    };
+    PyGIInvokeState state = { 0 };
 
     state.user_data = user_data;
 
