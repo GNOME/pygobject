@@ -717,7 +717,7 @@ pygi_invoke_c_callable (PyGIFunctionCache *function_cache,
         if (pygi_error_check (&state->error)) {
             /* even though we errored out, the call itself was successful,
                so we assume the call processed all of the parameters */
-            pygi_marshal_cleanup_args_from_py (state, cache);
+            pygi_marshal_cleanup_args_from_py (state, cache, !state->failed);
             goto err;
         }
     }
@@ -729,8 +729,8 @@ pygi_invoke_c_callable (PyGIFunctionCache *function_cache,
     }
 
     ret = _invoke_marshal_out_args (state, function_cache);
-    pygi_marshal_cleanup_args_from_py (state, cache);
-    pygi_marshal_cleanup_args_to_py (state, cache);
+    pygi_marshal_cleanup_args_from_py (state, cache, !state->failed);
+    pygi_marshal_cleanup_args_to_py (state, cache, !state->failed);
 
 err:
     _invoke_state_clear (state, function_cache);
