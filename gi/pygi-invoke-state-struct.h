@@ -58,8 +58,6 @@ typedef struct _PyGIInvokeState {
      */
     GError *error;
 
-    gboolean failed;
-
     /* An awaitable to return for an async function that was called with
      * default arguments.
      */
