@@ -319,8 +319,7 @@ static PyObject *
 _wrap_pyg_enum_register (PyObject *self, PyObject *args)
 {
     PyTypeObject *class;
-    const char *type_name = NULL;
-    char *new_type_name;
+    char *type_name = NULL;
 
     if (!PyArg_ParseTuple (args, "O!z:enum_register", &PyType_Type, &class,
                            &type_name))
@@ -331,12 +330,14 @@ _wrap_pyg_enum_register (PyObject *self, PyObject *args)
         return NULL;
     }
 
-    if (type_name)
-        new_type_name = g_strdup (type_name);
-    else
-        new_type_name = get_type_name_for_class (class);
-
-    if (!pyg_enum_register (class, new_type_name)) return NULL;
+    if (type_name) {
+        if (!pyg_enum_register (class, type_name)) return NULL;
+    } else {
+        char *new_type_name = get_type_name_for_class (class);
+        gboolean success = pyg_enum_register (class, new_type_name);
+        g_free (new_type_name);
+        if (!success) return NULL;
+    }
 
     Py_RETURN_NONE;
 }
@@ -345,8 +346,7 @@ static PyObject *
 _wrap_pyg_flags_register (PyObject *self, PyObject *args)
 {
     PyTypeObject *class;
-    const char *type_name = NULL;
-    char *new_type_name;
+    char *type_name = NULL;
 
     if (!PyArg_ParseTuple (args, "O!z:flags_register", &PyType_Type, &class,
                            &type_name))
@@ -357,12 +357,14 @@ _wrap_pyg_flags_register (PyObject *self, PyObject *args)
         return NULL;
     }
 
-    if (type_name)
-        new_type_name = g_strdup (type_name);
-    else
-        new_type_name = get_type_name_for_class (class);
-
-    if (!pyg_flags_register (class, new_type_name)) return NULL;
+    if (type_name) {
+        if (!pyg_flags_register (class, type_name)) return NULL;
+    } else {
+        char *new_type_name = get_type_name_for_class (class);
+        gboolean success = pyg_flags_register (class, new_type_name);
+        g_free (new_type_name);
+        if (!success) return NULL;
+    }
 
     Py_RETURN_NONE;
 }
