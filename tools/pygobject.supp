@@ -81,8 +81,14 @@
 
 {
     static type initialization
-    Memecheck:Leak
+    Memcheck:Leak
     ...
     fun:pygi_type_import_by_name
 }
 
+{
+    Fontconfig cache
+    Memcheck:Leak
+    ...
+    fun:FcPatternObjectInsertElt
+}
