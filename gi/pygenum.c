@@ -329,7 +329,6 @@ out:
     Py_XDECREF (values);
     /* If type registration succeeded, this data should not be freed */
     if (gtype == G_TYPE_INVALID) {
-        g_free (type_name);
         if (enum_values != NULL) {
             GEnumValue *v;
             for (v = enum_values; v->value_name != NULL; v++) {
