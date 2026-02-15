@@ -29,9 +29,6 @@ void pygi_marshal_cleanup_args_from_py (PyGIInvokeState *state,
                                         PyGICallableCache *cache,
                                         gboolean success);
 
-void pygi_marshal_cleanup_args_from_py_parameter_fail (
-    PyGIInvokeState *state, PyGICallableCache *cache);
-
 void pygi_marshal_cleanup_args_to_py (PyGIInvokeState *state,
                                       PyGICallableCache *cache,
                                       gboolean success);

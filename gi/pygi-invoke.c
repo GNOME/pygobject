@@ -462,12 +462,6 @@ _invoke_marshal_in_args (PyGIInvokeState *state,
                               full_name, cache->n_py_args,
                               state->n_py_in_args);
                 g_free (full_name);
-
-                /* clean up all of the args we have already marshalled,
-                 * since invoke will not be called.
-                 */
-                pygi_marshal_cleanup_args_from_py_parameter_fail (state,
-                                                                  cache);
                 return FALSE;
             }
 
@@ -485,8 +479,6 @@ _invoke_marshal_in_args (PyGIInvokeState *state,
                         "%s() takes exactly %zd argument(s) (%zd given)",
                         full_name, cache->n_py_args, state->n_py_in_args);
                     g_free (full_name);
-                    pygi_marshal_cleanup_args_from_py_parameter_fail (state,
-                                                                      cache);
                     return FALSE;
                 }
 
@@ -521,8 +513,6 @@ _invoke_marshal_in_args (PyGIInvokeState *state,
                                   "callable %s",
                                   i, full_name);
                     g_free (full_name);
-                    pygi_marshal_cleanup_args_from_py_parameter_fail (state,
-                                                                      cache);
                     return FALSE;
                 }
             } else {
@@ -566,8 +556,6 @@ _invoke_marshal_in_args (PyGIInvokeState *state,
                               "Argument %zd does not allow None as a value",
                               i);
 
-                pygi_marshal_cleanup_args_from_py_parameter_fail (state,
-                                                                  cache);
                 return FALSE;
             }
             success = arg_cache->from_py_marshaller (
@@ -575,8 +563,6 @@ _invoke_marshal_in_args (PyGIInvokeState *state,
             state->args[i].from_py_arg_cleanup_data = cleanup_data;
 
             if (!success) {
-                pygi_marshal_cleanup_args_from_py_parameter_fail (state,
-                                                                  cache);
                 return FALSE;
             }
         }
@@ -686,7 +672,6 @@ pygi_invoke_c_callable (PyGIFunctionCache *function_cache,
 {
     PyGICallableCache *cache = (PyGICallableCache *)function_cache;
     GIFFIReturnValue ffi_return_value = PYGI_ARG_INIT;
-    gboolean success = TRUE;
     PyObject *ret = NULL;
 
     if (Py_EnterRecursiveCall (" while calling a GICallable")) return NULL;
@@ -697,7 +682,7 @@ pygi_invoke_c_callable (PyGIFunctionCache *function_cache,
         goto err;
 
     if (!_invoke_marshal_in_args (state, function_cache)) {
-        success = FALSE;
+        pygi_marshal_cleanup_args_from_py (state, cache, /*success=*/FALSE);
         goto err;
     }
     Py_BEGIN_ALLOW_THREADS;
@@ -716,7 +701,7 @@ pygi_invoke_c_callable (PyGIFunctionCache *function_cache,
         if (pygi_error_check (&state->error)) {
             /* even though we errored out, the call itself was successful,
                so we assume the call processed all of the parameters */
-            pygi_marshal_cleanup_args_from_py (state, cache, success);
+            pygi_marshal_cleanup_args_from_py (state, cache, /*success=*/TRUE);
             goto err;
         }
     }
@@ -728,9 +713,8 @@ pygi_invoke_c_callable (PyGIFunctionCache *function_cache,
     }
 
     ret = _invoke_marshal_out_args (state, function_cache);
-    success |= ret != NULL;
-    pygi_marshal_cleanup_args_from_py (state, cache, success);
-    pygi_marshal_cleanup_args_to_py (state, cache, success);
+    pygi_marshal_cleanup_args_from_py (state, cache, /*success=*/TRUE);
+    pygi_marshal_cleanup_args_to_py (state, cache, /*success=*/ret != NULL);
 
 err:
     _invoke_state_clear (state, function_cache);
