@@ -169,35 +169,3 @@ pygi_marshal_cleanup_args_to_py (PyGIInvokeState *state,
 
     if (have_error) PyErr_Restore (error_type, error_value, error_traceback);
 }
-
-void
-pygi_marshal_cleanup_args_from_py_parameter_fail (PyGIInvokeState *state,
-                                                  PyGICallableCache *cache)
-{
-    PyObject *error_type, *error_value, *error_traceback;
-
-    g_assert (PyErr_Occurred ());
-
-    PyErr_Fetch (&error_type, &error_value, &error_traceback);
-
-    for (guint i = 0; i < _pygi_callable_cache_args_len (cache); i++) {
-        PyGIArgCache *arg_cache = _pygi_callable_cache_get_arg (cache, i);
-        PyGIMarshalCleanupData *cleanup_data =
-            &state->args[i].from_py_arg_cleanup_data;
-
-        if (arg_cache->py_arg_index < 0) {
-            continue;
-        }
-
-        if (arg_cache->direction == PYGI_DIRECTION_FROM_PYTHON) {
-            pygi_marshal_cleanup_data_destroy_failed (cleanup_data);
-        } else if (pygi_arg_cache_is_caller_allocates (arg_cache)) {
-            _cleanup_caller_allocates (state, arg_cache, cleanup_data->data,
-                                       FALSE);
-        }
-        state->args[i].from_py_arg_cleanup_data =
-            (PyGIMarshalCleanupData){ NULL, NULL, NULL };
-    }
-
-    PyErr_Restore (error_type, error_value, error_traceback);
-}
