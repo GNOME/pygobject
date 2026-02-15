@@ -130,12 +130,14 @@ unhandled_type:
 static void
 free_ptr_array_keep_segment (GPtrArray *array)
 {
+    g_ptr_array_set_free_func (array, NULL);
     g_ptr_array_free (array, FALSE);
 }
 
 static void
 free_array_keep_segment (GArray *array)
 {
+    g_array_set_clear_func (array, NULL);
     g_array_free (array, FALSE);
 }
 
@@ -156,6 +158,12 @@ _marshal_length_arg_from_py (PyGIInvokeState *state,
         }
     }
     return TRUE;
+}
+
+static void
+array_clear_utf8 (gpointer *utf8)
+{
+    g_clear_pointer (utf8, g_free);
 }
 
 static gboolean
@@ -368,7 +376,22 @@ _pygi_marshal_from_py_array (PyGIInvokeState *state,
         }
         case GI_TRANSFER_CONTAINER:
             /* Only the elements need to be deleted. */
+            pygi_marshal_cleanup_data_init_full (
+                &array_cleanup_data, array_, NULL,
+                is_ptr_array ? (GDestroyNotify)free_ptr_array_keep_segment
+                             : (GDestroyNotify)free_array_keep_segment);
+            break;
         case GI_TRANSFER_EVERYTHING:
+            if (sequence_cache->item_cache->type_tag == GI_TYPE_TAG_UTF8
+                || sequence_cache->item_cache->type_tag
+                       == GI_TYPE_TAG_FILENAME) {
+                if (is_ptr_array)
+                    g_ptr_array_set_free_func ((GPtrArray *)array_, g_free);
+                else
+                    g_array_set_clear_func (array_,
+                                            (GDestroyNotify)array_clear_utf8);
+            }
+
             /* No cleanup, everything is given to the callee. */
             pygi_marshal_cleanup_data_init_full (
                 &array_cleanup_data, array_, NULL,
