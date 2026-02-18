@@ -128,17 +128,24 @@ unhandled_type:
 }
 
 static void
-free_ptr_array_keep_segment (GPtrArray *array)
-{
-    g_ptr_array_set_free_func (array, NULL);
-    g_ptr_array_free (array, FALSE);
-}
-
-static void
 free_array_keep_segment (GArray *array)
 {
     g_array_set_clear_func (array, NULL);
     g_array_free (array, FALSE);
+}
+
+static void
+free_ptr_array_no_clear (GPtrArray *array)
+{
+    g_ptr_array_set_free_func (array, NULL);
+    g_ptr_array_unref (array);
+}
+
+static void
+free_array_no_clear (GArray *array)
+{
+    g_array_set_clear_func (array, NULL);
+    g_array_unref (array);
 }
 
 static gboolean
@@ -357,29 +364,28 @@ _pygi_marshal_from_py_array (PyGIInvokeState *state,
             arg_cache->transfer == GI_TRANSFER_NOTHING
                 ? (GDestroyNotify)g_array_unref
                 : (GDestroyNotify)free_array_keep_segment,
-            (GDestroyNotify)free_array_keep_segment);
+            (GDestroyNotify)free_array_no_clear);
         g_array_append_val (item_cleanups, array_cleanup_data);
     } else {
         PyGIMarshalCleanupData array_cleanup_data = { 0 };
         arg->v_pointer = array_;
 
         switch (arg_cache->transfer) {
-        case GI_TRANSFER_NOTHING: {
+        case GI_TRANSFER_NOTHING:
             /* Free everything in cleanup. */
             pygi_marshal_cleanup_data_init_full (
                 &array_cleanup_data, array_,
                 is_ptr_array ? (GDestroyNotify)g_ptr_array_unref
                              : (GDestroyNotify)g_array_unref,
-                is_ptr_array ? (GDestroyNotify)free_ptr_array_keep_segment
-                             : (GDestroyNotify)free_array_keep_segment);
+                is_ptr_array ? (GDestroyNotify)free_ptr_array_no_clear
+                             : (GDestroyNotify)free_array_no_clear);
             break;
-        }
         case GI_TRANSFER_CONTAINER:
             /* Only the elements need to be deleted. */
             pygi_marshal_cleanup_data_init_full (
                 &array_cleanup_data, array_, NULL,
-                is_ptr_array ? (GDestroyNotify)free_ptr_array_keep_segment
-                             : (GDestroyNotify)free_array_keep_segment);
+                is_ptr_array ? (GDestroyNotify)free_ptr_array_no_clear
+                             : (GDestroyNotify)free_array_no_clear);
             break;
         case GI_TRANSFER_EVERYTHING:
             if (sequence_cache->item_cache->type_tag == GI_TYPE_TAG_UTF8
@@ -395,8 +401,8 @@ _pygi_marshal_from_py_array (PyGIInvokeState *state,
             /* No cleanup, everything is given to the callee. */
             pygi_marshal_cleanup_data_init_full (
                 &array_cleanup_data, array_, NULL,
-                is_ptr_array ? (GDestroyNotify)free_ptr_array_keep_segment
-                             : (GDestroyNotify)free_array_keep_segment);
+                is_ptr_array ? (GDestroyNotify)free_ptr_array_no_clear
+                             : (GDestroyNotify)free_array_no_clear);
             break;
         default:
             g_assert_not_reached ();
