@@ -126,10 +126,6 @@ PyObject *pygi_marshal_to_py_basic_type_cache_adapter (
 void pygi_arg_gvalue_from_py_cleanup (PyGIInvokeState *state,
                                       PyGIMarshalCleanupData cleanup_data);
 
-
-void pygi_marshal_cleanup_data_init (PyGIMarshalCleanupData *cleanup_data,
-                                     gpointer data, GDestroyNotify destroy);
-
 void pygi_marshal_cleanup_data_init_full (PyGIMarshalCleanupData *cleanup_data,
                                           gpointer data,
                                           GDestroyNotify destroy,
