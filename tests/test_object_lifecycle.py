@@ -367,12 +367,34 @@ def test_gobject_cycle_is_collected():
 
 def test_object_with_post_init():
     class PostInit(Regress.TestObj):
+        number = GObject.Property(
+            type=int, flags=GObject.ParamFlags.READWRITE | GObject.ParamFlags.CONSTRUCT
+        )
+
         def do_constructed(self):
             self.post_init_called = True
+            assert self.number == 42
 
-    obj = PostInit()
+    obj = PostInit(number=42)
 
     assert obj.post_init_called
+    assert obj.number == 42
+
+
+def test_object_with_post_init_created_by_new():
+    class PostInit(Regress.TestObj):
+        number = GObject.Property(
+            type=int, flags=GObject.ParamFlags.READWRITE | GObject.ParamFlags.CONSTRUCT
+        )
+
+        def do_constructed(self):
+            self.post_init_called = True
+            assert self.number == 42
+
+    obj = GObject.new(PostInit, number=42)
+
+    assert obj.post_init_called
+    assert obj.number == 42
 
 
 def test_object_with_post_init_and_interface():
@@ -405,3 +427,5 @@ def test_object_with_post_init_raises_exception():
 
     with pytest.raises(ValueError, match="Catch me"):
         PostInit()
+    with pytest.raises(ValueError, match="Catch me"):
+        GObject.new(PostInit)
