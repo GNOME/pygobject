@@ -626,20 +626,6 @@ pygobject_new (GObject *obj)
                                /*steal=*/FALSE, NULL);
 }
 
-static GPrivate pygobject_construction_wrapper;
-
-static inline void
-pygobject_init_wrapper_set (PyObject *wrapper)
-{
-    g_private_set (&pygobject_construction_wrapper, wrapper);
-}
-
-static inline PyObject *
-pygobject_init_wrapper_get (void)
-{
-    return (PyObject *)g_private_get (&pygobject_construction_wrapper);
-}
-
 static int
 pygobject_constructv (PyGObject *self, guint n_properties, const char *names[],
                       const GValue values[])
@@ -706,78 +692,6 @@ pygobject_watch_closure (PyObject *self, GClosure *closure)
     data->closures = g_slist_prepend (data->closures, closure);
     g_closure_add_invalidate_notifier (closure, data,
                                        pygobject_unwatch_closure);
-}
-
-void
-pygobject__g_instance_init (GTypeInstance *instance, gpointer g_class)
-{
-    GObject *object;
-    PyObject *wrapper, *result;
-    PyGILState_STATE state;
-    gboolean needs_init = FALSE;
-
-    g_return_if_fail (G_IS_OBJECT (instance));
-
-    object = (GObject *)instance;
-
-    wrapper = g_object_get_qdata (object, pygobject_wrapper_key);
-    if (wrapper == NULL) {
-        wrapper = pygobject_init_wrapper_get ();
-        if (wrapper && ((PyGObject *)wrapper)->obj == NULL) {
-            ((PyGObject *)wrapper)->obj = object;
-            pygobject_register_wrapper (wrapper);
-        }
-    }
-    pygobject_init_wrapper_set (NULL);
-
-    state = PyGILState_Ensure ();
-
-    if (wrapper == NULL) {
-        /* this looks like a python object created through
-         * g_object_new -> we have no python wrapper, so create it
-         * now */
-
-        if (g_object_is_floating (object)) {
-            g_object_ref (object);
-            wrapper = pygobject_new_full (object,
-                                          /*steal=*/TRUE, g_class);
-            g_object_force_floating (object);
-        } else {
-            wrapper = pygobject_new_full (object,
-                                          /*steal=*/FALSE, g_class);
-        }
-
-        needs_init = TRUE;
-    }
-
-    /* XXX: used for Gtk.Template */
-    gboolean is_final_subclass = G_OBJECT_TYPE (object)
-                                 == G_OBJECT_CLASS_TYPE (g_class);
-    if (is_final_subclass
-        && PyObject_HasAttrString ((PyObject *)Py_TYPE (wrapper),
-                                   "__dontuse_ginstance_init__")) {
-        result =
-            PyObject_CallMethod (wrapper, "__dontuse_ginstance_init__", NULL);
-        if (result == NULL)
-            PyErr_Print ();
-        else
-            Py_DECREF (result);
-    }
-
-    if (needs_init) {
-        result = PyObject_CallMethod (wrapper, "__init__", NULL);
-        if (result == NULL)
-            PyErr_Print ();
-        else
-            Py_DECREF (result);
-
-#ifndef PYPY_VERSION
-        /* TODO: why does this decref cause PyPy to crash? */
-        Py_DECREF (wrapper);
-#endif
-    }
-
-    PyGILState_Release (state);
 }
 
 /* -------------- PyGObject behaviour ----------------- */
