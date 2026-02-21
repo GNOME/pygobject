@@ -702,6 +702,13 @@ pyg_object_constructed (GObject *object)
         Py_XDECREF (retval);
     }
 
+#ifdef PYPY_VERSION
+    /* Force a new wrapper next time the wrapper is retrieved.
+     * Somehow if we keep this wrapper around we may end up refering to
+     * a semi-destroyed wrapper object. */
+    g_object_set_qdata_full (object, pygobject_wrapper_key, NULL, NULL);
+#endif
+
     /* Release the reference obtained in pygobject__g_instance_init(). */
     Py_DECREF (wrapper);
 
