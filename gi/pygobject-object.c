@@ -632,30 +632,6 @@ pygobject_new (GObject *obj)
                                /*steal=*/FALSE, NULL);
 }
 
-static int
-pygobject_constructv (PyGObject *self, guint n_properties, const char *names[],
-                      const GValue values[])
-{
-    GObject *obj;
-    GType type;
-
-    g_assert (self->obj == NULL);
-    pygobject_init_wrapper_set ((PyObject *)self);
-
-    type = pyg_type_from_object ((PyObject *)self);
-    obj = g_object_new_with_properties (type, n_properties, names, values);
-
-    if (G_IS_INITIALLY_UNOWNED (obj)) {
-        g_object_ref_sink (obj);
-    }
-
-    pygobject_init_wrapper_set (NULL);
-    self->obj = obj;
-    pygobject_register_wrapper ((PyObject *)self);
-
-    return 0;
-}
-
 static void
 pygobject_unwatch_closure (gpointer data, GClosure *closure)
 {
@@ -906,6 +882,7 @@ pygobject_init (PyGObject *self, PyObject *args, PyObject *kwargs)
     const PyGIArgumentFromPyCleanupData *cleanup_data = NULL;
     const char **names = NULL;
     GObjectClass *class;
+    GObject *obj;
 
     /* Only do GObject creation and property setting if the GObject hasn't
      * already been created. The case where self->obj already exists can occur
@@ -941,8 +918,17 @@ pygobject_init (PyGObject *self, PyObject *args, PyObject *kwargs)
             class, kwargs, &n_properties, &names, &values, &cleanup_data))
         goto cleanup;
 
-    if (pygobject_constructv (self, n_properties, names, values))
-        PyErr_SetString (PyExc_RuntimeError, "could not create object");
+    pygobject_init_wrapper_set ((PyObject *)self);
+    obj = g_object_new_with_properties (object_type, n_properties, names,
+                                        values);
+    pygobject_init_wrapper_set (NULL);
+
+    if (G_IS_INITIALLY_UNOWNED (obj)) {
+        g_object_ref_sink (obj);
+    }
+
+    self->obj = obj;
+    pygobject_register_wrapper ((PyObject *)self);
 
 cleanup:
     for (i = 0; i < n_properties; i++) {
