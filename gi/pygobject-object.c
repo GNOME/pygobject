@@ -734,8 +734,8 @@ pygobject__g_instance_init (GTypeInstance *instance, gpointer g_class)
 
     if (wrapper == NULL) {
         /* this looks like a python object created through
-           * g_object_new -> we have no python wrapper, so create it
-           * now */
+         * g_object_new -> we have no python wrapper, so create it
+         * now */
 
         if (g_object_is_floating (object)) {
             g_object_ref (object);
@@ -1036,14 +1036,7 @@ cleanup:
 
     g_type_class_unref (class);
 
-    /* Call `do_constructed`, to simulate GObject's `constructed` vfunc. */
-    if (!PyErr_Occurred ()
-        && PyObject_HasAttrString ((PyObject *)self, "do_constructed")) {
-        PyObject *result =
-            PyObject_CallMethod ((PyObject *)self, "do_constructed", NULL);
-        if (result == NULL) return -1;
-        Py_DECREF (result);
-    }
+    if (PyErr_Occurred ()) return -1;
 
     return (self->obj) ? 0 : -1;
 }

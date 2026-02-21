@@ -620,6 +620,36 @@ pyg_object_set_property (GObject *object, guint property_id,
 }
 
 static void
+pyg_object_constructed (GObject *object)
+{
+    GObjectClass *klass = G_OBJECT_GET_CLASS (object);
+    PyObject *object_wrapper, *retval;
+    PyGILState_STATE state;
+
+    /* Find the first non-pygobject constructed method. */
+    while (klass && klass->constructed == pyg_object_constructed) {
+        klass = g_type_class_peek_parent (klass);
+    }
+
+    if (klass && klass->constructed) {
+        klass->constructed (object);
+    }
+
+    state = PyGILState_Ensure ();
+
+    object_wrapper =
+        (PyObject *)g_object_get_qdata (object, pygobject_wrapper_key);
+
+    if (object_wrapper != NULL
+        && PyObject_HasAttrString (object_wrapper, "do_constructed")) {
+        retval = PyObject_CallMethod (object_wrapper, "do_constructed", NULL);
+        Py_XDECREF (retval);
+    }
+
+    PyGILState_Release (state);
+}
+
+static void
 pyg_object_dispose (GObject *object)
 {
     GObjectClass *klass = G_OBJECT_GET_CLASS (object);
@@ -669,6 +699,7 @@ pygobject__g_class_init (GObjectClass *class, PyObject *py_class)
 
     class->set_property = pyg_object_set_property;
     class->get_property = pyg_object_get_property;
+    class->constructed = pyg_object_constructed;
     class->dispose = pyg_object_dispose;
 
     /* install signals */
