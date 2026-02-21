@@ -264,11 +264,15 @@ pygobject_register_class (PyObject *dict, const gchar *type_name, GType gtype,
 void
 pygobject_register_wrapper (PyObject *self)
 {
+    PyObject *error_type, *error_value, *error_traceback;
+    gboolean have_error = !!PyErr_Occurred ();
     PyGObject *gself;
     PyGObjectData *inst_data;
 
     g_return_if_fail (self != NULL);
     g_return_if_fail (PyObject_TypeCheck (self, &PyGObject_Type));
+
+    if (have_error) PyErr_Fetch (&error_type, &error_value, &error_traceback);
 
     gself = (PyGObject *)self;
 
@@ -298,6 +302,8 @@ pygobject_register_wrapper (PyObject *self)
     g_object_set_qdata (
         gself->obj, pygobject_has_dispose_method,
         GINT_TO_POINTER (PyObject_HasAttrString (self, "do_dispose")));
+
+    if (have_error) PyErr_Restore (error_type, error_value, error_traceback);
 }
 
 static PyObject *
