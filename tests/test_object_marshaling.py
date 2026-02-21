@@ -115,7 +115,7 @@ class TestVFuncsWithObjectArg(unittest.TestCase):
 
         del vfuncs
         gc.collect()
-        self.assertTrue(vfuncs_ref() is None)
+        self.assertIsNone(vfuncs_ref())
 
     def test_vfunc_return_object_transfer_none(self):
         # This tests a problem case where the vfunc returns a GObject owned solely by Python

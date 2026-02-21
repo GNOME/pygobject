@@ -679,7 +679,7 @@ static void
 pyg_object_constructed (GObject *object)
 {
     GObjectClass *klass = G_OBJECT_GET_CLASS (object);
-    PyObject *object_wrapper, *retval;
+    PyObject *wrapper, *retval;
     PyGILState_STATE state;
 
     /* Find the first non-pygobject constructed method. */
@@ -693,14 +693,17 @@ pyg_object_constructed (GObject *object)
 
     state = PyGILState_Ensure ();
 
-    object_wrapper =
-        (PyObject *)g_object_get_qdata (object, pygobject_wrapper_key);
+    wrapper = (PyObject *)g_object_get_qdata (object, pygobject_wrapper_key);
+    g_assert (wrapper != NULL);
 
-    if (object_wrapper != NULL
-        && PyObject_HasAttrString (object_wrapper, "do_constructed")) {
-        retval = PyObject_CallMethod (object_wrapper, "do_constructed", NULL);
+    if (!PyErr_Occurred ()
+        && PyObject_HasAttrString (wrapper, "do_constructed")) {
+        retval = PyObject_CallMethod (wrapper, "do_constructed", NULL);
         Py_XDECREF (retval);
     }
+
+    /* Release the reference obtained in pygobject__g_instance_init(). */
+    Py_DECREF (wrapper);
 
     PyGILState_Release (state);
 }
@@ -712,12 +715,15 @@ pygobject__g_instance_init (GTypeInstance *instance, gpointer g_class)
     PyObject *wrapper, *result;
     PyGILState_STATE state;
     gboolean needs_init = FALSE;
+    gboolean needs_extra_ref;
 
     g_return_if_fail (G_IS_OBJECT (instance));
 
     object = (GObject *)instance;
 
     wrapper = g_object_get_qdata (object, pygobject_wrapper_key);
+    needs_extra_ref = wrapper == NULL || ((PyGObject *)wrapper)->obj == NULL;
+
     if (wrapper == NULL) {
         wrapper = pygobject_init_wrapper_get ();
         if (wrapper && ((PyGObject *)wrapper)->obj == NULL) {
@@ -730,9 +736,8 @@ pygobject__g_instance_init (GTypeInstance *instance, gpointer g_class)
     state = PyGILState_Ensure ();
 
     if (wrapper == NULL) {
-        /* this looks like a python object created through
-         * g_object_new -> we have no python wrapper, so create it
-         * now */
+        /* This looks like a python object created through g_object_new().
+         * we have no python wrapper, so create it now. */
 
         if (g_object_is_floating (object)) {
             g_object_ref (object);
@@ -768,10 +773,10 @@ pygobject__g_instance_init (GTypeInstance *instance, gpointer g_class)
         else
             Py_DECREF (result);
 
-#ifndef PYPY_VERSION
-        /* TODO: why does this decref cause PyPy to crash? */
-        Py_DECREF (wrapper);
-#endif
+        /* The wrapper's reference will be released in pyg_object_constructed(). */
+    } else if (needs_extra_ref) {
+        /* Take an extra reference, will be released in pyg_object_constructed(). */
+        Py_INCREF (wrapper);
     }
 
     PyGILState_Release (state);
