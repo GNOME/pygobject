@@ -2194,18 +2194,25 @@ pyg_object_new (PyGObject *self, PyObject *args, PyObject *kwargs)
 
     g_type_class_unref (class);
 
+    if (PyErr_Occurred ()) {
+        g_object_unref (obj);
+        return NULL;
+    }
+
     if (obj) {
         if (G_IS_INITIALLY_UNOWNED (obj)) {
             g_object_ref_sink (obj);
         }
+
         self = g_object_get_qdata (obj, pygobject_wrapper_key);
         if (self == NULL) {
             self = (PyGObject *)pygobject_new ((GObject *)obj);
             g_object_unref (obj);
         }
     } else {
-        PyErr_SetString (PyExc_RuntimeError, "could not create object");
-        self = NULL;
+        if (!PyErr_Occurred ())
+            PyErr_SetString (PyExc_RuntimeError, "could not create object");
+        return NULL;
     }
 
     return (PyObject *)self;
