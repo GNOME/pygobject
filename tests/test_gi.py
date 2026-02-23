@@ -1168,6 +1168,37 @@ class TestArray(unittest.TestCase):
             ],
         )
 
+    def test_array_fixed_caller_allocated_out(self):
+        self.assertEqual(
+            GIMarshallingTests.array_fixed_caller_allocated_out(),
+            [
+                -1,
+                0,
+                1,
+                2,
+            ],
+        )
+
+    def test_array_fixed_caller_allocated_struct_out(self):
+        array = GIMarshallingTests.array_fixed_caller_allocated_struct_out()
+        self.assertEqual(len(array), 4)
+
+        self.assertIsInstance(array[0], GIMarshallingTests.SimpleStruct)
+        self.assertEqual(array[0].long_, -2)
+        self.assertEqual(array[0].int8, -1)
+
+        self.assertIsInstance(array[1], GIMarshallingTests.SimpleStruct)
+        self.assertEqual(array[1].long_, 1)
+        self.assertEqual(array[1].int8, 2)
+
+        self.assertIsInstance(array[2], GIMarshallingTests.SimpleStruct)
+        self.assertEqual(array[2].long_, 3)
+        self.assertEqual(array[2].int8, 4)
+
+        self.assertIsInstance(array[3], GIMarshallingTests.SimpleStruct)
+        self.assertEqual(array[3].long_, 5)
+        self.assertEqual(array[3].int8, 6)
+
 
 class TestLengthArray(unittest.TestCase):
     def test_length_array_utf8_none_inout(self):

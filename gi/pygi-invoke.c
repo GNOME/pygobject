@@ -346,9 +346,16 @@ _caller_alloc (PyGIArgCache *arg_cache, GIArgument *arg)
         }
     } else if (arg_cache->type_tag == GI_TYPE_TAG_ARRAY) {
         PyGIArgGArray *array_cache = (PyGIArgGArray *)arg_cache;
+        size_t fixed_size;
 
         switch (gi_type_info_get_array_type (arg_cache->type_info)) {
         case GI_ARRAY_TYPE_C:
+            if (gi_type_info_get_array_fixed_size (arg_cache->type_info,
+                                                   &fixed_size)) {
+                arg->v_pointer =
+                    g_malloc0 (array_cache->item_size * fixed_size);
+                break;
+            }
             return FALSE;
         case GI_ARRAY_TYPE_ARRAY:
             arg->v_pointer =
