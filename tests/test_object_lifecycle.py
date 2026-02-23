@@ -397,6 +397,28 @@ def test_object_with_post_init_created_by_new():
     assert obj.number == 42
 
 
+class InitializationOrder(Regress.TestObj):
+    def __init__(self):
+        self.order = ["__init__1"]
+        super().__init__()
+        self.order.append("__init__2")
+
+    def do_constructed(self):
+        self.order.append("do_constructed")
+
+
+def test_object_constructed_after_init():
+    obj = InitializationOrder()
+
+    assert obj.order == ["__init__1", "do_constructed", "__init__2"]
+
+
+def test_object_constructed_after_init_by_new():
+    obj = GObject.new(InitializationOrder)
+
+    assert obj.order == ["__init__1", "__init__2", "do_constructed"]
+
+
 def test_object_with_post_init_and_interface():
     class PostInit(Regress.TestObj, Regress.TestInterface):
         number = GObject.Property(type=int)
