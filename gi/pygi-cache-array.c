@@ -499,7 +499,12 @@ _wrap_c_array (PyGIInvokeState *state, PyGIArgGArray *array_cache,
     } else if (array_cache->has_len_arg) {
         GIArgument len_arg = state->args[array_cache->len_arg_index].arg_value;
 
-        len = len_arg.v_long;
+        if (array_cache->len_arg_cache)
+            pygi_argument_to_gsize (
+                len_arg, array_cache->len_arg_cache->type_tag, &len);
+        else
+            /* short circuit from pygi_argument_to_py_with_array_length */
+            len = len_arg.v_size;
     }
 
     return g_array_new_take (data, (guint)len, FALSE,
@@ -745,10 +750,10 @@ pygi_arg_garray_len_arg_setup (PyGIArgGArray *seq_cache, GITypeInfo *type_info,
     if (seq_cache->has_len_arg) {
         PyGIArgCache *child_cache = NULL;
 
-        child_cache = _pygi_callable_cache_get_arg (callable_cache,
-                                                    seq_cache->len_arg_index);
+        child_cache = seq_cache->len_arg_cache = _pygi_callable_cache_get_arg (
+            callable_cache, seq_cache->len_arg_index);
         if (child_cache == NULL) {
-            child_cache = pygi_arg_cache_alloc ();
+            child_cache = seq_cache->len_arg_cache = pygi_arg_cache_alloc ();
             _pygi_callable_cache_set_arg (
                 callable_cache, seq_cache->len_arg_index, child_cache);
         } else {
