@@ -115,7 +115,12 @@ def init_test_environ():
     # before importing Gio. Support a separate build tree, so look in build dir
     # first.
     os.environ["GSETTINGS_BACKEND"] = "memory"
-    os.environ["GSETTINGS_SCHEMA_DIR"] = tests_builddir
+    os.environ["GSETTINGS_SCHEMA_DIR"] = os.pathsep.join(
+        [
+            tests_builddir,
+            os.environ.get("GSETTINGS_SCHEMA_DIR", ""),
+        ]
+    )
     os.environ["G_FILENAME_ENCODING"] = "UTF-8"
 
     # Avoid accessibility dbus warnings

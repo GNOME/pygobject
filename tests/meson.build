@@ -37,9 +37,13 @@ if pycairo_dep.found() and pycairo_dep.type_name() == 'internal'
   test_deps += [gicairoext]
 endif
 envdata.append('PYTHONPATH', python_paths)
+envdata.prepend('PYTHONPATH', meson.current_build_dir())
 
 gi_tests_builddir = meson.project_build_root() / 'subprojects' / 'gobject-introspection-tests'
+envdata.prepend('LD_LIBRARY_PATH', gi_tests_builddir)
 envdata.prepend('GI_TYPELIB_PATH', gi_tests_builddir)
+envdata.prepend('GSETTINGS_SCHEMA_DIR', meson.current_build_dir())
+envdata.set('GSETTINGS_BACKEND', 'memory')
 
 test('pygobject-test-suite',
   python,
