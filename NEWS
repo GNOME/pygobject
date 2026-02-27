@@ -1,3 +1,11 @@
+3.56.0 - 2026-02-27
+-------------------
+
+* Handle caller-allocated fixed-size C-Arrays :mr:`523`
+* Fix reading array length on big-endian :mr:`521`
+* Invoke `do_constructed` for object constructed by GObject directly :mr:`519` :mr:`520`
+* events: fix main context iteration without thread default :mr:`518`
+
 3.55.3 - 2026-02-04
 -------------------
 
