@@ -30,13 +30,4 @@ This way you don't need to manually load stylesheets, and it will load the
 matching stylesheets depending on the system appearance settings exposed by
 :class:`Adw.StyleManager`.
 
-
-* ``style.css`` contains the base styles.
-
-* ``style-dark.css`` contains styles only used when :attr:`Adw.StyleManager.props.dark`
-  is ``True``.
-
-* ``style-hc.css`` contains styles used when :attr:`Adw.StyleManager.props.high_contrast` is ``True``.
-
-* ``style-hc-dark.css`` contains styles used when :attr:`Adw.StyleManager.props.high_contrast`
-  and :attr:`Adw.StyleManager.props.dark` are both ``True``.
+Have a look at the `libadwaita styling documentation <https://gnome.pages.gitlab.gnome.org/libadwaita/doc/main/styles-and-appearance.html>`__.
