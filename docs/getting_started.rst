@@ -205,6 +205,14 @@ For more details on how to use a virtualenv with PyGObject, see the
 .. toctree::
     :hidden:
     :maxdepth: 1
+    :caption: What's new
+
+    news/pygobject-3-56
+
+.. toctree::
+    :hidden:
+    :maxdepth: 1
+    :caption: Project Information
 
     changelog
     bugs_repo
