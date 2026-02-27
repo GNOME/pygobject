@@ -726,6 +726,14 @@ class TestUtf8(unittest.TestCase):
     def test_utf8_full_inout(self):
         self.assertEqual("", GIMarshallingTests.utf8_full_inout(CONSTANT_UTF8))
 
+    def test_zero_terminated_array_utf8_full_in(self):
+        GIMarshallingTests.zero_terminated_array_utf8_full_in(["🅰", "β", "c", "d"])
+
+        with self.assertRaises(TypeError):
+            GIMarshallingTests.zero_terminated_array_utf8_full_in(
+                ["🅰", "β", "c", "d"], 1
+            )
+
 
 class TestFilename(unittest.TestCase):
     def setUp(self):
@@ -1036,6 +1044,16 @@ class TestArray(unittest.TestCase):
 
         GIMarshallingTests.array_struct_in([struct1, struct2, struct3])
 
+    def test_array_boxed_struct_full_in(self):
+        struct1 = GIMarshallingTests.BoxedStruct()
+        struct1.long_ = 1
+        struct2 = GIMarshallingTests.BoxedStruct()
+        struct2.long_ = 2
+        struct3 = GIMarshallingTests.BoxedStruct()
+        struct3.long_ = 3
+
+        GIMarshallingTests.array_struct_full_in([struct1, struct2, struct3])
+
     def test_array_boxed_struct_in_item_marshal_failure(self):
         struct1 = GIMarshallingTests.BoxedStruct()
         struct1.long_ = 1
@@ -1342,6 +1360,12 @@ class TestGPtrArray(unittest.TestCase):
 
     def test_gptrarray_utf8_none_in(self):
         GIMarshallingTests.gptrarray_utf8_none_in(Sequence(["0", "1", "2"]))
+
+        self.assertRaises(
+            TypeError,
+            GIMarshallingTests.gptrarray_utf8_none_in,
+            Sequence(["0", "1", 2]),
+        )
 
     def test_gptrarray_utf8_none_out(self):
         self.assertEqual(["0", "1", "2"], GIMarshallingTests.gptrarray_utf8_none_out())
