@@ -62,11 +62,10 @@ libraries.
 #) Run ``C:\msys64\ucrt64.exe`` - a terminal window should pop up
 #) Execute ``pacman -Suy``
 #) Execute ``pacman -S mingw-w64-ucrt-x86_64-gtk4 mingw-w64-ucrt-x86_64-python mingw-w64-ucrt-x86_64-python-gobject``
-   
+
    .. note::
       While some systems may use ``python3`` in the package name, current MSYS2 UCRT64
       environments typically use ``python``. If one fails, try the other (incl. step 8).
-
 #) To test that GTK is working you can run ``gtk4-demo``
 #) Copy the ``hello.py`` script you created to ``C:\msys64\home\<username>``
 #) In the mingw32 terminal execute ``python hello.py`` - a window should appear.
