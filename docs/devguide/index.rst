@@ -10,6 +10,7 @@ Development Guide
     dev_environ
     style_guide
     override_guidelines
+    internal_structure
     gbytes_marshaller_tutorial
     initializer_deprecations
     introspection_porting
