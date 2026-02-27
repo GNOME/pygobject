@@ -28,4 +28,4 @@ repo is hosted on the `GNOME Gitlab instance <https://gitlab.gnome.org/>`__:
 
 Release tarballs of all releases can be found on the GNOME server:
 
-https://ftp.gnome.org/pub/GNOME/sources/pygobject
+https://download.gnome.org/sources/pygobject/
