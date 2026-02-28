@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+
+{% block body %}
+  {% if meta is defined and meta and (meta.get("date") or meta.get("author")) %}
+    {% set page_date = meta.get("date") %}
+    {% set page_author = meta.get("author") %}
+    {% set byline %}
+<p class="page-docinfo-meta">
+  {% if page_date %}{{ page_date }}{% endif %}
+  {% if page_author %}{% if page_date %} · {% endif %}{{ page_author }}{% endif %}
+</p>
+    {% endset %}
+    {{ body | replace("</h1>", "</h1>" ~ byline, 1) }}
+  {% else %}
+    {{ body }}
+  {% endif %}
+{% endblock %}

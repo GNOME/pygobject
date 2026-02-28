@@ -1,3 +1,6 @@
+:date: Feb 27, 2026
+:author: Arjan Molenaar
+
 PyGObject 3.56.0
 ================
 
