@@ -1,5 +1,7 @@
-import tempfile
+import gc
 import os
+import tempfile
+import typing
 import weakref
 
 import pytest
@@ -782,3 +784,44 @@ def test_finalization_of_custom_child_objects():
     assert "CustomBox -> GObject finalized" in finalized
     assert "CustomLabel -> PyObject finalized" in finalized
     assert "CustomLabel -> GObject finalized" in finalized
+
+
+def test_signal_handler_with_object_does_not_leak_memory():
+    """Regression test for a memory leak when using signal handlers in GTK templates.
+    Note that this example is intentionally minimal, i.e. the handler doesn't even
+    need to exist on the class. The only requirement is that the `object` is specified.
+    """
+    type_name = new_gtype_name()
+    xml = f"""\
+    <?xml version="1.0" encoding="UTF-8"?>
+    <interface>
+    <requires lib="gtk" version="4.0" />
+    <template class="{type_name}" parent="GtkWidget">
+        <signal name="show" handler="on_show" object="{type_name}" swapped="no" />
+    </template>
+    </interface>
+    """
+
+    @Gtk.Template(string=xml)
+    class MyWidget(Gtk.Widget):
+        __gtype_name__ = type_name
+
+    weak = _create_weak(MyWidget)
+
+    # Mostly arbitrarily chosen, pypy needs two calls to gc.collect()
+    # while cpython 3.14 currently only needs one call.
+    GC_COLLECT_MAX_ATTEMPTS = 5
+    for _ in range(GC_COLLECT_MAX_ATTEMPTS):
+        gc.collect()
+        if weak() is None:
+            break
+
+    assert weak() is None
+
+
+T = typing.TypeVar("T", bound=GObject.Object)
+
+
+def _create_weak(Class: type[T]) -> T:
+    instance = Class()
+    return instance.weak_ref()
