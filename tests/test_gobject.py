@@ -904,6 +904,22 @@ class TestDispose(unittest.TestCase):
 
         assert dispose_invoked
 
+    @unittest.skipIf(platform.python_implementation() == "PyPy", "CPython only")
+    def test_dispose_on_floating_object(self):
+        dispose_invoked = False
+
+        class TestObject(GObject.Object):
+            def do_dispose(self):
+                nonlocal dispose_invoked
+                dispose_invoked = True
+                super().do_dispose()
+
+        with warnings.catch_warnings(record=True):
+            warnings.simplefilter("always")
+            TestObject()._force_floating()
+
+        assert dispose_invoked
+
 
 def test_list_properties():
     def find_param(props, name):

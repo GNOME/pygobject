@@ -650,7 +650,15 @@ pyg_object_dispose (GObject *object)
         object_wrapper = g_object_get_qdata (object, pygobject_wrapper_key);
         Py_XINCREF (object_wrapper);
 #else
-        object_wrapper = pygobject_new_full (object, FALSE, klass);
+        if (g_object_is_floating (object)) {
+            g_object_ref (object);
+            object_wrapper = pygobject_new_full (object,
+                                                 /*steal=*/TRUE, klass);
+            g_object_force_floating (object);
+        } else {
+            object_wrapper = pygobject_new_full (object,
+                                                 /*steal=*/FALSE, klass);
+        }
 #endif
 
         if (object_wrapper != NULL
