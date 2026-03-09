@@ -44,14 +44,12 @@ while still showing feedback on the progress in a window.
             window.set_child(self.progress)
             window.present()
 
-            thread = threading.Thread(target=self.example_target)
-            thread.daemon = True
+            thread = threading.Thread(target=self.example_target, daemon=True)
             thread.start()
 
         def update_progress(self, i):
             self.progress.pulse()
             self.progress.set_text(str(i))
-            return False
 
         def example_target(self):
             for i in range(50):
