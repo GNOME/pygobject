@@ -15,36 +15,35 @@ class EntryWindow(Gtk.ApplicationWindow):
         header = Gtk.HeaderBar()
         self.set_titlebar(header)
 
-        vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
-        vbox.props.margin_start = 24
-        vbox.props.margin_end = 24
-        vbox.props.margin_top = 24
-        vbox.props.margin_bottom = 24
+        vbox = Gtk.Box(
+            orientation=Gtk.Orientation.VERTICAL,
+            spacing=6,
+            margin_start=24,
+            margin_end=24,
+            margin_top=24,
+            margin_bottom=24,
+        )
         self.set_child(vbox)
 
         # Gtk.SearchEntry
-        search = Gtk.SearchEntry()
-        search.props.placeholder_text = "Search Entry"
+        search = Gtk.SearchEntry(placeholder_text="Search Entry")
         search.set_key_capture_widget(self)
         header.set_title_widget(search)
         self.set_focus(search)
 
         # Gtk.Entry
-        self.entry = Gtk.Entry()
-        self.entry.set_text("Hello World")
+        self.entry = Gtk.Entry(text="Hello World")
         vbox.append(self.entry)
 
         hbox = Gtk.Box(spacing=6)
         vbox.append(hbox)
 
-        self.check_editable = Gtk.CheckButton(label="Editable")
+        self.check_editable = Gtk.CheckButton(label="Editable", active=True)
         self.check_editable.connect("toggled", self.on_editable_toggled)
-        self.check_editable.props.active = True
         hbox.append(self.check_editable)
 
-        self.check_visible = Gtk.CheckButton(label="Visible")
+        self.check_visible = Gtk.CheckButton(label="Visible", active=True)
         self.check_visible.connect("toggled", self.on_visible_toggled)
-        self.check_visible.props.active = True
         hbox.append(self.check_visible)
 
         self.pulse = Gtk.CheckButton(label="Pulse")
@@ -56,10 +55,11 @@ class EntryWindow(Gtk.ApplicationWindow):
         hbox.append(self.icon)
 
         # Gtk.PasswordEntry
-        pass_entry = Gtk.PasswordEntry()
-        pass_entry.props.placeholder_text = "Password Entry"
-        pass_entry.props.show_peek_icon = True
-        pass_entry.props.margin_top = 24
+        pass_entry = Gtk.PasswordEntry(
+            placeholder_text="Password Entry",
+            show_peek_icon=True,
+            margin_top=24,
+        )
         vbox.append(pass_entry)
 
     def on_editable_toggled(self, button):
