@@ -167,6 +167,14 @@ minimal-meson:
     - meson compile -C _build
     - PYTEST_ADDOPTS="-sv -k 'not test_cairo'" meson test -C _build --suite pygobject --verbose
 
+regression-gstreamer:
+    # Only for weekly build on main
+    allow_failure: true
+    stage: build
+    image: $CI_IMAGE:$[[ inputs.default_version ]]
+    script:
+      - bash -x ./.gitlab-ci/regress-gstreamer.sh
+
 coverage:
   stage: coverage
   image: $CI_IMAGE:$[[ inputs.default_version ]]
