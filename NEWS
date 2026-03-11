@@ -1,3 +1,9 @@
+3.56.1 - 2026-02-27
+-------------------
+
+* Fix `do_dispose` for floating objects :mr:`527`
+* Updates and fixes for Windows documantation :mr:`525`
+
 3.56.0 - 2026-02-27
 -------------------
 
