@@ -109,7 +109,7 @@ Who Is Using PyGObject?
 * `GNOME Video Player <https://gitlab.gnome.org/GNOME/showtime/>`__ - a GNOME video player
 * `Gramps <https://gramps-project.org/>`__ - a genealogy program
 * `Iotas <https://apps.gnome.org/Iotas/>`__ - simple note taking
-* `Komikku <https://valos.gitlab.io/Komikku/>`__ - a manga reader
+* `Komikku <https://apps.gnome.org/Komikku/>`__ - a manga reader
 * `Lollypop <https://wiki.gnome.org/Apps/Lollypop>`__ - a modern music player
 * `Lutris <https://lutris.net/>`__ - a video game manager
 * `Meld <https://meldmerge.org/>`__ - a visual diff and merge tool
