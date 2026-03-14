@@ -920,6 +920,22 @@ class TestDispose(unittest.TestCase):
 
         assert dispose_invoked
 
+    def test_only_call_do_dispose_if_defined_on_class(self):
+        dispose_invoked = False
+
+        def do_dispose(self):
+            nonlocal dispose_invoked
+            dispose_invoked = True
+
+        class TestObject(GObject.Object):
+            def __init__(self):
+                self.do_dispose = do_dispose
+                super().__init__()
+
+        TestObject()
+
+        assert not dispose_invoked
+
 
 def test_list_properties():
     def find_param(props, name):

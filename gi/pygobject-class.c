@@ -34,7 +34,6 @@
 #include "pygobject-object.h"
 
 extern GQuark pygobject_instance_init_ref_count;
-extern GQuark pygobject_has_dispose_method;
 
 static GPrivate pygobject_construction_wrapper;
 
@@ -638,10 +637,9 @@ static void
 pyg_object_dispose (GObject *object)
 {
     GObjectClass *klass = G_OBJECT_GET_CLASS (object);
+    PyGObjectData *inst_data = pyg_object_peek_inst_data (object);
 
-    if (Py_IsInitialized ()
-        && GPOINTER_TO_INT (
-            g_object_get_qdata (object, pygobject_has_dispose_method))) {
+    if (Py_IsInitialized () && inst_data && inst_data->call_do_dispose) {
         PyObject *object_wrapper, *retval;
         PyGILState_STATE state = PyGILState_Ensure ();
 
@@ -661,6 +659,9 @@ pyg_object_dispose (GObject *object)
                                                  /*steal=*/FALSE, klass);
         }
 #endif
+
+        /* Avoid redundant calls to do_dispose() */
+        inst_data->call_do_dispose = FALSE;
 
         if (object_wrapper != NULL
             && PyObject_HasAttrString (object_wrapper, "do_dispose")) {

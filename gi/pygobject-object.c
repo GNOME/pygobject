@@ -44,23 +44,15 @@ static void pygobject_inherit_slots (PyTypeObject *type, PyObject *bases,
 static void pygobject_find_slot_for (PyTypeObject *type, PyObject *bases,
                                      int slot_offset,
                                      gboolean check_for_present);
+
 GType PY_TYPE_OBJECT = 0;
 GQuark pygobject_custom_key;
 GQuark pygobject_class_key;
 GQuark pygobject_class_init_key;
 GQuark pygobject_wrapper_key;
 GQuark pygobject_instance_init_ref_count;
-GQuark pygobject_has_dispose_method;
 GQuark pygobject_instance_data_key;
 
-
-static inline PyGObjectData *
-pyg_object_peek_inst_data (GObject *obj)
-{
-    if (!obj) return NULL;
-    return ((PyGObjectData *)g_object_get_qdata (obj,
-                                                 pygobject_instance_data_key));
-}
 
 static GClosure *
 gclosure_from_pyfunc (PyGObject *object, PyObject *func)
@@ -85,6 +77,33 @@ gclosure_from_pyfunc (PyGObject *object, PyObject *func)
 
 
 /* -------------- class <-> wrapper manipulation --------------- */
+
+static gboolean
+pygobject_has_custom_do_dispose (PyObject *self)
+{
+    PyTypeObject *type = Py_TYPE (self);
+    PyObject *mro;
+    PyObject *base_do_dispose;
+    Py_ssize_t i;
+
+    if (type == &PyGObject_Type) return FALSE;
+
+    mro = type->tp_mro;
+    if (mro == NULL) return FALSE;
+
+    base_do_dispose =
+        PyDict_GetItemString (PyGObject_Type.tp_dict, "do_dispose");
+
+    for (i = 0; i < PyTuple_GET_SIZE (mro); i++) {
+        PyTypeObject *mro_type = (PyTypeObject *)PyTuple_GET_ITEM (mro, i);
+        PyObject *do_dispose =
+            PyDict_GetItemString (mro_type->tp_dict, "do_dispose");
+
+        if (do_dispose != NULL) return do_dispose != base_do_dispose;
+    }
+
+    return FALSE;
+}
 
 static void
 pygobject_data_free (PyGObjectData *data)
@@ -144,6 +163,12 @@ pygobject_get_inst_data (PyGObject *self)
 
         inst_data->type = Py_TYPE (self);
         Py_INCREF ((PyObject *)inst_data->type);
+
+
+        /* Add a marker so we know if we should create a new object
+         * to call `do_dispose` on. */
+        inst_data->call_do_dispose =
+            pygobject_has_custom_do_dispose ((PyObject *)self);
 
         g_object_set_qdata_full (self->obj, pygobject_instance_data_key,
                                  inst_data,
@@ -297,12 +322,6 @@ pygobject_register_wrapper (PyObject *self)
 
     /* save wrapper pointer so we can access it later */
     g_object_set_qdata_full (gself->obj, pygobject_wrapper_key, gself, NULL);
-
-    /* Add a marker so we know if we should create a new object to call `do_dispose` on.
-     */
-    g_object_set_qdata (
-        gself->obj, pygobject_has_dispose_method,
-        GINT_TO_POINTER (PyObject_HasAttrString (self, "do_dispose")));
 
     if (have_error) PyErr_Restore (error_type, error_value, error_traceback);
 }
@@ -1996,8 +2015,6 @@ pyg_object_register_types (PyObject *d)
     pygobject_instance_init_ref_count =
         g_quark_from_static_string ("PyGObject::instance-init-ref-count");
 
-    pygobject_has_dispose_method =
-        g_quark_from_static_string ("PyGObject::has-dispose-method");
     pygobject_instance_data_key =
         g_quark_from_static_string ("PyGObject::instance-data");
 

@@ -9,6 +9,7 @@
 struct _PyGObjectData {
     PyTypeObject *type; /* wrapper type for this instance */
     PyObject *inst_dict;
+    gboolean call_do_dispose;
     GSList *closures;
 };
 
@@ -17,6 +18,7 @@ extern GQuark pygobject_custom_key;
 extern GQuark pygobject_wrapper_key;
 extern GQuark pygobject_class_key;
 extern GQuark pygobject_class_init_key;
+extern GQuark pygobject_instance_data_key;
 
 extern PyTypeObject PyGObjectWeakRef_Type;
 extern PyTypeObject PyGObject_Type;
@@ -38,5 +40,13 @@ void pygobject_init_wrapper_set (PyObject *wrapper);
 
 void pygobject__g_instance_init (GTypeInstance *instance, gpointer g_class);
 void pygobject__g_class_init (GObjectClass *class, PyObject *py_class);
+
+static inline PyGObjectData *
+pyg_object_peek_inst_data (GObject *obj)
+{
+    if (!obj) return NULL;
+    return ((PyGObjectData *)g_object_get_qdata (obj,
+                                                 pygobject_instance_data_key));
+}
 
 #endif /*__PYGOBJECT_OBJECT_H__*/
