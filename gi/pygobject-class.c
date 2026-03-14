@@ -639,7 +639,8 @@ pyg_object_dispose (GObject *object)
 {
     GObjectClass *klass = G_OBJECT_GET_CLASS (object);
 
-    if (GPOINTER_TO_INT (
+    if (Py_IsInitialized ()
+        && GPOINTER_TO_INT (
             g_object_get_qdata (object, pygobject_has_dispose_method))) {
         PyObject *object_wrapper, *retval;
         PyGILState_STATE state = PyGILState_Ensure ();
