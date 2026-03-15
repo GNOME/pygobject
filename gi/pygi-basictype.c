@@ -276,11 +276,6 @@ filename_from_py_unix (PyObject *py_arg, gchar **result)
 {
     gchar *filename;
 
-    if (Py_IsNone (py_arg)) {
-        *result = NULL;
-        return TRUE;
-    }
-
     if (PyBytes_Check (py_arg)) {
         char *buffer;
 
@@ -318,11 +313,6 @@ static gboolean
 filename_from_py_win32 (PyObject *py_arg, gchar **result)
 {
     gchar *filename;
-
-    if (Py_IsNone (py_arg)) {
-        *result = NULL;
-        return TRUE;
-    }
 
     if (PyBytes_Check (py_arg)) {
         PyObject *uni_arg;
@@ -379,11 +369,27 @@ filename_from_py_win32 (PyObject *py_arg, gchar **result)
 static gboolean
 pygi_filename_from_py (PyObject *py_arg, gchar **result)
 {
+    PyObject *py_fspath;
+    gboolean ret = FALSE;
+
+    if (Py_IsNone (py_arg)) {
+        *result = NULL;
+        return TRUE;
+    }
+
+    py_fspath = PyOS_FSPath (py_arg);
+
+    if (py_fspath != NULL) {
 #ifdef G_OS_WIN32
-    return filename_from_py_win32 (py_arg, result);
+        ret = filename_from_py_win32 (py_fspath, result);
 #else
-    return filename_from_py_unix (py_arg, result);
+        ret = filename_from_py_unix (py_fspath, result);
 #endif
+
+        Py_DECREF (py_fspath);
+    }
+
+    return ret;
 }
 
 static PyObject *

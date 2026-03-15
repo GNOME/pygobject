@@ -8,6 +8,7 @@ import os
 import gc
 import weakref
 import warnings
+import pathlib
 import pickle
 import platform
 import enum
@@ -759,6 +760,25 @@ class TestFilename(unittest.TestCase):
     def test_filename_in_nullable(self):
         self.assertTrue(GIMarshallingTests.filename_copy(None) is None)
         self.assertRaises(TypeError, GIMarshallingTests.filename_exists, None)
+
+    def test_filename_in_pathlike(self):
+        fpath = pathlib.Path(self.workdir) / "test_pathlike.txt"
+
+        try:
+            os.path.exists(fpath)
+        except ValueError:
+            # non-unicode fs encoding
+            return
+
+        self.assertRaises(GLib.GError, GLib.file_get_contents, fpath)
+        self.assertRaises(TypeError, GLib.file_get_contents, 12345)
+
+        with open(fpath, "wb") as f:
+            f.write(b"hello world!\n\x01\x02")
+
+        (result, contents) = GLib.file_get_contents(fpath)
+        self.assertEqual(result, True)
+        self.assertEqual(contents, b"hello world!\n\x01\x02")
 
     @unittest.skipIf(os.name == "nt", "fixme")
     def test_filename_out(self):
