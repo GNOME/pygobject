@@ -936,6 +936,37 @@ class TestDispose(unittest.TestCase):
 
         assert not dispose_invoked
 
+    @unittest.skipIf(platform.python_implementation() == "PyPy", "CPython only")
+    def test_access_members_objects_from_dispose(self):
+        dispose_invoked = False
+
+        class TestObject(GObject.Object):
+            def __init__(self, a, b):
+                super().__init__()
+                self.a = a
+                self.b = b
+
+            def do_dispose(self):
+                nonlocal dispose_invoked
+                # access members: do_dispose should be called before they're removed
+                self.a.val
+                self.b.val
+                dispose_invoked = True
+
+        class TestMember:
+            def __init__(self, val):
+                self.val = val
+
+        a = TestMember("a")
+        b = TestMember("b")
+        o = TestObject(a, b)
+        a.o = o
+        del a, b, o
+
+        gc.collect()
+
+        assert dispose_invoked
+
 
 def test_list_properties():
     def find_param(props, name):
