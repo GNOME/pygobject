@@ -6,6 +6,7 @@ pacman --noconfirm -Suy
 
 pacman --noconfirm -S --needed \
     "${MINGW_PACKAGE_PREFIX}"-ccache \
+    "${MINGW_PACKAGE_PREFIX}"-git \
     "${MINGW_PACKAGE_PREFIX}"-glib2 \
     "${MINGW_PACKAGE_PREFIX}"-gobject-introspection \
     "${MINGW_PACKAGE_PREFIX}"-gtk3 \
@@ -18,7 +19,6 @@ pacman --noconfirm -S --needed \
     "${MINGW_PACKAGE_PREFIX}"-python-pytest \
     "${MINGW_PACKAGE_PREFIX}"-python-pytest-cov \
     "${MINGW_PACKAGE_PREFIX}"-toolchain \
-    git \
     lcov
 
 # ccache setup

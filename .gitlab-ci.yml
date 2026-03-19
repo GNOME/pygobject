@@ -114,8 +114,8 @@ windows:
   parallel:
     matrix:
       - MSYSTEM:
-          - "MINGW32"
-          - "MINGW64"
+          - "UCRT64"
+          - "CLANG64"
   artifacts:
     when: always
     paths:
