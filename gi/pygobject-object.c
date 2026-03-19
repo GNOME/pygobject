@@ -830,6 +830,25 @@ pygobject_clear (PyGObject *self)
     return 0;
 }
 
+#ifndef PYPY_VERSION
+static void
+pygobject_finalize (PyGObject *self)
+{
+    PyGObjectData *data = pyg_object_peek_inst_data (self->obj);
+
+    /* We hold the last reference to the GObject.
+     * Call `do_dispose` before the object is cleared. */
+    if (data && data->call_do_dispose && self->obj->ref_count == 1) {
+        PyObject *error_type, *error_value, *error_traceback;
+        PyErr_Fetch (&error_type, &error_value, &error_traceback);
+
+        g_object_run_dispose (self->obj);
+
+        PyErr_Restore (error_type, error_value, error_traceback);
+    }
+}
+#endif
+
 static void
 pygobject_free (PyObject *op)
 {
@@ -2035,6 +2054,7 @@ pyg_object_register_types (PyObject *d)
     PyGObject_Type.tp_getset = pygobject_getsets;
 #ifndef PYPY_VERSION
     PyGObject_Type.tp_dictoffset = offsetof (PyGObject, inst_dict);
+    PyGObject_Type.tp_finalize = (destructor)pygobject_finalize;
 #endif
     PyGObject_Type.tp_init = (initproc)pygobject_init;
     PyGObject_Type.tp_free = (freefunc)pygobject_free;
