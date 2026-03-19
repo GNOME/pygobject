@@ -1056,6 +1056,17 @@ class TestGtk(unittest.TestCase):
         self.assertTrue(first_child not in widget)
         self.assertTrue(last_child not in widget)
 
+    @unittest.skipUnless(Gtk_version != "4.0", "GtkExpression was added in GTK4")
+    def test_expressions(self):
+        label = Gtk.PropertyExpression(Gtk.Label, "label")
+        has_label = Gtk.ClosureExpression(bool, lambda _, label: bool(label), label)
+        false = Gtk.ConstantExpression(False)
+        expression = Gtk.TryExpression(has_label, false)
+
+        value = GObject.Value()
+        expression.evaluate(Gtk.Label(label="test"), value)
+        self.assertTrue(value.get_bool())
+
 
 @unittest.skipUnless(Gtk, "Gtk not available")
 class TestWidget(unittest.TestCase):

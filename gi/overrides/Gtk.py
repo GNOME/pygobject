@@ -18,6 +18,8 @@
 
 import sys
 import warnings
+from collections.abc import Callable
+from typing import Any, Self
 
 from gi.repository import GObject, GLib
 from .._ossighelper import register_sigint_fallback, get_event_loop
@@ -1848,6 +1850,64 @@ if GTK3:
 
     Menu = override(Menu)
     __all__.append("Menu")
+
+if GTK4:
+
+    class ClosureExpression(Gtk.ClosureExpression):
+        def __new__(
+            cls,
+            value_type: type,
+            closure: Callable[..., Any],
+            *params: Gtk.Expression,
+        ) -> Self:
+            return super().new(value_type, closure, params)
+
+        def __init__(
+            self,
+            value_type: type,
+            closure: Callable[..., Any],
+            *params: Gtk.Expression,
+        ) -> None: ...
+
+    ClosureExpression = override(ClosureExpression)
+    __all__.append("ClosureExpression")
+
+    class ConstantExpression(Gtk.ConstantExpression):
+        def __new__(cls, value: object) -> Self:
+            return super().new_for_value(value)
+
+        def __init__(self, value: object) -> None: ...
+
+    ConstantExpression = override(ConstantExpression)
+    __all__.append("ConstantExpression")
+
+    class PropertyExpression(Gtk.PropertyExpression):
+        def __new__(
+            cls,
+            this_type: type,
+            property_name: str,
+            expression: Gtk.Expression | None = None,
+        ) -> Self:
+            return super().new(this_type, expression, property_name)
+
+        def __init__(
+            self,
+            this_type: type,
+            property_name: str,
+            expression: Gtk.Expression | None = None,
+        ) -> None: ...
+
+    PropertyExpression = override(PropertyExpression)
+    __all__.append("PropertyExpression")
+
+    class TryExpression(Gtk.TryExpression):
+        def __new__(cls, *expressions: Gtk.Expression) -> Self:
+            return super().new(expressions)
+
+        def __init__(self, *expressions: Gtk.Expression) -> None: ...
+
+    TryExpression = override(TryExpression)
+    __all__.append("TryExpression")
 
 if GTK3:
     _Gtk_main_quit = Gtk.main_quit
