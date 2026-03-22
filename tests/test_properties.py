@@ -8,6 +8,7 @@ import tempfile
 
 import pytest
 
+import testhelper
 from gi.repository import GObject
 from gi.repository.GObject import ParamFlags, GType, new
 from gi.repository.GObject import (
@@ -113,6 +114,24 @@ class PropertyObject(GObject.GObject):
         type=Gio.File,
         flags=ParamFlags.READABLE | ParamFlags.WRITABLE | ParamFlags.CONSTRUCT,
     )
+
+
+class UnownedPropertyObject(GObject.InitiallyUnowned):
+    def __init__(self):
+        super().__init__()
+        self.value = "test getter"
+
+    def set_string(self, value):
+        self.value = value
+
+    @GObject.Property(
+        type=GObject.TYPE_STRING,
+        default="",
+        flags=GObject.ParamFlags.READWRITE,
+        setter=set_string,  # <-- happen both with explicit setter and with @property setter
+    )
+    def string(self) -> str:
+        return self.value
 
 
 class PropertyInheritanceObject(Regress.TestObj):
@@ -1557,3 +1576,13 @@ def test_set_function_property():
 
     with pytest.raises(TypeError):
         obj.props.function_property = lambda *x: x
+
+
+def test_get_property_on_unowned_object():
+    result = testhelper.create_and_get_property(UnownedPropertyObject, "string")
+
+    assert result == "test getter"
+
+
+def test_set_property_on_unowned_object():
+    testhelper.create_and_set_property(UnownedPropertyObject, "string", "value")

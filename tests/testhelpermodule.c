@@ -621,6 +621,74 @@ _wrap_test_floating_and_sunk_get_instance_list (PyObject *self)
     return py_list;
 }
 
+static PyObject *
+_wrap_test_create_and_get_property (PyObject *self, PyObject *args)
+{
+    PyObject *pygtype, *pyvalue;
+    char *property_name;
+    GType type;
+    GObject *object;
+    GValue value = {
+        0,
+    };
+
+    if (!PyArg_ParseTuple (args, "Os", &pygtype, &property_name)) return NULL;
+
+    type = pyg_type_from_object (pygtype);
+    if (PyErr_Occurred ()) return NULL;
+
+    object = g_object_new (type, NULL);
+
+    g_assert (g_object_is_floating (object));
+
+    g_value_init (&value, G_TYPE_STRING);
+
+    g_object_get_property (object, property_name, &value);
+
+    pyvalue = PyUnicode_FromString (g_value_get_string (&value));
+
+    g_value_unset (&value);
+
+    g_assert (g_object_is_floating (object));
+    g_object_unref (object);
+
+    return pyvalue;
+}
+
+static PyObject *
+_wrap_test_create_and_set_property (PyObject *self, PyObject *args)
+{
+    PyObject *pygtype;
+    char *property_name, *property_value;
+    GType type;
+    GObject *object;
+    GValue value = {
+        0,
+    };
+
+    if (!PyArg_ParseTuple (args, "Oss", &pygtype, &property_name,
+                           &property_value))
+        return NULL;
+
+    type = pyg_type_from_object (pygtype);
+    if (PyErr_Occurred ()) return NULL;
+
+    object = g_object_new (type, NULL);
+
+    g_assert (g_object_is_floating (object));
+
+    g_value_init (&value, G_TYPE_STRING);
+    g_value_set_string (&value, property_value);
+
+    g_object_set_property (object, property_name, &value);
+
+    g_value_unset (&value);
+
+    g_assert (g_object_is_floating (object));
+    g_object_unref (object);
+
+    Py_RETURN_NONE;
+}
 
 static PyObject *
 _wrap_force_g_object_ref (PyObject *self, PyObject *args)
@@ -714,6 +782,10 @@ static PyMethodDef testhelper_functions[] = {
     { "floating_and_sunk_get_instance_list",
       (PyCFunction)_wrap_test_floating_and_sunk_get_instance_list,
       METH_NOARGS },
+    { "create_and_get_property",
+      (PyCFunction)_wrap_test_create_and_get_property, METH_VARARGS },
+    { "create_and_set_property",
+      (PyCFunction)_wrap_test_create_and_set_property, METH_VARARGS },
     { NULL, NULL }
 };
 
