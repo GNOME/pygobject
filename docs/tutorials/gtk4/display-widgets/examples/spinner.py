@@ -8,9 +8,8 @@ class SpinnerAnimation(Gtk.ApplicationWindow):
     def __init__(self, **kargs):
         super().__init__(**kargs, title="Spinner Demo")
 
-        button = Gtk.ToggleButton(label="Start Spinning")
+        button = Gtk.ToggleButton(label="Start Spinning", active=False)
         button.connect("toggled", self.on_button_toggled)
-        button.props.active = False
 
         self.spinner = Gtk.Spinner()
 

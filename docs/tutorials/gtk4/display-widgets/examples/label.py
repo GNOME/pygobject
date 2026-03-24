@@ -11,9 +11,12 @@ class LabelWindow(Gtk.ApplicationWindow):
         box = Gtk.Box(spacing=10)
         self.set_child(box)
 
-        box_left = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
-        box_left.props.hexpand = True
-        box_left.props.homogeneous = True
+        box_left = Gtk.Box(
+            orientation=Gtk.Orientation.VERTICAL,
+            spacing=10,
+            hexpand=True,
+            homogeneous=True,
+        )
         box_right = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
 
         box.append(box_left)
@@ -22,19 +25,22 @@ class LabelWindow(Gtk.ApplicationWindow):
         label = Gtk.Label(label="This is a normal label")
         box_left.append(label)
 
-        label = Gtk.Label(label="This is a normal label with xalign set to 0")
-        label.props.xalign = 0
-        box_left.append(label)
-
-        label = Gtk.Label()
-        label.props.label = "This is a left-justified label.\nWith multiple lines."
-        label.props.justify = Gtk.Justification.LEFT
+        label = Gtk.Label(
+            label="This is a normal label with xalign set to 0",
+            xalign=0,
+        )
         box_left.append(label)
 
         label = Gtk.Label(
-            label="This is a right-justified label.\nWith multiple lines."
+            label="This is a left-justified label.\nWith multiple lines.",
+            justify=Gtk.Justification.LEFT,
         )
-        label.props.justify = Gtk.Justification.RIGHT
+        box_left.append(label)
+
+        label = Gtk.Label(
+            label="This is a right-justified label.\nWith multiple lines.",
+            justify=Gtk.Justification.RIGHT,
+        )
         box_left.append(label)
 
         label = Gtk.Label(
@@ -44,10 +50,10 @@ class LabelWindow(Gtk.ApplicationWindow):
             "wraps the words to fit.\n"
             "     It supports multiple paragraphs correctly, "
             "and  correctly   adds "
-            "many          extra  spaces. "
+            "many          extra  spaces. ",
+            wrap=True,
+            max_width_chars=32,
         )
-        label.props.wrap = True
-        label.props.max_width_chars = 32
         box_right.append(label)
 
         label = Gtk.Label(
@@ -60,32 +66,30 @@ class LabelWindow(Gtk.ApplicationWindow):
             "    This is a new paragraph.\n"
             "    This is another newer, longer, better "
             "paragraph.  It is coming to an end, "
-            "unfortunately."
+            "unfortunately.",
+            wrap=True,
+            justify=Gtk.Justification.FILL,
+            max_width_chars=32,
         )
-        label.props.wrap = True
-        label.props.justify = Gtk.Justification.FILL
-        label.props.max_width_chars = 32
         box_right.append(label)
 
-        label = Gtk.Label()
+        label = Gtk.Label(wrap=True, max_width_chars=48)
         label.set_markup(
             "Text can be <small>small</small>, <big>big</big>, "
             "<b>bold</b>, <i>italic</i> and even point to "
             'somewhere in the <a href="https://www.gtk.org" '
             'title="Click to find out more">internets</a>.'
         )
-        label.props.wrap = True
-        label.props.max_width_chars = 48
         box_left.append(label)
-
-        label = Gtk.Label.new_with_mnemonic(
-            "_Press Alt + P to select button to the right"
-        )
-        box_left.append(label)
-        label.props.selectable = True
 
         button = Gtk.Button(label="Click at your own risk")
-        label.props.mnemonic_widget = button
+        label = Gtk.Label(
+            label="_Press Alt + P to select button to the right",
+            use_underline=True,
+            selectable=True,
+            mnemonic_widget=button,
+        )
+        box_left.append(label)
         box_right.append(button)
 
 

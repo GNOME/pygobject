@@ -17,16 +17,14 @@ class SpinnerAnimation(Gtk.ApplicationWindow):
         self.label = Gtk.Label()
         main_box.append(self.label)
 
-        self.entry = Gtk.Entry()
-        self.entry.props.text = "10"
+        self.entry = Gtk.Entry(text="10")
         main_box.append(self.entry)
 
         self.button_start = Gtk.Button(label="Start timer")
         self.button_start.connect("clicked", self.on_button_start_clicked)
         main_box.append(self.button_start)
 
-        self.button_stop = Gtk.Button(label="Stop timer")
-        self.button_stop.props.sensitive = False
+        self.button_stop = Gtk.Button(label="Stop timer", sensitive=False)
         self.button_stop.connect("clicked", self.on_button_stop_clicked)
         main_box.append(self.button_stop)
 
