@@ -114,11 +114,11 @@ class TextViewWindow(Gtk.ApplicationWindow):
         self.box.append(grid)
 
         check_editable = Gtk.CheckButton(label="Editable", active=True)
-        check_editable.connect("toggled", self.on_editable_toggled)
+        check_editable.bind_property("active", self.textview, "editable", 0)
         grid.attach(check_editable, 0, 0, 1, 1)
 
         check_cursor = Gtk.CheckButton(label="Cursor Visible", active=True)
-        check_editable.connect("toggled", self.on_cursor_toggled)
+        check_cursor.bind_property("active", self.textview, "cursor_visible", 0)
         grid.attach_next_to(check_cursor, check_editable, Gtk.PositionType.RIGHT, 1, 1)
 
         radio_wrapnone = Gtk.CheckButton(label="No Wrapping", active=True)
@@ -150,12 +150,6 @@ class TextViewWindow(Gtk.ApplicationWindow):
         start = self.textbuffer.get_start_iter()
         end = self.textbuffer.get_end_iter()
         self.textbuffer.remove_all_tags(start, end)
-
-    def on_editable_toggled(self, widget):
-        self.textview.props.editable = widget.props.active
-
-    def on_cursor_toggled(self, widget):
-        self.textview.props.cursor_visible = widget.props.active
 
     def on_wrap_toggled(self, _widget, mode):
         self.textview.props.wrap_mode = mode
