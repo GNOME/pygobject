@@ -31,7 +31,9 @@ connect to ``notify::selected-item`` or ``notify::selected``.
 Example
 ^^^^^^^
 
-We are creating a simple :class:`Gtk.DropDown` using :class:`Gtk.StringList`.
+We are constructing a simple :class:`Gtk.DropDown` with
+:func:`Gtk.DropDown.new_from_strings` which creates a :class:`Gtk.StringList`
+to use as its model.
 
 .. image:: images/dropdown.png
 
