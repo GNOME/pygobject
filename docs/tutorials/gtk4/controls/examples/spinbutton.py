@@ -17,7 +17,7 @@ class SpinButtonWindow(Gtk.ApplicationWindow):
         hbox.append(self.spinbutton)
 
         check_numeric = Gtk.CheckButton(label="Numeric")
-        check_numeric.connect("toggled", self.on_numeric_toggled)
+        check_numeric.bind_property("active", self.spinbutton, "numeric", 0)
         hbox.append(check_numeric)
 
         check_ifvalid = Gtk.CheckButton(label="If Valid")
@@ -26,9 +26,6 @@ class SpinButtonWindow(Gtk.ApplicationWindow):
 
     def on_value_changed(self, _scroll):
         print(self.spinbutton.get_value_as_int())
-
-    def on_numeric_toggled(self, button):
-        self.spinbutton.props.numeric = button.props.active
 
     def on_ifvalid_toggled(self, button):
         if button.get_active():
