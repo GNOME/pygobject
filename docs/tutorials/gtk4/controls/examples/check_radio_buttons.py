@@ -19,13 +19,11 @@ class CheckButtonWindow(Gtk.ApplicationWindow):
         radio1.connect("toggled", self.on_radio_toggled, "1")
         box.append(radio1)
 
-        radio2 = Gtk.CheckButton(label="Radio 2")
-        radio2.set_group(radio1)
+        radio2 = Gtk.CheckButton(label="Radio 2", group=radio1)
         radio2.connect("toggled", self.on_radio_toggled, "2")
         box.append(radio2)
 
-        radio3 = Gtk.CheckButton.new_with_mnemonic("R_adio 3")
-        radio3.set_group(radio1)
+        radio3 = Gtk.CheckButton(label="R_adio 3", use_underline=True, group=radio1)
         radio3.connect("toggled", self.on_radio_toggled, "3")
         box.append(radio3)
 

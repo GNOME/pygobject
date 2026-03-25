@@ -12,8 +12,7 @@ class SpinButtonWindow(Gtk.ApplicationWindow):
         self.set_child(hbox)
 
         adjustment = Gtk.Adjustment(upper=100, step_increment=1, page_increment=10)
-        self.spinbutton = Gtk.SpinButton()
-        self.spinbutton.props.adjustment = adjustment
+        self.spinbutton = Gtk.SpinButton(adjustment=adjustment)
         self.spinbutton.connect("value-changed", self.on_value_changed)
         hbox.append(self.spinbutton)
 

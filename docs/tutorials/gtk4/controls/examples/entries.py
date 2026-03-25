@@ -26,13 +26,14 @@ class EntryWindow(Gtk.ApplicationWindow):
         self.set_child(vbox)
 
         # Gtk.SearchEntry
-        search = Gtk.SearchEntry(placeholder_text="Search Entry")
-        search.set_key_capture_widget(self)
+        search = Gtk.SearchEntry(
+            key_capture_widget=self, placeholder_text="Search Entry"
+        )
         header.set_title_widget(search)
         self.set_focus(search)
 
         # Gtk.Entry
-        self.entry = Gtk.Entry(text="Hello World")
+        self.entry = Gtk.Entry(text="Hello World", progress_pulse_step=0.2)
         vbox.append(self.entry)
 
         hbox = Gtk.Box(spacing=6)
@@ -71,14 +72,12 @@ class EntryWindow(Gtk.ApplicationWindow):
 
     def on_pulse_toggled(self, button):
         if button.get_active():
-            self.entry.props.progress_pulse_step = 0.2
             # Call self.do_pulse every 100 ms
             self.timeout_id = GLib.timeout_add(100, self.do_pulse)
         else:
             # Don't call self.do_pulse anymore
             GLib.source_remove(self.timeout_id)
             self.timeout_id = None
-            self.entry.props.progress_pulse_step = 0
 
     def do_pulse(self):
         self.entry.progress_pulse()

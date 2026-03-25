@@ -8,21 +8,15 @@ class SwitcherWindow(Gtk.ApplicationWindow):
     def __init__(self, **kargs):
         super().__init__(**kargs, title="Switch Demo")
 
-        hbox = Gtk.Box(spacing=6, homogeneous=True)
-        hbox.props.margin_top = 24
-        hbox.props.margin_bottom = 24
+        hbox = Gtk.Box(spacing=6, homogeneous=True, margin_top=24, margin_bottom=24)
         self.set_child(hbox)
 
-        switch = Gtk.Switch()
+        switch = Gtk.Switch(active=False, halign=Gtk.Align.CENTER)
         switch.connect("notify::active", self.on_switch_activated)
-        switch.props.active = False
-        switch.props.halign = Gtk.Align.CENTER
         hbox.append(switch)
 
-        switch = Gtk.Switch()
+        switch = Gtk.Switch(active=True, halign=Gtk.Align.CENTER)
         switch.connect("notify::active", self.on_switch_activated)
-        switch.props.active = True
-        switch.props.halign = Gtk.Align.CENTER
         hbox.append(switch)
 
     def on_switch_activated(self, switch, _gparam):

@@ -15,8 +15,7 @@ class ToggleButtonWindow(Gtk.ApplicationWindow):
         button.connect("toggled", self.on_button_toggled, "1")
         hbox.append(button)
 
-        button = Gtk.ToggleButton(label="B_utton 2", use_underline=True)
-        button.set_active(True)
+        button = Gtk.ToggleButton(label="B_utton 2", use_underline=True, active=True)
         button.connect("toggled", self.on_button_toggled, "2")
         hbox.append(button)
 
