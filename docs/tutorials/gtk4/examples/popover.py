@@ -10,15 +10,15 @@ class PopoverWindow(Gtk.ApplicationWindow):
 
         self.set_default_size(300, 200)
 
-        box = Gtk.Box(spacing=6, orientation=Gtk.Orientation.VERTICAL)
-        box.props.halign = box.props.valign = Gtk.Align.CENTER
+        box = Gtk.Box(
+            spacing=6,
+            orientation=Gtk.Orientation.VERTICAL,
+            halign=Gtk.Align.CENTER,
+            valign=Gtk.Align.CENTER,
+        )
         self.set_child(box)
 
-        popover = Gtk.Popover()
-        popover_box = Gtk.Box()
-        popover_box.append(Gtk.Label(label="Item"))
-        popover.set_child(popover_box)
-
+        popover = Gtk.Popover(child=Gtk.Label(label="Item"))
         button = Gtk.MenuButton(label="Click Me", popover=popover)
         box.append(button)
 
@@ -26,10 +26,10 @@ class PopoverWindow(Gtk.ApplicationWindow):
         button2.connect("clicked", self.on_button_clicked)
         box.append(button2)
 
-        self.popover2 = Gtk.Popover()
-        self.popover2.set_child(Gtk.Label(label="Another Popup!"))
+        self.popover2 = Gtk.Popover(
+            child=Gtk.Label(label="Another Popup!"), position=Gtk.PositionType.LEFT
+        )
         self.popover2.set_parent(button2)
-        self.popover2.props.position = Gtk.PositionType.LEFT
 
     def on_button_clicked(self, _button):
         self.popover2.popup()

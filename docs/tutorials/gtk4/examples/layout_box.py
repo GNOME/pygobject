@@ -15,8 +15,7 @@ class MyWindow(Gtk.ApplicationWindow):
         button1.connect("clicked", self.on_button1_clicked)
         box.append(button1)
 
-        button2 = Gtk.Button(label="Goodbye")
-        button2.props.hexpand = True
+        button2 = Gtk.Button(label="Goodbye", hexpand=True)
         button2.connect("clicked", self.on_button2_clicked)
         box.append(button2)
 

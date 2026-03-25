@@ -17,10 +17,11 @@ class FlowBoxWindow(Gtk.ApplicationWindow):
         scrolled.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
         self.set_child(scrolled)
 
-        flowbox = Gtk.FlowBox()
-        flowbox.props.valign = Gtk.Align.START
-        flowbox.props.max_children_per_line = 30
-        flowbox.props.selection_mode = Gtk.SelectionMode.NONE
+        flowbox = Gtk.FlowBox(
+            valign=Gtk.Align.START,
+            max_children_per_line=30,
+            selection_mode=Gtk.SelectionMode.NONE,
+        )
         scrolled.set_child(flowbox)
 
         self.create_flowbox(flowbox)
@@ -38,7 +39,7 @@ class FlowBoxWindow(Gtk.ApplicationWindow):
         rgba = Gdk.RGBA()
         rgba.parse(str_color)
 
-        button = Gtk.Button()
+        button = Gtk.Button(tooltip_text=str_color)
 
         area = Gtk.DrawingArea()
         area.set_size_request(24, 24)
@@ -115,7 +116,6 @@ class FlowBoxWindow(Gtk.ApplicationWindow):
 
         for color in colors:
             button = self.color_swatch_new(color)
-            button.props.tooltip_text = color
             flowbox.append(button)
 
 

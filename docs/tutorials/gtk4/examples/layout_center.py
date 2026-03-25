@@ -8,17 +8,12 @@ class CenterBoxWindow(Gtk.ApplicationWindow):
     def __init__(self, **kargs):
         super().__init__(**kargs, default_width=400, title="CenterBox Example")
 
-        box = Gtk.CenterBox()
+        box = Gtk.CenterBox(
+            start_widget=Gtk.Button(label="Start"),
+            center_widget=Gtk.Label(label="Center"),
+            end_widget=Gtk.Button(label="End"),
+        )
         self.set_child(box)
-
-        button1 = Gtk.Button(label="Start")
-        box.set_start_widget(button1)
-
-        label = Gtk.Label(label="Center")
-        box.set_center_widget(label)
-
-        button2 = Gtk.Button(label="End")
-        box.set_end_widget(button2)
 
 
 def on_activate(app):

@@ -13,14 +13,17 @@ class StackWindow(Gtk.ApplicationWindow):
         header = Gtk.HeaderBar()
         self.set_titlebar(header)
 
-        stack = Gtk.Stack()
-        stack.props.transition_type = Gtk.StackTransitionType.SLIDE_LEFT_RIGHT
-        stack.props.transition_duration = 1000
+        stack = Gtk.Stack(
+            transition_type=Gtk.StackTransitionType.SLIDE_LEFT_RIGHT,
+            transition_duration=1000,
+        )
         self.set_child(stack)
 
-        checkbutton = Gtk.CheckButton(label="Click me!")
-        checkbutton.props.hexpand = True
-        checkbutton.props.halign = Gtk.Align.CENTER
+        checkbutton = Gtk.CheckButton(
+            label="Click me!",
+            hexpand=True,
+            halign=Gtk.Align.CENTER,
+        )
         page1 = stack.add_titled(checkbutton, "check", "Check Button")
         checkbutton.bind_property(
             "active", page1, "needs-attention", GObject.BindingFlags.DEFAULT
@@ -30,8 +33,7 @@ class StackWindow(Gtk.ApplicationWindow):
         label.set_markup("<big>A fancy label</big>")
         stack.add_titled(label, "label", "A label")
 
-        stack_switcher = Gtk.StackSwitcher()
-        stack_switcher.set_stack(stack)
+        stack_switcher = Gtk.StackSwitcher(stack=stack)
         header.set_title_widget(stack_switcher)
 
         # Let's start in the second page

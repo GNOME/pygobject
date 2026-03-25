@@ -11,13 +11,11 @@ class DragDropWindow(Gtk.ApplicationWindow):
 
         self.set_default_size(500, 400)
 
-        views_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-        views_box.props.vexpand = True
+        views_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, vexpand=True)
         self.set_child(views_box)
 
-        flow_box = Gtk.FlowBox()
+        flow_box = Gtk.FlowBox(selection_mode=Gtk.SelectionMode.NONE)
         views_box.append(flow_box)
-        flow_box.props.selection_mode = Gtk.SelectionMode.NONE
         flow_box.append(SourceFlowBoxChild("Item 1", "image-missing"))
         flow_box.append(SourceFlowBoxChild("Item 2", "help-about"))
         flow_box.append(SourceFlowBoxChild("Item 3", "edit-copy"))

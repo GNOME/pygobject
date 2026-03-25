@@ -16,17 +16,21 @@ class ListBoxWindow(Gtk.ApplicationWindow):
         super().__init__(**kargs, default_width=400, title="ListBox Demo")
 
         # Main box of out window
-        box_outer = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=24)
-        box_outer.props.margin_start = 24
-        box_outer.props.margin_end = 24
-        box_outer.props.margin_top = 24
-        box_outer.props.margin_bottom = 24
+        box_outer = Gtk.Box(
+            orientation=Gtk.Orientation.VERTICAL,
+            spacing=24,
+            margin_start=24,
+            margin_end=24,
+            margin_top=24,
+            margin_bottom=24,
+        )
         self.set_child(box_outer)
 
         # Let's create our first ListBox
-        listbox = Gtk.ListBox()
-        listbox.props.selection_mode = Gtk.SelectionMode.NONE
-        listbox.props.show_separators = True
+        listbox = Gtk.ListBox(
+            selection_mode=Gtk.SelectionMode.NONE,
+            show_separators=True,
+        )
         box_outer.append(listbox)
 
         # Let's create our first ListBoxRow
@@ -40,10 +44,11 @@ class ListBoxWindow(Gtk.ApplicationWindow):
         vbox.append(label1)
         vbox.append(label2)
 
-        switch = Gtk.Switch()
-        switch.props.hexpand = True  # Lets make the Switch expand to the window width
-        switch.props.halign = Gtk.Align.END  # Horizontally aligned to the end
-        switch.props.valign = Gtk.Align.CENTER  # Vertically aligned to the center
+        switch = Gtk.Switch(
+            hexpand=True,  # Lets make the Switch expand to the window width
+            halign=Gtk.Align.END,  # Horizontally aligned to the end
+            valign=Gtk.Align.CENTER,  # Vertically aligned to the center
+        )
         hbox.append(switch)
 
         listbox.append(row)  # Add the row to the list
@@ -51,9 +56,7 @@ class ListBoxWindow(Gtk.ApplicationWindow):
         # Our second row. We will omit the ListBoxRow and directly append a Box
         hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=24)
         label = Gtk.Label(label="Enable Automatic Update", xalign=0)
-        check = Gtk.CheckButton()
-        check.props.hexpand = True
-        check.props.halign = Gtk.Align.END
+        check = Gtk.CheckButton(hexpand=True, halign=Gtk.Align.END)
         hbox.append(label)
         hbox.append(check)
         listbox.append(hbox)  # Add the second row to the list

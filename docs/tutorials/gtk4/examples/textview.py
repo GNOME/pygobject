@@ -35,10 +35,7 @@ class TextViewWindow(Gtk.ApplicationWindow):
         self.create_buttons()
 
     def create_toolbar(self):
-        toolbar = Gtk.Box(spacing=6)
-        toolbar.props.margin_top = 6
-        toolbar.props.margin_start = 6
-        toolbar.props.margin_end = 6
+        toolbar = Gtk.Box(spacing=6, margin_top=6, margin_start=6, margin_end=6)
         self.box.prepend(toolbar)
 
         button_bold = Gtk.Button(icon_name="format-text-bold-symbolic")
@@ -93,9 +90,7 @@ class TextViewWindow(Gtk.ApplicationWindow):
         toolbar.append(button_search)
 
     def create_textview(self):
-        scrolledwindow = Gtk.ScrolledWindow()
-        scrolledwindow.props.hexpand = True
-        scrolledwindow.props.vexpand = True
+        scrolledwindow = Gtk.ScrolledWindow(hexpand=True, vexpand=True)
         self.box.append(scrolledwindow)
 
         self.textview = Gtk.TextView()
@@ -118,28 +113,25 @@ class TextViewWindow(Gtk.ApplicationWindow):
         grid = Gtk.Grid()
         self.box.append(grid)
 
-        check_editable = Gtk.CheckButton(label="Editable")
-        check_editable.props.active = True
+        check_editable = Gtk.CheckButton(label="Editable", active=True)
         check_editable.connect("toggled", self.on_editable_toggled)
         grid.attach(check_editable, 0, 0, 1, 1)
 
-        check_cursor = Gtk.CheckButton(label="Cursor Visible")
-        check_cursor.props.active = True
+        check_cursor = Gtk.CheckButton(label="Cursor Visible", active=True)
         check_editable.connect("toggled", self.on_cursor_toggled)
         grid.attach_next_to(check_cursor, check_editable, Gtk.PositionType.RIGHT, 1, 1)
 
-        radio_wrapnone = Gtk.CheckButton(label="No Wrapping")
-        radio_wrapnone.props.active = True
+        radio_wrapnone = Gtk.CheckButton(label="No Wrapping", active=True)
         grid.attach(radio_wrapnone, 0, 1, 1, 1)
 
-        radio_wrapchar = Gtk.CheckButton(label="Character Wrapping")
-        radio_wrapchar.set_group(radio_wrapnone)
+        radio_wrapchar = Gtk.CheckButton(
+            label="Character Wrapping", group=radio_wrapnone
+        )
         grid.attach_next_to(
             radio_wrapchar, radio_wrapnone, Gtk.PositionType.RIGHT, 1, 1
         )
 
-        radio_wrapword = Gtk.CheckButton(label="Word Wrapping")
-        radio_wrapword.set_group(radio_wrapnone)
+        radio_wrapword = Gtk.CheckButton(label="Word Wrapping", group=radio_wrapnone)
         grid.attach_next_to(
             radio_wrapword, radio_wrapchar, Gtk.PositionType.RIGHT, 1, 1
         )
