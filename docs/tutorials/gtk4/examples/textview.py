@@ -6,7 +6,7 @@ from gi.repository import Gtk, Pango
 
 class SearchDialog(Gtk.Window):
     def __init__(self, parent):
-        super().__init__(title="Search", transient_for=parent)
+        super().__init__(title="Search", modal=True, transient_for=parent)
 
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
         self.set_child(box)
