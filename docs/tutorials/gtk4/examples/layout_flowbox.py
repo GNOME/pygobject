@@ -27,10 +27,6 @@ class FlowBoxWindow(Gtk.ApplicationWindow):
         self.create_flowbox(flowbox)
 
     def draw_button_color(self, area, cr, width, height, rgba):
-        context = area.get_style_context()
-
-        Gtk.render_background(context, cr, 0, 0, width, height)
-
         cr.set_source_rgba(rgba.red, rgba.green, rgba.blue, rgba.alpha)
         cr.rectangle(0, 0, width, height)
         cr.fill()
