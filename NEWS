@@ -1,3 +1,10 @@
+3.56.2 - 2026-03-25
+-------------------
+
+* ci: drop obsolete mingw environments, add UCRT64 and clang64 (backport) :mr:`533`
+* Leave floating state intact for get/set property (backport) :mr:`534`
+* Only call do_dispose if it's implemented on the class (backport) :mr:`531`
+
 3.56.1 - 2026-02-27
 -------------------
 
