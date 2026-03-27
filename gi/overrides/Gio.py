@@ -16,6 +16,7 @@
 # USA
 
 import asyncio
+import os
 import warnings
 
 from .._ossighelper import register_sigint_fallback, get_event_loop
@@ -638,6 +639,31 @@ class File(Gio.File):
         if path is None or path == "":
             raise TypeError("File has no associated path.")
         return path
+
+    def __truediv__(self, subpath):
+        """Create a new child File by concatenating a sub-path.
+
+        The sub-path can be of type `str`, `bytes`, or implement `os.PathLike`.
+        If the sub-path is absolute, the previous parts will be ignored.
+        """
+        subpath = os.fspath(subpath)
+
+        # If the argument is an absolute path, the previous path is ignored,
+        # just like `os.path.join` and `pathlib.Path` do.
+        if os.path.isabs(subpath):
+            return Gio.File.new_for_path(subpath)
+
+        if isinstance(subpath, str):
+            child = self.get_child_for_display_name(subpath)
+        elif isinstance(subpath, bytes):
+            child = self.get_child(subpath)
+        else:
+            msg = f"Sub-path should be str or bytes, not {type(subpath)}"
+            raise TypeError(msg)
+
+        if child is None:
+            raise ValueError("Sub-path could not be concatenated")
+        return child
 
 
 File = override(File)

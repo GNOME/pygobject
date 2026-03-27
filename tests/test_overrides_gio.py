@@ -1,4 +1,5 @@
 import os
+import pathlib
 import platform
 import random
 import warnings
@@ -393,6 +394,31 @@ def test_file_fspath_with_no_path():
     else:
         assert path == file.__fspath__()
         assert path == os.getcwd()
+
+
+def test_file_truediv():
+    tmp_path = GLib.get_tmp_dir()
+    folder = Gio.File.new_for_path(tmp_path)
+    filename = "TestGFile.Äéìôü.txt"
+    content_ref = "hello world! \u263a".encode()
+
+    p = pathlib.Path(tmp_path, filename)
+    p.write_bytes(content_ref)
+    assert p.read_bytes() == content_ref
+
+    with pytest.raises(TypeError):
+        folder / 12345
+
+    file_str = folder / filename
+    success, content, _etag = file_str.load_contents(None)
+    assert success and content == content_ref
+
+    file_bytes = folder / os.fsencode(filename)
+    success, content, _etag = file_bytes.load_contents(None)
+    assert success and content == content_ref
+
+    file_absolute_arg = folder / "whatever" / tmp_path
+    assert file_absolute_arg.peek_path() == folder.peek_path()
 
 
 @pytest.mark.skipif(
