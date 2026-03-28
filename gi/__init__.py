@@ -42,6 +42,7 @@ from ._gi import _API as _API
 from ._gi import Repository
 from ._gi import PyGIDeprecationWarning  # noqa: F401
 from ._gi import PyGIWarning  # noqa: F401
+from ._gi import enable_strict_mode as enable_strict_mode
 
 _versions = {}
 _overridesdir = os.path.join(os.path.dirname(__file__), "overrides")

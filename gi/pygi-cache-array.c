@@ -582,9 +582,14 @@ _pygi_marshal_to_py_array (PyGIInvokeState *state,
                         item_arg.v_pointer =
                             g_array_index (array_, gpointer, i);
                     } else {
-                        // TODO: this warning needs to be actionable
-                        //  I do not have enough context to show which field/argument is in error, maybe
-                        //  allow to raise errors for those cases (e.g. an option that can be set in unit tests)
+                        if (pyg_marshal_strict_mode) {
+                            PyErr_Format (
+                                PyExc_TypeError,
+                                "Array type is assumed to be a pointer, but "
+                                "item size is %llu bytes",
+                                item_size);
+                            goto err;
+                        }
                         if (!item_size_warning) {
                             g_warning (
                                 "Array type is assumed to be a pointer, but "

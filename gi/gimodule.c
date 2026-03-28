@@ -53,6 +53,8 @@ PyObject *PyGIWarning;
 PyObject *PyGIDeprecationWarning;
 PyObject *_PyGIDefaultArgPlaceholder;
 
+gboolean pyg_marshal_strict_mode = FALSE;
+
 static int _gi_exec (PyObject *module);
 
 
@@ -1011,7 +1013,17 @@ _wrap_pygobject_new_full (PyObject *self, PyObject *args)
     return pygobject_new_full (obj, PyObject_IsTrue (steal), NULL);
 }
 
+static PyObject *
+_wrap_pyg_enable_strict_mode (PyObject *module, PyObject *pystrict)
+{
+    pyg_marshal_strict_mode = Py_IsTrue (pystrict);
+
+    Py_RETURN_NONE;
+}
+
 static PyMethodDef _gi_functions[] = {
+    { "enable_strict_mode", (PyCFunction)_wrap_pyg_enable_strict_mode,
+      METH_O },
     { "pygobject_new_full", (PyCFunction)_wrap_pygobject_new_full,
       METH_VARARGS },
     { "enum_add", (PyCFunction)_wrap_pyg_enum_add,

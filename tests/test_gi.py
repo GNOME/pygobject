@@ -2600,6 +2600,15 @@ class TestStructure(unittest.TestCase):
         with capture_glib_warnings(allow_warnings=True):
             assert out_struct.array == list(map(ord, "0123456789"))
 
+    def test_pointer_array_struct_with_guint8_strict(self):
+        out_struct = GIMarshallingTests.PointerArrayStruct.with_uint8_array()
+
+        try:
+            gi.enable_strict_mode(True)
+            self.assertRaises(TypeError, lambda: out_struct.array)
+        finally:
+            gi.enable_strict_mode(False)
+
     def test_struct_field_assignment(self):
         struct = GIMarshallingTests.BoxedStruct()
 

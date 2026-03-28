@@ -70,6 +70,8 @@ typedef void (*PyGIMarshalToPyCleanupFunc) (PyGIInvokeState *state,
                                             gpointer data,
                                             gboolean was_processed);
 
+extern gboolean pyg_marshal_strict_mode;
+
 /* Argument meta types denote how we process the argument:
  *  - PYGI_META_ARG_TYPE_PARENT - parents may or may not have children
  *    but are always processed via the normal marshaller for their
