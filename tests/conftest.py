@@ -88,12 +88,8 @@ def init_test_environ():
 
     # force untranslated messages, as we check for them in some tests
     os.environ["LC_MESSAGES"] = "C"
-    os.environ["G_DEBUG"] = "fatal-warnings fatal-criticals"
-    if sys.platform == "darwin" or os.name == "nt":
-        # gtk 3.22 has warnings and ciriticals on OS X, ignore for now.
-        # On Windows glib will create an error dialog which will block tests
-        # so it's never a good idea there to make things fatal.
-        os.environ["G_DEBUG"] = ""
+    if os.name != "nt":
+        os.environ["G_DEBUG"] = "fatal-warnings fatal-criticals"
 
     # First add test directory, since we have a gi package there
     tests_srcdir = os.path.abspath(os.path.dirname(__file__))

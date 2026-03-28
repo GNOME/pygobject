@@ -21,7 +21,7 @@ from gi.repository import GObject, GLib, Gio
 from gi.repository import GIMarshallingTests
 import pytest
 
-from .helper import capture_exceptions, capture_output
+from .helper import capture_exceptions, capture_glib_warnings, capture_output
 import contextlib
 
 
@@ -2593,6 +2593,12 @@ class TestStructure(unittest.TestCase):
 
         del in_struct
         del out_struct
+
+    def test_pointer_array_struct_with_guint8(self):
+        out_struct = GIMarshallingTests.PointerArrayStruct.with_uint8_array()
+
+        with capture_glib_warnings(allow_warnings=True):
+            assert out_struct.array == list(map(ord, "0123456789"))
 
     def test_struct_field_assignment(self):
         struct = GIMarshallingTests.BoxedStruct()
