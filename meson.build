@@ -223,9 +223,12 @@ pygobject_dep = declare_dependency(
 
 subdir('gi')
 
+gi_deps = [python_dep, glib_dep, gi_dep, ffi_dep]
+gi_cairo_deps = [pycairo_dep, cairo_dep, cairo_gobject_dep]
+
 if embed
   giext = library('_gi', gi_c_sources,
-    dependencies : [python_dep, glib_dep, gi_dep, ffi_dep, pythoncapi_compat_dep],
+    dependencies : gi_deps + [pythoncapi_compat_dep],
     include_directories: include_directories('gi'),
     install: true,
     c_args: pygiext_c_args + pyext_c_args + main_c_args
@@ -233,7 +236,7 @@ if embed
 
   if cairo_dep.found()
     gicairoext = library('_gi_cairo', gi_cairo_c_sources,
-      dependencies : [python_dep, glib_dep, gi_dep, ffi_dep, pycairo_dep, cairo_dep, cairo_gobject_dep, pythoncapi_compat_dep],
+      dependencies : gi_deps + gi_cairo_deps + [pythoncapi_compat_dep],
       include_directories: include_directories('gi'),
       install: true,
       c_args: pyext_c_args + main_c_args
@@ -241,13 +244,13 @@ if embed
     gi_dep = declare_dependency(
       link_with: [giext, gicairoext],
       include_directories: include_directories('gi'),
-      dependencies: [python_dep, glib_dep, gi_dep, ffi_dep, pycairo_dep, cairo_dep, cairo_gobject_dep]
+      dependencies: gi_deps + gi_cairo_deps
     )
   else
     gi_dep = declare_dependency(
       link_with: giext,
       include_directories: include_directories('gi'),
-      dependencies: [python_dep, glib_dep, gi_dep, ffi_dep]
+      dependencies: gi_deps
     )
   endif
 
@@ -255,7 +258,7 @@ if embed
 
 else
   giext = python.extension_module('_gi', gi_c_sources,
-    dependencies : [python_dep, glib_dep, gi_dep, ffi_dep, pythoncapi_compat_dep],
+    dependencies : gi_deps + [pythoncapi_compat_dep],
     include_directories: include_directories('gi'),
     install: true,
     c_args: pygiext_c_args + pyext_c_args + main_c_args
@@ -263,7 +266,7 @@ else
 
   if cairo_dep.found()
     gicairoext = python.extension_module('_gi_cairo', gi_cairo_c_sources,
-      dependencies : [python_dep, glib_dep, gi_dep, ffi_dep, pycairo_dep, cairo_dep, cairo_gobject_dep, pythoncapi_compat_dep],
+      dependencies : gi_deps + gi_cairo_deps + [pythoncapi_compat_dep],
       include_directories: include_directories('gi'),
       install: true,
       c_args: pyext_c_args + main_c_args)
