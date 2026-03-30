@@ -768,12 +768,20 @@ pygobject__g_instance_init (GTypeInstance *instance, gpointer g_class)
     if (is_final_subclass
         && PyObject_HasAttrString ((PyObject *)Py_TYPE (wrapper),
                                    "__dontuse_ginstance_init__")) {
+        gboolean was_floating = g_object_is_floating (object);
+        g_object_ref_sink (object);
+
         result =
             PyObject_CallMethod (wrapper, "__dontuse_ginstance_init__", NULL);
         if (result == NULL)
             PyErr_Print ();
         else
             Py_DECREF (result);
+
+        if (was_floating)
+            g_object_force_floating (object);
+        else
+            g_object_unref (object);
     }
 
     if (needs_init) {
