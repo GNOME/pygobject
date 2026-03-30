@@ -1,7 +1,6 @@
 import gc
 import os
 import tempfile
-import typing
 import weakref
 
 import pytest
