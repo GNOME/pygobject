@@ -806,22 +806,9 @@ def test_signal_handler_with_object_does_not_leak_memory():
     class MyWidget(Gtk.Widget):
         __gtype_name__ = type_name
 
-    weak = _create_weak(MyWidget)
+    weak = MyWidget().weak_ref()
 
-    # Mostly arbitrarily chosen, pypy needs two calls to gc.collect()
-    # while cpython 3.14 currently only needs one call.
-    GC_COLLECT_MAX_ATTEMPTS = 5
-    for _ in range(GC_COLLECT_MAX_ATTEMPTS):
-        gc.collect()
-        if weak() is None:
-            break
+    gc.collect()
+    gc.collect()  # One more for PyPy
 
     assert weak() is None
-
-
-T = typing.TypeVar("T", bound=GObject.Object)
-
-
-def _create_weak(Class: type[T]) -> T:
-    instance = Class()
-    return instance.weak_ref()
