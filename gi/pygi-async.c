@@ -63,8 +63,14 @@ async_repr (PyGIAsync *self)
  * Cancel the asynchronous operation.
  */
 static PyObject *
-async_cancel (PyGIAsync *self)
+async_cancel (PyGIAsync *self, PyObject *args, PyObject *kwargs)
 {
+    static char *kwlist[] = { "msg", NULL };
+    const char *msg = NULL;
+
+    if (!PyArg_ParseTupleAndKeywords (args, kwargs, "|z", kwlist, &msg))
+        return NULL;
+
     return PyObject_CallMethod (self->cancellable, "cancel", NULL);
 }
 
@@ -295,7 +301,7 @@ out:
 }
 
 static PyMethodDef async_methods[] = {
-    { "cancel", (PyCFunction)async_cancel, METH_NOARGS },
+    { "cancel", (PyCFunction)async_cancel, METH_VARARGS | METH_KEYWORDS },
     { "done", (PyCFunction)async_done, METH_NOARGS },
     { "result", (PyCFunction)async_result, METH_NOARGS },
     { "exception", (PyCFunction)async_exception, METH_NOARGS },
