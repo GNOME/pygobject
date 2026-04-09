@@ -1,3 +1,4 @@
+import sys
 import pytest
 import platform
 import unittest
@@ -73,6 +74,45 @@ class TestAsync(unittest.TestCase):
             cancel.cancel()
             with self.assertRaisesRegex(GLib.GError, "Operation was cancelled"):
                 await res
+
+        self.loop.run_until_complete(run())
+
+    def test_cancel_async_task(self):
+        # Regression test for https://gitlab.gnome.org/GNOME/pygobject/-/issues/755
+        async def _long_task(proc):
+            await proc.wait_async()
+
+        async def run():
+            nonlocal self
+
+            # Create a process which waits for input on stdin, without ever
+            # actually providing any such input.  This process won't exit unless
+            # we explicitly kill it.
+            flags = (
+                Gio.SubprocessFlags.STDOUT_SILENCE
+                | Gio.SubprocessFlags.STDERR_SILENCE
+                | Gio.SubprocessFlags.STDIN_PIPE
+            )
+            proc = Gio.Subprocess.new([sys.executable], flags)
+
+            try:
+                # Create a task which waits for said process to exit; but since
+                # the process won't actually do so we've created a task which
+                # indefinitely awaits on a Gio cancellable.
+                res = asyncio.create_task(_long_task(proc))
+                # Briefly yield control to make sure the task we just created
+                # starts running on the loop and polls on a Gio task.
+                await asyncio.sleep(0.1)
+                # Now cancel the task while it's awaiting on a Gio task; this
+                # will now hit the async_cancel implementation on the C side.
+                #
+                # Also, explicitly assert that the task was really cancelled
+                # (.cancel() returns True), and hasn't already finished by this
+                # time (.cancel() returns False).  This makes sure that we're
+                # really testing the cancellation here.
+                assert res.cancel(), "Test invalid, task already finished"
+            finally:
+                proc.force_exit()
 
         self.loop.run_until_complete(run())
 
