@@ -116,6 +116,46 @@ class TestAsync(unittest.TestCase):
 
         self.loop.run_until_complete(run())
 
+    def test_async_task_cancellation(self):
+        """Cancellation works on wrapping task."""
+        f = Gio.file_new_for_path("./")
+
+        async def run():
+            nonlocal self, task
+
+            # Queue cancellation of ourselves with default idle priority
+            GLib.idle_add(lambda: task.cancel("custom cancellation message") and False)
+
+            cancel = Gio.Cancellable()
+
+            try:
+                # Start low priority task which will be cancelled (lower than default idle)
+                async_call = f.enumerate_children_async(
+                    "standard::*", 0, GLib.PRIORITY_LOW, cancel
+                )
+                await async_call
+
+                self.fail("await did not raise!")
+            except asyncio.CancelledError:
+                self.assertTrue(cancel.is_cancelled())
+
+                gio_exception = async_call.exception()
+                self.assertIsInstance(gio_exception, GLib.GError)
+                self.assertTrue(
+                    gio_exception.matches(
+                        Gio.io_error_quark(), Gio.IOErrorEnum.CANCELLED
+                    )
+                )
+
+                # re-raise cancellation
+                raise
+
+        task = self.loop.create_task(run())
+        with self.assertRaisesRegex(
+            asyncio.CancelledError, "custom cancellation message"
+        ):
+            self.loop.run_until_complete(task)
+
     def test_not_completed(self):
         """Querying an uncompleted task raises exceptions."""
         f = Gio.file_new_for_path("./")
