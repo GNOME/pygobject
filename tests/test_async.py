@@ -152,7 +152,8 @@ class TestAsync(unittest.TestCase):
 
         task = self.loop.create_task(run())
         with self.assertRaisesRegex(
-            asyncio.CancelledError, "custom cancellation message"
+            asyncio.CancelledError,
+            "" if sys.version_info < (3, 11) else "custom cancellation message",
         ):
             self.loop.run_until_complete(task)
 
