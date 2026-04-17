@@ -347,6 +347,33 @@ Settings = override(Settings)
 __all__.append("Settings")
 
 
+@override
+class DBusConnection(Gio.DBusConnection):
+    __init__ = _warn_init(Gio.DBusConnection)
+
+    if hasattr(Gio.DBusConnection, "register_object_with_closures2"):
+        # Use register_object_with_closures2 to implement register_object, if
+        # GLib has it, see https://gitlab.gnome.org/GNOME/pygobject/-/issues/756
+        def register_object(
+            self,
+            object_path,
+            interface_info,
+            method_call_closure=None,
+            get_property_closure=None,
+            set_property_closure=None,
+        ):
+            return self.register_object_with_closures2(
+                object_path,
+                interface_info,
+                method_call_closure,
+                get_property_closure,
+                set_property_closure,
+            )
+
+
+__all__.append("DBusConnection")
+
+
 class _DBusProxyMethodCall:
     """Helper class to implement DBusProxy method calls."""
 
