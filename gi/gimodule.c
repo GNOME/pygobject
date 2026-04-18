@@ -451,7 +451,11 @@ _wrap_pyg_register_interface_info (PyObject *self, PyObject *args)
 {
     PyObject *py_g_type;
     GType g_type;
-    GInterfaceInfo *info;
+    GInterfaceInfo info = {
+        .interface_init = (GInterfaceInitFunc)initialize_interface,
+        .interface_finalize = NULL,
+        .interface_data = NULL,
+    };
 
     if (!PyArg_ParseTuple (args, "O!:register_interface_info",
                            &PyGTypeWrapper_Type, &py_g_type)) {
@@ -464,11 +468,7 @@ _wrap_pyg_register_interface_info (PyObject *self, PyObject *args)
         return NULL;
     }
 
-    info = g_new0 (GInterfaceInfo, 1);
-    info->interface_init = (GInterfaceInitFunc)initialize_interface;
-
-    pyg_register_interface_info (g_type, info);
-    g_free (info);
+    pyg_register_interface_info (g_type, &info);
 
     Py_RETURN_NONE;
 }
