@@ -27,7 +27,7 @@ _interface_cache_free_func (PyGIInterfaceCache *cache)
 {
     if (cache != NULL) {
         Py_XDECREF (cache->py_type);
-        if (cache->type_name != NULL) g_free (cache->type_name);
+        g_free (cache->type_name);
         if (cache->interface_info != NULL)
             gi_base_info_unref ((GIBaseInfo *)cache->interface_info);
         g_slice_free (PyGIInterfaceCache, cache);
@@ -69,7 +69,7 @@ pygi_arg_interface_setup (
     iface_cache->py_type = pygi_type_import_by_gi_info (base_info);
 
     if (g_type_is_a (iface_cache->g_type, G_TYPE_OBJECT)) {
-        if (g_str_equal (g_type_name (iface_cache->g_type), "GCancellable"))
+        if (g_strcmp0 (g_type_name (iface_cache->g_type), "GCancellable") == 0)
             iface_cache->arg_cache.async_context =
                 PYGI_ASYNC_CONTEXT_CANCELLABLE;
     }

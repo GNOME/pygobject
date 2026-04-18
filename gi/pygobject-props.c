@@ -219,8 +219,7 @@ pygobject_props_dir (PyGProps *self)
     }
 
     g_type_class_unref (class);
-
-    if (props) g_free (props);
+    g_free (props);
 
     return props_list;
 }

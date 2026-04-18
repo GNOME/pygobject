@@ -260,21 +260,21 @@ static void
 test1_callback (GObject *object, char *data)
 {
     g_return_if_fail (G_IS_OBJECT (object));
-    g_return_if_fail (!strcmp (data, "user-data"));
+    g_return_if_fail (g_strcmp0 (data, "user-data") == 0);
 }
 
 static void
 test1_callback_swapped (char *data, GObject *object)
 {
     g_return_if_fail (G_IS_OBJECT (object));
-    g_return_if_fail (!strcmp (data, "user-data"));
+    g_return_if_fail (g_strcmp0 (data, "user-data") == 0);
 }
 
 static void
 test2_callback (GObject *object, char *string)
 {
     g_return_if_fail (G_IS_OBJECT (object));
-    g_return_if_fail (!strcmp (string, "string"));
+    g_return_if_fail (g_strcmp0 (string, "string") == 0);
 }
 
 static int
@@ -329,7 +329,7 @@ static char *
 test_string_callback (GObject *object, char *s)
 {
     g_return_val_if_fail (G_IS_OBJECT (object), NULL);
-    g_return_val_if_fail (!strcmp (s, "str"), NULL);
+    g_return_val_if_fail (g_strcmp0 (s, "str") == 0, NULL);
 
     return g_strdup (s);
 }
