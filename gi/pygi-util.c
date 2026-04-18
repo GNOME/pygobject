@@ -119,7 +119,7 @@ pyg_is_python_keyword (const gchar *name)
 
     /* Python 3.x; note that we explicitly keep "print"; it is not a keyword
      * any more, but we do not want to break API between Python versions */
-    if (strcmp (name, "print") == 0) Py_RETURN_TRUE;
+    if (g_strcmp0 (name, "print") == 0) Py_RETURN_TRUE;
 
     pyname = PyUnicode_FromString (name);
     if (!pyname) return NULL;

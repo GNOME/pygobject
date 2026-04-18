@@ -264,7 +264,7 @@ pygi_arg_foreign_from_py_marshal (PyGIInvokeState *state,
         py_arg, GI_REGISTERED_TYPE_INFO (iface_cache->interface_info),
         arg_cache->transfer, arg);
 
-    ForeignReleaseData *release_data = g_malloc (sizeof (ForeignReleaseData));
+    ForeignReleaseData *release_data = g_new (ForeignReleaseData, 1);
     release_data->base_info = gi_base_info_ref (
         GI_BASE_INFO (((PyGIInterfaceCache *)arg_cache)->interface_info));
     release_data->struct_ = arg->v_pointer;
@@ -409,8 +409,7 @@ pygi_arg_foreign_to_py_marshal (PyGIInvokeState *state,
         iface_cache->interface_info, arg_cache->transfer, arg->v_pointer);
 
     if (arg_cache->transfer == GI_TRANSFER_EVERYTHING) {
-        ForeignReleaseData *release_data =
-            g_malloc (sizeof (ForeignReleaseData));
+        ForeignReleaseData *release_data = g_new (ForeignReleaseData, 1);
         release_data->base_info = gi_base_info_ref (
             GI_BASE_INFO (((PyGIInterfaceCache *)arg_cache)->interface_info));
         release_data->struct_ = arg->v_pointer;

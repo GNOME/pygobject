@@ -564,7 +564,8 @@ _function_info_vectorcall (PyGICallableInfo *self, PyObject *const *args,
         }
 
         str_name = PyUnicode_AsUTF8 (py_str_name);
-        if (strcmp (str_name, _safe_base_info_get_name (container_info))) {
+        if (g_strcmp0 (str_name, _safe_base_info_get_name (container_info))
+            != 0) {
             PyErr_Format (
                 PyExc_TypeError,
                 "%s constructor cannot be used to create instances of "

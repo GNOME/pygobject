@@ -42,8 +42,8 @@ lookup_property_from_object_info (GIObjectInfo *info, const gchar *attr_name)
         property_info = gi_object_info_get_property (info, i);
         g_assert (info != NULL);
 
-        if (strcmp (attr_name,
-                    gi_base_info_get_name (GI_BASE_INFO (property_info)))
+        if (g_strcmp0 (attr_name,
+                       gi_base_info_get_name (GI_BASE_INFO (property_info)))
             == 0) {
             return property_info;
         }
@@ -68,8 +68,8 @@ lookup_property_from_interface_info (GIInterfaceInfo *info,
         property_info = gi_interface_info_get_property (info, i);
         g_assert (info != NULL);
 
-        if (strcmp (attr_name,
-                    gi_base_info_get_name (GI_BASE_INFO (property_info)))
+        if (g_strcmp0 (attr_name,
+                       gi_base_info_get_name (GI_BASE_INFO (property_info)))
             == 0) {
             return property_info;
         }

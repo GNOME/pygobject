@@ -51,9 +51,7 @@ pyg_register_interface_info (GType gtype, const GInterfaceInfo *info)
 {
     GInterfaceInfo *prev_info = pyg_lookup_interface_info (gtype);
 
-    if (prev_info) {
-        g_free (prev_info);
-    }
+    g_free (prev_info);
 
     g_type_set_qdata (gtype, pyginterface_info_key,
                       g_memdup2 (info, sizeof (GInterfaceInfo)));
