@@ -1,7 +1,6 @@
 import asyncio
 import unittest
 
-import pytest
 from gi.events import GLibEventLoopPolicy
 from gi.repository import GLib
 from gi.repository import Gio
@@ -323,7 +322,6 @@ class TestDBusConnection:
             bus.unregister_object(reg_id)
 
     @unittest.skipUnless(has_dbus, "no dbus running")
-    @pytest.mark.xfail()
     def test_connection_invocation_ref_count(self):
         """Invocation object should not leak a reference."""
         invocation, errors = self.run_server(self.client_call)
