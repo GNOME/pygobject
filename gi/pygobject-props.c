@@ -18,13 +18,14 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "pygobject-props.h"
+
 #include "pygi-fundamental.h"
 #include "pygi-property.h"
 #include "pygi-type.h"
-#include "pygi-value.h"
 #include "pygi-util.h"
+#include "pygi-value.h"
 #include "pygobject-object.h"
-#include "pygobject-props.h"
 
 typedef struct {
     PyObject_HEAD

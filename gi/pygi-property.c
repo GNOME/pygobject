@@ -21,10 +21,10 @@
  * IN THE SOFTWARE.
  */
 
-#include "pygi-argument.h"
+#include "pygi-property.h"
+
 #include "pygi-basictype.h"
 #include "pygi-fundamental.h"
-#include "pygi-property.h"
 #include "pygi-repository.h"
 #include "pygi-type.h"
 #include "pygi-value.h"

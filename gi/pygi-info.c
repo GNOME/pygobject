@@ -20,12 +20,11 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "pygi-type.h"
-
 #include "pygi-argument.h"
 #include "pygi-basictype.h"
 #include "pygi-fundamental.h"
 #include "pygi-invoke.h"
+#include "pygi-type.h"
 #include "pygi-util.h"
 
 /* _generate_doc_string

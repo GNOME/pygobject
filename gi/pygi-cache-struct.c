@@ -19,14 +19,14 @@
  */
 
 #include "pygboxed.h"
-#include "pygpointer.h"
 #include "pygi-boxed.h"
+#include "pygi-cache-private.h"
 #include "pygi-foreign.h"
 #include "pygi-info.h"
 #include "pygi-struct.h"
 #include "pygi-type.h"
 #include "pygi-value.h"
-#include "pygi-cache-private.h"
+#include "pygpointer.h"
 
 /*
  * _is_union_member - check to see if the py_arg is actually a member of the

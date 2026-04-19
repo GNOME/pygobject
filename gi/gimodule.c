@@ -22,9 +22,10 @@
  */
 
 #include "config.h"
+
+#include "pygboxed.h"
 #include "pygenum.h"
 #include "pygflags.h"
-#include "pygboxed.h"
 #include "pygi-async.h"
 #include "pygi-basictype.h"
 #include "pygi-boxed.h"
@@ -44,9 +45,9 @@
 #include "pygi-util.h"
 #include "pygi-value.h"
 #include "pyginterface.h"
-#include "pygobject-types.h"
 #include "pygobject-object.h"
 #include "pygobject-props.h"
+#include "pygobject-types.h"
 #include "pygpointer.h"
 
 PyObject *PyGIWarning;

@@ -20,9 +20,9 @@
 #ifndef __PYGOBJECT_TYPES_H__
 #define __PYGOBJECT_TYPES_H__
 
-#include <glib.h>
-#include <glib-object.h>
 #include <Python.h>
+#include <glib-object.h>
+#include <glib.h>
 
 G_BEGIN_DECLS
 

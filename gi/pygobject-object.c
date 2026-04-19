@@ -18,7 +18,8 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "pygobject-types.h"
+#include "pygobject-object.h"
+
 #include "pygboxed.h"
 #include "pygi-basictype.h"
 #include "pygi-fundamental.h"
@@ -28,8 +29,8 @@
 #include "pygi-util.h"
 #include "pygi-value.h"
 #include "pyginterface.h"
-#include "pygobject-object.h"
 #include "pygobject-props.h"
+#include "pygobject-types.h"
 
 extern PyObject *PyGIDeprecationWarning;
 

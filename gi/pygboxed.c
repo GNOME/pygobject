@@ -18,9 +18,10 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "pygboxed.h"
+
 #include "pygi-type.h"
 #include "pygi-util.h"
-#include "pygboxed.h"
 
 GQuark pygboxed_type_key;
 

@@ -20,8 +20,8 @@
 #ifndef __PYGI_FOREIGN_TYPES_H__
 #define __PYGI_FOREIGN_TYPES_H__
 
-#include <girepository/girepository.h>
 #include <Python.h>
+#include <girepository/girepository.h>
 
 typedef PyObject *(*PyGIArgOverrideToGIArgumentFunc) (
     PyObject *value, GIRegisteredTypeInfo *interface_info, GITransfer transfer,

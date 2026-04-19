@@ -18,9 +18,9 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "pygi-cache-private.h"
 #include "pygi-fundamental.h"
 #include "pygobject-object.h"
-#include "pygi-cache-private.h"
 
 /* pygi_marshal_from_py_object:
  * py_arg: (in):

@@ -22,9 +22,9 @@
  * IN THE SOFTWARE.
  */
 
-#include "pygobject-types.h"
-
 #include "pygi-foreign.h"
+
+#include "pygobject-types.h"
 
 typedef struct {
     const char *namespace;

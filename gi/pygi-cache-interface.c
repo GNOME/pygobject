@@ -18,9 +18,9 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "pygi-cache-private.h"
 #include "pygi-info.h"
 #include "pygi-type.h"
-#include "pygi-cache-private.h"
 
 static void
 _interface_cache_free_func (PyGIInterfaceCache *cache)

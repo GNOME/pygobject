@@ -19,12 +19,12 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "pygi-type.h"
+#include "pygi-boxed.h"
 
 #include "pygboxed.h"
 #include "pygi-basictype.h"
-#include "pygi-boxed.h"
 #include "pygi-info.h"
+#include "pygi-type.h"
 #include "pygi-util.h"
 
 struct _PyGIBoxed {

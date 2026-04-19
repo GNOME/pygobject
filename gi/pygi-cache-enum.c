@@ -18,10 +18,10 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "pygi-type.h"
 #include "pygenum.h"
 #include "pygflags.h"
 #include "pygi-cache-private.h"
+#include "pygi-type.h"
 
 static gboolean
 gi_argument_from_c_long (GIArgument *arg_out, long c_long_in,

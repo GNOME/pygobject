@@ -19,8 +19,8 @@
  */
 
 #include "pygi-argument.h"
-#include "pygi-util.h"
 #include "pygi-cache-private.h"
+#include "pygi-util.h"
 
 typedef PyGISequenceCache PyGIArgGList;
 
