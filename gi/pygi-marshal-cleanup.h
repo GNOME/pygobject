@@ -20,8 +20,8 @@
 #ifndef __PYGI_MARSHAL_CLEANUP_H__
 #define __PYGI_MARSHAL_CLEANUP_H__
 
-#include "pygi-struct.h"
 #include "pygi-cache.h"
+#include "pygi-struct.h"
 
 G_BEGIN_DECLS
 

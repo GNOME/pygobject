@@ -18,8 +18,9 @@
  */
 
 #include "pygi-marshal-cleanup.h"
-#include "pygi-foreign.h"
+
 #include "pygi-cache-private.h"
+#include "pygi-foreign.h"
 
 static inline void
 _cleanup_caller_allocates (PyGIInvokeState *state, PyGIArgCache *cache,

@@ -26,8 +26,8 @@
 
 #include <girepository/girepository.h>
 
-#include "pygpointer.h"
 #include "pygi-type.h"
+#include "pygpointer.h"
 
 G_BEGIN_DECLS
 

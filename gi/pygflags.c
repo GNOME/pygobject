@@ -19,9 +19,9 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "pygi-type.h"
-
 #include "pygflags.h"
+
+#include "pygi-type.h"
 #include "pygi-util.h"
 
 GQuark pygflags_class_key;

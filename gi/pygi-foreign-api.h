@@ -20,8 +20,8 @@
 #ifndef __PYGI_FOREIGN_API_H__
 #define __PYGI_FOREIGN_API_H__
 
-#include <pygobject.h>
 #include <pygi-foreign-types.h>
+#include <pygobject.h>
 
 static struct PyGI_API *PyGI_API = NULL;
 

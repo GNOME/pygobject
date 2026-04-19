@@ -23,14 +23,14 @@
  * IN THE SOFTWARE.
  */
 
-#include "pygi-type.h"
+#include "pygi-source.h"
 
 #include "pygboxed.h"
 #include "pygi-basictype.h"
 #include "pygi-boxed.h"
 #include "pygi-info.h"
+#include "pygi-type.h"
 #include "pygi-util.h"
-#include "pygi-source.h"
 
 typedef struct {
     GSource source;
@@ -185,7 +185,7 @@ handler_marshal (gpointer user_data)
 }
 
 PyObject *
-pygi_source_set_callback (PyGObject *self_module, PyObject *args)
+pygi_source_set_callback (PyObject *self_module, PyObject *args)
 {
     PyObject *self, *first, *callback, *cbargs = NULL, *data;
     Py_ssize_t len;

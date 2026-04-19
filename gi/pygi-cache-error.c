@@ -20,8 +20,8 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "pygi-error.h"
 #include "pygi-cache-private.h"
+#include "pygi-error.h"
 
 static gboolean
 _pygi_marshal_from_py_gerror (PyGIInvokeState *state,

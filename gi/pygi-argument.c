@@ -19,23 +19,22 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "pygi-argument.h"
+
 #include <string.h>
 #include <time.h>
 
 #include "pygenum.h"
 #include "pygflags.h"
-
-#include "pygi-type.h"
-
-#include "pygi-argument.h"
 #include "pygi-basictype.h"
 #include "pygi-boxed.h"
+#include "pygi-cache-private.h"
 #include "pygi-error.h"
 #include "pygi-foreign.h"
 #include "pygi-info.h"
+#include "pygi-type.h"
 #include "pygi-util.h"
 #include "pygi-value.h"
-#include "pygi-cache-private.h"
 
 GIArgument
 pygi_argument_from_py (GITypeInfo *type_info, PyObject *object,

@@ -22,7 +22,6 @@
  * USA
  */
 
-#include "pygobject-types.h"
 #include "pygenum.h"
 #include "pygflags.h"
 #include "pygi-basictype.h"
@@ -32,6 +31,7 @@
 #include "pygi-util.h"
 #include "pygi-value.h"
 #include "pygobject-object.h"
+#include "pygobject-types.h"
 
 extern GQuark pygobject_instance_init_ref_count;
 

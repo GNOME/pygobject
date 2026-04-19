@@ -21,6 +21,9 @@
 #ifndef __PYGOBJECT_INTERFACE_H__
 #define __PYGOBJECT_INTERFACE_H__
 
+#include <glib-object.h>
+#include <pythoncapi_compat.h>
+
 extern GQuark pyginterface_type_key;
 extern GQuark pyginterface_info_key;
 

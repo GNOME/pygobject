@@ -17,12 +17,12 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "pygobject-object.h"
+#include "pygi-async.h"
 
 #include "pygboxed.h"
-#include "pygi-async.h"
 #include "pygi-invoke.h"
 #include "pygi-util.h"
+#include "pygobject-object.h"
 
 static PyObject *asyncio_InvalidStateError;
 static PyObject *asyncio_get_running_loop;

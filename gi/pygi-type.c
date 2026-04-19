@@ -16,17 +16,17 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "pygobject-object.h"
+#include "pygi-type.h"
 
 #include "pygboxed.h"
 #include "pygenum.h"
 #include "pygflags.h"
 #include "pygi-basictype.h"
 #include "pygi-repository.h"
-#include "pygi-type.h"
 #include "pygi-util.h"
 #include "pygi-value.h"
 #include "pyginterface.h"
+#include "pygobject-object.h"
 #include "pygpointer.h"
 
 PyObject *

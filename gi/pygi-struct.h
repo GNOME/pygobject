@@ -20,8 +20,9 @@
 #ifndef __PYGI_STRUCT_H__
 #define __PYGI_STRUCT_H__
 
-#include "pygobject-types.h"
 #include <pythoncapi_compat.h>
+
+#include "pygobject-types.h"
 
 G_BEGIN_DECLS
 

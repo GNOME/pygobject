@@ -18,9 +18,10 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "pygpointer.h"
+
 #include "pygi-type.h"
 #include "pygi-util.h"
-#include "pygpointer.h"
 
 GQuark pygpointer_class_key;
 

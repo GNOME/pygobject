@@ -20,9 +20,9 @@
 
 #include "pygi-argument.h"
 #include "pygi-basictype.h"
+#include "pygi-cache-private.h"
 #include "pygi-info.h"
 #include "pygi-util.h"
-#include "pygi-cache-private.h"
 
 /*
  * GArray to Python

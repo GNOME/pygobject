@@ -21,9 +21,11 @@
  * USA
  */
 
+#include "pygi-capi.h"
+
+#include "pygboxed.h"
 #include "pygenum.h"
 #include "pygflags.h"
-#include "pygboxed.h"
 #include "pygi-basictype.h"
 #include "pygi-error.h"
 #include "pygi-type.h"
@@ -32,7 +34,6 @@
 #include "pyginterface.h"
 #include "pygobject-object.h"
 #include "pygpointer.h"
-#include "pygi-capi.h"
 
 
 /**
