@@ -21,7 +21,7 @@
 
 /* TestFloating */
 
-G_DEFINE_TYPE (TestFloating, test_floating, G_TYPE_INITIALLY_UNOWNED)
+G_DEFINE_TYPE (TestFloating, test_floating, G_TYPE_INITIALLY_UNOWNED);
 
 static void
 test_floating_finalize (GObject *gobject)
@@ -55,7 +55,7 @@ test_floating_init (TestFloating *self)
 
 /* TestOwnedByLibrary */
 
-G_DEFINE_TYPE (TestOwnedByLibrary, test_owned_by_library, G_TYPE_OBJECT)
+G_DEFINE_TYPE (TestOwnedByLibrary, test_owned_by_library, G_TYPE_OBJECT);
 
 static GSList *obl_instance_list = NULL;
 
@@ -92,7 +92,7 @@ test_owned_by_library_get_instance_list (void)
  */
 
 G_DEFINE_TYPE (TestFloatingAndSunk, test_floating_and_sunk,
-               G_TYPE_INITIALLY_UNOWNED)
+               G_TYPE_INITIALLY_UNOWNED);
 
 static GSList *fas_instance_list = NULL;
 

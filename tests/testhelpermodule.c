@@ -1,7 +1,7 @@
 #include <string.h>
 
-#include <pythoncapi_compat.h>
 #include <pygobject.h>
+#include <pythoncapi_compat.h>
 
 #include "test-floating.h"
 #include "test-thread.h"
@@ -348,7 +348,7 @@ test_paramspec_callback (GObject *object)
     g_return_val_if_fail (G_IS_OBJECT (object), NULL);
 
     return g_param_spec_boolean ("test-param", "test", "test boolean", TRUE,
-                                 G_PARAM_READABLE);
+                                 G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 }
 
 static GValue *
@@ -359,7 +359,7 @@ test_gvalue_callback (GObject *object, const GValue *v)
     g_return_val_if_fail (G_IS_OBJECT (object), NULL);
     g_return_val_if_fail (G_IS_VALUE (v), NULL);
 
-    ret = g_malloc0 (sizeof (GValue));
+    ret = g_new0 (GValue, 1);
     g_value_init (ret, G_VALUE_TYPE (v));
     g_value_copy (v, ret);
     return ret;
@@ -372,7 +372,7 @@ test_gvalue_ret_callback (GObject *object, GType type)
 
     g_return_val_if_fail (G_IS_OBJECT (object), NULL);
 
-    ret = g_malloc0 (sizeof (GValue));
+    ret = g_new0 (GValue, 1);
     g_value_init (ret, type);
 
     switch (type) {
@@ -389,7 +389,7 @@ test_gvalue_ret_callback (GObject *object, GType type)
         g_value_set_uint64 (ret, G_MAXUINT64);
         break;
     case G_TYPE_STRING:
-        g_value_set_string (ret, "hello");
+        g_value_set_static_string (ret, "hello");
         break;
     default:
         g_critical ("test_gvalue_ret_callback() does not support type %s",
@@ -558,6 +558,7 @@ _wrap_test_gerror_exception (PyObject *self, PyObject *args)
     PyObject *py_method;
     PyObject *py_args;
     PyObject *py_ret;
+    /* goblint-ignore-next-line: g_error_leak */
     GError *err = NULL;
 
     if (!PyArg_ParseTuple (args, "O", &py_method)) return NULL;
@@ -565,7 +566,7 @@ _wrap_test_gerror_exception (PyObject *self, PyObject *args)
     py_args = PyTuple_New (0);
     py_ret = PyObject_CallObject (py_method, py_args);
     if (pyg_gerror_exception_check (&err)) {
-        pyg_error_check (&err);
+        pyg_error_check (&err); /* also clears the error. */
         return NULL;
     }
 
