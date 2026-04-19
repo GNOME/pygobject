@@ -615,7 +615,6 @@ pyg_channel_read (PyObject *self, PyObject *args, PyObject *kwargs)
     int max_count = -1;
     PyObject *py_iochannel, *ret_obj = NULL;
     gsize total_read = 0;
-    GError *error = NULL;
     GIOStatus status = G_IO_STATUS_NORMAL;
     GIOChannel *iochannel = NULL;
 
@@ -638,6 +637,9 @@ pyg_channel_read (PyObject *self, PyObject *args, PyObject *kwargs)
         gsize single_read;
         char *buf;
         gsize buf_size;
+        /* Cleared by pygi_check_error().
+        * goblint-ignore-next-line: g_error_leak */
+        GError *error = NULL;
 
         if (max_count == -1)
             buf_size = CHUNK_SIZE;

@@ -30,6 +30,7 @@ _pygi_marshal_from_py_gerror (PyGIInvokeState *state,
                               GIArgument *arg,
                               PyGIMarshalCleanupData *cleanup_data)
 {
+    /* goblint-ignore-next-line: g_error_leak */
     GError *error = NULL;
     if (Py_IsNone (py_arg)) {
         arg->v_pointer = NULL;

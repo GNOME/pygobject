@@ -6,5 +6,4 @@ use_g_autofree = false
 use_g_autoptr_error = false
 use_g_autoptr_goto_cleanup = false
 use_g_autoptr_inline_cleanup = false
-g_param_spec_static_name_canonical = false
 g_param_spec_null_nick_blurb = false
