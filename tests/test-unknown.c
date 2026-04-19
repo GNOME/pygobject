@@ -12,9 +12,10 @@ test_interface_base_init (gpointer g_iface)
 
     if (!initialized) {
         g_object_interface_install_property (
-            g_iface, g_param_spec_string ("some-property", "some-property",
-                                          "A simple test property", NULL,
-                                          G_PARAM_READWRITE));
+            g_iface,
+            g_param_spec_string ("some-property", "some-property",
+                                 "A simple test property", NULL,
+                                 G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
         initialized = TRUE;
     }
 }
@@ -94,7 +95,7 @@ test_unknown_class_init (TestUnknownClass *klass)
         G_OBJECT_CLASS (klass), PROP_SOME_PROPERTY,
         g_param_spec_string ("some-property", "some-property",
                              "A simple test property", NULL,
-                             G_PARAM_READWRITE));
+                             G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
 }
 
 void
