@@ -670,6 +670,8 @@ _function_cache_init (PyGIFunctionCache *function_cache,
 {
     PyGICallableCache *callable_cache = (PyGICallableCache *)function_cache;
     GIFunctionInvoker *invoker = &function_cache->invoker;
+    /* Cleared by pygi_check_error().
+     * goblint-ignore-next-line: g_error_leak */
     GError *error = NULL;
 
     callable_cache->calling_context = PYGI_CALLING_CONTEXT_IS_FROM_PY;
@@ -728,7 +730,9 @@ _function_cache_init (PyGIFunctionCache *function_cache,
 
             /* Original name without _async if it is there, _finish + NUL byte */
             finish_name = g_malloc0 (name_len + 7 + 1);
+            /* goblint-ignore-next-line: use_g_strlcpy */
             strncat (finish_name, name, name_len);
+            /* goblint-ignore-next-line: use_g_strlcpy */
             strcat (finish_name, "_finish");
 
             if (container && GI_IS_OBJECT_INFO (container)) {
@@ -986,6 +990,8 @@ _vfunc_cache_invoke_real (PyGIFunctionCache *function_cache,
     Py_ssize_t nargs = PyVectorcall_NARGS (py_nargsf);
     PyObject *py_gtype;
     GType implementor_gtype;
+    /* Cleared by pygi_check_error().
+     * goblint-ignore-next-line: g_error_leak */
     GError *error = NULL;
     PyObject *ret;
 

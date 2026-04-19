@@ -22,12 +22,13 @@
 
 #include "pygi-invoke-state-struct.h"
 
-G_BEGIN_DECLS
 
 /* GIArgument is initialized based on the assumption that
  * it's the same size as a gint64 (long long).
  */
 G_STATIC_ASSERT (sizeof (GIArgument) == sizeof (gint64));
+
+G_BEGIN_DECLS
 
 #define PYGI_ARG_INIT { .v_int64 = 0 }
 

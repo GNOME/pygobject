@@ -832,6 +832,7 @@ pygobject_clear (PyGObject *self)
 }
 
 #ifndef PYPY_VERSION
+/* goblint-ignore-next-line: g_object_virtual_methods_chain_up */
 static void
 pygobject_finalize (PyGObject *self)
 {

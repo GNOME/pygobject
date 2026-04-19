@@ -222,6 +222,7 @@ pygerror_from_gvalue (const GValue *value)
 static int
 pygerror_to_gvalue (GValue *value, PyObject *pyerror)
 {
+    /* goblint-ignore-next-line: g_error_leak */
     GError *gerror = NULL;
 
     if (pygi_error_marshal_from_py (pyerror, &gerror)) {
