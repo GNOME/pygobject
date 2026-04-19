@@ -26,7 +26,12 @@ test_thread_enum_get_type (void)
     return enum_type;
 }
 
-G_DEFINE_TYPE (TestThread, test_thread, G_TYPE_OBJECT);
+typedef struct _TestThreadPrivate TestThreadPrivate;
+struct _TestThreadPrivate {
+    GThread *thread;
+};
+
+G_DEFINE_TYPE_WITH_PRIVATE (TestThread, test_thread, G_TYPE_OBJECT);
 
 static G_NORETURN void
 other_thread_cb (TestThread *self)
@@ -38,13 +43,15 @@ other_thread_cb (TestThread *self)
 static void
 test_thread_emit_signal (TestThread *self)
 {
-    self->thread = g_thread_new ("t", (GThreadFunc)other_thread_cb, self);
+    TestThreadPrivate *priv = test_thread_get_instance_private (self);
+    priv->thread = g_thread_new ("t", (GThreadFunc)other_thread_cb, self);
 }
 
 static void
 test_thread_init (TestThread *self)
 {
 }
+
 static void
 test_thread_class_init (TestThreadClass *klass)
 {

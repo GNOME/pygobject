@@ -21,82 +21,25 @@
 
 /* TestFloating */
 
-typedef struct {
-    GInitiallyUnowned parent;
-} TestFloating;
-
-typedef struct {
-    GInitiallyUnownedClass parent_class;
-} TestFloatingClass;
-
 #define TEST_TYPE_FLOATING (test_floating_get_type ())
-#define TEST_FLOATING(obj)                                                    \
-    (G_TYPE_CHECK_INSTANCE_CAST ((obj), TEST_TYPE_FLOATING, TestFloating))
-#define TEST_FLOATING_CLASS(klass)                                            \
-    (G_TYPE_CHECK_CLASS_CAST ((klass), TEST_TYPE_FLOATING, TestFloatingClass))
-#define TEST_IS_FLOATING(obj)                                                 \
-    (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TEST_TYPE_FLOATING))
-#define TEST_IS_FLOATING_CLASS(klass)                                         \
-    (G_TYPE_CHECK_CLASS_TYPE ((obj), TEST_TYPE_FLOATING))
-#define TEST_FLOATING_GET_CLASS(obj)                                          \
-    (G_TYPE_INSTANCE_GET_CLASS ((obj), TEST_TYPE_FLOATING, TestFloatingClass))
+G_DECLARE_FINAL_TYPE (TestFloating, test_floating, TEST, FLOATING,
+                      GInitiallyUnowned);
 
-GType test_floating_get_type (void);
 
 /* TestOwnedByLibrary */
 
-typedef struct {
-    GObject parent;
-} TestOwnedByLibrary;
-
-typedef struct {
-    GObjectClass parent_class;
-} TestOwnedByLibraryClass;
-
 #define TEST_TYPE_OWNED_BY_LIBRARY (test_owned_by_library_get_type ())
-#define TEST_OWNED_BY_LIBRARY(obj)                                            \
-    (G_TYPE_CHECK_INSTANCE_CAST ((obj), TEST_TYPE_OWNED_BY_LIBRARY,           \
-                                 TestOwnedByLibrary))
-#define TEST_OWNED_BY_LIBRARY_CLASS(klass)                                    \
-    (G_TYPE_CHECK_CLASS_CAST ((klass), TEST_TYPE_OWNED_BY_LIBRARY,            \
-                              TestOwnedByLibraryClass))
-#define TEST_IS_OWNED_BY_LIBRARY(obj)                                         \
-    (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TEST_TYPE_OWNED_BY_LIBRARY))
-#define TEST_IS_OWNED_BY_LIBRARY_CLASS(klass)                                 \
-    (G_TYPE_CHECK_CLASS_TYPE ((obj), TEST_TYPE_OWNED_BY_LIBRARY))
-#define TEST_OWNED_BY_LIBRARY_GET_CLASS(obj)                                  \
-    (G_TYPE_INSTANCE_GET_CLASS ((obj), TEST_TYPE_OWNED_BY_LIBRARY,            \
-                                TestOwnedByLibraryClass))
+G_DECLARE_FINAL_TYPE (TestOwnedByLibrary, test_owned_by_library, TEST,
+                      OWNED_BY_LIBRARY, GObject);
 
-GType test_owned_by_library_get_type (void);
 void test_owned_by_library_release (TestOwnedByLibrary *self);
 GSList *test_owned_by_library_get_instance_list (void);
 
 /* TestFloatingAndSunk */
 
-typedef struct {
-    GInitiallyUnowned parent;
-} TestFloatingAndSunk;
-
-typedef struct {
-    GInitiallyUnownedClass parent_class;
-} TestFloatingAndSunkClass;
-
 #define TEST_TYPE_FLOATING_AND_SUNK (test_floating_and_sunk_get_type ())
-#define TEST_FLOATING_AND_SUNK(obj)                                           \
-    (G_TYPE_CHECK_INSTANCE_CAST ((obj), TEST_TYPE_FLOATING_AND_SUNK,          \
-                                 TestFloatingAndSunk))
-#define TEST_FLOATING_AND_SUNK_CLASS(klass)                                   \
-    (G_TYPE_CHECK_CLASS_CAST ((klass), TEST_TYPE_FLOATING_AND_SUNK,           \
-                              TestFloatingAndSunkClass))
-#define TEST_IS_FLOATING_AND_SUNK(obj)                                        \
-    (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TEST_TYPE_FLOATING_AND_SUNK))
-#define TEST_IS_FLOATING_AND_SUNK_CLASS(klass)                                \
-    (G_TYPE_CHECK_CLASS_TYPE ((obj), TEST_TYPE_FLOATING_AND_SUNK))
-#define TEST_FLOATING_AND_SUNK_GET_CLASS(obj)                                 \
-    (G_TYPE_INSTANCE_GET_CLASS ((obj), TEST_TYPE_FLOATING_AND_SUNK,           \
-                                TestFloatingAndSunkClass))
+G_DECLARE_FINAL_TYPE (TestFloatingAndSunk, test_floating_and_sunk, TEST,
+                      FLOATING_AND_SUNK, GInitiallyUnowned);
 
-GType test_floating_and_sunk_get_type (void);
 void test_floating_and_sunk_release (TestFloatingAndSunk *self);
 GSList *test_floating_and_sunk_get_instance_list (void);

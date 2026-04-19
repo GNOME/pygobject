@@ -28,14 +28,14 @@ test_interface_get_type (void)
 
     if (!gtype) {
         static const GTypeInfo info = {
-            sizeof (TestInterfaceIface), /* class_size */
-            test_interface_base_init,    /* base_init */
-            NULL,                        /* base_finalize */
+            sizeof (TestInterfaceInterface), /* class_size */
+            test_interface_base_init,        /* base_init */
+            NULL,                            /* base_finalize */
             NULL,
-            NULL,                        /* class_finalize */
-            NULL,                        /* class_data */
+            NULL,                            /* class_finalize */
+            NULL,                            /* class_data */
             0,
-            0,                           /* n_preallocs */
+            0,                               /* n_preallocs */
             NULL
         };
 
@@ -54,7 +54,7 @@ test_unknown_iface_method (TestInterface *iface)
 }
 
 static void
-test_unknown_test_interface_init (TestInterfaceIface *iface)
+test_unknown_test_interface_init (TestInterfaceInterface *iface)
 {
     iface->iface_method = test_unknown_iface_method;
 }
@@ -101,7 +101,7 @@ test_unknown_class_init (TestUnknownClass *klass)
 void
 test_interface_iface_method (TestInterface *instance)
 {
-    TestInterfaceIface *iface = TEST_INTERFACE_GET_IFACE (instance);
+    TestInterfaceInterface *iface = TEST_INTERFACE_GET_IFACE (instance);
 
     (*iface->iface_method) (instance);
 }

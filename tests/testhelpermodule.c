@@ -117,7 +117,7 @@ static PyObject *
 _wrap_TestInterface__do_iface_method (PyObject *cls, PyObject *args,
                                       PyObject *kwargs)
 {
-    TestInterfaceIface *iface;
+    TestInterfaceInterface *iface;
     static char *kwlist[] = { "self", NULL };
     PyGObject *self;
 
@@ -194,10 +194,11 @@ _wrap_TestInterface__proxy_do_iface_method (TestInterface *self)
 }
 
 static void
-__TestInterface__interface_init (TestInterfaceIface *iface,
+__TestInterface__interface_init (TestInterfaceInterface *iface,
                                  PyTypeObject *pytype)
 {
-    TestInterfaceIface *parent_iface = g_type_interface_peek_parent (iface);
+    TestInterfaceInterface *parent_iface =
+        g_type_interface_peek_parent (iface);
     PyObject *py_method;
 
     py_method =
