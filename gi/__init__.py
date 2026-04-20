@@ -36,6 +36,27 @@ _static_binding_error = (
 if "gobject" in sys.modules:
     raise ImportError(_static_binding_error)
 
+if sys.platform.startswith("win"):
+    bindirs = []
+    if "PYGI_DLL_PATH" in os.environ:
+        bindirs += os.environ["PYGI_DLL_PATH"].split(os.pathsep)
+
+    # Find prefix assuming directory layout is Lib/site-packages/gi (msvc)
+    prefix = os.path.abspath(
+        os.path.join(
+            os.path.dirname(__file__), os.path.pardir, os.path.pardir, os.path.pardir
+        )
+    )
+    bindir = os.path.join(prefix, "bin")
+    # Find prefix assuming layout is lib/pythonx.y/site-packages/gi (mingw)
+    if not os.path.isdir(bindir):
+        prefix = os.path.dirname(prefix)
+        bindir = os.path.join(prefix, "bin")
+    if os.path.isdir(bindir):
+        bindirs += [bindir]
+
+    for bindir in bindirs:
+        os.add_dll_directory(bindir)
 
 from . import _gi
 from ._gi import _API as _API

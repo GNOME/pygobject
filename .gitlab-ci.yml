@@ -79,7 +79,7 @@ pre-commit:
   script:
     - git config --global --add safe.directory "$CI_PROJECT_DIR"
     - python -m pip install -q --no-warn-script-location pre-commit
-    - python -m pre_commit run --verbose --all-files
+    - python -m pre_commit run --verbose --all-files || git diff
   artifacts:
     when: on_failure
     paths:

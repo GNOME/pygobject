@@ -73,6 +73,8 @@ libraries.
 .. figure:: images/start_windows.png
     :scale: 60%
 
+NOTE: You will need to tell PyGObject where to search for DLLs by setting
+`PYGI_DLL_PATH`, which takes a `;`-separated list of directories.
 
 .. _ubuntu-getting-started:
 
