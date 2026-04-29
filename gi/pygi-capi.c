@@ -309,8 +309,7 @@ disable_warning_redirections (void)
 
     if (log_handlers) {
         g_hash_table_foreach (log_handlers, remove_handler, NULL);
-        g_hash_table_destroy (log_handlers);
-        log_handlers = NULL;
+        g_clear_pointer (&log_handlers, g_hash_table_destroy);
     }
 }
 

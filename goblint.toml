@@ -1,9 +1,8 @@
 min_glib_version = "2.80"
+msvc_compatible = true
 
 [rules]
-# Can't use g_autoptr for MSVC
-use_g_autofree = false
-use_g_autoptr_error = false
-use_g_autoptr_goto_cleanup = false
-use_g_autoptr_inline_cleanup = false
-g_param_spec_null_nick_blurb = false
+use_pragma_once = false
+
+[rules.g_param_spec_null_nick_blurb]
+ignore = ["tests/*.c"]

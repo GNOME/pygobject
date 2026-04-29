@@ -424,23 +424,23 @@ connectcallbacks (GObject *object)
                       NULL);
     g_signal_connect (G_OBJECT (object), "test4", G_CALLBACK (test4_callback),
                       NULL);
-    g_signal_connect (G_OBJECT (object), "test_float",
+    g_signal_connect (G_OBJECT (object), "test-float",
                       G_CALLBACK (test_float_callback), NULL);
-    g_signal_connect (G_OBJECT (object), "test_double",
+    g_signal_connect (G_OBJECT (object), "test-double",
                       G_CALLBACK (test_double_callback), NULL);
-    g_signal_connect (G_OBJECT (object), "test_int64",
+    g_signal_connect (G_OBJECT (object), "test-int64",
                       G_CALLBACK (test_int64_callback), NULL);
-    g_signal_connect (G_OBJECT (object), "test_string",
+    g_signal_connect (G_OBJECT (object), "test-string",
                       G_CALLBACK (test_string_callback), NULL);
-    g_signal_connect (G_OBJECT (object), "test_object",
+    g_signal_connect (G_OBJECT (object), "test-object",
                       G_CALLBACK (test_object_callback), NULL);
-    g_signal_connect (G_OBJECT (object), "test_paramspec",
+    g_signal_connect (G_OBJECT (object), "test-paramspec",
                       G_CALLBACK (test_paramspec_callback), NULL);
-    g_signal_connect (G_OBJECT (object), "test_gvalue",
+    g_signal_connect (G_OBJECT (object), "test-gvalue",
                       G_CALLBACK (test_gvalue_callback), NULL);
-    g_signal_connect (G_OBJECT (object), "test_gvalue_ret",
+    g_signal_connect (G_OBJECT (object), "test-gvalue-ret",
                       G_CALLBACK (test_gvalue_ret_callback), NULL);
-    g_signal_connect (G_OBJECT (object), "test_paramspec_in",
+    g_signal_connect (G_OBJECT (object), "test-paramspec-in",
                       G_CALLBACK (test_paramspec_in_callback), NULL);
 }
 
