@@ -22,6 +22,8 @@
 #include <glib-object.h>
 #include <pythoncapi_compat.h>
 
+G_BEGIN_DECLS
+
 extern GQuark pygboxed_type_key;
 
 extern PyTypeObject PyGBoxed_Type;
@@ -32,3 +34,5 @@ PyObject *pygi_gboxed_new (GType boxed_type, gpointer boxed,
                            gboolean copy_boxed, gboolean own_ref);
 
 int pygi_gboxed_register_types (PyObject *d);
+
+G_END_DECLS

@@ -28,6 +28,8 @@
 
 #include "pygi-foreign-types.h"
 
+G_BEGIN_DECLS
+
 PyObject *pygi_struct_foreign_convert_to_g_argument (
     PyObject *value, GIRegisteredTypeInfo *interface_info, GITransfer transfer,
     GIArgument *arg);
@@ -48,3 +50,5 @@ PyObject *pygi_require_foreign (PyObject *self, PyObject *args,
 int pygi_foreign_init (void);
 
 PyObject *pygi_register_foreign (PyObject *self, PyObject *args);
+
+G_END_DECLS

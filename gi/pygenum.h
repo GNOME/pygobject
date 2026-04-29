@@ -22,6 +22,8 @@
 #include <girepository/girepository.h>
 #include <pythoncapi_compat.h>
 
+G_BEGIN_DECLS
+
 extern GQuark pygenum_class_key;
 
 extern PyTypeObject *PyGEnum_Type;
@@ -41,3 +43,5 @@ PyObject *pyg_enum_from_gtype (GType gtype, int value);
 gint pyg_enum_get_value (GType enum_type, PyObject *obj, gint *val);
 
 int pygi_enum_register_types (PyObject *mod);
+
+G_END_DECLS

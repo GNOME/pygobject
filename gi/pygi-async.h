@@ -21,6 +21,8 @@
 
 #include "pygi-info.h"
 
+G_BEGIN_DECLS
+
 typedef struct {
     PyObject *func;
     PyObject *context;
@@ -49,3 +51,5 @@ void pygi_async_finish_cb (GObject *source_object, gpointer res,
                            PyGIAsync *async);
 
 PyObject *pygi_async_new (PyObject *async_finish, PyObject *cancellable);
+
+G_END_DECLS

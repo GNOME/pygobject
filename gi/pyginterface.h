@@ -23,6 +23,8 @@
 #include <glib-object.h>
 #include <pythoncapi_compat.h>
 
+G_BEGIN_DECLS
+
 extern GQuark pyginterface_type_key;
 extern GQuark pyginterface_info_key;
 
@@ -31,3 +33,5 @@ extern PyTypeObject PyGInterface_Type;
 const GInterfaceInfo *pyg_lookup_interface_info (GType gtype);
 void pyg_register_interface_info (GType gtype, const GInterfaceInfo *info);
 int pygi_interface_register_types (PyObject *d);
+
+G_END_DECLS
