@@ -90,7 +90,7 @@ test_unknown_class_init (TestUnknownClass *klass)
     gobject_class->get_property = test_unknown_get_property;
     gobject_class->set_property = test_unknown_set_property;
 
-
+    /* goblint-ignore-next-line: use_g_object_class_install_properties */
     g_object_class_install_property (
         G_OBJECT_CLASS (klass), PROP_SOME_PROPERTY,
         g_param_spec_string ("some-property", "some-property",
