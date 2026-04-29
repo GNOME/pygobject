@@ -17,8 +17,7 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __PYGI_ARG_BASICTYPE_H__
-#define __PYGI_ARG_BASICTYPE_H__
+#pragma once
 
 #include "pygi-cache.h"
 
@@ -65,5 +64,3 @@ gboolean pygi_gschar_from_py (PyObject *object, gint8 *result);
 gboolean pygi_guchar_from_py (PyObject *object, guchar *result);
 
 G_END_DECLS
-
-#endif /*__PYGI_ARG_BASICTYPE_H__*/

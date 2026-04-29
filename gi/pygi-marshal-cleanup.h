@@ -17,8 +17,7 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __PYGI_MARSHAL_CLEANUP_H__
-#define __PYGI_MARSHAL_CLEANUP_H__
+#pragma once
 
 #include "pygi-cache.h"
 #include "pygi-struct.h"
@@ -34,5 +33,3 @@ void pygi_marshal_cleanup_args_to_py (PyGIInvokeState *state,
                                       gboolean success);
 
 G_END_DECLS
-
-#endif /* __PYGI_MARSHAL_CLEANUP_H__ */

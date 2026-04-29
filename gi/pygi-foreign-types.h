@@ -17,8 +17,7 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __PYGI_FOREIGN_TYPES_H__
-#define __PYGI_FOREIGN_TYPES_H__
+#pragma once
 
 #include <Python.h>
 #include <girepository/girepository.h>
@@ -39,5 +38,3 @@ struct PyGI_API {
         PyGIArgOverrideFromGIArgumentFunc from_func,
         PyGIArgOverrideReleaseFunc release_func);
 };
-
-#endif /* __PYGI_FOREIGN_TYPES_H__ */

@@ -19,8 +19,7 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __PYGI_ERROR_H__
-#define __PYGI_ERROR_H__
+#pragma once
 
 #include "pygi-cache.h"
 
@@ -39,5 +38,3 @@ gboolean pygi_gerror_exception_check (GError **error);
 int pygi_error_register_types (PyObject *module);
 
 G_END_DECLS
-
-#endif /*__PYGI_ERROR_H__*/

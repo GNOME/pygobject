@@ -1,8 +1,5 @@
 min_glib_version = "2.80"
 msvc_compatible = true
 
-[rules]
-use_pragma_once = false
-
 [rules.g_param_spec_null_nick_blurb]
 ignore = ["tests/*.c"]

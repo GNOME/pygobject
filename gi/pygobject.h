@@ -17,8 +17,7 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __PYGOBJECT_H__
-#define __PYGOBJECT_H__
+#pragma once
 
 #include <pygobject-types.h>
 
@@ -455,5 +454,3 @@ pygobject_init (int req_major, int req_minor, int req_micro)
                        convert_func, child_free_func, errormsg, errorreturn)
 
 G_END_DECLS
-
-#endif /* __PYGOBJECT_H__ */

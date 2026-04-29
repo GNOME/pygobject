@@ -21,8 +21,7 @@
  * IN THE SOFTWARE.
  */
 
-#ifndef __PYGI_PROPERTY_H__
-#define __PYGI_PROPERTY_H__
+#pragma once
 
 #include "pygi-argument.h"
 #include "pygobject-types.h"
@@ -39,5 +38,3 @@ int pygi_set_property_value (PyGObject *instance, GParamSpec *pspec,
 gint pygi_set_gvalue_for_pspec (GValue *value, GParamSpec *pspec,
                                 PyObject *py_value,
                                 PyGIArgumentFromPyCleanupData *cleanup_data);
-
-#endif /* __PYGI_PROPERTY_H__ */

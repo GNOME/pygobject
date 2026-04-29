@@ -18,8 +18,7 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __PYGI_CACHE_H__
-#define __PYGI_CACHE_H__
+#pragma once
 
 
 /* Workaround for FFI_GO_CLOSURES not being defined on macOS
@@ -275,5 +274,3 @@ _pygi_callable_cache_set_arg (PyGICallableCache *cache, guint index,
 }
 
 G_END_DECLS
-
-#endif /* __PYGI_CACHE_H__ */

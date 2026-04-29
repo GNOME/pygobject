@@ -15,8 +15,7 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __PYGI_VALUE_H__
-#define __PYGI_VALUE_H__
+#pragma once
 
 #include <girepository/girepository.h>
 #include <pythoncapi_compat.h>
@@ -39,5 +38,3 @@ PyObject *pyg__gvalue_set (PyObject *module, PyObject *args);
 PyObject *pyg__gvalue_get_type (PyObject *module, PyObject *pygvalue);
 
 G_END_DECLS
-
-#endif /* __PYGI_VALUE_H__ */

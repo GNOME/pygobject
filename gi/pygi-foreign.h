@@ -22,8 +22,7 @@
  * IN THE SOFTWARE.
  */
 
-#ifndef __PYGI_FOREIGN_H__
-#define __PYGI_FOREIGN_H__
+#pragma once
 
 #include <pythoncapi_compat.h>
 
@@ -49,5 +48,3 @@ PyObject *pygi_require_foreign (PyObject *self, PyObject *args,
 int pygi_foreign_init (void);
 
 PyObject *pygi_register_foreign (PyObject *self, PyObject *args);
-
-#endif /* __PYGI_FOREIGN_H__ */

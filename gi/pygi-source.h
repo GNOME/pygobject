@@ -21,12 +21,9 @@
  * IN THE SOFTWARE.
  */
 
-#ifndef __PYGI_SOURCE_H__
-#define __PYGI_SOURCE_H__
+#pragma once
 
 #include <pythoncapi_compat.h>
 
 PyObject *pygi_source_new (PyObject *self, PyObject *args);
 PyObject *pygi_source_set_callback (PyObject *self, PyObject *args);
-
-#endif /* __PYGI_SOURCE_H__ */

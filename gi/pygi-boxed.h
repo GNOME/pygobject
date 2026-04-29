@@ -17,8 +17,7 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __PYGI_BOXED_H__
-#define __PYGI_BOXED_H__
+#pragma once
 
 #include <girepository/girepository.h>
 #include <pythoncapi_compat.h>
@@ -41,5 +40,3 @@ void pygi_boxed_copy_in_place (PyGIBoxed *self);
 int pygi_boxed_register_types (PyObject *m);
 
 G_END_DECLS
-
-#endif /* __PYGI_BOXED_H__ */

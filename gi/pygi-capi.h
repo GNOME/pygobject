@@ -21,13 +21,10 @@
  * USA
  */
 
-#ifndef __PYGI_CAPI_H__
-#define __PYGI_CAPI_H__
+#pragma once
 
 #include <pythoncapi_compat.h>
 
 int pygi_register_warnings (PyObject *d);
 
 int pygi_register_api (PyObject *d);
-
-#endif /* __PYGI_CAPI_H__ */
