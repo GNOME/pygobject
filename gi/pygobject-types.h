@@ -17,8 +17,7 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __PYGOBJECT_TYPES_H__
-#define __PYGOBJECT_TYPES_H__
+#pragma once
 
 #include <Python.h>
 #include <glib-object.h>
@@ -211,5 +210,3 @@ struct _PyGObject_Functions {
 };
 
 G_END_DECLS
-
-#endif /* __PYGOBJECT_TYPES_H__ */

@@ -17,8 +17,7 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __PYGI_REPOSITORY_H__
-#define __PYGI_REPOSITORY_H__
+#pragma once
 
 #include <girepository/girepository.h>
 #include <pythoncapi_compat.h>
@@ -41,5 +40,3 @@ GIRepository *pygi_repository_get_default (void);
 int pygi_repository_register_types (PyObject *m);
 
 G_END_DECLS
-
-#endif /* __PYGI_REPOSITORY_H__ */

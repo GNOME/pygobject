@@ -15,8 +15,7 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __PYGI_CLOSURE_H__
-#define __PYGI_CLOSURE_H__
+#pragma once
 
 
 /* Workaround for FFI_GO_CLOSURES not being defined on macOS
@@ -57,5 +56,3 @@ PyGICClosure *_pygi_make_native_closure (GICallableInfo *info,
                                          PyObject *user_data);
 
 G_END_DECLS
-
-#endif /* __PYGI_CLOSURE_H__ */

@@ -17,8 +17,7 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __PYGI_RESULTTUPLE_H__
-#define __PYGI_RESULTTUPLE_H__
+#pragma once
 
 #include <pythoncapi_compat.h>
 
@@ -27,5 +26,3 @@ int pygi_resulttuple_register_types (PyObject *d);
 PyTypeObject *pygi_resulttuple_new_type (PyObject *tuple_names);
 
 PyObject *pygi_resulttuple_new (PyTypeObject *subclass, Py_ssize_t len);
-
-#endif /* __PYGI_RESULTTUPLE_H__ */

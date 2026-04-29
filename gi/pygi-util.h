@@ -1,5 +1,4 @@
-#ifndef __PYGI_UTIL_H__
-#define __PYGI_UTIL_H__
+#pragma once
 
 #include <glib.h>
 #include <pythoncapi_compat.h>
@@ -58,5 +57,3 @@ void pyg_destroy_notify (gpointer user_data);
 
 
 G_END_DECLS
-
-#endif /* __PYGI_UTIL_H__ */

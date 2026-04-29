@@ -17,8 +17,7 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __PYGI_INVOKE_H__
-#define __PYGI_INVOKE_H__
+#pragma once
 
 #include "pygi-info.h"
 
@@ -37,5 +36,3 @@ gboolean _pygi_invoke_arg_state_init (PyGIInvokeState *state);
 void _pygi_invoke_arg_state_free (PyGIInvokeState *state);
 
 G_END_DECLS
-
-#endif /* __PYGI_INVOKE_H__ */

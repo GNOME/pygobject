@@ -17,8 +17,7 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __PYGI_CACHE_PRIVATE_H__
-#define __PYGI_CACHE_PRIVATE_H__
+#pragma once
 
 #include "pygi-cache.h"
 
@@ -135,5 +134,3 @@ void pygi_marshal_cleanup_data_destroy_array (GArray *item_cleanups);
 void pygi_marshal_cleanup_data_destroy_array_failed (GArray *item_cleanups);
 
 G_END_DECLS
-
-#endif /*__PYGI_CACHE_PRIVATE_H__*/

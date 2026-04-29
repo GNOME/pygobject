@@ -1,5 +1,4 @@
-#ifndef __PYGI_INVOKE_STATE_STRUCT_H__
-#define __PYGI_INVOKE_STATE_STRUCT_H__
+#pragma once
 
 #include <girepository/girepository.h>
 #include <pythoncapi_compat.h>
@@ -71,5 +70,3 @@ typedef struct _PyGIInvokeState {
 } PyGIInvokeState;
 
 G_END_DECLS
-
-#endif

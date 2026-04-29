@@ -17,8 +17,7 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __PYGI_FOREIGN_API_H__
-#define __PYGI_FOREIGN_API_H__
+#pragma once
 
 #include <pygi-foreign-types.h>
 #include <pygobject.h>
@@ -53,5 +52,3 @@ pygi_register_foreign_struct (const char *namespace_, const char *name,
                                        release_func);
     Py_RETURN_NONE;
 }
-
-#endif /* __PYGI_FOREIGN_API_H__ */
