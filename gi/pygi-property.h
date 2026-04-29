@@ -26,6 +26,8 @@
 #include "pygi-argument.h"
 #include "pygobject-types.h"
 
+G_BEGIN_DECLS
+
 PyObject *pygi_get_property_value (PyGObject *instance, GParamSpec *pspec);
 
 PyObject *pygi_get_property_value_by_name (PyGObject *self, gchar *param_name);
@@ -38,3 +40,5 @@ int pygi_set_property_value (PyGObject *instance, GParamSpec *pspec,
 gint pygi_set_gvalue_for_pspec (GValue *value, GParamSpec *pspec,
                                 PyObject *py_value,
                                 PyGIArgumentFromPyCleanupData *cleanup_data);
+
+G_END_DECLS

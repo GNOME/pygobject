@@ -22,6 +22,8 @@
 #include <Python.h>
 #include <girepository/girepository.h>
 
+G_BEGIN_DECLS
+
 typedef PyObject *(*PyGIArgOverrideToGIArgumentFunc) (
     PyObject *value, GIRegisteredTypeInfo *interface_info, GITransfer transfer,
     GIArgument *arg);
@@ -38,3 +40,5 @@ struct PyGI_API {
         PyGIArgOverrideFromGIArgumentFunc from_func,
         PyGIArgOverrideReleaseFunc release_func);
 };
+
+G_END_DECLS

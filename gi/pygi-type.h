@@ -25,6 +25,8 @@
 
 #include "pygobject-types.h"
 
+G_BEGIN_DECLS
+
 extern PyTypeObject PyGTypeWrapper_Type;
 
 typedef PyObject *(*fromvaluefunc) (const GValue *value);
@@ -69,3 +71,5 @@ PyObject *pygi_type_import_by_gi_info (GIBaseInfo *info);
 PyObject *pygi_type_get_from_g_type (GType g_type);
 
 PyGIInterfaceTypeTag pygi_interface_type_tag (GIBaseInfo *info);
+
+G_END_DECLS

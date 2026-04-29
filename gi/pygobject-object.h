@@ -4,6 +4,8 @@
 
 #include "pygobject-types.h"
 
+G_BEGIN_DECLS
+
 /* Data that belongs to the GObject instance, not the Python wrapper */
 struct _PyGObjectData {
     PyTypeObject *type; /* wrapper type for this instance */
@@ -47,3 +49,5 @@ pyg_object_peek_inst_data (GObject *obj)
     return ((PyGObjectData *)g_object_get_qdata (obj,
                                                  pygobject_instance_data_key));
 }
+
+G_END_DECLS

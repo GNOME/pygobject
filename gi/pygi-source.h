@@ -23,7 +23,12 @@
 
 #pragma once
 
+#include <glib.h>
 #include <pythoncapi_compat.h>
+
+G_BEGIN_DECLS
 
 PyObject *pygi_source_new (PyObject *self, PyObject *args);
 PyObject *pygi_source_set_callback (PyObject *self, PyObject *args);
+
+G_END_DECLS

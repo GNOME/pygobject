@@ -22,6 +22,8 @@
 #include <pygi-foreign-types.h>
 #include <pygobject.h>
 
+G_BEGIN_DECLS
+
 static struct PyGI_API *PyGI_API = NULL;
 
 static int
@@ -52,3 +54,5 @@ pygi_register_foreign_struct (const char *namespace_, const char *name,
                                        release_func);
     Py_RETURN_NONE;
 }
+
+G_END_DECLS
