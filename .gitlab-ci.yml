@@ -25,7 +25,7 @@ include:
 
 stages:
   - images
-  - pre-commit
+  - lint
   - build
   - coverage
   - documentation
@@ -72,7 +72,7 @@ build-image:
     paths:
 
 pre-commit:
-  stage: pre-commit
+  stage: lint
   image: $CI_IMAGE:$[[ inputs.default_version ]]
   variables:
     XDG_CACHE_HOME: "$CI_PROJECT_DIR/.cache"
@@ -87,6 +87,19 @@ pre-commit:
   cache:
     paths:
       - .cache
+
+goblint:
+  stage: lint
+  allow_failure: true
+  image:
+    name: "ghcr.io/bilelmoussaoui/goblint:latest"
+    entrypoint: [""]
+  script:
+    - goblint --format gitlab-codequality > goblint-codequality.json
+  artifacts:
+    expire_in: "1 week"
+    reports:
+      codequality: goblint-codequality.json
 
 linux:
   stage: build
