@@ -270,6 +270,26 @@ pygi_arg_callback_new_from_info (GITypeInfo *type_info,
         PyGIArgCache *user_data_arg_cache = pygi_arg_cache_alloc ();
         user_data_arg_cache->meta_type = PYGI_META_ARG_TYPE_CHILD_WITH_PYARG;
         user_data_arg_cache->direction = direction;
+
+        PyGIArgCache *existing = _pygi_callable_cache_get_arg (
+            callable_cache, callback_cache->user_data_index);
+        if (existing != NULL) {
+            /* user_data preceded the callback in the arg list and was already
+             * built as a PARENT by the main loop. Reuse its py_arg_index so
+             * we don't leave a hole in the [0..n_py_args) numbering.
+             */
+
+            /* user_data should never be (out); if it ever is, we'd also need to
+             * remove `existing` from `callable_cache->to_py_args` and decrememnt
+             * `n_to_py_args` before freeing it. */
+            g_assert (!(existing->direction & PYGI_DIRECTION_TO_PYTHON));
+
+            user_data_arg_cache->py_arg_index = existing->py_arg_index;
+            user_data_arg_cache->c_arg_index = existing->c_arg_index;
+            user_data_arg_cache->type_tag = existing->type_tag;
+            pygi_arg_cache_free (existing);
+        }
+
         _pygi_callable_cache_set_arg (callable_cache,
                                       callback_cache->user_data_index,
                                       user_data_arg_cache);

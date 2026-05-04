@@ -3113,6 +3113,42 @@ class TestPythonGObject(unittest.TestCase):
         GIMarshallingTests.callback_owned_boxed(nop_callback, None)
         self.assertEqual(self.box.long_, 1)
 
+    def test_callback_user_data_after_callback(self):
+        def callback(*args):
+            self.callback_args = args
+
+        GIMarshallingTests.callback_user_data_after_callback(1, 2, callback)
+        self.assertEqual(self.callback_args, (1, 2))
+
+        GIMarshallingTests.callback_user_data_after_callback(3, 4, callback, "testdata")
+        self.assertEqual(self.callback_args, (3, 4, "testdata"))
+
+        GIMarshallingTests.callback_user_data_after_callback(
+            5, 6, callback, "more testdata", "even more testdata"
+        )
+        self.assertEqual(
+            self.callback_args, (5, 6, "more testdata", "even more testdata")
+        )
+
+    def test_callback_user_data_before_callback(self):
+        def callback(*args):
+            self.callback_args = args
+
+        GIMarshallingTests.callback_user_data_before_callback(1, 2, None, callback)
+        self.assertEqual(self.callback_args, (1, 2, None))
+
+        GIMarshallingTests.callback_user_data_before_callback(
+            3, 4, "testdata", callback
+        )
+        self.assertEqual(self.callback_args, (3, 4, "testdata"))
+
+        GIMarshallingTests.callback_user_data_before_callback(
+            5, 6, ("more testdata", "even more testdata"), callback
+        )
+        self.assertEqual(
+            self.callback_args, (5, 6, ("more testdata", "even more testdata"))
+        )
+
 
 class TestMultiOutputArgs(unittest.TestCase):
     def test_int_out_out(self):

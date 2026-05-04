@@ -287,6 +287,7 @@ static inline void
 _pygi_callable_cache_set_arg (PyGICallableCache *cache, guint index,
                               PyGIArgCache *arg_cache)
 {
+    g_assert (index < cache->args_cache->len);
     cache->args_cache->pdata[index] = arg_cache;
 }
 
