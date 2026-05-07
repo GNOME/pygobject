@@ -14,7 +14,7 @@ from pkgutil import extend_path
 __path__ = extend_path(__path__, __name__)
 
 
-# namespace -> (attr, replacement)
+# namespace -> {attr -> replacement}
 _deprecated_attrs = {}
 
 
@@ -154,7 +154,7 @@ def load_overrides(introspection_module):
 
     # Replace deprecated module level attributes with a descriptor
     # which emits a warning when accessed.
-    for attr, replacement in _deprecated_attrs.pop(namespace, []):
+    for attr, replacement in _deprecated_attrs.pop(namespace, {}).items():
         try:
             value = getattr(proxy, attr)
         except AttributeError:
@@ -252,7 +252,7 @@ def deprecated_attr(namespace, attr, replacement):
     :param str replacement:
         The replacement text which will be included in the warning.
     """
-    _deprecated_attrs.setdefault(namespace, []).append((attr, replacement))
+    _deprecated_attrs.setdefault(namespace, {})[attr] = replacement
 
 
 def deprecated_init(
