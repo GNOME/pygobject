@@ -8,6 +8,7 @@ sources = [
   'pygobject-props.c',
   'pygpointer.c',
   'gimodule.c',
+  'pygi-debug.c',
   'pygi-capi.c',
   'pygi-repository.c',
   'pygi-info.c',
@@ -53,6 +54,7 @@ install_headers(headers, subdir : 'pygobject-@0@'.format(platform_version))
 python_sources = [
   'events.py',
   '_constants.py',
+  '_debug.py',
   'docstring.py',
   '_enum.py',
   '_error.py',
