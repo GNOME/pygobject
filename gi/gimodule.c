@@ -24,6 +24,7 @@
 #include "config.h"
 
 #include "pygboxed.h"
+#include "pygdebug.h"
 #include "pygenum.h"
 #include "pygflags.h"
 #include "pygi-async.h"
@@ -1010,6 +1011,18 @@ _wrap_pyig_pyos_setsig (PyObject *self, PyObject *args)
 }
 
 static PyObject *
+_wrap_pyg_set_debug_flags (PyObject *self, PyObject *args)
+{
+    unsigned int flags;
+
+    if (!PyArg_ParseTuple (args, "I:set_debug_flags", &flags)) return NULL;
+
+    pyg_set_debug_flags (flags);
+
+    Py_RETURN_NONE;
+}
+
+static PyObject *
 _wrap_pygobject_new_full (PyObject *self, PyObject *args)
 {
     PyObject *ptr_value, *long_value;
@@ -1051,6 +1064,8 @@ static PyMethodDef _gi_functions[] = {
     { "source_new", (PyCFunction)pygi_source_new, METH_NOARGS },
     { "pyos_getsig", (PyCFunction)_wrap_pyig_pyos_getsig, METH_VARARGS },
     { "pyos_setsig", (PyCFunction)_wrap_pyig_pyos_setsig, METH_VARARGS },
+    { "set_debug_flags", (PyCFunction)_wrap_pyg_set_debug_flags,
+      METH_VARARGS },
     { "source_set_callback", (PyCFunction)pygi_source_set_callback,
       METH_VARARGS },
     { "io_channel_read", (PyCFunction)pyg_channel_read, METH_VARARGS },

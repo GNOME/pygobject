@@ -63,6 +63,7 @@ from ._gi import _API as _API
 from ._gi import Repository
 from ._gi import PyGIDeprecationWarning  # noqa: F401
 from ._gi import PyGIWarning  # noqa: F401
+from ._debug import set_debug_options
 
 _versions = {}
 _overridesdir = os.path.join(os.path.dirname(__file__), "overrides")
@@ -245,3 +246,7 @@ def disable_legacy_autoinit():
     e.g. `Gtk.Application` manage it when needed.
     """
     _options["legacy_autoinit"] = False
+
+
+if _debug_options := os.getenv("PYGI_DEBUG"):
+    set_debug_options(_debug_options)
