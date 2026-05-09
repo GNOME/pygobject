@@ -21,6 +21,7 @@
 #include "pygobject-types.h"
 #include "pygboxed.h"
 #include "pygi-basictype.h"
+#include "pygi-debug.h"
 #include "pygi-fundamental.h"
 #include "pygi-property.h"
 #include "pygi-signal-closure.h"
@@ -633,6 +634,9 @@ pygobject_new_full (GObject *obj, gboolean steal, gpointer g_class)
         self->private_flags.flags = 0;
         self->obj = obj;
 
+        PYGI_DEBUG (LIFECYCLE, "Create Python at %p (type=%s obj=%p rc=%d)",
+                    self, G_OBJECT_TYPE_NAME (obj), obj, obj->ref_count);
+
         /* If we are not stealing a ref or the object is floating,
          * add a regular ref or sink the object. */
         if (!steal || g_object_is_floating (obj)) g_object_ref_sink (obj);
@@ -813,6 +817,11 @@ pygobject_clear (PyGObject *self)
 {
     if (self->obj) {
         PyGObjectData *inst_data = pygobject_get_inst_data (self);
+
+        PYGI_DEBUG (LIFECYCLE,
+                    "Clear Python object at %p (type=%s obj=%p rc=%d)", self,
+                    G_OBJECT_TYPE_NAME (self->obj), self->obj,
+                    self->obj->ref_count);
 
         /* The __class__ of the object may have changed. If so, update it. */
         if (inst_data != NULL && inst_data->type != Py_TYPE (self)) {
