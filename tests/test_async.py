@@ -1,9 +1,12 @@
 import sys
+import types
 import pytest
 import platform
 import unittest
+from typing import TypeVar
 
 import asyncio
+from gi._gi import Async
 from gi.repository import GLib, Gio
 from gi.events import GLibEventLoopPolicy
 
@@ -279,3 +282,22 @@ class TestAsync(unittest.TestCase):
                 GLib.MainContext.pop_thread_default(ctx)
 
         self.loop.run_until_complete(run())
+
+
+class TestAsyncGenericAlias(unittest.TestCase):
+    def test_subscript_with_typevar_returns_generic_alias(self):
+        T = TypeVar("T")
+        alias = Async[T]
+        self.assertIsInstance(alias, types.GenericAlias)
+        self.assertIs(alias.__origin__, Async)
+        self.assertEqual(alias.__args__, (T,))
+
+    def test_subscript_with_concrete_type(self):
+        alias = Async[int]
+        self.assertEqual(alias.__args__, (int,))
+
+    def test_subscript_accepts_multiple_args(self):
+        # Matches the behavior of builtins like list/dict and
+        # collections.abc — Py_GenericAlias does not validate arity.
+        alias = Async[int, str]
+        self.assertEqual(alias.__args__, (int, str))
