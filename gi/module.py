@@ -274,7 +274,7 @@ def get_fallback_platform_specific_module_symbol(
     wrapper_attr = symbol
 
     assert platform_namespace._namespace.startswith(namespace._namespace)
-    platform_name = f"{platform_namespace._namespace[len(namespace._namespace) :]}"
+    platform_name = platform_namespace._namespace.removeprefix(namespace._namespace)
     platform_name_lower = platform_name.lower()
 
     if isinstance(

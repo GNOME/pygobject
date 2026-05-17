@@ -121,7 +121,7 @@ class MetaClassHelper:
             # get_vfuncs() use the C vfunc name (ie. there is no "do_" prefix).
             if vfunc_info is None:
                 vfunc_info = find_vfunc_info_in_interface(
-                    cls.__bases__, vfunc_name[len("do_") :]
+                    cls.__bases__, vfunc_name.removeprefix("do_")
                 )
 
             if vfunc_info is not None:

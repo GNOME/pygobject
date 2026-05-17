@@ -332,7 +332,7 @@ class TestGLibPlatform(unittest.TestCase):
 
         if cls.platform_glib:
             cls.platform_full_name = cls.platform_glib._namespace
-            cls.platform_name = f"{cls.platform_full_name[len(GLib._namespace) :]}"
+            cls.platform_name = cls.platform_full_name.removeprefix(GLib._namespace)
 
         unittest.TestCase.setUpClass()
 
@@ -340,10 +340,10 @@ class TestGLibPlatform(unittest.TestCase):
         self.assertIn(symbol_name, dir(GLib))
 
         platform_symbol_name = symbol_name
-        if symbol_name.startswith(f"{self.platform_name}"):
-            platform_symbol_name = symbol_name[len(self.platform_name) :]
+        if symbol_name.startswith(self.platform_name):
+            platform_symbol_name = symbol_name.removeprefix(self.platform_name)
         elif symbol_name.startswith(f"{self.platform_name.lower()}_"):
-            platform_symbol_name = symbol_name[len(self.platform_name) + 1 :]
+            platform_symbol_name = symbol_name.removeprefix(f"{self.platform_name.lower()}_")
 
         with warnings.catch_warnings(record=True) as warn:
             symbol = getattr(GLib, symbol_name)
