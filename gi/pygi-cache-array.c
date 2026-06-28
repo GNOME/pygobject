@@ -513,7 +513,6 @@ _pygi_marshal_to_py_array (PyGIInvokeState *state,
         gsize item_size;
         PyGIMarshalToPyFunc item_to_py_marshaller;
         PyGIArgCache *item_arg_cache;
-        gboolean item_size_warning = FALSE;
 
         py_obj = PyList_New (array_->len);
         if (py_obj == NULL) goto err;
@@ -542,20 +541,11 @@ _pygi_marshal_to_py_array (PyGIInvokeState *state,
                 if (item_size == sizeof (gpointer)) {
                     item_arg.v_pointer = g_array_index (array_, gpointer, i);
                 } else {
-                    // TODO: this warning needs to be actionable
-                    //  I do not have enough context to show which field/argument is in error, maybe
-                    //  allow to raise errors for those cases (e.g. an option that can be set in unit tests)
-                    if (!item_size_warning) {
-                        g_warning (
-                            "Array type is assumed to be a pointer, but "
-                            "item size is %" G_GSIZE_FORMAT " bytes",
-                            item_size);
-                        item_size_warning = TRUE;
-                    }
-
-                    // For now, copy the right number of bytes
-                    memcpy (&item_arg, array_->data + i * item_size,
-                            item_size);
+                    PyErr_Format (PyExc_TypeError,
+                                  "Array type is assumed to be a pointer, but "
+                                  "item size is %" G_GSIZE_FORMAT " bytes",
+                                  item_size);
+                    return NULL;
                 }
             } else if (item_arg_cache->type_tag == GI_TYPE_TAG_INTERFACE) {
                 PyGIInterfaceCache *iface_cache =
