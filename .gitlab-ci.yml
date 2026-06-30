@@ -88,18 +88,18 @@ pre-commit:
     paths:
       - .cache
 
-goblint:
+gobject-linter:
   stage: lint
   allow_failure: true
   image:
-    name: "ghcr.io/bilelmoussaoui/goblint:latest"
+    name: "ghcr.io/bilelmoussaoui/gobject-linter:latest"
     entrypoint: [""]
   script:
-    - goblint --format gitlab-codequality > goblint-codequality.json
+    - gobject-linter --format gitlab-codequality > gobject-linter-codequality.json
   artifacts:
     expire_in: "1 week"
     reports:
-      codequality: goblint-codequality.json
+      codequality: gobject-linter-codequality.json
 
 linux:
   stage: build

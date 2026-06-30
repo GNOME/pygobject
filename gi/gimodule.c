@@ -638,7 +638,7 @@ pyg_channel_read (PyObject *self, PyObject *args, PyObject *kwargs)
         char *buf;
         gsize buf_size;
         /* Cleared by pygi_check_error().
-        * goblint-ignore-next-line: g_error_leak */
+        * gobject-linter-ignore-next-line: g_error_leak */
         GError *error = NULL;
 
         if (max_count == -1)
