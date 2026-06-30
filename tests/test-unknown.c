@@ -1,8 +1,8 @@
 #include "test-unknown.h"
 
-enum {
+typedef enum {
     PROP_SOME_PROPERTY = 1,
-};
+} TestUnknownProps;
 
 
 static void

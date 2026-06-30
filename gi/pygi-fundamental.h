@@ -58,3 +58,5 @@ int pygi_fundamental_register_types (PyObject *m);
 GTypeInstance *pygi_fundamental_from_value (const GValue *value);
 
 gboolean pygi_fundamental_set_value (GValue *value, GTypeInstance *instance);
+
+G_END_DECLS

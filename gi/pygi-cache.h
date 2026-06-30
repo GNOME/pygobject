@@ -241,7 +241,7 @@ PyObject *pygi_function_cache_invoke (PyGIFunctionCache *function_cache,
 PyGIFunctionCache *pygi_ccallback_cache_new (GICallableInfo *info,
                                              GCallback function_ptr);
 
-PyObject *pygi_ccallback_cache_invoke (PyGIFunctionCache *function_cache,
+PyObject *pygi_ccallback_cache_invoke (PyGICCallbackCache *function_cache,
                                        PyObject *const *py_args,
                                        size_t py_nargsf, PyObject *py_kwnames,
                                        gpointer user_data);
