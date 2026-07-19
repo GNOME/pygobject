@@ -559,7 +559,6 @@ _wrap_test_gerror_exception (PyObject *self, PyObject *args)
     PyObject *py_method;
     PyObject *py_args;
     PyObject *py_ret;
-    /* gobject-linter-ignore-next-line: g_error_leak */
     GError *err = NULL;
 
     if (!PyArg_ParseTuple (args, "O", &py_method)) return NULL;

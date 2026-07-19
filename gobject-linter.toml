@@ -7,3 +7,6 @@ ignore = ["tests/*.c"]
 [rules.type_style]
 ignore = ["gi/*.c", "gi/*.h", "tests/*.c"]
 style = "c"
+
+[rules.g_error_leak]
+extra_propagation_functions = ["pyg_error_check", "pygi_error_check"]

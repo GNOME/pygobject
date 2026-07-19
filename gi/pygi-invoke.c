@@ -354,7 +354,7 @@ _caller_alloc (PyGIArgCache *arg_cache, GIArgument *arg)
             if (gi_type_info_get_array_fixed_size (arg_cache->type_info,
                                                    &fixed_size)) {
                 arg->v_pointer =
-                    g_malloc0 (array_cache->item_size * fixed_size);
+                    g_malloc0_n (fixed_size, array_cache->item_size);
                 break;
             }
             return FALSE;

@@ -670,8 +670,7 @@ _function_cache_init (PyGIFunctionCache *function_cache,
 {
     PyGICallableCache *callable_cache = (PyGICallableCache *)function_cache;
     GIFunctionInvoker *invoker = &function_cache->invoker;
-    /* Cleared by pygi_check_error().
-     * gobject-linter-ignore-next-line: g_error_leak */
+    /* Cleared by pygi_check_error(). */
     GError *error = NULL;
 
     callable_cache->calling_context = PYGI_CALLING_CONTEXT_IS_FROM_PY;
@@ -990,8 +989,7 @@ _vfunc_cache_invoke_real (PyGIFunctionCache *function_cache,
     Py_ssize_t nargs = PyVectorcall_NARGS (py_nargsf);
     PyObject *py_gtype;
     GType implementor_gtype;
-    /* Cleared by pygi_check_error().
-     * gobject-linter-ignore-next-line: g_error_leak */
+    /* Cleared by pygi_check_error(). */
     GError *error = NULL;
     PyObject *ret;
 
