@@ -1,3 +1,20 @@
+3.57.0 - 2026-07-20
+-------------------
+
+* doc: Update tutorial and examples :mr:`536` :mr:`537` :mr:`538`
+* Fix memory leak when initializing GTK templates :mr:`526`
+* Fix potential buffer overflow errors where the C API exposes `GArray`'s :mr:`540` :mr:`550`
+* gio: Support creating `GFile` child with slash operator, similar to `pathlib.Path` :mr:`539`
+* Refactor memory management for marshaller cache :mr:`490` :mr:`517`
+* Add missing msg argument to asyncio cancel() :mr:`541`
+* Fix deprecation warning for register_object :mr:`542`
+* Find libraries automatically on Windows :mr:`415`
+* Fix crash when `user_data` is defined before callback :mr:`554`
+* Avoid extraneous deprecation warnings :mr:`545`
+* Support generic annotations on `Async` :mr:`547`
+* fix: Simplify string prefix handling :mr:`548`
+* doc: Use gobject-linter for linting GObject code :mr:`543` :mr:`551` :mr:`552`
+
 3.56.2 - 2026-03-25
 -------------------
 
