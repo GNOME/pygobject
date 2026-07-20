@@ -29,5 +29,6 @@ modules:
     run-tests: true
     test-rule: ''
     test-commands:
-      - meson test -v
+      # Set IM-module. The default (ibus) tends to crash (stack overflow)
+      - GTK_IM_MODULE=fcitx5 meson test -v
       - cd .. && python3 -m coverage lcov -o "coverage/flatpak-${TEST_GTK_VERSION}.py.lcov"
