@@ -29,8 +29,5 @@ modules:
     run-tests: true
     test-rule: ''
     test-commands:
-      # Remove vala-nightly, since it contains an incompatible version of libdbus
-      - >-
-        LD_LIBRARY_PATH=$(echo $LD_LIBRARY_PATH | sed s/vala-nightly/foobar/)
-        meson test -v
+      - meson test -v
       - cd .. && python3 -m coverage lcov -o "coverage/flatpak-${TEST_GTK_VERSION}.py.lcov"
