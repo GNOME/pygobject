@@ -1,7 +1,7 @@
 project(
   'pygobject',
   'c',
-  version : '3.58.0',
+  version : '3.58.1',
   meson_version : '>= 0.64.0',
   default_options : [
     'warning_level=1',
