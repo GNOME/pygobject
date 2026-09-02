@@ -712,7 +712,22 @@ _function_cache_init (PyGIFunctionCache *function_cache,
             }
         }
 
-        if (cancellable && async_callback) {
+        if (gi_callable_info_is_async (callable_info) && cancellable
+            && async_callback) {
+            GICallableInfo *async_finish =
+                gi_callable_info_get_finish_function (callable_info);
+            if (async_finish) {
+                function_cache->async_finish =
+                    _pygi_info_new ((GIBaseInfo *)async_finish);
+                function_cache->async_cancellable = cancellable;
+                function_cache->async_callback = async_callback;
+                gi_base_info_unref (async_finish);
+            }
+        } else if (cancellable && async_callback) {
+            /* This is the legacy code path.
+             * By now, code should have been properly instrumented.
+             */
+
             GIBaseInfo *container =
                 gi_base_info_get_container ((GIBaseInfo *)callable_info);
             const char *name = gi_base_info_get_name (callable_cache->info);
