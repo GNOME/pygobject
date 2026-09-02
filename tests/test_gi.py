@@ -1,3 +1,4 @@
+import array
 import sys
 
 import unittest
@@ -942,9 +943,11 @@ class TestArray(unittest.TestCase):
 
     def test_array_int64_in(self):
         GIMarshallingTests.array_int64_in([-1, 0, 1, 2])
+        GIMarshallingTests.array_int64_in(array.array('q', [-1, 0, 1, 2]))
 
     def test_array_uint64_in(self):
         GIMarshallingTests.array_uint64_in([GLib.MAXUINT64, 0, 1, 2])
+        GIMarshallingTests.array_uint64_in(array.array('Q', [GLib.MAXUINT64, 0, 1, 2]))
 
     def test_array_unichar_in(self):
         GIMarshallingTests.array_unichar_in(list(CONSTANT_UCS4))
@@ -967,6 +970,7 @@ class TestArray(unittest.TestCase):
 
     def test_array_fixed_int_in(self):
         GIMarshallingTests.array_fixed_int_in(Sequence([-1, 0, 1, 2]))
+        GIMarshallingTests.array_fixed_int_in(array.array('i', [-1, 0, 1, 2]))
 
         self.assertRaises(
             TypeError, GIMarshallingTests.array_fixed_int_in, Sequence([-1, "0", 1, 2])
@@ -977,6 +981,7 @@ class TestArray(unittest.TestCase):
 
     def test_array_fixed_short_in(self):
         GIMarshallingTests.array_fixed_short_in(Sequence([-1, 0, 1, 2]))
+        GIMarshallingTests.array_fixed_short_in(array.array('h', [-1, 0, 1, 2]))
 
     def test_array_fixed_out(self):
         self.assertEqual([-1, 0, 1, 2], GIMarshallingTests.array_fixed_out())
@@ -996,15 +1001,20 @@ class TestArray(unittest.TestCase):
         GIMarshallingTests.array_in(Sequence([-1, 0, 1, 2]))
         GIMarshallingTests.array_in_guint64_len(Sequence([-1, 0, 1, 2]))
         GIMarshallingTests.array_in_guint8_len(Sequence([-1, 0, 1, 2]))
+        GIMarshallingTests.array_in(array.array('i', [-1, 0, 1, 2]))
+        GIMarshallingTests.array_in_guint64_len(array.array('i', [-1, 0, 1, 2]))
+        GIMarshallingTests.array_in_guint8_len(array.array('i', [-1, 0, 1, 2]))
 
     def test_array_in_len_before(self):
         GIMarshallingTests.array_in_len_before(Sequence([-1, 0, 1, 2]))
+        GIMarshallingTests.array_in_len_before(array.array('i', [-1, 0, 1, 2]))
 
     def test_array_in_len_zero_terminated(self):
         GIMarshallingTests.array_in_len_zero_terminated(Sequence([-1, 0, 1, 2]))
 
     def test_array_uint8_in(self):
         GIMarshallingTests.array_uint8_in(Sequence([97, 98, 99, 100]))
+        GIMarshallingTests.array_uint8_in(array.array('B', [97, 98, 99, 100]))
         GIMarshallingTests.array_uint8_in(b"abcd")
 
     def test_array_string_in(self):
@@ -1454,6 +1464,11 @@ class TestGBytes(unittest.TestCase):
         self.assertEqual(3, b.get_size())
         self.assertEqual(b"\x00\x01\xff", b.get_data())
 
+    def test_gbytes_create_from_array(self):
+        b = GLib.Bytes.new(array.array('B', b"\x00\x01\xff"))
+        self.assertEqual(3, b.get_size())
+        self.assertEqual(b"\x00\x01\xff", b.get_data())
+
     def test_gbytes_create_from_bytearray(self):
         b = GLib.Bytes.new(bytearray(b"\x00\x01\xff"))
         self.assertEqual(3, b.get_size())
@@ -1461,6 +1476,11 @@ class TestGBytes(unittest.TestCase):
 
     def test_gbytes_create_take(self):
         b = GLib.Bytes.new_take(b"\x00\x01\xff")
+        self.assertEqual(3, b.get_size())
+        self.assertEqual(b"\x00\x01\xff", b.get_data())
+
+    def test_gbytes_create_take_from_array(self):
+        b = GLib.Bytes.new_take(array.array('B', b"\x00\x01\xff"))
         self.assertEqual(3, b.get_size())
         self.assertEqual(b"\x00\x01\xff", b.get_data())
 
