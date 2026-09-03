@@ -127,26 +127,6 @@ unhandled_type:
     return FALSE;
 }
 
-typedef struct {
-    Py_buffer view;
-    gpointer contiguous;
-} PyGIBufferCleanupData;
-
-static void
-free_py_buffer (PyGIBufferCleanupData *buffer)
-{
-    PyBuffer_Release (&buffer->view);
-    g_free (buffer->contiguous);
-    g_free (buffer);
-}
-
-static void
-free_py_buffer_keep_contiguous (PyGIBufferCleanupData *buffer)
-{
-    PyBuffer_Release (&buffer->view);
-    g_free (buffer);
-}
-
 static void
 free_array_keep_segment (GArray *array)
 {
@@ -191,6 +171,125 @@ static void
 array_clear_utf8 (gpointer *utf8)
 {
     g_clear_pointer (utf8, g_free);
+}
+
+typedef struct {
+    Py_buffer view;
+    gpointer contiguous;
+} PyGIBufferCleanupData;
+
+static void
+free_py_buffer (PyGIBufferCleanupData *buffer)
+{
+    PyBuffer_Release (&buffer->view);
+    g_free (buffer->contiguous);
+    g_free (buffer);
+}
+
+static void
+free_py_buffer_keep_contiguous (PyGIBufferCleanupData *buffer)
+{
+    PyBuffer_Release (&buffer->view);
+    g_free (buffer);
+}
+
+static gboolean
+_pygi_marshal_from_py_buffer (PyGIInvokeState *state,
+                              PyGICallableCache *callable_cache,
+                              PyGIArgCache *arg_cache, PyObject *py_arg,
+                              GIArgument *arg,
+                              PyGIMarshalCleanupData *cleanup_data,
+                              guint length)
+{
+    PyGISequenceCache *sequence_cache = (PyGISequenceCache *)arg_cache;
+    PyGIArgGArray *array_cache = (PyGIArgGArray *)arg_cache;
+    GIArrayType array_type;
+    GITypeTag type_tag;
+    char *format = NULL;
+    PyGIBufferCleanupData *buffer = NULL;
+    gboolean valid = FALSE;
+
+    array_type = gi_type_info_get_array_type (arg_cache->type_info);
+    if (array_type != GI_ARRAY_TYPE_C) {
+        return FALSE;
+    }
+
+    if (!PyObject_CheckBuffer (py_arg)) {
+        return FALSE;
+    }
+
+    buffer = g_new0(PyGIBufferCleanupData, 1);
+    if (PyObject_GetBuffer (py_arg, &buffer->view, PyBUF_FULL_RO) < 0) {
+        PyErr_Clear ();
+        g_free (buffer);
+        return FALSE;
+    }
+
+    type_tag = sequence_cache->item_cache->type_tag;
+    format = buffer->view.format;
+    valid =
+        (format == NULL && type_tag == GI_TYPE_TAG_UINT8) ||
+        (g_strcmp0 (format, "b") == 0 && type_tag == GI_TYPE_TAG_INT8) ||
+        (g_strcmp0 (format, "B") == 0 && type_tag == GI_TYPE_TAG_UINT8) ||
+        (g_strcmp0 (format, "h") == 0 && type_tag == GI_TYPE_TAG_INT16) ||
+        (g_strcmp0 (format, "H") == 0 && type_tag == GI_TYPE_TAG_UINT16) ||
+        (g_strcmp0 (format, "i") == 0 && type_tag == GI_TYPE_TAG_INT32) ||
+        (g_strcmp0 (format, "I") == 0 && type_tag == GI_TYPE_TAG_UINT32) ||
+        (g_strcmp0 (format, "q") == 0 && type_tag == GI_TYPE_TAG_INT64) ||
+        (g_strcmp0 (format, "Q") == 0 && type_tag == GI_TYPE_TAG_UINT64) ||
+        (g_strcmp0 (format, "f") == 0 && type_tag == GI_TYPE_TAG_FLOAT) ||
+        (g_strcmp0 (format, "d") == 0 && type_tag == GI_TYPE_TAG_DOUBLE);
+    valid = valid && buffer->view.ndim <= 1; /* 0 is a single element. */
+    if (!valid) {
+        PyBuffer_Release (&buffer->view);
+        g_free (buffer);
+        return FALSE;
+    }
+
+    if (PyBuffer_IsContiguous (&buffer->view, 'C')) {
+        arg->v_pointer = buffer->view.buf;
+    } else {
+        buffer->contiguous = g_malloc (buffer->view.len);
+        PyBuffer_ToContiguous (
+                buffer->contiguous, &buffer->view,
+                buffer->view.len, 'C');
+        arg->v_pointer = buffer->contiguous;
+    }
+
+    switch (arg_cache->transfer) {
+    case GI_TRANSFER_NOTHING:
+        /* Free everything in cleanup. */
+        pygi_marshal_cleanup_data_init_full (
+                cleanup_data, buffer,
+                (GDestroyNotify)free_py_buffer,
+                (GDestroyNotify)free_py_buffer);
+        break;
+    case GI_TRANSFER_CONTAINER:
+        /* Only the elements need to be deleted. */
+        pygi_marshal_cleanup_data_init_full (
+                cleanup_data, buffer,
+                (GDestroyNotify)free_py_buffer,
+                (GDestroyNotify)free_py_buffer);
+        break;
+    case GI_TRANSFER_EVERYTHING:
+        /* No memory cleanup: it is given to the callee, but
+         * we still clean up the buffer object from Python. */
+        if (buffer->contiguous == NULL) {
+            buffer->contiguous = g_memdup2 (
+                    buffer->view.buf, buffer->view.len);
+            arg->v_pointer = buffer->contiguous;
+        }
+        pygi_marshal_cleanup_data_init_full (
+                cleanup_data, buffer,
+                (GDestroyNotify)free_py_buffer_keep_contiguous,
+                (GDestroyNotify)free_py_buffer);
+        break;
+    default:
+        g_assert_not_reached ();
+    }
+
+    return _marshal_length_arg_from_py (state, callable_cache,
+                                        array_cache, length);
 }
 
 static gboolean
@@ -245,86 +344,14 @@ _pygi_marshal_from_py_array (PyGIInvokeState *state,
         return FALSE;
     }
 
-    array_type = gi_type_info_get_array_type (arg_cache->type_info);
-
     /* Handle simple byte arrays first */
-    if (array_type == GI_ARRAY_TYPE_C && !is_zero_terminated) {
-        if (PyObject_CheckBuffer (py_arg)) {
-            PyGIBufferCleanupData *buffer = g_new0(PyGIBufferCleanupData, 1);
-            if (PyObject_GetBuffer (py_arg, &buffer->view, PyBUF_FULL_RO) == 0) {
-                gboolean valid = FALSE;
-                if (buffer->view.format == NULL) {
-                    if (sequence_cache->item_cache->type_tag == GI_TYPE_TAG_UINT8) {
-                        valid = TRUE;
-                    }
-                } else {
-                    valid =
-                        (g_strcmp0 (buffer->view.format, "b") == 0 && sequence_cache->item_cache->type_tag == GI_TYPE_TAG_INT8) ||
-                        (g_strcmp0 (buffer->view.format, "B") == 0 && sequence_cache->item_cache->type_tag == GI_TYPE_TAG_UINT8) ||
-                        (g_strcmp0 (buffer->view.format, "h") == 0 && sequence_cache->item_cache->type_tag == GI_TYPE_TAG_INT16) ||
-                        (g_strcmp0 (buffer->view.format, "H") == 0 && sequence_cache->item_cache->type_tag == GI_TYPE_TAG_UINT16) ||
-                        (g_strcmp0 (buffer->view.format, "i") == 0 && sequence_cache->item_cache->type_tag == GI_TYPE_TAG_INT32) ||
-                        (g_strcmp0 (buffer->view.format, "I") == 0 && sequence_cache->item_cache->type_tag == GI_TYPE_TAG_UINT32) ||
-                        (g_strcmp0 (buffer->view.format, "q") == 0 && sequence_cache->item_cache->type_tag == GI_TYPE_TAG_INT64) ||
-                        (g_strcmp0 (buffer->view.format, "Q") == 0 && sequence_cache->item_cache->type_tag == GI_TYPE_TAG_UINT64) ||
-                        (g_strcmp0 (buffer->view.format, "f") == 0 && sequence_cache->item_cache->type_tag == GI_TYPE_TAG_FLOAT) ||
-                        (g_strcmp0 (buffer->view.format, "d") == 0 && sequence_cache->item_cache->type_tag == GI_TYPE_TAG_DOUBLE);
-                }
-                valid = valid && buffer->view.ndim <= 1; /* 0 is a single element. */
-                if (valid) {
-                    if (PyBuffer_IsContiguous (&buffer->view, 'C')) {
-                        arg->v_pointer = buffer->view.buf;
-                    } else {
-                        buffer->contiguous = g_malloc (buffer->view.len);
-                        PyBuffer_ToContiguous (
-                                buffer->contiguous, &buffer->view,
-                                buffer->view.len, 'C');
-                        arg->v_pointer = buffer->contiguous;
-                    }
-
-                    switch (arg_cache->transfer) {
-                    case GI_TRANSFER_NOTHING:
-                        /* Free everything in cleanup. */
-                        pygi_marshal_cleanup_data_init_full (
-                                cleanup_data, buffer,
-                                (GDestroyNotify)free_py_buffer,
-                                (GDestroyNotify)free_py_buffer);
-                        break;
-                    case GI_TRANSFER_CONTAINER:
-                        /* Only the elements need to be deleted. */
-                        pygi_marshal_cleanup_data_init_full (
-                                cleanup_data, buffer,
-                                (GDestroyNotify)free_py_buffer,
-                                (GDestroyNotify)free_py_buffer);
-                        break;
-                    case GI_TRANSFER_EVERYTHING:
-                        /* No memory cleanup: it is given to the callee, but
-                         * we still clean up the buffer object from Python. */
-                        if (buffer->contiguous == NULL) {
-                            buffer->contiguous = g_memdup2 (
-                                    buffer->view.buf, buffer->view.len);
-                            arg->v_pointer = buffer->contiguous;
-                        }
-                        pygi_marshal_cleanup_data_init_full (
-                                cleanup_data, buffer,
-                                (GDestroyNotify)free_py_buffer_keep_contiguous,
-                                (GDestroyNotify)free_py_buffer);
-                        break;
-                    default:
-                        g_assert_not_reached ();
-                    }
-                    return _marshal_length_arg_from_py (state, callable_cache,
-                                                        array_cache, length);
-                } else {
-                    PyBuffer_Release (&buffer->view);
-                    g_free (buffer);
-                }
-            } else {
-                PyErr_Clear ();
-            }
-        }
+    if (!is_zero_terminated && _pygi_marshal_from_py_buffer (
+                state, callable_cache, arg_cache, py_arg, arg, cleanup_data,
+                length)) {
+        return TRUE;
     }
 
+    array_type = gi_type_info_get_array_type (arg_cache->type_info);
     item_size = (guint)array_cache->item_size;
     is_ptr_array = (array_type == GI_ARRAY_TYPE_PTR_ARRAY);
 
