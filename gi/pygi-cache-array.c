@@ -322,19 +322,6 @@ _pygi_marshal_from_py_array (PyGIInvokeState *state,
             } else {
                 PyErr_Clear ();
             }
-        } else if (sequence_cache->item_cache->type_tag == GI_TYPE_TAG_UINT8
-            && PyBytes_Check (py_arg)) {
-            gchar *data = PyBytes_AsString (py_arg); /* borrowed */
-
-            /* Avoid making a copy if the data is not transferred
-             * to the C function and cannot not be modified by it.
-             */
-            if (arg_cache->transfer == GI_TRANSFER_NOTHING) {
-                arg->v_pointer = data;
-                /* Borrowing, nothing to clean up. */
-                return _marshal_length_arg_from_py (state, callable_cache,
-                                                    array_cache, length);
-            }
         }
     }
 
