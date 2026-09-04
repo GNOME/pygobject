@@ -203,11 +203,14 @@ _pygi_marshal_from_py_buffer (PyGIInvokeState *state,
 {
     PyGISequenceCache *sequence_cache = (PyGISequenceCache *)arg_cache;
     PyGIArgGArray *array_cache = (PyGIArgGArray *)arg_cache;
+    gboolean must_be_zero_terminated =
+        gi_type_info_is_zero_terminated (arg_cache->type_info);
     GIArrayType array_type;
     GITypeTag type_tag;
     char *format = NULL;
     PyGIBufferCleanupData *buffer = NULL;
     gboolean valid = FALSE;
+    gboolean is_zero_terminated = FALSE;
 
     array_type = gi_type_info_get_array_type (arg_cache->type_info);
     if (array_type != GI_ARRAY_TYPE_C) {
@@ -246,10 +249,29 @@ _pygi_marshal_from_py_buffer (PyGIInvokeState *state,
         return FALSE;
     }
 
-    if (PyBuffer_IsContiguous (&buffer->view, 'C')) {
+    if (must_be_zero_terminated) {
+        if (buffer->view.ndim == 1 && buffer->view.len > 0) {
+            Py_ssize_t last_index = buffer->view.shape[0] - 1;
+            const char *last = PyBuffer_GetPointer (&buffer->view, &last_index);
+            is_zero_terminated = TRUE;
+            for (Py_ssize_t i = 0; i < buffer->view.itemsize; i++) {
+                if (last[i] != 0) {
+                    is_zero_terminated = FALSE;
+                    break;
+                }
+            }
+        } else {
+            is_zero_terminated = FALSE;
+        }
+    }
+    if (PyBuffer_IsContiguous (&buffer->view, 'C')
+        && (!must_be_zero_terminated || is_zero_terminated)) {
         arg->v_pointer = buffer->view.buf;
     } else {
-        buffer->contiguous = g_malloc (buffer->view.len);
+        buffer->contiguous = g_malloc0 (
+            buffer->view.len +
+            (must_be_zero_terminated && !is_zero_terminated ?
+                 buffer->view.itemsize : 0));
         PyBuffer_ToContiguous (
                 buffer->contiguous, &buffer->view,
                 buffer->view.len, 'C');
@@ -345,7 +367,7 @@ _pygi_marshal_from_py_array (PyGIInvokeState *state,
     }
 
     /* Handle simple byte arrays first */
-    if (!is_zero_terminated && _pygi_marshal_from_py_buffer (
+    if (_pygi_marshal_from_py_buffer (
                 state, callable_cache, arg_cache, py_arg, arg, cleanup_data,
                 length)) {
         return TRUE;
