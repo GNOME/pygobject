@@ -21,6 +21,17 @@ PyGObject can be deconstructed in the following functionalities:
   Some code, e.g. in ``pygboxed.c``, is solely for the extension API, and is not used internally.
 - Foreign interface for pycairo interop. This is not available outside of PyGObject.
 
+Object lifecycle
+----------------
+
+* Numeric types, boolean, unichar: converted to their appropriate Python type.
+* ``GObject``-based types: Python object on demand, shared if the same object is returned from multiple calls, instance dict shared among instances.
+* Simple types (``GTypeInstance``, but not `GObject``), boxed types, structs:
+  Python object on demand, instance dict *not* shared.
+* Arrays, lists, hash tables: elements are marshalled to their appropriate C type.
+  Python lists and dicts are created.
+  Modifying a list or dict coming from an introspected function does not change the original.
+
 Marshallers
 -----------
 
