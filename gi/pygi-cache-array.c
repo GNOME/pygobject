@@ -207,7 +207,7 @@ _pygi_marshal_from_py_buffer (PyGIInvokeState *state,
         gi_type_info_is_zero_terminated (arg_cache->type_info);
     GIArrayType array_type;
     GITypeTag type_tag;
-    char *format = NULL;
+    char format = '\0';
     PyGIBufferCleanupData *buffer = NULL;
     gboolean valid = FALSE;
     gboolean is_zero_terminated = FALSE;
@@ -229,20 +229,24 @@ _pygi_marshal_from_py_buffer (PyGIInvokeState *state,
     }
 
     type_tag = sequence_cache->item_cache->type_tag;
-    format = buffer->view.format;
+    if (buffer->view.format == NULL) {
+        format = 'B';
+    } else if (buffer->view.format[0] != '\0'
+               && buffer->view.format[1] == '\0') {
+        format = buffer->view.format[0];
+    }
     valid =
-        (format == NULL && type_tag == GI_TYPE_TAG_UINT8) ||
-        (g_strcmp0 (format, "b") == 0 && type_tag == GI_TYPE_TAG_INT8) ||
-        (g_strcmp0 (format, "B") == 0 && type_tag == GI_TYPE_TAG_UINT8) ||
-        (g_strcmp0 (format, "h") == 0 && type_tag == GI_TYPE_TAG_INT16) ||
-        (g_strcmp0 (format, "H") == 0 && type_tag == GI_TYPE_TAG_UINT16) ||
-        (g_strcmp0 (format, "i") == 0 && type_tag == GI_TYPE_TAG_INT32) ||
-        (g_strcmp0 (format, "I") == 0 && type_tag == GI_TYPE_TAG_UINT32) ||
-        (g_strcmp0 (format, "q") == 0 && type_tag == GI_TYPE_TAG_INT64) ||
-        (g_strcmp0 (format, "Q") == 0 && type_tag == GI_TYPE_TAG_UINT64) ||
-        (g_strcmp0 (format, "f") == 0 && type_tag == GI_TYPE_TAG_FLOAT) ||
-        (g_strcmp0 (format, "d") == 0 && type_tag == GI_TYPE_TAG_DOUBLE) ||
-        (g_strcmp0 (format, "w") == 0 && type_tag == GI_TYPE_TAG_UNICHAR);
+        (format == 'b' && type_tag == GI_TYPE_TAG_INT8) ||
+        (format == 'B' && type_tag == GI_TYPE_TAG_UINT8) ||
+        (format == 'h' && type_tag == GI_TYPE_TAG_INT16) ||
+        (format == 'H' && type_tag == GI_TYPE_TAG_UINT16) ||
+        (format == 'i' && type_tag == GI_TYPE_TAG_INT32) ||
+        (format == 'I' && type_tag == GI_TYPE_TAG_UINT32) ||
+        (format == 'q' && type_tag == GI_TYPE_TAG_INT64) ||
+        (format == 'Q' && type_tag == GI_TYPE_TAG_UINT64) ||
+        (format == 'f' && type_tag == GI_TYPE_TAG_FLOAT) ||
+        (format == 'd' && type_tag == GI_TYPE_TAG_DOUBLE) ||
+        (format == 'w' && type_tag == GI_TYPE_TAG_UNICHAR);
     valid = valid && buffer->view.ndim <= 1; /* 0 is a single element. */
     if (!valid) {
         PyBuffer_Release (&buffer->view);
