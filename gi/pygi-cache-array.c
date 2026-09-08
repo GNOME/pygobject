@@ -228,6 +228,7 @@ _pygi_marshal_from_py_array (PyGIInvokeState *state,
     array_type = gi_type_info_get_array_type (arg_cache->type_info);
 
     /* Handle simple byte arrays first */
+    // TODO: should also apply to GI_TYPE_TAG_UTF8, GI_TYPE_TAG_INT8, GI_TYPE_TAG_FILENAME?
     if (array_type == GI_ARRAY_TYPE_C
         && sequence_cache->item_cache->type_tag == GI_TYPE_TAG_UINT8
         && PyBytes_Check (py_arg)) {

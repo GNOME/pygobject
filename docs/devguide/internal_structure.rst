@@ -86,6 +86,30 @@ There's a few cases where cleanup is needed:
 
 Note that a call that sets a :class:`~gi.repository.GLib.Error` is still a successful call.
 
+Note that the cleanup data is not always the marshalled value, but can contain more information needed to
+properly free an object. A good example is closures.
+
+Collections
+~~~~~~~~~~~
+
+Collection types (``GArray``, ``GPtrArray``, ``GHashTable``, ``GList``, ``GSlist``) have special serializers.
+
+Because those types contain other types, everything from an integer to an object, PyGObject collects the
+cleanup data for each element that's part of the collection.
+
+Arrays and has tables can be reference counted, lists can't. For lists it's quite evident PyGObject has to
+keep track of cleanup data for each element in the list.
+
+The case of arrays and hash tables is a bit more complicated. Currently no ``free_func`` is set, except
+for UTF8 and filename types when the ownership type is *transfer everything*.
+For hash tables, the key and value ownership type is changed to avoid double free.
+
+The current approach is not ideal, since it leaks references for other pointer types than
+UTF8 and filenames.
+
+NB. There's no guarantee that the introspected library will use the appropriate ``_ref``
+and ``_unref`` functions on arrays and hash tables.
+
 Non-GI Marshallers
 ------------------
 
