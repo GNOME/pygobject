@@ -241,7 +241,8 @@ _pygi_marshal_from_py_buffer (PyGIInvokeState *state,
         (g_strcmp0 (format, "q") == 0 && type_tag == GI_TYPE_TAG_INT64) ||
         (g_strcmp0 (format, "Q") == 0 && type_tag == GI_TYPE_TAG_UINT64) ||
         (g_strcmp0 (format, "f") == 0 && type_tag == GI_TYPE_TAG_FLOAT) ||
-        (g_strcmp0 (format, "d") == 0 && type_tag == GI_TYPE_TAG_DOUBLE);
+        (g_strcmp0 (format, "d") == 0 && type_tag == GI_TYPE_TAG_DOUBLE) ||
+        (g_strcmp0 (format, "w") == 0 && type_tag == GI_TYPE_TAG_UNICHAR);
     valid = valid && buffer->view.ndim <= 1; /* 0 is a single element. */
     if (!valid) {
         PyBuffer_Release (&buffer->view);

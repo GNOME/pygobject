@@ -952,6 +952,8 @@ class TestArray(unittest.TestCase):
     def test_array_unichar_in(self):
         GIMarshallingTests.array_unichar_in(list(CONSTANT_UCS4))
         GIMarshallingTests.array_unichar_in(CONSTANT_UCS4)
+        if sys.version_info[:2] >= (3, 13):
+            GIMarshallingTests.array_unichar_in(array.array('w', CONSTANT_UCS4))
 
     def test_array_unichar_out(self):
         result = list(CONSTANT_UCS4)
