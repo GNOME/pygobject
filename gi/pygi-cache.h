@@ -20,6 +20,7 @@
 
 #pragma once
 
+#include <pythoncapi_compat.h>
 
 /* Workaround for FFI_GO_CLOSURES not being defined on macOS
  * See also: https://github.com/openjdk/jdk17u-dev/pull/741

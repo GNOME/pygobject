@@ -1,7 +1,6 @@
-#include <string.h>
-
-#include <pygobject.h>
 #include <pythoncapi_compat.h>
+#include <pygobject.h>
+#include <string.h>
 
 #include "test-floating.h"
 #include "test-thread.h"

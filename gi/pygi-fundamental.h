@@ -23,6 +23,8 @@
 
 #pragma once
 
+#include <pythoncapi_compat.h>
+
 #include <girepository/girepository.h>
 
 #include "pygi-type.h"

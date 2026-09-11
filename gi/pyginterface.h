@@ -20,8 +20,8 @@
 
 #pragma once
 
-#include <glib-object.h>
 #include <pythoncapi_compat.h>
+#include <glib-object.h>
 
 G_BEGIN_DECLS
 

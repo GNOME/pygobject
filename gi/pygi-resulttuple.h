@@ -19,8 +19,8 @@
 
 #pragma once
 
-#include <glib.h>
 #include <pythoncapi_compat.h>
+#include <glib.h>
 
 G_BEGIN_DECLS
 

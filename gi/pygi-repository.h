@@ -19,8 +19,8 @@
 
 #pragma once
 
-#include <girepository/girepository.h>
 #include <pythoncapi_compat.h>
+#include <girepository/girepository.h>
 
 G_BEGIN_DECLS
 
