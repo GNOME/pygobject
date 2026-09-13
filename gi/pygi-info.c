@@ -34,6 +34,7 @@
 static PyObject *
 _generate_doc_string (PyGIBaseInfo *self)
 {
+    // TODO: needs mutex
     static PyObject *_py_generate_doc_string = NULL;
 
     if (_py_generate_doc_string == NULL) {
@@ -55,6 +56,7 @@ _generate_doc_string (PyGIBaseInfo *self)
 static PyObject *
 _generate_signature (PyGICallableInfo *self)
 {
+    // TODO: needs mutex
     static PyObject *_py_generate_signature = NULL;
 
     if (_py_generate_signature == NULL) {
@@ -355,6 +357,7 @@ _base_info_getattro (PyGIBaseInfo *self, PyObject *name)
 {
     PyObject *result;
 
+    // TODO: needs mutex
     static PyObject *docstr;
     if (docstr == NULL) {
         docstr = PyUnicode_InternFromString ("__doc__");

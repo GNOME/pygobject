@@ -29,6 +29,7 @@ static char tuple_indices_key[] = "__tuple_indices";
 #undef PYGI_USE_FREELIST
 #endif
 
+// TODO: should no longer use this?
 #ifdef PYGI_USE_FREELIST
 /* A free list similar to the one used for the CPython tuple. Difference
  * is that zero length tuples aren't cached (as we don't need them)
