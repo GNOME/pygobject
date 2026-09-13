@@ -687,6 +687,9 @@ static PyMethodDef _gi_cairo_functions[] = {
 
 static PyModuleDef_Slot _gi_cairo_slots[] = {
     { Py_mod_exec, _gi_cairo_exec },
+#ifdef Py_GIL_DISABLED
+    { Py_mod_gil, Py_MOD_GIL_NOT_USED },
+#endif
     { 0, NULL },
 };
 

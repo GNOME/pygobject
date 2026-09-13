@@ -718,7 +718,18 @@ pygi_callable_info_get_cache (PyGICallableInfo *self)
     PyGIFunctionCache *function_cache;
     GIBaseInfo *info = self->base.info;
 
-    if (self->cache != NULL) return self->cache;
+#ifdef Py_GIL_DISABLED
+    static PyMutex cache_lock = { 0 };
+
+    PyMutex_Lock (&cache_lock);
+#endif
+
+    if (self->cache != NULL) {
+#ifdef Py_GIL_DISABLED
+        PyMutex_Unlock (&cache_lock);
+#endif
+        return self->cache;
+    }
 
     if (GI_IS_FUNCTION_INFO (info)) {
         GIFunctionInfoFlags flags;
@@ -742,6 +753,10 @@ pygi_callable_info_get_cache (PyGICallableInfo *self)
     }
 
     self->cache = function_cache;
+
+#ifdef Py_GIL_DISABLED
+    PyMutex_Unlock (&cache_lock);
+#endif
 
     return function_cache;
 }
