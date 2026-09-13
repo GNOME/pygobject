@@ -34,6 +34,7 @@ typedef struct {
     PyGIArgOverrideReleaseFunc release_func;
 } PyGIForeignStruct;
 
+// TODO: needs mutex?
 static GPtrArray *foreign_structs = NULL;
 
 static void

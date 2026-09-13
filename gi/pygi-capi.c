@@ -252,7 +252,9 @@ pyg_register_class_init (GType gtype, PyGClassInitFunc class_init)
 }
 
 
+// TODO: needs mutex
 static GHashTable *log_handlers = NULL;
+// TODO: needs mutex
 static gboolean log_handlers_disabled = FALSE;
 
 

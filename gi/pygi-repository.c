@@ -33,6 +33,7 @@ PYGI_DEFINE_TYPE ("gi.Repository", PyGIRepository_Type, PyGIRepository);
 GIRepository *
 pygi_repository_get_default (void)
 {
+    // TODO: needs mutex
     static GIRepository *default_repository = NULL;
 
     if (default_repository == NULL)
@@ -48,6 +49,7 @@ pygi_repository_get_default (void)
 static PyObject *
 _wrap_pygi_repository_get_default (PyObject *self)
 {
+    // TODO: needs mutex
     static PyGIRepository *repository = NULL;
 
     if (!repository) {
