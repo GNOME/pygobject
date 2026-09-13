@@ -29,6 +29,7 @@ static PyObject *asyncio_get_running_loop;
 #if defined(PYPY_VERSION)
 static PyObject *contextvars_copy_context;
 #endif
+// TODO: needs mutex
 static PyObject *cancellable_info;
 
 /* This is never instantiated. */
@@ -233,6 +234,7 @@ async_init (PyGIAsync *self, PyObject *args, PyObject *kwargs)
     /* We need to pull in Gio.Cancellable at some point, but we delay it
      * until really needed to avoid having a dependency.
      */
+    // TODO: needs mutex
     if (G_UNLIKELY (!cancellable_info)) {
         PyObject *gio;
 

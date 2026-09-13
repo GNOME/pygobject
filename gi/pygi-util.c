@@ -105,6 +105,7 @@ pyg_constant_strip_prefix (const gchar *name, const gchar *strip_prefix)
 PyObject *
 pyg_is_python_keyword (const gchar *name)
 {
+    // TODO: needs mutex
     static PyObject *iskeyword = NULL;
     PyObject *pyname, *result;
 
