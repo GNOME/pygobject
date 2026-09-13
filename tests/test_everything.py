@@ -25,6 +25,11 @@ const_str = b"const \xe2\x99\xa5 utf8".decode("UTF-8")
 noconst_str = "non" + const_str
 
 
+def is_immortal_or_deferred(obj):
+    """``obj`` has an immortal or deferred reference count."""
+    return hasattr(sys, "getrefcount") and sys.getrefcount(obj) > (1 << 29)
+
+
 class RawGList(ctypes.Structure):
     _fields_ = [
         ("data", ctypes.c_void_p),
@@ -902,6 +907,7 @@ class TestCallbacks(unittest.TestCase):
 
         if hasattr(sys, "getrefcount"):
             self.assertEqual(sys.getrefcount(callback), callback_refcount + 1)
+        if not is_immortal_or_deferred(ud):
             self.assertEqual(sys.getrefcount(ud), ud_refcount + 1)
 
         # test_callback_thaw_async will run the callback previously supplied.
@@ -1129,6 +1135,7 @@ class TestCallbacks(unittest.TestCase):
         self.assertEqual(called, 100)
         if hasattr(sys, "getrefcount"):
             self.assertEqual(sys.getrefcount(callback), callback_refcount + 100)
+        if not is_immortal_or_deferred(ud):
             self.assertEqual(sys.getrefcount(ud), value_refcount + 100)
 
         # thaw will call the callback again, this time resources should be freed

@@ -949,6 +949,8 @@ class TestProperty(unittest.TestCase):
         # the local reference to this object, its reference count shoud
         # drop to zero, and our dummy object should loose one reference.
         del t
+        # In free-threaded python we need to call GC first
+        gc.collect()
         self.assertEqual(sys.getrefcount(o), rc)
 
     def test_doc_strings(self):
