@@ -713,7 +713,9 @@ pyg_flags_get_value (GType flag_type, PyObject *obj, guint *val)
     return res;
 }
 
+// TODO: needs mutex
 static GQuark pyg_type_marshal_key = 0;
+// TODO: needs mutex
 static GQuark pyg_type_marshal_helper_key = 0;
 
 typedef enum _marshal_helper_data_e marshal_helper_data_e;
@@ -1042,6 +1044,7 @@ pyg_signal_class_closure_marshal (GClosure *closure, GValue *return_value,
 GClosure *
 pyg_signal_class_closure_get (void)
 {
+    // TODO: needs mutex
     static GClosure *closure;
 
     if (closure == NULL) {
@@ -1215,6 +1218,7 @@ PYGI_DEFINE_TYPE ("gobject.GObject.__doc__", PyGObjectDoc_Type, PyObject);
 PyObject *
 pyg_object_descr_doc_get (void)
 {
+    // TODO: needs mutex
     static PyObject *doc_descr = NULL;
 
     if (!doc_descr) {

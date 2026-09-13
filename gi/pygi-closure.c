@@ -29,6 +29,7 @@
    as they have been called.  We will free them on the next
    library function call.
  */
+// TODO: needs mutex
 static GSList *async_free_list;
 
 static void
