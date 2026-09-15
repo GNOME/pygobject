@@ -65,7 +65,6 @@ SnakeViz - cProfile Based Visualization
     python -m cProfile -o prof.out quodlibet.py
     snakeviz prof.out
 
-
 Sysprof - System-wide Performance Profiler for Linux
 ----------------------------------------------------
 
@@ -110,3 +109,25 @@ Debugging HiDPI Issue
 
     MUTTER_DEBUG_NUM_DUMMY_MONITORS=2 MUTTER_DEBUG_DUMMY_MONITOR_SCALES=1,2 mutter --nested --wayland
     # start your app, it should show up in the nested mutter
+
+
+C Extension (callgrind)
+-----------------------
+
+.. code-block:: bash
+
+    PROFTEST=myproftest
+    valgrind --tool=callgrind --callgrind-out-file=$PROFTEST.callgrind $PYTHON $PROFTEST.py
+    kcachegrind $PROFTEST.callgrind
+
+C Extension (gperftools)
+------------------------
+
+Google PerfTools https://code.google.com/p/gperftools
+
+.. code-block:: bash
+
+    PROFTEST=myproftest
+    $PYTHON -m yep -o $PROFTEST.py.prof $PROFTEST.py
+    google-pprof --callgrind $PYTHON $PROFTEST.py.prof > $PROFTEST.callgrind
+    kcachegrind $PROFTEST.callgrind

@@ -10,12 +10,9 @@ Development Guide
     dev_environ
     style_guide
     override_guidelines
-    internal_structure
+    marshalling
     gbytes_marshaller_tutorial
-    initializer_deprecations
-    introspection_porting
-    profiling
 
     maintguide
     packagingguide
-    analysis/index
+    archived

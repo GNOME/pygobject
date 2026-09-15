@@ -1,39 +1,15 @@
-Internal Structure
-==================
+Marshalling Between Python and C
+================================
 
 PyGObject is written part in Python, and part in C. This can make it hard to find functionality.
-This document should give you enough context so you can confidently start working on PyGObject.
+This document should give you enough context so you can confidently start working on PyGObject's
+marshalling logic.
 
-PyGObject's responsibility is to marshal between Python and libraries exposed via
+PyGObject marshals between Python and (C-) libraries exposed via
 `GObject Introspection <https://docs.gtk.org/girepository/>`_.
 
-PyGObject can be deconstructed in the following functionalities:
-
-- Object creation and lifecycle management. Objects can be created from Python, but also from
-  GObject directly (e.g. by ``Gtk.Builder``).
-- Marshalling happens for ``GValue`` and ``GIArguments`` to/from Python types.
-  Asynchronous functions have some special handling. Marshallers are generally cached (``pygi-cache.h``).
-- Overrides allow us to make GI API's more Pythonic or deal with version inconsistencies.
-  Overrides are written in Python (preferred), but sometimes use functions written in C.
-  Most notably :class:`~gi.repository.GObject.Object`.
-- Hard coded wrappers (``GSource``, ``GError``, GIRepository classes, GObject (partly)).
-- C extension API (``pygobject.h``, ``pygobject-types.h``).
-  Some code, e.g. in ``pygboxed.c``, is solely for the extension API, and is not used internally.
-- Foreign interface for pycairo interop. This is not available outside of PyGObject.
-
-Object lifecycle
-----------------
-
-* Numeric types, boolean, unichar: converted to their appropriate Python type.
-* ``GObject``\-based types: Python object on demand, shared if the same object is returned from multiple calls, instance dict shared among instances.
-* Simple types (``GTypeInstance``, but not ``GObject``), boxed types, structs:
-  Python object on demand, instance dict *not* shared.
-* Arrays, lists, hash tables: elements are marshalled to their appropriate C type.
-  Python lists and dicts are created.
-  Modifying a list or dict coming from an introspected function does not change the original.
-
-Marshallers
------------
+Marshalling happens for ``GValue`` and ``GIArgument`` to/from Python types.
+Asynchronous functions have some special handling. Marshallers are generally cached (``pygi-cache.h``).
 
 Marshalling happens for all interactions with libraries exposed through PyGObject:
 
@@ -49,7 +25,7 @@ Some types, like ``char*``, and ``GValue`` can not.
 For those types its important we keep track of who owns that data at any point in time.
 
 Ownership
-~~~~~~~~~
+---------
 
 When an introspected function is called with anything more complex than an integer,
 the question of ownership arises. Who is responsible for (freeing) the data after a
@@ -81,7 +57,7 @@ Boxed types have copy/free functions that work in a similar way.
 For other types we have to revert to copying memory. This also applies to types like ``char*``, ``char**`` (primitive arrays).
 
 Cleanup
-~~~~~~~
+-------
 
 After a call is done, either from Python to C, or from C to python, C variables created during marshalling
 need to be cleaned up (see transfer rules above).
@@ -101,7 +77,7 @@ Note that the cleanup data is not always the marshalled value, but can contain m
 properly free an object. A good example is closures.
 
 Collections
-~~~~~~~~~~~
+-----------
 
 Collection types (``GArray``, ``GPtrArray``, ``GHashTable``, ``GList``, ``GSlist``) have special serializers.
 
@@ -122,7 +98,7 @@ NB. There's no guarantee that the introspected library will use the appropriate 
 and ``_unref`` functions on arrays and hash tables.
 
 Non-GI Marshallers
-~~~~~~~~~~~~~~~~~~
+------------------
 
 In Python it's possible to create your own types. Those are registered with the GObject type system and can have
 properties and signals. Those types are not available as GI data, obviously, so this case is dealt differently.
@@ -130,7 +106,7 @@ properties and signals. Those types are not available as GI data, obviously, so 
 This applies only to properties and signals.
 
 Properties
-~~~~~~~~~~
+----------
 
 Property values are marshalled into ``GValue``s. Since ``GValue`` uses ``GType`` for type information,
 the marshalling is slightly simpler.
