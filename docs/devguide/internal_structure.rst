@@ -5,7 +5,7 @@ PyGObject is written part in Python, and part in C. This can make it hard to fin
 This document should give you enough context so you can confidently start working on PyGObject.
 
 PyGObject's responsibility is to marshal between Python and libraries exposed via
-[GObject Introspection](https://docs.gtk.org/girepository/).
+`GObject Introspection <https://docs.gtk.org/girepository/>`_.
 
 PyGObject can be deconstructed in the following functionalities:
 
@@ -25,8 +25,8 @@ Object lifecycle
 ----------------
 
 * Numeric types, boolean, unichar: converted to their appropriate Python type.
-* ``GObject``-based types: Python object on demand, shared if the same object is returned from multiple calls, instance dict shared among instances.
-* Simple types (``GTypeInstance``, but not `GObject``), boxed types, structs:
+* ``GObject``\-based types: Python object on demand, shared if the same object is returned from multiple calls, instance dict shared among instances.
+* Simple types (``GTypeInstance``, but not ``GObject``), boxed types, structs:
   Python object on demand, instance dict *not* shared.
 * Arrays, lists, hash tables: elements are marshalled to their appropriate C type.
   Python lists and dicts are created.
@@ -46,13 +46,13 @@ Marshalling happens for all interactions with libraries exposed through PyGObjec
 
 Many types in the GLib/GObject ecosystem can be reference-counted.
 Some types, like ``char*``, and ``GValue`` can not.
-For those types its imporant we keep track of who owns that data at any point in time.
+For those types its important we keep track of who owns that data at any point in time.
 
 Ownership
 ~~~~~~~~~
 
 When an introspected function is called with anything more complex than an integer,
-the question of ownership arises. Who is resposible for (freeing) the data after a
+the question of ownership arises. Who is responsible for (freeing) the data after a
 function is called? For this, parameters are annotated with ownership rules (``transfer``).
 
 In the Python to C scenario (``*_from_py``):
@@ -93,7 +93,7 @@ There's a few cases where cleanup is needed:
   and needs to be freed accordingly.
 * Return value or "out" parameter marshalling fails: The call was successful, but we can't deal with the result.
   PyGObject should clean up the "in" and "out" parameters as if the call was successful.
-  Already marshalled objects need to be clean up as well.
+  Already marshalled objects need to be cleaned up as well.
 
 Note that a call that sets a :class:`~gi.repository.GLib.Error` is still a successful call.
 
@@ -122,7 +122,7 @@ NB. There's no guarantee that the introspected library will use the appropriate 
 and ``_unref`` functions on arrays and hash tables.
 
 Non-GI Marshallers
-------------------
+~~~~~~~~~~~~~~~~~~
 
 In Python it's possible to create your own types. Those are registered with the GObject type system and can have
 properties and signals. Those types are not available as GI data, obviously, so this case is dealt differently.
@@ -130,7 +130,7 @@ properties and signals. Those types are not available as GI data, obviously, so 
 This applies only to properties and signals.
 
 Properties
-----------
+~~~~~~~~~~
 
 Property values are marshalled into ``GValue``s. Since ``GValue`` uses ``GType`` for type information,
 the marshalling is slightly simpler.
