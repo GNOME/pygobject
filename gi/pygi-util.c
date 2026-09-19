@@ -102,21 +102,28 @@ pyg_constant_strip_prefix (const gchar *name, const gchar *strip_prefix)
     return name;
 }
 
+static gpointer
+init_once_iskeyword (gpointer user_data)
+{
+    PyObject *iskeyword;
+    PyObject *keyword_module = PyImport_ImportModule ("keyword");
+    if (!keyword_module) return NULL;
+
+    iskeyword = PyObject_GetAttrString (keyword_module, "iskeyword");
+    Py_DECREF (keyword_module);
+
+    return iskeyword;
+}
+
 PyObject *
 pyg_is_python_keyword (const gchar *name)
 {
-    // TODO: needs mutex
-    static PyObject *iskeyword = NULL;
-    PyObject *pyname, *result;
+    static GOnce once_iskeyword = G_ONCE_INIT;
+    PyObject *iskeyword, *pyname, *result;
 
-    if (!iskeyword) {
-        PyObject *keyword_module = PyImport_ImportModule ("keyword");
-        if (!keyword_module) return NULL;
-
-        iskeyword = PyObject_GetAttrString (keyword_module, "iskeyword");
-        Py_DECREF (keyword_module);
-        if (!iskeyword) return NULL;
-    }
+    g_once (&once_iskeyword, init_once_iskeyword, NULL);
+    iskeyword = once_iskeyword.retval;
+    if (!iskeyword) return NULL;
 
     /* Python 3.x; note that we explicitly keep "print"; it is not a keyword
      * any more, but we do not want to break API between Python versions */
