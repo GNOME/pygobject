@@ -29,8 +29,8 @@
    as they have been called.  We will free them on the next
    library function call.
  */
-// TODO: needs mutex
 static GSList *async_free_list;
+static GMutex async_free_list_lock;
 
 static void
 _pygi_closure_assign_pyobj_to_retval (gpointer retval, GIArgument *arg,
@@ -579,7 +579,9 @@ end:
         /* Append this PyGICClosure to a list of closure that we will free
                after we're done with this function invokation */
         _pygi_invoke_closure_clear_py_data (closure);
+        g_mutex_lock (&async_free_list_lock);
         async_free_list = g_slist_prepend (async_free_list, closure);
+        g_mutex_unlock (&async_free_list_lock);
         break;
     case GI_SCOPE_TYPE_INVALID:
     case GI_SCOPE_TYPE_FOREVER:
@@ -623,9 +625,11 @@ _pygi_make_native_closure (GICallableInfo *info, PyGIClosureCache *cache,
     ffi_closure *fficlosure;
 
     /* Begin by cleaning up old async functions */
+    g_mutex_lock (&async_free_list_lock);
     g_slist_free_full (async_free_list,
                        (GDestroyNotify)_pygi_invoke_closure_free);
     async_free_list = NULL;
+    g_mutex_unlock (&async_free_list_lock);
 
     /* Build the closure itself */
     closure = g_slice_new0 (PyGICClosure);
