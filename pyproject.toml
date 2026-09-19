@@ -48,6 +48,7 @@ build = [
 test = [
     "pytest!=9.0.0",
     "pytest-cov",
+    "pytest-run-parallel>=0.10.0",
 ]
 docs = [
     "sphinx",
