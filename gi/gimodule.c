@@ -1166,10 +1166,10 @@ _gi_exec (PyObject *module)
     PyModule_AddStringConstant (module, "__package__", "gi._gi");
 
     if ((ret = pygi_foreign_init ()) < 0) return ret;
+    if ((ret = pygi_type_register_types (module_dict)) < 0) return ret;
     if ((ret = pygi_error_register_types (module)) < 0) return ret;
     if ((ret = pygi_repository_register_types (module)) < 0) return ret;
     if ((ret = pygi_info_register_types (module)) < 0) return ret;
-    if ((ret = pygi_type_register_types (module_dict)) < 0) return ret;
     if ((ret = pygi_pointer_register_types (module_dict)) < 0) return ret;
     if ((ret = pygi_struct_register_types (module)) < 0) return ret;
     if ((ret = pygi_gboxed_register_types (module_dict)) < 0) return ret;
