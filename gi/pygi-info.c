@@ -27,6 +27,22 @@
 #include "pygi-type.h"
 #include "pygi-util.h"
 
+
+static gpointer
+init_once_py_generate_doc_string (gpointer user_data)
+{
+    PyObject *py_generate_doc_string;
+    PyObject *mod = PyImport_ImportModule ("gi.docstring");
+    if (!mod) return NULL;
+
+    py_generate_doc_string =
+        PyObject_GetAttrString (mod, "generate_doc_string");
+
+    Py_DECREF (mod);
+
+    return py_generate_doc_string;
+}
+
 /* _generate_doc_string
  *
  * C wrapper to call Python implemented "gi.docstring.generate_doc_string"
@@ -34,45 +50,43 @@
 static PyObject *
 _generate_doc_string (PyGIBaseInfo *self)
 {
-    // TODO: needs mutex
-    static PyObject *_py_generate_doc_string = NULL;
+    static GOnce once_py_generate_doc_string = G_ONCE_INIT;
+    PyObject *py_generate_doc_string = NULL;
 
-    if (_py_generate_doc_string == NULL) {
-        PyObject *mod = PyImport_ImportModule ("gi.docstring");
-        if (!mod) return NULL;
+    g_once (&once_py_generate_doc_string, init_once_py_generate_doc_string,
+            NULL);
+    py_generate_doc_string = once_py_generate_doc_string.retval;
+    if (py_generate_doc_string == NULL) return NULL;
 
-        _py_generate_doc_string =
-            PyObject_GetAttrString (mod, "generate_doc_string");
-        if (_py_generate_doc_string == NULL) {
-            Py_DECREF (mod);
-            return NULL;
-        }
-        Py_DECREF (mod);
-    }
+    return PyObject_CallFunctionObjArgs (py_generate_doc_string, self, NULL);
+}
 
-    return PyObject_CallFunctionObjArgs (_py_generate_doc_string, self, NULL);
+static gpointer
+init_once_py_generate_signature (gpointer user_data)
+{
+    PyObject *py_generate_signature;
+    PyObject *mod = PyImport_ImportModule ("gi._signature");
+    if (!mod) return NULL;
+
+    py_generate_signature = PyObject_GetAttrString (mod, "generate_signature");
+
+    Py_DECREF (mod);
+
+    return py_generate_signature;
 }
 
 static PyObject *
 _generate_signature (PyGICallableInfo *self)
 {
-    // TODO: needs mutex
-    static PyObject *_py_generate_signature = NULL;
+    static GOnce once_py_generate_signature = G_ONCE_INIT;
+    PyObject *py_generate_signature;
 
-    if (_py_generate_signature == NULL) {
-        PyObject *mod = PyImport_ImportModule ("gi._signature");
-        if (!mod) return NULL;
+    g_once (&once_py_generate_signature, init_once_py_generate_signature,
+            NULL);
+    py_generate_signature = once_py_generate_signature.retval;
+    if (py_generate_signature == NULL) return NULL;
 
-        _py_generate_signature =
-            PyObject_GetAttrString (mod, "generate_signature");
-        if (_py_generate_signature == NULL) {
-            Py_DECREF (mod);
-            return NULL;
-        }
-        Py_DECREF (mod);
-    }
-
-    return PyObject_CallFunctionObjArgs (_py_generate_signature, self, NULL);
+    return PyObject_CallFunctionObjArgs (py_generate_signature, self, NULL);
 }
 
 static PyObject *
@@ -347,6 +361,12 @@ static PyMethodDef _PyGIBaseInfo_methods[] = {
     { NULL, NULL, 0 },
 };
 
+static gpointer
+init_once_docstr (gpointer user_data)
+{
+    return PyUnicode_InternFromString ("__doc__");
+}
+
 /* _base_info_getattro:
  *
  * The usage of __getattr__ is needed because the get/set method table
@@ -355,14 +375,13 @@ static PyMethodDef _PyGIBaseInfo_methods[] = {
 static PyObject *
 _base_info_getattro (PyGIBaseInfo *self, PyObject *name)
 {
+    static GOnce once_docstr = G_ONCE_INIT;
+    PyObject *docstr;
     PyObject *result;
 
-    // TODO: needs mutex
-    static PyObject *docstr;
-    if (docstr == NULL) {
-        docstr = PyUnicode_InternFromString ("__doc__");
-        if (docstr == NULL) return NULL;
-    }
+    g_once (&once_docstr, init_once_docstr, NULL);
+    docstr = once_docstr.retval;
+    if (docstr == NULL) return NULL;
 
     Py_INCREF (name);
     PyUnicode_InternInPlace (&name);
