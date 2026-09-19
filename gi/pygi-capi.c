@@ -252,11 +252,9 @@ pyg_register_class_init (GType gtype, PyGClassInitFunc class_init)
 }
 
 
-// TODO: needs mutex
 static GHashTable *log_handlers = NULL;
-// TODO: needs mutex
 static gboolean log_handlers_disabled = FALSE;
-
+static GMutex log_handlers_lock;
 
 static void
 remove_handler (gpointer domain, gpointer handler, gpointer unused)
@@ -285,6 +283,8 @@ add_warning_redirection (const char *domain, PyObject *warning)
     g_return_if_fail (domain != NULL);
     g_return_if_fail (warning != NULL);
 
+    g_mutex_lock (&log_handlers_lock);
+
     if (!log_handlers_disabled) {
         guint handler;
         gpointer old_handler;
@@ -302,17 +302,23 @@ add_warning_redirection (const char *domain, PyObject *warning)
         g_hash_table_insert (log_handlers, g_strdup (domain),
                              GUINT_TO_POINTER (handler));
     }
+
+    g_mutex_unlock (&log_handlers_lock);
 }
 
 static void
 disable_warning_redirections (void)
 {
+    g_mutex_lock (&log_handlers_lock);
+
     log_handlers_disabled = TRUE;
 
     if (log_handlers) {
         g_hash_table_foreach (log_handlers, remove_handler, NULL);
         g_clear_pointer (&log_handlers, g_hash_table_destroy);
     }
+
+    g_mutex_unlock (&log_handlers_lock);
 }
 
 /**
