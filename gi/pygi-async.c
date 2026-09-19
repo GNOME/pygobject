@@ -29,8 +29,6 @@ static PyObject *asyncio_get_running_loop;
 #if defined(PYPY_VERSION)
 static PyObject *contextvars_copy_context;
 #endif
-// TODO: needs mutex
-static PyObject *cancellable_info;
 
 /* This is never instantiated. */
 PYGI_DEFINE_TYPE ("gi._gi.Async", PyGIAsync_Type, PyGIAsync)
@@ -215,10 +213,25 @@ async_remove_done_callback (PyGIAsync *self, PyObject *fn)
     return PyLong_FromSsize_t (removed);
 }
 
+static gpointer
+init_once_cancellable_info (gpointer user_data)
+{
+    PyObject *cancellable_info;
+    PyObject *gio = PyImport_ImportModule ("gi.repository.Gio");
+    if (gio == NULL) return NULL;
+
+    cancellable_info = PyObject_GetAttrString (gio, "Cancellable");
+    Py_DECREF (gio);
+
+    return cancellable_info;
+}
+
 static int
 async_init (PyGIAsync *self, PyObject *args, PyObject *kwargs)
 {
     static char *kwlist[] = { "finish_func", "cancellable", NULL };
+    static GOnce once_cancellable_info = G_ONCE_INIT;
+    PyObject *cancellable_info;
     PyObject *context = NULL;
     GMainContext *ctx = NULL;
     int ret = -1;
@@ -231,21 +244,9 @@ async_init (PyGIAsync *self, PyObject *args, PyObject *kwargs)
 
     Py_INCREF (self->finish_func);
 
-    /* We need to pull in Gio.Cancellable at some point, but we delay it
-     * until really needed to avoid having a dependency.
-     */
-    // TODO: needs mutex
-    if (G_UNLIKELY (!cancellable_info)) {
-        PyObject *gio;
-
-        gio = PyImport_ImportModule ("gi.repository.Gio");
-        if (gio == NULL) goto out;
-
-        cancellable_info = PyObject_GetAttrString (gio, "Cancellable");
-        Py_DECREF (gio);
-
-        if (!cancellable_info) goto out;
-    }
+    g_once (&once_cancellable_info, init_once_cancellable_info, NULL);
+    cancellable_info = once_cancellable_info.retval;
+    if (!cancellable_info) goto out;
 
     if (self->cancellable) {
         int res;
@@ -629,9 +630,6 @@ pygi_async_register_types (PyObject *module)
     Py_CLEAR (contextvars);
     if (contextvars_copy_context == NULL) goto fail;
 #endif
-
-    /* Only initialized when really needed! */
-    cancellable_info = NULL;
 
     Py_CLEAR (asyncio);
     return 0;
