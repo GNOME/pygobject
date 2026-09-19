@@ -30,37 +30,48 @@ PyObject *PyGIRepositoryError;
 PYGI_DEFINE_TYPE ("gi.Repository", PyGIRepository_Type, PyGIRepository);
 
 
+static gpointer
+init_once_default_repository (gpointer user_data)
+{
+#if GLIB_CHECK_VERSION(2, 85, 0)
+    return gi_repository_dup_default ();
+#else
+    return gi_repository_new ();
+#endif
+}
+
 GIRepository *
 pygi_repository_get_default (void)
 {
-    // TODO: needs mutex
-    static GIRepository *default_repository = NULL;
+    static GOnce once_default_repository = G_ONCE_INIT;
 
-    if (default_repository == NULL)
-#if GLIB_CHECK_VERSION(2, 85, 0)
-        default_repository = gi_repository_dup_default ();
-#else
-        default_repository = gi_repository_new ();
-#endif
+    g_once (&once_default_repository, init_once_default_repository, NULL);
 
-    return default_repository;
+    return once_default_repository.retval;
+}
+
+static gpointer
+init_once_py_default_repository (gpointer user_data)
+{
+    PyGIRepository *repository =
+        (PyGIRepository *)PyObject_New (PyGIRepository, &PyGIRepository_Type);
+    if (repository == NULL) {
+        return NULL;
+    }
+
+    repository->repository = pygi_repository_get_default ();
+
+    return repository;
 }
 
 static PyObject *
 _wrap_pygi_repository_get_default (PyObject *self)
 {
-    // TODO: needs mutex
-    static PyGIRepository *repository = NULL;
+    PyGIRepository *repository;
+    static GOnce once_repository = G_ONCE_INIT;
 
-    if (!repository) {
-        repository = (PyGIRepository *)PyObject_New (PyGIRepository,
-                                                     &PyGIRepository_Type);
-        if (repository == NULL) {
-            return NULL;
-        }
-
-        repository->repository = pygi_repository_get_default ();
-    }
+    g_once (&once_repository, init_once_py_default_repository, NULL);
+    repository = once_repository.retval;
 
     Py_INCREF ((PyObject *)repository);
     return (PyObject *)repository;
