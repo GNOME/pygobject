@@ -23,14 +23,9 @@
 static char repr_format_key[] = "__repr_format";
 static char tuple_indices_key[] = "__tuple_indices";
 
+#if !defined(PYPY_VERSION) && !defined(Py_GIL_DISABLED)
 #define PYGI_USE_FREELIST
 
-#ifdef PYPY_VERSION
-#undef PYGI_USE_FREELIST
-#endif
-
-// TODO: should no longer use this?
-#ifdef PYGI_USE_FREELIST
 /* A free list similar to the one used for the CPython tuple. Difference
  * is that zero length tuples aren't cached (as we don't need them)
  * and that the freelist is smaller as we don't free it with the cyclic GC

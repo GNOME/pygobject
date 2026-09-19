@@ -34,14 +34,7 @@ typedef struct {
     PyGIArgOverrideReleaseFunc release_func;
 } PyGIForeignStruct;
 
-// TODO: needs mutex?
 static GPtrArray *foreign_structs = NULL;
-
-static void
-init_foreign_structs (void)
-{
-    foreign_structs = g_ptr_array_new ();
-}
 
 static PyGIForeignStruct *
 do_lookup (const gchar *namespace, const gchar *name)
@@ -201,12 +194,11 @@ int
 pygi_foreign_init (void)
 {
     if (foreign_structs == NULL) {
-        init_foreign_structs ();
+        foreign_structs = g_ptr_array_new ();
     }
 
     return 0;
 }
-
 
 PyObject *
 pygi_register_foreign (PyObject *self, PyObject *args)
