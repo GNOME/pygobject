@@ -216,8 +216,11 @@ _py_args_combine_and_check_length (PyGICallableCache *cache,
 
 #define PyGI_INVOKE_ARG_STATE_SIZE(n)                                         \
     (n * (sizeof (PyGIInvokeArgState) + sizeof (GIArgument *)))
+
+#ifndef Py_GIL_DISABLED
 #define PyGI_INVOKE_ARG_STATE_N_MAX 10
 static gpointer free_arg_state[PyGI_INVOKE_ARG_STATE_N_MAX];
+#endif
 
 /**
  * _pygi_invoke_arg_state_init:
@@ -229,6 +232,7 @@ _pygi_invoke_arg_state_init (PyGIInvokeState *state)
 {
     gpointer mem;
 
+#ifndef Py_GIL_DISABLED
     if (state->n_args < PyGI_INVOKE_ARG_STATE_N_MAX
         && (mem = free_arg_state[state->n_args]) != NULL) {
         free_arg_state[state->n_args] = NULL;
@@ -236,6 +240,9 @@ _pygi_invoke_arg_state_init (PyGIInvokeState *state)
     } else {
         mem = g_slice_alloc0 (PyGI_INVOKE_ARG_STATE_SIZE (state->n_args));
     }
+#else
+    mem = g_slice_alloc0 (PyGI_INVOKE_ARG_STATE_SIZE (state->n_args));
+#endif
 
     if (mem == NULL && state->n_args != 0) {
         PyErr_NoMemory ();
@@ -259,11 +266,13 @@ _pygi_invoke_arg_state_init (PyGIInvokeState *state)
 void
 _pygi_invoke_arg_state_free (PyGIInvokeState *state)
 {
+#ifndef Py_GIL_DISABLED
     if (state->n_args < PyGI_INVOKE_ARG_STATE_N_MAX
         && free_arg_state[state->n_args] == NULL) {
         free_arg_state[state->n_args] = state->args;
         return;
     }
+#endif
 
     g_slice_free1 (PyGI_INVOKE_ARG_STATE_SIZE (state->n_args), state->args);
 }
