@@ -507,6 +507,9 @@ class TestEverything(unittest.TestCase):
                 e.args, ("Regress.test_int8() takes exactly 1 argument (0 given)",)
             )
 
+    class ARegisteredClass(GObject.GObject):
+        __gtype_name__ = "EverythingTestsARegisteredClass"
+
     def test_gtypes(self):
         gchararray_gtype = GObject.type_from_name("gchararray")
         gtype = Everything.test_gtype(str)
@@ -525,13 +528,10 @@ class TestEverything(unittest.TestCase):
 
         self.assertRaises(TypeError, Everything.test_gtype, NotARegisteredClass)
 
-        class ARegisteredClass(GObject.GObject):
-            __gtype_name__ = "EverythingTestsARegisteredClass"
-
         gtype = Everything.test_gtype("EverythingTestsARegisteredClass")
-        self.assertEqual(ARegisteredClass.__gtype__, gtype)
-        gtype = Everything.test_gtype(ARegisteredClass)
-        self.assertEqual(ARegisteredClass.__gtype__, gtype)
+        self.assertEqual(TestEverything.ARegisteredClass.__gtype__, gtype)
+        gtype = Everything.test_gtype(TestEverything.ARegisteredClass)
+        self.assertEqual(TestEverything.ARegisteredClass.__gtype__, gtype)
         self.assertRaises(TypeError, Everything.test_gtype, "ARegisteredClass")
 
     def test_dir(self):
@@ -614,16 +614,17 @@ class TestEverything(unittest.TestCase):
             Everything.test_array_of_non_utf8_strings()
 
     def test_array_callback(self):
-        TestCallbacks.called = 0
+        called = 0
 
         def callback(ints, ints_length, strings, strings_length):
+            nonlocal called
             self.assertEqual(ints, [-1, 0, 1, 2])
             self.assertEqual(strings, ["one", "two", "three"])
-            TestCallbacks.called += 1
-            return TestCallbacks.called
+            called += 1
+            return called
 
         Everything.test_array_callback(callback)
-        self.assertEqual(TestCallbacks.called, 2)
+        self.assertEqual(called, 2)
 
     def test_garray_container_return(self):
         # GPtrArray transfer container
@@ -816,17 +817,15 @@ class TestNullableArgs(unittest.TestCase):
 
 
 class TestCallbacks(unittest.TestCase):
-    called = False
-    main_loop = GLib.MainLoop()
-
     def test_callback(self):
-        TestCallbacks.called = False
+        called = False
 
         def callback():
-            TestCallbacks.called = True
+            nonlocal called
+            called = True
 
         Everything.test_simple_callback(callback)
-        self.assertTrue(TestCallbacks.called)
+        self.assertTrue(called)
 
     def test_callback_exception(self):
         """This test ensures that we get errors from callbacks correctly
@@ -868,22 +867,24 @@ class TestCallbacks(unittest.TestCase):
         self.assertEqual(exc[0].type, ZeroDivisionError)
 
     def test_return_value_callback(self):
-        TestCallbacks.called = False
+        called = False
 
         def callback():
-            TestCallbacks.called = True
+            nonlocal called
+            called = True
             return 44
 
         self.assertEqual(Everything.test_callback(callback), 44)
-        self.assertTrue(TestCallbacks.called)
+        self.assertTrue(called)
 
     def test_callback_scope_async(self):
-        TestCallbacks.called = False
+        called = False
         ud = "Test Value 44"
 
         def callback(user_data):
+            nonlocal called
             self.assertEqual(user_data, ud)
-            TestCallbacks.called = True
+            called = True
             return 44
 
         if hasattr(sys, "getrefcount"):
@@ -892,7 +893,7 @@ class TestCallbacks(unittest.TestCase):
 
         self.assertEqual(Everything.test_callback_async(callback, ud), None)
         # Callback should not have run and the ref count is increased by 1
-        self.assertEqual(TestCallbacks.called, False)
+        self.assertEqual(called, False)
 
         if hasattr(sys, "getrefcount"):
             self.assertEqual(sys.getrefcount(callback), callback_refcount + 1)
@@ -901,7 +902,7 @@ class TestCallbacks(unittest.TestCase):
         # test_callback_thaw_async will run the callback previously supplied.
         # references should be auto decremented after this call.
         self.assertEqual(Everything.test_callback_thaw_async(), 44)
-        self.assertTrue(TestCallbacks.called)
+        self.assertTrue(called)
 
         # Make sure refcounts are returned to normal
         if hasattr(sys, "getrefcount"):
@@ -911,18 +912,19 @@ class TestCallbacks(unittest.TestCase):
     def test_callback_scope_call_multi(self):
         # This tests a callback that gets called multiple times from a
         # single scope call in python.
-        TestCallbacks.called = 0
+        called = 0
 
         def callback():
-            TestCallbacks.called += 1
-            return TestCallbacks.called
+            nonlocal called
+            called += 1
+            return called
 
         if hasattr(sys, "getrefcount"):
             refcount = sys.getrefcount(callback)
         result = Everything.test_multi_callback(callback)
         # first callback should give 1, second 2, and the function sums them up
         self.assertEqual(result, 3)
-        self.assertEqual(TestCallbacks.called, 2)
+        self.assertEqual(called, 2)
 
         if hasattr(sys, "getrefcount"):
             self.assertEqual(sys.getrefcount(callback), refcount)
@@ -930,22 +932,20 @@ class TestCallbacks(unittest.TestCase):
     def test_callback_scope_call_array(self):
         # This tests a callback that gets called multiple times from a
         # single scope call in python with array arguments
-        TestCallbacks.callargs = []
+        callargs = []
 
         # FIXME: would be cleaner without the explicit length args:
         # def callback(one, two):
         def callback(one, one_length, two, two_length):
-            TestCallbacks.callargs.append((one, two))
-            return len(TestCallbacks.callargs)
+            callargs.append((one, two))
+            return len(callargs)
 
         if hasattr(sys, "getrefcount"):
             refcount = sys.getrefcount(callback)
         result = Everything.test_array_callback(callback)
         # first callback should give 1, second 2, and the function sums them up
         self.assertEqual(result, 3)
-        self.assertEqual(
-            TestCallbacks.callargs, [([-1, 0, 1, 2], ["one", "two", "three"])] * 2
-        )
+        self.assertEqual(callargs, [([-1, 0, 1, 2], ["one", "two", "three"])] * 2)
 
         if hasattr(sys, "getrefcount"):
             self.assertEqual(sys.getrefcount(callback), refcount)
@@ -953,78 +953,82 @@ class TestCallbacks(unittest.TestCase):
     def test_callback_scope_call_array_inout(self):
         # This tests a callback that gets called multiple times from a
         # single scope call in python with inout array arguments
-        TestCallbacks.callargs = []
+        callargs = []
 
         def callback(ints, ints_length):
-            TestCallbacks.callargs.append(ints)
+            callargs.append(ints)
             return ints[1:], len(ints[1:])
 
         if hasattr(sys, "getrefcount"):
             refcount = sys.getrefcount(callback)
         result = Everything.test_array_inout_callback(callback)
-        self.assertEqual(TestCallbacks.callargs, [[-2, -1, 0, 1, 2], [-1, 0, 1, 2]])
+        self.assertEqual(callargs, [[-2, -1, 0, 1, 2], [-1, 0, 1, 2]])
         # first callback should give 4, second 3
         self.assertEqual(result, 3)
         if hasattr(sys, "getrefcount"):
             self.assertEqual(sys.getrefcount(callback), refcount)
 
     def test_callback_userdata(self):
-        TestCallbacks.called = 0
+        called = 0
 
         def callback(userdata):
-            self.assertEqual(userdata, f"Test{TestCallbacks.called:d}")
-            TestCallbacks.called += 1
-            return TestCallbacks.called
+            nonlocal called
+            self.assertEqual(userdata, f"Test{called:d}")
+            called += 1
+            return called
 
         for i in range(100):
             val = Everything.test_callback_user_data(callback, f"Test{i:d}")
             self.assertEqual(val, i + 1)
 
-        self.assertEqual(TestCallbacks.called, 100)
+        self.assertEqual(called, 100)
 
     def test_callback_userdata_no_user_data(self):
-        TestCallbacks.called = 0
+        called = 0
 
         def callback():
-            TestCallbacks.called += 1
-            return TestCallbacks.called
+            nonlocal called
+            called += 1
+            return called
 
         for i in range(100):
             val = Everything.test_callback_user_data(callback)
             self.assertEqual(val, i + 1)
 
-        self.assertEqual(TestCallbacks.called, 100)
+        self.assertEqual(called, 100)
 
     def test_callback_userdata_varargs(self):
-        TestCallbacks.called = 0
+        called = 0
         collected_user_data = []
 
         def callback(a, b):
+            nonlocal called
             collected_user_data.extend([a, b])
-            TestCallbacks.called += 1
-            return TestCallbacks.called
+            called += 1
+            return called
 
         for i in range(10):
             val = Everything.test_callback_user_data(callback, 1, 2)
             self.assertEqual(val, i + 1)
 
-        self.assertEqual(TestCallbacks.called, 10)
+        self.assertEqual(called, 10)
         self.assertSequenceEqual(collected_user_data, [1, 2] * 10)
 
     def test_callback_userdata_as_kwarg_tuple(self):
-        TestCallbacks.called = 0
+        called = 0
         collected_user_data = []
 
         def callback(user_data):
+            nonlocal called
             collected_user_data.extend(user_data)
-            TestCallbacks.called += 1
-            return TestCallbacks.called
+            called += 1
+            return called
 
         for i in range(10):
             val = Everything.test_callback_user_data(callback, user_data=(1, 2))
             self.assertEqual(val, i + 1)
 
-        self.assertEqual(TestCallbacks.called, 10)
+        self.assertEqual(called, 10)
         self.assertSequenceEqual(collected_user_data, [1, 2] * 10)
 
     def test_callback_user_data_middle_none(self):
@@ -1079,26 +1083,32 @@ class TestCallbacks(unittest.TestCase):
         self.assertEqual(cb_info["userdata"], (-5, "User Data"))
 
     def test_async_ready_callback(self):
-        TestCallbacks.called = False
-        TestCallbacks.main_loop = GLib.MainLoop()
+        called = False
+        context = GLib.MainContext()
+        main_loop = GLib.MainLoop(context)
+        context.push_thread_default()
 
         def callback(obj, result, user_data):
-            TestCallbacks.main_loop.quit()
-            TestCallbacks.called = True
+            nonlocal called
+            main_loop.quit()
+            called = True
 
-        Everything.test_async_ready_callback(callback)
+        try:
+            Everything.test_async_ready_callback(callback)
+            main_loop.run()
+        finally:
+            context.pop_thread_default()
 
-        TestCallbacks.main_loop.run()
-
-        self.assertTrue(TestCallbacks.called)
+        self.assertTrue(called)
 
     def test_callback_scope_notified_with_destroy(self):
-        TestCallbacks.called = 0
+        called = 0
         ud = "Test scope notified data 33"
 
         def callback(user_data):
+            nonlocal called
             self.assertEqual(user_data, ud)
-            TestCallbacks.called += 1
+            called += 1
             return 33
 
         if hasattr(sys, "getrefcount"):
@@ -1110,24 +1120,25 @@ class TestCallbacks(unittest.TestCase):
             res = Everything.test_callback_destroy_notify(callback, ud)
             self.assertEqual(res, 33)
 
-        self.assertEqual(TestCallbacks.called, 100)
+        self.assertEqual(called, 100)
         if hasattr(sys, "getrefcount"):
             self.assertEqual(sys.getrefcount(callback), callback_refcount + 100)
             self.assertEqual(sys.getrefcount(ud), value_refcount + 100)
 
         # thaw will call the callback again, this time resources should be freed
         self.assertEqual(Everything.test_callback_thaw_notifications(), 33 * 100)
-        self.assertEqual(TestCallbacks.called, 200)
+        self.assertEqual(called, 200)
         if hasattr(sys, "getrefcount"):
             self.assertEqual(sys.getrefcount(callback), callback_refcount)
             self.assertEqual(sys.getrefcount(ud), value_refcount)
 
     def test_callback_scope_notified_with_destroy_no_user_data(self):
-        TestCallbacks.called = 0
+        called = 0
 
         def callback(user_data):
+            nonlocal called
             self.assertEqual(user_data, None)
-            TestCallbacks.called += 1
+            called += 1
             return 34
 
         if hasattr(sys, "getrefcount"):
@@ -1142,7 +1153,7 @@ class TestCallbacks(unittest.TestCase):
                 callback,
             )
 
-        self.assertEqual(TestCallbacks.called, 0)
+        self.assertEqual(called, 0)
         if hasattr(sys, "getrefcount"):
             self.assertEqual(sys.getrefcount(callback), callback_refcount)
 
@@ -1158,14 +1169,14 @@ class TestCallbacks(unittest.TestCase):
             self.assertTrue("Callables passed to" in str(w[-1].message))
 
         self.assertEqual(res, 34)
-        self.assertEqual(TestCallbacks.called, 1)
+        self.assertEqual(called, 1)
         if hasattr(sys, "getrefcount"):
             self.assertEqual(sys.getrefcount(callback), callback_refcount + 1)
 
         # thaw will call the callback again,
         # refcount will not go down without user_data parameter
         self.assertEqual(Everything.test_callback_thaw_notifications(), 34)
-        self.assertEqual(TestCallbacks.called, 2)
+        self.assertEqual(called, 2)
         if hasattr(sys, "getrefcount"):
             self.assertEqual(sys.getrefcount(callback), callback_refcount + 1)
 
@@ -1173,29 +1184,31 @@ class TestCallbacks(unittest.TestCase):
         object_ = Everything.TestObj()
 
         def callback():
-            TestCallbacks.called = True
+            nonlocal called
+            called = True
             return 42
 
-        TestCallbacks.called = False
+        called = False
         object_.instance_method_callback(callback)
-        self.assertTrue(TestCallbacks.called)
+        self.assertTrue(called)
 
-        TestCallbacks.called = False
+        called = False
         Everything.TestObj.static_method_callback(callback)
-        self.assertTrue(TestCallbacks.called)
+        self.assertTrue(called)
 
         def callbackWithUserData(user_data):
-            TestCallbacks.called += 1
+            nonlocal called
+            called += 1
             return 42
 
-        TestCallbacks.called = 0
+        called = 0
         Everything.TestObj.new_callback(callbackWithUserData, None)
-        self.assertEqual(TestCallbacks.called, 1)
+        self.assertEqual(called, 1)
         # Note: using "new_callback" adds the notification to the same global
         # list as Everything.test_callback_destroy_notify, so thaw the list
         # so we don't get confusion between tests.
         self.assertEqual(Everything.test_callback_thaw_notifications(), 42)
-        self.assertEqual(TestCallbacks.called, 2)
+        self.assertEqual(called, 2)
 
     def test_callback_none(self):
         # make sure this doesn't assert or crash
@@ -1203,57 +1216,62 @@ class TestCallbacks(unittest.TestCase):
 
     def test_callback_gerror(self):
         def callback(error):
+            nonlocal called
             self.assertEqual(error.message, "regression test error")
             self.assertTrue("g-io" in error.domain)
             self.assertEqual(error.code, Gio.IOErrorEnum.NOT_SUPPORTED)
-            TestCallbacks.called = True
+            called = True
 
-        TestCallbacks.called = False
+        called = False
         Everything.test_gerror_callback(callback)
-        self.assertTrue(TestCallbacks.called)
+        self.assertTrue(called)
 
     def test_callback_null_gerror(self):
         def callback(error):
+            nonlocal called
             self.assertEqual(error, None)
-            TestCallbacks.called = True
+            called = True
 
-        TestCallbacks.called = False
+        called = False
         Everything.test_null_gerror_callback(callback)
-        self.assertTrue(TestCallbacks.called)
+        self.assertTrue(called)
 
     def test_callback_owned_gerror(self):
         def callback(error):
+            nonlocal called
             self.assertEqual(error.message, "regression test owned error")
             self.assertTrue("g-io" in error.domain)
             self.assertEqual(error.code, Gio.IOErrorEnum.PERMISSION_DENIED)
-            TestCallbacks.called = True
+            called = True
 
-        TestCallbacks.called = False
+        called = False
         Everything.test_owned_gerror_callback(callback)
-        self.assertTrue(TestCallbacks.called)
+        self.assertTrue(called)
 
     def test_callback_hashtable(self):
         def callback(data):
+            nonlocal called
             self.assertEqual(data, mydict)
             mydict["new"] = 42
-            TestCallbacks.called = True
+            called = True
 
         mydict = {"foo": 1, "bar": 2}
-        TestCallbacks.called = False
+        called = False
         Everything.test_hash_table_callback(mydict, callback)
-        self.assertTrue(TestCallbacks.called)
+        self.assertTrue(called)
         self.assertEqual(mydict, {"foo": 1, "bar": 2, "new": 42})
 
 
 class TestClosures(unittest.TestCase):
     def test_no_arg(self):
         def callback():
-            self.called = True
+            nonlocal called
+            called = True
             return 42
 
-        self.called = False
+        called = False
         result = Everything.test_closure(callback)
-        self.assertTrue(self.called)
+        self.assertTrue(called)
         self.assertEqual(result, 42)
 
     def test_int_arg(self):
