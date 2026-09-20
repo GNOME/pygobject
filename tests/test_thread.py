@@ -1,4 +1,5 @@
 import unittest
+import pytest
 
 from gi.repository import GLib
 
@@ -22,6 +23,7 @@ class TestThread(unittest.TestCase):
         self.obj.connect("from-thread", self.from_thread_cb)
         self.obj.emit("emit-signal")
 
+    @pytest.mark.thread_unsafe  # runs main loop
     def test_extension_module(self):
         GLib.idle_add(self.idle_cb)
         GLib.timeout_add(2000, self.timeout_cb)

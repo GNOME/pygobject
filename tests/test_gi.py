@@ -3278,9 +3278,6 @@ class TestInterfaces(unittest.TestCase):
         def do_test_int8_in(self, int8):
             self.val = int8
 
-    def setUp(self):
-        self.instance = self.TestInterfaceImpl()
-
     def test_iface_impl(self):
         instance = GIMarshallingTests.InterfaceImpl()
         assert instance.get_as_interface() is instance
@@ -3297,11 +3294,14 @@ class TestInterfaces(unittest.TestCase):
         self.assertTrue(
             issubclass(self.TestInterfaceImpl, GIMarshallingTests.Interface)
         )
-        self.assertTrue(isinstance(self.instance, GIMarshallingTests.Interface))
+        self.assertTrue(
+            isinstance(self.TestInterfaceImpl(), GIMarshallingTests.Interface)
+        )
 
     def test_int8_int(self):
-        GIMarshallingTests.test_interface_test_int8_in(self.instance, 42)
-        self.assertEqual(self.instance.val, 42)
+        instance = self.TestInterfaceImpl()
+        GIMarshallingTests.test_interface_test_int8_in(instance, 42)
+        self.assertEqual(instance.val, 42)
 
     def test_subclass(self):
         class TestInterfaceImplA(self.TestInterfaceImpl):

@@ -3,6 +3,8 @@ import gc
 import unittest
 import warnings
 
+import pytest
+
 from gi.repository import GLib
 from gi import PyGIDeprecationWarning
 
@@ -47,6 +49,7 @@ class TestSource(unittest.TestCase):
         timeout.set_callback(self.timeout_callback, loop)
         timeout.attach()
 
+    @pytest.mark.thread_unsafe
     def test_sources(self):
         loop = GLib.MainLoop()
 
@@ -75,6 +78,7 @@ class TestSource(unittest.TestCase):
         self.assertTrue(m.is_destroyed())
         self.assertTrue(idle.is_destroyed())
 
+    @pytest.mark.thread_unsafe
     def test_source_prepare(self):
         # this test may not terminate if prepare() is wrapped incorrectly
         dispatched = [False]
@@ -261,6 +265,7 @@ class TestSource(unittest.TestCase):
     @unittest.skipIf(
         sys.implementation.name == "pypy", "PyPy doesn't __del__ immediately"
     )
+    @pytest.mark.thread_unsafe
     def test_python_unref_during_dispatch(self):
         # Tests a Python derived Source which is free'd in the context of
         # Python, while being dispatched

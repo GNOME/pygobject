@@ -10,6 +10,8 @@ try:
 except ImportError:
     fcntl = None
 
+import pytest
+
 from gi.repository import GLib
 from gi import PyGIDeprecationWarning
 
@@ -213,6 +215,7 @@ second line
         os.close(r)
 
     @unittest.skipIf(os.name == "nt", "NONBLOCK not implemented on Windows")
+    @pytest.mark.thread_unsafe  # uses default main loop
     def test_deprecated_method_add_watch_no_data(self):
         (r, w) = os.pipe()
 
@@ -248,6 +251,7 @@ second line
         self.assertEqual(cb_reads, [b"a", b"b"])
 
     @unittest.skipIf(os.name == "nt", "NONBLOCK not implemented on Windows")
+    @pytest.mark.thread_unsafe  # uses default main loop
     def test_deprecated_method_add_watch_data_priority(self):
         (r, w) = os.pipe()
 
@@ -290,6 +294,7 @@ second line
         self.assertEqual(cb_reads, [b"a", b"b"])
 
     @unittest.skipIf(os.name == "nt", "NONBLOCK not implemented on Windows")
+    @pytest.mark.thread_unsafe  # uses default main loop
     def test_add_watch_no_data(self):
         (r, w) = os.pipe()
 
@@ -325,6 +330,7 @@ second line
         self.assertEqual(cb_reads, [b"a", b"b"])
 
     @unittest.skipIf(os.name == "nt", "NONBLOCK not implemented on Windows")
+    @pytest.mark.thread_unsafe  # uses default main loop
     def test_add_watch_with_data(self):
         (r, w) = os.pipe()
 
@@ -361,6 +367,7 @@ second line
         self.assertEqual(cb_reads, [b"a", b"b"])
 
     @unittest.skipIf(os.name == "nt", "NONBLOCK not implemented on Windows")
+    @pytest.mark.thread_unsafe  # uses default main loop
     def test_add_watch_with_multi_data(self):
         (r, w) = os.pipe()
 
@@ -401,6 +408,7 @@ second line
         self.assertEqual(cb_reads, [b"a", b"b"])
 
     @unittest.skipIf(os.name == "nt", "NONBLOCK not implemented on Windows")
+    @pytest.mark.thread_unsafe  # uses default main loop
     def test_deprecated_add_watch_no_data(self):
         (r, w) = os.pipe()
 
@@ -441,6 +449,7 @@ second line
         self.assertEqual(cb_reads, [b"a", b"b"])
 
     @unittest.skipIf(os.name == "nt", "NONBLOCK not implemented on Windows")
+    @pytest.mark.thread_unsafe  # uses default main loop
     def test_deprecated_add_watch_with_data(self):
         (r, w) = os.pipe()
 

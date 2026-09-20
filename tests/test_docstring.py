@@ -1,5 +1,7 @@
 import unittest
 
+import pytest
+
 import gi.docstring
 
 from gi.repository import Regress
@@ -14,6 +16,7 @@ except ImportError:
 
 
 class Test(unittest.TestCase):
+    @pytest.mark.thread_unsafe
     def test_api(self):
         def new_func(info):
             return "docstring test"

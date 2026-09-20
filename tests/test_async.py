@@ -11,6 +11,7 @@ from gi.repository import GLib, Gio
 from gi.events import GLibEventLoopPolicy
 
 
+@pytest.mark.thread_unsafe
 class TestAsync(unittest.TestCase):
     def setUp(self):
         policy = GLibEventLoopPolicy()

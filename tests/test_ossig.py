@@ -20,6 +20,8 @@ import unittest
 import threading
 from contextlib import contextmanager
 
+import pytest
+
 try:
     from gi.repository import Gtk
 
@@ -31,6 +33,7 @@ from gi.repository import Gio, GLib
 from gi._ossighelper import wakeup_on_signal, register_sigint_fallback
 
 
+@pytest.mark.thread_unsafe  # only works in main thread of the main interpreter
 class TestOverridesWakeupOnAlarm(unittest.TestCase):
     @contextmanager
     def _run_with_timeout(self, timeout, abort_func):
@@ -119,6 +122,7 @@ class TestSigintFallback(unittest.TestCase):
     def tearDown(self):
         self.assertEqual(signal.getsignal(signal.SIGINT), signal.default_int_handler)
 
+    @pytest.mark.thread_unsafe
     def test_replace_handler_and_restore_nested(self):
         with register_sigint_fallback(lambda: None):
             new_handler = signal.getsignal(signal.SIGINT)
@@ -127,6 +131,7 @@ class TestSigintFallback(unittest.TestCase):
                 self.assertTrue(signal.getsignal(signal.SIGINT) is new_handler)
         self.assertEqual(signal.getsignal(signal.SIGINT), signal.default_int_handler)
 
+    @pytest.mark.thread_unsafe
     def test_no_replace_if_not_default(self):
         def new_handler(*args):
             return None
@@ -162,6 +167,7 @@ class TestSigintFallback(unittest.TestCase):
         self.assertFalse(failed)
 
     @unittest.skipIf(os.name == "nt", "not on Windows")
+    @pytest.mark.thread_unsafe
     def test_no_replace_if_set_by_glib(self):
         id_ = GLib.unix_signal_add(
             GLib.PRIORITY_DEFAULT, signal.SIGINT, lambda *args: None
