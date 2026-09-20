@@ -21,6 +21,7 @@ with contextlib.suppress(ImportError):
 
 class TestGLib(unittest.TestCase):
     @pytest.mark.xfail()
+    @pytest.mark.thread_unsafe  # Uses global main loop
     def test_pytest_capture_error_in_closure(self):
         # this test is supposed to fail
         ml = GLib.MainLoop()
@@ -51,6 +52,7 @@ class TestGLib(unittest.TestCase):
         GLib.set_prgname("moo")
         self.assertEqual(GLib.get_prgname(), "moo")
 
+    @pytest.mark.thread_unsafe
     def test_appname(self):
         GLib.set_application_name("moo")
         self.assertEqual(GLib.get_application_name(), "moo")
@@ -139,6 +141,7 @@ https://my.org/q?x=1&y=2
         self.assertFalse(ml.is_running())
         self.assertEqual(ml.get_context(), context)
 
+    @pytest.mark.thread_unsafe  # uses default main context
     def test_main_context(self):
         # constructor
         context = GLib.MainContext()
@@ -324,6 +327,7 @@ https://my.org/q?x=1&y=2
         self.assertTrue(GLib.Source.remove(source_id))
 
 
+@pytest.mark.parallel_threads(1)  # warnings are only issued once
 class TestGLibPlatform(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

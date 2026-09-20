@@ -1,6 +1,8 @@
 import sys
 import unittest
 
+import pytest
+
 import gi.overrides
 import gi.module
 import gi.importer
@@ -24,6 +26,7 @@ class TestOverrides(unittest.TestCase):
         # https://bugzilla.gnome.org/show_bug.cgi?id=680913
         self.assertEqual(Regress.REGRESS_OVERRIDE, 42)
 
+    @pytest.mark.thread_unsafe
     def test_load_overrides(self):
         mod = gi.module.get_introspection_module("GIMarshallingTests")
         mod_override = gi.overrides.load_overrides(mod)
@@ -32,6 +35,7 @@ class TestOverrides(unittest.TestCase):
         self.assertEqual(mod_override.OVERRIDES_CONSTANT, 7)
         self.assertEqual(mod.OVERRIDES_CONSTANT, 42)
 
+    @pytest.mark.thread_unsafe
     def test_load_no_overrides(self):
         mod_key = "gi.overrides.GIMarshallingTests"
         had_mod = mod_key in sys.modules

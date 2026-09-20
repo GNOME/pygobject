@@ -21,13 +21,15 @@ def get_id():
         return counter
 
 
+class MyEnum(GObject.GEnum):
+    ONE = 1
+    TWO = 2
+    THREE = 3
+    FORTY_TWO = 42
+
+
 class EnumTests(unittest.TestCase):
     def test_gtype(self):
-        class MyEnum(GObject.GEnum):
-            ONE = 1
-            TWO = 2
-            THREE = 3
-
         # The new enum has it's own GType, which subclasses GEnum
         self.assertIsInstance(MyEnum.__gtype__, GObject.GType)
         self.assertNotEqual(MyEnum.__gtype__, GObject.GEnum.__gtype__)
@@ -44,10 +46,6 @@ class EnumTests(unittest.TestCase):
         self.assertIs(MyEnum.__gtype__.pytype, MyEnum)
 
     def test_values(self):
-        class MyEnum(GObject.GEnum):
-            ONE = 1
-            FORTY_TWO = 42
-
         # As this is a stdlib enum, the enum values are subclasses of the enum
         self.assertIsInstance(MyEnum.ONE, MyEnum)
         self.assertIsInstance(MyEnum.FORTY_TWO, MyEnum)
@@ -90,13 +88,15 @@ class EnumTests(unittest.TestCase):
         assert box.props.orientation == Gtk.Orientation.VERTICAL
 
 
+class MyFlags(GObject.GFlags):
+    ONE = 1
+    TWO = 2
+    FOUR = 4
+    THIRTY_TWO = 32
+
+
 class FlagsTests(unittest.TestCase):
     def test_gtype(self):
-        class MyFlags(GObject.GFlags):
-            ONE = 1
-            TWO = 2
-            FOUR = 4
-
         # The new enum has it's own GType, which subclasses GFlags
         self.assertIsInstance(MyFlags.__gtype__, GObject.GType)
         self.assertNotEqual(MyFlags.__gtype__, GObject.GFlags.__gtype__)
@@ -113,10 +113,6 @@ class FlagsTests(unittest.TestCase):
         self.assertIs(MyFlags.__gtype__.pytype, MyFlags)
 
     def test_values(self):
-        class MyFlags(GObject.GFlags):
-            ONE = 1
-            THIRTY_TWO = 32
-
         # As this is a stdlib enum, the enum values are subclasses of the enum
         self.assertIsInstance(MyFlags.ONE, MyFlags)
         self.assertIsInstance(MyFlags.THIRTY_TWO, MyFlags)

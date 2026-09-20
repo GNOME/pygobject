@@ -107,6 +107,7 @@ class TestProcess(unittest.TestCase):
         self.assertEqual(res[2], cb)
         self.assertSequenceEqual(res[3], [12345])
 
+    @pytest.mark.thread_unsafe  # runs main loop
     def test_child_watch_no_data(self):
         def cb(pid, status):
             self.status = status
@@ -126,6 +127,7 @@ class TestProcess(unittest.TestCase):
         self.loop.run()
         self.assertEqual(self.status, 0)
 
+    @pytest.mark.thread_unsafe  # runs main loop
     def test_child_watch_with_data(self):
         def cb(pid, status, data):
             self.status = status
@@ -212,6 +214,7 @@ class TestProcess(unittest.TestCase):
 
 
 @pytest.mark.skipif(os.name == "nt", reason="not on Windows")
+@pytest.mark.thread_unsafe
 def test_spawn_async_fds_with_child_setup(tmp_path):
     callback_file = tmp_path / "child_setup_called"
 
