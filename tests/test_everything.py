@@ -683,6 +683,7 @@ class TestEverything(unittest.TestCase):
         Everything.test_gslist_nothing_in(["1", "2", "3"])
         Everything.test_gslist_nothing_in2(["1", "2", "3"])
 
+    @pytest.mark.thread_unsafe
     def test_hash_return(self):
         expected = {"foo": "bar", "baz": "bat", "qux": "quux"}
 
@@ -877,6 +878,7 @@ class TestCallbacks(unittest.TestCase):
         self.assertEqual(Everything.test_callback(callback), 44)
         self.assertTrue(called)
 
+    @pytest.mark.parallel_threads(1)  # uses refcount
     def test_callback_scope_async(self):
         called = False
         ud = "Test Value 44"
@@ -1101,6 +1103,7 @@ class TestCallbacks(unittest.TestCase):
 
         self.assertTrue(called)
 
+    @pytest.mark.thread_unsafe
     def test_callback_scope_notified_with_destroy(self):
         called = 0
         ud = "Test scope notified data 33"
@@ -1132,6 +1135,7 @@ class TestCallbacks(unittest.TestCase):
             self.assertEqual(sys.getrefcount(callback), callback_refcount)
             self.assertEqual(sys.getrefcount(ud), value_refcount)
 
+    @pytest.mark.thread_unsafe
     def test_callback_scope_notified_with_destroy_no_user_data(self):
         called = 0
 
@@ -1180,6 +1184,7 @@ class TestCallbacks(unittest.TestCase):
         if hasattr(sys, "getrefcount"):
             self.assertEqual(sys.getrefcount(callback), callback_refcount + 1)
 
+    @pytest.mark.thread_unsafe
     def test_callback_in_methods(self):
         object_ = Everything.TestObj()
 
@@ -1276,36 +1281,38 @@ class TestClosures(unittest.TestCase):
 
     def test_int_arg(self):
         def callback(num):
-            self.called = True
+            nonlocal called
+            called = True
             return num + 1
 
-        self.called = False
+        called = False
         result = Everything.test_closure_one_arg(callback, 42)
-        self.assertTrue(self.called)
+        self.assertTrue(called)
         self.assertEqual(result, 43)
 
     def test_variant(self):
         def callback(variant):
-            self.called = True
+            nonlocal called
+            called = True
             if variant is None:
                 return None
             self.assertEqual(variant.get_type_string(), "i")
             return GLib.Variant("i", variant.get_int32() + 1)
 
-        self.called = False
+        called = False
         result = Everything.test_closure_variant(callback, GLib.Variant("i", 42))
-        self.assertTrue(self.called)
+        self.assertTrue(called)
         self.assertEqual(result.get_type_string(), "i")
         self.assertEqual(result.get_int32(), 43)
 
-        self.called = False
+        called = False
         result = Everything.test_closure_variant(callback, None)
-        self.assertTrue(self.called)
+        self.assertTrue(called)
         self.assertEqual(result, None)
 
-        self.called = False
+        called = False
         self.assertRaises(TypeError, Everything.test_closure_variant, callback, "foo")
-        self.assertFalse(self.called)
+        self.assertFalse(called)
 
     def test_variant_wrong_return_type(self):
         def callback(variant):
@@ -1405,6 +1412,7 @@ class TestBoxed(unittest.TestCase):
         del obj
         gc.collect()
 
+    @pytest.mark.thread_unsafe
     def test_array_fixed_boxed_none_out(self):
         arr = Everything.test_array_fixed_boxed_none_out()
         assert len(arr) == 2
@@ -1417,6 +1425,7 @@ class TestBoxed(unittest.TestCase):
             int8 = random.randint(GLib.MININT8, GLib.MAXINT8)
             assert Everything.test_gvalue_out_boxed(int8).some_int8 == int8
 
+    @pytest.mark.thread_unsafe
     def test_glist_boxed_none_return(self):
         assert len(Everything.test_glist_boxed_none_return(0)) == 0
 
