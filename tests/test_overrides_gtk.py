@@ -389,6 +389,9 @@ class TestGtk(unittest.TestCase):
         mi = ui.get_widget("/menubær1")
         self.assertEqual(type(mi), Gtk.MenuBar)
 
+    class TestWindow(Gtk.Window):
+        __gtype_name__ = "TestWindow"
+
     @unittest.skipIf(Gtk_version == "4.0", "not in gtk4")
     def test_window_gtk3(self):
         # standard Window
@@ -398,9 +401,6 @@ class TestGtk(unittest.TestCase):
         # type works as keyword argument
         w = Gtk.Window(type=Gtk.WindowType.POPUP)
         self.assertEqual(w.get_property("type"), Gtk.WindowType.POPUP)
-
-        class TestWindow(Gtk.Window):
-            __gtype_name__ = "TestWindow"
 
         # works from builder
         builder = Gtk.Builder()
@@ -432,9 +432,6 @@ class TestGtk(unittest.TestCase):
         # check that setting default size works
         w.set_default_size(300, 300)
         self.assertEqual(w.get_default_size(), (300, 300))
-
-        class TestWindow(Gtk.Window):
-            __gtype_name__ = "TestWindow"
 
         # works from builder
         builder = Gtk.Builder()
@@ -1009,6 +1006,7 @@ class TestGtk(unittest.TestCase):
         self.assertEqual(Gtk.stock_lookup("nosuchthing"), None)
 
     @unittest.skipIf(Gtk_version == "4.0", "not in gtk4")
+    @pytest.mark.thread_unsafe  # GTK main loop
     def test_gtk_main(self):
         # with no arguments
         GLib.idle_add(Gtk.main_quit)
@@ -1019,6 +1017,7 @@ class TestGtk(unittest.TestCase):
         Gtk.main()
 
     @unittest.skipIf(Gtk_version == "4.0", "not in gtk4")
+    @pytest.mark.thread_unsafe
     def test_widget_render_icon(self):
         button = Gtk.Button(label="OK")
         pixbuf = button.render_icon(Gtk.STOCK_OK, Gtk.IconSize.BUTTON)
@@ -1090,6 +1089,7 @@ class TestWidget(unittest.TestCase):
             button.style_get_property("not-a-valid-style-property")
 
     @unittest.skipIf(Gtk_version != "4.0", "only in gtk4")
+    @pytest.mark.thread_unsafe
     def test_translate_coordinates(self):
         box = Gtk.Box()
         child = Gtk.Button()

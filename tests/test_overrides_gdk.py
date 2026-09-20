@@ -34,6 +34,7 @@ from .helper import capture_glib_deprecation_warnings
 
 
 @unittest.skipUnless(Gdk, "Gdk not available")
+@pytest.mark.thread_unsafe  # GDK is not thread-safe
 class TestGdk(unittest.TestCase):
     @unittest.skipIf(sys.platform == "darwin" or os.name == "nt", "crashes")
     @unittest.skipIf(GDK4, "not in gdk4")

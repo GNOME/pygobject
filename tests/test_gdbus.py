@@ -1,6 +1,8 @@
 import asyncio
 import unittest
 
+import pytest
+
 from gi.events import GLibEventLoopPolicy
 from gi.repository import GLib
 from gi.repository import Gio
@@ -43,6 +45,7 @@ class TestDBusNodeInfo(unittest.TestCase):
 
 
 @unittest.skipUnless(has_dbus, "no dbus running")
+@pytest.mark.thread_unsafe
 class TestGDBusClient(unittest.TestCase):
     def setUp(self):
         self.bus = Gio.bus_get_sync(Gio.BusType.SESSION, None)
@@ -410,6 +413,7 @@ class TestDBusConnection:
 
 
 @unittest.skipUnless(has_dbus, "no dbus running")
+@pytest.mark.thread_unsafe
 class AsyncDBusTests(unittest.TestCase):
     def setUp(self):
         policy = GLibEventLoopPolicy()

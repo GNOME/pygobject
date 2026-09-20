@@ -5,6 +5,8 @@ import weakref
 import threading
 import time
 
+import pytest
+
 from gi.repository import GObject, GLib, Regress, Gio
 from gi import _signalhelper as signalhelper
 from gi.module import repository as repo
@@ -212,6 +214,7 @@ class F(GObject.GObject):
 
 
 class TestEmissionHook(unittest.TestCase):
+    @pytest.mark.thread_unsafe  # add emission hook
     def test_add(self):
         self.hook = True
         e = E()
@@ -220,6 +223,7 @@ class TestEmissionHook(unittest.TestCase):
         e.emit("signal")
         self.assertEqual(e.status, 3)
 
+    @pytest.mark.thread_unsafe  # add emission hook
     def test_remove(self):
         self.hook = False
         e = E()
@@ -240,6 +244,7 @@ class TestEmissionHook(unittest.TestCase):
             self.assertEqual(e.status, 1)
         e.status = 3
 
+    @pytest.mark.thread_unsafe  # add emission hook
     def test_callback_return_false(self):
         self.hook = False
         obj = F()
@@ -253,6 +258,7 @@ class TestEmissionHook(unittest.TestCase):
         obj.emit("signal")
         self.assertEqual(obj.status, 3)
 
+    @pytest.mark.thread_unsafe  # add emission hook
     def test_callback_return_true(self):
         self.hook = False
         obj = F()
@@ -267,6 +273,7 @@ class TestEmissionHook(unittest.TestCase):
         GObject.remove_emission_hook(obj, "signal", hook_id)
         self.assertEqual(obj.status, 4)
 
+    @pytest.mark.thread_unsafe  # add emission hook
     def test_callback_return_true_but_remove(self):
         self.hook = False
         obj = F()
@@ -1344,6 +1351,7 @@ class TestIntrospectedSignals(unittest.TestCase):
         self.assertIsNone(other_obj2)
 
 
+@pytest.mark.parallel_threads(1)
 class TestIntrospectedSignalsIssue158(unittest.TestCase):
     """The test for https://gitlab.gnome.org/GNOME/pygobject/issues/158."""
 
