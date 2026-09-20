@@ -389,6 +389,7 @@ def test_check_decorated_class():
 
 
 @pytest.mark.skipif(Gtk._version == "4.0", reason="errors out first with gtk4")
+@pytest.mark.thread_unsafe
 def test_subclass_fail():
     @Gtk.Template.from_string("")
     class Base(Gtk.Widget):
@@ -504,6 +505,7 @@ def test_from_string_bytes():
     assert foo.props.spacing == 42
 
 
+@pytest.mark.parallel_threads(1)
 def test_from_resource():
     resource_path = ensure_resource_registered()
 
@@ -620,6 +622,7 @@ def test_internal_child():
     assert child.props.label == "foo"
 
 
+@pytest.mark.parallel_threads(1)
 def test_template_hierarchy():
     testlabel = """
     <interface>
@@ -692,6 +695,7 @@ def test_template_hierarchy():
     assert isinstance(win, MyWindow)
 
 
+@pytest.mark.parallel_threads(1)
 def test_multiple_init_template_calls():
     xml = """
     <interface>
@@ -725,6 +729,7 @@ def test_multiple_init_template_calls():
     assert len(children) == 1
 
 
+@pytest.mark.parallel_threads(1)
 def test_python_class_hierarchy():
     xml = """
     <interface>
