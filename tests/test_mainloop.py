@@ -4,6 +4,8 @@ import signal
 import unittest
 import warnings
 
+import pytest
+
 from gi.repository import GLib
 
 from .helper import capture_exceptions
@@ -11,6 +13,7 @@ from .helper import capture_exceptions
 
 class TestMainLoop(unittest.TestCase):
     @unittest.skipUnless(hasattr(os, "fork"), "no os.fork available")
+    @pytest.mark.parallel_threads(1)  # uses capture_exceptions
     def test_exception_handling(self):
         pipe_r, pipe_w = os.pipe()
 

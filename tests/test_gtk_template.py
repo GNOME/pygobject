@@ -1,4 +1,5 @@
 import gc
+import itertools
 import os
 import tempfile
 import weakref
@@ -15,9 +16,8 @@ from .helper import capture_exceptions
 GTK4 = Gtk._version == "4.0"
 
 
-def new_gtype_name(_count=[0]):
-    _count[0] += 1
-    return f"GtkTemplateTest{_count[0]:d}"
+def new_gtype_name(_counter=itertools.count(1)):
+    return f"GtkTemplateTest{next(_counter):d}"
 
 
 def ensure_resource_registered():
@@ -251,6 +251,7 @@ def test_duplicate_child():
         Gtk.Template.from_string(xml)(Foo)
 
 
+@pytest.mark.parallel_threads(1)  # uses capture_exceptions()
 def test_nonexist_handler():
     type_name = new_gtype_name()
 
@@ -296,6 +297,7 @@ def test_missing_handler_callback():
     Gtk.Template.from_string(xml)(Foo)()
 
 
+@pytest.mark.parallel_threads(1)  # uses capture_exceptions()
 def test_handler_swapped_not_supported():
     type_name = new_gtype_name()
 
