@@ -73,6 +73,7 @@ except ImportError:
 GTK4 = Gtk and Gtk._version == "4.0"
 
 
+@pytest.mark.thread_unsafe
 class GLibEventLoopTests(GLibEventLoopTestsMixin, TestCase):
     def __init__(self, *args):
         super().__init__(*args)
@@ -99,6 +100,7 @@ class GLibEventLoopTests(GLibEventLoopTestsMixin, TestCase):
         return loop
 
 
+@pytest.mark.thread_unsafe
 class SubprocessWatcherTests(SubprocessMixin, TestCase):
     def setUp(self):
         super().setUp()
@@ -127,6 +129,7 @@ class SubprocessWatcherTests(SubprocessMixin, TestCase):
         )
 
 
+@pytest.mark.thread_unsafe
 class GLibEventLoopPolicyTests(unittest.TestCase):
     def create_policy(self):
         return gi.events.GLibEventLoopPolicy()

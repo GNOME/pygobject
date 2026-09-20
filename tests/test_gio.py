@@ -333,6 +333,7 @@ Exec={GLib.find_program_in_path("true")} action
             self.assertNotEqual(Gio.InputStreamClass, GioUnix.InputStreamClass)
 
 
+@pytest.mark.thread_unsafe  # Settings are global
 class TestGSettings(unittest.TestCase):
     def setUp(self):
         self.settings = Gio.Settings.new("org.gnome.test")
@@ -518,9 +519,11 @@ class TestGFile(unittest.TestCase):
         self.assertTrue(self.file.query_exists(None))
 
     def test_delete(self):
-        self.file.delete(None)
-        self.assertFalse(self.file.query_exists(None))
+        file, _io_stream = Gio.File.new_tmp("TestGFile.XXXXXX")
+        file.delete(None)
+        self.assertFalse(file.query_exists(None))
 
+    @pytest.mark.thread_unsafe  # uses MainLoop
     def test_delete_async(self):
         def callback(f, result, data):
             main_loop.quit()
@@ -533,6 +536,7 @@ class TestGFile(unittest.TestCase):
 
 @unittest.skipIf(os.name == "nt", "crashes on Windows")
 class TestGApplication(unittest.TestCase):
+    @pytest.mark.thread_unsafe  # uses Gio.Application.run()
     def test_command_line(self):
         class App(Gio.Application):
             args = None
@@ -550,6 +554,7 @@ class TestGApplication(unittest.TestCase):
         self.assertEqual(res, 42)
         self.assertSequenceEqual(app.args, ["spam", "eggs"])
 
+    @pytest.mark.thread_unsafe  # uses Gio.Application.run()
     def test_local_command_line(self):
         class App(Gio.Application):
             local_args = None
@@ -570,6 +575,7 @@ class TestGApplication(unittest.TestCase):
         self.assertEqual(res, 42)
         self.assertSequenceEqual(app.local_args, ["spam", "eggs"])
 
+    @pytest.mark.thread_unsafe  # uses Gio.Application.run()
     def test_local_and_remote_command_line(self):
         class App(Gio.Application):
             args = None
@@ -596,6 +602,7 @@ class TestGApplication(unittest.TestCase):
         self.assertSequenceEqual(app.args, ["spam"])
         self.assertSequenceEqual(app.local_args, ["spam", "eggs"])
 
+    @pytest.mark.thread_unsafe  # uses Gio.Application.run()
     def test_add_main_option(self):
         stored_options = []
 

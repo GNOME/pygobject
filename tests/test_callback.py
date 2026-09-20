@@ -1,3 +1,5 @@
+import pytest
+
 from gi.repository import GLib, Gio, Regress
 
 
@@ -7,6 +9,7 @@ def iteration():
         ctx.iteration(False)
 
 
+@pytest.mark.thread_unsafe
 def test_async_callback():
     result = []
     cancel = Gio.Cancellable()
@@ -23,6 +26,7 @@ def test_async_callback():
     assert result == [True]
 
 
+@pytest.mark.thread_unsafe
 def test_async_callback_with_extra_callbacks():
     result = []
 
@@ -38,6 +42,7 @@ def test_async_callback_with_extra_callbacks():
     assert result == [(True, True, None)]
 
 
+@pytest.mark.thread_unsafe
 def test_async_callback_with_extra_callbacks_filled_in():
     result = []
     cancel = Gio.Cancellable()
@@ -58,6 +63,7 @@ def test_async_callback_with_extra_callbacks_filled_in():
     assert result == ["test_cb data", (True, True, None)]
 
 
+@pytest.mark.thread_unsafe
 def test_async_callback_with_extra_callbacks_as_kwarg():
     result = []
     cancel = Gio.Cancellable()
@@ -80,6 +86,7 @@ def test_async_callback_with_extra_callbacks_as_kwarg():
     assert result == [None, (True, True, None)]
 
 
+@pytest.mark.thread_unsafe
 def test_async_callback_with_extra_callbacks_as_kwarg_and_user_data():
     result = []
     cancel = Gio.Cancellable()

@@ -62,6 +62,7 @@ def test_create_fundamental_refcount():
     assert obj.refcount == 1
 
 
+@pytest.mark.thread_unsafe  # uses gc.collect()
 def test_delete_fundamental_refcount():
     obj = Regress.TestFundamentalSubObject.new("foo")
     del obj
@@ -135,6 +136,7 @@ def test_multiple_objects():
     assert obj1 != obj2
 
 
+@pytest.mark.thread_unsafe  # uses gc.collect()
 def test_fundamental_weak_ref():
     obj = Regress.TestFundamentalSubObject()
     weak = weakref.ref(obj)
@@ -153,6 +155,7 @@ def test_fundamental_primitive_object():
     assert bitmask.v == 2
 
 
+@pytest.mark.thread_unsafe  # uses gc.collect()
 def test_custom_fundamental_type_vfunc_override():
     class MyCustomFundamentalObject(Regress.TestFundamentalObject):
         def __init__(self):

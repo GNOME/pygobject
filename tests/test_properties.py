@@ -836,14 +836,14 @@ class TestProperty(unittest.TestCase):
         pobj1 = pobj2.obj
         self.assertEqual(hash(pobj1), obj1_hash)
 
+    class ObjectSubclass(GObject.GObject):
+        __gtype_name__ = "ObjectSubclass"
+
     def test_object_subclass_property(self):
-        class ObjectSubclass(GObject.GObject):
-            __gtype_name__ = "ObjectSubclass"
-
         class PropertyObjectSubclass(GObject.GObject):
-            obj = GObject.Property(type=ObjectSubclass)
+            obj = GObject.Property(type=TestProperty.ObjectSubclass)
 
-        PropertyObjectSubclass(obj=ObjectSubclass())
+        PropertyObjectSubclass(obj=TestProperty.ObjectSubclass())
 
     def test_generic_instance_property(self):
         GObject.Property(type=Gio.ListStore[Gio.File])
@@ -1018,6 +1018,7 @@ class TestProperty(unittest.TestCase):
         self.assertRaises(TypeError, tester._type_from_python, types.CodeType)
 
 
+@pytest.mark.thread_unsafe
 class TestInstallProperties(unittest.TestCase):
     # These tests only test how signalhelper.install_signals works
     # with the __gsignals__ dict and therefore does not need to use
@@ -1091,9 +1092,6 @@ class TestInstallProperties(unittest.TestCase):
 class CPropertiesTestBase:
     # Tests for properties implemented in C not Python.
 
-    def setUp(self):
-        self.obj = GIMarshallingTests.PropertiesObject()
-
     def get_prop(self, obj, name):
         raise NotImplementedError
 
@@ -1101,12 +1099,13 @@ class CPropertiesTestBase:
         raise NotImplementedError
 
     def test_flags(self):
+        obj = GIMarshallingTests.PropertiesObject()
         self.assertEqual(
-            self.get_prop(self.obj, "some-flags"), GIMarshallingTests.Flags.VALUE1
+            self.get_prop(obj, "some-flags"), GIMarshallingTests.Flags.VALUE1
         )
-        self.set_prop(self.obj, "some-flags", GIMarshallingTests.Flags.VALUE2)
+        self.set_prop(obj, "some-flags", GIMarshallingTests.Flags.VALUE2)
         self.assertEqual(
-            self.get_prop(self.obj, "some-flags"), GIMarshallingTests.Flags.VALUE2
+            self.get_prop(obj, "some-flags"), GIMarshallingTests.Flags.VALUE2
         )
 
         obj = GIMarshallingTests.PropertiesObject(
@@ -1117,7 +1116,8 @@ class CPropertiesTestBase:
         )
 
     def test_flags_values(self):
-        prop = self.obj.find_property("some-flags")
+        obj = GIMarshallingTests.PropertiesObject()
+        prop = obj.find_property("some-flags")
         flags_class = prop.flags_class
 
         assert GIMarshallingTests.Flags.VALUE1 in flags_class
@@ -1125,12 +1125,13 @@ class CPropertiesTestBase:
         assert GIMarshallingTests.Flags.VALUE3 in flags_class
 
     def test_enum(self):
+        obj = GIMarshallingTests.PropertiesObject()
         self.assertEqual(
-            self.get_prop(self.obj, "some-enum"), GIMarshallingTests.GEnum.VALUE1
+            self.get_prop(obj, "some-enum"), GIMarshallingTests.GEnum.VALUE1
         )
-        self.set_prop(self.obj, "some-enum", GIMarshallingTests.GEnum.VALUE2)
+        self.set_prop(obj, "some-enum", GIMarshallingTests.GEnum.VALUE2)
         self.assertEqual(
-            self.get_prop(self.obj, "some-enum"), GIMarshallingTests.GEnum.VALUE2
+            self.get_prop(obj, "some-enum"), GIMarshallingTests.GEnum.VALUE2
         )
 
         obj = GIMarshallingTests.PropertiesObject(
@@ -1141,7 +1142,8 @@ class CPropertiesTestBase:
         )
 
     def test_enum_values(self):
-        prop = self.obj.find_property("some-enum")
+        obj = GIMarshallingTests.PropertiesObject()
+        prop = obj.find_property("some-enum")
         enum_class = prop.enum_class
 
         assert GIMarshallingTests.GEnum.VALUE1 in enum_class
@@ -1149,17 +1151,19 @@ class CPropertiesTestBase:
         assert GIMarshallingTests.GEnum.VALUE3 in enum_class
 
     def test_boolean(self):
-        self.assertEqual(self.get_prop(self.obj, "some-boolean"), False)
-        self.set_prop(self.obj, "some-boolean", True)
-        self.assertEqual(self.get_prop(self.obj, "some-boolean"), True)
+        obj = GIMarshallingTests.PropertiesObject()
+        self.assertEqual(self.get_prop(obj, "some-boolean"), False)
+        self.set_prop(obj, "some-boolean", True)
+        self.assertEqual(self.get_prop(obj, "some-boolean"), True)
 
         obj = GIMarshallingTests.PropertiesObject(some_boolean=True)
         self.assertEqual(self.get_prop(obj, "some-boolean"), True)
 
     def test_char(self):
-        self.assertEqual(self.get_prop(self.obj, "some-char"), 0)
-        self.set_prop(self.obj, "some-char", GLib.MAXINT8)
-        self.assertEqual(self.get_prop(self.obj, "some-char"), GLib.MAXINT8)
+        obj = GIMarshallingTests.PropertiesObject()
+        self.assertEqual(self.get_prop(obj, "some-char"), 0)
+        self.set_prop(obj, "some-char", GLib.MAXINT8)
+        self.assertEqual(self.get_prop(obj, "some-char"), GLib.MAXINT8)
 
         obj = GIMarshallingTests.PropertiesObject(some_char=-42)
         self.assertEqual(self.get_prop(obj, "some-char"), -42)
@@ -1185,9 +1189,10 @@ class CPropertiesTestBase:
             GIMarshallingTests.PropertiesObject(some_char="\ud83d")
 
     def test_uchar(self):
-        self.assertEqual(self.get_prop(self.obj, "some-uchar"), 0)
-        self.set_prop(self.obj, "some-uchar", GLib.MAXUINT8)
-        self.assertEqual(self.get_prop(self.obj, "some-uchar"), GLib.MAXUINT8)
+        obj = GIMarshallingTests.PropertiesObject()
+        self.assertEqual(self.get_prop(obj, "some-uchar"), 0)
+        self.set_prop(obj, "some-uchar", GLib.MAXUINT8)
+        self.assertEqual(self.get_prop(obj, "some-uchar"), GLib.MAXUINT8)
 
         obj = GIMarshallingTests.PropertiesObject(some_uchar=42)
         self.assertEqual(self.get_prop(obj, "some-uchar"), 42)
@@ -1213,77 +1218,84 @@ class CPropertiesTestBase:
             GIMarshallingTests.PropertiesObject(some_uchar="\ud83d")
 
     def test_int(self):
-        self.assertEqual(self.get_prop(self.obj, "some_int"), 0)
-        self.set_prop(self.obj, "some-int", GLib.MAXINT)
-        self.assertEqual(self.get_prop(self.obj, "some_int"), GLib.MAXINT)
+        obj = GIMarshallingTests.PropertiesObject()
+        self.assertEqual(self.get_prop(obj, "some_int"), 0)
+        self.set_prop(obj, "some-int", GLib.MAXINT)
+        self.assertEqual(self.get_prop(obj, "some_int"), GLib.MAXINT)
 
         obj = GIMarshallingTests.PropertiesObject(some_int=-42)
         self.assertEqual(self.get_prop(obj, "some-int"), -42)
 
-        self.assertRaises(TypeError, self.set_prop, self.obj, "some-int", "foo")
-        self.assertRaises(TypeError, self.set_prop, self.obj, "some-int", None)
+        self.assertRaises(TypeError, self.set_prop, obj, "some-int", "foo")
+        self.assertRaises(TypeError, self.set_prop, obj, "some-int", None)
 
         self.assertEqual(self.get_prop(obj, "some-int"), -42)
 
     def test_uint(self):
-        self.assertEqual(self.get_prop(self.obj, "some_uint"), 0)
-        self.set_prop(self.obj, "some-uint", GLib.MAXUINT)
-        self.assertEqual(self.get_prop(self.obj, "some_uint"), GLib.MAXUINT)
+        obj = GIMarshallingTests.PropertiesObject()
+        self.assertEqual(self.get_prop(obj, "some_uint"), 0)
+        self.set_prop(obj, "some-uint", GLib.MAXUINT)
+        self.assertEqual(self.get_prop(obj, "some_uint"), GLib.MAXUINT)
 
         obj = GIMarshallingTests.PropertiesObject(some_uint=42)
         self.assertEqual(self.get_prop(obj, "some-uint"), 42)
 
-        self.assertRaises(TypeError, self.set_prop, self.obj, "some-uint", "foo")
-        self.assertRaises(TypeError, self.set_prop, self.obj, "some-uint", None)
+        self.assertRaises(TypeError, self.set_prop, obj, "some-uint", "foo")
+        self.assertRaises(TypeError, self.set_prop, obj, "some-uint", None)
 
         self.assertEqual(self.get_prop(obj, "some-uint"), 42)
 
     def test_long(self):
-        self.assertEqual(self.get_prop(self.obj, "some_long"), 0)
-        self.set_prop(self.obj, "some-long", GLib.MAXLONG)
-        self.assertEqual(self.get_prop(self.obj, "some_long"), GLib.MAXLONG)
+        obj = GIMarshallingTests.PropertiesObject()
+        self.assertEqual(self.get_prop(obj, "some_long"), 0)
+        self.set_prop(obj, "some-long", GLib.MAXLONG)
+        self.assertEqual(self.get_prop(obj, "some_long"), GLib.MAXLONG)
 
         obj = GIMarshallingTests.PropertiesObject(some_long=-42)
         self.assertEqual(self.get_prop(obj, "some-long"), -42)
 
-        self.assertRaises(TypeError, self.set_prop, self.obj, "some-long", "foo")
-        self.assertRaises(TypeError, self.set_prop, self.obj, "some-long", None)
+        self.assertRaises(TypeError, self.set_prop, obj, "some-long", "foo")
+        self.assertRaises(TypeError, self.set_prop, obj, "some-long", None)
 
         self.assertEqual(self.get_prop(obj, "some-long"), -42)
 
     def test_ulong(self):
-        self.assertEqual(self.get_prop(self.obj, "some_ulong"), 0)
-        self.set_prop(self.obj, "some-ulong", GLib.MAXULONG)
-        self.assertEqual(self.get_prop(self.obj, "some_ulong"), GLib.MAXULONG)
+        obj = GIMarshallingTests.PropertiesObject()
+        self.assertEqual(self.get_prop(obj, "some_ulong"), 0)
+        self.set_prop(obj, "some-ulong", GLib.MAXULONG)
+        self.assertEqual(self.get_prop(obj, "some_ulong"), GLib.MAXULONG)
 
         obj = GIMarshallingTests.PropertiesObject(some_ulong=42)
         self.assertEqual(self.get_prop(obj, "some-ulong"), 42)
 
-        self.assertRaises(TypeError, self.set_prop, self.obj, "some-ulong", "foo")
-        self.assertRaises(TypeError, self.set_prop, self.obj, "some-ulong", None)
+        self.assertRaises(TypeError, self.set_prop, obj, "some-ulong", "foo")
+        self.assertRaises(TypeError, self.set_prop, obj, "some-ulong", None)
 
         self.assertEqual(self.get_prop(obj, "some-ulong"), 42)
 
     def test_int64(self):
-        self.assertEqual(self.get_prop(self.obj, "some-int64"), 0)
-        self.set_prop(self.obj, "some-int64", GLib.MAXINT64)
-        self.assertEqual(self.get_prop(self.obj, "some-int64"), GLib.MAXINT64)
+        obj = GIMarshallingTests.PropertiesObject()
+        self.assertEqual(self.get_prop(obj, "some-int64"), 0)
+        self.set_prop(obj, "some-int64", GLib.MAXINT64)
+        self.assertEqual(self.get_prop(obj, "some-int64"), GLib.MAXINT64)
 
         obj = GIMarshallingTests.PropertiesObject(some_int64=-4200000000000000)
         self.assertEqual(self.get_prop(obj, "some-int64"), -4200000000000000)
 
     def test_uint64(self):
-        self.assertEqual(self.get_prop(self.obj, "some-uint64"), 0)
-        self.set_prop(self.obj, "some-uint64", GLib.MAXUINT64)
-        self.assertEqual(self.get_prop(self.obj, "some-uint64"), GLib.MAXUINT64)
+        obj = GIMarshallingTests.PropertiesObject()
+        self.assertEqual(self.get_prop(obj, "some-uint64"), 0)
+        self.set_prop(obj, "some-uint64", GLib.MAXUINT64)
+        self.assertEqual(self.get_prop(obj, "some-uint64"), GLib.MAXUINT64)
 
         obj = GIMarshallingTests.PropertiesObject(some_uint64=4200000000000000)
         self.assertEqual(self.get_prop(obj, "some-uint64"), 4200000000000000)
 
     def test_float(self):
-        self.assertEqual(self.get_prop(self.obj, "some-float"), 0)
-        self.set_prop(self.obj, "some-float", GLib.MAXFLOAT)
-        self.assertEqual(self.get_prop(self.obj, "some-float"), GLib.MAXFLOAT)
+        obj = GIMarshallingTests.PropertiesObject()
+        self.assertEqual(self.get_prop(obj, "some-float"), 0)
+        self.set_prop(obj, "some-float", GLib.MAXFLOAT)
+        self.assertEqual(self.get_prop(obj, "some-float"), GLib.MAXFLOAT)
 
         obj = GIMarshallingTests.PropertiesObject(some_float=42.42)
         self.assertAlmostEqual(self.get_prop(obj, "some-float"), 42.42, places=4)
@@ -1291,15 +1303,16 @@ class CPropertiesTestBase:
         obj = GIMarshallingTests.PropertiesObject(some_float=42)
         self.assertAlmostEqual(self.get_prop(obj, "some-float"), 42.0, places=4)
 
-        self.assertRaises(TypeError, self.set_prop, self.obj, "some-float", "foo")
-        self.assertRaises(TypeError, self.set_prop, self.obj, "some-float", None)
+        self.assertRaises(TypeError, self.set_prop, obj, "some-float", "foo")
+        self.assertRaises(TypeError, self.set_prop, obj, "some-float", None)
 
         self.assertAlmostEqual(self.get_prop(obj, "some-float"), 42.0, places=4)
 
     def test_double(self):
-        self.assertEqual(self.get_prop(self.obj, "some-double"), 0)
-        self.set_prop(self.obj, "some-double", GLib.MAXDOUBLE)
-        self.assertEqual(self.get_prop(self.obj, "some-double"), GLib.MAXDOUBLE)
+        obj = GIMarshallingTests.PropertiesObject()
+        self.assertEqual(self.get_prop(obj, "some-double"), 0)
+        self.set_prop(obj, "some-double", GLib.MAXDOUBLE)
+        self.assertEqual(self.get_prop(obj, "some-double"), GLib.MAXDOUBLE)
 
         obj = GIMarshallingTests.PropertiesObject(some_double=42.42)
         self.assertAlmostEqual(self.get_prop(obj, "some-double"), 42.42)
@@ -1307,32 +1320,34 @@ class CPropertiesTestBase:
         obj = GIMarshallingTests.PropertiesObject(some_double=42)
         self.assertAlmostEqual(self.get_prop(obj, "some-double"), 42.0)
 
-        self.assertRaises(TypeError, self.set_prop, self.obj, "some-double", "foo")
-        self.assertRaises(TypeError, self.set_prop, self.obj, "some-double", None)
+        self.assertRaises(TypeError, self.set_prop, obj, "some-double", "foo")
+        self.assertRaises(TypeError, self.set_prop, obj, "some-double", None)
 
         self.assertAlmostEqual(self.get_prop(obj, "some-double"), 42.0)
 
     def test_byte_array(self):
-        self.assertEqual(self.get_prop(self.obj, "some-byte-array"), b"")
-        self.set_prop(self.obj, "some-byte-array", b"hello world")
-        self.assertEqual(self.get_prop(self.obj, "some-byte-array"), b"hello world")
+        obj = GIMarshallingTests.PropertiesObject()
+        self.assertEqual(self.get_prop(obj, "some-byte-array"), b"")
+        self.set_prop(obj, "some-byte-array", b"hello world")
+        self.assertEqual(self.get_prop(obj, "some-byte-array"), b"hello world")
 
-        self.assertRaises(TypeError, self.set_prop, self.obj, "some-byte-array", 1)
+        self.assertRaises(TypeError, self.set_prop, obj, "some-byte-array", 1)
         self.assertRaises(
-            TypeError, self.set_prop, self.obj, "some-byte-array", "normal string"
+            TypeError, self.set_prop, obj, "some-byte-array", "normal string"
         )
 
     def test_strv(self):
-        self.assertEqual(self.get_prop(self.obj, "some-strv"), [])
-        self.set_prop(self.obj, "some-strv", ["hello", "world"])
-        self.assertEqual(self.get_prop(self.obj, "some-strv"), ["hello", "world"])
+        obj = GIMarshallingTests.PropertiesObject()
+        self.assertEqual(self.get_prop(obj, "some-strv"), [])
+        self.set_prop(obj, "some-strv", ["hello", "world"])
+        self.assertEqual(self.get_prop(obj, "some-strv"), ["hello", "world"])
 
-        self.assertRaises(TypeError, self.set_prop, self.obj, "some-strv", 1)
-        self.assertRaises(TypeError, self.set_prop, self.obj, "some-strv", "foo")
-        self.assertRaises(TypeError, self.set_prop, self.obj, "some-strv", [1, 2])
-        self.assertRaises(TypeError, self.set_prop, self.obj, "some-strv", ["foo", 1])
+        self.assertRaises(TypeError, self.set_prop, obj, "some-strv", 1)
+        self.assertRaises(TypeError, self.set_prop, obj, "some-strv", "foo")
+        self.assertRaises(TypeError, self.set_prop, obj, "some-strv", [1, 2])
+        self.assertRaises(TypeError, self.set_prop, obj, "some-strv", ["foo", 1])
 
-        self.assertEqual(self.get_prop(self.obj, "some-strv"), ["hello", "world"])
+        self.assertEqual(self.get_prop(obj, "some-strv"), ["hello", "world"])
 
         obj = GIMarshallingTests.PropertiesObject(some_strv=["hello", "world"])
         self.assertEqual(self.get_prop(obj, "some-strv"), ["hello", "world"])
@@ -1340,22 +1355,20 @@ class CPropertiesTestBase:
         # unicode on py2
         obj = GIMarshallingTests.PropertiesObject(some_strv=["foo"])
         self.assertEqual(self.get_prop(obj, "some-strv"), ["foo"])
-        self.assertRaises(TypeError, self.set_prop, self.obj, "some-strv", ["foo", 1])
+        self.assertRaises(TypeError, self.set_prop, obj, "some-strv", ["foo", 1])
 
     def test_some_hash_table(self):
-        self.assertEqual(self.get_prop(self.obj, "some-hash-table"), None)
-        self.set_prop(self.obj, "some-hash-table", {1: "foo", 2: "bar"})
-        self.assertEqual(
-            self.get_prop(self.obj, "some-hash-table"), {1: "foo", 2: "bar"}
-        )
+        obj = GIMarshallingTests.PropertiesObject()
+        self.assertEqual(self.get_prop(obj, "some-hash-table"), None)
+        self.set_prop(obj, "some-hash-table", {1: "foo", 2: "bar"})
+        self.assertEqual(self.get_prop(obj, "some-hash-table"), {1: "foo", 2: "bar"})
 
-        self.assertRaises(TypeError, self.set_prop, self.obj, "some-hash-table", 1)
-        self.assertRaises(
-            TypeError, self.set_prop, self.obj, "some-hash-table", {"a": "b"}
-        )
+        self.assertRaises(TypeError, self.set_prop, obj, "some-hash-table", 1)
+        self.assertRaises(TypeError, self.set_prop, obj, "some-hash-table", {"a": "b"})
 
     def test_boxed_struct(self):
-        self.assertEqual(self.get_prop(self.obj, "some-boxed-struct"), None)
+        obj = GIMarshallingTests.PropertiesObject()
+        self.assertEqual(self.get_prop(obj, "some-boxed-struct"), None)
 
         class GStrv(list):
             __gtype__ = GObject.TYPE_STRV
@@ -1363,30 +1376,29 @@ class CPropertiesTestBase:
         struct1 = GIMarshallingTests.BoxedStruct()
         struct1.long_ = 1
 
-        self.set_prop(self.obj, "some-boxed-struct", struct1)
-        self.assertEqual(self.get_prop(self.obj, "some-boxed-struct").long_, 1)
-        self.assertEqual(self.obj.some_boxed_struct.long_, 1)
+        self.set_prop(obj, "some-boxed-struct", struct1)
+        self.assertEqual(self.get_prop(obj, "some-boxed-struct").long_, 1)
+        self.assertEqual(obj.some_boxed_struct.long_, 1)
 
-        self.assertRaises(TypeError, self.set_prop, self.obj, "some-boxed-struct", 1)
-        self.assertRaises(
-            TypeError, self.set_prop, self.obj, "some-boxed-struct", "foo"
-        )
+        self.assertRaises(TypeError, self.set_prop, obj, "some-boxed-struct", 1)
+        self.assertRaises(TypeError, self.set_prop, obj, "some-boxed-struct", "foo")
 
         obj = GIMarshallingTests.PropertiesObject(some_boxed_struct=struct1)
         self.assertEqual(self.get_prop(obj, "some-boxed-struct").long_, 1)
 
     def test_boxed_glist(self):
-        self.assertEqual(self.get_prop(self.obj, "some-boxed-glist"), [])
+        obj = GIMarshallingTests.PropertiesObject()
+        self.assertEqual(self.get_prop(obj, "some-boxed-glist"), [])
 
         list_ = [GLib.MININT, 42, GLib.MAXINT]
-        self.set_prop(self.obj, "some-boxed-glist", list_)
-        self.assertEqual(self.get_prop(self.obj, "some-boxed-glist"), list_)
-        self.set_prop(self.obj, "some-boxed-glist", [])
-        self.assertEqual(self.get_prop(self.obj, "some-boxed-glist"), [])
+        self.set_prop(obj, "some-boxed-glist", list_)
+        self.assertEqual(self.get_prop(obj, "some-boxed-glist"), list_)
+        self.set_prop(obj, "some-boxed-glist", [])
+        self.assertEqual(self.get_prop(obj, "some-boxed-glist"), [])
 
-        self.assertRaises(TypeError, self.set_prop, self.obj, "some-boxed-glist", 1)
-        self.assertRaises(TypeError, self.set_prop, self.obj, "some-boxed-glist", "foo")
-        self.assertRaises(TypeError, self.set_prop, self.obj, "some-boxed-glist", ["a"])
+        self.assertRaises(TypeError, self.set_prop, obj, "some-boxed-glist", 1)
+        self.assertRaises(TypeError, self.set_prop, obj, "some-boxed-glist", "foo")
+        self.assertRaises(TypeError, self.set_prop, obj, "some-boxed-glist", ["a"])
 
     def test_annotated_glist(self):
         obj = Regress.TestObj()
@@ -1402,23 +1414,22 @@ class CPropertiesTestBase:
         self.assertEqual(self.get_prop(obj, "some-boxed-glist"), list_)
 
     def test_variant(self):
-        self.assertEqual(self.get_prop(self.obj, "some-variant"), None)
+        obj = GIMarshallingTests.PropertiesObject()
+        self.assertEqual(self.get_prop(obj, "some-variant"), None)
 
-        self.set_prop(self.obj, "some-variant", GLib.Variant("o", "/myobj"))
-        self.assertEqual(self.get_prop(self.obj, "some-variant").get_type_string(), "o")
-        self.assertEqual(
-            self.get_prop(self.obj, "some-variant").print_(False), "'/myobj'"
-        )
+        self.set_prop(obj, "some-variant", GLib.Variant("o", "/myobj"))
+        self.assertEqual(self.get_prop(obj, "some-variant").get_type_string(), "o")
+        self.assertEqual(self.get_prop(obj, "some-variant").print_(False), "'/myobj'")
 
-        self.set_prop(self.obj, "some-variant", None)
-        self.assertEqual(self.get_prop(self.obj, "some-variant"), None)
+        self.set_prop(obj, "some-variant", None)
+        self.assertEqual(self.get_prop(obj, "some-variant"), None)
 
         obj = GIMarshallingTests.PropertiesObject(some_variant=GLib.Variant("b", True))
         self.assertEqual(self.get_prop(obj, "some-variant").get_type_string(), "b")
         self.assertEqual(self.get_prop(obj, "some-variant").get_boolean(), True)
 
-        self.assertRaises(TypeError, self.set_prop, self.obj, "some-variant", "foo")
-        self.assertRaises(TypeError, self.set_prop, self.obj, "some-variant", 23)
+        self.assertRaises(TypeError, self.set_prop, obj, "some-variant", "foo")
+        self.assertRaises(TypeError, self.set_prop, obj, "some-variant", 23)
 
         self.assertEqual(self.get_prop(obj, "some-variant").get_type_string(), "b")
         self.assertEqual(self.get_prop(obj, "some-variant").get_boolean(), True)
