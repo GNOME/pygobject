@@ -291,6 +291,7 @@ class TestGDBusClient(unittest.TestCase):
         SomeProxy()
 
 
+@pytest.mark.thread_unsafe
 class TestDBusConnection:
     @unittest.skipUnless(has_dbus, "no dbus running")
     def test_register_object(self):

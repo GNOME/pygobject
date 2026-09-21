@@ -1,6 +1,8 @@
 import os
 import unittest
 
+import pytest
+
 try:
     from gi.repository import Gtk, Gdk
 except ImportError:
@@ -45,6 +47,7 @@ class TestGdkAtom(unittest.TestCase):
         )
 
     @unittest.skipUnless(os.name != "nt", "not on Windows")
+    @pytest.mark.thread_unsafe  # clipboard
     def test_in_single(self):
         a_selection = Gdk.Atom.intern("test_clipboard", False)
         clipboard = Gtk.Clipboard.get(a_selection)
