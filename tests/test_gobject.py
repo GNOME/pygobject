@@ -178,6 +178,7 @@ class TestReferenceCounting(unittest.TestCase):
         obj.release()
         self.assertEqual(obj.__grefcount__, 1)
 
+    @pytest.mark.thread_unsafe
     def test_owned_by_library_out_of_scope(self):
         obj = testhelper.OwnedByLibrary()
         self.assertEqual(obj.__grefcount__, 2)
@@ -209,6 +210,7 @@ class TestReferenceCounting(unittest.TestCase):
         obj.release()
         self.assertEqual(obj.__grefcount__, 1)
 
+    @pytest.mark.thread_unsafe
     def test_owned_by_library_out_of_scope_using_gobject_new(self):
         obj = GObject.new(testhelper.OwnedByLibrary)
         self.assertEqual(obj.__grefcount__, 2)
@@ -240,6 +242,7 @@ class TestReferenceCounting(unittest.TestCase):
         obj.release()
         self.assertEqual(obj.__grefcount__, 1)
 
+    @pytest.mark.thread_unsafe
     def test_floating_and_sunk_out_of_scope(self):
         obj = testhelper.FloatingAndSunk()
         self.assertEqual(obj.__grefcount__, 2)
@@ -271,6 +274,7 @@ class TestReferenceCounting(unittest.TestCase):
         obj.release()
         self.assertEqual(obj.__grefcount__, 1)
 
+    @pytest.mark.thread_unsafe
     def test_floating_and_sunk_out_of_scope_using_gobject_new(self):
         obj = GObject.new(testhelper.FloatingAndSunk)
         self.assertEqual(obj.__grefcount__, 2)
@@ -339,6 +343,7 @@ class TestPythonReferenceCounting(unittest.TestCase):
             )
 
 
+@pytest.mark.thread_unsafe
 class TestContextManagers(unittest.TestCase):
     class ContextTestObject(GObject.GObject):
         prop = GObject.Property(default=0, type=int)
@@ -516,29 +521,29 @@ class TestPropertyBindings(unittest.TestCase):
     class TestObject(GObject.GObject):
         int_prop = GObject.Property(default=0, type=int)
 
-    def setUp(self):
-        self.source = self.TestObject()
-        self.target = self.TestObject()
-
     def test_default_binding(self):
-        binding = self.source.bind_property(
-            "int_prop", self.target, "int_prop", GObject.BindingFlags.DEFAULT
+        source = self.TestObject()
+        target = self.TestObject()
+        binding = source.bind_property(
+            "int_prop", target, "int_prop", GObject.BindingFlags.DEFAULT
         )
         binding = binding
 
         # Test setting value on source gets pushed to target
-        self.source.int_prop = 1
-        self.assertEqual(self.source.int_prop, 1)
-        self.assertEqual(self.target.int_prop, 1)
+        source.int_prop = 1
+        self.assertEqual(source.int_prop, 1)
+        self.assertEqual(target.int_prop, 1)
 
         # Test setting value on target does not change source
-        self.target.props.int_prop = 2
-        self.assertEqual(self.source.int_prop, 1)
-        self.assertEqual(self.target.int_prop, 2)
+        target.props.int_prop = 2
+        self.assertEqual(source.int_prop, 1)
+        self.assertEqual(target.int_prop, 2)
 
     def test_call_binding(self):
-        binding = self.source.bind_property(
-            "int_prop", self.target, "int_prop", GObject.BindingFlags.DEFAULT
+        source = self.TestObject()
+        target = self.TestObject()
+        binding = source.bind_property(
+            "int_prop", target, "int_prop", GObject.BindingFlags.DEFAULT
         )
         with capture_glib_deprecation_warnings() as warn:
             result = binding()
@@ -546,29 +551,34 @@ class TestPropertyBindings(unittest.TestCase):
         assert result is binding
 
     def test_bidirectional_binding(self):
-        binding = self.source.bind_property(
-            "int_prop", self.target, "int_prop", GObject.BindingFlags.BIDIRECTIONAL
+        source = self.TestObject()
+        target = self.TestObject()
+        binding = source.bind_property(
+            "int_prop", target, "int_prop", GObject.BindingFlags.BIDIRECTIONAL
         )
         binding = binding
 
         # Test setting value on source gets pushed to target
-        self.source.int_prop = 1
-        self.assertEqual(self.source.int_prop, 1)
-        self.assertEqual(self.target.int_prop, 1)
+        source.int_prop = 1
+        self.assertEqual(source.int_prop, 1)
+        self.assertEqual(target.int_prop, 1)
 
         # Test setting value on target also changes source
-        self.target.props.int_prop = 2
-        self.assertEqual(self.source.int_prop, 2)
-        self.assertEqual(self.target.int_prop, 2)
+        target.props.int_prop = 2
+        self.assertEqual(source.int_prop, 2)
+        self.assertEqual(target.int_prop, 2)
 
     def test_transform_to_only(self):
+        source = self.TestObject()
+        target = self.TestObject()
+
         def transform_to(binding, value, user_data=None):
             self.assertEqual(user_data, "test-data")
             return value * 2
 
-        binding = self.source.bind_property(
+        binding = source.bind_property(
             "int_prop",
-            self.target,
+            target,
             "int_prop",
             GObject.BindingFlags.DEFAULT,
             transform_to,
@@ -576,37 +586,42 @@ class TestPropertyBindings(unittest.TestCase):
         )
         binding = binding
 
-        self.source.int_prop = 1
-        self.assertEqual(self.source.int_prop, 1)
-        self.assertEqual(self.target.int_prop, 2)
+        source.int_prop = 1
+        self.assertEqual(source.int_prop, 1)
+        self.assertEqual(target.int_prop, 2)
 
-        self.target.props.int_prop = 1
-        self.assertEqual(self.source.int_prop, 1)
-        self.assertEqual(self.target.int_prop, 1)
+        target.props.int_prop = 1
+        self.assertEqual(source.int_prop, 1)
+        self.assertEqual(target.int_prop, 1)
 
     def test_transform_from_only(self):
+        source = self.TestObject()
+        target = self.TestObject()
+
         def transform_from(binding, value, user_data=None):
             self.assertEqual(user_data, None)
             return value * 2
 
-        binding = self.source.bind_property(
+        binding = source.bind_property(
             "int_prop",
-            self.target,
+            target,
             "int_prop",
             GObject.BindingFlags.BIDIRECTIONAL,
             transform_from=transform_from,
         )
         binding = binding
 
-        self.source.int_prop = 1
-        self.assertEqual(self.source.int_prop, 1)
-        self.assertEqual(self.target.int_prop, 1)
+        source.int_prop = 1
+        self.assertEqual(source.int_prop, 1)
+        self.assertEqual(target.int_prop, 1)
 
-        self.target.props.int_prop = 1
-        self.assertEqual(self.source.int_prop, 2)
-        self.assertEqual(self.target.int_prop, 1)
+        target.props.int_prop = 1
+        self.assertEqual(source.int_prop, 2)
+        self.assertEqual(target.int_prop, 1)
 
     def test_transform_bidirectional(self):
+        source = self.TestObject()
+        target = self.TestObject()
         test_data = object()
 
         def transform_to(binding, value, user_data=None):
@@ -623,9 +638,9 @@ class TestPropertyBindings(unittest.TestCase):
             transform_from_ref_count = sys.getrefcount(transform_from)
 
         # bidirectional bindings
-        binding = self.source.bind_property(
+        binding = source.bind_property(
             "int_prop",
-            self.target,
+            target,
             "int_prop",
             GObject.BindingFlags.BIDIRECTIONAL,
             transform_to,
@@ -637,13 +652,13 @@ class TestPropertyBindings(unittest.TestCase):
             binding_ref_count = sys.getrefcount(binding)
             binding_gref_count = binding.__grefcount__
 
-        self.source.int_prop = 1
-        self.assertEqual(self.source.int_prop, 1)
-        self.assertEqual(self.target.int_prop, 2)
+        source.int_prop = 1
+        self.assertEqual(source.int_prop, 1)
+        self.assertEqual(target.int_prop, 2)
 
-        self.target.props.int_prop = 4
-        self.assertEqual(self.source.int_prop, 2)
-        self.assertEqual(self.target.int_prop, 4)
+        target.props.int_prop = 4
+        self.assertEqual(source.int_prop, 2)
+        self.assertEqual(target.int_prop, 4)
 
         if hasattr(sys, "getrefcount"):
             self.assertEqual(sys.getrefcount(binding), binding_ref_count)
@@ -661,10 +676,10 @@ class TestPropertyBindings(unittest.TestCase):
         binding.unbind()
 
         # Setting source or target should not change the other.
-        self.target.int_prop = 3
-        self.source.int_prop = 5
-        self.assertEqual(self.target.int_prop, 3)
-        self.assertEqual(self.source.int_prop, 5)
+        target.int_prop = 3
+        source.int_prop = 5
+        self.assertEqual(target.int_prop, 3)
+        self.assertEqual(source.int_prop, 5)
 
         if hasattr(sys, "getrefcount"):
             self.assertEqual(sys.getrefcount(test_data), test_data_ref_count)
@@ -672,53 +687,57 @@ class TestPropertyBindings(unittest.TestCase):
             self.assertEqual(sys.getrefcount(transform_from), transform_from_ref_count)
 
     def test_explicit_unbind_clears_connection(self):
-        self.assertEqual(self.source.int_prop, 0)
-        self.assertEqual(self.target.int_prop, 0)
+        source = self.TestObject()
+        target = self.TestObject()
+        self.assertEqual(source.int_prop, 0)
+        self.assertEqual(target.int_prop, 0)
 
         # Test deleting binding reference removes binding.
-        binding = self.source.bind_property("int_prop", self.target, "int_prop")
-        self.source.int_prop = 1
-        self.assertEqual(self.source.int_prop, 1)
-        self.assertEqual(self.target.int_prop, 1)
+        binding = source.bind_property("int_prop", target, "int_prop")
+        source.int_prop = 1
+        self.assertEqual(source.int_prop, 1)
+        self.assertEqual(target.int_prop, 1)
 
         # unbind should clear out the bindings self reference
         binding.unbind()
         self.assertEqual(binding.__grefcount__, 1)
 
-        self.source.int_prop = 10
-        self.assertEqual(self.source.int_prop, 10)
-        self.assertEqual(self.target.int_prop, 1)
+        source.int_prop = 10
+        self.assertEqual(source.int_prop, 10)
+        self.assertEqual(target.int_prop, 1)
 
         for i in range(10):
             binding.unbind()
 
     def test_reference_counts(self):
-        self.assertEqual(self.source.__grefcount__, 1)
-        self.assertEqual(self.target.__grefcount__, 1)
+        source = self.TestObject()
+        target = self.TestObject()
+        self.assertEqual(source.__grefcount__, 1)
+        self.assertEqual(target.__grefcount__, 1)
 
         # Binding ref count will be 2 do to the initial ref implicitly held by
         # the act of binding and the ref incurred by using __call__ to generate
         # a wrapper from the weak binding ref within python.
-        binding = self.source.bind_property("int_prop", self.target, "int_prop")
+        binding = source.bind_property("int_prop", target, "int_prop")
         self.assertEqual(binding.__grefcount__, 2)
 
         # Creating a binding does not inc refs on source and target (they are weak
         # on the binding object itself)
-        self.assertEqual(self.source.__grefcount__, 1)
-        self.assertEqual(self.target.__grefcount__, 1)
+        self.assertEqual(source.__grefcount__, 1)
+        self.assertEqual(target.__grefcount__, 1)
 
         # Use GObject.get_property because the "props" accessor leaks.
         # Note property names are canonicalized.
-        self.assertEqual(binding.get_property("source"), self.source)
+        self.assertEqual(binding.get_property("source"), source)
         self.assertEqual(binding.get_property("source_property"), "int-prop")
-        self.assertEqual(binding.get_property("target"), self.target)
+        self.assertEqual(binding.get_property("target"), target)
         self.assertEqual(binding.get_property("target_property"), "int-prop")
         self.assertEqual(binding.get_property("flags"), GObject.BindingFlags.DEFAULT)
 
         # Delete reference to source or target and the binding will remove its own
         # "self reference".
-        ref = self.source.weak_ref()
-        del self.source
+        ref = source.weak_ref()
+        del source
         gc.collect()
         self.assertEqual(ref(), None)
         self.assertEqual(binding.__grefcount__, 1)
