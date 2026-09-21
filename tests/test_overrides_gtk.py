@@ -1102,6 +1102,7 @@ class TestWidget(unittest.TestCase):
 @unittest.skipIf(sys.platform == "darwin", "hangs")
 @unittest.skipUnless(Gtk, "Gtk not available")
 class TestSignals(unittest.TestCase):
+    @pytest.mark.thread_unsafe
     def test_class_closure_override_with_aliased_type(self):
         class WindowWithSizeAllocOverride(Gtk.ScrolledWindow):
             if not GTK4:
@@ -2841,6 +2842,7 @@ class TestTreeModel(unittest.TestCase):
 @unittest.skipIf(sys.platform == "darwin", "hangs")
 @unittest.skipUnless(Gtk, "Gtk not available")
 class TestTreeView(unittest.TestCase):
+    @pytest.mark.thread_unsafe
     def test_tree_view(self):
         store = Gtk.ListStore(int, str)
         store.append((0, "foo"))
@@ -2863,6 +2865,7 @@ class TestTreeView(unittest.TestCase):
         # Regression test for: https://bugzilla.gnome.org/show_bug.cgi?id=711173
         col.set_cell_data_func(cell, None, None)
 
+    @pytest.mark.thread_unsafe
     def test_tree_view_add_column_with_attributes(self):
         model = Gtk.ListStore(str, str, str)
         # deliberately use out-of-order sorting here; we assign column 0 to
@@ -2905,6 +2908,7 @@ class TestTreeView(unittest.TestCase):
                 self.assertEqual(cell3.props.text, "cell13")
                 self.assertEqual(cell4.props.text, None)
 
+    @pytest.mark.thread_unsafe
     def test_tree_view_column_set_attributes(self):
         store = Gtk.ListStore(int, str)
         directors = ["Fellini", "Tarantino", "Tarkovskiy"]

@@ -132,6 +132,7 @@ class TestSource(unittest.TestCase):
         gc.collect()
         self.assertTrue(s.is_destroyed())
 
+    @pytest.mark.thread_unsafe
     def test_remove(self):
         s = GLib.idle_add(dir)
         self.assertEqual(GLib.source_remove(s), True)
@@ -317,6 +318,7 @@ class TestSource(unittest.TestCase):
 
 @unittest.skipIf(sys.platform == "darwin", "hangs")
 class TestUserData(unittest.TestCase):
+    @pytest.mark.thread_unsafe
     def test_idle_no_data(self):
         ml = GLib.MainLoop()
 
@@ -329,6 +331,7 @@ class TestUserData(unittest.TestCase):
         )
         ml.run()
 
+    @pytest.mark.thread_unsafe
     def test_timeout_no_data(self):
         ml = GLib.MainLoop()
 
@@ -341,6 +344,7 @@ class TestUserData(unittest.TestCase):
         )
         ml.run()
 
+    @pytest.mark.thread_unsafe
     def test_idle_data(self):
         ml = GLib.MainLoop()
 
@@ -356,6 +360,7 @@ class TestUserData(unittest.TestCase):
         ml.run()
         self.assertTrue(data["called"])
 
+    @pytest.mark.thread_unsafe
     def test_idle_multidata(self):
         ml = GLib.MainLoop()
 
@@ -373,6 +378,7 @@ class TestUserData(unittest.TestCase):
         self.assertTrue(data["called"])
         self.assertEqual(data["data2"], "hello")
 
+    @pytest.mark.thread_unsafe
     def test_timeout_data(self):
         ml = GLib.MainLoop()
 
@@ -388,6 +394,7 @@ class TestUserData(unittest.TestCase):
         ml.run()
         self.assertTrue(data["called"])
 
+    @pytest.mark.thread_unsafe
     def test_timeout_multidata(self):
         ml = GLib.MainLoop()
 
@@ -405,6 +412,7 @@ class TestUserData(unittest.TestCase):
         self.assertTrue(data["called"])
         self.assertEqual(data["data2"], "hello")
 
+    @pytest.mark.thread_unsafe
     def test_idle_no_data_priority(self):
         ml = GLib.MainLoop()
 
@@ -417,6 +425,7 @@ class TestUserData(unittest.TestCase):
         )
         ml.run()
 
+    @pytest.mark.thread_unsafe
     def test_timeout_no_data_priority(self):
         ml = GLib.MainLoop()
 
@@ -429,6 +438,7 @@ class TestUserData(unittest.TestCase):
         )
         ml.run()
 
+    @pytest.mark.thread_unsafe
     def test_idle_data_priority(self):
         ml = GLib.MainLoop()
 
@@ -444,6 +454,7 @@ class TestUserData(unittest.TestCase):
         ml.run()
         self.assertTrue(data["called"])
 
+    @pytest.mark.thread_unsafe
     def test_timeout_data_priority(self):
         ml = GLib.MainLoop()
 
@@ -462,6 +473,7 @@ class TestUserData(unittest.TestCase):
     def cb_no_data(self):
         self.loop.quit()
 
+    @pytest.mark.thread_unsafe
     def test_idle_method_callback_no_data(self):
         self.loop = GLib.MainLoop()
         GLib.idle_add(self.cb_no_data)
@@ -471,6 +483,7 @@ class TestUserData(unittest.TestCase):
         data["called"] = True
         self.loop.quit()
 
+    @pytest.mark.thread_unsafe
     def test_idle_method_callback_with_data(self):
         self.loop = GLib.MainLoop()
         data = {}

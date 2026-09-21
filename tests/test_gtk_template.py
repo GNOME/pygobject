@@ -119,6 +119,7 @@ def test_init_template_second_instance():
     assert isinstance(foo2.label, Gtk.Label)
 
 
+@pytest.mark.thread_unsafe
 def test_main_example():
     type_name = new_gtype_name()
 
@@ -252,7 +253,7 @@ def test_duplicate_child():
         Gtk.Template.from_string(xml)(Foo)
 
 
-@pytest.mark.parallel_threads(1)  # uses capture_exceptions()
+@pytest.mark.thread_unsafe  # uses capture_exceptions()
 def test_nonexist_handler():
     type_name = new_gtype_name()
 
@@ -298,7 +299,7 @@ def test_missing_handler_callback():
     Gtk.Template.from_string(xml)(Foo)()
 
 
-@pytest.mark.parallel_threads(1)  # uses capture_exceptions()
+@pytest.mark.thread_unsafe  # uses capture_exceptions()
 def test_handler_swapped_not_supported():
     type_name = new_gtype_name()
 
@@ -506,7 +507,7 @@ def test_from_string_bytes():
     assert foo.props.spacing == 42
 
 
-@pytest.mark.parallel_threads(1)
+@pytest.mark.thread_unsafe
 def test_from_resource():
     resource_path = ensure_resource_registered()
 
@@ -556,6 +557,7 @@ def test_child_construct():
         Gtk.Template.Child("name", internal=True, something=False)
 
 
+@pytest.mark.thread_unsafe
 def test_internal_child():
     main_type_name = new_gtype_name()
 
@@ -623,7 +625,7 @@ def test_internal_child():
     assert child.props.label == "foo"
 
 
-@pytest.mark.parallel_threads(1)
+@pytest.mark.thread_unsafe
 def test_template_hierarchy():
     testlabel = """
     <interface>
@@ -696,7 +698,7 @@ def test_template_hierarchy():
     assert isinstance(win, MyWindow)
 
 
-@pytest.mark.parallel_threads(1)
+@pytest.mark.thread_unsafe
 def test_multiple_init_template_calls():
     xml = """
     <interface>
@@ -730,7 +732,7 @@ def test_multiple_init_template_calls():
     assert len(children) == 1
 
 
-@pytest.mark.parallel_threads(1)
+@pytest.mark.thread_unsafe
 def test_python_class_hierarchy():
     xml = """
     <interface>
@@ -817,6 +819,7 @@ def test_finalization_of_custom_child_objects():
     assert "CustomLabel -> GObject finalized" in finalized
 
 
+@pytest.mark.thread_unsafe
 def test_signal_handler_with_object_does_not_leak_memory():
     """Regression test for a memory leak when using signal handlers in GTK templates.
     Note that this example is intentionally minimal, i.e. the handler doesn't even
