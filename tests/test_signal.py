@@ -160,9 +160,9 @@ class TestAccumulator(unittest.TestCase):
         # the following handler will not be called because handler2
         # returns True, so it should stop the emission.
         inst.my_other_acc_signal.connect(self._true_handler3)
-        self.__true_val = None
+        inst.__true_val = None
         inst.my_other_acc_signal.emit()
-        self.assertEqual(self.__true_val, 2)
+        self.assertEqual(inst.__true_val, 2)
 
     def test_accumulator_first_wins(self):
         # First signal hit will always win
@@ -170,20 +170,20 @@ class TestAccumulator(unittest.TestCase):
         inst.my_acc_first_wins.connect(self._true_handler3)
         inst.my_acc_first_wins.connect(self._true_handler1)
         inst.my_acc_first_wins.connect(self._true_handler2)
-        self.__true_val = None
+        inst.__true_val = None
         inst.my_acc_first_wins.emit()
-        self.assertEqual(self.__true_val, 3)
+        self.assertEqual(inst.__true_val, 3)
 
     def _true_handler1(self, obj):
-        self.__true_val = 1
+        obj.__true_val = 1
         return False
 
     def _true_handler2(self, obj):
-        self.__true_val = 2
+        obj.__true_val = 2
         return True
 
     def _true_handler3(self, obj):
-        self.__true_val = 3
+        obj.__true_val = 3
         return False
 
 
@@ -213,8 +213,8 @@ class F(GObject.GObject):
         self.status += 1
 
 
+@pytest.mark.thread_unsafe  # add emission hook
 class TestEmissionHook(unittest.TestCase):
-    @pytest.mark.thread_unsafe  # add emission hook
     def test_add(self):
         self.hook = True
         e = E()
@@ -223,7 +223,6 @@ class TestEmissionHook(unittest.TestCase):
         e.emit("signal")
         self.assertEqual(e.status, 3)
 
-    @pytest.mark.thread_unsafe  # add emission hook
     def test_remove(self):
         self.hook = False
         e = E()
@@ -244,7 +243,6 @@ class TestEmissionHook(unittest.TestCase):
             self.assertEqual(e.status, 1)
         e.status = 3
 
-    @pytest.mark.thread_unsafe  # add emission hook
     def test_callback_return_false(self):
         self.hook = False
         obj = F()
@@ -258,7 +256,6 @@ class TestEmissionHook(unittest.TestCase):
         obj.emit("signal")
         self.assertEqual(obj.status, 3)
 
-    @pytest.mark.thread_unsafe  # add emission hook
     def test_callback_return_true(self):
         self.hook = False
         obj = F()
@@ -273,7 +270,6 @@ class TestEmissionHook(unittest.TestCase):
         GObject.remove_emission_hook(obj, "signal", hook_id)
         self.assertEqual(obj.status, 4)
 
-    @pytest.mark.thread_unsafe  # add emission hook
     def test_callback_return_true_but_remove(self):
         self.hook = False
         obj = F()
@@ -378,85 +374,102 @@ class TestMatching(unittest.TestCase):
 
 
 class TestClosures(unittest.TestCase):
-    def setUp(self):
-        self.count = 0
-        self.emission_stopped = False
-        self.emission_error = False
-        self.handler_pending = False
-
-    def _callback_handler_pending(self, e):
-        signal_id, detail = GObject.signal_parse_name("signal", e, True)
-        self.handler_pending = GObject.signal_has_handler_pending(
-            e, signal_id, detail, may_be_blocked=False
-        )
-
-    def _callback(self, e):
-        self.count += 1
-
-    def _callback_stop_emission(self, obj, prop, stop_it):
-        if stop_it:
-            obj.stop_emission_by_name("notify::prop")
-            self.emission_stopped = True
-        else:
-            self.count += 1
-
-    def _callback_invalid_stop_emission_name(self, obj, prop):
-        with capture_glib_warnings(allow_warnings=True, allow_criticals=True) as warn:
-            obj.stop_emission_by_name("notasignal::baddetail")
-            self.emission_error = True
-            self.assertTrue(warn)
-
     def test_disconnect_by_func(self):
+        count = 0
         e = E()
-        e.connect("signal", self._callback)
-        e.disconnect_by_func(self._callback)
+
+        def _callback(e):
+            nonlocal count
+            count += 1
+
+        e.connect("signal", _callback)
+        e.disconnect_by_func(_callback)
         e.emit("signal")
-        self.assertEqual(self.count, 0)
+        self.assertEqual(count, 0)
 
     def test_disconnect(self):
+        count = 0
         e = E()
-        handler_id = e.connect("signal", self._callback)
+
+        def _callback(e):
+            nonlocal count
+            count += 1
+
+        handler_id = e.connect("signal", _callback)
         self.assertTrue(e.handler_is_connected(handler_id))
         e.disconnect(handler_id)
         e.emit("signal")
-        self.assertEqual(self.count, 0)
+        self.assertEqual(count, 0)
         self.assertFalse(e.handler_is_connected(handler_id))
 
     def test_stop_emission_by_name(self):
+        emission_stopped = False
+        count = 0
         e = E()
 
+        def _callback_stop_emission(obj, prop, stop_it):
+            if stop_it:
+                nonlocal emission_stopped
+                obj.stop_emission_by_name("notify::prop")
+                emission_stopped = True
+            else:
+                nonlocal count
+                count += 1
+
         # Sandwich a callback that stops emission in between a callback that increments
-        e.connect("notify::prop", self._callback_stop_emission, False)
-        e.connect("notify::prop", self._callback_stop_emission, True)
-        e.connect("notify::prop", self._callback_stop_emission, False)
+        e.connect("notify::prop", _callback_stop_emission, False)
+        e.connect("notify::prop", _callback_stop_emission, True)
+        e.connect("notify::prop", _callback_stop_emission, False)
 
         e.set_property("prop", 1234)
         self.assertEqual(e.get_property("prop"), 1234)
-        self.assertEqual(self.count, 1)
-        self.assertTrue(self.emission_stopped)
+        self.assertEqual(count, 1)
+        self.assertTrue(emission_stopped)
 
     def test_stop_emission_by_name_error(self):
+        emission_error = False
         e = E()
 
-        e.connect("notify::prop", self._callback_invalid_stop_emission_name)
+        def _callback_invalid_stop_emission_name(obj, prop):
+            nonlocal emission_error
+            with capture_glib_warnings(
+                allow_warnings=True, allow_criticals=True
+            ) as warn:
+                obj.stop_emission_by_name("notasignal::baddetail")
+                emission_error = True
+                self.assertTrue(warn)
+
+        e.connect("notify::prop", _callback_invalid_stop_emission_name)
         with capture_glib_warnings():
             e.set_property("prop", 1234)
-        self.assertTrue(self.emission_error)
+        self.assertTrue(emission_error)
 
     def test_handler_block(self):
+        count = 0
         e = E()
-        e.connect("signal", self._callback)
-        e.handler_block_by_func(self._callback)
+
+        def _callback(e):
+            nonlocal count
+            count += 1
+
+        e.connect("signal", _callback)
+        e.handler_block_by_func(_callback)
         e.emit("signal")
-        self.assertEqual(self.count, 0)
+        self.assertEqual(count, 0)
 
     def test_handler_unblock(self):
+        count = 0
         e = E()
-        handler_id = e.connect("signal", self._callback)
+
+        def _callback(e):
+            nonlocal count
+            count += 1
+
+        handler_id = e.connect("signal", _callback)
         e.handler_block(handler_id)
-        e.handler_unblock_by_func(self._callback)
+        e.handler_unblock_by_func(_callback)
         e.emit("signal")
-        self.assertEqual(self.count, 1)
+        self.assertEqual(count, 1)
 
     def test_handler_block_method(self):
         # Filed as #375589
@@ -499,30 +512,50 @@ class TestClosures(unittest.TestCase):
         self.assertEqual(data, "\02\00\01")
 
     def test_handler_pending(self):
+        handler_pending = False
+        count = 0
         obj = F()
-        obj.connect("signal", self._callback_handler_pending)
-        obj.connect("signal", self._callback)
 
-        self.assertEqual(self.count, 0)
-        self.assertEqual(self.handler_pending, False)
+        def _callback_handler_pending(e):
+            nonlocal handler_pending
+            signal_id, detail = GObject.signal_parse_name("signal", e, True)
+            handler_pending = GObject.signal_has_handler_pending(
+                e, signal_id, detail, may_be_blocked=False
+            )
+
+        def _callback(e):
+            nonlocal count
+            count += 1
+
+        obj.connect("signal", _callback_handler_pending)
+        obj.connect("signal", _callback)
+
+        self.assertEqual(count, 0)
+        self.assertEqual(handler_pending, False)
 
         obj.emit("signal")
-        self.assertEqual(self.count, 1)
-        self.assertEqual(self.handler_pending, True)
+        self.assertEqual(count, 1)
+        self.assertEqual(handler_pending, True)
 
     def test_signal_handlers_destroy(self):
+        count = 0
         obj = F()
-        obj.connect("signal", self._callback)
-        obj.connect("signal", self._callback)
-        obj.connect("signal", self._callback)
+
+        def _callback(e):
+            nonlocal count
+            count += 1
+
+        obj.connect("signal", _callback)
+        obj.connect("signal", _callback)
+        obj.connect("signal", _callback)
 
         obj.emit("signal")
-        self.assertEqual(self.count, 3)
+        self.assertEqual(count, 3)
 
         # count should remain at 3 after all handlers are destroyed
         GObject.signal_handlers_destroy(obj)
         obj.emit("signal")
-        self.assertEqual(self.count, 3)
+        self.assertEqual(count, 3)
 
 
 class SigPropClass(GObject.GObject):
@@ -615,124 +648,133 @@ class CM(GObject.GObject):
 
 
 class _TestCMarshaller:
-    def setUp(self):
-        self.obj = CM()
-        testhelper.connectcallbacks(self.obj)
+    def new_obj(self):
+        obj = CM()
+        testhelper.connectcallbacks(obj)
+        return obj
 
     def test_test1(self):
-        self.obj.emit("test1")
+        self.new_obj().emit("test1")
 
     def test_test2(self):
-        self.obj.emit("test2", "string")
+        self.new_obj().emit("test2", "string")
 
     def test_test3(self):
-        rv = self.obj.emit("test3", 42.0)
+        obj = self.new_obj()
+        rv = obj.emit("test3", 42.0)
         self.assertEqual(rv, 20)
 
     def test_test4(self):
-        self.obj.emit("test4", True, 10, 3.14, 1.78, 20, 30, 31)
+        obj = self.new_obj()
+        obj.emit("test4", True, 10, 3.14, 1.78, 20, 30, 31)
 
     def test_float(self):
-        rv = self.obj.emit("test-float", 1.234)
+        obj = self.new_obj()
+        rv = obj.emit("test-float", 1.234)
         self.assertTrue(rv >= 1.233999 and rv <= 1.2400001, rv)
 
     def test_double(self):
-        rv = self.obj.emit("test-double", 1.234)
+        obj = self.new_obj()
+        rv = obj.emit("test-double", 1.234)
         self.assertEqual(rv, 1.234)
 
     def test_int64(self):
-        rv = self.obj.emit("test-int64", 102030405)
+        obj = self.new_obj()
+        rv = obj.emit("test-int64", 102030405)
         self.assertEqual(rv, 102030405)
 
-        rv = self.obj.emit("test-int64", GLib.MAXINT64)
+        rv = obj.emit("test-int64", GLib.MAXINT64)
         self.assertEqual(rv, GLib.MAXINT64 - 1)
 
-        rv = self.obj.emit("test-int64", GLib.MININT64)
+        rv = obj.emit("test-int64", GLib.MININT64)
         self.assertEqual(rv, GLib.MININT64)
 
     def test_string(self):
-        rv = self.obj.emit("test-string", "str")
+        obj = self.new_obj()
+        rv = obj.emit("test-string", "str")
         self.assertEqual(rv, "str")
 
     def test_object(self):
-        rv = self.obj.emit("test-object", self)
+        obj = self.new_obj()
+        rv = obj.emit("test-object", self)
         self.assertEqual(rv, self)
 
     def test_paramspec(self):
-        rv = self.obj.emit("test-paramspec")
+        obj = self.new_obj()
+        rv = obj.emit("test-paramspec")
         self.assertEqual(rv.name, "test-param")
         self.assertEqual(rv.nick, "test")
 
     def test_paramspec_in(self):
+        obj = self.new_obj()
         rv = GObject.param_spec_boolean(
             "mybool", "test-bool", "do something", True, GObject.ParamFlags.READABLE
         )
 
-        rv2 = self.obj.emit("test-paramspec-in", rv)
+        rv2 = obj.emit("test-paramspec-in", rv)
         self.assertEqual(type(rv), type(rv2))
         self.assertEqual(rv2.name, "mybool")
         self.assertEqual(rv2.nick, "test-bool")
 
     def test_C_paramspec(self):
-        self.notify_called = False
+        obj = self.new_obj()
+        notify_called = False
 
         def cb_notify(obj, prop):
-            self.notify_called = True
-            self.assertEqual(obj, self.obj)
+            nonlocal notify_called
+            notify_called = True
+            self.assertEqual(obj, obj)
             self.assertEqual(prop.name, "testprop")
 
-        self.obj.connect("notify", cb_notify)
-        self.obj.set_property("testprop", 42)
-        self.assertTrue(self.notify_called)
+        obj.connect("notify", cb_notify)
+        obj.set_property("testprop", 42)
+        self.assertTrue(notify_called)
 
     def test_gvalue(self):
+        obj = self.new_obj()
         # implicit int
-        rv = self.obj.emit("test-gvalue", 42)
+        rv = obj.emit("test-gvalue", 42)
         self.assertEqual(rv, 42)
 
         # explicit float
         v = GObject.Value(GObject.TYPE_FLOAT, 1.234)
-        rv = self.obj.emit("test-gvalue", v)
+        rv = obj.emit("test-gvalue", v)
         self.assertAlmostEqual(rv, 1.234, places=4)
 
         # implicit float
-        rv = self.obj.emit("test-gvalue", 1.234)
+        rv = obj.emit("test-gvalue", 1.234)
         self.assertAlmostEqual(rv, 1.234, places=4)
 
         # explicit int64
         v = GObject.Value(GObject.TYPE_INT64, GLib.MAXINT64)
-        rv = self.obj.emit("test-gvalue", v)
+        rv = obj.emit("test-gvalue", v)
         self.assertEqual(rv, GLib.MAXINT64)
 
         # explicit uint64
         v = GObject.Value(GObject.TYPE_UINT64, GLib.MAXUINT64)
-        rv = self.obj.emit("test-gvalue", v)
+        rv = obj.emit("test-gvalue", v)
         self.assertEqual(rv, GLib.MAXUINT64)
 
     @unittest.expectedFailure  # https://bugzilla.gnome.org/show_bug.cgi?id=705291
     def test_gvalue_implicit_int64(self):
+        obj = self.new_obj()
         # implicit int64
-        rv = self.obj.emit("test-gvalue", GLib.MAXINT64)
+        rv = obj.emit("test-gvalue", GLib.MAXINT64)
         self.assertEqual(rv, GLib.MAXINT64)
 
         # implicit uint64
-        rv = self.obj.emit("test-gvalue", GLib.MAXUINT64)
+        rv = obj.emit("test-gvalue", GLib.MAXUINT64)
         self.assertEqual(rv, GLib.MAXUINT64)
 
     def test_gvalue_ret(self):
+        obj = self.new_obj()
+        self.assertEqual(obj.emit("test-gvalue-ret", GObject.TYPE_INT), GLib.MAXINT)
+        self.assertEqual(obj.emit("test-gvalue-ret", GObject.TYPE_UINT), GLib.MAXUINT)
+        self.assertEqual(obj.emit("test-gvalue-ret", GObject.TYPE_INT64), GLib.MAXINT64)
         self.assertEqual(
-            self.obj.emit("test-gvalue-ret", GObject.TYPE_INT), GLib.MAXINT
+            obj.emit("test-gvalue-ret", GObject.TYPE_UINT64), GLib.MAXUINT64
         )
-        self.assertEqual(
-            self.obj.emit("test-gvalue-ret", GObject.TYPE_UINT), GLib.MAXUINT
-        )
-        self.assertEqual(
-            self.obj.emit("test-gvalue-ret", GObject.TYPE_INT64), GLib.MAXINT64
-        )
-        self.assertEqual(
-            self.obj.emit("test-gvalue-ret", GObject.TYPE_UINT64), GLib.MAXUINT64
-        )
-        self.assertEqual(self.obj.emit("test-gvalue-ret", GObject.TYPE_STRING), "hello")
+        self.assertEqual(obj.emit("test-gvalue-ret", GObject.TYPE_STRING), "hello")
 
 
 class TestCMarshaller(_TestCMarshaller, unittest.TestCase):
@@ -787,12 +829,6 @@ class TestSignalDecorator(unittest.TestCase):
 
         def on_notify(self, obj, prop):
             self.notify_called = True
-
-    def setUp(self):
-        self.unnamedCalled = False
-
-    def onUnnamed(self, obj):
-        self.unnamedCalled = True
 
     def test_disconnect(self):
         decorated = self.Decorated()
@@ -855,11 +891,17 @@ class TestSignalDecorator(unittest.TestCase):
         self.assertEqual(str(self.Decorated.unnamed), "unnamed")
 
     def test_unnamed_signal_gets_called(self):
+        unnamedCalled = False
         obj = self.Decorated()
-        obj.connect("unnamed", self.onUnnamed)
-        self.assertEqual(self.unnamedCalled, False)
+
+        def onUnnamed(obj):
+            nonlocal unnamedCalled
+            unnamedCalled = True
+
+        obj.connect("unnamed", onUnnamed)
+        self.assertEqual(unnamedCalled, False)
         obj.emit("unnamed")
-        self.assertEqual(self.unnamedCalled, True)
+        self.assertEqual(unnamedCalled, True)
 
     def test_overridden_signal(self):
         # Test that the pushed signal is called in with super and the override
@@ -873,6 +915,7 @@ class TestSignalDecorator(unittest.TestCase):
         self.assertTrue(obj.notify_called)
 
 
+@pytest.mark.thread_unsafe
 class TestSignalConnectors(unittest.TestCase):
     class CustomButton(GObject.GObject):
         on_notify_called = False
@@ -1064,6 +1107,7 @@ class TestConnectDataIntrospected(unittest.TestCase, _ConnectDataTestBase):
     Object = Regress.TestObj
 
 
+@pytest.mark.thread_unsafe
 class TestInstallSignals(unittest.TestCase):
     # These tests only test how signalhelper.install_signals works
     # with the __gsignals__ dict and therefore does not need to use
@@ -1180,6 +1224,7 @@ class TestSignalModuleLevelFunctions(unittest.TestCase):
         # Invalid signal names return 0 instead of raising
         self.assertEqual(GObject.signal_lookup("NOT_A_SIGNAL_NAME", C), 0)
 
+    @pytest.mark.thread_unsafe
     def test_signal_query(self):
         (my_signal_id,) = GObject.signal_list_ids(C)
 
@@ -1389,8 +1434,11 @@ class TestIntrospectedSignalsIssue158(unittest.TestCase):
         gc_thread = threading.Thread(target=self._gc_thread)
         gc_thread.start()
 
+        def _callback(e):
+            pass
+
         for _ in range(8):
-            handlers = [obj.connect(sig, self._callback) for sig in self._obj_sig_names]
+            handlers = [obj.connect(sig, _callback) for sig in self._obj_sig_names]
             time.sleep(0.010)
             while len(handlers) > 0:
                 obj.disconnect(handlers.pop())
