@@ -674,6 +674,7 @@ class TestEverything(unittest.TestCase):
             [Everything.TestObj, Everything.TestSubObj]
         )
 
+    @pytest.mark.thread_unsafe
     def test_gslist(self):
         self.assertEqual(Everything.test_gslist_nothing_return(), ["1", "2", "3"])
         self.assertEqual(Everything.test_gslist_nothing_return2(), ["1", "2", "3"])

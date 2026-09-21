@@ -46,6 +46,7 @@ class TestMainLoop(unittest.TestCase):
 
     @unittest.skipUnless(hasattr(os, "fork"), "no os.fork available")
     @unittest.skipIf(os.environ.get("PYGI_TEST_GDB"), "SIGINT stops gdb")
+    @pytest.mark.thread_unsafe
     def test_sigint(self):
         r, w = os.pipe()
         with warnings.catch_warnings():

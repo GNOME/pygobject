@@ -171,6 +171,7 @@ https://my.org/q?x=1&y=2
         assert len(fds) == 1
 
     @unittest.skipIf(os.name == "nt", "hangs")
+    @pytest.mark.thread_unsafe
     def test_io_add_watch_no_data(self):
         (r, w) = os.pipe()
         call_data = []
@@ -201,6 +202,7 @@ https://my.org/q?x=1&y=2
         )
 
     @unittest.skipIf(os.name == "nt", "hangs")
+    @pytest.mark.thread_unsafe
     def test_io_add_watch_with_data(self):
         (r, w) = os.pipe()
         call_data = []
@@ -237,6 +239,7 @@ https://my.org/q?x=1&y=2
         )
 
     @unittest.skipIf(os.name == "nt", "hangs")
+    @pytest.mark.thread_unsafe
     def test_io_add_watch_with_multiple_data(self):
         (r, w) = os.pipe()
         call_data = []
@@ -261,6 +264,7 @@ https://my.org/q?x=1&y=2
 
     @unittest.skipIf(sys.platform == "darwin", "fails")
     @unittest.skipIf(os.name == "nt", "no shell on Windows")
+    @pytest.mark.thread_unsafe
     def test_io_add_watch_pyfile(self):
         call_data = []
 

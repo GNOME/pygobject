@@ -84,6 +84,7 @@ def test_gerror_matches():
     assert e.matches(42, 24)
 
 
+@pytest.mark.thread_unsafe
 def test_timeout_add_seconds():
     h = GLib.timeout_add_seconds(
         100, lambda *x: None, 1, 2, 3, priority=GLib.PRIORITY_HIGH_IDLE

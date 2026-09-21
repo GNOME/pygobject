@@ -1432,6 +1432,7 @@ class TestGPtrArray(unittest.TestCase):
             Sequence(["0", "1", 2]),
         )
 
+    @pytest.mark.thread_unsafe
     def test_gptrarray_utf8_none_out(self):
         self.assertEqual(["0", "1", "2"], GIMarshallingTests.gptrarray_utf8_none_out())
 
