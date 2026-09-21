@@ -84,6 +84,7 @@ def test_allow_init_template_call():
     Foo()
 
 
+@pytest.mark.thread_unsafe
 def test_init_template_second_instance():
     type_name = new_gtype_name()
 
@@ -764,6 +765,7 @@ def test_python_class_hierarchy():
 
 
 @pytest.mark.skipif(not GTK4, reason="GTK 4 only")
+@pytest.mark.thread_unsafe
 def test_finalization_of_custom_child_objects():
     xml = """
     <?xml version="1.0" encoding="UTF-8"?>

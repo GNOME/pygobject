@@ -1447,6 +1447,7 @@ class TestBoxed(unittest.TestCase):
 
 
 class TestTortureProfile(unittest.TestCase):
+    @pytest.mark.parallel_threads(1)  # slow test
     def test_torture_profile(self):
         total_time = 0
         object_ = Everything.TestObj()
