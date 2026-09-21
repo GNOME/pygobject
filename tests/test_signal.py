@@ -1396,7 +1396,7 @@ class TestIntrospectedSignals(unittest.TestCase):
         self.assertIsNone(other_obj2)
 
 
-@pytest.mark.parallel_threads(1)
+@pytest.mark.thread_unsafe
 class TestIntrospectedSignalsIssue158(unittest.TestCase):
     """The test for https://gitlab.gnome.org/GNOME/pygobject/issues/158."""
 

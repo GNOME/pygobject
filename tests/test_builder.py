@@ -33,6 +33,7 @@ if Gtk:
 
 
 @pytest.mark.skipif(Gtk is None, reason="Gtk not available")
+@pytest.mark.thread_unsafe
 def test_subclass_of_subclass():
     builder = Gtk.Builder.new_from_string(xml, len(xml))
     label = builder.get_object("label")

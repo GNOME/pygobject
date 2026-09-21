@@ -55,6 +55,7 @@ class TestOverrides(unittest.TestCase):
 class TestModule(unittest.TestCase):
     # Tests for gi.module
 
+    @pytest.mark.thread_unsafe
     def test_get_introspection_module_caching(self):
         # This test attempts to minimize side effects by
         # using a DynamicModule directly instead of going though:
