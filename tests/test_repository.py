@@ -21,6 +21,8 @@
 import unittest
 from collections import abc
 
+import pytest
+
 import gi._gi as GIRepository
 from gi.module import repository as repo
 from gi.repository import GObject
@@ -415,6 +417,7 @@ class Test(unittest.TestCase):
         self.assertTrue(hasattr(GIRepository, "FunctionInfoFlags"))
         self.assertTrue(hasattr(GIRepository, "TypeTag"))
 
+    @pytest.mark.thread_unsafe
     def test_introspected_argument_info(self):
         self.assertTrue(
             isinstance(IntrospectedRepository.Argument.__info__, GIRepository.UnionInfo)

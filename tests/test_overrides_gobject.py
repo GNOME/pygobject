@@ -33,6 +33,7 @@ def test_signal_parse_name():
         GObject.signal_parse_name("foobar", obj, True)
 
 
+@pytest.mark.thread_unsafe
 def test_signal_query():
     obj = GObject.GObject()
     res = GObject.signal_query("notify", obj)

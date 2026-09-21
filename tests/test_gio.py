@@ -478,6 +478,7 @@ class TestGFile(unittest.TestCase):
             # test_delete and test_delete_async already remove it
             self.file.delete(None)
 
+    @pytest.mark.thread_unsafe
     def test_replace_contents(self):
         content = b"hello\0world\x7f!"
         succ, etag = self.file.replace_contents(
