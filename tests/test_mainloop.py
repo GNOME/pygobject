@@ -13,7 +13,7 @@ from .helper import capture_exceptions
 
 class TestMainLoop(unittest.TestCase):
     @unittest.skipUnless(hasattr(os, "fork"), "no os.fork available")
-    @pytest.mark.parallel_threads(1)  # uses capture_exceptions
+    @pytest.mark.thread_unsafe  # uses capture_exceptions
     def test_exception_handling(self):
         pipe_r, pipe_w = os.pipe()
 
@@ -46,6 +46,7 @@ class TestMainLoop(unittest.TestCase):
 
     @unittest.skipUnless(hasattr(os, "fork"), "no os.fork available")
     @unittest.skipIf(os.environ.get("PYGI_TEST_GDB"), "SIGINT stops gdb")
+    @pytest.mark.thread_unsafe
     def test_sigint(self):
         r, w = os.pipe()
         with warnings.catch_warnings():

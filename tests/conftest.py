@@ -59,6 +59,10 @@ def dbus_launch_session():
 
 
 def pytest_configure(config):
+    config.addinivalue_line(
+        "markers", "thread_unsafe: mark the test function as single-threaded"
+    )
+
     pid, addr = dbus_launch_session()
     if pid >= 0:
         os.environ["DBUS_SESSION_BUS_ADDRESS"] = addr

@@ -396,6 +396,7 @@ def test_file_fspath_with_no_path():
         assert path == os.getcwd()
 
 
+@pytest.mark.thread_unsafe  # constant file name
 def test_file_truediv():
     tmp_path = GLib.get_tmp_dir()
     folder = Gio.File.new_for_path(tmp_path)

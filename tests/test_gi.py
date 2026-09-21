@@ -1432,6 +1432,7 @@ class TestGPtrArray(unittest.TestCase):
             Sequence(["0", "1", 2]),
         )
 
+    @pytest.mark.thread_unsafe
     def test_gptrarray_utf8_none_out(self):
         self.assertEqual(["0", "1", "2"], GIMarshallingTests.gptrarray_utf8_none_out())
 
@@ -3199,7 +3200,7 @@ class TestPythonGObject(unittest.TestCase):
         object_.call_vfunc_with_callback()
         self.assertTrue(object_.worked)
 
-    @pytest.mark.parallel_threads(1)  # uses capture_exceptions()
+    @pytest.mark.thread_unsafe  # uses capture_exceptions()
     def test_exception_in_vfunc_return_value(self):
         obj = self.ErrorObject()
         with capture_exceptions() as exc:

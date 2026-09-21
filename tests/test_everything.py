@@ -674,6 +674,7 @@ class TestEverything(unittest.TestCase):
             [Everything.TestObj, Everything.TestSubObj]
         )
 
+    @pytest.mark.thread_unsafe
     def test_gslist(self):
         self.assertEqual(Everything.test_gslist_nothing_return(), ["1", "2", "3"])
         self.assertEqual(Everything.test_gslist_nothing_return2(), ["1", "2", "3"])
@@ -828,7 +829,7 @@ class TestCallbacks(unittest.TestCase):
         Everything.test_simple_callback(callback)
         self.assertTrue(called)
 
-    @pytest.mark.parallel_threads(1)  # uses capture_exceptions()
+    @pytest.mark.thread_unsafe  # uses capture_exceptions()
     def test_callback_exception(self):
         """This test ensures that we get errors from callbacks correctly
         and in particular that we do not segv when callbacks fail.
@@ -846,7 +847,7 @@ class TestCallbacks(unittest.TestCase):
         self.assertTrue(exc)
         self.assertEqual(exc[0].type, ZeroDivisionError)
 
-    @pytest.mark.parallel_threads(1)  # uses capture_exceptions()
+    @pytest.mark.thread_unsafe  # uses capture_exceptions()
     def test_double_callback_exception(self):
         """This test ensures that we get errors from callbacks correctly
         and in particular that we do not segv when callbacks fail.
@@ -880,7 +881,7 @@ class TestCallbacks(unittest.TestCase):
         self.assertEqual(Everything.test_callback(callback), 44)
         self.assertTrue(called)
 
-    @pytest.mark.parallel_threads(1)  # uses refcount
+    @pytest.mark.thread_unsafe  # uses refcount
     def test_callback_scope_async(self):
         called = False
         ud = "Test Value 44"
@@ -1316,7 +1317,7 @@ class TestClosures(unittest.TestCase):
         self.assertRaises(TypeError, Everything.test_closure_variant, callback, "foo")
         self.assertFalse(called)
 
-    @pytest.mark.parallel_threads(1)  # uses capture_exceptions()
+    @pytest.mark.thread_unsafe  # uses capture_exceptions()
     def test_variant_wrong_return_type(self):
         def callback(variant):
             return "no_variant"
@@ -1447,6 +1448,7 @@ class TestBoxed(unittest.TestCase):
 
 
 class TestTortureProfile(unittest.TestCase):
+    @pytest.mark.thread_unsafe  # slow test
     def test_torture_profile(self):
         total_time = 0
         object_ = Everything.TestObj()
