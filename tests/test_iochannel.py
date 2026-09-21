@@ -2,7 +2,6 @@ import os
 import unittest
 import tempfile
 import os.path
-import shutil
 import warnings
 
 try:
@@ -16,165 +15,179 @@ from gi.repository import GLib
 from gi import PyGIDeprecationWarning
 
 
-class IOChannel(unittest.TestCase):
-    def setUp(self):
-        self.workdir = tempfile.mkdtemp()
-
-        self.testutf8 = os.path.join(self.workdir, "testutf8.txt")
-        with open(self.testutf8, "wb") as f:
-            f.write(
-                """hello ♥ world
+def write_utf8_content(f):
+    f.write(
+        """hello ♥ world
 second line
 
 À demain!""".encode()
-            )
+    )
+    f.flush()
 
-        self.testlatin1 = os.path.join(self.workdir, "testlatin1.txt")
-        with open(self.testlatin1, "wb") as f:
-            f.write(b"""hell\xf8 world
+
+def write_latin1_content(f):
+    f.write(b"""hell\xf8 world
 second line
 
 \xc0 demain!""")
+    f.flush()
 
-        self.testout = os.path.join(self.workdir, "testout.txt")
 
-    def tearDown(self):
-        shutil.rmtree(self.workdir)
-
+class IOChannel(unittest.TestCase):
     def test_file_readline_utf8(self):
-        ch = GLib.IOChannel(filename=self.testutf8)
-        self.assertEqual(ch.get_encoding(), "UTF-8")
-        self.assertTrue(ch.get_close_on_unref())
-        self.assertEqual(ch.readline(), "hello ♥ world\n")
-        self.assertEqual(ch.get_buffer_condition(), GLib.IOCondition.IN)
-        self.assertEqual(ch.readline(), "second line\n")
-        self.assertEqual(ch.readline(), "\n")
-        self.assertEqual(ch.readline(), "À demain!")
-        self.assertEqual(ch.get_buffer_condition(), 0)
-        self.assertEqual(ch.readline(), "")
-        ch.shutdown(True)
+        with tempfile.NamedTemporaryFile() as testutf8:
+            write_utf8_content(testutf8)
+            ch = GLib.IOChannel(filename=testutf8.name)
+            self.assertEqual(ch.get_encoding(), "UTF-8")
+            self.assertTrue(ch.get_close_on_unref())
+            self.assertEqual(ch.readline(), "hello ♥ world\n")
+            self.assertEqual(ch.get_buffer_condition(), GLib.IOCondition.IN)
+            self.assertEqual(ch.readline(), "second line\n")
+            self.assertEqual(ch.readline(), "\n")
+            self.assertEqual(ch.readline(), "À demain!")
+            self.assertEqual(ch.get_buffer_condition(), 0)
+            self.assertEqual(ch.readline(), "")
+            ch.shutdown(True)
 
     def test_file_readline_latin1(self):
-        ch = GLib.IOChannel(filename=self.testlatin1, mode="r")
-        ch.set_encoding("latin1")
-        self.assertEqual(ch.get_encoding(), "latin1")
-        self.assertEqual(ch.readline(), "hellø world\n")
-        self.assertEqual(ch.readline(), "second line\n")
-        self.assertEqual(ch.readline(), "\n")
-        self.assertEqual(ch.readline(), "À demain!")
-        ch.shutdown(True)
+        with tempfile.NamedTemporaryFile() as testlatin1:
+            write_latin1_content(testlatin1)
+            ch = GLib.IOChannel(filename=testlatin1.name, mode="r")
+            ch.set_encoding("latin1")
+            self.assertEqual(ch.get_encoding(), "latin1")
+            self.assertEqual(ch.readline(), "hellø world\n")
+            self.assertEqual(ch.readline(), "second line\n")
+            self.assertEqual(ch.readline(), "\n")
+            self.assertEqual(ch.readline(), "À demain!")
+            ch.shutdown(True)
 
     def test_file_iter(self):
         items = []
-        ch = GLib.IOChannel(filename=self.testutf8)
-        for item in ch:
-            items.append(item)  # noqa: PERF402
-        self.assertEqual(len(items), 4)
-        self.assertEqual(items[0], "hello ♥ world\n")
-        ch.shutdown(True)
+        with tempfile.NamedTemporaryFile() as testutf8:
+            write_utf8_content(testutf8)
+            ch = GLib.IOChannel(filename=testutf8.name)
+            for item in ch:
+                items.append(item)  # noqa: PERF402
+            self.assertEqual(len(items), 4)
+            self.assertEqual(items[0], "hello ♥ world\n")
+            ch.shutdown(True)
 
     def test_file_readlines(self):
-        ch = GLib.IOChannel(filename=self.testutf8)
-        lines = ch.readlines()
-        # Note, this really ought to be 4, but the static bindings add an extra
-        # empty one
-        self.assertGreaterEqual(len(lines), 4)
-        self.assertLessEqual(len(lines), 5)
-        self.assertEqual(lines[0], "hello ♥ world\n")
-        self.assertEqual(lines[3], "À demain!")
-        if len(lines) == 4:
-            self.assertEqual(lines[4], "")
+        with tempfile.NamedTemporaryFile() as testutf8:
+            write_utf8_content(testutf8)
+            ch = GLib.IOChannel(filename=testutf8.name)
+            lines = ch.readlines()
+            # Note, this really ought to be 4, but the static bindings add an extra
+            # empty one
+            self.assertGreaterEqual(len(lines), 4)
+            self.assertLessEqual(len(lines), 5)
+            self.assertEqual(lines[0], "hello ♥ world\n")
+            self.assertEqual(lines[3], "À demain!")
+            if len(lines) == 4:
+                self.assertEqual(lines[4], "")
 
     def test_file_read(self):
-        ch = GLib.IOChannel(filename=self.testutf8)
-        with open(self.testutf8, "rb") as f:
-            self.assertEqual(ch.read(), f.read())
+        with tempfile.NamedTemporaryFile() as testutf8:
+            write_utf8_content(testutf8)
 
-        ch = GLib.IOChannel(filename=self.testutf8)
-        with open(self.testutf8, "rb") as f:
-            self.assertEqual(ch.read(10), f.read(10))
+            ch = GLib.IOChannel(filename=testutf8.name)
+            with open(testutf8.name, "rb") as f:
+                self.assertEqual(ch.read(), f.read())
 
-        ch = GLib.IOChannel(filename=self.testutf8)
-        with open(self.testutf8, "rb") as f:
-            self.assertEqual(ch.read(max_count=15), f.read(15))
+            ch = GLib.IOChannel(filename=testutf8.name)
+            with open(testutf8.name, "rb") as f:
+                self.assertEqual(ch.read(10), f.read(10))
+
+            ch = GLib.IOChannel(filename=testutf8.name)
+            with open(testutf8.name, "rb") as f:
+                self.assertEqual(ch.read(max_count=15), f.read(15))
 
     def test_file_read_chars(self):
-        ch = GLib.IOChannel(filename=self.testutf8)
-        with open(self.testutf8, "rb") as f:
-            self.assertEqual(ch.read_chars(), f.read())
+        with tempfile.NamedTemporaryFile() as testutf8:
+            write_utf8_content(testutf8)
+
+            ch = GLib.IOChannel(filename=testutf8.name)
+            with open(testutf8.name, "rb") as f:
+                self.assertEqual(ch.read_chars(), f.read())
 
     def test_seek(self):
-        ch = GLib.IOChannel(filename=self.testutf8)
-        ch.seek(2)
-        self.assertEqual(ch.read(3), b"llo")
+        with tempfile.NamedTemporaryFile() as testutf8:
+            write_utf8_content(testutf8)
 
-        ch.seek(2, 0)  # SEEK_SET
-        self.assertEqual(ch.read(3), b"llo")
+            ch = GLib.IOChannel(filename=testutf8.name)
+            ch.seek(2)
+            self.assertEqual(ch.read(3), b"llo")
 
-        ch.seek(1, 1)  # SEEK_CUR, skip the space
-        self.assertEqual(ch.read(3), b"\xe2\x99\xa5")
+            ch.seek(2, 0)  # SEEK_SET
+            self.assertEqual(ch.read(3), b"llo")
 
-        ch.seek(2, 2)  # SEEK_END
-        # FIXME: does not work currently
-        # self.assertEqual(ch.read(2), b'n!')
+            ch.seek(1, 1)  # SEEK_CUR, skip the space
+            self.assertEqual(ch.read(3), b"\xe2\x99\xa5")
 
-        # invalid whence value
-        self.assertRaises(ValueError, ch.seek, 0, 3)
-        ch.shutdown(True)
+            ch.seek(2, 2)  # SEEK_END
+            # FIXME: does not work currently
+            # self.assertEqual(ch.read(2), b'n!')
+
+            # invalid whence value
+            self.assertRaises(ValueError, ch.seek, 0, 3)
+            ch.shutdown(True)
 
     def test_file_write(self):
-        ch = GLib.IOChannel(filename=self.testout, mode="w")
-        ch.set_encoding("latin1")
-        ch.write("hellø world\n")
-        ch.shutdown(True)
-        ch = GLib.IOChannel(filename=self.testout, mode="a")
-        ch.set_encoding("latin1")
-        ch.write("À demain!")
-        ch.shutdown(True)
+        with tempfile.NamedTemporaryFile() as testout:
+            ch = GLib.IOChannel(filename=testout.name, mode="w")
+            ch.set_encoding("latin1")
+            ch.write("hellø world\n")
+            ch.shutdown(True)
+            ch = GLib.IOChannel(filename=testout.name, mode="a")
+            ch.set_encoding("latin1")
+            ch.write("À demain!")
+            ch.shutdown(True)
 
-        with open(self.testout, "rb") as f:
-            self.assertEqual(f.read().decode("latin1"), "hellø world\nÀ demain!")
+            with open(testout.name, "rb") as f:
+                self.assertEqual(f.read().decode("latin1"), "hellø world\nÀ demain!")
 
     def test_file_writelines(self):
-        ch = GLib.IOChannel(filename=self.testout, mode="w")
-        ch.writelines(["foo", "bar\n", "baz\n", "end"])
-        ch.shutdown(True)
+        with tempfile.NamedTemporaryFile() as testout:
+            ch = GLib.IOChannel(filename=testout.name, mode="w")
+            ch.writelines(["foo", "bar\n", "baz\n", "end"])
+            ch.shutdown(True)
 
-        with open(self.testout) as f:
-            self.assertEqual(f.read(), "foobar\nbaz\nend")
+            with open(testout.name) as f:
+                self.assertEqual(f.read(), "foobar\nbaz\nend")
 
     def test_buffering(self):
-        writer = GLib.IOChannel(filename=self.testout, mode="w")
-        writer.set_encoding(None)
-        self.assertTrue(writer.get_buffered())
-        self.assertGreater(writer.get_buffer_size(), 10)
+        with tempfile.NamedTemporaryFile() as testout:
+            writer = GLib.IOChannel(filename=testout.name, mode="w")
+            writer.set_encoding(None)
+            self.assertTrue(writer.get_buffered())
+            self.assertGreater(writer.get_buffer_size(), 10)
 
-        reader = GLib.IOChannel(filename=self.testout, mode="r")
+            reader = GLib.IOChannel(filename=testout.name, mode="r")
 
-        # does not get written immediately on buffering
-        writer.write("abc")
-        self.assertEqual(reader.read(), b"")
-        writer.flush()
-        self.assertEqual(reader.read(), b"abc")
+            # does not get written immediately on buffering
+            writer.write("abc")
+            self.assertEqual(reader.read(), b"")
+            writer.flush()
+            self.assertEqual(reader.read(), b"abc")
 
-        # does get written immediately without buffering
-        writer.set_buffered(False)
-        writer.write("def")
-        self.assertEqual(reader.read(), b"def")
+            # does get written immediately without buffering
+            writer.set_buffered(False)
+            writer.write("def")
+            self.assertEqual(reader.read(), b"def")
 
-        # writes after buffer overflow
-        writer.set_buffer_size(10)
-        writer.write("0123456789012")
-        self.assertTrue(reader.read().startswith(b"012"))
-        writer.flush()
-        reader.read()  # ignore bits written after flushing
+            # writes after buffer overflow
+            writer.set_buffer_size(10)
+            writer.write("0123456789012")
+            self.assertTrue(reader.read().startswith(b"012"))
+            writer.flush()
+            reader.read()  # ignore bits written after flushing
 
-        # closing flushes
-        writer.set_buffered(True)
-        writer.write("ghi")
-        writer.shutdown(True)
-        self.assertEqual(reader.read(), b"ghi")
-        reader.shutdown(True)
+            # closing flushes
+            writer.set_buffered(True)
+            writer.write("ghi")
+            writer.shutdown(True)
+            self.assertEqual(reader.read(), b"ghi")
+            reader.shutdown(True)
 
     @unittest.skipIf(os.name == "nt", "NONBLOCK not implemented on Windows")
     def test_fd_read(self):
