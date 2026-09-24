@@ -53,6 +53,7 @@ if typing.TYPE_CHECKING:
     IOChannel = GLib.IOChannel
     IOCondition = GLib.IOCondition
     PollFD = GLib.PollFD
+    Uri = GLib.Uri
 else:
     from gi.module import get_introspection_module
 
@@ -978,6 +979,15 @@ class PollFD(GLib.PollFD):
 
 PollFD = override(PollFD)
 __all__.append("PollFD")
+
+
+class Uri(GLib.Uri):
+    def __str__(self) -> str:
+        return self.to_string()
+
+
+Uri = override(Uri)
+__all__.append("Uri")
 
 
 # The GI GLib API uses g_child_watch_add_full renamed to g_child_watch_add with

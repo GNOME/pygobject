@@ -17,6 +17,7 @@
 *.dylib
 .DS_STORE
 .idea
+.helix
 .cache
 .pytest_cache
 /tmp/*

@@ -367,14 +367,16 @@ class TestGVariant(unittest.TestCase):
         self.assertEqual(variant.get_child_value(0).n_children(), 1)
         self.assertEqual(variant.get_child_value(0).get_child_value(0).n_children(), 2)
         self.assertEqual(
-            variant.get_child_value(0)
+            variant
+            .get_child_value(0)
             .get_child_value(0)
             .get_child_value(0)
             .get_int32(),
             5,
         )
         self.assertEqual(
-            variant.get_child_value(0)
+            variant
+            .get_child_value(0)
             .get_child_value(0)
             .get_child_value(1)
             .get_int32(),
@@ -776,3 +778,16 @@ class TestConstants(unittest.TestCase):
     def test_basic_types_limits(self):
         self.assertTrue(isinstance(GLib.MINFLOAT, float))
         self.assertTrue(isinstance(GLib.MAXLONG, int))
+
+
+def test_uri_str_representation():
+    url = GLib.Uri.build(
+        GLib.UriFlags.NONE,
+        "https",
+        None,
+        "pygobject.gnome.org",
+        -1,
+        "/search.html",
+        "q=Tài liệu",
+    )
+    assert str(url) == "https://pygobject.gnome.org/search.html?q=Tài%20liệu"
