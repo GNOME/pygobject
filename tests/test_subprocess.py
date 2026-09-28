@@ -262,6 +262,7 @@ def test_os_kill_with_pid():
     os.kill(pid, signal.SIGTERM)
 
 
+@pytest.mark.thread_unsafe
 def test_close_pid_when_deleted(monkeypatch):
     gc.collect()  # for Pypy
 

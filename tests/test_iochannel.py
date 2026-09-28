@@ -122,6 +122,7 @@ second line
         self.assertRaises(ValueError, ch.seek, 0, 3)
         ch.shutdown(True)
 
+    @pytest.mark.thread_unsafe
     def test_file_write(self):
         ch = GLib.IOChannel(filename=self.testout, mode="w")
         ch.set_encoding("latin1")
@@ -135,6 +136,7 @@ second line
         with open(self.testout, "rb") as f:
             self.assertEqual(f.read().decode("latin1"), "hellø world\nÀ demain!")
 
+    @pytest.mark.thread_unsafe
     def test_file_writelines(self):
         ch = GLib.IOChannel(filename=self.testout, mode="w")
         ch.writelines(["foo", "bar\n", "baz\n", "end"])
@@ -143,6 +145,7 @@ second line
         with open(self.testout) as f:
             self.assertEqual(f.read(), "foobar\nbaz\nend")
 
+    @pytest.mark.thread_unsafe
     def test_buffering(self):
         writer = GLib.IOChannel(filename=self.testout, mode="w")
         writer.set_encoding(None)
@@ -197,6 +200,7 @@ second line
         ch.shutdown(True)
 
     @unittest.skipUnless(fcntl, "no fcntl")
+    @pytest.mark.thread_unsafe
     def test_fd_write(self):
         (r, w) = os.pipe()
         fcntl.fcntl(r, fcntl.F_SETFL, fcntl.fcntl(r, fcntl.F_GETFL) | os.O_NONBLOCK)
