@@ -3200,7 +3200,7 @@ class TestPythonGObject(unittest.TestCase):
         object_.call_vfunc_with_callback()
         self.assertTrue(object_.worked)
 
-    @pytest.mark.parallel_threads(1)  # uses capture_exceptions()
+    @pytest.mark.thread_unsafe  # uses capture_exceptions()
     def test_exception_in_vfunc_return_value(self):
         obj = self.ErrorObject()
         with capture_exceptions() as exc:

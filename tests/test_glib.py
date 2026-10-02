@@ -331,7 +331,7 @@ https://my.org/q?x=1&y=2
         self.assertTrue(GLib.Source.remove(source_id))
 
 
-@pytest.mark.parallel_threads(1)  # warnings are only issued once
+@pytest.mark.thread_unsafe  # warnings are only issued once
 class TestGLibPlatform(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
