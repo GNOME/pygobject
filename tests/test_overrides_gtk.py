@@ -389,8 +389,10 @@ class TestGtk(unittest.TestCase):
         mi = ui.get_widget("/menubær1")
         self.assertEqual(type(mi), Gtk.MenuBar)
 
-    class TestWindow(Gtk.Window):
-        __gtype_name__ = "TestWindow"
+    if Gtk_version:
+
+        class TestWindow(Gtk.Window):
+            __gtype_name__ = "TestWindow"
 
     @unittest.skipIf(Gtk_version == "4.0", "not in gtk4")
     def test_window_gtk3(self):
