@@ -733,6 +733,7 @@ void
 pygobject__g_instance_init (GTypeInstance *instance, gpointer g_class)
 {
     GObject *object;
+    GType final_subclass;
     PyObject *wrapper, *result;
     PyGILState_STATE state;
     gboolean needs_init = FALSE;
@@ -740,6 +741,13 @@ pygobject__g_instance_init (GTypeInstance *instance, gpointer g_class)
     g_return_if_fail (G_IS_OBJECT (instance));
 
     object = (GObject *)instance;
+
+    final_subclass = G_OBJECT_CLASS_TYPE (g_class);
+    while (final_subclass
+           && !g_type_get_qdata (final_subclass, pygobject_custom_key))
+        final_subclass = g_type_parent (final_subclass);
+
+    if (final_subclass != G_OBJECT_TYPE (object)) return;
 
     wrapper = g_object_get_qdata (object, pygobject_wrapper_key);
 
@@ -763,11 +771,8 @@ pygobject__g_instance_init (GTypeInstance *instance, gpointer g_class)
     }
 
     /* XXX: used for Gtk.Template */
-    gboolean is_final_subclass = G_OBJECT_TYPE (object)
-                                 == G_OBJECT_CLASS_TYPE (g_class);
-    if (is_final_subclass
-        && PyObject_HasAttrString ((PyObject *)Py_TYPE (wrapper),
-                                   "__dontuse_ginstance_init__")) {
+    if (PyObject_HasAttrString ((PyObject *)Py_TYPE (wrapper),
+                                "__dontuse_ginstance_init__")) {
         gboolean was_floating = g_object_is_floating (object);
         g_object_ref_sink (object);
 
