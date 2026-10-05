@@ -33,8 +33,6 @@
 #include "pygobject-object.h"
 #include "pygobject-types.h"
 
-extern GQuark pygobject_instance_init_ref_count;
-
 static GPrivate pygobject_construction_wrapper;
 
 void
@@ -691,7 +689,6 @@ pyg_object_constructed (GObject *object)
     GObjectClass *klass = G_OBJECT_GET_CLASS (object);
     PyObject *wrapper, *retval;
     PyGILState_STATE state;
-    int instance_init_ref_count;
 
     /* Find the first non-pygobject constructed method. */
     while (klass && klass->constructed == pyg_object_constructed) {
@@ -714,10 +711,7 @@ pyg_object_constructed (GObject *object)
     }
 
     /* Release the reference obtained in pygobject__g_instance_init(). */
-    instance_init_ref_count = GPOINTER_TO_INT (
-        g_object_get_qdata (object, pygobject_instance_init_ref_count));
-    for (int i = 0; i < instance_init_ref_count; i++) Py_DECREF (wrapper);
-    g_object_set_qdata (object, pygobject_instance_init_ref_count, NULL);
+    Py_DECREF (wrapper);
 
 #ifdef PYPY_VERSION
     /* Force a new wrapper next time the wrapper is retrieved.
@@ -768,7 +762,8 @@ pygobject__g_instance_init (GTypeInstance *instance, gpointer g_class)
 
         wrapper = pyg_object_new_retain_floating (object, g_class);
         needs_init = TRUE;
-    }
+    } else
+        Py_INCREF (wrapper);
 
     /* XXX: used for Gtk.Template */
     if (PyObject_HasAttrString ((PyObject *)Py_TYPE (wrapper),
@@ -795,19 +790,9 @@ pygobject__g_instance_init (GTypeInstance *instance, gpointer g_class)
             PyErr_Print ();
         else
             Py_DECREF (result);
-
-        /* The wrapper's reference will be released in pyg_object_constructed(). */
-        g_object_set_qdata (object, pygobject_instance_init_ref_count,
-                            GINT_TO_POINTER (1));
-    } else {
-        int instance_init_ref_count = GPOINTER_TO_INT (
-            g_object_get_qdata (object, pygobject_instance_init_ref_count));
-
-        /* Take an extra reference, will be released in pyg_object_constructed(). */
-        Py_INCREF (wrapper);
-        g_object_set_qdata (object, pygobject_instance_init_ref_count,
-                            GINT_TO_POINTER (instance_init_ref_count + 1));
     }
+
+    /* The wrapper's reference will be released in pyg_object_constructed(). */
 
     PyGILState_Release (state);
 }

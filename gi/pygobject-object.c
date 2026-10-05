@@ -51,7 +51,6 @@ GQuark pygobject_custom_key;
 GQuark pygobject_class_key;
 GQuark pygobject_class_init_key;
 GQuark pygobject_wrapper_key;
-GQuark pygobject_instance_init_ref_count;
 GQuark pygobject_instance_data_key;
 
 
@@ -2033,8 +2032,6 @@ pyg_object_register_types (PyObject *d)
     pygobject_class_init_key =
         g_quark_from_static_string ("PyGObject::class-init");
     pygobject_wrapper_key = g_quark_from_static_string ("PyGObject::wrapper");
-    pygobject_instance_init_ref_count =
-        g_quark_from_static_string ("PyGObject::instance-init-ref-count");
 
     pygobject_instance_data_key =
         g_quark_from_static_string ("PyGObject::instance-data");
