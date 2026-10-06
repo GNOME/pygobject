@@ -410,7 +410,7 @@ pygobject_new_with_interfaces (GType gtype)
     }
 
     /* Workaround python tp_(get|set)attr slot inheritance bug.
-       * Fixes bug #144135. */
+     * Fixes bug #144135. */
     if (!type->tp_getattr && py_parent_type->tp_getattr) {
         type->tp_getattro = NULL;
         type->tp_getattr = py_parent_type->tp_getattr;
@@ -423,8 +423,11 @@ pygobject_new_with_interfaces (GType gtype)
     type->tp_dealloc = py_parent_type->tp_dealloc;
     type->tp_alloc = py_parent_type->tp_alloc;
     type->tp_free = py_parent_type->tp_free;
-    type->tp_traverse = py_parent_type->tp_traverse;
-    type->tp_clear = py_parent_type->tp_clear;
+    /* The new type has GC set, only override tp_traverse if it's set */
+    if (py_parent_type->tp_traverse) {
+        type->tp_traverse = py_parent_type->tp_traverse;
+        type->tp_clear = py_parent_type->tp_clear;
+    }
 
     pygobject_inherit_slots (type, bases, FALSE);
 
