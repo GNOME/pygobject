@@ -2,5 +2,5 @@
 directory=gobject-introspection-tests
 url=https://gitlab.gnome.org/GNOME/gobject-introspection-tests.git
 push-url=git@ssh.gitlab.gnome.org:GNOME/gobject-introspection-tests.git
-revision=53e6bc978d5011f22d0a27cca49a94b19816ca7d
+revision=bafffd954c045a66f85646fafd5674ac6d0b26ae
 depth=1
