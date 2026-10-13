@@ -76,9 +76,9 @@ def define_builder_scope():
             handler, args = _extract_handler_and_args(current_object, handler_name)
 
             if obj:
-                p = partial(handler, *args, swap_data=obj)
+                p = partial(handler, *args, swap_data=obj, watcher=obj)
             else:
-                p = partial(handler, *args)
+                p = partial(handler, *args, watcher=current_object)
 
             p.__gtk_template__ = True
             return p
