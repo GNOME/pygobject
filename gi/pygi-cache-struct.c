@@ -27,6 +27,7 @@
 #include "pygi-type.h"
 #include "pygi-value.h"
 #include "pygpointer.h"
+#include "pygobject-object.h"
 
 /*
  * _is_union_member - check to see if the py_arg is actually a member of the
@@ -184,13 +185,18 @@ pygi_arg_gclosure_from_py_marshal (PyGIInvokeState *state,
             PyObject *partial_args;
             PyObject *partial_keywords;
             PyObject *swap_data;
+            PyObject *watcher;
 
             partial_func = PyObject_GetAttrString (py_arg, "func");
             partial_args = PyObject_GetAttrString (py_arg, "args");
             partial_keywords = PyObject_GetAttrString (py_arg, "keywords");
             swap_data = PyDict_GetItemString (partial_keywords, "swap_data");
+            watcher = PyDict_GetItemString (partial_keywords, "watcher");
 
             closure = pyg_closure_new (partial_func, partial_args, swap_data);
+
+            if (PyObject_TypeCheck (watcher, &PyGObject_Type))
+                pygobject_watch_closure (watcher, closure);
 
             Py_DECREF (partial_func);
             Py_DECREF (partial_args);

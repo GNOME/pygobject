@@ -830,7 +830,75 @@ def test_signal_handler_with_object_does_not_leak_memory():
 
     weak = MyWidget().weak_ref()
 
-    gc.collect()
-    gc.collect()  # One more for PyPy
+    _gc_collect()
 
     assert weak() is None
+
+
+@pytest.mark.skipif(Gtk._version == "3.0", reason="only fixed in GTK4")
+def test_template_callback_does_not_block_widget_dispose():
+    type_name = new_gtype_name()
+    xml = f"""\
+    <?xml version="1.0" encoding="UTF-8"?>
+    <interface>
+    <requires lib="gtk" version="4.0" />
+    <template class="{type_name}" parent="GtkBox">
+        <child>
+            <object class="GtkButton">
+                <signal name="clicked" handler="on_click" swapped="no" />
+            </object>
+        </child>
+    </template>
+    </interface>
+    """
+
+    @Gtk.Template(string=xml)
+    class MyWidget(Gtk.Box):
+        __gtype_name__ = type_name
+
+        @Gtk.Template.Callback("on_click")
+        def _on_click(self):
+            pass
+
+    weak = MyWidget().weak_ref()
+
+    _gc_collect()
+
+    assert weak() is None
+
+
+@pytest.mark.skipif(Gtk._version == "3.0", reason="only fixed in GTK4")
+def test_template_callback_with_object_does_not_block_widget_dispose():
+    type_name = new_gtype_name()
+    xml = f"""\
+    <?xml version="1.0" encoding="UTF-8"?>
+    <interface>
+    <requires lib="gtk" version="4.0" />
+    <template class="{type_name}" parent="GtkBox">
+        <child>
+            <object class="GtkButton">
+                <signal name="clicked" object="{type_name}" handler="on_click" swapped="no" />
+            </object>
+        </child>
+    </template>
+    </interface>
+    """
+
+    @Gtk.Template(string=xml)
+    class MyWidget(Gtk.Box):
+        __gtype_name__ = type_name
+
+        @Gtk.Template.Callback("on_click")
+        def _on_click(self):
+            pass
+
+    weak = MyWidget().weak_ref()
+
+    _gc_collect()
+
+    assert weak() is None
+
+
+def _gc_collect():
+    gc.collect()
+    gc.collect()  # One more for PyPy
