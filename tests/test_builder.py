@@ -8,8 +8,8 @@ except ImportError:
     Gtk = None
 
 
-@pytest.mark.skipif(Gtk is None, reason="Gtk not available")
-def test_subclass_of_subclass():
+if Gtk:
+
     class FirstLabel(Gtk.Label):
         __gtype_name__ = "FirstLabel"
 
@@ -24,13 +24,16 @@ def test_subclass_of_subclass():
     xml = """\
     <?xml version="1.0" encoding="UTF-8"?>
     <interface domain="test">
-      <requires lib="gtk" version="4.0" />
-      <object class="SecondLabel" id="label">
+        <requires lib="gtk" version="4.0" />
+        <object class="SecondLabel" id="label">
         <property name="label">Hello, world</property>
-      </object>
+        </object>
     </interface>
     """
 
+
+@pytest.mark.skipif(Gtk is None, reason="Gtk not available")
+def test_subclass_of_subclass():
     builder = Gtk.Builder.new_from_string(xml, len(xml))
     label = builder.get_object("label")
 
