@@ -221,7 +221,7 @@ _pygi_marshal_from_py_buffer (PyGIInvokeState *state,
         return FALSE;
     }
 
-    buffer = g_new0(PyGIBufferCleanupData, 1);
+    buffer = g_new0 (PyGIBufferCleanupData, 1);
     if (PyObject_GetBuffer (py_arg, &buffer->view, PyBUF_FULL_RO) < 0) {
         PyErr_Clear ();
         g_free (buffer);
@@ -235,18 +235,17 @@ _pygi_marshal_from_py_buffer (PyGIInvokeState *state,
                && buffer->view.format[1] == '\0') {
         format = buffer->view.format[0];
     }
-    valid =
-        (format == 'b' && type_tag == GI_TYPE_TAG_INT8) ||
-        (format == 'B' && type_tag == GI_TYPE_TAG_UINT8) ||
-        (format == 'h' && type_tag == GI_TYPE_TAG_INT16) ||
-        (format == 'H' && type_tag == GI_TYPE_TAG_UINT16) ||
-        (format == 'i' && type_tag == GI_TYPE_TAG_INT32) ||
-        (format == 'I' && type_tag == GI_TYPE_TAG_UINT32) ||
-        (format == 'q' && type_tag == GI_TYPE_TAG_INT64) ||
-        (format == 'Q' && type_tag == GI_TYPE_TAG_UINT64) ||
-        (format == 'f' && type_tag == GI_TYPE_TAG_FLOAT) ||
-        (format == 'd' && type_tag == GI_TYPE_TAG_DOUBLE) ||
-        (format == 'w' && type_tag == GI_TYPE_TAG_UNICHAR);
+    valid = (format == 'b' && type_tag == GI_TYPE_TAG_INT8)
+            || (format == 'B' && type_tag == GI_TYPE_TAG_UINT8)
+            || (format == 'h' && type_tag == GI_TYPE_TAG_INT16)
+            || (format == 'H' && type_tag == GI_TYPE_TAG_UINT16)
+            || (format == 'i' && type_tag == GI_TYPE_TAG_INT32)
+            || (format == 'I' && type_tag == GI_TYPE_TAG_UINT32)
+            || (format == 'q' && type_tag == GI_TYPE_TAG_INT64)
+            || (format == 'Q' && type_tag == GI_TYPE_TAG_UINT64)
+            || (format == 'f' && type_tag == GI_TYPE_TAG_FLOAT)
+            || (format == 'd' && type_tag == GI_TYPE_TAG_DOUBLE)
+            || (format == 'w' && type_tag == GI_TYPE_TAG_UNICHAR);
     valid = valid && buffer->view.ndim <= 1; /* 0 is a single element. */
     if (!valid) {
         PyBuffer_Release (&buffer->view);
@@ -257,7 +256,8 @@ _pygi_marshal_from_py_buffer (PyGIInvokeState *state,
     if (must_be_zero_terminated) {
         if (buffer->view.ndim == 1 && buffer->view.len > 0) {
             Py_ssize_t last_index = buffer->view.shape[0] - 1;
-            const char *last = PyBuffer_GetPointer (&buffer->view, &last_index);
+            const char *last =
+                PyBuffer_GetPointer (&buffer->view, &last_index);
             is_zero_terminated = TRUE;
             for (Py_ssize_t i = 0; i < buffer->view.itemsize; i++) {
                 if (last[i] != 0) {
@@ -273,50 +273,48 @@ _pygi_marshal_from_py_buffer (PyGIInvokeState *state,
         && (!must_be_zero_terminated || is_zero_terminated)) {
         arg->v_pointer = buffer->view.buf;
     } else {
-        buffer->contiguous = g_malloc0 (
-            buffer->view.len +
-            (must_be_zero_terminated && !is_zero_terminated ?
-                 buffer->view.itemsize : 0));
-        PyBuffer_ToContiguous (
-                buffer->contiguous, &buffer->view,
-                buffer->view.len, 'C');
+        buffer->contiguous =
+            g_malloc0 (buffer->view.len
+                       + (must_be_zero_terminated && !is_zero_terminated
+                              ? buffer->view.itemsize
+                              : 0));
+        PyBuffer_ToContiguous (buffer->contiguous, &buffer->view,
+                               buffer->view.len, 'C');
         arg->v_pointer = buffer->contiguous;
     }
 
     switch (arg_cache->transfer) {
     case GI_TRANSFER_NOTHING:
         /* Free everything in cleanup. */
-        pygi_marshal_cleanup_data_init_full (
-                cleanup_data, buffer,
-                (GDestroyNotify)free_py_buffer,
-                (GDestroyNotify)free_py_buffer);
+        pygi_marshal_cleanup_data_init_full (cleanup_data, buffer,
+                                             (GDestroyNotify)free_py_buffer,
+                                             (GDestroyNotify)free_py_buffer);
         break;
     case GI_TRANSFER_CONTAINER:
         /* Only the elements need to be deleted. */
-        pygi_marshal_cleanup_data_init_full (
-                cleanup_data, buffer,
-                (GDestroyNotify)free_py_buffer,
-                (GDestroyNotify)free_py_buffer);
+        pygi_marshal_cleanup_data_init_full (cleanup_data, buffer,
+                                             (GDestroyNotify)free_py_buffer,
+                                             (GDestroyNotify)free_py_buffer);
         break;
     case GI_TRANSFER_EVERYTHING:
         /* No memory cleanup: it is given to the callee, but
          * we still clean up the buffer object from Python. */
         if (buffer->contiguous == NULL) {
-            buffer->contiguous = g_memdup2 (
-                    buffer->view.buf, buffer->view.len);
+            buffer->contiguous =
+                g_memdup2 (buffer->view.buf, buffer->view.len);
             arg->v_pointer = buffer->contiguous;
         }
         pygi_marshal_cleanup_data_init_full (
-                cleanup_data, buffer,
-                (GDestroyNotify)free_py_buffer_keep_contiguous,
-                (GDestroyNotify)free_py_buffer);
+            cleanup_data, buffer,
+            (GDestroyNotify)free_py_buffer_keep_contiguous,
+            (GDestroyNotify)free_py_buffer);
         break;
     default:
         g_assert_not_reached ();
     }
 
-    return _marshal_length_arg_from_py (state, callable_cache,
-                                        array_cache, length);
+    return _marshal_length_arg_from_py (state, callable_cache, array_cache,
+                                        length);
 }
 
 static gboolean
@@ -372,9 +370,8 @@ _pygi_marshal_from_py_array (PyGIInvokeState *state,
     }
 
     /* Handle simple byte arrays first */
-    if (_pygi_marshal_from_py_buffer (
-                state, callable_cache, arg_cache, py_arg, arg, cleanup_data,
-                length)) {
+    if (_pygi_marshal_from_py_buffer (state, callable_cache, arg_cache, py_arg,
+                                      arg, cleanup_data, length)) {
         return TRUE;
     }
 

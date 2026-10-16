@@ -367,16 +367,14 @@ class TestGVariant(unittest.TestCase):
         self.assertEqual(variant.get_child_value(0).n_children(), 1)
         self.assertEqual(variant.get_child_value(0).get_child_value(0).n_children(), 2)
         self.assertEqual(
-            variant
-            .get_child_value(0)
+            variant.get_child_value(0)
             .get_child_value(0)
             .get_child_value(0)
             .get_int32(),
             5,
         )
         self.assertEqual(
-            variant
-            .get_child_value(0)
+            variant.get_child_value(0)
             .get_child_value(0)
             .get_child_value(1)
             .get_int32(),
