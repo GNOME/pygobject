@@ -1115,6 +1115,7 @@ class CPropertiesTestBase:
             self.get_prop(obj, "some-flags"), GIMarshallingTests.Flags.VALUE3
         )
 
+    @pytest.mark.thread_unsafe
     def test_flags_values(self):
         obj = GIMarshallingTests.PropertiesObject()
         prop = obj.find_property("some-flags")
@@ -1141,6 +1142,7 @@ class CPropertiesTestBase:
             self.get_prop(obj, "some-enum"), GIMarshallingTests.GEnum.VALUE3
         )
 
+    @pytest.mark.thread_unsafe
     def test_enum_values(self):
         obj = GIMarshallingTests.PropertiesObject()
         prop = obj.find_property("some-enum")
