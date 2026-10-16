@@ -22,6 +22,7 @@
 #include "pygi-boxed.h"
 #include "pygi-repository.h"
 #include "pygi-value.h"
+#include "pygobject-object.h"
 
 static GISignalInfo *
 _pygi_lookup_signal_from_g_type (GType g_type, const gchar *signal_name)
@@ -130,9 +131,14 @@ pygi_signal_closure_marshal (GClosure *closure, GValue *return_value,
     for (i = 0; i < n_param_values; i++) {
         /* swap in a different initial data for connect_object() */
         if (i == 0 && G_CCLOSURE_SWAP_DATA (closure)) {
-            g_return_if_fail (pc->swap_data != NULL);
-            Py_INCREF (pc->swap_data);
-            PyTuple_SetItem (params, 0, pc->swap_data);
+            if (closure->data != NULL) {
+                PyTuple_SetItem (params, 0,
+                                 pygobject_new (G_OBJECT (closure->data)));
+            } else {
+                g_return_if_fail (pc->swap_data != NULL);
+                Py_INCREF (pc->swap_data);
+                PyTuple_SetItem (params, 0, pc->swap_data);
+            }
 
         } else if (i == 0) {
             PyObject *item = pyg_value_to_pyobject (&param_values[i], FALSE);
@@ -283,13 +289,17 @@ pygi_signal_closure_new (PyGObject *instance, GType g_type,
     GClosure *closure = NULL;
     PyGISignalClosure *pygi_closure = NULL;
     GISignalInfo *signal_info = NULL;
+    GObject *swap_data_gobject = NULL;
 
     g_return_val_if_fail (callback != NULL, NULL);
 
     signal_info = _pygi_lookup_signal_from_g_type (g_type, signal_name);
     if (signal_info == NULL) return NULL;
 
-    closure = g_closure_new_simple (sizeof (PyGISignalClosure), NULL);
+    if (swap_data != NULL && PyObject_TypeCheck (swap_data, &PyGObject_Type))
+        swap_data_gobject = pygobject_get (swap_data);
+    closure =
+        g_closure_new_simple (sizeof (PyGISignalClosure), swap_data_gobject);
     g_closure_add_invalidate_notifier (closure, NULL,
                                        pygi_signal_closure_invalidate);
     g_closure_set_marshal (closure, pygi_signal_closure_marshal);
@@ -309,8 +319,11 @@ pygi_signal_closure_new (PyGObject *instance, GType g_type,
         pygi_closure->pyg_closure.extra_args = extra_args;
     }
     if (swap_data) {
-        pygi_closure->pyg_closure.swap_data = Py_NewRef (swap_data);
         closure->derivative_flag = TRUE;
+        if (swap_data_gobject != NULL)
+            g_object_watch_closure (swap_data_gobject, closure);
+        else
+            pygi_closure->pyg_closure.swap_data = Py_NewRef (swap_data);
     }
 
     return closure;

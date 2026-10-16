@@ -823,9 +823,14 @@ pyg_closure_marshal (GClosure *closure, GValue *return_value,
     for (i = 0; i < n_param_values; i++) {
         /* swap in a different initial data for connect_object() */
         if (i == 0 && G_CCLOSURE_SWAP_DATA (closure)) {
-            g_return_if_fail (pc->swap_data != NULL);
-            Py_INCREF (pc->swap_data);
-            PyTuple_SetItem (params, 0, pc->swap_data);
+            if (closure->data != NULL) {
+                PyTuple_SetItem (params, 0,
+                                 pygobject_new (G_OBJECT (closure->data)));
+            } else {
+                g_return_if_fail (pc->swap_data != NULL);
+                Py_INCREF (pc->swap_data);
+                PyTuple_SetItem (params, 0, pc->swap_data);
+            }
         } else {
             PyObject *item = pyg_value_to_pyobject (&param_values[i], FALSE);
 
@@ -898,9 +903,13 @@ GClosure *
 pyg_closure_new (PyObject *callback, PyObject *extra_args, PyObject *swap_data)
 {
     GClosure *closure;
+    GObject *swap_data_gobject = NULL;
 
     g_return_val_if_fail (callback != NULL, NULL);
-    closure = g_closure_new_simple (sizeof (PyGClosure), NULL);
+
+    if (swap_data != NULL && PyObject_TypeCheck (swap_data, &PyGObject_Type))
+        swap_data_gobject = pygobject_get (swap_data);
+    closure = g_closure_new_simple (sizeof (PyGClosure), swap_data_gobject);
     g_closure_add_invalidate_notifier (closure, NULL, pyg_closure_invalidate);
     g_closure_set_marshal (closure, pyg_closure_marshal);
     Py_INCREF (callback);
@@ -915,9 +924,11 @@ pyg_closure_new (PyObject *callback, PyObject *extra_args, PyObject *swap_data)
         ((PyGClosure *)closure)->extra_args = extra_args;
     }
     if (swap_data) {
-        Py_INCREF (swap_data);
-        ((PyGClosure *)closure)->swap_data = swap_data;
         closure->derivative_flag = TRUE;
+        if (swap_data_gobject != NULL)
+            g_object_watch_closure (swap_data_gobject, closure);
+        else
+            ((PyGClosure *)closure)->swap_data = Py_NewRef (swap_data);
     }
     return closure;
 }
