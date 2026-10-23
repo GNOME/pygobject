@@ -39,11 +39,24 @@ RUN set -eux; \
 RUN set -eux; \
     if python -c "import sys; sys.exit(0 if sys.implementation.name == 'pypy' else 1)"; \
     then \
-        PYPY_SHA256=f15c9c41e03f3f7ecc25228c6c67427b8918f21ef2d694215994b1fade20f69b; \
-        wget -O pypy.tar.bz2 "https://downloads.python.org/pypy/pypy3.11-v7.3.23-src.tar.bz2"; \
-        echo "$PYPY_SHA256 *pypy.tar.bz2" | sha256sum -c -; \
-        tar --extract --file pypy.tar.bz2 --directory $(python -c "import sysconfig; print(sysconfig.get_path('stdlib'))") --strip-components=3 pypy3.11-v7.3.23-src/lib-python/3/test; \
-        rm pypy.tar.bz2; \
+        case $(python -c "import sys; print('.'.join(map(str, sys.version_info[:2])))") in \
+        3.12) \
+            PYPY_VERSION=3.12-v8.0.1; \
+            PYPY_SHA256=9d5c82d39d590dc04677f4721738b21d670570cdc9824c003836bafd38556cda; \
+            ;; \
+        3.11) \
+            PYPY_VERSION=3.11-v8.0.1; \
+            PYPY_SHA256=7e5f2801ee87d52fb4de096fb650bca4d5605cd8b5fe278dba5500019fa3739e; \
+            ;; \
+        *) \
+            echo Invalid Python version >&2; \
+            exit 1; \
+            ;; \
+        esac; \
+        wget -O pypy.tar.gz "https://downloads.python.org/pypy/pypy$PYPY_VERSION-src.tar.gz"; \
+        echo "$PYPY_SHA256 *pypy.tar.gz" | sha256sum -c -; \
+        tar --extract --file pypy.tar.gz --directory $(python -c "import sysconfig; print(sysconfig.get_path('stdlib'))") --strip-components=3 pypy$PYPY_VERSION-src/lib-python/3/test; \
+        rm pypy.tar.gz; \
     else \
         wget -O python.tar.xz "https://www.python.org/ftp/python/${PYTHON_VERSION%%[a-z]*}/Python-$PYTHON_VERSION.tar.xz"; \
         echo "$PYTHON_SHA256 *python.tar.xz" | sha256sum -c -; \
