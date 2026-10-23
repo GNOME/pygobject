@@ -9,6 +9,7 @@ spec:
         - "python-3.14"
         - "python-3.15.0rc2"
         - "pypy-3.11"
+        - "pypy-3.12"
     default_version:
       default: "python-3.14"
     build_images:
