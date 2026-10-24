@@ -24,6 +24,10 @@
 #include "pygi-util.h"
 #include "pygobject-object.h"
 
+#if PY_VERSION_HEX < 0x030C00A3
+#include <structmember.h>
+#endif
+
 static PyObject *asyncio_InvalidStateError;
 static PyObject *asyncio_get_running_loop;
 #if defined(PYPY_VERSION)
