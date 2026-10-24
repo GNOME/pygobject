@@ -817,6 +817,10 @@ PyInit_testhelper (void)
 
     module = PyModule_Create (&_testhelpermodule);
 
+#ifdef Py_GIL_DISABLED
+    PyUnstable_Module_SetGIL (module, Py_MOD_GIL_NOT_USED);
+#endif
+
     if ((gobject_module = pygobject_init (-1, -1, -1)) == NULL) return NULL;
     Py_DECREF (gobject_module);
 
