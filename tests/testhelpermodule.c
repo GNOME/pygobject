@@ -789,42 +789,20 @@ static PyMethodDef testhelper_functions[] = {
     { NULL, NULL }
 };
 
-static struct PyModuleDef _testhelpermodule = { PyModuleDef_HEAD_INIT,
-                                                "testhelper",
-                                                NULL,
-                                                -1,
-                                                testhelper_functions,
-                                                NULL,
-                                                NULL,
-                                                NULL,
-                                                NULL };
-
-#ifdef __GNUC__
-#define PYGI_MODINIT_FUNC                                                     \
-    __attribute__ ((visibility ("default"))) PyMODINIT_FUNC
-#else
-#define PYGI_MODINIT_FUNC PyMODINIT_FUNC
-#endif
-
-PYGI_MODINIT_FUNC PyInit_testhelper (void);
-
-PYGI_MODINIT_FUNC
-PyInit_testhelper (void)
+static int
+testhelper_exec (PyObject *module)
 {
-    PyObject *module;
     PyObject *gobject_module;
     PyObject *m, *d;
 
-    module = PyModule_Create (&_testhelpermodule);
-
-    if ((gobject_module = pygobject_init (-1, -1, -1)) == NULL) return NULL;
+    if ((gobject_module = pygobject_init (-1, -1, -1)) == NULL) return -1;
     Py_DECREF (gobject_module);
 
     d = PyModule_GetDict (module);
 
     if ((m = PyImport_ImportModule ("gi.repository.GObject")) == NULL) {
         PyErr_SetString (PyExc_ImportError, "could not import gobject");
-        return NULL;
+        return -1;
     }
 
     /* TestInterface */
@@ -876,5 +854,30 @@ PyInit_testhelper (void)
         d, "FloatingAndSunk", TEST_TYPE_FLOATING_AND_SUNK,
         &PyTestFloatingAndSunk_Type, Py_BuildValue ("(O)", &PyGObject_Type));
 
-    return module;
+    return 0;
 }
+
+static PyModuleDef_Slot testhelper_slots[] = {
+    { Py_mod_exec, testhelper_exec },
+#ifdef Py_GIL_DISABLED
+    { Py_mod_gil, Py_MOD_GIL_NOT_USED },
+#endif
+    { 0, NULL },
+};
+
+static struct PyModuleDef testhelpermodule = {
+    PyModuleDef_HEAD_INIT, "testhelper", NULL, 0,    testhelper_functions,
+    testhelper_slots,      NULL,         NULL, NULL,
+};
+
+#ifdef __GNUC__
+#define PYGI_MODINIT_FUNC                                                     \
+    __attribute__ ((visibility ("default"))) PyMODINIT_FUNC
+#else
+#define PYGI_MODINIT_FUNC PyMODINIT_FUNC
+#endif
+
+PYGI_MODINIT_FUNC PyInit_testhelper (void);
+
+PYGI_MODINIT_FUNC
+PyInit_testhelper (void) { return PyModuleDef_Init (&testhelpermodule); }
