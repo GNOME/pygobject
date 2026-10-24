@@ -561,9 +561,7 @@ static struct PyMemberDef async_members[] = {
       Py_READONLY, NULL },
     { "cancellable", Py_T_OBJECT_EX, offsetof (PyGIAsync, cancellable),
       Py_READONLY, "The Gio.Cancellable associated with the task." },
-    {
-        NULL,
-    },
+    { NULL }
 };
 
 
