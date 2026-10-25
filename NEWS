@@ -1,3 +1,16 @@
+3.59.0 - yyyy-mm-dd
+-------------------
+
+This version of PyGObject supports Python 3.11 and newer, and requires GLib >= 2.84.
+
+* Drop Python 3.10, incorporate Python 3.15 in the builds :mr:`564` :mr:
+* Convert objects that support the Python buffer protocol directly to C arrays :mr:`563`
+* Use new GI api to get the finish-func for an async call :mr:`562`
+* Add documentation about PyGObject's internal working :mr:`561`
+* Override `__str__` for `GLib.Uri` :mr:`568`
+* fix initialization of Python sub-sub-classes: run instance init once :mr:`569`
+* fix issue when collecting non-GC objects :mr:`570`
+
 3.58.0 - 2026-08-27
 -------------------
 
