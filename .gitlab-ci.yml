@@ -184,7 +184,7 @@ linux-run-parallel:
 minimal-meson:
   allow_failure: true
   stage: build
-  image: quay.io/fedora/fedora:40
+  image: quay.io/fedora/fedora:42
   before_script:
     - dnf install --assumeyes gcc meson git flex bison diffutils python3-devel python3-test python3-pytest gobject-introspection-devel
   script:
