@@ -7,7 +7,7 @@ spec:
         - "python-3.12"
         - "python-3.13"
         - "python-3.14"
-        - "python-3.15.0rc2"
+        - "python-3.15"
         - "pypy-3.11"
     default_version:
       default: "python-3.14"

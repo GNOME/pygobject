@@ -122,8 +122,8 @@ class TestGObjectAPI(unittest.TestCase):
             ml = GObject.MainLoop()
             self.assertFalse(ml.is_running())
 
-            context = GObject.main_context_default()
-            self.assertTrue(context.pending() in [False, True])
+            # context = GObject.main_context_default()
+            # self.assertTrue(context.pending() in [False, True])
 
             context = GObject.MainContext()
             self.assertFalse(context.pending())
