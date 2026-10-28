@@ -741,14 +741,12 @@ pygi_callable_info_get_cache (PyGICallableInfo *self)
     GIBaseInfo *info = self->base.info;
 
 #ifdef Py_GIL_DISABLED
-    static PyMutex cache_lock = { 0 };
-
-    PyMutex_Lock (&cache_lock);
+    Py_BEGIN_CRITICAL_SECTION (self);
 #endif
 
     if (self->cache != NULL) {
 #ifdef Py_GIL_DISABLED
-        PyMutex_Unlock (&cache_lock);
+        Py_END_CRITICAL_SECTION ();
 #endif
         return self->cache;
     }
@@ -777,7 +775,7 @@ pygi_callable_info_get_cache (PyGICallableInfo *self)
     self->cache = function_cache;
 
 #ifdef Py_GIL_DISABLED
-    PyMutex_Unlock (&cache_lock);
+    Py_END_CRITICAL_SECTION ();
 #endif
 
     return function_cache;
