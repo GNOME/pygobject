@@ -737,50 +737,36 @@ static PyGetSetDef _PyGICallableInfo_getsets[] = {
 PyGIFunctionCache *
 pygi_callable_info_get_cache (PyGICallableInfo *self)
 {
-    PyGIFunctionCache *function_cache;
     GIBaseInfo *info = self->base.info;
 
-#ifdef Py_GIL_DISABLED
-    static PyMutex cache_lock = { 0 };
+    Py_BEGIN_CRITICAL_SECTION (self);
 
-    PyMutex_Lock (&cache_lock);
-#endif
+    if (self->cache == NULL) {
+        if (GI_IS_FUNCTION_INFO (info)) {
+            GIFunctionInfoFlags flags =
+                gi_function_info_get_flags (GI_FUNCTION_INFO (info));
 
-    if (self->cache != NULL) {
-#ifdef Py_GIL_DISABLED
-        PyMutex_Unlock (&cache_lock);
-#endif
-        return self->cache;
-    }
-
-    if (GI_IS_FUNCTION_INFO (info)) {
-        GIFunctionInfoFlags flags;
-
-        flags = gi_function_info_get_flags (GI_FUNCTION_INFO (info));
-
-        if (flags & GI_FUNCTION_IS_CONSTRUCTOR) {
-            function_cache =
-                pygi_constructor_cache_new (GI_CALLABLE_INFO (info));
-        } else if (flags & GI_FUNCTION_IS_METHOD) {
-            function_cache = pygi_method_cache_new (GI_CALLABLE_INFO (info));
+            if (flags & GI_FUNCTION_IS_CONSTRUCTOR) {
+                self->cache =
+                    pygi_constructor_cache_new (GI_CALLABLE_INFO (info));
+            } else if (flags & GI_FUNCTION_IS_METHOD) {
+                self->cache = pygi_method_cache_new (GI_CALLABLE_INFO (info));
+            } else {
+                self->cache =
+                    pygi_function_cache_new (GI_CALLABLE_INFO (info));
+            }
+        } else if (GI_IS_VFUNC_INFO (info)) {
+            self->cache = pygi_vfunc_cache_new (GI_CALLABLE_INFO (info));
+        } else if (GI_IS_CALLBACK_INFO (info)) {
+            g_error ("Cannot invoke callback types");
         } else {
-            function_cache = pygi_function_cache_new (GI_CALLABLE_INFO (info));
+            self->cache = pygi_method_cache_new (GI_CALLABLE_INFO (info));
         }
-    } else if (GI_IS_VFUNC_INFO (info)) {
-        function_cache = pygi_vfunc_cache_new (GI_CALLABLE_INFO (info));
-    } else if (GI_IS_CALLBACK_INFO (info)) {
-        g_error ("Cannot invoke callback types");
-    } else {
-        function_cache = pygi_method_cache_new (GI_CALLABLE_INFO (info));
     }
 
-    self->cache = function_cache;
+    Py_END_CRITICAL_SECTION ();
 
-#ifdef Py_GIL_DISABLED
-    PyMutex_Unlock (&cache_lock);
-#endif
-
-    return function_cache;
+    return self->cache;
 }
 
 /* CallbackInfo */
