@@ -428,6 +428,7 @@ class TestGtk(unittest.TestCase):
         )
 
     @unittest.skipUnless(Gtk_version == "4.0", "no GtkWindowType in gtk4")
+    @pytest.mark.thread_unsafe
     def test_window_gtk4(self):
         w = Gtk.Window()
 
