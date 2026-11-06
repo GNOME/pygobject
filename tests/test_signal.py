@@ -1710,6 +1710,32 @@ class _RefCountTestBase:
         self.assertIsNone(data_ref())
         self.assertFalse(obj.handler_is_connected(handler_id))
 
+    @unittest.skipUnless(hasattr(sys, "getrefcount"), "no sys.getrefcount")
+    def test_method_ref_count(self):
+        # connect_method() should only weakly reference the object passed in
+        # and auto-disconnect the signal when the object is destroyed.
+
+        class Data(GObject.Object):
+            def callback(data, value):
+                return value // 2
+
+        data = Data()
+        data_ref = weakref.ref(data)
+        self.assertEqual(sys.getrefcount(data), 2 if sys.version_info < (3, 14) else 1)
+
+        obj = self.Object()
+        handler_id = obj.connect_method("sig-with-int64-prop", data.callback)
+        self.assertEqual(sys.getrefcount(data), 2 if sys.version_info < (3, 14) else 1)
+
+        res = obj.emit("sig-with-int64-prop", 42)
+        self.assertEqual(res, 21)
+        self.assertEqual(sys.getrefcount(data), 2 if sys.version_info < (3, 14) else 1)
+
+        del data
+
+        self.assertIsNone(data_ref())
+        self.assertFalse(obj.handler_is_connected(handler_id))
+
 
 class TestRefCountsNonIntrospected(unittest.TestCase, _RefCountTestBase):
     class Object(GObject.Object):

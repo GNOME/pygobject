@@ -787,6 +787,39 @@ class Object(GObjectModule.Object):
 
         return connect_func(self, detailed_signal, new_handler, *data)
 
+    def connect_method(
+        self,
+        detailed_signal: str,
+        handler: typing.Callable,
+        *args: typing.Any,
+    ) -> int:
+        """Connect an instance method callback to the given signal.
+        The signal is automatically disconnected when the method's instance
+        is destroyed. Note that only methods of GObject objects are accepted.
+
+        :param str detailed_signal:
+            A detailed signal to connect to.
+        :param callable handler:
+            Callback handler to connect to the signal.
+        :param *args:
+            Extra args which are passed through to the signal handler.
+        :returns:
+            A signal id which can be used with disconnect.
+        """
+        try:
+            obj = handler.__self__
+            func = handler.__func__
+        except AttributeError:
+            raise TypeError(
+                f"Expected an instance method as handler, got a {type(handler)}"
+            )
+        if not isinstance(obj, GObject):
+            raise TypeError(
+                f"Expected an instance method belonging "
+                f"to a GObject object, got a {type(obj)}"
+            )
+        return self.connect_object(detailed_signal, func, obj, *args)
+
     #
     # Aliases
     #
