@@ -68,8 +68,28 @@ build-image:
     - echo "Building image '$IMG'"
     - buildah build --build-arg BASE=${IMAGE_TAG/-/:} -t $IMG -f Dockerfile .gitlab-ci
     - buildah push $IMG
-  cache:
-    paths:
+
+# We have to build and test a separate image: there's no official free-threading Python containers.
+build-ft-image:
+  stage: images
+  image: quay.io/buildah/stable:latest
+  rules:
+    - if: $CI_PROJECT_NAMESPACE == "GNOME" && $CI_COMMIT_BRANCH == "main"
+      changes:
+        - ".gitlab-ci.yml"
+        - ".gitlab-ci/Dockerfile.free-threading"
+      when: always
+    - when: $[[ inputs.build_images ]]
+  variables:
+    STORAGE_DRIVER: vfs
+    BUILDAH_ISOLATION: chroot
+    GSK_RENDERER: cairo
+  script:
+    - echo "$CI_REGISTRY_PASSWORD" | buildah login $CI_REGISTRY -u $CI_REGISTRY_USER --password-stdin
+    - IMG="$CI_IMAGE:3t"
+    - echo "Building image '$IMG'"
+    - buildah build -t $IMG -f Dockerfile.free-threading .gitlab-ci
+    - buildah push $IMG
 
 pre-commit:
   stage: lint
@@ -172,14 +192,21 @@ linux-pdm:
 linux-run-parallel:
   allow_failure: true
   stage: build
-  image: $CI_IMAGE:$[[ inputs.default_version ]]
+  image: $CI_IMAGE:3t
   variables:
     TEST_GTK_VERSION: "4.0"
-  before_script:
-    - python -m pip install pdm
-    - python -m pdm install -v
+    PYTEST_ADDOPTS: "--parallel-threads 8"
+    PIP_EXTRA: pytest-run-parallel
+    GSK_RENDERER: cairo
+  artifacts:
+    when: always
+    paths:
+      - coverage/
+      - test-results.xml
+    reports:
+      junit: test-results.xml
   script:
-    - xvfb-run -a python -m pdm run pytest -sv --parallel-threads 8
+   - bash -x ./.gitlab-ci/test-docker.sh
 
 minimal-meson:
   allow_failure: true

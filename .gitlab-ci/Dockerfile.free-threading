@@ -1,0 +1,26 @@
+FROM docker.io/library/fedora:45
+
+RUN set -eux; \
+    dnf group install -y c-development; \
+    dnf install -y \
+        git-core \
+        python3.14-freethreading-devel \
+        python3.14-freethreading-test \
+        libffi-devel \
+        gobject-introspection-devel \
+        gtk4-devel \
+        ninja-build \
+        xorg-x11-server-Xvfb \
+        lcov; \
+    alternatives --install /usr/bin/python python /usr/bin/python3.14t 1
+
+
+ARG HOST_USER_ID=5555
+ENV HOST_USER_ID=${HOST_USER_ID}
+RUN useradd -u $HOST_USER_ID -ms /bin/bash user
+
+USER user
+WORKDIR /home/user
+
+ENV LANG=C.UTF-8
+ENV CI=true

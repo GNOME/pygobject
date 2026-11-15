@@ -31,7 +31,7 @@ python -m venv /tmp/venv
 source /tmp/venv/bin/activate
 
 python -m pip install --upgrade pip
-python -m pip install meson meson-python pycairo pytest pytest-cov
+python -m pip install meson meson-python pycairo pytest pytest-cov "${PIP_EXTRA:-}"
 
 # BUILD & TEST
 python -m pip install --config-settings=setup-args="-Dtests=true" --no-build-isolation --editable .
