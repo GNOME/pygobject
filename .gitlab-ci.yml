@@ -48,7 +48,7 @@ default:
 # Build images if Dockerfile has changed
 build-image:
   stage: images
-  image: quay.io/buildah/stable:latest
+  image: quay.io/buildah/stable@sha256:a6f96bfffc47f36462985573d85e87f782bf2d8b37e02cb3dd307713bfa6cc13
   rules:
     - if: $CI_PROJECT_NAMESPACE == "GNOME" && $CI_COMMIT_BRANCH == "main"
       changes:
@@ -72,7 +72,7 @@ build-image:
 # We have to build and test a separate image: there's no official free-threading Python containers.
 build-ft-image:
   stage: images
-  image: quay.io/buildah/stable:latest
+  image: quay.io/buildah/stable@sha256:a6f96bfffc47f36462985573d85e87f782bf2d8b37e02cb3dd307713bfa6cc13
   rules:
     - if: $CI_PROJECT_NAMESPACE == "GNOME" && $CI_COMMIT_BRANCH == "main"
       changes:
