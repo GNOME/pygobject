@@ -1,6 +1,8 @@
 import threading
 import unittest
 
+import pytest
+
 from gi.repository import GObject
 from .helper import capture_glib_warnings
 
@@ -56,6 +58,7 @@ class EnumTests(unittest.TestCase):
         self.assertEqual(MyEnum.FORTY_TWO.value_name, "FORTY_TWO")
         self.assertEqual(MyEnum.FORTY_TWO.value_nick, "forty-two")
 
+    @pytest.mark.thread_unsafe  # calls capture_glib_warnings
     def test_custom_type_name(self):
         type_name = f"MyEnum{get_id()}"
 
@@ -129,6 +132,7 @@ class FlagsTests(unittest.TestCase):
         self.assertEqual(v.value_names, ["ONE", "THIRTY_TWO"])
         self.assertEqual(v.value_nicks, ["one", "thirty-two"])
 
+    @pytest.mark.thread_unsafe  # calls capture_glib_warnings
     def test_custom_type_name(self):
         type_name = f"MyFlags{get_id()}"
 

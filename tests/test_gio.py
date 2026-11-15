@@ -292,6 +292,7 @@ Exec={GLib.find_program_in_path("true")} action
             self.assert_expected_unix_stream_type(GioUnix.OutputStream)
 
     @unittest.skipIf(GioUnix is None, "Not supported")
+    @pytest.mark.thread_unsafe
     def test_deprecated_unix_class_can_be_used_from_gio(self):
         with warnings.catch_warnings(record=True) as warn:
             warnings.simplefilter("always")

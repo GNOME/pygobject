@@ -182,6 +182,7 @@ with warnings.catch_warnings():
             super().__init__()
 
 
+@pytest.mark.thread_unsafe
 def test_class_with_slots_raises_warning():
     with warnings.catch_warnings(record=True) as warn:
 
@@ -192,6 +193,7 @@ def test_class_with_slots_raises_warning():
     assert "SlotClass shouldn't use __slots__." in str(warn[0].message)
 
 
+@pytest.mark.thread_unsafe
 def test_subclass_with_slots_raises_warning():
     class BaseClass(GObject.Object):
         pass

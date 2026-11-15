@@ -72,6 +72,7 @@ class TestGdkAtom(unittest.TestCase):
         self.assertTrue(Gtk.targets_include_image([a_jpeg, a_plain], False))
 
     @unittest.skipUnless(is_X11(), "only on X11")
+    @pytest.mark.thread_unsafe  # clipboard
     def test_out_array(self):
         a_selection = Gdk.Atom.intern("my_clipboard", False)
         clipboard = Gtk.Clipboard.get(a_selection)

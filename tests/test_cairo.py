@@ -233,6 +233,7 @@ class TestRegion(unittest.TestCase):
 
 @unittest.skipUnless(has_cairo, "built without cairo support")
 @unittest.skipUnless(Gtk, "Gtk not available")
+@pytest.mark.thread_unsafe
 class TestPango(unittest.TestCase):
     def test_cairo_font_options(self):
         window = Gtk.Window()

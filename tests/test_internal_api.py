@@ -31,6 +31,10 @@ class PyGObject(GObject.GObject):
         return self._props[name]
 
 
+# Ensure test type is registered, in case we run parallel tests
+testhelper.create_test_type()
+
+
 def test_parse_constructor_args():
     assert testhelper.test_parse_constructor_args("foo") == 1
 

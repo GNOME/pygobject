@@ -115,6 +115,7 @@ def test_freeze_child_notif():
 
 @unittest.skipUnless(Gtk, "Gtk not available")
 @unittest.skipIf(Gtk_version == "4.0", "not in gtk4")
+@pytest.mark.thread_unsafe  # uses capture_glib_warnings
 def test_menu_popup():
     m = Gtk.Menu()
     with capture_glib_warnings():
@@ -124,6 +125,7 @@ def test_menu_popup():
 
 @unittest.skipUnless(Gtk, "Gtk not available")
 @unittest.skipIf(Gtk_version == "4.0", "not in gtk4")
+@pytest.mark.thread_unsafe  # uses capture_glib_warnings
 def test_button_stock():
     with capture_glib_warnings():
         button = Gtk.Button(stock=Gtk.STOCK_OK)
@@ -163,6 +165,7 @@ def test_wrapper_toggle_refs():
 
 @unittest.skipUnless(Gtk, "Gtk not available")
 @ignore_gi_deprecation_warnings
+@pytest.mark.thread_unsafe
 class TestGtk(unittest.TestCase):
     @unittest.skipIf(Gtk_version == "4.0", "not in gtk4")
     def test_container(self):
@@ -428,7 +431,6 @@ class TestGtk(unittest.TestCase):
         )
 
     @unittest.skipUnless(Gtk_version == "4.0", "no GtkWindowType in gtk4")
-    @pytest.mark.thread_unsafe
     def test_window_gtk4(self):
         w = Gtk.Window()
 
@@ -956,7 +958,6 @@ class TestGtk(unittest.TestCase):
         self.assertEqual(vscrollbar.props.adjustment, adjustment)
 
     def test_iconview(self):
-        # PyGTK compat
         iconview = Gtk.IconView()
         self.assertEqual(iconview.props.model, None)
 
@@ -966,8 +967,6 @@ class TestGtk(unittest.TestCase):
 
     @unittest.skipIf(Gtk_version == "4.0", "not in gtk4")
     def test_toolbutton(self):
-        # PyGTK compat
-
         # Using stock items causes hard warning in devel versions of GTK.
         with capture_glib_warnings(allow_warnings=True):
             button = Gtk.ToolButton()
@@ -1009,7 +1008,6 @@ class TestGtk(unittest.TestCase):
         self.assertEqual(Gtk.stock_lookup("nosuchthing"), None)
 
     @unittest.skipIf(Gtk_version == "4.0", "not in gtk4")
-    @pytest.mark.thread_unsafe  # GTK main loop
     def test_gtk_main(self):
         # with no arguments
         GLib.idle_add(Gtk.main_quit)
@@ -1020,7 +1018,6 @@ class TestGtk(unittest.TestCase):
         Gtk.main()
 
     @unittest.skipIf(Gtk_version == "4.0", "not in gtk4")
-    @pytest.mark.thread_unsafe
     def test_widget_render_icon(self):
         button = Gtk.Button(label="OK")
         pixbuf = button.render_icon(Gtk.STOCK_OK, Gtk.IconSize.BUTTON)
@@ -1060,6 +1057,7 @@ class TestGtk(unittest.TestCase):
 
 
 @unittest.skipUnless(Gtk, "Gtk not available")
+@pytest.mark.thread_unsafe
 class TestWidget(unittest.TestCase):
     @unittest.skipIf(Gtk_version == "4.0", "not in gtk4")
     def test_style_get_property_gvalue(self):
@@ -1092,7 +1090,6 @@ class TestWidget(unittest.TestCase):
             button.style_get_property("not-a-valid-style-property")
 
     @unittest.skipIf(Gtk_version != "4.0", "only in gtk4")
-    @pytest.mark.thread_unsafe
     def test_translate_coordinates(self):
         box = Gtk.Box()
         child = Gtk.Button()
@@ -1104,8 +1101,8 @@ class TestWidget(unittest.TestCase):
 
 @unittest.skipIf(sys.platform == "darwin", "hangs")
 @unittest.skipUnless(Gtk, "Gtk not available")
+@pytest.mark.thread_unsafe
 class TestSignals(unittest.TestCase):
-    @pytest.mark.thread_unsafe
     def test_class_closure_override_with_aliased_type(self):
         class WindowWithSizeAllocOverride(Gtk.ScrolledWindow):
             if not GTK4:
@@ -2859,6 +2856,7 @@ class TestTreeView(unittest.TestCase):
             view.get_cell_area(store[1].path)
             view.get_cell_area(str(store[1].path))
 
+    @pytest.mark.thread_unsafe
     def test_tree_view_column(self):
         cell = Gtk.CellRendererText()
         col = Gtk.TreeViewColumn(
@@ -2933,6 +2931,7 @@ class TestTreeView(unittest.TestCase):
                 # not sure why this doesn't work with gtk4
                 self.assertTrue(cell.props.text in directors)
 
+    @pytest.mark.thread_unsafe
     def test_tree_selection(self):
         store = Gtk.ListStore(int, str)
         for i in range(10):
@@ -2972,6 +2971,7 @@ class TestTreeView(unittest.TestCase):
         assert len(r) == 1
         assert r[0] == store[0].path
 
+    @pytest.mark.thread_unsafe
     def test_scroll_to_cell(self):
         store = Gtk.ListStore(int, str)
         store.append((0, "foo"))

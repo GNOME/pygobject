@@ -28,6 +28,9 @@ import contextlib
 CONSTANT_UTF8 = "const ♥ utf8"
 CONSTANT_UCS4 = "const ♥ utf8"
 
+GIMarshallingTests.ExtraFlags
+GIMarshallingTests.NoTypeFlags
+
 
 class Number:
     def __init__(self, value):
@@ -1167,6 +1170,7 @@ class TestArray(unittest.TestCase):
     def test_array_in_nonzero_nonlen(self):
         GIMarshallingTests.array_in_nonzero_nonlen(1, b"abcd")
 
+    @pytest.mark.thread_unsafe  # uses a static value
     def test_array_fixed_out_struct(self):
         struct1, struct2 = GIMarshallingTests.array_fixed_out_struct()
 
@@ -1326,11 +1330,13 @@ class TestGArray(unittest.TestCase):
     def test_garray_int_none_return(self):
         self.assertEqual([-1, 0, 1, 2], GIMarshallingTests.garray_int_none_return())
 
+    @pytest.mark.thread_unsafe
     def test_garray_uint64_none_return(self):
         self.assertEqual(
             [0, GLib.MAXUINT64], GIMarshallingTests.garray_uint64_none_return()
         )
 
+    @pytest.mark.thread_unsafe  # array is statically allocated
     def test_garray_enum_none_return(self):
         self.assertEqual(
             [
@@ -1590,6 +1596,7 @@ class TestGList(unittest.TestCase):
     def test_glist_utf8_none_in(self):
         GIMarshallingTests.glist_utf8_none_in(Sequence(("0", "1", "2")))
 
+    @pytest.mark.thread_unsafe
     def test_glist_utf8_none_out(self):
         self.assertEqual(["0", "1", "2"], GIMarshallingTests.glist_utf8_none_out())
 
@@ -1660,6 +1667,7 @@ class TestGSList(unittest.TestCase):
     def test_gslist_utf8_none_in(self):
         GIMarshallingTests.gslist_utf8_none_in(Sequence(("0", "1", "2")))
 
+    @pytest.mark.thread_unsafe
     def test_gslist_utf8_none_out(self):
         self.assertEqual(["0", "1", "2"], GIMarshallingTests.gslist_utf8_none_out())
 
@@ -1830,6 +1838,7 @@ class TestGHashTable(unittest.TestCase):
 
 
 class TestGValue(unittest.TestCase):
+    @pytest.mark.thread_unsafe
     def test_gvalue_return(self):
         self.assertEqual(42, GIMarshallingTests.gvalue_return())
 
@@ -1873,9 +1882,11 @@ class TestGValue(unittest.TestCase):
         with pytest.raises(TypeError):
             v2.get_value()
 
+    @pytest.mark.thread_unsafe
     def test_gvalue_out(self):
         self.assertEqual(42, GIMarshallingTests.gvalue_out())
 
+    @pytest.mark.thread_unsafe  # uses static value
     def test_gvalue_int64_out(self):
         self.assertEqual(GLib.MAXINT64, GIMarshallingTests.gvalue_int64_out())
 
@@ -2542,6 +2553,7 @@ class TestStructure(unittest.TestCase):
         struct = GIMarshallingTests.NotSimpleStruct()
         self.assertEqual(None, struct.pointer)
 
+    @pytest.mark.thread_unsafe  # uses a static value
     def test_simple_struct_return(self):
         struct = GIMarshallingTests.simple_struct_returnv()
 
@@ -2587,6 +2599,7 @@ class TestStructure(unittest.TestCase):
 
         del struct
 
+    @pytest.mark.thread_unsafe  # uses a static value
     def test_pointer_struct_return(self):
         struct = GIMarshallingTests.pointer_struct_returnv()
 
@@ -2636,6 +2649,7 @@ class TestStructure(unittest.TestCase):
         del new_struct
         del struct
 
+    @pytest.mark.thread_unsafe  # uses a static value
     def test_boxed_struct_return(self):
         struct = GIMarshallingTests.boxed_struct_returnv()
 
@@ -2654,6 +2668,7 @@ class TestStructure(unittest.TestCase):
 
         del struct
 
+    @pytest.mark.thread_unsafe  # uses a static value
     def test_boxed_struct_out(self):
         struct = GIMarshallingTests.boxed_struct_out()
 
@@ -2713,6 +2728,7 @@ class TestStructure(unittest.TestCase):
         del union
         del new_union
 
+    @pytest.mark.thread_unsafe  # uses a static value
     def test_union_return(self):
         union = GIMarshallingTests.union_returnv()
 

@@ -775,6 +775,7 @@ class TestProperty(unittest.TestCase):
                 TypeError, GObject.Property, type=gtype, minimum=min, maximum=max + 1
             )
 
+    @pytest.mark.thread_unsafe  # uses capture_glib_warnings
     def test_min_max(self):
         class C(GObject.GObject):
             prop_int = GObject.Property(type=int, minimum=1, maximum=100, default=1)
@@ -949,6 +950,7 @@ class TestProperty(unittest.TestCase):
         # the local reference to this object, its reference count shoud
         # drop to zero, and our dummy object should loose one reference.
         del t
+        gc.collect()
         self.assertEqual(sys.getrefcount(o), rc)
 
     def test_doc_strings(self):

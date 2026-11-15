@@ -24,6 +24,11 @@ from .helper import capture_exceptions
 const_str = b"const \xe2\x99\xa5 utf8".decode("UTF-8")
 noconst_str = "non" + const_str
 
+# Ensure type is registered, for parallel tests
+Everything.TestEnum
+Everything.TestEnumUnsigned
+Everything.TestFlags
+
 
 class RawGList(ctypes.Structure):
     _fields_ = [
@@ -357,6 +362,9 @@ class TestEverything(unittest.TestCase):
 
     def test_value(self):
         self.assertEqual(Everything.test_int_value_arg(GLib.MAXINT), GLib.MAXINT)
+
+    @pytest.mark.thread_unsafe
+    def test_value_return(self):
         self.assertEqual(Everything.test_value_return(GLib.MAXINT), GLib.MAXINT)
 
     def test_variant(self):
@@ -884,7 +892,8 @@ class TestCallbacks(unittest.TestCase):
     @pytest.mark.thread_unsafe  # uses refcount
     def test_callback_scope_async(self):
         called = False
-        ud = "Test Value 44"
+        # Ensure strings are not internalized
+        ud = b"Test Value 44".decode()
 
         def callback(user_data):
             nonlocal called
@@ -1109,7 +1118,8 @@ class TestCallbacks(unittest.TestCase):
     @pytest.mark.thread_unsafe
     def test_callback_scope_notified_with_destroy(self):
         called = 0
-        ud = "Test scope notified data 33"
+        # Ensure strings are not internalized
+        ud = b"Test scope notified data 33".decode()
 
         def callback(user_data):
             nonlocal called

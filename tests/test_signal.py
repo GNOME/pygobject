@@ -77,6 +77,7 @@ class TestGSignalsError(unittest.TestCase):
         self.assertRaises(TypeError, foo)
         gc.collect()
 
+    @pytest.mark.thread_unsafe  # uses capture_glib_warnings
     def test_invalid_name(self, *args):
         def foo():
             class Foo(GObject.GObject):
@@ -426,6 +427,7 @@ class TestClosures(unittest.TestCase):
         self.assertEqual(count, 1)
         self.assertTrue(emission_stopped)
 
+    @pytest.mark.thread_unsafe  # uses capture_glib_warnings
     def test_stop_emission_by_name_error(self):
         emission_error = False
         e = E()

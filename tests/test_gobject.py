@@ -165,6 +165,7 @@ class TestReferenceCounting(unittest.TestCase):
         obj = GObject.new(testhelper.Floating)
         self.assertEqual(obj.__grefcount__, 1)
 
+    @pytest.mark.thread_unsafe
     def test_owned_by_library(self):
         # Upon creation, the refcount of the object should be 2:
         # - someone already has a reference on the new object.
@@ -229,6 +230,7 @@ class TestReferenceCounting(unittest.TestCase):
         obj.release()
         self.assertEqual(obj.__grefcount__, 1)
 
+    @pytest.mark.thread_unsafe
     def test_floating_and_sunk(self):
         # Upon creation, the refcount of the object should be 2:
         # - someone already has a reference on the new object.
@@ -261,6 +263,7 @@ class TestReferenceCounting(unittest.TestCase):
         obj.release()
         self.assertEqual(obj.__grefcount__, 1)
 
+    @pytest.mark.thread_unsafe
     def test_floating_and_sunk_using_gobject_new(self):
         # Upon creation, the refcount of the object should be 2:
         # - someone already has a reference on the new object.
@@ -539,6 +542,7 @@ class TestPropertyBindings(unittest.TestCase):
         self.assertEqual(source.int_prop, 1)
         self.assertEqual(target.int_prop, 2)
 
+    @pytest.mark.thread_unsafe  # deprecation warnings
     def test_call_binding(self):
         source = self.TestObject()
         target = self.TestObject()
