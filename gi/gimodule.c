@@ -295,6 +295,7 @@ _wrap_pyg_type_register (PyObject *self, PyObject *args)
 {
     PyTypeObject *class;
     char *type_name = NULL;
+    int result = 0;
 
     if (!PyArg_ParseTuple (args, "O!|z:gobject.type_register", &PyType_Type,
                            &class, &type_name))
@@ -308,10 +309,16 @@ _wrap_pyg_type_register (PyObject *self, PyObject *args)
         return NULL;
     }
 
+    Py_BEGIN_CRITICAL_SECTION (self);
+
     /* Check if type already registered */
     if (pyg_type_from_object ((PyObject *)class) == base_gtype) {
-        if (pyg_type_register (class, type_name)) return NULL;
+        result = pyg_type_register (class, type_name);
     }
+
+    Py_END_CRITICAL_SECTION ();
+
+    if (result != 0) return NULL;
 
     return Py_NewRef (class);
 }
@@ -334,9 +341,15 @@ _wrap_pyg_enum_register (PyObject *self, PyObject *args)
     if (type_name) {
         if (!pyg_enum_register (class, type_name)) return NULL;
     } else {
-        char *new_type_name = get_type_name_for_class (class);
-        gboolean success = pyg_enum_register (class, new_type_name);
+        char *new_type_name;
+        gboolean success;
+
+        Py_BEGIN_CRITICAL_SECTION (self);
+        new_type_name = get_type_name_for_class (class);
+        success = pyg_enum_register (class, new_type_name);
         g_free (new_type_name);
+        Py_END_CRITICAL_SECTION ();
+
         if (!success) return NULL;
     }
 
@@ -361,9 +374,15 @@ _wrap_pyg_flags_register (PyObject *self, PyObject *args)
     if (type_name) {
         if (!pyg_flags_register (class, type_name)) return NULL;
     } else {
-        char *new_type_name = get_type_name_for_class (class);
-        gboolean success = pyg_flags_register (class, new_type_name);
+        char *new_type_name;
+        gboolean success;
+
+        Py_BEGIN_CRITICAL_SECTION (self);
+        new_type_name = get_type_name_for_class (class);
+        success = pyg_flags_register (class, new_type_name);
         g_free (new_type_name);
+        Py_END_CRITICAL_SECTION ();
+
         if (!success) return NULL;
     }
 
