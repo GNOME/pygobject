@@ -770,11 +770,7 @@ _function_cache_init (PyGIFunctionCache *function_cache,
                 async_finish = GI_BASE_INFO (gi_interface_info_find_method (
                     (GIInterfaceInfo *)container, finish_name));
             } else if (!container) {
-                GIRepository *repository;
-
-                repository = pygi_repository_get_default ();
-                async_finish = gi_repository_find_by_name (
-                    repository,
+                async_finish = pygi_repository_find_by_name (
                     gi_base_info_get_namespace (callable_cache->info),
                     finish_name);
             } else {

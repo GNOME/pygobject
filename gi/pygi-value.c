@@ -576,7 +576,6 @@ pyg_value_from_pyobject_with_error (GValue *value, PyObject *obj)
         if ((bm = pyg_type_lookup (G_VALUE_TYPE (value))) != NULL) {
             return bm->tovalue (value, obj);
         } else {
-            GIRepository *repository;
             GIBaseInfo *info;
             GIObjectInfoSetValueFunction set_value_func = NULL;
 
@@ -592,8 +591,7 @@ pyg_value_from_pyobject_with_error (GValue *value, PyObject *obj)
                 return -1;
             }
 
-            repository = pygi_repository_get_default ();
-            info = gi_repository_find_by_gtype (repository, value_type);
+            info = pygi_repository_find_by_gtype (value_type);
 
             if (info && GI_IS_OBJECT_INFO (info)) {
                 set_value_func =
@@ -787,15 +785,13 @@ value_to_py_structured_type (const GValue *value, GType fundamental,
         return NULL;
     default: {
         PyGTypeMarshal *bm;
-        GIRepository *repository;
         GIBaseInfo *info;
         GIObjectInfoGetValueFunction get_value_func = NULL;
 
         if ((bm = pyg_type_lookup (G_VALUE_TYPE (value))))
             return bm->fromvalue (value);
 
-        repository = pygi_repository_get_default ();
-        info = gi_repository_find_by_gtype (repository, fundamental);
+        info = pygi_repository_find_by_gtype (fundamental);
 
         if (info == NULL) break;
 

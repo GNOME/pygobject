@@ -71,6 +71,14 @@ class Test(unittest.TestCase):
             repo.get_immediate_dependencies("GIMarshallingTests"), ["Gio-2.0"]
         )
 
+    def test_get_infos(self):
+        infos = repo.get_infos("GIRepository")
+
+        assert len(infos) > 0
+
+    def test_get_infos_with_invalid_namespace(self):
+        self.assertRaises(RuntimeError, repo.get_infos, "Invalid")
+
     def test_arg_info(self):
         func_info = repo.find_by_name("GIMarshallingTests", "array_fixed_out_struct")
         args = func_info.get_arguments()

@@ -56,13 +56,10 @@ pygi_type_import_by_name (const char *namespace_, const char *name)
 PyObject *
 pygi_type_import_by_g_type (GType g_type)
 {
-    GIRepository *repository;
     GIBaseInfo *info;
     PyObject *type;
 
-    repository = pygi_repository_get_default ();
-
-    info = gi_repository_find_by_gtype (repository, g_type);
+    info = pygi_repository_find_by_gtype (g_type);
     if (info == NULL) {
         return NULL;
     }

@@ -24,19 +24,11 @@
 
 G_BEGIN_DECLS
 
-typedef struct {
-    PyObject_HEAD
-    GIRepository *repository;
-} PyGIRepository;
+int pygi_repository_register_types (PyObject* m);
 
-/* Private */
-
-extern PyTypeObject PyGIRepository_Type;
-
-extern PyObject *PyGIRepositoryError;
-
-GIRepository *pygi_repository_get_default (void);
-
-int pygi_repository_register_types (PyObject *m);
+/* Fetch type info from the default repository */
+GIBaseInfo* pygi_repository_find_by_gtype (GType gtype);
+GIBaseInfo* pygi_repository_find_by_name (const char* namespace_,
+                                          const char* name);
 
 G_END_DECLS

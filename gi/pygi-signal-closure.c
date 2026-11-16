@@ -27,12 +27,10 @@
 static GISignalInfo *
 _pygi_lookup_signal_from_g_type (GType g_type, const gchar *signal_name)
 {
-    GIRepository *repository;
     GIBaseInfo *info;
     GISignalInfo *signal_info = NULL;
 
-    repository = pygi_repository_get_default ();
-    info = gi_repository_find_by_gtype (repository, g_type);
+    info = pygi_repository_find_by_gtype (g_type);
     if (info == NULL) return NULL;
 
     if (GI_IS_OBJECT_INFO (info))

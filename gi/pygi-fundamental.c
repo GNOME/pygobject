@@ -253,10 +253,7 @@ pygi_fundamental_register_types (PyObject *m)
 GTypeInstance *
 pygi_fundamental_from_value (const GValue *value)
 {
-    GIRepository *repository =
-        pygi_repository_get_default ();  // Access to system wide (default) repo instead
-    GIBaseInfo *info =
-        gi_repository_find_by_gtype (repository, G_VALUE_TYPE (value));
+    GIBaseInfo *info = pygi_repository_find_by_gtype (G_VALUE_TYPE (value));
     GTypeInstance *instance = NULL;
 
     if (info == NULL) return NULL;
@@ -278,15 +275,12 @@ pygi_fundamental_from_value (const GValue *value)
 gboolean
 pygi_fundamental_set_value (GValue *value, GTypeInstance *instance)
 {
-    GIRepository *repository;
     GIBaseInfo *info;
     gboolean result = FALSE;
 
     if (instance == NULL) return result;
 
-    repository = pygi_repository_get_default ();
-    info = gi_repository_find_by_gtype (repository,
-                                        G_TYPE_FROM_INSTANCE (instance));
+    info = pygi_repository_find_by_gtype (G_TYPE_FROM_INSTANCE (instance));
 
     if (info == NULL) return result;
 

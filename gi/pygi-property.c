@@ -84,11 +84,9 @@ static GIPropertyInfo *
 _pygi_lookup_property_from_g_type (GType g_type, const gchar *attr_name)
 {
     GIPropertyInfo *ret = NULL;
-    GIRepository *repository;
     GIBaseInfo *info;
 
-    repository = pygi_repository_get_default ();
-    info = gi_repository_find_by_gtype (repository, g_type);
+    info = pygi_repository_find_by_gtype (g_type);
     if (info == NULL) return NULL;
 
     if (GI_IS_OBJECT_INFO (info))
