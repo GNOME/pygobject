@@ -123,9 +123,9 @@ class IntrospectionModule(ModuleType):
             raise AttributeError(f"{self.__name__!r} object has no attribute {name!r}")
 
         if isinstance(info, EnumInfo):
-            g_type = info.get_g_type()
-
             with self._lock:
+                g_type = info.get_g_type()
+
                 wrapper = g_type.pytype
 
                 if wrapper is None:
@@ -142,7 +142,8 @@ class IntrospectionModule(ModuleType):
                     g_type.pytype = wrapper
 
         elif isinstance(info, RegisteredTypeInfo):
-            g_type = info.get_g_type()
+            with self._lock:
+                g_type = info.get_g_type()
 
             # Create a wrapper.
             if isinstance(info, ObjectInfo):
