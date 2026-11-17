@@ -1687,7 +1687,6 @@ class _RefCountTestBase:
         self.assertIsNone(data_ref())
 
     @unittest.skipUnless(hasattr(sys, "getrefcount"), "no sys.getrefcount")
-    @unittest.expectedFailure  # https://bugzilla.gnome.org/show_bug.cgi?id=688064
     def test_object_ref_count(self):
         # connect_object() should only weakly reference the object passed in
         # and auto-disconnect the signal when the object is destroyed.
@@ -1696,15 +1695,15 @@ class _RefCountTestBase:
 
         data = GObject.Object()
         data_ref = weakref.ref(data)
-        self.assertEqual(sys.getrefcount(data), 2)
+        self.assertEqual(sys.getrefcount(data), 2 if sys.version_info < (3, 14) else 1)
 
         obj = self.Object()
         handler_id = obj.connect_object("sig-with-int64-prop", callback, data)
-        self.assertEqual(sys.getrefcount(data), 2)
+        self.assertEqual(sys.getrefcount(data), 2 if sys.version_info < (3, 14) else 1)
 
         res = obj.emit("sig-with-int64-prop", 42)
         self.assertEqual(res, 21)
-        self.assertEqual(sys.getrefcount(data), 2)
+        self.assertEqual(sys.getrefcount(data), 2 if sys.version_info < (3, 14) else 1)
 
         del data
 

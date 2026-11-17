@@ -31,10 +31,18 @@ typedef void (*PyClosureExceptionHandler) (GValue *ret, guint n_param_values,
 typedef struct _PyGClosure PyGClosure;
 typedef struct _PyGObjectData PyGObjectData;
 
+typedef enum {
+    PYGI_CLOSURE_SWAP_DATA_DEFAULT = 0,
+    /* A "borrowed" pointer to a GObject.
+     * The object is set up to watch the closure using g_object_watch_closure */
+    PYGI_CLOSURE_SWAP_DATA_GOBJECT = 1 << 0,
+} PyGClosureSwapDataFlags;
+
 struct _PyGClosure {
     GClosure closure;
     PyObject *callback;
     PyObject *extra_args; /* tuple of extra args to pass to callback */
+    PyGClosureSwapDataFlags swap_data_flags;
     PyClosureExceptionHandler exception_handler;
 };
 

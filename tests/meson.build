@@ -47,7 +47,7 @@ envdata.set('GSETTINGS_BACKEND', 'memory')
 
 test('pygobject-test-suite',
   python,
-  args: ['-m', 'pytest'],
+  args: ['-m', 'pytest', '--capture=no'],
   workdir: meson.project_source_root(),
   env: envdata,
   timeout: 90,

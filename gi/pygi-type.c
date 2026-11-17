@@ -798,7 +798,8 @@ pyg_closure_invalidate (gpointer data, GClosure *closure)
     state = PyGILState_Ensure ();
     Py_XDECREF (pc->callback);
     Py_XDECREF (pc->extra_args);
-    Py_XDECREF (closure->data);
+    if (!(pc->swap_data_flags & PYGI_CLOSURE_SWAP_DATA_GOBJECT))
+        Py_XDECREF (closure->data);
     PyGILState_Release (state);
 
     pc->callback = NULL;
@@ -823,6 +824,8 @@ pyg_closure_marshal (GClosure *closure, GValue *return_value,
     for (i = 0; i < n_param_values; i++) {
         /* swap in a different initial data for connect_object() */
         if (i == 0 && G_CCLOSURE_SWAP_DATA (closure)) {
+            g_return_if_fail (
+                !(pc->swap_data_flags & PYGI_CLOSURE_SWAP_DATA_GOBJECT));
             g_return_if_fail (closure->data != NULL);
             PyTuple_SetItem (params, 0, Py_NewRef ((PyObject *)closure->data));
         } else {
