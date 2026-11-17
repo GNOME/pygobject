@@ -798,7 +798,7 @@ pyg_closure_invalidate (gpointer data, GClosure *closure)
     state = PyGILState_Ensure ();
     Py_XDECREF (pc->callback);
     Py_XDECREF (pc->extra_args);
-    Py_XDECREF (pc->swap_data);
+    if (!pc->swap_data_is_gobject) Py_XDECREF (pc->swap_data);
     PyGILState_Release (state);
 
     pc->callback = NULL;
@@ -824,8 +824,11 @@ pyg_closure_marshal (GClosure *closure, GValue *return_value,
         /* swap in a different initial data for connect_object() */
         if (i == 0 && G_CCLOSURE_SWAP_DATA (closure)) {
             g_return_if_fail (pc->swap_data != NULL);
-            Py_INCREF (pc->swap_data);
-            PyTuple_SetItem (params, 0, pc->swap_data);
+            if (pc->swap_data_is_gobject)
+                PyTuple_SetItem (params, 0,
+                                 pygobject_new (G_OBJECT (pc->swap_data)));
+            else
+                PyTuple_SetItem (params, 0, Py_NewRef (pc->swap_data));
         } else {
             PyObject *item = pyg_value_to_pyobject (&param_values[i], FALSE);
 
@@ -892,6 +895,9 @@ out:
  * of additional function arguments.  This is needed to attach python
  * handlers to signals, for instance.
  *
+ * If swap_data is a GObject and the object is destroyed,
+ * then the closure will be automatically invalidated.
+ *
  * Returns: the new closure.
  */
 GClosure *
@@ -900,12 +906,26 @@ pyg_closure_new (PyObject *callback, PyObject *extra_args, PyObject *swap_data)
     GClosure *closure;
 
     g_return_val_if_fail (callback != NULL, NULL);
+
     closure = g_closure_new_simple (sizeof (PyGClosure), NULL);
+
+    if (swap_data != NULL && PyObject_TypeCheck (swap_data, &PyGObject_Type)) {
+        GObject *data = pygobject_get (swap_data);
+        g_object_watch_closure (data, closure);
+        ((PyGClosure *)closure)->swap_data = data;
+        ((PyGClosure *)closure)->swap_data_is_gobject = TRUE;
+        closure->derivative_flag = TRUE;
+    } else if (swap_data != NULL) {
+        ((PyGClosure *)closure)->swap_data = Py_NewRef (swap_data);
+        closure->derivative_flag = TRUE;
+    }
+
     g_closure_add_invalidate_notifier (closure, NULL, pyg_closure_invalidate);
     g_closure_set_marshal (closure, pyg_closure_marshal);
-    Py_INCREF (callback);
-    ((PyGClosure *)closure)->callback = callback;
-    if (extra_args && !Py_IsNone (extra_args)) {
+
+    ((PyGClosure *)closure)->callback = Py_NewRef (callback);
+
+    if (extra_args != NULL && !Py_IsNone (extra_args)) {
         Py_INCREF (extra_args);
         if (!PyTuple_Check (extra_args)) {
             PyObject *tmp = PyTuple_New (1);
@@ -913,11 +933,6 @@ pyg_closure_new (PyObject *callback, PyObject *extra_args, PyObject *swap_data)
             extra_args = tmp;
         }
         ((PyGClosure *)closure)->extra_args = extra_args;
-    }
-    if (swap_data) {
-        Py_INCREF (swap_data);
-        ((PyGClosure *)closure)->swap_data = swap_data;
-        closure->derivative_flag = TRUE;
     }
     return closure;
 }

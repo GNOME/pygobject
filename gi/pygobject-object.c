@@ -804,7 +804,8 @@ pygobject_traverse (PyGObject *self, visitproc visit, void *arg)
             if (closure->extra_args) ret = visit (closure->extra_args, arg);
             if (ret != 0) return ret;
 
-            if (closure->swap_data) ret = visit (closure->swap_data, arg);
+            if (closure->swap_data && !closure->swap_data_is_gobject)
+                ret = visit (closure->swap_data, arg);
             if (ret != 0) return ret;
         }
     }

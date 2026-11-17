@@ -22,6 +22,7 @@
 #include "pygi-boxed.h"
 #include "pygi-repository.h"
 #include "pygi-value.h"
+#include "pygobject-object.h"
 
 static GISignalInfo *
 _pygi_lookup_signal_from_g_type (GType g_type, const gchar *signal_name)
@@ -55,7 +56,7 @@ pygi_signal_closure_invalidate (gpointer data, GClosure *closure)
     state = PyGILState_Ensure ();
     Py_XDECREF (pc->callback);
     Py_XDECREF (pc->extra_args);
-    Py_XDECREF (pc->swap_data);
+    if (!(pc->swap_data_is_gobject)) Py_XDECREF (pc->swap_data);
     PyGILState_Release (state);
 
     pc->callback = NULL;
@@ -130,10 +131,11 @@ pygi_signal_closure_marshal (GClosure *closure, GValue *return_value,
     for (i = 0; i < n_param_values; i++) {
         /* swap in a different initial data for connect_object() */
         if (i == 0 && G_CCLOSURE_SWAP_DATA (closure)) {
-            g_return_if_fail (pc->swap_data != NULL);
-            Py_INCREF (pc->swap_data);
-            PyTuple_SetItem (params, 0, pc->swap_data);
-
+            if (pc->swap_data_is_gobject)
+                PyTuple_SetItem (params, 0,
+                                 pygobject_new (G_OBJECT (pc->swap_data)));
+            else
+                PyTuple_SetItem (params, 0, Py_NewRef (pc->swap_data));
         } else if (i == 0) {
             PyObject *item = pyg_value_to_pyobject (&param_values[i], FALSE);
 
@@ -281,7 +283,6 @@ pygi_signal_closure_new (PyGObject *instance, GType g_type,
                          PyObject *extra_args, PyObject *swap_data)
 {
     GClosure *closure = NULL;
-    PyGISignalClosure *pygi_closure = NULL;
     GISignalInfo *signal_info = NULL;
 
     g_return_val_if_fail (callback != NULL, NULL);
@@ -290,14 +291,24 @@ pygi_signal_closure_new (PyGObject *instance, GType g_type,
     if (signal_info == NULL) return NULL;
 
     closure = g_closure_new_simple (sizeof (PyGISignalClosure), NULL);
+
+    if (swap_data != NULL && PyObject_TypeCheck (swap_data, &PyGObject_Type)) {
+        GObject *data = pygobject_get (swap_data);
+        g_object_watch_closure (data, closure);
+        ((PyGClosure *)closure)->swap_data = data;
+        ((PyGClosure *)closure)->swap_data_is_gobject = TRUE;
+        closure->derivative_flag = TRUE;
+    } else if (swap_data != NULL) {
+        ((PyGClosure *)closure)->swap_data = Py_NewRef (swap_data);
+        closure->derivative_flag = TRUE;
+    }
+
     g_closure_add_invalidate_notifier (closure, NULL,
                                        pygi_signal_closure_invalidate);
     g_closure_set_marshal (closure, pygi_signal_closure_marshal);
 
-    pygi_closure = (PyGISignalClosure *)closure;
-
-    pygi_closure->signal_info = signal_info;
-    pygi_closure->pyg_closure.callback = Py_NewRef (callback);
+    ((PyGISignalClosure *)closure)->signal_info = signal_info;
+    ((PyGClosure *)closure)->callback = Py_NewRef (callback);
 
     if (extra_args != NULL && !Py_IsNone (extra_args)) {
         Py_INCREF (extra_args);
@@ -306,11 +317,7 @@ pygi_signal_closure_new (PyGObject *instance, GType g_type,
             PyTuple_SetItem (tmp, 0, extra_args);
             extra_args = tmp;
         }
-        pygi_closure->pyg_closure.extra_args = extra_args;
-    }
-    if (swap_data) {
-        pygi_closure->pyg_closure.swap_data = Py_NewRef (swap_data);
-        closure->derivative_flag = TRUE;
+        ((PyGClosure *)closure)->extra_args = extra_args;
     }
 
     return closure;

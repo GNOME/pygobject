@@ -35,7 +35,12 @@ struct _PyGClosure {
     GClosure closure;
     PyObject *callback;
     PyObject *extra_args; /* tuple of extra args to pass to callback */
-    PyObject *swap_data;  /* other object for gtk_signal_connect__object */
+    gpointer swap_data;   /* other object for GObject.connect_object.
+                                    * either a PyObject * or GObject * depending
+                                    * on swap_data_is_gobject */
+    gboolean swap_data_is_gobject; /* set if the swap data is a "borrowed"
+                                    * pointer to a GObject. the object is set up
+                                    * to watch the closure using g_object_watch_closure */
     PyClosureExceptionHandler exception_handler;
 };
 
