@@ -797,6 +797,7 @@ pygobject_traverse (PyGObject *self, visitproc visit, void *arg)
 
         for (GSList *tmp = data->closures; tmp != NULL; tmp = tmp->next) {
             PyGClosure *closure = tmp->data;
+            GClosure *gclosure = (GClosure *)closure;
 
             if (closure->callback) ret = visit (closure->callback, arg);
             if (ret != 0) return ret;
@@ -804,7 +805,7 @@ pygobject_traverse (PyGObject *self, visitproc visit, void *arg)
             if (closure->extra_args) ret = visit (closure->extra_args, arg);
             if (ret != 0) return ret;
 
-            if (closure->swap_data) ret = visit (closure->swap_data, arg);
+            if (gclosure->data) ret = visit (gclosure->data, arg);
             if (ret != 0) return ret;
         }
     }

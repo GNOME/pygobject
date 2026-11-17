@@ -798,12 +798,12 @@ pyg_closure_invalidate (gpointer data, GClosure *closure)
     state = PyGILState_Ensure ();
     Py_XDECREF (pc->callback);
     Py_XDECREF (pc->extra_args);
-    Py_XDECREF (pc->swap_data);
+    Py_XDECREF (closure->data);
     PyGILState_Release (state);
 
     pc->callback = NULL;
     pc->extra_args = NULL;
-    pc->swap_data = NULL;
+    closure->data = NULL;
 }
 
 static void
@@ -823,9 +823,8 @@ pyg_closure_marshal (GClosure *closure, GValue *return_value,
     for (i = 0; i < n_param_values; i++) {
         /* swap in a different initial data for connect_object() */
         if (i == 0 && G_CCLOSURE_SWAP_DATA (closure)) {
-            g_return_if_fail (pc->swap_data != NULL);
-            Py_INCREF (pc->swap_data);
-            PyTuple_SetItem (params, 0, pc->swap_data);
+            g_return_if_fail (closure->data != NULL);
+            PyTuple_SetItem (params, 0, Py_NewRef ((PyObject *)closure->data));
         } else {
             PyObject *item = pyg_value_to_pyobject (&param_values[i], FALSE);
 
@@ -900,7 +899,9 @@ pyg_closure_new (PyObject *callback, PyObject *extra_args, PyObject *swap_data)
     GClosure *closure;
 
     g_return_val_if_fail (callback != NULL, NULL);
-    closure = g_closure_new_simple (sizeof (PyGClosure), NULL);
+    closure =
+        g_closure_new_simple (sizeof (PyGClosure), Py_XNewRef (swap_data));
+    if (swap_data) closure->derivative_flag = TRUE;
     g_closure_add_invalidate_notifier (closure, NULL, pyg_closure_invalidate);
     g_closure_set_marshal (closure, pyg_closure_marshal);
     Py_INCREF (callback);
@@ -913,11 +914,6 @@ pyg_closure_new (PyObject *callback, PyObject *extra_args, PyObject *swap_data)
             extra_args = tmp;
         }
         ((PyGClosure *)closure)->extra_args = extra_args;
-    }
-    if (swap_data) {
-        Py_INCREF (swap_data);
-        ((PyGClosure *)closure)->swap_data = swap_data;
-        closure->derivative_flag = TRUE;
     }
     return closure;
 }
