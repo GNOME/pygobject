@@ -15,12 +15,22 @@ Such an operation might be:
 * Writing, reading and copying files
 * Calculations where the runtime depends on some external factor
 
-The following examples show
+This page will discuss multi-threading. A separate page discusses :doc:`asynchronous`.
 
-* how Python threads, running in parallel to GTK, can interact with the UI
-* how to use and control asynchronous I/O operations in glib
+Since PyGObject 3.59.0, the library support
+:doc:`free-threading Python <python:howto/free-threading-python>`.
+Although PyGObject could be used in a multi-threaded application, support
+for free-threading required additional checks, because library code should
+now be able to really run in parallel.
 
-This page will discuss multi-threading. A separate page discusses :doc:asynchronous.
+.. important::
+
+    Note that, if you use PyGObject with free-threading Python,
+    although PyGObject is safe to use, the libraries you're accessing through PyGObject may not be.
+    This could lead to unexpected behavior, including application crashes.
+
+    When submitting an issue, please check if the problem originates in PyGObject or the
+    accessed library.
 
 This example uses a Python thread to execute code in the background
 while still showing feedback on the progress in a window.
