@@ -33,11 +33,11 @@ class TestGLib(unittest.TestCase):
         GLib.idle_add(callback)
         ml.run()
 
-    @unittest.skipIf(os.name == "nt", "no bash on Windows")
+    @unittest.skipIf(os.name == "nt", "no sh on Windows")
     def test_find_program_in_path(self):
-        bash_path = GLib.find_program_in_path("bash")
-        self.assertTrue(bash_path.endswith(os.path.sep + "bash"))
-        self.assertTrue(os.path.exists(bash_path))
+        sh_path = GLib.find_program_in_path("sh")
+        self.assertTrue(sh_path.endswith(os.path.sep + "sh"))
+        self.assertTrue(os.path.exists(sh_path))
 
         self.assertEqual(GLib.find_program_in_path("non existing"), None)
 
