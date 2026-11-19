@@ -3,6 +3,10 @@
 
 This version of PyGObject supports Python 3.11 and newer, and requires GLib >= 2.84.
 
+This is the first release of PyGObject that supports Free-Threading Python.
+
+* Support Free-Threading Python :mr:`565`
+* `Object.connect_object` now properly releases GObject instances :mr:`576`
 * Drop Python 3.10, incorporate Python 3.15 in the builds :mr:`564` :mr:
 * Convert objects that support the Python buffer protocol directly to C arrays :mr:`563`
 * Use new GI api to get the finish-func for an async call :mr:`562`

@@ -1,5 +1,5 @@
 ===============
-Multi Threading
+Multi-Threading
 ===============
 
 Operations which could potentially block should not be executed in the main
@@ -17,7 +17,7 @@ Such an operation might be:
 
 This page will discuss multi-threading. A separate page discusses :doc:`asynchronous`.
 
-Since PyGObject 3.59.0, the library support
+Since PyGObject 3.59.0, the library supports
 :doc:`free-threading Python <python:howto/free-threading-python>`.
 Although PyGObject could be used in a multi-threaded application, support
 for free-threading required additional checks, because library code should
@@ -155,3 +155,6 @@ Threads: FAQ
   Similar to I/O operations in Python, all PyGObject calls release the
   GIL during their execution and other Python threads can be executed
   during that time.
+
+  With Python 3.59.0, free-threading Python is also an option. In FT Python
+  the GIL is disabled and true parallelism is possible.
