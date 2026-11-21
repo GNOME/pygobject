@@ -440,7 +440,7 @@ static PyGetSetDef pyg_enum_getsets[] = {
  * Returns 0 on success, or -1 and sets an exception.
  */
 int
-pygi_enum_register_types (PyObject *mod)
+pyg_enum_register_types (PyObject *mod)
 {
     PyObject *enum_module, *item;
     int i;

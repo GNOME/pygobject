@@ -38,6 +38,6 @@ PyObject *pyg_flags_from_gtype (GType gtype, guint value);
 
 gint pyg_flags_get_value (GType flag_type, PyObject *obj, guint *val);
 
-int pygi_flags_register_types (PyObject *d);
+int pyg_flags_register_types (PyObject *d);
 
 G_END_DECLS

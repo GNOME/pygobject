@@ -174,7 +174,7 @@ pyg_pointer_new (GType pointer_type, gpointer pointer)
  * Returns 0 on success, or -1 and sets an exception.
  */
 int
-pygi_pointer_register_types (PyObject *d)
+pyg_pointer_register_types (PyObject *d)
 {
     PyObject *pygtype;
 

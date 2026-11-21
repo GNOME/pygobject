@@ -492,7 +492,7 @@ static PyGetSetDef pyg_flags_getsets[] = {
  * Returns 0 on success, or -1 and sets an exception.
  */
 int
-pygi_flags_register_types (PyObject *mod)
+pyg_flags_register_types (PyObject *mod)
 {
     PyObject *enum_module, *item;
     int i;

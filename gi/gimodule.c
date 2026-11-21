@@ -1189,7 +1189,7 @@ _gi_exec (PyObject *module)
     if ((ret = pygi_error_register_types (module)) < 0) return ret;
     if ((ret = pygi_repository_register_types (module)) < 0) return ret;
     if ((ret = pygi_info_register_types (module)) < 0) return ret;
-    if ((ret = pygi_pointer_register_types (module_dict)) < 0) return ret;
+    if ((ret = pyg_pointer_register_types (module_dict)) < 0) return ret;
     if ((ret = pygi_struct_register_types (module)) < 0) return ret;
     if ((ret = pyg_boxed_register_types (module_dict)) < 0) return ret;
     if ((ret = pygi_fundamental_register_types (module)) < 0) return ret;
@@ -1204,8 +1204,8 @@ _gi_exec (PyObject *module)
     if ((ret = pyg_object_props_register_types (module_dict)) < 0) return ret;
     if ((ret = pyg_object_register_types (module_dict)) < 0) return ret;
     if ((ret = pyg_interface_register_types (module_dict)) < 0) return ret;
-    if ((ret = pygi_enum_register_types (module)) < 0) return ret;
-    if ((ret = pygi_flags_register_types (module)) < 0) return ret;
+    if ((ret = pyg_enum_register_types (module)) < 0) return ret;
+    if ((ret = pyg_flags_register_types (module)) < 0) return ret;
     if ((ret = pygi_register_api (module_dict)) < 0) return ret;
 
     PyGIWarning = PyErr_NewException ("gi.PyGIWarning", PyExc_Warning, NULL);
