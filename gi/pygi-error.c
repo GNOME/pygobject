@@ -24,7 +24,7 @@
 
 #include "pygi-basictype.h"
 #include "pygi-type.h"
-#include "pygi-util.h"
+#include "pygutil.h"
 
 PyObject *PyGError = NULL;
 

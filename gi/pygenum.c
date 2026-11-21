@@ -22,7 +22,7 @@
 #include "pygenum.h"
 #include "pygi-basictype.h"
 #include "pygi-type.h"
-#include "pygi-util.h"
+#include "pygutil.h"
 
 GQuark pygenum_class_key;
 

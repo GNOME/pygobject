@@ -20,7 +20,7 @@
 
 #include "pygi-argument.h"
 #include "pygi-cache-private.h"
-#include "pygi-util.h"
+#include "pygutil.h"
 
 typedef PyGISequenceCache PyGIArgGList;
 

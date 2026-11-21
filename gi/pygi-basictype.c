@@ -22,7 +22,7 @@
 
 #include "pygi-argument.h"
 #include "pygi-type.h"
-#include "pygi-util.h"
+#include "pygutil.h"
 
 static gboolean pygi_gint8_from_py (PyObject *object, gint8 *result);
 static gboolean pygi_guint8_from_py (PyObject *object, guint8 *result);

@@ -33,7 +33,7 @@
 #include "pygi-foreign.h"
 #include "pygi-info.h"
 #include "pygi-type.h"
-#include "pygi-util.h"
+#include "pygutil.h"
 #include "pygi-value.h"
 
 GIArgument

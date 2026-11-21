@@ -21,7 +21,7 @@
 #include "pygboxed.h"
 
 #include "pygi-type.h"
-#include "pygi-util.h"
+#include "pygutil.h"
 
 GQuark pygboxed_type_key;
 

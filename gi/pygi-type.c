@@ -23,7 +23,7 @@
 #include "pygflags.h"
 #include "pygi-basictype.h"
 #include "pygi-repository.h"
-#include "pygi-util.h"
+#include "pygutil.h"
 #include "pygi-value.h"
 #include "pyginterface.h"
 #include "pygobject-object.h"

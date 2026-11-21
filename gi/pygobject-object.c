@@ -25,7 +25,7 @@
 #include "pygi-property.h"
 #include "pygi-signal-closure.h"
 #include "pygi-type.h"
-#include "pygi-util.h"
+#include "pygutil.h"
 #include "pygi-value.h"
 #include "pyginterface.h"
 #include "pygobject-props.h"

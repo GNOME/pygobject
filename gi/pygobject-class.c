@@ -28,7 +28,7 @@
 #include "pygi-fundamental.h"
 #include "pygi-property.h"
 #include "pygi-type.h"
-#include "pygi-util.h"
+#include "pygutil.h"
 #include "pygi-value.h"
 #include "pygobject-object.h"
 #include "pygobject-types.h"

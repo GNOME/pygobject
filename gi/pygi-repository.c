@@ -23,7 +23,7 @@
 
 #include "pygi-basictype.h"
 #include "pygi-info.h"
-#include "pygi-util.h"
+#include "pygutil.h"
 
 
 typedef struct {

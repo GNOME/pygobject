@@ -39,7 +39,7 @@
                                  GParamSpecValueArray))
 
 GIArgument
-_pygi_argument_from_g_value (const GValue *value, GITypeInfo *type_info)
+pygi_argument_from_g_value (const GValue *value, GITypeInfo *type_info)
 {
     GIArgument arg = PYGI_ARG_INIT;
 

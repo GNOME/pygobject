@@ -20,7 +20,7 @@
  */
 
 #include "pygi-ccallback.h"
-#include "pygi-util.h"
+#include "pygutil.h"
 
 static PyObject *
 _ccallback_vectorcall (PyGICCallback *self, PyObject *const *args,

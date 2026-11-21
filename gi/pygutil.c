@@ -16,7 +16,7 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "pygi-util.h"
+#include "pygutil.h"
 
 gboolean
 pyg_guint_from_pyssize (Py_ssize_t pyval, guint *result)

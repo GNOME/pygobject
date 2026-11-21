@@ -25,7 +25,7 @@
 #include "pygi-fundamental.h"
 #include "pygi-invoke.h"
 #include "pygi-type.h"
-#include "pygi-util.h"
+#include "pygutil.h"
 
 
 static gpointer

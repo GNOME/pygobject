@@ -21,7 +21,7 @@
 
 #include "pygboxed.h"
 #include "pygi-invoke.h"
-#include "pygi-util.h"
+#include "pygutil.h"
 #include "pygobject-object.h"
 
 #if PY_VERSION_HEX < 0x030C00A3

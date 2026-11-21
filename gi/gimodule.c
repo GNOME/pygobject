@@ -42,7 +42,7 @@
 #include "pygi-source.h"
 #include "pygi-struct.h"
 #include "pygi-type.h"
-#include "pygi-util.h"
+#include "pygutil.h"
 #include "pygi-value.h"
 #include "pyginterface.h"
 #include "pygobject-object.h"

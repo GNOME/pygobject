@@ -29,7 +29,7 @@
 #include "pygi-basictype.h"
 #include "pygi-error.h"
 #include "pygi-type.h"
-#include "pygi-util.h"
+#include "pygutil.h"
 #include "pygi-value.h"
 #include "pyginterface.h"
 #include "pygobject-object.h"

@@ -28,7 +28,7 @@
 
 #include "pygi-info.h"
 #include "pygi-repository.h"
-#include "pygi-util.h"
+#include "pygutil.h"
 #include "pygobject-object.h"  // for pygobject_lookup_class
 #include "pygobject-types.h"
 

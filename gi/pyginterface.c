@@ -21,7 +21,7 @@
 #include "pyginterface.h"
 
 #include "pygi-type.h"
-#include "pygi-util.h"
+#include "pygutil.h"
 
 GQuark pyginterface_type_key;
 GQuark pyginterface_info_key;

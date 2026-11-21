@@ -25,7 +25,7 @@
 #include "pygi-basictype.h"
 #include "pygi-info.h"
 #include "pygi-type.h"
-#include "pygi-util.h"
+#include "pygutil.h"
 
 struct _PyGIBoxed {
     PyGBoxed base;

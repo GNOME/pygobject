@@ -21,7 +21,7 @@ sources = [
   'pygi-boxed.c',
   'pygi-closure.c',
   'pygi-ccallback.c',
-  'pygi-util.c',
+  'pygutil.c',
   'pygi-property.c',
   'pygi-signal-closure.c',
   'pygi-invoke.c',

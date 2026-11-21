@@ -22,7 +22,7 @@
 #include "pygflags.h"
 
 #include "pygi-type.h"
-#include "pygi-util.h"
+#include "pygutil.h"
 
 GQuark pygflags_class_key;
 

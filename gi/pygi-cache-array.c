@@ -22,7 +22,7 @@
 #include "pygi-basictype.h"
 #include "pygi-cache-private.h"
 #include "pygi-info.h"
-#include "pygi-util.h"
+#include "pygutil.h"
 
 /*
  * GArray from Python

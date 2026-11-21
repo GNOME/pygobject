@@ -162,7 +162,7 @@ pygi_get_property_value (PyGObject *instance, GParamSpec *pspec)
         GITypeInfo *type_info = gi_property_info_get_type_info (property_info);
         GITransfer transfer =
             gi_property_info_get_ownership_transfer (property_info);
-        GIArgument arg = _pygi_argument_from_g_value (&value, type_info);
+        GIArgument arg = pygi_argument_from_g_value (&value, type_info);
 
         py_value = pygi_argument_to_py (type_info, arg, transfer);
 

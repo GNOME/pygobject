@@ -30,7 +30,7 @@
 #include "pygi-boxed.h"
 #include "pygi-info.h"
 #include "pygi-type.h"
-#include "pygi-util.h"
+#include "pygutil.h"
 
 typedef struct {
     GSource source;

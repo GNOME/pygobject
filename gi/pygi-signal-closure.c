@@ -87,8 +87,8 @@ array_length_from_parameter (GICallableInfo *callable_info,
     gi_arg_info_load_type_info (&length_arg_info, &length_type_info);
 
     /* Take the next value: values[0] is "self". */
-    length_arg = _pygi_argument_from_g_value (&(values[length_arg_index + 1]),
-                                              &length_type_info);
+    length_arg = pygi_argument_from_g_value (&(values[length_arg_index + 1]),
+                                             &length_type_info);
     result = pygi_argument_to_gsize (
         length_arg, gi_type_info_get_tag (&length_type_info), array_len);
 
@@ -154,7 +154,7 @@ pygi_signal_closure_marshal (GClosure *closure, GValue *return_value,
                                        &arg_info);
             type_info = gi_arg_info_get_type_info (&arg_info);
 
-            arg = _pygi_argument_from_g_value (&param_values[i], type_info);
+            arg = pygi_argument_from_g_value (&param_values[i], type_info);
             type_tag = gi_type_info_get_tag (type_info);
 
             /* Hack to ensure struct arguments are passed-by-reference allowing
