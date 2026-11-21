@@ -134,7 +134,7 @@ fundamental_repr (PyGIFundamental *self)
     return PyUnicode_FromString (buf);
 }
 
-PYGI_DEFINE_TYPE ("gi.Fundamental", PyGIFundamental_Type, PyGIFundamental);
+PYG_DEFINE_TYPE ("gi.Fundamental", PyGIFundamental_Type, PyGIFundamental);
 
 
 PyObject *

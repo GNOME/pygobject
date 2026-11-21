@@ -88,7 +88,7 @@ _pygi_marshal_from_py_ghash (PyGIInvokeState *state,
         Py_DECREF (py_keys);
         return FALSE;
     }
-    if (!pygi_guint_from_pyssize (py_length, &length)) return FALSE;
+    if (!pyg_guint_from_pyssize (py_length, &length)) return FALSE;
 
     py_values = PyMapping_Values (py_arg);
     if (py_values == NULL) {
@@ -161,7 +161,7 @@ err:
         Py_DECREF (py_keys);
         Py_DECREF (py_values);
         g_hash_table_unref (hash_);
-        _PyGI_ERROR_PREFIX ("Item %i: ", i);
+        PYG_ERROR_PREFIX ("Item %i: ", i);
         return FALSE;
     }
 

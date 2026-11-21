@@ -22,7 +22,6 @@
 
 #include "pygboxed.h"
 #include "pygi-basictype.h"
-#include "pygi-fundamental.h"
 #include "pygi-property.h"
 #include "pygi-signal-closure.h"
 #include "pygi-type.h"
@@ -701,7 +700,7 @@ pygobject_watch_closure (PyObject *self, GClosure *closure)
 
 /* -------------- PyGObject behaviour ----------------- */
 
-PYGI_DEFINE_TYPE ("gi._gi.GObject", PyGObject_Type, PyGObject);
+PYG_DEFINE_TYPE ("gi._gi.GObject", PyGObject_Type, PyGObject);
 
 static void
 pygobject_dealloc (PyGObject *self)
@@ -1880,8 +1879,8 @@ typedef struct {
     gboolean have_floating_ref;
 } PyGObjectWeakRef;
 
-PYGI_DEFINE_TYPE ("gi._gi.GObjectWeakRef", PyGObjectWeakRef_Type,
-                  PyGObjectWeakRef);
+PYG_DEFINE_TYPE ("gi._gi.GObjectWeakRef", PyGObjectWeakRef_Type,
+                 PyGObjectWeakRef);
 
 static int
 pygobject_weak_ref_traverse (PyGObjectWeakRef *self, visitproc visit,

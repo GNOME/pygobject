@@ -19,7 +19,7 @@
 #include "pygi-util.h"
 
 gboolean
-pygi_guint_from_pyssize (Py_ssize_t pyval, guint *result)
+pyg_guint_from_pyssize (Py_ssize_t pyval, guint *result)
 {
     if (pyval < 0) {
         PyErr_SetString (PyExc_ValueError, "< 0");

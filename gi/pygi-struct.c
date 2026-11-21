@@ -138,7 +138,7 @@ struct_init (PyObject *self, PyObject *args, PyObject *kwargs)
     return 0;
 }
 
-PYGI_DEFINE_TYPE ("gi.Struct", PyGIStruct_Type, PyGIStruct);
+PYG_DEFINE_TYPE ("gi.Struct", PyGIStruct_Type, PyGIStruct);
 
 
 PyObject *

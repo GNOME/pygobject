@@ -266,7 +266,7 @@ _base_info_richcompare (PyGIBaseInfo *self, PyObject *other, int op)
     return Py_NewRef (res);
 }
 
-PYGI_DEFINE_TYPE ("gi.BaseInfo", PyGIBaseInfo_Type, PyGIBaseInfo);
+PYG_DEFINE_TYPE ("gi.BaseInfo", PyGIBaseInfo_Type, PyGIBaseInfo);
 
 static PyObject *
 _wrap_gi_base_info_get_name (PyGIBaseInfo *self)
@@ -514,7 +514,7 @@ out:
 
 
 /* CallableInfo */
-PYGI_DEFINE_TYPE ("gi.CallableInfo", PyGICallableInfo_Type, PyGICallableInfo);
+PYG_DEFINE_TYPE ("gi.CallableInfo", PyGICallableInfo_Type, PyGICallableInfo);
 
 static void
 _callable_info_dealloc (PyGICallableInfo *self)
@@ -770,22 +770,21 @@ pygi_callable_info_get_cache (PyGICallableInfo *self)
 }
 
 /* CallbackInfo */
-PYGI_DEFINE_TYPE ("gi.CallbackInfo", PyGICallbackInfo_Type, PyGICallableInfo);
+PYG_DEFINE_TYPE ("gi.CallbackInfo", PyGICallbackInfo_Type, PyGICallableInfo);
 
 static PyMethodDef _PyGICallbackInfo_methods[] = {
     { NULL, NULL, 0 },
 };
 
 /* ErrorDomainInfo */
-PYGI_DEFINE_TYPE ("gi.ErrorDomainInfo", PyGIErrorDomainInfo_Type,
-                  PyGIBaseInfo);
+PYG_DEFINE_TYPE ("gi.ErrorDomainInfo", PyGIErrorDomainInfo_Type, PyGIBaseInfo);
 
 static PyMethodDef _PyGIErrorDomainInfo_methods[] = {
     { NULL, NULL, 0 },
 };
 
 /* SignalInfo */
-PYGI_DEFINE_TYPE ("gi.SignalInfo", PyGISignalInfo_Type, PyGICallableInfo);
+PYG_DEFINE_TYPE ("gi.SignalInfo", PyGISignalInfo_Type, PyGICallableInfo);
 
 static PyObject *
 _wrap_gi_signal_info_get_flags (PyGIBaseInfo *self)
@@ -818,7 +817,7 @@ static PyMethodDef _PyGISignalInfo_methods[] = {
 };
 
 /* PropertyInfo */
-PYGI_DEFINE_TYPE ("gi.PropertyInfo", PyGIPropertyInfo_Type, PyGIBaseInfo);
+PYG_DEFINE_TYPE ("gi.PropertyInfo", PyGIPropertyInfo_Type, PyGIBaseInfo);
 
 static PyObject *
 _wrap_gi_property_info_get_flags (PyGIBaseInfo *self)
@@ -854,7 +853,7 @@ static PyMethodDef _PyGIPropertyInfo_methods[] = {
 
 
 /* ArgInfo */
-PYGI_DEFINE_TYPE ("gi.ArgInfo", PyGIArgInfo_Type, PyGIBaseInfo);
+PYG_DEFINE_TYPE ("gi.ArgInfo", PyGIArgInfo_Type, PyGIBaseInfo);
 
 static PyObject *
 _wrap_gi_arg_info_get_direction (PyGIBaseInfo *self)
@@ -957,7 +956,7 @@ static PyMethodDef _PyGIArgInfo_methods[] = {
 
 
 /* TypeInfo */
-PYGI_DEFINE_TYPE ("gi.TypeInfo", PyGITypeInfo_Type, PyGIBaseInfo);
+PYG_DEFINE_TYPE ("gi.TypeInfo", PyGITypeInfo_Type, PyGIBaseInfo);
 
 static PyObject *
 _wrap_gi_type_info_is_pointer (PyGIBaseInfo *self)
@@ -1063,7 +1062,7 @@ static PyMethodDef _PyGITypeInfo_methods[] = {
 
 
 /* FunctionInfo */
-PYGI_DEFINE_TYPE ("gi.FunctionInfo", PyGIFunctionInfo_Type, PyGICallableInfo);
+PYG_DEFINE_TYPE ("gi.FunctionInfo", PyGIFunctionInfo_Type, PyGICallableInfo);
 
 static PyObject *
 _wrap_gi_function_info_is_constructor (PyGIBaseInfo *self)
@@ -1296,8 +1295,8 @@ static PyMethodDef _PyGIFunctionInfo_methods[] = {
 };
 
 /* RegisteredTypeInfo */
-PYGI_DEFINE_TYPE ("gi.RegisteredTypeInfo", PyGIRegisteredTypeInfo_Type,
-                  PyGIBaseInfo);
+PYG_DEFINE_TYPE ("gi.RegisteredTypeInfo", PyGIRegisteredTypeInfo_Type,
+                 PyGIBaseInfo);
 
 static PyObject *
 _wrap_gi_registered_type_info_get_type_name (PyGIBaseInfo *self)
@@ -1337,7 +1336,7 @@ static PyMethodDef _PyGIRegisteredTypeInfo_methods[] = {
 
 
 /* GIStructInfo */
-PYGI_DEFINE_TYPE ("StructInfo", PyGIStructInfo_Type, PyGIBaseInfo);
+PYG_DEFINE_TYPE ("StructInfo", PyGIStructInfo_Type, PyGIBaseInfo);
 
 static PyObject *
 _wrap_gi_struct_info_get_fields (PyGIBaseInfo *self)
@@ -1513,7 +1512,7 @@ pygi_gi_struct_info_is_simple (GIStructInfo *struct_info)
 
 
 /* EnumInfo */
-PYGI_DEFINE_TYPE ("gi.EnumInfo", PyGIEnumInfo_Type, PyGIBaseInfo);
+PYG_DEFINE_TYPE ("gi.EnumInfo", PyGIEnumInfo_Type, PyGIBaseInfo);
 
 static PyObject *
 _wrap_gi_enum_info_get_values (PyGIBaseInfo *self)
@@ -1563,7 +1562,7 @@ static PyMethodDef _PyGIEnumInfo_methods[] = {
 
 
 /* ObjectInfo */
-PYGI_DEFINE_TYPE ("ObjectInfo", PyGIObjectInfo_Type, PyGIBaseInfo);
+PYG_DEFINE_TYPE ("ObjectInfo", PyGIObjectInfo_Type, PyGIBaseInfo);
 
 static PyObject *
 _wrap_gi_object_info_get_parent (PyGIBaseInfo *self)
@@ -1748,7 +1747,7 @@ static PyMethodDef _PyGIObjectInfo_methods[] = {
 
 
 /* GIInterfaceInfo */
-PYGI_DEFINE_TYPE ("InterfaceInfo", PyGIInterfaceInfo_Type, PyGIBaseInfo);
+PYG_DEFINE_TYPE ("InterfaceInfo", PyGIInterfaceInfo_Type, PyGIBaseInfo);
 
 static PyObject *
 _wrap_gi_interface_info_get_methods (PyGIBaseInfo *self)
@@ -1853,7 +1852,7 @@ static PyMethodDef _PyGIInterfaceInfo_methods[] = {
 };
 
 /* GIConstantInfo */
-PYGI_DEFINE_TYPE ("gi.ConstantInfo", PyGIConstantInfo_Type, PyGIBaseInfo);
+PYG_DEFINE_TYPE ("gi.ConstantInfo", PyGIConstantInfo_Type, PyGIBaseInfo);
 
 static PyObject *
 _wrap_gi_constant_info_get_value (PyGIBaseInfo *self)
@@ -1880,7 +1879,7 @@ static PyMethodDef _PyGIConstantInfo_methods[] = {
 };
 
 /* GIValueInfo */
-PYGI_DEFINE_TYPE ("gi.ValueInfo", PyGIValueInfo_Type, PyGIBaseInfo);
+PYG_DEFINE_TYPE ("gi.ValueInfo", PyGIValueInfo_Type, PyGIBaseInfo);
 
 static PyObject *
 _wrap_gi_value_info_get_value (PyGIBaseInfo *self)
@@ -1900,7 +1899,7 @@ static PyMethodDef _PyGIValueInfo_methods[] = {
 
 
 /* GIFieldInfo */
-PYGI_DEFINE_TYPE ("gi.FieldInfo", PyGIFieldInfo_Type, PyGIBaseInfo);
+PYG_DEFINE_TYPE ("gi.FieldInfo", PyGIFieldInfo_Type, PyGIBaseInfo);
 
 static gboolean
 field_array_length (GIFieldInfo *info, void *struct_data_ptr,
@@ -2036,7 +2035,7 @@ _wrap_gi_field_info_get_value (PyGIBaseInfo *self, PyObject *args)
     /* Check the instance. */
     if (!_pygi_gi_registered_type_info_check_object (
             (GIRegisteredTypeInfo *)container_info, instance)) {
-        _PyGI_ERROR_PREFIX ("argument 1: ");
+        PYG_ERROR_PREFIX ("argument 1: ");
         return NULL;
     }
 
@@ -2151,7 +2150,7 @@ _wrap_gi_field_info_set_value (PyGIBaseInfo *self, PyObject *args)
     /* Check the instance. */
     if (!_pygi_gi_registered_type_info_check_object (
             (GIRegisteredTypeInfo *)container_info, instance)) {
-        _PyGI_ERROR_PREFIX ("argument 1: ");
+        PYG_ERROR_PREFIX ("argument 1: ");
         return NULL;
     }
 
@@ -2322,14 +2321,14 @@ static PyMethodDef _PyGIFieldInfo_methods[] = {
 
 
 /* GIUnresolvedInfo */
-PYGI_DEFINE_TYPE ("gi.UnresolvedInfo", PyGIUnresolvedInfo_Type, PyGIBaseInfo);
+PYG_DEFINE_TYPE ("gi.UnresolvedInfo", PyGIUnresolvedInfo_Type, PyGIBaseInfo);
 
 static PyMethodDef _PyGIUnresolvedInfo_methods[] = {
     { NULL, NULL, 0 },
 };
 
 /* GIVFuncInfo */
-PYGI_DEFINE_TYPE ("gi.VFuncInfo", PyGIVFuncInfo_Type, PyGICallableInfo);
+PYG_DEFINE_TYPE ("gi.VFuncInfo", PyGIVFuncInfo_Type, PyGICallableInfo);
 
 static PyObject *
 _wrap_gi_vfunc_info_get_flags (PyGIBaseInfo *self)
@@ -2370,7 +2369,7 @@ static PyMethodDef _PyGIVFuncInfo_methods[] = {
 
 
 /* GIUnionInfo */
-PYGI_DEFINE_TYPE ("gi.UnionInfo", PyGIUnionInfo_Type, PyGIBaseInfo);
+PYG_DEFINE_TYPE ("gi.UnionInfo", PyGIUnionInfo_Type, PyGIBaseInfo);
 
 static PyObject *
 _wrap_gi_union_info_get_fields (PyGIBaseInfo *self)

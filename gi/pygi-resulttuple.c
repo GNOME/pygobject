@@ -37,7 +37,7 @@ static PyObject *free_list[PyGIResultTuple_MAXSAVESIZE];
 static int numfree[PyGIResultTuple_MAXSAVESIZE];
 #endif
 
-PYGI_DEFINE_TYPE ("gi._gi.ResultTuple", PyGIResultTuple_Type, PyTupleObject)
+PYG_DEFINE_TYPE ("gi._gi.ResultTuple", PyGIResultTuple_Type, PyTupleObject)
 
 /**
  * ResultTuple.__repr__() implementation.

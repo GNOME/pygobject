@@ -34,7 +34,7 @@ typedef struct {
     guint index;
 } PyGPropsIter;
 
-PYGI_DEFINE_TYPE ("gi._gi.GPropsIter", PyGPropsIter_Type, PyGPropsIter);
+PYG_DEFINE_TYPE ("gi._gi.GPropsIter", PyGPropsIter_Type, PyGPropsIter);
 
 static void
 pyg_props_iter_dealloc (PyGPropsIter *self)
@@ -61,7 +61,7 @@ typedef struct {
     GType gtype;
 } PyGProps;
 
-PYGI_DEFINE_TYPE ("gi._gi.GProps", PyGProps_Type, PyGProps);
+PYG_DEFINE_TYPE ("gi._gi.GProps", PyGProps_Type, PyGProps);
 
 static void
 PyGProps_dealloc (PyGProps *self)
@@ -250,7 +250,7 @@ static PySequenceMethods _PyGProps_as_sequence = {
     (lenfunc)PyGProps_length, 0, 0, 0, 0, 0, 0,
 };
 
-PYGI_DEFINE_TYPE ("gi._gi.GPropsDescr", PyGPropsDescr_Type, PyObject);
+PYG_DEFINE_TYPE ("gi._gi.GPropsDescr", PyGPropsDescr_Type, PyObject);
 
 static PyObject *
 pyg_props_descr_descr_get (PyObject *self, PyObject *obj, PyObject *type)

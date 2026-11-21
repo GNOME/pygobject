@@ -33,7 +33,7 @@ typedef struct {
 
 PyObject *PyGIRepositoryError;
 
-PYGI_DEFINE_TYPE ("gi.Repository", PyGIRepository_Type, PyGIRepository);
+PYG_DEFINE_TYPE ("gi.Repository", PyGIRepository_Type, PyGIRepository);
 
 
 static gpointer

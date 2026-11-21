@@ -35,7 +35,7 @@ static PyObject *contextvars_copy_context;
 #endif
 
 /* This is never instantiated. */
-PYGI_DEFINE_TYPE ("gi._gi.Async", PyGIAsync_Type, PyGIAsync)
+PYG_DEFINE_TYPE ("gi._gi.Async", PyGIAsync_Type, PyGIAsync)
 
 /**
  * Async.__repr__() implementation.

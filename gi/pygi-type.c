@@ -105,7 +105,7 @@ typedef struct {
     GType type;
 } PyGTypeWrapper;
 
-PYGI_DEFINE_TYPE ("gobject.GType", PyGTypeWrapper_Type, PyGTypeWrapper);
+PYG_DEFINE_TYPE ("gobject.GType", PyGTypeWrapper_Type, PyGTypeWrapper);
 
 static PyObject *
 generic_gsize_richcompare (gsize a, gsize b, int op)
@@ -1210,7 +1210,7 @@ object_doc_descr_get (PyObject *self, PyObject *obj, PyObject *type)
     return pystring;
 }
 
-PYGI_DEFINE_TYPE ("gobject.GObject.__doc__", PyGObjectDoc_Type, PyObject);
+PYG_DEFINE_TYPE ("gobject.GObject.__doc__", PyGObjectDoc_Type, PyObject);
 
 static gpointer
 init_once_doc_descr (gpointer user_data)

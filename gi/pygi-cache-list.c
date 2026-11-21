@@ -55,7 +55,7 @@ _pygi_marshal_from_py_glist (PyGIInvokeState *state,
 
     py_length = PySequence_Length (py_arg);
     if (py_length < 0) return FALSE;
-    if (!pygi_guint_from_pyssize (py_length, &length)) return FALSE;
+    if (!pyg_guint_from_pyssize (py_length, &length)) return FALSE;
 
     item_cleanups = g_array_sized_new (
         FALSE, TRUE, sizeof (PyGIMarshalCleanupData), length + 1);
@@ -91,7 +91,7 @@ err:
         */
         Py_XDECREF (py_item);
         g_list_free (list_);
-        _PyGI_ERROR_PREFIX ("Item %i: ", i);
+        PYG_ERROR_PREFIX ("Item %i: ", i);
         return FALSE;
     }
 
@@ -137,7 +137,7 @@ _pygi_marshal_from_py_gslist (PyGIInvokeState *state,
 
     py_length = PySequence_Length (py_arg);
     if (py_length < 0) return FALSE;
-    if (!pygi_guint_from_pyssize (py_length, &length)) return FALSE;
+    if (!pyg_guint_from_pyssize (py_length, &length)) return FALSE;
 
     item_cleanups = g_array_sized_new (
         FALSE, TRUE, sizeof (PyGIMarshalCleanupData), length + 1);
@@ -174,7 +174,7 @@ err:
 
         Py_XDECREF (py_item);
         g_slist_free (list_);
-        _PyGI_ERROR_PREFIX ("Item %i: ", i);
+        PYG_ERROR_PREFIX ("Item %i: ", i);
         return FALSE;
     }
 
@@ -239,7 +239,7 @@ _pygi_marshal_to_py_glist (PyGIInvokeState *state,
 
         if (py_item == NULL) {
             Py_CLEAR (py_obj);
-            _PyGI_ERROR_PREFIX ("Item %u: ", i);
+            PYG_ERROR_PREFIX ("Item %u: ", i);
             g_array_unref (item_cleanups);
             return NULL;
         }
@@ -309,7 +309,7 @@ _pygi_marshal_to_py_gslist (PyGIInvokeState *state,
 
         if (py_item == NULL) {
             Py_CLEAR (py_obj);
-            _PyGI_ERROR_PREFIX ("Item %u: ", i);
+            PYG_ERROR_PREFIX ("Item %u: ", i);
             g_array_unref (item_cleanups);
             return NULL;
         }

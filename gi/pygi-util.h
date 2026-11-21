@@ -9,7 +9,7 @@ PyObject *pyg_ptr_richcompare (void *a, void *b, int op);
 const gchar *pyg_constant_strip_prefix (const gchar *name,
                                         const gchar *strip_prefix);
 
-gboolean pygi_guint_from_pyssize (Py_ssize_t pyval, guint *result);
+gboolean pyg_guint_from_pyssize (Py_ssize_t pyval, guint *result);
 
 PyObject *pyg_is_python_keyword (const gchar *name);
 
@@ -27,11 +27,11 @@ void pyg_destroy_notify (gpointer user_data);
 #define CPy_TRASHCAN_END(op)            Py_TRASHCAN_SAFE_END (op)
 #endif
 
-#define PYGI_DEFINE_TYPE(typename, symbol, csymbol)                           \
+#define PYG_DEFINE_TYPE(typename, symbol, csymbol)                            \
     PyTypeObject symbol = { PyVarObject_HEAD_INIT (NULL, 0) typename,         \
                             sizeof (csymbol) };
 
-#define _PyGI_ERROR_PREFIX(format, ...)                                       \
+#define PYG_ERROR_PREFIX(format, ...)                                         \
     G_STMT_START                                                              \
     {                                                                         \
         PyObject *py_error_prefix;                                            \

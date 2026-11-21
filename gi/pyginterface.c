@@ -26,7 +26,7 @@
 GQuark pyginterface_type_key;
 GQuark pyginterface_info_key;
 
-PYGI_DEFINE_TYPE ("gobject.GInterface", PyGInterface_Type, PyObject)
+PYG_DEFINE_TYPE ("gobject.GInterface", PyGInterface_Type, PyObject)
 
 static int
 pyg_interface_init (PyObject *self, PyObject *args, PyObject *kwargs)
@@ -68,7 +68,7 @@ pyg_lookup_interface_info (GType gtype)
  * Returns 0 on success, or -1 and sets an exception.
  */
 int
-pygi_interface_register_types (PyObject *d)
+pyg_interface_register_types (PyObject *d)
 {
     PyObject *pygtype;
 

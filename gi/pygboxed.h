@@ -33,6 +33,6 @@ void pygi_register_gboxed (PyObject *dict, const gchar *class_name,
 PyObject *pygi_gboxed_new (GType boxed_type, gpointer boxed,
                            gboolean copy_boxed, gboolean own_ref);
 
-int pygi_gboxed_register_types (PyObject *d);
+int pyg_boxed_register_types (PyObject *d);
 
 G_END_DECLS

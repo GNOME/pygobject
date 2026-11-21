@@ -893,7 +893,7 @@ pyg_signal_new (PyObject *self, PyObject *args)
     py_n_params = PySequence_Length (py_param_types);
     if (py_n_params < 0) return FALSE;
 
-    if (!pygi_guint_from_pyssize (py_n_params, &n_params)) return FALSE;
+    if (!pyg_guint_from_pyssize (py_n_params, &n_params)) return FALSE;
 
     param_types = g_new (GType, n_params);
     for (i = 0; i < n_params; i++) {
@@ -1191,7 +1191,7 @@ _gi_exec (PyObject *module)
     if ((ret = pygi_info_register_types (module)) < 0) return ret;
     if ((ret = pygi_pointer_register_types (module_dict)) < 0) return ret;
     if ((ret = pygi_struct_register_types (module)) < 0) return ret;
-    if ((ret = pygi_gboxed_register_types (module_dict)) < 0) return ret;
+    if ((ret = pyg_boxed_register_types (module_dict)) < 0) return ret;
     if ((ret = pygi_fundamental_register_types (module)) < 0) return ret;
     if ((ret = pygi_boxed_register_types (module)) < 0) return ret;
     if ((ret = pygi_ccallback_register_types (module)) < 0) return ret;
@@ -1203,7 +1203,7 @@ _gi_exec (PyObject *module)
     if ((ret = pygi_register_warnings (module_dict)) < 0) return ret;
     if ((ret = pyg_object_props_register_types (module_dict)) < 0) return ret;
     if ((ret = pyg_object_register_types (module_dict)) < 0) return ret;
-    if ((ret = pygi_interface_register_types (module_dict)) < 0) return ret;
+    if ((ret = pyg_interface_register_types (module_dict)) < 0) return ret;
     if ((ret = pygi_enum_register_types (module)) < 0) return ret;
     if ((ret = pygi_flags_register_types (module)) < 0) return ret;
     if ((ret = pygi_register_api (module_dict)) < 0) return ret;

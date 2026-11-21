@@ -39,7 +39,7 @@ _ccallback_vectorcall (PyGICCallback *self, PyObject *const *args,
     return result;
 }
 
-PYGI_DEFINE_TYPE ("gi.CCallback", PyGICCallback_Type, PyGICCallback);
+PYG_DEFINE_TYPE ("gi.CCallback", PyGICCallback_Type, PyGICCallback);
 
 PyObject *
 _pygi_ccallback_new (GCallback callback, gpointer user_data, GIScopeType scope,

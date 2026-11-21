@@ -25,7 +25,7 @@
 
 GQuark pygboxed_type_key;
 
-PYGI_DEFINE_TYPE ("gobject.GBoxed", PyGBoxed_Type, PyGBoxed);
+PYG_DEFINE_TYPE ("gobject.GBoxed", PyGBoxed_Type, PyGBoxed);
 
 static void
 gboxed_dealloc (PyGBoxed *self)
@@ -229,7 +229,7 @@ pygi_gboxed_new (GType boxed_type, gpointer boxed, gboolean copy_boxed,
  * Returns 0 on success, or -1 and sets an exception.
  */
 int
-pygi_gboxed_register_types (PyObject *d)
+pyg_boxed_register_types (PyObject *d)
 {
     PyObject *pygtype;
 

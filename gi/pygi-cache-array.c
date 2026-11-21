@@ -359,7 +359,7 @@ _pygi_marshal_from_py_array (PyGIInvokeState *state,
     py_length = PySequence_Length (py_arg);
     if (py_length < 0) return FALSE;
 
-    if (!pygi_guint_from_pyssize (py_length, &length)) return FALSE;
+    if (!pyg_guint_from_pyssize (py_length, &length)) return FALSE;
 
     if (gi_type_info_get_array_fixed_size (arg_cache->type_info, &fixed_size)
         && (guint)fixed_size != length) {
@@ -417,7 +417,7 @@ _pygi_marshal_from_py_array (PyGIInvokeState *state,
             PyGIMarshalCleanupData item_cleanup_data = { 0 };
             PyObject *py_item = PySequence_GetItem (py_arg, i);
             if (py_item == NULL) {
-                _PyGI_ERROR_PREFIX ("Item %u: ", i);
+                PYG_ERROR_PREFIX ("Item %u: ", i);
                 goto err;
             }
 
@@ -425,7 +425,7 @@ _pygi_marshal_from_py_array (PyGIInvokeState *state,
                                      sequence_cache->item_cache, py_item,
                                      &item, &item_cleanup_data)) {
                 Py_DECREF (py_item);
-                _PyGI_ERROR_PREFIX ("Item %u: ", i);
+                PYG_ERROR_PREFIX ("Item %u: ", i);
                 goto err;
             }
             Py_DECREF (py_item);
