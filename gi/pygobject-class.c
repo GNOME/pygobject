@@ -27,6 +27,7 @@
 #include "pygbasictype.h"
 #include "pygi-fundamental.h"
 #include "pygi-property.h"
+#include "pygi-signal-closure.h"
 #include "pygi-type.h"
 #include "pygutil.h"
 #include "pygi-value.h"

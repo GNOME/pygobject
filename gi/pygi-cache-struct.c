@@ -21,6 +21,7 @@
 #include "pygboxed.h"
 #include "pygi-boxed.h"
 #include "pygi-cache-private.h"
+#include "pygi-closure.h"
 #include "pygi-foreign.h"
 #include "pygi-info.h"
 #include "pygi-struct.h"

@@ -39,6 +39,7 @@
 #include "pygi-property.h"
 #include "pygi-repository.h"
 #include "pygi-resulttuple.h"
+#include "pygi-signal-closure.h"
 #include "pygi-source.h"
 #include "pygi-struct.h"
 #include "pygi-type.h"

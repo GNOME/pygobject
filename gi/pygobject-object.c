@@ -23,6 +23,7 @@
 #include "pygboxed.h"
 #include "pygbasictype.h"
 #include "pygi-property.h"
+#include "pygi-closure.h"
 #include "pygi-signal-closure.h"
 #include "pygi-type.h"
 #include "pygutil.h"
@@ -1320,7 +1321,7 @@ connect_helper (PyGObject *self, gchar *name, PyObject *callback,
     if (!pyg_gtype_is_custom (query_info.itype)) {
         /* The signal is implemented by a non-Python class, probably
          * something in the gi repository. */
-        closure = pygi_signal_closure_new (self, query_info.itype,
+        closure = pygi_signal_closure_new (query_info.itype,
                                            query_info.signal_name, callback,
                                            extra_args, object);
     }

@@ -21,6 +21,7 @@ sources = [
   'pygi-async.c',
   'pygi-type.c',
   'pygi-boxed.c',
+  'pygi-closure.c',
   'pygi-native-closure.c',
   'pygi-ccallback.c',
   'pygi-property.c',

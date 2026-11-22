@@ -18,11 +18,18 @@
 
 #include "pygi-signal-closure.h"
 
+#include "pygboxed.h"
 #include "pygi-argument.h"
 #include "pygi-boxed.h"
+#include "pygi-closure.h"
 #include "pygi-repository.h"
 #include "pygi-value.h"
 #include "pygobject-object.h"
+
+typedef struct {
+    PyGClosure pyg_closure;
+    GISignalInfo *signal_info;
+} PyGISignalClosure;
 
 static GISignalInfo *
 _pygi_lookup_signal_from_g_type (GType g_type, const gchar *signal_name)
@@ -276,9 +283,9 @@ out:
 }
 
 GClosure *
-pygi_signal_closure_new (PyGObject *instance, GType g_type,
-                         const gchar *signal_name, PyObject *callback,
-                         PyObject *extra_args, PyObject *swap_data)
+pygi_signal_closure_new (GType g_type, const gchar *signal_name,
+                         PyObject *callback, PyObject *extra_args,
+                         PyObject *swap_data)
 {
     GClosure *closure = NULL;
     GISignalInfo *signal_info = NULL;
@@ -288,35 +295,150 @@ pygi_signal_closure_new (PyGObject *instance, GType g_type,
     signal_info = _pygi_lookup_signal_from_g_type (g_type, signal_name);
     if (signal_info == NULL) return NULL;
 
-    closure = g_closure_new_simple (sizeof (PyGISignalClosure), NULL);
-
-    if (swap_data != NULL && PyObject_TypeCheck (swap_data, &PyGObject_Type)) {
-        GObject *data = pygobject_get (swap_data);
-        g_object_watch_closure (data, closure);
-        ((PyGClosure *)closure)->swap_data = data;
-        ((PyGClosure *)closure)->swap_data_is_gobject = TRUE;
-        closure->derivative_flag = TRUE;
-    } else if (swap_data != NULL) {
-        ((PyGClosure *)closure)->swap_data = Py_NewRef (swap_data);
-        closure->derivative_flag = TRUE;
-    }
-
-    g_closure_add_invalidate_notifier (closure, NULL,
-                                       pygi_signal_closure_invalidate);
-    g_closure_set_marshal (closure, pygi_signal_closure_marshal);
+    closure = pyg_closure_new_full (
+        sizeof (PyGISignalClosure), callback, extra_args, swap_data,
+        pygi_signal_closure_marshal, pygi_signal_closure_invalidate);
 
     ((PyGISignalClosure *)closure)->signal_info = signal_info;
-    ((PyGClosure *)closure)->callback = Py_NewRef (callback);
-
-    if (extra_args != NULL && !Py_IsNone (extra_args)) {
-        Py_INCREF (extra_args);
-        if (!PyTuple_Check (extra_args)) {
-            PyObject *tmp = PyTuple_New (1);
-            PyTuple_SetItem (tmp, 0, extra_args);
-            extra_args = tmp;
-        }
-        ((PyGClosure *)closure)->extra_args = extra_args;
-    }
 
     return closure;
+}
+
+/* -------------- PySignalClassClosure ----------------- */
+/* a closure used for the `class closure' of a signal.  As this gets
+ * all the info from the first argument to the closure and the
+ * invocation hint, we can have a single closure that handles all
+ * class closure cases.  We call a method by the name of the signal
+ * with "do_" prepended.
+ *
+ *  We also remove the first argument from the * param list, as it is
+ *  the instance object, which is passed * implicitly to the method
+ *  object. */
+
+static void
+pyg_signal_class_closure_marshal (GClosure *closure, GValue *return_value,
+                                  guint n_param_values,
+                                  const GValue *param_values,
+                                  gpointer invocation_hint,
+                                  gpointer marshal_data)
+{
+    PyGILState_STATE state;
+    GObject *object;
+    PyObject *object_wrapper;
+    GSignalInvocationHint *hint = (GSignalInvocationHint *)invocation_hint;
+    gchar *method_name, *tmp;
+    PyObject *method;
+    PyObject *params, *ret;
+    Py_ssize_t py_len;
+    guint i, len;
+
+    state = PyGILState_Ensure ();
+
+    g_return_if_fail (invocation_hint != NULL);
+    /* get the object passed as the first argument to the closure */
+    object = g_value_get_object (&param_values[0]);
+    g_return_if_fail (object != NULL && G_IS_OBJECT (object));
+
+    /* get the wrapper for this object */
+    object_wrapper = pygobject_new (object);
+    g_return_if_fail (object_wrapper != NULL);
+
+    /* construct method name for this class closure */
+    method_name = g_strconcat ("do_", g_signal_name (hint->signal_id), NULL);
+
+    /* convert dashes to underscores.  For some reason, g_signal_name
+     * seems to convert all the underscores in the signal name to
+       dashes??? */
+    for (tmp = method_name; *tmp != '\0'; tmp++)
+        if (*tmp == '-') *tmp = '_';
+
+    method = PyObject_GetAttrString (object_wrapper, method_name);
+    g_free (method_name);
+
+    if (!method) {
+        PyErr_Clear ();
+        Py_DECREF (object_wrapper);
+        PyGILState_Release (state);
+        return;
+    }
+    Py_DECREF (object_wrapper);
+
+    /* construct Python tuple for the parameter values; don't copy boxed values
+       initially because we'll check after the call to see if a copy is needed. */
+    params = PyTuple_New (n_param_values - 1);
+    for (i = 1; i < n_param_values; i++) {
+        PyObject *item = pyg_value_to_pyobject (&param_values[i], FALSE);
+
+        /* error condition */
+        if (!item) {
+            Py_DECREF (params);
+            PyGILState_Release (state);
+            return;
+        }
+        PyTuple_SetItem (params, i - 1, item);
+    }
+
+    ret = PyObject_CallObject (method, params);
+
+    /* Copy boxed values if others ref them, this needs to be done regardless of
+       exception status. */
+    py_len = PyTuple_Size (params);
+    len = (guint)py_len;
+    for (i = 0; i < len; i++) {
+        PyObject *item = PyTuple_GetItem (params, i);
+        if (item != NULL && PyObject_TypeCheck (item, &PyGBoxed_Type)
+            && Py_REFCNT (item) != 1) {
+            PyGBoxed *boxed_item = (PyGBoxed *)item;
+            if (!boxed_item->free_on_dealloc) {
+                gpointer boxed_ptr = pyg_boxed_get_ptr (boxed_item);
+                pyg_boxed_set_ptr (
+                    boxed_item, g_boxed_copy (boxed_item->gtype, boxed_ptr));
+                boxed_item->free_on_dealloc = TRUE;
+            }
+        }
+    }
+
+    if (ret == NULL) {
+        PyErr_Print ();
+        Py_DECREF (method);
+        Py_DECREF (params);
+        PyGILState_Release (state);
+        return;
+    }
+    Py_DECREF (method);
+    Py_DECREF (params);
+    if (G_IS_VALUE (return_value)) pyg_value_from_pyobject (return_value, ret);
+    Py_DECREF (ret);
+    PyGILState_Release (state);
+}
+
+static gpointer
+init_once_closure (gpointer user_data)
+{
+    GClosure *closure = g_closure_new_simple (sizeof (GClosure), NULL);
+    g_closure_set_marshal (closure, pyg_signal_class_closure_marshal);
+
+    g_closure_ref (closure);
+    g_closure_sink (closure);
+
+    return closure;
+}
+
+/**
+ * pyg_signal_class_closure_get:
+ *
+ * Returns the GClosure used for the class closure of signals.  When
+ * called, it will invoke the method do_signalname (for the signal
+ * "signalname").
+ *
+ * Returns: the closure.
+ */
+GClosure *
+pyg_signal_class_closure_get (void)
+{
+    static GOnce once_closure = G_ONCE_INIT;
+
+    g_once (&once_closure, init_once_closure, NULL);
+
+    return once_closure.retval;
 }

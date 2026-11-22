@@ -28,6 +28,7 @@
 #include "pygflags.h"
 #include "pygbasictype.h"
 #include "pygi-error.h"
+#include "pygi-closure.h"
 #include "pygi-type.h"
 #include "pygutil.h"
 #include "pygi-value.h"
