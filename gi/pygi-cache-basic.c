@@ -18,8 +18,10 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "pygi-argument.h"
 #include "pygi-basictype.h"
 #include "pygi-cache-private.h"
+#include "pygi-type.h"
 
 
 /* pygi_arg_base_setup:
@@ -52,6 +54,176 @@ pygi_arg_base_setup (
     if (arg_info != NULL) {
         gi_base_info_ref ((GIBaseInfo *)arg_info);
         arg_cache->arg_info = arg_info;
+    }
+}
+
+static GIArgument
+pygi_marshal_from_py_basic_type (PyObject *object, /* in */
+                                 GITypeTag type_tag, GITransfer transfer,
+                                 gpointer *cleanup_data /* out */)
+{
+    GIArgument arg = PYGI_ARG_INIT;
+    gboolean converted = FALSE;
+
+    switch (type_tag) {
+    case GI_TYPE_TAG_VOID:
+        g_warn_if_fail (transfer == GI_TRANSFER_NOTHING);
+        if (pygi_gpointer_from_py (object, &(arg.v_pointer))) {
+            *cleanup_data = arg.v_pointer;
+            converted = TRUE;
+        }
+        break;
+
+    case GI_TYPE_TAG_INT8:
+        converted = pygi_gint8_from_py (object, &(arg.v_int8));
+        break;
+    case GI_TYPE_TAG_UINT8:
+        converted = pygi_guint8_from_py (object, &(arg.v_uint8));
+        break;
+    case GI_TYPE_TAG_INT16:
+        converted = pygi_gint16_from_py (object, &(arg.v_int16));
+        break;
+    case GI_TYPE_TAG_UINT16:
+        converted = pygi_guint16_from_py (object, &(arg.v_uint16));
+        break;
+    case GI_TYPE_TAG_INT32:
+        converted = pygi_gint32_from_py (object, &(arg.v_int32));
+        break;
+    case GI_TYPE_TAG_UINT32:
+        converted = pygi_guint32_from_py (object, &(arg.v_uint32));
+        break;
+    case GI_TYPE_TAG_INT64:
+        converted = pygi_gint64_from_py (object, &(arg.v_int64));
+        break;
+    case GI_TYPE_TAG_UINT64:
+        converted = pygi_guint64_from_py (object, &(arg.v_uint64));
+        break;
+    case GI_TYPE_TAG_BOOLEAN:
+        converted = pygi_gboolean_from_py (object, &(arg.v_boolean));
+        break;
+    case GI_TYPE_TAG_FLOAT:
+        converted = pygi_gfloat_from_py (object, &(arg.v_float));
+        break;
+    case GI_TYPE_TAG_DOUBLE:
+        converted = pygi_gdouble_from_py (object, &(arg.v_double));
+        break;
+    case GI_TYPE_TAG_GTYPE:
+        converted = pygi_gtype_from_py (object, &(arg.v_size));
+        break;
+    case GI_TYPE_TAG_UNICHAR:
+        converted = pygi_gunichar_from_py (object, &(arg.v_uint32));
+        break;
+    case GI_TYPE_TAG_UTF8:
+        if (pygi_utf8_from_py (object, &(arg.v_string))) {
+            *cleanup_data = arg.v_string;
+            converted = TRUE;
+        }
+        break;
+
+    case GI_TYPE_TAG_FILENAME:
+        if (pygi_filename_from_py (object, &(arg.v_string))) {
+            *cleanup_data = arg.v_string;
+            converted = TRUE;
+        }
+        break;
+
+    case GI_TYPE_TAG_ARRAY:
+    case GI_TYPE_TAG_INTERFACE:
+    case GI_TYPE_TAG_GLIST:
+    case GI_TYPE_TAG_GSLIST:
+    case GI_TYPE_TAG_GHASH:
+    case GI_TYPE_TAG_ERROR:
+        PyErr_Format (PyExc_TypeError, "Type tag %s (%d) not supported",
+                      gi_type_tag_to_string (type_tag), type_tag);
+        break;
+    default:
+        g_assert_not_reached ();
+    }
+
+    if (!converted && !PyErr_Occurred ()) {
+        PyErr_Format (PyExc_TypeError,
+                      "Object %R Could not be converted type tag %s", object,
+                      gi_type_tag_to_string (type_tag));
+    }
+
+    return arg;
+}
+
+/**
+ * pygi_marshal_to_py_basic_type:
+ * @arg: The argument to convert to an object.
+ * @type_tag: Type tag for @arg
+ * @transfer: Transfer annotation
+ *
+ * Convert the given argument to a Python object. This function
+ * is restricted to simple types that only require the GITypeTag
+ * and GITransfer. For a more complete conversion routine, use:
+ * pygi_argument_to_py.
+ *
+ * Returns: A PyObject representing @arg or NULL if it cannot convert
+ *          the argument.
+ */
+static PyObject *
+pygi_marshal_to_py_basic_type (GIArgument arg, GITypeTag type_tag,
+                               GITransfer transfer)
+{
+    switch (type_tag) {
+    case GI_TYPE_TAG_BOOLEAN:
+        return pygi_gboolean_to_py (arg.v_boolean);
+
+    case GI_TYPE_TAG_INT8:
+        return pygi_gint8_to_py (arg.v_int8);
+
+    case GI_TYPE_TAG_UINT8:
+        return pygi_guint8_to_py (arg.v_uint8);
+
+    case GI_TYPE_TAG_INT16:
+        return pygi_gint16_to_py (arg.v_int16);
+
+    case GI_TYPE_TAG_UINT16:
+        return pygi_guint16_to_py (arg.v_uint16);
+
+    case GI_TYPE_TAG_INT32:
+        return pygi_gint32_to_py (arg.v_int32);
+
+    case GI_TYPE_TAG_UINT32:
+        return pygi_guint32_to_py (arg.v_uint32);
+
+    case GI_TYPE_TAG_INT64:
+        return pygi_gint64_to_py (arg.v_int64);
+
+    case GI_TYPE_TAG_UINT64:
+        return pygi_guint64_to_py (arg.v_uint64);
+
+    case GI_TYPE_TAG_FLOAT:
+        return pygi_gfloat_to_py (arg.v_float);
+
+    case GI_TYPE_TAG_DOUBLE:
+        return pygi_gdouble_to_py (arg.v_double);
+
+    case GI_TYPE_TAG_GTYPE:
+        return pyg_type_wrapper_new ((GType)arg.v_size);
+
+    case GI_TYPE_TAG_UNICHAR:
+        return pygi_gunichar_to_py (arg.v_uint32);
+
+    case GI_TYPE_TAG_UTF8:
+        return pygi_utf8_to_py (arg.v_string);
+
+    case GI_TYPE_TAG_FILENAME:
+        return pygi_filename_to_py (arg.v_string);
+
+    case GI_TYPE_TAG_VOID:
+    case GI_TYPE_TAG_ARRAY:
+    case GI_TYPE_TAG_INTERFACE:
+    case GI_TYPE_TAG_GLIST:
+    case GI_TYPE_TAG_GSLIST:
+    case GI_TYPE_TAG_GHASH:
+    case GI_TYPE_TAG_ERROR:
+        PyErr_Format (PyExc_TypeError, "Type tag %d not supported", type_tag);
+        return NULL;
+    default:
+        g_assert_not_reached ();
     }
 }
 
