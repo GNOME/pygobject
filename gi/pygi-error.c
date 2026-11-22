@@ -26,7 +26,29 @@
 #include "pygi-value.h"
 #include "pygutil.h"
 
-PyObject *PyGError = NULL;
+
+static gpointer
+init_once_gerror_class (gpointer data)
+{
+    PyObject *gerror_class;
+    PyObject *glib_module = PyImport_ImportModule ("gi.repository.GLib");
+    if (glib_module == NULL) {
+        return NULL;
+    }
+
+    gerror_class = PyObject_GetAttrString (glib_module, "Error");
+    Py_DECREF (glib_module);
+    return gerror_class;
+}
+
+static PyObject *
+pyg_error_type_get (void)
+{
+    static GOnce once_gerror_class = G_ONCE_INIT;
+
+    g_once (&once_gerror_class, init_once_gerror_class, NULL);
+    return once_gerror_class.retval;
+}
 
 /**
  * pygi_error_marshal_to_py:
@@ -43,7 +65,6 @@ PyObject *
 pygi_error_marshal_to_py (GError **error)
 {
     PyGILState_STATE state;
-    PyObject *exc_type;
     PyObject *exc_instance;
     const char *domain = NULL;
 
@@ -53,14 +74,13 @@ pygi_error_marshal_to_py (GError **error)
 
     state = PyGILState_Ensure ();
 
-    exc_type = PyGError;
-
     if ((*error)->domain) {
         domain = g_quark_to_string ((*error)->domain);
     }
 
-    exc_instance = PyObject_CallFunction (exc_type, "ssi", (*error)->message,
-                                          domain, (*error)->code);
+    exc_instance = PyObject_CallFunction (pyg_error_type_get (), "ssi",
+                                          (*error)->message, domain,
+                                          (*error)->code);
 
     PyGILState_Release (state);
 
@@ -90,7 +110,7 @@ pygi_error_check (GError **error)
 
     exc_instance = pygi_error_marshal_to_py (error);
     if (exc_instance != NULL) {
-        PyErr_SetObject (PyGError, exc_instance);
+        PyErr_SetObject (pyg_error_type_get (), exc_instance);
         Py_DECREF (exc_instance);
     } else {
         PyErr_Print ();
@@ -122,7 +142,7 @@ pygi_error_marshal_from_py (PyObject *pyerr, GError **error)
     gboolean res = FALSE;
     PyObject *py_message = NULL, *py_domain = NULL, *py_code = NULL;
 
-    if (PyObject_IsInstance (pyerr, PyGError) != 1) {
+    if (PyObject_IsInstance (pyerr, pyg_error_type_get ()) != 1) {
         PyErr_Format (PyExc_TypeError, "Must be GLib.Error, not %s",
                       Py_TYPE (pyerr)->tp_name);
         return FALSE;
@@ -194,7 +214,7 @@ pygi_gerror_exception_check (GError **error)
         PyErr_Print ();
         return -2;
     }
-    if (!value || !PyErr_GivenExceptionMatches (type, (PyObject *)PyGError)) {
+    if (!value || !PyErr_GivenExceptionMatches (type, pyg_error_type_get ())) {
         PyErr_Restore (type, value, traceback);
         PyErr_Print ();
         return -2;
@@ -238,16 +258,6 @@ pygerror_to_gvalue (GValue *value, PyObject *pyerror)
 int
 pygi_error_register_types (PyObject *module)
 {
-    PyObject *error_module = PyImport_ImportModule ("gi._error");
-    if (!error_module) {
-        return -1;
-    }
-
-    /* Stash a reference to the Python implemented gi._error.GError. */
-    PyGError = PyObject_GetAttrString (error_module, "GError");
-    Py_DECREF (error_module);
-    if (PyGError == NULL) return -1;
-
     pyg_register_gtype_custom (G_TYPE_ERROR, pygerror_from_gvalue,
                                pygerror_to_gvalue);
 

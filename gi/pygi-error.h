@@ -25,8 +25,6 @@
 
 G_BEGIN_DECLS
 
-extern PyObject *PyGError;
-
 gboolean pygi_error_check (GError **error);
 
 PyObject *pygi_error_marshal_to_py (GError **error);

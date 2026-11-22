@@ -22,7 +22,6 @@ from inspect import Parameter, Signature
 from typing import Any, Optional
 from collections.abc import Callable
 
-from ._error import GError
 from ._gi import (
     VFuncInfo,
     FunctionInfo,
@@ -53,7 +52,6 @@ tag_pytype = {
     TypeTag.UTF8: str,
     TypeTag.FILENAME: str,
     TypeTag.UNICHAR: str,
-    TypeTag.ERROR: GError,
 }
 
 list_tag_types = {TypeTag.GLIST, TypeTag.GSLIST, TypeTag.ARRAY}
@@ -78,6 +76,10 @@ def get_pytype(gi_type: TypeInfo) -> object:
         if key_type is Parameter.empty or value_type is Parameter.empty:
             return dict
         return dict[key_type, value_type]
+    if tag == TypeTag.ERROR:
+        from gi.repository import GLib
+
+        return GLib.Error
     if tag == TypeTag.INTERFACE:
         info = gi_type.get_interface()
         if isinstance(info, CallbackInfo):

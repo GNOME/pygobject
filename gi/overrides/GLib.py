@@ -63,9 +63,50 @@ __all__ = []
 
 # Types and functions still needed from static bindings
 from gi import _gi
-from gi._error import GError
 
-Error = GError
+
+class Error(RuntimeError):
+    __gtype__ = GLib.Error.__gtype__
+
+    message: str
+    domain: str
+    code: int
+
+    def __init__(
+        self, message: str = "unknown error", domain: str = "pygi-error", code: int = 0
+    ) -> None:
+        super().__init__(message)
+        self.message = message
+        self.domain = domain
+        self.code = code
+
+    def __str__(self) -> str:
+        return f"{self.domain:s}: {self.message:s} ({self.code:d})"
+
+    def __repr__(self) -> str:
+        return f"{GError.__module__.rsplit('.', 1)[-1]:s}.{GError.__name__:s}('{self.message:s}', '{self.domain:s}', {self.code:d})"
+
+    def copy(self) -> Self:
+        return GError(self.message, self.domain, self.code)
+
+    def matches(self, domain: str | int, code: int) -> bool:
+        """Placeholder that will be monkey patched in GLib overrides."""
+        # Handle cases where self.domain was set to an integer for compatibility
+        # with the introspected GLib.Error.
+        if isinstance(self.domain, str):
+            self_domain_quark = GLib.quark_from_string(self.domain)
+        else:
+            self_domain_quark = self.domain
+        return (self_domain_quark, self.code) == (domain, code)
+
+    @staticmethod
+    def new_literal(domain: int, message: str, code: int) -> Self:
+        """Placeholder that will be monkey patched in GLib overrides."""
+        domain_quark = GLib.quark_to_string(domain)
+        return GError(message, domain_quark, code)
+
+
+GError = Error
 
 
 class Pid(int):
@@ -111,29 +152,6 @@ def threads_init():
         PyGIDeprecationWarning,
         stacklevel=2,
     )
-
-
-def gerror_matches(self, domain: str | int, code: int) -> bool:
-    # Handle cases where self.domain was set to an integer for compatibility
-    # with the introspected GLib.Error.
-    if isinstance(self.domain, str):
-        self_domain_quark = GLib.quark_from_string(self.domain)
-    else:
-        self_domain_quark = self.domain
-    return (self_domain_quark, self.code) == (domain, code)
-
-
-def gerror_new_literal(domain: int, message: str, code: int) -> GError:
-    domain_quark = GLib.quark_to_string(domain)
-    return GError(message, domain_quark, code)
-
-
-# Monkey patch methods that rely on GLib introspection to be loaded at runtime.
-Error.__name__ = "Error"
-Error.__module__ = "gi.repository.GLib"
-Error.__gtype__ = GLib.Error.__gtype__
-Error.matches = gerror_matches
-Error.new_literal = staticmethod(gerror_new_literal)
 
 
 __all__ += [
