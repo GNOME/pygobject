@@ -71,6 +71,64 @@ pyg_enum_from_gtype (GType gtype, int value)
     return pyg_enum_val_new (pyclass, value);
 }
 
+/**
+ * pyg_enum_get_value:
+ * @enum_type: the GType of the flag.
+ * @obj: a Python object representing the flag value
+ * @val: a pointer to the location to store the integer representation of the flag.
+ *
+ * Converts a Python object to the integer equivalent.  The conversion
+ * will depend on the type of the Python object.  If the object is an
+ * integer, it is passed through directly.  If it is a string, it will
+ * be treated as a full or short enum name as defined in the GType.
+ *
+ * Returns: 0 on success or -1 on failure
+ */
+gint
+pyg_enum_get_value (GType enum_type, PyObject *obj, gint *val)
+{
+    GEnumClass *eclass = NULL;
+    gint res = -1;
+
+    g_return_val_if_fail (val != NULL, -1);
+    if (!obj) {
+        *val = 0;
+        return 0;
+    }
+
+    if (PyNumber_Check (obj)) {
+        if (pyg_gint_from_py (obj, val)) res = 0;
+    } else if (PyUnicode_Check (obj)) {
+        GEnumValue *info;
+        char *str = PyUnicode_AsUTF8 (obj);
+
+        if (enum_type != G_TYPE_NONE)
+            eclass = G_ENUM_CLASS (g_type_class_ref (enum_type));
+        else {
+            PyErr_SetString (PyExc_TypeError,
+                             "could not convert string to enum because there "
+                             "is no GType associated to look up the value");
+            return -1;
+        }
+        info = g_enum_get_value_by_name (eclass, str);
+
+        if (!info) info = g_enum_get_value_by_nick (eclass, str);
+        if (info) {
+            *val = info->value;
+            res = 0;
+        } else {
+            PyErr_SetString (PyExc_TypeError, "could not convert string");
+            res = -1;
+        }
+        g_type_class_unref (eclass);
+    } else {
+        PyErr_SetString (PyExc_TypeError,
+                         "enum values must be strings or ints");
+        res = -1;
+    }
+    return res;
+}
+
 static void
 add_value (PyObject *dict, const char *value_nick, int value)
 {

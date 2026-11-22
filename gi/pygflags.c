@@ -21,6 +21,7 @@
 
 #include "pygflags.h"
 
+#include "pygbasictype.h"
 #include "pygi-type.h"
 #include "pygutil.h"
 
@@ -92,6 +93,99 @@ add_value (PyObject *dict, const char *value_nick, unsigned int value)
     PyMapping_SetItemString (dict, upper, v);
     Py_DECREF (v);
     g_free (upper);
+}
+
+
+/**
+ * pyg_flags_get_value:
+ * @flag_type: the GType of the flag.
+ * @obj: a Python object representing the flag value
+ * @val: a pointer to the location to store the integer representation of the flag.
+ *
+ * Converts a Python object to the integer equivalent.  The conversion
+ * will depend on the type of the Python object.  If the object is an
+ * integer, it is passed through directly.  If it is a string, it will
+ * be treated as a full or short flag name as defined in the GType.
+ * If it is a tuple, then the items are treated as strings and ORed
+ * together.
+ *
+ * Returns: 0 on success or -1 on failure
+ */
+gint
+pyg_flags_get_value (GType flag_type, PyObject *obj, guint *val)
+{
+    GFlagsClass *fclass = NULL;
+    gint res = -1;
+
+    g_return_val_if_fail (val != NULL, -1);
+    if (!obj) {
+        *val = 0;
+        return 0;
+    }
+
+    if (PyNumber_Check (obj)) {
+        if (pyg_guint_from_py (obj, val)) res = 0;
+    } else if (PyUnicode_Check (obj)) {
+        GFlagsValue *info;
+        char *str = PyUnicode_AsUTF8 (obj);
+
+        if (flag_type != G_TYPE_NONE)
+            fclass = G_FLAGS_CLASS (g_type_class_ref (flag_type));
+        else {
+            PyErr_SetString (PyExc_TypeError,
+                             "could not convert string to flag because there "
+                             "is no GType associated to look up the value");
+            return -1;
+        }
+        info = g_flags_get_value_by_name (fclass, str);
+
+        if (!info) info = g_flags_get_value_by_nick (fclass, str);
+        if (info) {
+            *val = info->value;
+            res = 0;
+        } else {
+            PyErr_SetString (PyExc_TypeError, "could not convert string");
+            res = -1;
+        }
+        g_type_class_unref (fclass);
+    } else if (PyTuple_Check (obj)) {
+        Py_ssize_t i, len;
+
+        len = PyTuple_Size (obj);
+        *val = 0;
+        res = 0;
+
+        if (flag_type != G_TYPE_NONE)
+            fclass = G_FLAGS_CLASS (g_type_class_ref (flag_type));
+        else {
+            PyErr_SetString (PyExc_TypeError,
+                             "could not convert string to flag because there "
+                             "is no GType associated to look up the value");
+            res = -1;
+        }
+
+        for (i = 0; i < len; i++) {
+            PyObject *item = PyTuple_GetItem (obj, i);
+            char *str = PyUnicode_AsUTF8 (item);
+            GFlagsValue *info = g_flags_get_value_by_name (fclass, str);
+
+            if (!info) info = g_flags_get_value_by_nick (fclass, str);
+            if (info) {
+                *val |= info->value;
+            } else {
+                PyErr_SetString (PyExc_TypeError, "could not convert string");
+                res = -1;
+                break;
+            }
+        }
+        g_type_class_unref (fclass);
+    } else {
+        PyErr_SetString (
+            PyExc_TypeError,
+            "flag values must be strings, ints, longs, or tuples");
+        res = -1;
+    }
+    return res;
 }
 
 PyObject *

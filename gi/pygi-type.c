@@ -77,27 +77,6 @@ pygi_type_import_by_gi_info (GIBaseInfo *info)
                                      gi_base_info_get_name (info));
 }
 
-PyObject *
-pygi_type_get_from_g_type (GType g_type)
-{
-    PyObject *py_g_type;
-    PyObject *py_type;
-
-    py_g_type = pyg_type_wrapper_new (g_type);
-    if (py_g_type == NULL) {
-        return NULL;
-    }
-
-    py_type = PyObject_GetAttrString (py_g_type, "pytype");
-    if (Py_IsNone (py_type)) {
-        py_type = pygi_type_import_by_g_type (g_type);
-    }
-
-    Py_DECREF (py_g_type);
-
-    return py_type;
-}
-
 /* -------------- __gtype__ objects ---------------------------- */
 
 typedef struct {
@@ -475,7 +454,6 @@ pyg_type_wrapper_new (GType type)
  *
  * Returns: the corresponding GType, or 0 on error.
  */
-
 GType
 pyg_type_from_object_strict (PyObject *obj, gboolean strict)
 {
@@ -558,220 +536,6 @@ pyg_type_from_object (PyObject *obj)
 {
     /* Legacy call always defaults to strict type checking */
     return pyg_type_from_object_strict (obj, TRUE);
-}
-
-/**
- * pyg_enum_get_value:
- * @enum_type: the GType of the flag.
- * @obj: a Python object representing the flag value
- * @val: a pointer to the location to store the integer representation of the flag.
- *
- * Converts a Python object to the integer equivalent.  The conversion
- * will depend on the type of the Python object.  If the object is an
- * integer, it is passed through directly.  If it is a string, it will
- * be treated as a full or short enum name as defined in the GType.
- *
- * Returns: 0 on success or -1 on failure
- */
-gint
-pyg_enum_get_value (GType enum_type, PyObject *obj, gint *val)
-{
-    GEnumClass *eclass = NULL;
-    gint res = -1;
-
-    g_return_val_if_fail (val != NULL, -1);
-    if (!obj) {
-        *val = 0;
-        return 0;
-    }
-
-    if (PyNumber_Check (obj)) {
-        if (pyg_gint_from_py (obj, val)) res = 0;
-    } else if (PyUnicode_Check (obj)) {
-        GEnumValue *info;
-        char *str = PyUnicode_AsUTF8 (obj);
-
-        if (enum_type != G_TYPE_NONE)
-            eclass = G_ENUM_CLASS (g_type_class_ref (enum_type));
-        else {
-            PyErr_SetString (PyExc_TypeError,
-                             "could not convert string to enum because there "
-                             "is no GType associated to look up the value");
-            return -1;
-        }
-        info = g_enum_get_value_by_name (eclass, str);
-
-        if (!info) info = g_enum_get_value_by_nick (eclass, str);
-        if (info) {
-            *val = info->value;
-            res = 0;
-        } else {
-            PyErr_SetString (PyExc_TypeError, "could not convert string");
-            res = -1;
-        }
-        g_type_class_unref (eclass);
-    } else {
-        PyErr_SetString (PyExc_TypeError,
-                         "enum values must be strings or ints");
-        res = -1;
-    }
-    return res;
-}
-
-/**
- * pyg_flags_get_value:
- * @flag_type: the GType of the flag.
- * @obj: a Python object representing the flag value
- * @val: a pointer to the location to store the integer representation of the flag.
- *
- * Converts a Python object to the integer equivalent.  The conversion
- * will depend on the type of the Python object.  If the object is an
- * integer, it is passed through directly.  If it is a string, it will
- * be treated as a full or short flag name as defined in the GType.
- * If it is a tuple, then the items are treated as strings and ORed
- * together.
- *
- * Returns: 0 on success or -1 on failure
- */
-gint
-pyg_flags_get_value (GType flag_type, PyObject *obj, guint *val)
-{
-    GFlagsClass *fclass = NULL;
-    gint res = -1;
-
-    g_return_val_if_fail (val != NULL, -1);
-    if (!obj) {
-        *val = 0;
-        return 0;
-    }
-
-    if (PyNumber_Check (obj)) {
-        if (pyg_guint_from_py (obj, val)) res = 0;
-    } else if (PyUnicode_Check (obj)) {
-        GFlagsValue *info;
-        char *str = PyUnicode_AsUTF8 (obj);
-
-        if (flag_type != G_TYPE_NONE)
-            fclass = G_FLAGS_CLASS (g_type_class_ref (flag_type));
-        else {
-            PyErr_SetString (PyExc_TypeError,
-                             "could not convert string to flag because there "
-                             "is no GType associated to look up the value");
-            return -1;
-        }
-        info = g_flags_get_value_by_name (fclass, str);
-
-        if (!info) info = g_flags_get_value_by_nick (fclass, str);
-        if (info) {
-            *val = info->value;
-            res = 0;
-        } else {
-            PyErr_SetString (PyExc_TypeError, "could not convert string");
-            res = -1;
-        }
-        g_type_class_unref (fclass);
-    } else if (PyTuple_Check (obj)) {
-        Py_ssize_t i, len;
-
-        len = PyTuple_Size (obj);
-        *val = 0;
-        res = 0;
-
-        if (flag_type != G_TYPE_NONE)
-            fclass = G_FLAGS_CLASS (g_type_class_ref (flag_type));
-        else {
-            PyErr_SetString (PyExc_TypeError,
-                             "could not convert string to flag because there "
-                             "is no GType associated to look up the value");
-            res = -1;
-        }
-
-        for (i = 0; i < len; i++) {
-            PyObject *item = PyTuple_GetItem (obj, i);
-            char *str = PyUnicode_AsUTF8 (item);
-            GFlagsValue *info = g_flags_get_value_by_name (fclass, str);
-
-            if (!info) info = g_flags_get_value_by_nick (fclass, str);
-            if (info) {
-                *val |= info->value;
-            } else {
-                PyErr_SetString (PyExc_TypeError, "could not convert string");
-                res = -1;
-                break;
-            }
-        }
-        g_type_class_unref (fclass);
-    } else {
-        PyErr_SetString (
-            PyExc_TypeError,
-            "flag values must be strings, ints, longs, or tuples");
-        res = -1;
-    }
-    return res;
-}
-
-static GQuark pyg_type_marshal_key = 0;
-static GQuark pyg_type_marshal_helper_key = 0;
-
-typedef enum {
-    MARSHAL_HELPER_NONE = 0,
-    MARSHAL_HELPER_RETURN_NULL,
-    MARSHAL_HELPER_IMPORT_DONE,
-} marshal_helper_data_e;
-
-PyGTypeMarshal *
-pyg_type_lookup (GType type)
-{
-    GType ptype = type;
-    PyGTypeMarshal *tm = NULL;
-    marshal_helper_data_e marshal_helper;
-
-    if (type == G_TYPE_INVALID) return NULL;
-
-    marshal_helper =
-        GPOINTER_TO_INT (g_type_get_qdata (type, pyg_type_marshal_helper_key));
-
-    /* If we called this function before with @type and nothing was found,
-     * return NULL early to not spend time in the loop below */
-    if (marshal_helper == MARSHAL_HELPER_RETURN_NULL) return NULL;
-
-    /* Otherwise do recursive type lookup */
-    do {
-        if (marshal_helper == MARSHAL_HELPER_IMPORT_DONE)
-            pygi_type_import_by_g_type (ptype);
-
-        if ((tm = g_type_get_qdata (ptype, pyg_type_marshal_key)) != NULL)
-            break;
-        ptype = g_type_parent (ptype);
-    } while (ptype);
-
-    if (marshal_helper == MARSHAL_HELPER_NONE) {
-        marshal_helper = (tm == NULL) ? MARSHAL_HELPER_RETURN_NULL
-                                      : MARSHAL_HELPER_IMPORT_DONE;
-        g_type_set_qdata (type, pyg_type_marshal_helper_key,
-                          GINT_TO_POINTER (marshal_helper));
-    }
-    return tm;
-}
-
-/**
- * pyg_register_gtype_custom:
- * @gtype: the GType for the new type
- * @from_func: a function to convert GValues to Python objects
- * @to_func: a function to convert Python objects to GValues
- *
- * In order to handle specific conversion of gboxed types or new
- * fundamental types, you may use this function to register conversion
- * handlers.
- */
-void
-pyg_register_gtype_custom (GType gtype, fromvaluefunc from_func,
-                           tovaluefunc to_func)
-{
-    PyGTypeMarshal *tm = g_new (PyGTypeMarshal, 1);
-    tm->fromvalue = from_func;
-    tm->tovalue = to_func;
-    g_type_set_qdata (gtype, pyg_type_marshal_key, tm);
 }
 
 /* -------------- PyGClosure ----------------- */
@@ -1247,71 +1011,12 @@ pyg_gtype_is_custom (GType gtype)
     return g_type_get_qdata (gtype, pygobject_custom_key) != NULL;
 }
 
-static PyObject *
-strv_from_gvalue (const GValue *value)
-{
-    gchar **argv;
-    PyObject *py_argv;
-    gsize i;
-
-    argv = (gchar **)g_value_get_boxed (value);
-    py_argv = PyList_New (0);
-
-    for (i = 0; argv && argv[i]; i++) {
-        int res;
-        PyObject *item = pyg_utf8_to_py (argv[i]);
-        if (item == NULL) {
-            Py_DECREF (py_argv);
-            return NULL;
-        }
-        res = PyList_Append (py_argv, item);
-        Py_DECREF (item);
-        if (res == -1) {
-            Py_DECREF (py_argv);
-            return NULL;
-        }
-    }
-
-    return py_argv;
-}
-
-static int
-strv_to_gvalue (GValue *value, PyObject *obj)
-{
-    Py_ssize_t argc, i;
-    gchar **argv;
-
-    if (!(PyTuple_Check (obj) || PyList_Check (obj))) return -1;
-
-    argc = PySequence_Length (obj);
-    argv = g_new (gchar *, argc + 1);
-    for (i = 0; i < argc; ++i) {
-        PyObject *item = PySequence_Fast_GET_ITEM (obj, i);
-        if (!pyg_utf8_from_py (item, &(argv[i]))) goto error;
-    }
-
-    argv[i] = NULL;
-    g_value_take_boxed (value, argv);
-    return 0;
-
-error:
-    for (i = i - 1; i >= 0; i--) {
-        g_free (argv[i]);
-    }
-    g_free (argv);
-    return -1;
-}
-
 /**
  * Returns 0 on success, or -1 and sets an exception.
  */
 int
 pygi_type_register_types (PyObject *d)
 {
-    pyg_type_marshal_key = g_quark_from_static_string ("PyGType::marshal");
-    pyg_type_marshal_helper_key =
-        g_quark_from_static_string ("PyGType::marshal-helper");
-
     PyGTypeWrapper_Type.tp_dealloc = (destructor)pyg_type_wrapper_dealloc;
     PyGTypeWrapper_Type.tp_richcompare = pyg_type_wrapper_richcompare;
     PyGTypeWrapper_Type.tp_repr = (reprfunc)pyg_type_wrapper_repr;
@@ -1330,8 +1035,6 @@ pygi_type_register_types (PyObject *d)
     PyGObjectDoc_Type.tp_dealloc = (destructor)object_doc_dealloc;
     PyGObjectDoc_Type.tp_flags = Py_TPFLAGS_DEFAULT;
     PyGObjectDoc_Type.tp_descr_get = (descrgetfunc)object_doc_descr_get;
-
-    pyg_register_gtype_custom (G_TYPE_STRV, strv_from_gvalue, strv_to_gvalue);
 
     return 0;
 }

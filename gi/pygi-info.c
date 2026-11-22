@@ -1901,6 +1901,28 @@ static PyMethodDef _PyGIValueInfo_methods[] = {
 /* GIFieldInfo */
 PYG_DEFINE_TYPE ("gi.FieldInfo", PyGIFieldInfo_Type, PyGIBaseInfo);
 
+
+static PyObject *
+type_from_g_type (GType g_type)
+{
+    PyObject *py_g_type;
+    PyObject *py_type;
+
+    py_g_type = pyg_type_wrapper_new (g_type);
+    if (py_g_type == NULL) {
+        return NULL;
+    }
+
+    py_type = PyObject_GetAttrString (py_g_type, "pytype");
+    if (Py_IsNone (py_type)) {
+        py_type = pygi_type_import_by_g_type (g_type);
+    }
+
+    Py_DECREF (py_g_type);
+
+    return py_type;
+}
+
 static gboolean
 field_array_length (GIFieldInfo *info, void *struct_data_ptr,
                     gsize *array_length)
@@ -1973,7 +1995,7 @@ _pygi_gi_registered_type_info_check_object (GIRegisteredTypeInfo *info,
 
     g_type = gi_registered_type_info_get_g_type (info);
     if (g_type != G_TYPE_NONE) {
-        py_type = pygi_type_get_from_g_type (g_type);
+        py_type = type_from_g_type (g_type);
     } else {
         py_type = pygi_type_import_by_gi_info ((GIBaseInfo *)info);
     }

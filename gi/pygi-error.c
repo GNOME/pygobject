@@ -23,7 +23,7 @@
 #include "pygi-error.h"
 
 #include "pygbasictype.h"
-#include "pygi-type.h"
+#include "pygi-value.h"
 #include "pygutil.h"
 
 PyObject *PyGError = NULL;

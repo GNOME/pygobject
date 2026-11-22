@@ -17,15 +17,14 @@
 
 #include "pygi-value.h"
 
+#include "pygbasictype.h"
 #include "pygboxed.h"
 #include "pygenum.h"
 #include "pygflags.h"
 #include "pygi-argument.h"
-#include "pygbasictype.h"
 #include "pygi-fundamental.h"
 #include "pygi-repository.h"
 #include "pygi-struct.h"
-#include "pygi-type.h"
 #include "pygobject-object.h"
 #include "pygpointer.h"
 
@@ -256,6 +255,75 @@ pyg_value_array_from_pyobject (GValue *value, PyObject *obj,
 }
 
 G_GNUC_END_IGNORE_DEPRECATIONS
+
+static GQuark pyg_type_marshal_key = 0;
+static GQuark pyg_type_marshal_helper_key = 0;
+
+typedef struct {
+    fromvaluefunc fromvalue;
+    tovaluefunc tovalue;
+} PyGTypeMarshal;
+
+typedef enum {
+    MARSHAL_HELPER_NONE = 0,
+    MARSHAL_HELPER_RETURN_NULL,
+    MARSHAL_HELPER_IMPORT_DONE,
+} marshal_helper_data_e;
+
+static PyGTypeMarshal *
+pyg_type_lookup (GType type)
+{
+    GType ptype = type;
+    PyGTypeMarshal *tm = NULL;
+    marshal_helper_data_e marshal_helper;
+
+    if (type == G_TYPE_INVALID) return NULL;
+
+    marshal_helper =
+        GPOINTER_TO_INT (g_type_get_qdata (type, pyg_type_marshal_helper_key));
+
+    /* If we called this function before with @type and nothing was found,
+     * return NULL early to not spend time in the loop below */
+    if (marshal_helper == MARSHAL_HELPER_RETURN_NULL) return NULL;
+
+    /* Otherwise do recursive type lookup */
+    do {
+        if (marshal_helper == MARSHAL_HELPER_IMPORT_DONE)
+            pygi_type_import_by_g_type (ptype);
+
+        if ((tm = g_type_get_qdata (ptype, pyg_type_marshal_key)) != NULL)
+            break;
+        ptype = g_type_parent (ptype);
+    } while (ptype);
+
+    if (marshal_helper == MARSHAL_HELPER_NONE) {
+        marshal_helper = (tm == NULL) ? MARSHAL_HELPER_RETURN_NULL
+                                      : MARSHAL_HELPER_IMPORT_DONE;
+        g_type_set_qdata (type, pyg_type_marshal_helper_key,
+                          GINT_TO_POINTER (marshal_helper));
+    }
+    return tm;
+}
+
+/**
+ * pyg_register_gtype_custom:
+ * @gtype: the GType for the new type
+ * @from_func: a function to convert GValues to Python objects
+ * @to_func: a function to convert Python objects to GValues
+ *
+ * In order to handle specific conversion of gboxed types or new
+ * fundamental types, you may use this function to register conversion
+ * handlers.
+ */
+void
+pyg_register_gtype_custom (GType gtype, fromvaluefunc from_func,
+                           tovaluefunc to_func)
+{
+    PyGTypeMarshal *tm = g_new (PyGTypeMarshal, 1);
+    tm->fromvalue = from_func;
+    tm->tovalue = to_func;
+    g_type_set_qdata (gtype, pyg_type_marshal_key, tm);
+}
 
 static int
 pyg_array_from_pyobject (GValue *value, PyObject *obj)
@@ -929,4 +997,72 @@ pyg__gvalue_set (PyObject *module, PyObject *args)
         return NULL;
 
     Py_RETURN_NONE;
+}
+
+
+static PyObject *
+strv_from_gvalue (const GValue *value)
+{
+    gchar **argv;
+    PyObject *py_argv;
+    gsize i;
+
+    argv = (gchar **)g_value_get_boxed (value);
+    py_argv = PyList_New (0);
+
+    for (i = 0; argv && argv[i]; i++) {
+        int res;
+        PyObject *item = pyg_utf8_to_py (argv[i]);
+        if (item == NULL) {
+            Py_DECREF (py_argv);
+            return NULL;
+        }
+        res = PyList_Append (py_argv, item);
+        Py_DECREF (item);
+        if (res == -1) {
+            Py_DECREF (py_argv);
+            return NULL;
+        }
+    }
+
+    return py_argv;
+}
+
+static int
+strv_to_gvalue (GValue *value, PyObject *obj)
+{
+    Py_ssize_t argc, i;
+    gchar **argv;
+
+    if (!(PyTuple_Check (obj) || PyList_Check (obj))) return -1;
+
+    argc = PySequence_Length (obj);
+    argv = g_new (gchar *, argc + 1);
+    for (i = 0; i < argc; ++i) {
+        PyObject *item = PySequence_Fast_GET_ITEM (obj, i);
+        if (!pyg_utf8_from_py (item, &(argv[i]))) goto error;
+    }
+
+    argv[i] = NULL;
+    g_value_take_boxed (value, argv);
+    return 0;
+
+error:
+    for (i = i - 1; i >= 0; i--) {
+        g_free (argv[i]);
+    }
+    g_free (argv);
+    return -1;
+}
+
+int
+pygi_value_register_types (PyObject *d)
+{
+    pyg_type_marshal_key = g_quark_from_static_string ("PyGValue::marshal");
+    pyg_type_marshal_helper_key =
+        g_quark_from_static_string ("PyGValue::marshal-helper");
+
+    pyg_register_gtype_custom (G_TYPE_STRV, strv_from_gvalue, strv_to_gvalue);
+
+    return 0;
 }

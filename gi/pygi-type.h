@@ -29,14 +29,6 @@ G_BEGIN_DECLS
 
 extern PyTypeObject PyGTypeWrapper_Type;
 
-typedef PyObject *(*fromvaluefunc) (const GValue *value);
-typedef int (*tovaluefunc) (GValue *value, PyObject *obj);
-
-typedef struct {
-    fromvaluefunc fromvalue;
-    tovaluefunc tovalue;
-} PyGTypeMarshal;
-
 typedef enum {
     PYGI_INTERFACE_TYPE_TAG_FLAGS,
     PYGI_INTERFACE_TYPE_TAG_ENUM,
@@ -47,12 +39,7 @@ typedef enum {
     PYGI_INTERFACE_TYPE_TAG_CALLBACK
 } PyGIInterfaceTypeTag;
 
-PyGTypeMarshal *pyg_type_lookup (GType type);
-
 gboolean pyg_gtype_is_custom (GType gtype);
-
-void pyg_register_gtype_custom (GType gtype, fromvaluefunc from_func,
-                                tovaluefunc to_func);
 
 int pygi_type_register_types (PyObject *d);
 
@@ -68,7 +55,6 @@ GClosure *pyg_signal_class_closure_get (void);
 PyObject *pygi_type_import_by_g_type (GType g_type);
 PyObject *pygi_type_import_by_name (const char *namespace_, const char *name);
 PyObject *pygi_type_import_by_gi_info (GIBaseInfo *info);
-PyObject *pygi_type_get_from_g_type (GType g_type);
 
 PyGIInterfaceTypeTag pygi_interface_type_tag (GIBaseInfo *info);
 

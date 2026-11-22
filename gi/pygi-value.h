@@ -22,6 +22,9 @@
 
 G_BEGIN_DECLS
 
+typedef PyObject *(*fromvaluefunc) (const GValue *value);
+typedef int (*tovaluefunc) (GValue *value, PyObject *obj);
+
 GIArgument pygi_argument_from_g_value (const GValue *value,
                                        GITypeInfo *type_info);
 
@@ -32,6 +35,11 @@ int pyg_param_gvalue_from_pyobject (GValue *value, PyObject *py_obj,
                                     const GParamSpec *pspec);
 
 PyObject *pygi_value_to_py_basic_type (const GValue *value, GType fundamental);
+
+void pyg_register_gtype_custom (GType gtype, fromvaluefunc from_func,
+                                tovaluefunc to_func);
+
+int pygi_value_register_types (PyObject *m);
 
 PyObject *pyg__gvalue_get (PyObject *module, PyObject *pygvalue);
 PyObject *pyg__gvalue_set (PyObject *module, PyObject *args);
