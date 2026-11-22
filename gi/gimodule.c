@@ -1170,9 +1170,9 @@ _gi_exec (PyObject *module)
     PyObject *module_dict = PyModule_GetDict (module);
     int ret;
 
-#if PY_VERSION_HEX < 0x03090000 || defined(PYPY_VERSION)
-    /* Deprecated since 3.9 */
-    /* Except in PyPy it's still not a no-op: https://foss.heptapod.net/pypy/pypy/-/issues/3691, https://github.com/pypy/pypy/issues/3690 */
+#if defined(PYPY_VERSION)
+    /* No longer used in CPython */
+    /* In PyPy it's still not a no-op: https://github.com/pypy/pypy/issues/3690 */
 
     /* Always enable Python threads since we cannot predict which GI repositories
      * might accept Python callbacks run within non-Python threads or might trigger
