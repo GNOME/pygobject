@@ -19,7 +19,7 @@
  */
 
 #include "pygi-argument.h"
-#include "pygi-basictype.h"
+#include "pygbasictype.h"
 #include "pygi-cache-private.h"
 #include "pygi-type.h"
 

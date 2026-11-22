@@ -21,7 +21,7 @@
 #include "pygboxed.h"
 #include "pygenum.h"
 #include "pygflags.h"
-#include "pygi-basictype.h"
+#include "pygbasictype.h"
 #include "pygi-repository.h"
 #include "pygutil.h"
 #include "pygi-value.h"

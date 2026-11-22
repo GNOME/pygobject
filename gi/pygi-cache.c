@@ -20,7 +20,7 @@
 
 #include "pygi-cache-private.h"
 
-#include "pygi-basictype.h"
+#include "pygbasictype.h"
 #include "pygi-closure.h"
 #include "pygi-error.h"
 #include "pygi-invoke.h"

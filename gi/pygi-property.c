@@ -23,7 +23,7 @@
 
 #include "pygi-property.h"
 
-#include "pygi-basictype.h"
+#include "pygbasictype.h"
 #include "pygi-fundamental.h"
 #include "pygi-repository.h"
 #include "pygi-type.h"

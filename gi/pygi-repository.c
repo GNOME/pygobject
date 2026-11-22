@@ -21,7 +21,7 @@
 
 #include "pygi-repository.h"
 
-#include "pygi-basictype.h"
+#include "pygbasictype.h"
 #include "pygi-info.h"
 #include "pygutil.h"
 

@@ -19,7 +19,8 @@
 
 #pragma once
 
-#include "pygi-cache.h"
+#include <pythoncapi_compat.h>
+#include <glib-object.h>
 
 G_BEGIN_DECLS
 

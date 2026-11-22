@@ -21,7 +21,7 @@
 #include "pygobject-object.h"
 
 #include "pygboxed.h"
-#include "pygi-basictype.h"
+#include "pygbasictype.h"
 #include "pygi-property.h"
 #include "pygi-signal-closure.h"
 #include "pygi-type.h"

@@ -21,7 +21,7 @@
 #include "pygenum.h"
 #include "pygflags.h"
 #include "pygi-argument.h"
-#include "pygi-basictype.h"
+#include "pygbasictype.h"
 #include "pygi-fundamental.h"
 #include "pygi-repository.h"
 #include "pygi-struct.h"

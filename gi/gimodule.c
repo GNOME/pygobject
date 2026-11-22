@@ -27,7 +27,7 @@
 #include "pygenum.h"
 #include "pygflags.h"
 #include "pygi-async.h"
-#include "pygi-basictype.h"
+#include "pygbasictype.h"
 #include "pygi-boxed.h"
 #include "pygi-capi.h"
 #include "pygi-ccallback.h"

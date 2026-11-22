@@ -26,7 +26,7 @@
 
 #include "pygenum.h"
 #include "pygflags.h"
-#include "pygi-basictype.h"
+#include "pygbasictype.h"
 #include "pygi-boxed.h"
 #include "pygi-cache-private.h"
 #include "pygi-error.h"

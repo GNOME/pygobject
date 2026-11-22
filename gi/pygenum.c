@@ -20,7 +20,7 @@
  */
 
 #include "pygenum.h"
-#include "pygi-basictype.h"
+#include "pygbasictype.h"
 #include "pygi-type.h"
 #include "pygutil.h"
 

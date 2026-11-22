@@ -26,7 +26,7 @@
 #include "pygboxed.h"
 #include "pygenum.h"
 #include "pygflags.h"
-#include "pygi-basictype.h"
+#include "pygbasictype.h"
 #include "pygi-error.h"
 #include "pygi-type.h"
 #include "pygutil.h"

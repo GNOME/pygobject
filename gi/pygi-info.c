@@ -21,7 +21,7 @@
  */
 
 #include "pygi-argument.h"
-#include "pygi-basictype.h"
+#include "pygbasictype.h"
 #include "pygi-fundamental.h"
 #include "pygi-invoke.h"
 #include "pygi-type.h"

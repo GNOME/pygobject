@@ -22,7 +22,7 @@
 #include "pygi-boxed.h"
 
 #include "pygboxed.h"
-#include "pygi-basictype.h"
+#include "pygbasictype.h"
 #include "pygi-info.h"
 #include "pygi-type.h"
 #include "pygutil.h"
