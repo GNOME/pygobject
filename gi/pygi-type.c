@@ -302,7 +302,7 @@ _wrap_g_type_wrapper__get_interfaces (PyGTypeWrapper *self, void *closure)
 static PyObject *
 _wrap_g_type_wrapper__get_depth (PyGTypeWrapper *self, void *closure)
 {
-    return pygi_guint_to_py (g_type_depth (self->type));
+    return pyg_guint_to_py (g_type_depth (self->type));
 }
 
 static PyGetSetDef _PyGTypeWrapper_getsets[] = {
@@ -321,55 +321,55 @@ static PyGetSetDef _PyGTypeWrapper_getsets[] = {
 static PyObject *
 _wrap_g_type_is_interface (PyGTypeWrapper *self)
 {
-    return pygi_gboolean_to_py (G_TYPE_IS_INTERFACE (self->type));
+    return pyg_gboolean_to_py (G_TYPE_IS_INTERFACE (self->type));
 }
 
 static PyObject *
 _wrap_g_type_is_classed (PyGTypeWrapper *self)
 {
-    return pygi_gboolean_to_py (G_TYPE_IS_CLASSED (self->type));
+    return pyg_gboolean_to_py (G_TYPE_IS_CLASSED (self->type));
 }
 
 static PyObject *
 _wrap_g_type_is_instantiatable (PyGTypeWrapper *self)
 {
-    return pygi_gboolean_to_py (G_TYPE_IS_INSTANTIATABLE (self->type));
+    return pyg_gboolean_to_py (G_TYPE_IS_INSTANTIATABLE (self->type));
 }
 
 static PyObject *
 _wrap_g_type_is_derivable (PyGTypeWrapper *self)
 {
-    return pygi_gboolean_to_py (G_TYPE_IS_DERIVABLE (self->type));
+    return pyg_gboolean_to_py (G_TYPE_IS_DERIVABLE (self->type));
 }
 
 static PyObject *
 _wrap_g_type_is_deep_derivable (PyGTypeWrapper *self)
 {
-    return pygi_gboolean_to_py (G_TYPE_IS_DEEP_DERIVABLE (self->type));
+    return pyg_gboolean_to_py (G_TYPE_IS_DEEP_DERIVABLE (self->type));
 }
 
 static PyObject *
 _wrap_g_type_is_abstract (PyGTypeWrapper *self)
 {
-    return pygi_gboolean_to_py (G_TYPE_IS_ABSTRACT (self->type));
+    return pyg_gboolean_to_py (G_TYPE_IS_ABSTRACT (self->type));
 }
 
 static PyObject *
 _wrap_g_type_is_value_abstract (PyGTypeWrapper *self)
 {
-    return pygi_gboolean_to_py (G_TYPE_IS_VALUE_ABSTRACT (self->type));
+    return pyg_gboolean_to_py (G_TYPE_IS_VALUE_ABSTRACT (self->type));
 }
 
 static PyObject *
 _wrap_g_type_is_value_type (PyGTypeWrapper *self)
 {
-    return pygi_gboolean_to_py (G_TYPE_IS_VALUE_TYPE (self->type));
+    return pyg_gboolean_to_py (G_TYPE_IS_VALUE_TYPE (self->type));
 }
 
 static PyObject *
 _wrap_g_type_has_value_table (PyGTypeWrapper *self)
 {
-    return pygi_gboolean_to_py (G_TYPE_HAS_VALUE_TABLE (self->type));
+    return pyg_gboolean_to_py (G_TYPE_HAS_VALUE_TABLE (self->type));
 }
 
 static PyObject *
@@ -400,7 +400,7 @@ _wrap_g_type_is_a (PyGTypeWrapper *self, PyObject *args)
     else if ((parent = pyg_type_from_object (gparent)) == 0)
         return NULL;
 
-    return pygi_gboolean_to_py (g_type_is_a (self->type, parent));
+    return pyg_gboolean_to_py (g_type_is_a (self->type, parent));
 }
 
 static PyMethodDef _PyGTypeWrapper_methods[] = {
@@ -586,7 +586,7 @@ pyg_enum_get_value (GType enum_type, PyObject *obj, gint *val)
     }
 
     if (PyNumber_Check (obj)) {
-        if (pygi_gint_from_py (obj, val)) res = 0;
+        if (pyg_gint_from_py (obj, val)) res = 0;
     } else if (PyUnicode_Check (obj)) {
         GEnumValue *info;
         char *str = PyUnicode_AsUTF8 (obj);
@@ -646,7 +646,7 @@ pyg_flags_get_value (GType flag_type, PyObject *obj, guint *val)
     }
 
     if (PyNumber_Check (obj)) {
-        if (pygi_guint_from_py (obj, val)) res = 0;
+        if (pyg_guint_from_py (obj, val)) res = 0;
     } else if (PyUnicode_Check (obj)) {
         GFlagsValue *info;
         char *str = PyUnicode_AsUTF8 (obj);
@@ -1259,7 +1259,7 @@ strv_from_gvalue (const GValue *value)
 
     for (i = 0; argv && argv[i]; i++) {
         int res;
-        PyObject *item = pygi_utf8_to_py (argv[i]);
+        PyObject *item = pyg_utf8_to_py (argv[i]);
         if (item == NULL) {
             Py_DECREF (py_argv);
             return NULL;
@@ -1287,7 +1287,7 @@ strv_to_gvalue (GValue *value, PyObject *obj)
     argv = g_new (gchar *, argc + 1);
     for (i = 0; i < argc; ++i) {
         PyObject *item = PySequence_Fast_GET_ITEM (obj, i);
-        if (!pygi_utf8_from_py (item, &(argv[i]))) goto error;
+        if (!pyg_utf8_from_py (item, &(argv[i]))) goto error;
     }
 
     argv[i] = NULL;

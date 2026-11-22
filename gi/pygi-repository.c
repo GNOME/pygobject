@@ -133,7 +133,7 @@ _wrap_gi_repository_enumerate_versions (PyGIRepository *self, PyObject *args,
     ret = PyList_New (0);
     for (size_t i = 0; versions[i] != NULL; i++) {
         char *version = g_steal_pointer (&versions[i]);
-        PyObject *py_version = pygi_utf8_to_py (version);
+        PyObject *py_version = pyg_utf8_to_py (version);
         PyList_Append (ret, py_version);
         Py_DECREF (py_version);
         g_free (version);
@@ -198,7 +198,7 @@ _wrap_gi_repository_is_registered (PyGIRepository *self, PyObject *args,
         gi_repository_is_registered (self->repository, namespace_, version);
     Py_END_CRITICAL_SECTION ();
 
-    return pygi_gboolean_to_py (registered);
+    return pyg_gboolean_to_py (registered);
 }
 
 static PyObject *
@@ -329,7 +329,7 @@ _wrap_gi_repository_get_typelib_path (PyGIRepository *self, PyObject *args,
         return NULL;
     }
 
-    return pygi_filename_to_py (typelib_path);
+    return pyg_filename_to_py (typelib_path);
 }
 
 static PyObject *
@@ -355,7 +355,7 @@ _wrap_gi_repository_get_version (PyGIRepository *self, PyObject *args,
         return NULL;
     }
 
-    return pygi_utf8_to_py (version);
+    return pyg_utf8_to_py (version);
 }
 
 static PyObject *
@@ -371,7 +371,7 @@ _wrap_gi_repository_get_loaded_namespaces (PyGIRepository *self)
 
     py_namespaces = PyList_New (0);
     for (i = 0; namespaces[i] != NULL; i++) {
-        PyObject *py_namespace = pygi_utf8_to_py (namespaces[i]);
+        PyObject *py_namespace = pyg_utf8_to_py (namespaces[i]);
         PyList_Append (py_namespaces, py_namespace);
         Py_DECREF (py_namespace);
         g_free (namespaces[i]);
@@ -411,7 +411,7 @@ _wrap_gi_repository_get_dependencies (PyGIRepository *self, PyObject *args,
     }
 
     for (i = 0; namespaces[i] != NULL; i++) {
-        PyObject *py_namespace = pygi_utf8_to_py (namespaces[i]);
+        PyObject *py_namespace = pyg_utf8_to_py (namespaces[i]);
         PyList_Append (py_namespaces, py_namespace);
         Py_DECREF (py_namespace);
     }
@@ -447,7 +447,7 @@ _wrap_gi_repository_get_immediate_dependencies (PyGIRepository *self,
     Py_END_CRITICAL_SECTION ();
 
     for (i = 0; namespaces[i] != NULL; i++) {
-        PyObject *py_namespace = pygi_utf8_to_py (namespaces[i]);
+        PyObject *py_namespace = pyg_utf8_to_py (namespaces[i]);
         PyList_Append (py_namespaces, py_namespace);
         Py_DECREF (py_namespace);
     }

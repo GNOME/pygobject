@@ -215,7 +215,7 @@ pyg_param_gvalue_as_pyobject (const GValue *gvalue, gboolean copy_boxed,
                               const GParamSpec *pspec)
 {
     if (G_IS_PARAM_SPEC_UNICHAR (pspec)) {
-        return pygi_gunichar_to_py (g_value_get_uint (gvalue));
+        return pyg_gunichar_to_py (g_value_get_uint (gvalue));
     } else {
         return pyg_value_to_pyobject (gvalue, copy_boxed);
     }
@@ -369,7 +369,7 @@ pyg_param_spec_from_object (PyObject *tuple)
 static int
 pyg_pyobj_to_unichar_conv (PyObject *py_obj, void *ptr)
 {
-    if (!pygi_gunichar_from_py (py_obj, ptr)) return 0;
+    if (!pyg_gunichar_from_py (py_obj, ptr)) return 0;
     return 1;
 }
 

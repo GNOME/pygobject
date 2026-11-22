@@ -68,12 +68,12 @@ source_prepare (GSource *source, gint *timeout)
         goto bail;
     }
 
-    if (!pygi_gboolean_from_py (PyTuple_GET_ITEM (t, 0), &ret)) {
+    if (!pyg_gboolean_from_py (PyTuple_GET_ITEM (t, 0), &ret)) {
         ret = FALSE;
         goto bail;
     }
 
-    if (!pygi_gint_from_py (PyTuple_GET_ITEM (t, 1), timeout)) {
+    if (!pyg_gint_from_py (PyTuple_GET_ITEM (t, 1), timeout)) {
         ret = FALSE;
         goto bail;
     }

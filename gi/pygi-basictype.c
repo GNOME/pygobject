@@ -25,21 +25,21 @@
 #if defined(G_OS_WIN32)
 #include <float.h>
 static gboolean
-pygi_isfinite (gdouble value)
+pyg_isfinite (gdouble value)
 {
     return _finite (value);
 }
 #else
 #include <math.h>
 static gboolean
-pygi_isfinite (gdouble value)
+pyg_isfinite (gdouble value)
 {
     return isfinite (value);
 }
 #endif
 
 gboolean
-pygi_gpointer_from_py (PyObject *py_arg, gpointer *result)
+pyg_gpointer_from_py (PyObject *py_arg, gpointer *result)
 {
     void *temp;
 
@@ -67,13 +67,13 @@ pygi_gpointer_from_py (PyObject *py_arg, gpointer *result)
 }
 
 PyObject *
-pygi_gsize_to_py (gsize value)
+pyg_gsize_to_py (gsize value)
 {
     return PyLong_FromSize_t (value);
 }
 
 PyObject *
-pygi_gssize_to_py (gssize value)
+pyg_gssize_to_py (gssize value)
 {
     return PyLong_FromSsize_t (value);
 }
@@ -91,7 +91,7 @@ base_float_checks (PyObject *object)
 }
 
 gboolean
-pygi_gdouble_from_py (PyObject *py_arg, gdouble *result)
+pyg_gdouble_from_py (PyObject *py_arg, gdouble *result)
 {
     PyObject *py_float;
     gdouble temp;
@@ -110,13 +110,13 @@ pygi_gdouble_from_py (PyObject *py_arg, gdouble *result)
 }
 
 PyObject *
-pygi_gdouble_to_py (gdouble value)
+pyg_gdouble_to_py (gdouble value)
 {
     return PyFloat_FromDouble (value);
 }
 
 gboolean
-pygi_gfloat_from_py (PyObject *py_arg, gfloat *result)
+pyg_gfloat_from_py (PyObject *py_arg, gfloat *result)
 {
     gdouble double_;
     PyObject *py_float;
@@ -130,12 +130,12 @@ pygi_gfloat_from_py (PyObject *py_arg, gfloat *result)
         return FALSE;
     }
 
-    if (pygi_isfinite (double_)
+    if (pyg_isfinite (double_)
         && (double_ < -G_MAXFLOAT || double_ > G_MAXFLOAT)) {
         PyObject *min, *max;
 
-        min = pygi_gfloat_to_py (-G_MAXFLOAT);
-        max = pygi_gfloat_to_py (G_MAXFLOAT);
+        min = pyg_gfloat_to_py (-G_MAXFLOAT);
+        max = pyg_gfloat_to_py (G_MAXFLOAT);
         PyErr_Format (PyExc_OverflowError, "%S not in range %S to %S",
                       py_float, min, max);
         Py_DECREF (min);
@@ -151,13 +151,13 @@ pygi_gfloat_from_py (PyObject *py_arg, gfloat *result)
 }
 
 PyObject *
-pygi_gfloat_to_py (gfloat value)
+pyg_gfloat_to_py (gfloat value)
 {
     return PyFloat_FromDouble (value);
 }
 
 gboolean
-pygi_gunichar_from_py (PyObject *py_arg, gunichar *result)
+pyg_gunichar_from_py (PyObject *py_arg, gunichar *result)
 {
     Py_ssize_t size;
     gchar *string_;
@@ -197,7 +197,7 @@ pygi_gunichar_from_py (PyObject *py_arg, gunichar *result)
 }
 
 PyObject *
-pygi_gunichar_to_py (gunichar value)
+pyg_gunichar_to_py (gunichar value)
 {
     PyObject *py_obj = NULL;
 
@@ -220,7 +220,7 @@ pygi_gunichar_to_py (gunichar value)
 }
 
 gboolean
-pygi_gtype_from_py (PyObject *py_arg, GType *type)
+pyg_gtype_from_py (PyObject *py_arg, GType *type)
 {
     GType temp = pyg_type_from_object (py_arg);
 
@@ -240,7 +240,7 @@ pygi_gtype_from_py (PyObject *py_arg, GType *type)
 }
 
 gboolean
-pygi_utf8_from_py (PyObject *py_arg, gchar **result)
+pyg_utf8_from_py (PyObject *py_arg, gchar **result)
 {
     gchar *string_;
 
@@ -362,7 +362,7 @@ filename_from_py_win32 (PyObject *py_arg, gchar **result)
 }
 
 gboolean
-pygi_filename_from_py (PyObject *py_arg, gchar **result)
+pyg_filename_from_py (PyObject *py_arg, gchar **result)
 {
     PyObject *py_fspath;
     gboolean ret = FALSE;
@@ -409,7 +409,7 @@ base_number_checks (PyObject *object)
 }
 
 gboolean
-pygi_gboolean_from_py (PyObject *object, gboolean *result)
+pyg_gboolean_from_py (PyObject *object, gboolean *result)
 {
     int value = PyObject_IsTrue (object);
     if (value == -1) return FALSE;
@@ -418,37 +418,37 @@ pygi_gboolean_from_py (PyObject *object, gboolean *result)
 }
 
 PyObject *
-pygi_gboolean_to_py (gboolean value)
+pyg_gboolean_to_py (gboolean value)
 {
     return PyBool_FromLong (value);
 }
 
-/* A super set of pygi_gint8_from_py (also handles unicode) */
+/* A super set of pyg_gint8_from_py (also handles unicode) */
 gboolean
-pygi_gschar_from_py (PyObject *object, gint8 *result)
+pyg_gschar_from_py (PyObject *object, gint8 *result)
 {
     if (PyUnicode_Check (object)) {
         gunichar uni;
         PyObject *temp;
         gboolean status;
 
-        if (!pygi_gunichar_from_py (object, &uni)) return FALSE;
+        if (!pyg_gunichar_from_py (object, &uni)) return FALSE;
 
-        temp = pygi_guint32_to_py (uni);
-        status = pygi_gint8_from_py (temp, result);
+        temp = pyg_guint32_to_py (uni);
+        status = pyg_gint8_from_py (temp, result);
         Py_DECREF (temp);
         return status;
     } else {
-        /* pygi_gint8_from_py handles numbers and bytes */
-        return pygi_gint8_from_py (object, result);
+        /* pyg_gint8_from_py handles numbers and bytes */
+        return pyg_gint8_from_py (object, result);
     }
 
     return FALSE;
 }
 
-/* A super set of pygi_guint8_from_py (also handles unicode) */
+/* A super set of pyg_guint8_from_py (also handles unicode) */
 gboolean
-pygi_guchar_from_py (PyObject *object, guchar *result)
+pyg_guchar_from_py (PyObject *object, guchar *result)
 {
     if (PyUnicode_Check (object)) {
         gunichar uni;
@@ -456,21 +456,21 @@ pygi_guchar_from_py (PyObject *object, guchar *result)
         gboolean status;
         gint8 codepoint;
 
-        if (!pygi_gunichar_from_py (object, &uni)) return FALSE;
+        if (!pyg_gunichar_from_py (object, &uni)) return FALSE;
 
-        temp = pygi_guint32_to_py (uni);
-        status = pygi_gint8_from_py (temp, &codepoint);
+        temp = pyg_guint32_to_py (uni);
+        status = pyg_gint8_from_py (temp, &codepoint);
         Py_DECREF (temp);
         if (status) *result = (guchar)codepoint;
         return status;
     } else {
-        /* pygi_guint8_from_py handles numbers and bytes */
-        return pygi_guint8_from_py (object, result);
+        /* pyg_guint8_from_py handles numbers and bytes */
+        return pyg_guint8_from_py (object, result);
     }
 }
 
 gboolean
-pygi_gint_from_py (PyObject *object, gint *result)
+pyg_gint_from_py (PyObject *object, gint *result)
 {
     long long_value;
     PyObject *number;
@@ -500,13 +500,13 @@ overflow:
 }
 
 PyObject *
-pygi_gint_to_py (gint value)
+pyg_gint_to_py (gint value)
 {
     return PyLong_FromLong (value);
 }
 
 gboolean
-pygi_guint_from_py (PyObject *object, guint *result)
+pyg_guint_from_py (PyObject *object, guint *result)
 {
     unsigned long long_value;
     PyObject *number;
@@ -536,7 +536,7 @@ overflow:
 }
 
 PyObject *
-pygi_guint_to_py (guint value)
+pyg_guint_to_py (guint value)
 {
 #if (G_MAXUINT <= LONG_MAX)
     return PyLong_FromLong ((long)value);
@@ -547,7 +547,7 @@ pygi_guint_to_py (guint value)
 }
 
 gboolean
-pygi_glong_from_py (PyObject *object, glong *result)
+pyg_glong_from_py (PyObject *object, glong *result)
 {
     long long_value;
     PyObject *number;
@@ -575,13 +575,13 @@ overflow:
 }
 
 PyObject *
-pygi_glong_to_py (glong value)
+pyg_glong_to_py (glong value)
 {
     return PyLong_FromLong (value);
 }
 
 gboolean
-pygi_gulong_from_py (PyObject *object, gulong *result)
+pyg_gulong_from_py (PyObject *object, gulong *result)
 {
     unsigned long long_value;
     PyObject *number;
@@ -609,7 +609,7 @@ overflow:
 }
 
 PyObject *
-pygi_gulong_to_py (gulong value)
+pyg_gulong_to_py (gulong value)
 {
     if (value <= LONG_MAX)
         return PyLong_FromLong ((long)value);
@@ -618,7 +618,7 @@ pygi_gulong_to_py (gulong value)
 }
 
 static gboolean
-pygi_gint8_from_py_converted (PyObject *object, gint8 *result)
+pyg_gint8_from_py_converted (PyObject *object, gint8 *result)
 {
     long long_value;
     PyObject *number;
@@ -658,7 +658,7 @@ overflow:
 }
 
 gboolean
-pygi_gint8_from_py (PyObject *object, gint8 *result)
+pyg_gint8_from_py (PyObject *object, gint8 *result)
 {
     /* If we pass unicode, convert it to a bytes representation
      * and then continue. */
@@ -671,23 +671,23 @@ pygi_gint8_from_py (PyObject *object, gint8 *result)
             return FALSE;
         }
 
-        gboolean ret = pygi_gint8_from_py_converted (bytes_object, result);
+        gboolean ret = pyg_gint8_from_py_converted (bytes_object, result);
         Py_DECREF (bytes_object);
 
         return ret;
     }
 
-    return pygi_gint8_from_py_converted (object, result);
+    return pyg_gint8_from_py_converted (object, result);
 }
 
 PyObject *
-pygi_gint8_to_py (gint8 value)
+pyg_gint8_to_py (gint8 value)
 {
     return PyLong_FromLong (value);
 }
 
 static gboolean
-pygi_guint8_from_py_converted (PyObject *object, guint8 *result)
+pyg_guint8_from_py_converted (PyObject *object, guint8 *result)
 {
     long long_value;
     PyObject *number;
@@ -727,7 +727,7 @@ overflow:
 }
 
 gboolean
-pygi_guint8_from_py (PyObject *object, guint8 *result)
+pyg_guint8_from_py (PyObject *object, guint8 *result)
 {
     /* If we pass unicode, convert it to a bytes representation
      * and then continue */
@@ -740,23 +740,23 @@ pygi_guint8_from_py (PyObject *object, guint8 *result)
             return FALSE;
         }
 
-        gboolean ret = pygi_guint8_from_py_converted (bytes_object, result);
+        gboolean ret = pyg_guint8_from_py_converted (bytes_object, result);
         Py_DECREF (bytes_object);
 
         return ret;
     }
 
-    return pygi_guint8_from_py_converted (object, result);
+    return pyg_guint8_from_py_converted (object, result);
 }
 
 PyObject *
-pygi_guint8_to_py (guint8 value)
+pyg_guint8_to_py (guint8 value)
 {
     return PyLong_FromLong (value);
 }
 
 gboolean
-pygi_gint16_from_py (PyObject *object, gint16 *result)
+pyg_gint16_from_py (PyObject *object, gint16 *result)
 {
     long long_value;
     PyObject *number;
@@ -786,13 +786,13 @@ overflow:
 }
 
 PyObject *
-pygi_gint16_to_py (gint16 value)
+pyg_gint16_to_py (gint16 value)
 {
     return PyLong_FromLong (value);
 }
 
 gboolean
-pygi_guint16_from_py (PyObject *object, guint16 *result)
+pyg_guint16_from_py (PyObject *object, guint16 *result)
 {
     long long_value;
     PyObject *number;
@@ -822,13 +822,13 @@ overflow:
 }
 
 PyObject *
-pygi_guint16_to_py (guint16 value)
+pyg_guint16_to_py (guint16 value)
 {
     return PyLong_FromLong (value);
 }
 
 gboolean
-pygi_gint32_from_py (PyObject *object, gint32 *result)
+pyg_gint32_from_py (PyObject *object, gint32 *result)
 {
     long long_value;
     PyObject *number;
@@ -858,13 +858,13 @@ overflow:
 }
 
 PyObject *
-pygi_gint32_to_py (gint32 value)
+pyg_gint32_to_py (gint32 value)
 {
     return PyLong_FromLong (value);
 }
 
 gboolean
-pygi_guint32_from_py (PyObject *object, guint32 *result)
+pyg_guint32_from_py (PyObject *object, guint32 *result)
 {
     long long long_value;
     PyObject *number;
@@ -894,7 +894,7 @@ overflow:
 }
 
 PyObject *
-pygi_guint32_to_py (guint32 value)
+pyg_guint32_to_py (guint32 value)
 {
 #if (G_MAXUINT <= LONG_MAX)
     return PyLong_FromLong (value);
@@ -907,7 +907,7 @@ pygi_guint32_to_py (guint32 value)
 }
 
 gboolean
-pygi_gint64_from_py (PyObject *object, gint64 *result)
+pyg_gint64_from_py (PyObject *object, gint64 *result)
 {
     long long long_value;
     PyObject *number, *min, *max;
@@ -930,8 +930,8 @@ pygi_gint64_from_py (PyObject *object, gint64 *result)
 
 overflow:
     PyErr_Clear ();
-    min = pygi_gint64_to_py (G_MININT64);
-    max = pygi_gint64_to_py (G_MAXINT64);
+    min = pyg_gint64_to_py (G_MININT64);
+    max = pyg_gint64_to_py (G_MAXINT64);
     PyErr_Format (PyExc_OverflowError, "%S not in range %S to %S", number, min,
                   max);
     Py_DECREF (number);
@@ -941,7 +941,7 @@ overflow:
 }
 
 PyObject *
-pygi_gint64_to_py (gint64 value)
+pyg_gint64_to_py (gint64 value)
 {
     if (LONG_MIN <= value && value <= LONG_MAX)
         return PyLong_FromLong ((long)value);
@@ -950,7 +950,7 @@ pygi_gint64_to_py (gint64 value)
 }
 
 gboolean
-pygi_guint64_from_py (PyObject *object, guint64 *result)
+pyg_guint64_from_py (PyObject *object, guint64 *result)
 {
     unsigned long long long_value;
     PyObject *number, *max;
@@ -973,7 +973,7 @@ pygi_guint64_from_py (PyObject *object, guint64 *result)
 
 overflow:
     PyErr_Clear ();
-    max = pygi_guint64_to_py (G_MAXUINT64);
+    max = pyg_guint64_to_py (G_MAXUINT64);
     PyErr_Format (PyExc_OverflowError, "%S not in range %ld to %S", number,
                   (long)0, max);
     Py_DECREF (number);
@@ -982,7 +982,7 @@ overflow:
 }
 
 PyObject *
-pygi_guint64_to_py (guint64 value)
+pyg_guint64_to_py (guint64 value)
 {
     if (value <= LONG_MAX)
         return PyLong_FromLong ((long)value);
@@ -991,7 +991,7 @@ pygi_guint64_to_py (guint64 value)
 }
 
 PyObject *
-pygi_utf8_to_py (gchar *value)
+pyg_utf8_to_py (gchar *value)
 {
     if (value == NULL) {
         Py_RETURN_NONE;
@@ -1001,7 +1001,7 @@ pygi_utf8_to_py (gchar *value)
 }
 
 PyObject *
-pygi_filename_to_py (gchar *value)
+pyg_filename_to_py (gchar *value)
 {
     PyObject *py_obj;
 

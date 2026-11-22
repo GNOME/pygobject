@@ -378,7 +378,7 @@ pyg_enum_get_value_name (PyObject *self, void *closure)
     PyObject *retval;
     gint intvalue;
 
-    if (!pygi_gint_from_py ((PyObject *)self, &intvalue)) return NULL;
+    if (!pyg_gint_from_py ((PyObject *)self, &intvalue)) return NULL;
 
     gtype = get_enum_gtype (Py_TYPE (self));
     if (gtype == G_TYPE_INVALID) return NULL;
@@ -393,7 +393,7 @@ pyg_enum_get_value_name (PyObject *self, void *closure)
         return NULL;
     }
 
-    retval = pygi_utf8_to_py (enum_value->value_name);
+    retval = pyg_utf8_to_py (enum_value->value_name);
     g_type_class_unref (enum_class);
 
     return retval;
@@ -408,7 +408,7 @@ pyg_enum_get_value_nick (PyObject *self, void *closure)
     PyObject *retval;
     gint intvalue;
 
-    if (!pygi_gint_from_py ((PyObject *)self, &intvalue)) return NULL;
+    if (!pyg_gint_from_py ((PyObject *)self, &intvalue)) return NULL;
 
     gtype = get_enum_gtype (Py_TYPE (self));
     if (gtype == G_TYPE_INVALID) return NULL;
@@ -423,7 +423,7 @@ pyg_enum_get_value_nick (PyObject *self, void *closure)
         return NULL;
     }
 
-    retval = pygi_utf8_to_py (enum_value->value_nick);
+    retval = pyg_utf8_to_py (enum_value->value_nick);
 
     g_type_class_unref (enum_class);
 

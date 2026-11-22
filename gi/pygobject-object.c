@@ -1334,7 +1334,7 @@ connect_helper (PyGObject *self, gchar *name, PyObject *callback,
     pygobject_watch_closure ((PyObject *)self, closure);
     handlerid = g_signal_connect_closure_by_id (self->obj, sigid, detail,
                                                 closure, after);
-    return pygi_gulong_to_py (handlerid);
+    return pyg_gulong_to_py (handlerid);
 }
 
 static PyObject *
@@ -1741,7 +1741,7 @@ pygobject_disconnect_by_func (PyGObject *self, PyObject *args)
 
     retval = g_signal_handlers_disconnect_matched (
         self->obj, G_SIGNAL_MATCH_CLOSURE, 0, 0, closure, NULL, NULL);
-    return pygi_guint_to_py (retval);
+    return pyg_guint_to_py (retval);
 }
 
 static PyObject *
@@ -1772,7 +1772,7 @@ pygobject_handler_block_by_func (PyGObject *self, PyObject *args)
 
     retval = g_signal_handlers_block_matched (
         self->obj, G_SIGNAL_MATCH_CLOSURE, 0, 0, closure, NULL, NULL);
-    return pygi_guint_to_py (retval);
+    return pyg_guint_to_py (retval);
 }
 
 static PyObject *
@@ -1803,7 +1803,7 @@ pygobject_handler_unblock_by_func (PyGObject *self, PyObject *args)
 
     retval = g_signal_handlers_unblock_matched (
         self->obj, G_SIGNAL_MATCH_CLOSURE, 0, 0, closure, NULL, NULL);
-    return pygi_guint_to_py (retval);
+    return pyg_guint_to_py (retval);
 }
 
 
@@ -1843,7 +1843,7 @@ pygobject_get_refcount (PyGObject *self, void *closure)
         PyErr_Format (PyExc_TypeError, "GObject instance is not yet created");
         return NULL;
     }
-    return pygi_guint_to_py (self->obj->ref_count);
+    return pyg_guint_to_py (self->obj->ref_count);
 }
 
 static PyObject *

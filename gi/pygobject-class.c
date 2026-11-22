@@ -525,7 +525,7 @@ add_properties (GObjectClass *klass, PyObject *properties)
             ret = FALSE;
             break;
         }
-        if (!pygi_gint_from_py (item, &flags)) {
+        if (!pyg_gint_from_py (item, &flags)) {
             ret = FALSE;
             break;
         }

@@ -142,7 +142,7 @@ pygi_get_property_value (PyGObject *instance, GParamSpec *pspec)
 
     // special case: unichar, which has a uint type
     if (G_IS_PARAM_SPEC_UNICHAR (pspec)) {
-        py_value = pygi_gunichar_to_py (g_value_get_uint (&value));
+        py_value = pyg_gunichar_to_py (g_value_get_uint (&value));
         goto out;
     }
 
@@ -406,7 +406,7 @@ pygi_set_property_value (PyGObject *instance, GParamSpec *pspec,
     if (G_IS_PARAM_SPEC_UNICHAR (pspec)) {
         gunichar u;
 
-        if (!pygi_gunichar_from_py (py_value, &u)) {
+        if (!pyg_gunichar_from_py (py_value, &u)) {
             return -1;
         }
         g_value_set_uint (&value, u);

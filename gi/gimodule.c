@@ -847,7 +847,7 @@ pyg_add_emission_hook (PyGObject *self, PyObject *args)
                                           data,
                                           (GDestroyNotify)pyg_destroy_notify);
 
-    return pygi_gulong_to_py (hook_id);
+    return pyg_gulong_to_py (hook_id);
 }
 
 static PyObject *
@@ -916,7 +916,7 @@ pyg_signal_new (PyObject *self, PyObject *args)
         pyg_signal_class_closure_get (), (GSignalAccumulator)0, NULL,
         (GSignalCMarshaller)0, return_type, n_params, param_types);
     g_free (param_types);
-    if (signal_id != 0) return pygi_guint_to_py (signal_id);
+    if (signal_id != 0) return pyg_guint_to_py (signal_id);
     PyErr_SetString (PyExc_RuntimeError, "could not create signal");
     return NULL;
 }
@@ -1084,24 +1084,24 @@ static int
 pygi_register_constants (PyObject *m)
 {
     /* PyFloat_ return a new ref, and add object takes the ref */
-    PyModule_AddObject (m, "G_MINFLOAT", pygi_gfloat_to_py (G_MINFLOAT));
-    PyModule_AddObject (m, "G_MAXFLOAT", pygi_gfloat_to_py (G_MAXFLOAT));
-    PyModule_AddObject (m, "G_MINDOUBLE", pygi_gdouble_to_py (G_MINDOUBLE));
-    PyModule_AddObject (m, "G_MAXDOUBLE", pygi_gdouble_to_py (G_MAXDOUBLE));
+    PyModule_AddObject (m, "G_MINFLOAT", pyg_gfloat_to_py (G_MINFLOAT));
+    PyModule_AddObject (m, "G_MAXFLOAT", pyg_gfloat_to_py (G_MAXFLOAT));
+    PyModule_AddObject (m, "G_MINDOUBLE", pyg_gdouble_to_py (G_MINDOUBLE));
+    PyModule_AddObject (m, "G_MAXDOUBLE", pyg_gdouble_to_py (G_MAXDOUBLE));
     PyModule_AddIntConstant (m, "G_MINSHORT", G_MINSHORT);
     PyModule_AddIntConstant (m, "G_MAXSHORT", G_MAXSHORT);
     PyModule_AddIntConstant (m, "G_MAXUSHORT", G_MAXUSHORT);
     PyModule_AddIntConstant (m, "G_MININT", G_MININT);
     PyModule_AddIntConstant (m, "G_MAXINT", G_MAXINT);
-    PyModule_AddObject (m, "G_MAXUINT", pygi_guint_to_py (G_MAXUINT));
-    PyModule_AddObject (m, "G_MINLONG", pygi_glong_to_py (G_MINLONG));
-    PyModule_AddObject (m, "G_MAXLONG", pygi_glong_to_py (G_MAXLONG));
-    PyModule_AddObject (m, "G_MAXULONG", pygi_gulong_to_py (G_MAXULONG));
-    PyModule_AddObject (m, "G_MAXSIZE", pygi_gsize_to_py (G_MAXSIZE));
-    PyModule_AddObject (m, "G_MAXSSIZE", pygi_gssize_to_py (G_MAXSSIZE));
-    PyModule_AddObject (m, "G_MINSSIZE", pygi_gssize_to_py (G_MINSSIZE));
-    PyModule_AddObject (m, "G_MINOFFSET", pygi_gint64_to_py (G_MINOFFSET));
-    PyModule_AddObject (m, "G_MAXOFFSET", pygi_gint64_to_py (G_MAXOFFSET));
+    PyModule_AddObject (m, "G_MAXUINT", pyg_guint_to_py (G_MAXUINT));
+    PyModule_AddObject (m, "G_MINLONG", pyg_glong_to_py (G_MINLONG));
+    PyModule_AddObject (m, "G_MAXLONG", pyg_glong_to_py (G_MAXLONG));
+    PyModule_AddObject (m, "G_MAXULONG", pyg_gulong_to_py (G_MAXULONG));
+    PyModule_AddObject (m, "G_MAXSIZE", pyg_gsize_to_py (G_MAXSIZE));
+    PyModule_AddObject (m, "G_MAXSSIZE", pyg_gssize_to_py (G_MAXSSIZE));
+    PyModule_AddObject (m, "G_MINSSIZE", pyg_gssize_to_py (G_MINSSIZE));
+    PyModule_AddObject (m, "G_MINOFFSET", pyg_gint64_to_py (G_MINOFFSET));
+    PyModule_AddObject (m, "G_MAXOFFSET", pyg_gint64_to_py (G_MAXOFFSET));
 
     PyModule_AddIntConstant (m, "SIGNAL_RUN_FIRST", G_SIGNAL_RUN_FIRST);
     PyModule_AddIntConstant (m, "PARAM_READWRITE", G_PARAM_READWRITE);

@@ -136,7 +136,7 @@ pygi_error_marshal_from_py (PyObject *pyerr, GError **error)
         goto cleanup;
     }
 
-    if (!pygi_utf8_from_py (py_message, &message)) goto cleanup;
+    if (!pyg_utf8_from_py (py_message, &message)) goto cleanup;
 
     py_domain = PyObject_GetAttrString (pyerr, "domain");
     if (!py_domain) {
@@ -146,7 +146,7 @@ pygi_error_marshal_from_py (PyObject *pyerr, GError **error)
         goto cleanup;
     }
 
-    if (!pygi_utf8_from_py (py_domain, &domain)) goto cleanup;
+    if (!pyg_utf8_from_py (py_domain, &domain)) goto cleanup;
 
     py_code = PyObject_GetAttrString (pyerr, "code");
     if (!py_code) {
@@ -156,7 +156,7 @@ pygi_error_marshal_from_py (PyObject *pyerr, GError **error)
         goto cleanup;
     }
 
-    if (!pygi_gint_from_py (py_code, &code)) goto cleanup;
+    if (!pyg_gint_from_py (py_code, &code)) goto cleanup;
 
     res = TRUE;
     g_set_error_literal (error, g_quark_from_string (domain), code, message);
