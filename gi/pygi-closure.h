@@ -25,9 +25,10 @@ G_BEGIN_DECLS
 GClosure *pyg_closure_new (PyObject *callback, PyObject *extra_args,
                            PyObject *swap_data);
 
-GClosure *pyg_closure_new_full (guint sizeof_closure, PyObject *callback,
-                                PyObject *extra_args, PyObject *swap_data,
-                                GClosureMarshal closure_marshal,
-                                GClosureNotify closure_invalidate);
+GClosure *pygi_signal_closure_new (GType g_type, const gchar *sig_name,
+                                   PyObject *callback, PyObject *extra_args,
+                                   PyObject *swap_data);
+
+GClosure *pyg_signal_class_closure_get (void);
 
 G_END_DECLS

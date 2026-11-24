@@ -25,7 +25,6 @@ sources = [
   'pygi-native-closure.c',
   'pygi-ccallback.c',
   'pygi-property.c',
-  'pygi-signal-closure.c',
   'pygi-invoke.c',
   'pygi-cache.c',
   'pygi-cache-array.c',
