@@ -374,28 +374,15 @@ pyg_pyobj_to_unichar_conv (PyObject *py_obj, void *ptr)
     return 1;
 }
 
-/**
- * pyg_closure_set_exception_handler:
- * @closure: a closure created with pyg_closure_new()
- * @handler: the handler to call when an exception occurs or NULL for none
- *
- * Sets the handler to call when an exception occurs during closure invocation.
- * The handler is responsible for providing a proper return value to the
- * closure invocation. If @handler is %NULL, the default handler will be used.
- * The default handler prints the exception to stderr and doesn't touch the
- * closure's return value.
- */
 static void
-pyg_closure_set_exception_handler (GClosure *closure,
-                                   PyClosureExceptionHandler handler)
+pyg_closure_set_exception_handler (GClosure *closure, gpointer handler)
 {
-    PyGClosure *pygclosure;
-
-    g_return_if_fail (closure != NULL);
-
-    pygclosure = (PyGClosure *)closure;
-    pygclosure->exception_handler = handler;
+    PyErr_SetString (
+        PyExc_NotImplementedError,
+        "Setting an exception handler on a closure through "
+        "pyg_closure_set_exception_handler is no longer supported");
 }
+
 const gpointer PyGParamSpec_Type_Stub = NULL;
 
 struct _PyGObject_Functions pygobject_api_functions = {

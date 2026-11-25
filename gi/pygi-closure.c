@@ -39,8 +39,7 @@ pyg_closure_set_swap_data (PyGClosure *pc, PyObject *params)
 
 static gboolean
 pyg_closure_invoke_with_extra_data (PyGClosure *pc, PyObject *params,
-                                    GValue *return_value, guint n_param_values,
-                                    const GValue *param_values)
+                                    GValue *return_value)
 {
     PyObject *all_params, *ret;
     gboolean result = TRUE;
@@ -54,10 +53,7 @@ pyg_closure_invoke_with_extra_data (PyGClosure *pc, PyObject *params,
     ret = PyObject_CallObject (pc->callback, all_params);
     if (pc->extra_args) Py_DECREF (all_params);
     if (ret == NULL) {
-        if (pc->exception_handler)
-            pc->exception_handler (return_value, n_param_values, param_values);
-        else
-            PyErr_Print ();
+        PyErr_Print ();
         return FALSE;
     }
 
@@ -66,10 +62,7 @@ pyg_closure_invoke_with_extra_data (PyGClosure *pc, PyObject *params,
         PyErr_SetString (PyExc_TypeError,
                          "can't convert return value to desired type");
 
-        if (pc->exception_handler)
-            pc->exception_handler (return_value, n_param_values, param_values);
-        else
-            PyErr_Print ();
+        PyErr_Print ();
         result = FALSE;
     }
     Py_DECREF (ret);
@@ -121,11 +114,7 @@ pyg_closure_marshal (GClosure *closure, GValue *return_value,
                         PyExc_TypeError,
                         "can't convert parameter to desired type");
 
-                if (pc->exception_handler)
-                    pc->exception_handler (return_value, n_param_values,
-                                           param_values);
-                else
-                    PyErr_Print ();
+                PyErr_Print ();
 
                 goto out;
             }
@@ -133,8 +122,7 @@ pyg_closure_marshal (GClosure *closure, GValue *return_value,
         }
     }
 
-    pyg_closure_invoke_with_extra_data (pc, params, return_value,
-                                        n_param_values, param_values);
+    pyg_closure_invoke_with_extra_data (pc, params, return_value);
 
 out:
     Py_DECREF (params);
@@ -220,7 +208,7 @@ typedef struct _PyGISignalClosure {
 } PyGISignalClosure;
 
 static GISignalInfo *
-_pygi_lookup_signal_from_g_type (GType g_type, const gchar *signal_name)
+lookup_signal_from_g_type (GType g_type, const gchar *signal_name)
 {
     GIBaseInfo *info;
     GISignalInfo *signal_info = NULL;
@@ -407,8 +395,7 @@ pygi_signal_closure_marshal (GClosure *closure, GValue *return_value,
         }
     }
 
-    if (pyg_closure_invoke_with_extra_data (pc, params, return_value,
-                                            n_param_values, param_values)) {
+    if (pyg_closure_invoke_with_extra_data (pc, params, return_value)) {
         /* Run through the list of structs which have been passed by reference and
          * check if they are being held longer than the duration of the callback
          * execution. This is determined if the ref count is greater than 1.
@@ -442,7 +429,7 @@ pygi_signal_closure_new (GType g_type, const gchar *signal_name,
 
     g_return_val_if_fail (callback != NULL, NULL);
 
-    signal_info = _pygi_lookup_signal_from_g_type (g_type, signal_name);
+    signal_info = lookup_signal_from_g_type (g_type, signal_name);
     if (signal_info == NULL) return NULL;
 
     closure = pyg_closure_new_full (

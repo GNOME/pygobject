@@ -26,8 +26,6 @@
 G_BEGIN_DECLS
 
 /* PyGClosure is a _private_ structure */
-typedef void (*PyClosureExceptionHandler) (GValue *ret, guint n_param_values,
-                                           const GValue *params);
 typedef struct _PyGClosure PyGClosure;
 typedef struct _PyGObjectData PyGObjectData;
 
@@ -41,7 +39,6 @@ struct _PyGClosure {
     gboolean swap_data_is_gobject; /* set if the swap data is a "borrowed"
                                     * pointer to a GObject. the object is set up
                                     * to watch the closure using g_object_watch_closure */
-    PyClosureExceptionHandler exception_handler;
 };
 
 typedef enum {
@@ -194,7 +191,7 @@ struct _PyGObject_Functions {
     void (*register_class_init) (GType gtype, PyGClassInitFunc class_init);
     void (*register_interface_info) (GType gtype, const GInterfaceInfo *info);
     void (*closure_set_exception_handler) (GClosure *closure,
-                                           PyClosureExceptionHandler handler);
+                                           gpointer handler);
 
     void (*add_warning_redirection) (const char *domain, PyObject *warning);
     void (*disable_warning_redirections) (void);
