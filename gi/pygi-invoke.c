@@ -700,6 +700,11 @@ pygi_invoke_c_callable (PyGIFunctionCache *function_cache,
 
     Py_END_ALLOW_THREADS;
 
+    if (state->py_async) {
+        ((PyGIAsync *)state->py_async)->py_in_args =
+            Py_NewRef (state->py_in_args);
+    }
+
     /* If the callable throws, the address of state->error will be bound into
      * the state->args as the last value. When the callee sets an error using
      * the state->args passed, it will have the side effect of setting

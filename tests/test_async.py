@@ -1,3 +1,4 @@
+import gc
 import sys
 import types
 import pytest
@@ -280,6 +281,44 @@ class TestAsync(unittest.TestCase):
                 self.assertIsNone(res)
             finally:
                 GLib.MainContext.pop_thread_default(ctx)
+
+        self.loop.run_until_complete(run())
+
+    def test_async_uint8_array_lifetime(self):
+        """Async awaitable retains input args so borrowed buffers stay valid."""
+
+        async def run():
+            stream = Gio.MemoryOutputStream.new_resizable()
+            data = bytes(range(256)) * 100
+            baseline_refcount = sys.getrefcount(data)
+
+            async_result = stream.write_async(data, GLib.PRIORITY_DEFAULT)
+
+            self.assertGreater(sys.getrefcount(data), baseline_refcount)
+
+            written = await async_result
+            self.assertEqual(written, len(data))
+            stream.close()
+            self.assertEqual(stream.steal_as_bytes().get_data(), data)
+
+        self.loop.run_until_complete(run())
+
+    def test_async_uint8_array_temporary_bytes(self):
+        """Temporary bytes object survives async call via retained input args."""
+
+        async def run():
+            stream = Gio.MemoryOutputStream.new_resizable()
+            expected = bytes(range(256)) * 100
+
+            async_result = stream.write_async(
+                bytes(range(256)) * 100, GLib.PRIORITY_DEFAULT
+            )
+            gc.collect()
+
+            written = await async_result
+            self.assertEqual(written, len(expected))
+            stream.close()
+            self.assertEqual(stream.steal_as_bytes().get_data(), expected)
 
         self.loop.run_until_complete(run())
 

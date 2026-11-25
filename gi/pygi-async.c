@@ -406,6 +406,7 @@ finally:
 
     Py_CLEAR (self->loop);
     Py_CLEAR (self->finish_func);
+    Py_CLEAR (self->py_in_args);
     if (self->cancellable) Py_CLEAR (self->cancellable);
     if (self->result) Py_CLEAR (self->result);
     if (self->exception) Py_CLEAR (self->exception);
@@ -506,6 +507,7 @@ pygi_async_finish_cb (GObject *source_object, gpointer res, PyGIAsync *self)
     if (self->callbacks) g_array_free (self->callbacks, TRUE);
     self->callbacks = NULL;
 
+    Py_CLEAR (self->py_in_args);
     Py_DECREF (self);
     PyGILState_Release (py_state);
 }

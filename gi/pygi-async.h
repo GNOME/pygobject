@@ -35,6 +35,7 @@ typedef struct {
     PyGICallableInfo *finish_func;
     PyObject *loop;
     PyObject *cancellable;
+    PyObject *py_in_args;
     char _asyncio_future_blocking;
     PyObject *result;
     PyObject *exception;
