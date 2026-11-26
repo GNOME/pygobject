@@ -17,8 +17,6 @@
 
 #pragma once
 
-#include <pythoncapi_compat.h>
-
 /* Workaround for FFI_GO_CLOSURES not being defined on macOS
  * See also: https://github.com/openjdk/jdk17u-dev/pull/741
  */
@@ -27,6 +25,7 @@
 #endif
 
 #include <ffi.h>
+#include <pythoncapi_compat.h>
 
 #include "pygi-cache.h"
 

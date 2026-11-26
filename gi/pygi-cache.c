@@ -21,9 +21,9 @@
 #include "pygi-cache-private.h"
 
 #include "pygbasictype.h"
-#include "pygi-closure.h"
 #include "pygi-error.h"
 #include "pygi-invoke.h"
+#include "pygi-native-closure.h"
 #include "pygi-repository.h"
 #include "pygi-resulttuple.h"
 #include "pygi-type.h"

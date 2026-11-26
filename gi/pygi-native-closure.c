@@ -1,7 +1,7 @@
 /* -*- Mode: C; c-basic-offset: 4 -*-
  * vim: tabstop=4 shiftwidth=4 expandtab
  *
- *   pygi-closure.c: PyGI C Closure functions
+ *   pygi-native-closure.c: PyGI C Closure functions
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,7 +17,7 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "pygi-closure.h"
+#include "pygi-native-closure.h"
 #include "pygi-argument.h"
 #include "pygi-async.h"
 #include "pygi-ccallback.h"
@@ -626,8 +626,8 @@ _pygi_make_native_closure (GICallableInfo *info, PyGIClosureCache *cache,
 
     /* Begin by cleaning up old async functions */
     g_mutex_lock (&async_free_list_lock);
-    g_slist_free_full (async_free_list,
-                       (GDestroyNotify)_pygi_invoke_closure_free);
+    g_clear_slist (&async_free_list,
+                   (GDestroyNotify)_pygi_invoke_closure_free);
     async_free_list = NULL;
     g_mutex_unlock (&async_free_list_lock);
 

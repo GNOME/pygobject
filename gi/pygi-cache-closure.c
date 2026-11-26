@@ -21,7 +21,7 @@
 #include "pygi-async.h"
 #include "pygi-cache-private.h"
 #include "pygi-ccallback.h"
-#include "pygi-closure.h"
+#include "pygi-native-closure.h"
 
 extern PyObject *_PyGIDefaultArgPlaceholder;
 
