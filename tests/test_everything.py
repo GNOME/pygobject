@@ -668,6 +668,7 @@ class TestEverything(unittest.TestCase):
     def test_strv_in(self):
         Everything.test_strv_in(["1", "2", "3"])
 
+    @pytest.mark.thread_unsafe
     def test_glist(self):
         self.assertEqual(Everything.test_glist_nothing_return(), ["1", "2", "3"])
         self.assertEqual(Everything.test_glist_nothing_return2(), ["1", "2", "3"])
