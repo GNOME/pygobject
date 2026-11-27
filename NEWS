@@ -14,6 +14,8 @@ This is the first release of PyGObject that supports Free-Threading Python.
 * Override `__str__` for `GLib.Uri` :mr:`568`
 * fix initialization of Python sub-sub-classes: run instance init once :mr:`569`
 * fix issue when collecting non-GC objects :mr:`570`
+* Structral refactring :mr:`582`
+* Improve testing :mr:`580` :mr:`581`
 
 3.58.0 - 2026-08-27
 -------------------
