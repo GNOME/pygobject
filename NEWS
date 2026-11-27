@@ -1,4 +1,4 @@
-3.59.0 - yyyy-mm-dd
+3.59.0 - 2026-11-27
 -------------------
 
 This version of PyGObject supports Python 3.11 and newer, and requires GLib >= 2.84.
